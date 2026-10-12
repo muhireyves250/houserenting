@@ -291,7 +291,7 @@ export function SearchBar({
           )}
         />
         <div className={segmentClass} onMouseEnter={() => hover("where")}>
-          <label htmlFor={`${listboxId}-input`} className="text-xs font-semibold text-ink">
+          <label htmlFor={`${listboxId}-input`} className="text-[11px] font-bold tracking-[0.14em] text-ink uppercase">
             {t("where")}
           </label>
           <input
@@ -326,21 +326,21 @@ export function SearchBar({
               setActiveIndex(-1);
               openPanel("where");
             }}
-            className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-muted md:placeholder:text-[#4a4e54]"
+            className="w-full bg-transparent text-[15px] font-medium text-ink outline-none placeholder:font-normal placeholder:text-muted md:placeholder:text-[#4a4e54]"
           />
         </div>
 
         {short && (
           <>
             <button type="button" className={segmentClass} onMouseEnter={() => hover("when")} aria-expanded={open === "when"} onClick={() => openPanel(open === "when" ? null : "when")}>
-              <span className="text-xs font-semibold text-ink">{t("when")}</span>
-              <span className={cn("text-sm", whenSummary ? "text-ink" : "text-muted md:text-[#4a4e54]")}>
+              <span className="text-[11px] font-bold tracking-[0.14em] text-ink uppercase">{t("when")}</span>
+              <span className={cn("text-[15px] font-medium", whenSummary ? "text-ink" : "text-muted md:text-[#4a4e54]")}>
                 {whenSummary ?? t("whenPlaceholder")}
               </span>
             </button>
             <button type="button" className={segmentClass} onMouseEnter={() => hover("who")} aria-expanded={open === "who"} onClick={() => openPanel(open === "who" ? null : "who")}>
-              <span className="text-xs font-semibold text-ink">{t("who")}</span>
-              <span className={cn("text-sm", whoSummary ? "text-ink" : "text-muted md:text-[#4a4e54]")}>
+              <span className="text-[11px] font-bold tracking-[0.14em] text-ink uppercase">{t("who")}</span>
+              <span className={cn("text-[15px] font-medium", whoSummary ? "text-ink" : "text-muted md:text-[#4a4e54]")}>
                 {whoSummary ?? t("whoPlaceholder")}
               </span>
             </button>
