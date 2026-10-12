@@ -12,10 +12,10 @@ describe("easeInOutCubic", () => {
 });
 
 describe("scrollDuration", () => {
-  it("grows with distance within 500–1100ms", () => {
-    expect(scrollDuration(50)).toBe(500);
+  it("grows with distance within a slow, relaxed 900–1600ms", () => {
+    expect(scrollDuration(50)).toBe(900);
     expect(scrollDuration(1200)).toBeGreaterThan(scrollDuration(600));
-    expect(scrollDuration(100_000)).toBe(1100);
+    expect(scrollDuration(100_000)).toBe(1600);
   });
 });
 

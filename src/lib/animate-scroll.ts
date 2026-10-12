@@ -3,9 +3,9 @@ export function easeInOutCubic(t: number): number {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
-/** Longer trips take a little longer, within 500–1100ms. */
+/** Longer trips take a little longer, within a relaxed 900–1600ms. */
 export function scrollDuration(distance: number): number {
-  return Math.round(Math.min(1100, Math.max(500, 400 + Math.abs(distance) * 0.35)));
+  return Math.round(Math.min(1600, Math.max(900, 700 + Math.abs(distance) * 0.6)));
 }
 
 const USER_SCROLL_EVENTS = ["wheel", "touchstart", "keydown", "mousedown"] as const;
