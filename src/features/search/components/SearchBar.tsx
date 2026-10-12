@@ -160,7 +160,7 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
         }}
         className={cn(
           "flex flex-col gap-2 rounded-card border border-line-strong bg-surface p-5 shadow-sm",
-          "md:flex-row md:items-center md:gap-0 md:rounded-full md:border-transparent md:p-2",
+          "md:flex-row md:items-center md:gap-0 md:rounded-full md:border-2 md:border-[#9ea3a9] md:p-2",
           // Mid-light grey bar with dark text; the hover pill darkens it a little more.
           "md:transition-colors md:duration-500",
           "md:bg-[#cfd2d6]",
