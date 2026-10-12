@@ -4,13 +4,14 @@ import { useTranslations } from "next-intl";
 import { useLayoutEffect, useRef, useState, type FocusEvent, type MouseEvent } from "react";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
-import { isActive, NAV_ITEMS } from "./nav-items";
+import { isActive, NAV_ITEMS, navHref } from "./nav-items";
 
 type Box = { left: number; width: number };
 
 const SLIDE = "duration-500 ease-[cubic-bezier(0.25,0.8,0.25,1)] motion-reduce:transition-none";
 
-export function HeaderNav() {
+/** `signedIn` decides whether members-only links go straight to the page or open the login modal. */
+export function HeaderNav({ signedIn = true }: { signedIn?: boolean }) {
   const t = useTranslations("Nav");
   const pathname = usePathname();
   const listRef = useRef<HTMLUListElement>(null);
@@ -99,7 +100,7 @@ export function HeaderNav() {
           return (
             <li key={key}>
               <Link
-                href={href}
+                href={navHref(href, signedIn)}
                 aria-current={active ? "page" : undefined}
                 onMouseEnter={track}
                 onFocus={track}

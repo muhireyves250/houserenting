@@ -21,7 +21,7 @@ export async function SiteHeader({ user }: { user: { name: string } | null }) {
         </Link>
         {/* When the compact search pill is showing, narrower screens drop the text links to make room. */}
         <div className="max-[1535px]:group-has-[[data-header-search]]/header:hidden">
-          <HeaderNav />
+          <HeaderNav signedIn={Boolean(user)} />
         </div>
         <div className="flex flex-1 justify-center">
           <HeaderSearch />

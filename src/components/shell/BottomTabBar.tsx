@@ -3,9 +3,10 @@
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
-import { isActive, NAV_ITEMS } from "./nav-items";
+import { isActive, NAV_ITEMS, navHref } from "./nav-items";
 
-export function BottomTabBar() {
+/** `signedIn` decides whether members-only tabs go straight to the page or open the login modal. */
+export function BottomTabBar({ signedIn = true }: { signedIn?: boolean }) {
   const t = useTranslations("Nav");
   const pathname = usePathname();
 
@@ -20,7 +21,7 @@ export function BottomTabBar() {
           return (
             <li key={key}>
               <Link
-                href={href}
+                href={navHref(href, signedIn)}
                 aria-current={active ? "page" : undefined}
                 className={cn("relative flex flex-col items-center gap-1 py-2 text-[11px]", active ? "font-semibold text-primary" : "text-muted")}
               >

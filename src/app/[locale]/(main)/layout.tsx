@@ -9,7 +9,7 @@ export default async function MainLayout({ children, modal }: { children: ReactN
     <>
       <SiteHeader user={user ? { name: user.name } : null} />
       <main className="min-h-dvh pb-24 md:pb-12">{children}</main>
-      <BottomTabBar />
+      <BottomTabBar signedIn={Boolean(user)} />
       {modal}
     </>
   );
