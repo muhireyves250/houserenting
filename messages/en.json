@@ -13,7 +13,8 @@
     "signup": "Sign up",
     "language": "Language",
     "mainNav": "Main navigation",
-    "back": "Back"
+    "back": "Back",
+    "chooseLanguage": "Choose a language"
   },
   "Common": {
     "save": "Save",

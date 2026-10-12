@@ -24,7 +24,8 @@ test("mobile uses the bottom tab bar, desktop the header", async ({ page }, test
 test("language switcher translates the page", async ({ page }) => {
   await skipOnboarding(page);
   await page.goto("/en");
-  await page.getByLabel("Language").filter({ visible: true }).selectOption("fr");
+  await page.getByRole("button", { name: /^Language:/ }).filter({ visible: true }).click();
+  await page.getByRole("menuitemradio", { name: /Français/ }).click();
   await expect(page).toHaveURL(/\/fr$/);
   await expect(page.getByRole("heading", { name: /Trouvez\s*votre nouveau chez-vous/ })).toBeVisible();
 });
@@ -33,7 +34,8 @@ test("language switcher keeps the query string (desktop header)", async ({ page 
   test.skip(testInfo.project.name !== "desktop", "the header switcher is desktop-only");
   await skipOnboarding(page);
   await page.goto("/en/search?mode=long&location=Kigali");
-  await page.getByLabel("Language").filter({ visible: true }).selectOption("fr");
+  await page.getByRole("button", { name: /^Language:/ }).filter({ visible: true }).click();
+  await page.getByRole("menuitemradio", { name: /Français/ }).click();
   await expect(page).toHaveURL(/\/fr\/search\?mode=long&location=Kigali/);
   await expect(page.getByText("À partir de 6 mois")).toBeVisible();
 });
