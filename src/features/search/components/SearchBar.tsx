@@ -235,7 +235,8 @@ export function SearchBar({
           { value: "short", label: t("short") },
           { value: "long", label: t("long") },
         ]}
-        className="relative md:max-w-md md:self-center"
+        // Pro edge matching the search bar: blue hairline, frosted halo, soft floating shadow.
+        className="relative border border-primary/80 shadow-[0_12px_32px_-14px_rgba(0,30,80,0.55)] ring-[5px] ring-white/20 md:max-w-md md:self-center"
       />
 
       {/* Reserves the expanded bar height so growing on hover never shifts the page. */}
