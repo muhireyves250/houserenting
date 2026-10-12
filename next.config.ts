@@ -11,14 +11,6 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "images.unsplash.com" },
     ],
   },
-  turbopack: {
-    rules: {
-      "*.css": {
-        loaders: ["@tailwindcss/turbopack"],
-        as: "*.css",
-      },
-    },
-  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders({ isProd: process.env.NODE_ENV === "production" }) }];
   },
