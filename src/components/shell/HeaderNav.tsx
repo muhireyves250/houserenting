@@ -17,6 +17,8 @@ export function HeaderNav() {
 
   function track(event: MouseEvent<HTMLAnchorElement> | FocusEvent<HTMLAnchorElement>) {
     const el = event.currentTarget;
+    // The current page already has its own solid pill; don't stack the shade on top of it.
+    if (el.getAttribute("aria-current") === "page") return setVisible(false);
     setBox({ left: el.offsetLeft, width: el.offsetWidth });
     setVisible(true);
   }
@@ -46,13 +48,19 @@ export function HeaderNav() {
                 onMouseEnter={track}
                 onFocus={track}
                 className={cn(
-                  "relative block rounded-full px-4 py-2 text-[15px] font-semibold tracking-[0.01em] transition-colors duration-300",
+                  "relative block rounded-full px-4 py-2 text-[15px] font-semibold tracking-[0.01em]",
+                  "transition-[background-color,color,box-shadow] duration-300",
                   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
-                  // Current page keeps a short underline.
-                  "after:absolute after:inset-x-4 after:bottom-0.5 after:h-0.5 after:origin-center after:rounded-full after:bg-primary after:transition-transform after:duration-300",
-                  active ? "text-primary after:scale-x-100" : "text-ink/80 after:scale-x-0 hover:text-ink",
-                  "group-data-[overlay=true]/header:text-white/85 group-data-[overlay=true]/header:after:bg-white group-data-[overlay=true]/header:hover:text-white",
-                  active && "group-data-[overlay=true]/header:text-white",
+                  active
+                    ? // Current page: solid pill like the selected tab; deepens on hover.
+                      cn(
+                        "bg-primary text-white shadow-[0_6px_16px_-8px_rgba(0,87,184,0.7)] hover:bg-primary-hover",
+                        "group-data-[overlay=true]/header:bg-white group-data-[overlay=true]/header:text-primary group-data-[overlay=true]/header:hover:bg-white/90",
+                      )
+                    : cn(
+                        "text-ink/80 hover:text-ink",
+                        "group-data-[overlay=true]/header:text-white/85 group-data-[overlay=true]/header:hover:text-white",
+                      ),
                 )}
               >
                 {t(key)}

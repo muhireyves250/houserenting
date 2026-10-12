@@ -52,4 +52,14 @@ describe("HeaderNav hover", () => {
     await userEvent.tab();
     expect(screen.getByTestId("nav-hover")).toHaveAttribute("data-visible", "true");
   });
+
+  it("marks the current page with a solid pill and keeps the sliding shade off it", async () => {
+    renderWithIntl(<HeaderNav />);
+    const current = screen.getByRole("link", { name: "Search" });
+    expect(current).toHaveAttribute("aria-current", "page");
+    expect(current).toHaveClass("bg-primary", "text-white");
+    layout(current, 0, 80);
+    await userEvent.hover(current);
+    expect(screen.getByTestId("nav-hover")).toHaveAttribute("data-visible", "false");
+  });
 });
