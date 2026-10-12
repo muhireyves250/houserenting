@@ -19,7 +19,15 @@ export function HeaderNav() {
               <Link
                 href={href}
                 aria-current={active ? "page" : undefined}
-                className={cn("text-sm font-medium transition-colors hover:text-primary", active ? "text-primary" : "text-ink")}
+                className={cn(
+                  "relative py-1 text-sm font-semibold transition-colors duration-300",
+                  // Underline grows from the centre on hover; stays for the current page.
+                  "after:absolute after:inset-x-0 after:-bottom-1 after:h-0.5 after:origin-center after:rounded-full after:bg-primary",
+                  "after:transition-transform after:duration-300 after:ease-out hover:after:scale-x-100 motion-reduce:after:transition-none",
+                  active ? "text-primary after:scale-x-100" : "text-ink/80 after:scale-x-0 hover:text-ink",
+                  "group-data-[overlay=true]/header:text-white/85 group-data-[overlay=true]/header:after:bg-white group-data-[overlay=true]/header:hover:text-white",
+                  active && "group-data-[overlay=true]/header:text-white",
+                )}
               >
                 {t(key)}
               </Link>

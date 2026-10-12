@@ -11,11 +11,23 @@ export function LogoMark({ className }: { className?: string }) {
   );
 }
 
-export function Logo({ withWordmark = false, className }: { withWordmark?: boolean; className?: string }) {
+export function Logo({
+  withWordmark = false,
+  className,
+  wordmarkClassName,
+}: {
+  withWordmark?: boolean;
+  className?: string;
+  wordmarkClassName?: string;
+}) {
   return (
     <span className={cn("inline-flex items-center gap-2 text-primary", className)}>
       <LogoMark className="h-7 w-8" />
-      {withWordmark ? <span className="text-lg font-bold text-ink">Space Rental</span> : <span className="sr-only">Space Rental</span>}
+      {withWordmark ? (
+        <span className={cn("text-lg font-bold tracking-tight text-ink", wordmarkClassName)}>Space Rental</span>
+      ) : (
+        <span className="sr-only">Space Rental</span>
+      )}
     </span>
   );
 }

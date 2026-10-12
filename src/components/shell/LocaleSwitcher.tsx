@@ -18,7 +18,13 @@ export function LocaleSwitcher({ className }: { className?: string }) {
   const [isPending, startTransition] = useTransition();
 
   return (
-    <label className={cn("flex items-center gap-1 text-sm text-muted", className)}>
+    <label
+      className={cn(
+        "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-muted transition-colors duration-300 hover:bg-ink/[0.05]",
+        "group-data-[overlay=true]/header:text-white/90 group-data-[overlay=true]/header:hover:bg-white/15",
+        className,
+      )}
+    >
       <Globe className="size-4" aria-hidden="true" />
       <span className="sr-only">{tNav("language")}</span>
       <select
@@ -30,10 +36,10 @@ export function LocaleSwitcher({ className }: { className?: string }) {
             router.replace({ pathname, query: Object.fromEntries(searchParams) }, { locale: next });
           });
         }}
-        className="cursor-pointer bg-transparent text-ink outline-none"
+        className="cursor-pointer bg-transparent text-ink outline-none group-data-[overlay=true]/header:text-white"
       >
         {routing.locales.map((value) => (
-          <option key={value} value={value}>
+          <option key={value} value={value} className="text-ink">
             {t(value)}
           </option>
         ))}

@@ -20,7 +20,8 @@ export default async function HomePage() {
   return (
     <>
       <OnboardingGate />
-      <section className="relative md:bg-primary">
+      {/* md:-mt-16 tucks the hero under the transparent sticky header; the extra top padding keeps content clear of it. */}
+      <section className="relative md:-mt-16 md:bg-primary">
         {/* Desktop hero: sharp photo under a brand-blue gradient (phones keep the clean white design). */}
         <div className="absolute inset-0 hidden overflow-hidden md:block" aria-hidden="true">
           {/* Footage graded to "pop" through the blue: a little more colour, contrast and light. */}
@@ -38,7 +39,7 @@ export default async function HomePage() {
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_50%,rgba(0,20,50,0.28)_100%)]" />
           <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-[#00214a]/40" />
         </div>
-        <PageContainer className="relative flex flex-col gap-8 pt-6 pb-10 md:items-center md:py-28">
+        <PageContainer className="relative flex flex-col gap-8 pt-6 pb-10 md:items-center md:pt-44 md:pb-28">
           <div className="flex justify-end md:hidden">
             <Suspense>
               <LocaleSwitcher />
