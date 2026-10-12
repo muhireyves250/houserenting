@@ -128,7 +128,8 @@
       "nameRequired": "Saisissez votre nom.",
       "nameTooLong": "Le nom est trop long (80 caractères maximum).",
       "emailInvalid": "Saisissez une adresse e-mail valide."
-    }
+    },
+    "modalTitle": "Bienvenue sur Space Rental"
   },
   "Profile": {
     "title": "Profil",
@@ -178,7 +179,7 @@
     "existingButton": "Se connecter"
   },
   "Locale": {
-    "en": "English",
+    "en": "Anglais",
     "rw": "Kinyarwanda",
     "fr": "Français"
   },

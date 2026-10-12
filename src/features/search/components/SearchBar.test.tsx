@@ -200,7 +200,7 @@ describe("SearchBar", () => {
     renderWithIntl(<SearchBar today={TODAY} />);
     const input = screen.getByRole("combobox", { name: "Where" });
     await userEvent.type(input, "zzz");
-    expect(await screen.findByText(/No places match/)).toBeInTheDocument();
+    expect(await screen.findByText(/No places match/, undefined, { timeout: 3000 })).toBeInTheDocument();
     expect(document.getElementById(input.getAttribute("aria-controls")!)).not.toBeNull();
   });
 

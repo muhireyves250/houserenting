@@ -52,4 +52,13 @@ describe("LoginForm", () => {
     await submit();
     expect(screen.getByRole("alert")).toHaveTextContent("Please verify your email first.");
   });
+
+  it("calls onSuccess instead of navigating when used inside the modal", async () => {
+    signInEmail.mockResolvedValue({ data: {}, error: null });
+    const onSuccess = vi.fn();
+    renderWithIntl(<LoginForm next="/profile" onSuccess={onSuccess} />);
+    await submit();
+    expect(onSuccess).toHaveBeenCalledOnce();
+    expect(push).not.toHaveBeenCalled();
+  });
 });

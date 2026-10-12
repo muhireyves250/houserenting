@@ -12,6 +12,7 @@ import { useSearchSummaries } from "@/features/search/use-search-summaries";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { useMediaQuery } from "@/lib/use-media-query";
+import { useModal } from "@/lib/use-modal";
 import { DatePanel } from "./DatePanel";
 import { GuestPanel } from "./GuestPanel";
 import { LocationPanel, optionId, type Suggestion } from "./LocationPanel";
@@ -432,37 +433,8 @@ function MobileSheet({
   const titleId = useId();
   const sheetRef = useRef<HTMLDivElement>(null);
 
-  // Modal behaviour: focus inside, Tab cycles within, page behind doesn't scroll, focus returns on close.
-  useEffect(() => {
-    const sheet = sheetRef.current;
-    if (!sheet) return;
-    const previous = document.activeElement as HTMLElement | null;
-    const focusables = () =>
-      Array.from(sheet.querySelectorAll<HTMLElement>('button:not(:disabled), input, [tabindex="0"]')).filter((el) => !el.hasAttribute("inert"));
-    if (!sheet.contains(document.activeElement)) focusables()[0]?.focus();
-    const { overflow } = document.body.style;
-    document.body.style.overflow = "hidden";
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key !== "Tab") return;
-      const items = focusables();
-      if (items.length === 0) return;
-      const first = items[0];
-      const last = items[items.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
-    };
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = overflow;
-      previous?.focus({ preventScroll: true });
-    };
-  }, []);
+  // Modal behaviour (focus inside, Tab trapped, scroll lock, focus restored); Escape is handled by SearchBar.
+  useModal(sheetRef);
 
   return (
     <div ref={sheetRef} role="dialog" aria-modal="true" aria-labelledby={titleId} className="fixed inset-0 z-50 flex flex-col bg-surface motion-safe:animate-sheet-up">

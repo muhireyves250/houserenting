@@ -12,7 +12,11 @@ import { authClient } from "@/lib/auth-client";
 import { safeNextPath } from "@/lib/safe-redirect";
 import { PasswordField } from "./PasswordField";
 
-export function LoginForm({ next }: { next?: string }) {
+/**
+ * `onSuccess` replaces the default "go to next" navigation, and `onForgot` replaces the
+ * "Forgot password?" link with an in-place action (both used by the auth modal).
+ */
+export function LoginForm({ next, onSuccess, onForgot }: { next?: string; onSuccess?: () => void; onForgot?: () => void }) {
   const t = useTranslations("Auth");
   const router = useRouter();
   const [error, setError] = useState<AuthErrorKey | null>(null);
@@ -34,6 +38,7 @@ export function LoginForm({ next }: { next?: string }) {
       setError(authErrorKey(result.error));
       return;
     }
+    if (onSuccess) return onSuccess();
     router.push(safeNextPath(next));
   }
 
@@ -41,9 +46,15 @@ export function LoginForm({ next }: { next?: string }) {
     <form onSubmit={onSubmit} noValidate className="flex flex-col gap-5">
       <TextField name="email" type="email" label={t("email")} icon={<Mail />} autoComplete="email" />
       <PasswordField name="password" label={t("password")} autoComplete="current-password" />
-      <Link href="/forgot-password" className="self-start text-sm text-primary underline">
-        {t("forgotPassword")}
-      </Link>
+      {onForgot ? (
+        <button type="button" onClick={onForgot} className="self-start text-sm text-primary underline">
+          {t("forgotPassword")}
+        </button>
+      ) : (
+        <Link href="/forgot-password" className="self-start text-sm text-primary underline">
+          {t("forgotPassword")}
+        </Link>
+      )}
       {error && (
         <p role="alert" className="text-sm text-danger">
           {t(`errors.${error}`)}

@@ -128,7 +128,8 @@
       "nameRequired": "Andika izina ryawe.",
       "nameTooLong": "Izina ni rirerire cyane (inyuguti 80 ntarengwa).",
       "emailInvalid": "Andika imeyili yemewe."
-    }
+    },
+    "modalTitle": "Murakaza neza kuri Space Rental"
   },
   "Profile": {
     "title": "Konti",
@@ -178,9 +179,9 @@
     "existingButton": "Injira"
   },
   "Locale": {
-    "en": "English",
-    "rw": "Kinyarwanda",
-    "fr": "Français"
+    "en": "Icyongereza",
+    "rw": "Ikinyarwanda",
+    "fr": "Igifaransa"
   },
   "Listings": {
     "featured": "Amazu yatoranyijwe",

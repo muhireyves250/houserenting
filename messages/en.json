@@ -128,7 +128,8 @@
       "nameRequired": "Enter your name.",
       "nameTooLong": "Name is too long (80 characters max).",
       "emailInvalid": "Enter a valid email address."
-    }
+    },
+    "modalTitle": "Welcome to Space Rental"
   },
   "Profile": {
     "title": "Profile",
@@ -180,7 +181,7 @@
   "Locale": {
     "en": "English",
     "rw": "Kinyarwanda",
-    "fr": "Français"
+    "fr": "French"
   },
   "Listings": {
     "featured": "Featured homes",
