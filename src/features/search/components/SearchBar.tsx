@@ -32,6 +32,13 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
   const [range, setRange] = useState<DateRange>({});
   const [flex, setFlex] = useState(0);
   const [guests, setGuests] = useState<GuestCounts>(NO_GUESTS);
+  // Where the shared highlight sits; kept after closing so the next open fades in place.
+  const [highlightAt, setHighlightAt] = useState<Panel>("where");
+
+  function openPanel(panel: Panel | null) {
+    setOpen(panel);
+    if (panel) setHighlightAt(panel);
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -75,7 +82,7 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
 
   function pickLocation(city: string) {
     setLocation(city);
-    setOpen(short && isDesktop ? "when" : null);
+    openPanel(short && isDesktop ? "when" : null);
   }
 
   const panels: Record<Panel, ReactNode> = {
@@ -92,12 +99,23 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
     who: () => setGuests(NO_GUESTS),
   };
 
-  const segment = (panel: Panel) =>
-    cn(
-      "flex flex-1 flex-col justify-center rounded-full px-6 py-3 text-left transition-colors",
+  const order: Panel[] = short ? ["where", "when", "who"] : ["where"];
+  const highlightIndex = Math.max(0, order.indexOf(highlightAt));
+  const showHighlight = Boolean(open && isDesktop);
+
+  const segment = (panel: Panel) => {
+    const index = order.indexOf(panel);
+    const touchesOpen = open !== null && (open === panel || order[index - 1] === open);
+    return cn(
+      "relative z-10 flex flex-col justify-center rounded-full px-6 py-3 text-left transition-colors duration-200",
       "max-md:rounded-none max-md:border-b max-md:border-line max-md:px-0",
-      open === panel ? "md:bg-surface md:shadow-lg" : "md:hover:bg-line/40",
+      open !== panel && "md:hover:bg-line/40",
+      // Divider before every segment but the first, hidden next to the highlighted one.
+      index > 0 &&
+        "md:before:absolute md:before:top-1/4 md:before:left-0 md:before:h-1/2 md:before:w-px md:before:bg-line md:before:transition-opacity",
+      index > 0 && touchesOpen && "md:before:opacity-0",
     );
+  };
 
   return (
     <div ref={rootRef} className="relative flex w-full max-w-4xl flex-col gap-4">
@@ -126,6 +144,18 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
           open ? "md:bg-canvas" : "md:bg-surface",
         )}
       >
+        <div className={cn("relative grid flex-1", short ? "md:grid-cols-3" : "md:grid-cols-1")}>
+        <span
+          data-testid="segment-highlight"
+          data-visible={showHighlight}
+          aria-hidden="true"
+          style={{ width: `${100 / order.length}%`, transform: `translateX(${highlightIndex * 100}%)` }}
+          className={cn(
+            "pointer-events-none absolute inset-y-0 left-0 hidden rounded-full bg-surface shadow-lg md:block",
+            "transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:transition-none",
+            showHighlight ? "opacity-100" : "opacity-0",
+          )}
+        />
         <div className={segment("where")}>
           <label htmlFor={`${listboxId}-input`} className="text-xs font-semibold text-ink">
             {t("where")}
@@ -139,11 +169,11 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
             autoComplete="off"
             value={location}
             placeholder={t("wherePlaceholder")}
-            onFocus={() => setOpen("where")}
-            onClick={() => setOpen("where")}
+            onFocus={() => openPanel("where")}
+            onClick={() => openPanel("where")}
             onChange={(event) => {
               setLocation(event.target.value);
-              setOpen("where");
+              openPanel("where");
             }}
             className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-muted"
           />
@@ -151,18 +181,17 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
 
         {short && (
           <>
-            <Divider />
-            <button type="button" className={segment("when")} aria-expanded={open === "when"} onClick={() => setOpen(open === "when" ? null : "when")}>
+            <button type="button" className={segment("when")} aria-expanded={open === "when"} onClick={() => openPanel(open === "when" ? null : "when")}>
               <span className="text-xs font-semibold text-ink">{t("when")}</span>
               <span className={cn("text-sm", whenSummary ? "text-ink" : "text-muted")}>{whenSummary ?? t("whenPlaceholder")}</span>
             </button>
-            <Divider />
-            <button type="button" className={segment("who")} aria-expanded={open === "who"} onClick={() => setOpen(open === "who" ? null : "who")}>
+            <button type="button" className={segment("who")} aria-expanded={open === "who"} onClick={() => openPanel(open === "who" ? null : "who")}>
               <span className="text-xs font-semibold text-ink">{t("who")}</span>
               <span className={cn("text-sm", whoSummary ? "text-ink" : "text-muted")}>{whoSummary ?? t("whoPlaceholder")}</span>
             </button>
           </>
         )}
+        </div>
 
         <button
           type="submit"
@@ -175,8 +204,9 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
 
       {open && isDesktop && (
         <div
+          key={open}
           className={cn(
-            "absolute top-full z-30 mt-3 rounded-[2rem] bg-surface p-8 shadow-2xl",
+            "absolute top-full z-30 mt-3 rounded-[2rem] bg-surface p-8 shadow-2xl motion-safe:animate-pop-in",
             open === "where" && "left-0 w-[26rem]",
             open === "when" && "inset-x-0",
             open === "who" && "right-0 w-[26rem]",
@@ -212,10 +242,6 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
   );
 }
 
-function Divider() {
-  return <span className="hidden h-8 w-px bg-line md:block" aria-hidden="true" />;
-}
-
 function MobileSheet({
   title,
   closeLabel,
@@ -235,7 +261,7 @@ function MobileSheet({
 }) {
   const titleId = useId();
   return (
-    <div role="dialog" aria-modal="true" aria-labelledby={titleId} className="fixed inset-0 z-50 flex flex-col bg-surface">
+    <div role="dialog" aria-modal="true" aria-labelledby={titleId} className="fixed inset-0 z-50 flex flex-col bg-surface motion-safe:animate-sheet-up">
       <div className="flex items-center justify-between border-b border-line px-4 py-3">
         <h2 id={titleId} className="text-lg font-semibold">
           {title}

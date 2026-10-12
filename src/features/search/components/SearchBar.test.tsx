@@ -96,6 +96,23 @@ describe("SearchBar", () => {
     expect(screen.queryByText("Ages 13 or above")).not.toBeInTheDocument();
   });
 
+  it("slides one shared highlight to the open segment", async () => {
+    renderWithIntl(<SearchBar today={TODAY} />);
+    const highlight = screen.getByTestId("segment-highlight");
+    expect(highlight).toHaveAttribute("data-visible", "false");
+    await userEvent.click(screen.getByRole("combobox", { name: "Where" }));
+    expect(highlight).toHaveAttribute("data-visible", "true");
+    expect(highlight.style.transform).toBe("translateX(0%)");
+    await userEvent.click(screen.getByRole("button", { name: /When/ }));
+    expect(highlight.style.transform).toBe("translateX(100%)");
+    await userEvent.click(screen.getByRole("button", { name: /Who/ }));
+    expect(highlight.style.transform).toBe("translateX(200%)");
+    await userEvent.keyboard("{Escape}");
+    expect(highlight).toHaveAttribute("data-visible", "false");
+    // Stays where it was, so the next open fades in place instead of sliding from the left.
+    expect(highlight.style.transform).toBe("translateX(200%)");
+  });
+
   it("opens panels as full-screen dialogs on phones", async () => {
     stubViewport(false);
     renderWithIntl(<SearchBar today={TODAY} />);
