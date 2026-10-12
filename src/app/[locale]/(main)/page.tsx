@@ -38,6 +38,14 @@ export default async function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-br from-primary/72 via-primary/48 to-[#00214a]/72" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_50%,rgba(0,20,50,0.28)_100%)]" />
           <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-[#00214a]/40" />
+          {/* Fine grain dithers the blue gradients so they stay smooth (no banding) on high-end displays. */}
+          <div
+            className="absolute inset-0 opacity-[0.07] mix-blend-overlay"
+            style={{
+              backgroundImage:
+                "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+            }}
+          />
         </div>
         <PageContainer className="relative flex flex-col gap-8 pt-6 pb-10 md:items-center md:pt-44 md:pb-28">
           <div className="flex justify-end md:hidden">
