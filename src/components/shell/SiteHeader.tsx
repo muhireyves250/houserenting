@@ -15,7 +15,7 @@ export async function SiteHeader({ user }: { user: { name: string } | null }) {
 
   return (
     <HeaderFrame>
-      <div className="mx-auto flex h-16 max-w-7xl items-center gap-10 px-6">
+      <div className="mx-auto flex h-[72px] max-w-7xl items-center gap-10 px-6">
         <Link href="/" className="shrink-0">
           {/* Icon-only logo; "Space Rental" stays as the accessible name. */}
           <Logo className="transition-colors duration-500 group-data-[overlay=true]/header:text-white [&_svg]:h-9 [&_svg]:w-10" />

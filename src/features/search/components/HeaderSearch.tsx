@@ -30,10 +30,10 @@ export function HeaderSearch() {
   useEffect(() => {
     const target = document.getElementById(HERO_SEARCH_ID);
     if (!target) return;
-    // 64px top margin = the sticky header, so the pill appears exactly when the hero bar slides under it.
+    // 72px top margin = the sticky header, so the pill appears exactly when the hero bar slides under it.
     const observer = new IntersectionObserver(
       ([entry]) => setObserved({ path: pathname, visible: entry.isIntersecting }),
-      { rootMargin: "-64px 0px 0px 0px" },
+      { rootMargin: "-72px 0px 0px 0px" },
     );
     observer.observe(target);
     return () => observer.disconnect();

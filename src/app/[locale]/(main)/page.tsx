@@ -20,8 +20,8 @@ export default async function HomePage() {
   return (
     <>
       <OnboardingGate />
-      {/* md:-mt-16 tucks the hero under the transparent sticky header; the extra top padding keeps content clear of it. */}
-      <section className="relative md:-mt-16 md:bg-primary">
+      {/* md:-mt-[73px] (72px header + 1px border) tucks the hero under the transparent sticky header; the extra top padding keeps content clear of it. */}
+      <section className="relative md:-mt-[73px] md:bg-primary">
         {/* Desktop hero: sharp photo under a brand-blue gradient (phones keep the clean white design). */}
         <div className="absolute inset-0 hidden overflow-hidden md:block" aria-hidden="true">
           {/* Footage graded to "pop" through the blue: a little more colour, contrast and light. */}
