@@ -56,15 +56,15 @@ The product is built in phases. Each phase gets its own implementation plan and 
 |---|---|
 | Framework | Next.js (App Router), TypeScript (strict), React Server Components + Server Actions |
 | Styling | Tailwind CSS with design tokens; headless primitives (Radix UI) for accessible dialogs, popovers, sheets |
-| Database | PostgreSQL 16, Prisma ORM + Prisma Migrate |
-| Auth | Auth.js (credentials provider), argon2 password hashing, database sessions |
+| Database | PostgreSQL 16 on Neon (separate dev and test branches; no Docker), Prisma ORM 7 + Prisma Migrate |
+| Auth | Better Auth (email + password, email verification, password reset, built-in rate limiting, database sessions), argon2id password hashing |
 | Validation | zod (shared between client and server) |
 | i18n | next-intl, locale-prefixed routes (`/en`, `/rw`, `/fr`) |
 | Images | Cloudinary (via `Storage` adapter) |
 | Realtime | Pusher Channels (via `Realtime` adapter) |
 | Maps | Google Maps JS + Places autocomplete + geocoding (via `Geo` adapter) |
-| Email | Resend or SMTP (via `Mailer` adapter); React Email templates |
-| Testing | Vitest (unit/integration), Testcontainers or a CI Postgres service, Playwright (E2E) |
+| Email | Resend (via `Mailer` adapter); localized HTML templates; file-outbox mailer for dev/E2E |
+| Testing | Vitest (unit/integration against the Neon test branch locally, a Postgres service in CI), Playwright (E2E) |
 | Observability | Sentry, structured JSON logs (pino) |
 | Hosting | Docker image deployable to a VPS or Vercel; managed Postgres with daily backups |
 
@@ -140,7 +140,7 @@ All IDs are cuid/uuid strings. All tables have `createdAt` / `updatedAt`. Timest
 ### User
 `id, name, email (unique), emailVerified, passwordHash, phone?, avatarUrl?, locale (en|rw|fr), role (USER|ADMIN), isHost, hostSince?, status (ACTIVE|SUSPENDED)`
 
-Plus Auth.js tables: `Session`, `VerificationToken` (email verification and password reset).
+Plus Better Auth tables: `Session`, `Account` (holds the password hash), `Verification` (email verification and password reset tokens), `RateLimit`.
 
 ### Listing
 `id, hostId → User, title, description, type (APARTMENT|DUPLEX|PRIVATE_HOUSE|LODGE|ROOM), status (DRAFT|PENDING_REVIEW|PUBLISHED|REJECTED|ARCHIVED), rejectionReason?, addressLine, district, city, country (default RW), lat, lng, sizeM2, rooms, bedrooms, bathrooms, maxGuests, petsAllowed, facilities (enum[]), characteristics (string[]), termsOfRent (string[]), depositMonths?, discountPercent?, ratingAvg, ratingCount, publishedAt?`
@@ -284,7 +284,7 @@ Domain events produce in-app notifications plus emails in the user's locale, for
 ## 9. Security
 - Passwords: argon2id hashes; minimum length 8; checked against a common-password list.
 - Email verification is required before booking, hosting or messaging.
-- Rate limiting (Postgres- or Redis-backed) on login, signup, password reset, booking creation and messaging.
+- Rate limiting (Postgres-backed; Better Auth's limiter for auth endpoints) on login, signup, password reset, booking creation and messaging.
 - Authorization checks inside services. Resources the user may not access return 404.
 - Server Actions are CSRF-protected by Next.js. API routes use the session cookie (SameSite=Lax) or, for the future mobile app, bearer tokens.
 - Security headers: CSP, HSTS, X-Frame-Options, Referrer-Policy.
@@ -310,7 +310,7 @@ Domain events produce in-app notifications plus emails in the user's locale, for
 - **CI (GitHub Actions)** runs lint, typecheck, unit + integration tests, build and E2E on every push and pull request.
 
 ## 12. Operations
-- Environments: development (Docker Compose Postgres), staging, production.
+- Environments: development (Neon dev branch), staging, production. Tests use a separate Neon test branch locally and a Postgres service in CI.
 - Prisma migrations are applied in the deploy pipeline. No manual schema edits.
 - Daily automated database backups with a tested restore procedure.
 - Scheduled jobs (hold expiry, booking completion, outbox dispatch) run as cron-triggered, authenticated route handlers.
