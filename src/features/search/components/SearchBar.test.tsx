@@ -102,15 +102,15 @@ describe("SearchBar", () => {
     expect(highlight).toHaveAttribute("data-visible", "false");
     await userEvent.click(screen.getByRole("combobox", { name: "Where" }));
     expect(highlight).toHaveAttribute("data-visible", "true");
-    expect(highlight.style.transform).toBe("translateX(0%)");
+    expect(highlight.style.transform).toBe("translateX(calc(0% + 0px))");
     await userEvent.click(screen.getByRole("button", { name: /When/ }));
-    expect(highlight.style.transform).toBe("translateX(100%)");
+    expect(highlight.style.transform).toBe("translateX(calc(100% + 8px))");
     await userEvent.click(screen.getByRole("button", { name: /Who/ }));
-    expect(highlight.style.transform).toBe("translateX(200%)");
+    expect(highlight.style.transform).toBe("translateX(calc(200% + 16px))");
     await userEvent.keyboard("{Escape}");
     expect(highlight).toHaveAttribute("data-visible", "false");
     // Stays where it was, so the next open fades in place instead of sliding from the left.
-    expect(highlight.style.transform).toBe("translateX(200%)");
+    expect(highlight.style.transform).toBe("translateX(calc(200% + 16px))");
   });
 
   it("opens panels as full-screen dialogs on phones", async () => {

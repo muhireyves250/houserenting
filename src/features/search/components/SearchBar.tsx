@@ -17,6 +17,8 @@ import { LocationPanel } from "./LocationPanel";
 type Panel = "where" | "when" | "who";
 
 const NO_GUESTS: GuestCounts = { adults: 0, children: 0, pets: 0 };
+// Must match the md:gap-2 between segments (0.5rem).
+const SEGMENT_GAP_PX = 8;
 
 export function SearchBar({ today = todayISO() }: { today?: string }) {
   const t = useTranslations("Home");
@@ -103,19 +105,15 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
   const highlightIndex = Math.max(0, order.indexOf(highlightAt));
   const showHighlight = Boolean(open && isDesktop);
 
-  const segment = (panel: Panel) => {
-    const index = order.indexOf(panel);
-    const touchesOpen = open !== null && (open === panel || order[index - 1] === open);
-    return cn(
-      "relative z-10 flex flex-col justify-center rounded-full px-6 py-3 text-left transition-colors duration-200",
-      "max-md:rounded-none max-md:border-b max-md:border-line max-md:px-0",
-      open !== panel && "md:hover:bg-line/40",
-      // Divider before every segment but the first, hidden next to the highlighted one.
-      index > 0 &&
-        "md:before:absolute md:before:top-1/4 md:before:left-0 md:before:h-1/2 md:before:w-px md:before:bg-line md:before:transition-opacity",
-      index > 0 && touchesOpen && "md:before:opacity-0",
+  const segment = (panel: Panel) =>
+    cn(
+      "relative z-10 flex flex-col justify-center rounded-xl border border-line-strong px-4 py-3 text-left transition-colors duration-200",
+      // Phones have no hover, so fields stay outlined there; on desktop the outline appears on hover only.
+      "md:rounded-full md:border-transparent md:px-6",
+      // Hovering one segment dims the others and lifts and outlines the hovered one.
+      "md:group-hover/segs:bg-ink/[0.06] md:hover:border-line-strong md:hover:bg-surface! md:hover:shadow-md",
+      open === panel && "md:group-hover/segs:bg-transparent md:hover:border-transparent md:hover:shadow-none",
     );
-  };
 
   return (
     <div ref={rootRef} className="relative flex w-full max-w-4xl flex-col gap-4">
@@ -139,17 +137,20 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
           submit();
         }}
         className={cn(
-          "flex flex-col gap-2 rounded-card border border-line bg-surface p-5 shadow-sm",
-          "md:flex-row md:items-center md:gap-0 md:rounded-full md:p-1.5",
+          "flex flex-col gap-2 rounded-card border border-line-strong bg-surface p-5 shadow-sm",
+          "md:flex-row md:items-center md:gap-0 md:rounded-full md:border-transparent md:p-2 md:transition-colors md:hover:border-line-strong",
           open ? "md:bg-canvas" : "md:bg-surface",
         )}
       >
-        <div className={cn("relative grid flex-1", short ? "md:grid-cols-3" : "md:grid-cols-1")}>
+        <div className={cn("group/segs relative grid flex-1 gap-3 md:gap-2", short ? "md:grid-cols-3" : "md:grid-cols-1")}>
         <span
           data-testid="segment-highlight"
           data-visible={showHighlight}
           aria-hidden="true"
-          style={{ width: `${100 / order.length}%`, transform: `translateX(${highlightIndex * 100}%)` }}
+          style={{
+            width: `calc((100% - ${(order.length - 1) * SEGMENT_GAP_PX}px) / ${order.length})`,
+            transform: `translateX(calc(${highlightIndex * 100}% + ${highlightIndex * SEGMENT_GAP_PX}px))`,
+          }}
           className={cn(
             "pointer-events-none absolute inset-y-0 left-0 hidden rounded-full bg-surface shadow-lg md:block",
             "transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:transition-none",
