@@ -6,6 +6,9 @@ import { renderWithIntl } from "@/test/render";
 import { HeaderSearch } from "./HeaderSearch";
 import { HERO_SEARCH_ID, SearchBar } from "./SearchBar";
 
+const animateScrollTo = vi.hoisted(() => vi.fn(() => Promise.resolve()));
+vi.mock("@/lib/animate-scroll", () => ({ animateScrollTo }));
+
 let currentPath = "/";
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: vi.fn() }), usePathname: () => currentPath }));
 
@@ -74,8 +77,6 @@ describe("HeaderSearch", () => {
 
   it("smoothly scrolls back to the hero and opens the clicked panel there", async () => {
     document.getElementById(HERO_SEARCH_ID)?.remove();
-    const scrollTo = vi.fn();
-    vi.stubGlobal("scrollTo", scrollTo);
     renderWithIntl(
       <>
         <SearchBar id={HERO_SEARCH_ID} today="2026-10-12" />
@@ -84,16 +85,15 @@ describe("HeaderSearch", () => {
     );
     act(() => report(false));
     await userEvent.click(screen.getByRole("button", { name: "Any dates" }));
-    expect(scrollTo).toHaveBeenCalledWith({ top: 0, behavior: "smooth" });
-    // The hero's own calendar opens; no second search bar is created.
+    // Eased scroll to the top first, then the hero's own calendar opens; no second search bar.
+    expect(animateScrollTo).toHaveBeenCalledWith(0);
+    expect(await screen.findByRole("button", { name: "Next month" })).toBeInTheDocument();
     expect(screen.getAllByRole("search")).toHaveLength(1);
-    expect(screen.getByRole("button", { name: "Next month" })).toBeInTheDocument();
     expect(screen.getByTestId("search-panel")).toContainElement(document.activeElement as HTMLElement);
   });
 
   it("opening Where from the header focuses the hero's Where field", async () => {
     document.getElementById(HERO_SEARCH_ID)?.remove();
-    vi.stubGlobal("scrollTo", vi.fn());
     renderWithIntl(
       <>
         <SearchBar id={HERO_SEARCH_ID} today="2026-10-12" />
@@ -102,7 +102,7 @@ describe("HeaderSearch", () => {
     );
     act(() => report(false));
     await userEvent.click(screen.getByRole("button", { name: "Anywhere" }));
-    expect(screen.getByRole("combobox", { name: "Where" })).toHaveFocus();
+    await vi.waitFor(() => expect(screen.getByRole("combobox", { name: "Where" })).toHaveFocus());
   });
 
   it("follows client-side navigation: starts watching a hero that appears later", () => {

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useSearchState, type SearchPanel } from "@/features/search/search-store";
 import { useSearchSummaries } from "@/features/search/use-search-summaries";
 import { usePathname } from "@/i18n/navigation";
+import { animateScrollTo } from "@/lib/animate-scroll";
 import { cn } from "@/lib/cn";
 import { HERO_SEARCH_ID } from "./SearchBar";
 
@@ -13,7 +14,7 @@ type HeroState = "absent" | "visible" | "hidden";
 
 /**
  * Compact "Anywhere | Any dates | Add guests" pill shown in the header once the hero search scrolls away.
- * Clicking a part smoothly scrolls back to the hero and asks it to open that panel.
+ * Clicking a part glides back to the hero (eased scroll) and then asks it to open that panel.
  */
 export function HeaderSearch() {
   const t = useTranslations("Home");
@@ -40,9 +41,9 @@ export function HeaderSearch() {
 
   if (hero !== "hidden") return null;
 
-  function openInHero(panel: SearchPanel) {
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
+  async function openInHero(panel: SearchPanel) {
+    // Eased glide back to the hero, then open the panel there so the two motions don't fight.
+    await animateScrollTo(0);
     setSearch({ openRequest: { panel, at: Date.now() } });
   }
 
