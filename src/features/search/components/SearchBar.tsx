@@ -135,9 +135,6 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
       "md:rounded-full md:border-transparent md:px-6",
   );
 
-  // Segments sit on the dark bar unless they are open (then they sit on the white pill).
-  const onDark = (panel: Panel) => open !== panel;
-
   const pillMotion = "transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.25,0.8,0.25,1)] motion-reduce:transition-none";
 
   return (
@@ -164,9 +161,9 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
         className={cn(
           "flex flex-col gap-2 rounded-card border border-line-strong bg-surface p-5 shadow-sm",
           "md:flex-row md:items-center md:gap-0 md:rounded-full md:border-transparent md:p-2",
-          // Dark grey bar with white text; the hover pill darkens it a little more.
+          // Mid-light grey bar with dark text; the hover pill darkens it a little more.
           "md:transition-colors md:duration-500",
-          "md:bg-[#3a3d42]",
+          "md:bg-[#cfd2d6]",
         )}
       >
         <div
@@ -190,13 +187,13 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
           aria-hidden="true"
           style={pillStyle(hoverIndex)}
           className={cn(
-            "pointer-events-none absolute inset-y-0 left-0 hidden rounded-full bg-black/35 md:block",
+            "pointer-events-none absolute inset-y-0 left-0 hidden rounded-full bg-black/10 md:block",
             pillMotion,
             showHover ? "opacity-100" : "opacity-0",
           )}
         />
         <div className={segmentClass} onMouseEnter={() => hover("where")}>
-          <label htmlFor={`${listboxId}-input`} className={cn("text-xs font-semibold text-ink", onDark("where") && "md:text-white")}>
+          <label htmlFor={`${listboxId}-input`} className="text-xs font-semibold text-ink">
             {t("where")}
           </label>
           <input
@@ -214,24 +211,21 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
               setLocation(event.target.value);
               openPanel("where");
             }}
-            className={cn(
-              "w-full bg-transparent text-sm text-ink outline-none placeholder:text-muted",
-              onDark("where") && "md:text-white md:placeholder:text-white/85",
-            )}
+            className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-muted md:placeholder:text-[#4a4e54]"
           />
         </div>
 
         {short && (
           <>
             <button type="button" className={segmentClass} onMouseEnter={() => hover("when")} aria-expanded={open === "when"} onClick={() => openPanel(open === "when" ? null : "when")}>
-              <span className={cn("text-xs font-semibold text-ink", onDark("when") && "md:text-white")}>{t("when")}</span>
-              <span className={cn("text-sm", whenSummary ? "text-ink" : "text-muted", onDark("when") && (whenSummary ? "md:text-white" : "md:text-white/85"))}>
+              <span className="text-xs font-semibold text-ink">{t("when")}</span>
+              <span className={cn("text-sm", whenSummary ? "text-ink" : "text-muted md:text-[#4a4e54]")}>
                 {whenSummary ?? t("whenPlaceholder")}
               </span>
             </button>
             <button type="button" className={segmentClass} onMouseEnter={() => hover("who")} aria-expanded={open === "who"} onClick={() => openPanel(open === "who" ? null : "who")}>
-              <span className={cn("text-xs font-semibold text-ink", onDark("who") && "md:text-white")}>{t("who")}</span>
-              <span className={cn("text-sm", whoSummary ? "text-ink" : "text-muted", onDark("who") && (whoSummary ? "md:text-white" : "md:text-white/85"))}>
+              <span className="text-xs font-semibold text-ink">{t("who")}</span>
+              <span className={cn("text-sm", whoSummary ? "text-ink" : "text-muted md:text-[#4a4e54]")}>
                 {whoSummary ?? t("whoPlaceholder")}
               </span>
             </button>
