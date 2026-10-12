@@ -43,10 +43,9 @@ export function AuthModal({ initialMode, next }: { initialMode: Exclude<Mode, "f
       closeLabel={tHome("close")}
       onClose={() => router.back()}
       title={
-        <span className="flex flex-col items-center">
-          <LogoMark className="h-10 w-11 text-primary" />
-          {/* No visible heading text, but the dialog still needs an accessible name. */}
-          <span className="sr-only">{t("modalTitle")}</span>
+        <span className="flex flex-col items-center gap-4">
+          <LogoMark className="h-16 w-[72px] text-primary" />
+          {t("tagline")}
         </span>
       }
     >

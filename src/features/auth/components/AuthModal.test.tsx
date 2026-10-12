@@ -24,7 +24,7 @@ describe("AuthModal", () => {
 
   it("opens as a dialog over the page with the log-in form", () => {
     renderWithIntl(<AuthModal initialMode="login" next="/search" />);
-    expect(screen.getByRole("dialog", { name: /Welcome to Space Rental/ })).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Rent your perfect fit" })).toBeInTheDocument();
     expect(screen.getByRole("radio", { name: "Log in" })).toHaveAttribute("aria-checked", "true");
     expect(screen.getByRole("button", { name: "Log in" })).toBeInTheDocument();
   });
