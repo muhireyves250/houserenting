@@ -5,8 +5,9 @@ import { describe, expect, it, vi } from "vitest";
 import { renderWithIntl } from "@/test/render";
 import { HeaderNav } from "./HeaderNav";
 
+let currentPath = "/";
 vi.mock("@/i18n/navigation", () => ({
-  usePathname: () => "/",
+  usePathname: () => currentPath,
   Link: ({ href, children, ...rest }: { href: string; children: ReactNode }) => (
     <a href={href} {...rest}>
       {children}
@@ -57,11 +58,37 @@ describe("HeaderNav hover", () => {
     renderWithIntl(<HeaderNav />);
     const current = screen.getByRole("link", { name: "Search" });
     expect(current).toHaveAttribute("aria-current", "page");
-    // Outline only: blue border and text, no solid fill.
-    expect(current).toHaveClass("border-primary", "text-primary");
-    expect(current).not.toHaveClass("bg-primary");
+    expect(current).toHaveClass("text-primary");
     layout(current, 0, 80);
     await userEvent.hover(current);
     expect(screen.getByTestId("nav-hover")).toHaveAttribute("data-visible", "false");
+  });
+
+  it("slides the outlined current-page pill to the new link when the page changes", () => {
+    currentPath = "/";
+    const view = renderWithIntl(<HeaderNav />);
+    const outline = screen.getByTestId("nav-active");
+    layout(screen.getByRole("link", { name: "Search" }), 0, 80);
+    layout(screen.getByRole("link", { name: "Bookings" }), 200, 104);
+
+    currentPath = "/bookings";
+    view.rerender(<HeaderNav />);
+    expect(outline.style.transform).toBe("translateX(200px)");
+    expect(outline.style.width).toBe("104px");
+    expect(outline).toHaveClass("border-primary");
+    currentPath = "/";
+  });
+
+  it("clears the hover shade once the hovered link becomes the current page", async () => {
+    currentPath = "/";
+    const view = renderWithIntl(<HeaderNav />);
+    const chats = screen.getByRole("link", { name: "Chats" });
+    layout(chats, 300, 70);
+    await userEvent.hover(chats);
+    expect(screen.getByTestId("nav-hover")).toHaveAttribute("data-visible", "true");
+    currentPath = "/chats";
+    view.rerender(<HeaderNav />);
+    expect(screen.getByTestId("nav-hover")).toHaveAttribute("data-visible", "false");
+    currentPath = "/";
   });
 });
