@@ -122,12 +122,11 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
     transform: `translateX(calc(${index * 100}% + ${index * SEGMENT_GAP_PX}px))`,
   });
 
-  const segment = (panel: Panel) =>
-    cn(
+  const segmentClass = cn(
       "relative z-10 flex flex-col justify-center rounded-xl border border-line-strong px-4 py-3 text-left transition-colors duration-500",
       // Phones have no hover, so fields stay outlined there; on desktop the sliding pills provide the outline.
       "md:rounded-full md:border-transparent md:px-6",
-    );
+  );
 
   const pillMotion = "transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.25,0.8,0.25,1)] motion-reduce:transition-none";
 
@@ -184,7 +183,7 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
             showHover ? "opacity-100" : "opacity-0",
           )}
         />
-        <div className={segment("where")} onMouseEnter={() => hover("where")}>
+        <div className={segmentClass} onMouseEnter={() => hover("where")}>
           <label htmlFor={`${listboxId}-input`} className="text-xs font-semibold text-ink">
             {t("where")}
           </label>
@@ -209,11 +208,11 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
 
         {short && (
           <>
-            <button type="button" className={segment("when")} onMouseEnter={() => hover("when")} aria-expanded={open === "when"} onClick={() => openPanel(open === "when" ? null : "when")}>
+            <button type="button" className={segmentClass} onMouseEnter={() => hover("when")} aria-expanded={open === "when"} onClick={() => openPanel(open === "when" ? null : "when")}>
               <span className="text-xs font-semibold text-ink">{t("when")}</span>
               <span className={cn("text-sm", whenSummary ? "text-ink" : "text-muted")}>{whenSummary ?? t("whenPlaceholder")}</span>
             </button>
-            <button type="button" className={segment("who")} onMouseEnter={() => hover("who")} aria-expanded={open === "who"} onClick={() => openPanel(open === "who" ? null : "who")}>
+            <button type="button" className={segmentClass} onMouseEnter={() => hover("who")} aria-expanded={open === "who"} onClick={() => openPanel(open === "who" ? null : "who")}>
               <span className="text-xs font-semibold text-ink">{t("who")}</span>
               <span className={cn("text-sm", whoSummary ? "text-ink" : "text-muted")}>{whoSummary ?? t("whoPlaceholder")}</span>
             </button>
