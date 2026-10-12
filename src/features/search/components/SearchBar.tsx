@@ -160,6 +160,8 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
         className="md:max-w-md md:self-center"
       />
 
+      {/* Reserves the expanded bar height so growing on hover never shifts the page. */}
+      <div className="md:flex md:h-[82px] md:items-center">
       <form
         role="search"
         data-expanded={expanded}
@@ -269,6 +271,7 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
           </span>
         </button>
       </form>
+      </div>
 
       {open && isDesktop && (
         // One persistent panel: it slides and resizes with the white pill instead of re-mounting per segment.
