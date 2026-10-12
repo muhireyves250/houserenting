@@ -23,10 +23,19 @@ export default async function HomePage() {
       <section className="relative md:bg-primary">
         {/* Desktop hero: sharp photo under a brand-blue gradient (phones keep the clean white design). */}
         <div className="absolute inset-0 hidden overflow-hidden md:block" aria-hidden="true">
-          <Image src={HERO_PHOTO} alt="" fill priority quality={90} sizes="100vw" className="object-cover object-center" />
-          <HeroVideo src={HERO_VIDEO} />
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/80 via-primary/55 to-[#00214a]/80" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_45%,rgba(0,20,50,0.3)_100%)]" />
+          {/* Footage graded to "pop" through the blue: a little more colour, contrast and light. */}
+          <Image
+            src={HERO_PHOTO}
+            alt=""
+            fill
+            priority
+            quality={90}
+            sizes="100vw"
+            className="object-cover object-center [filter:saturate(1.3)_contrast(1.12)_brightness(1.12)]"
+          />
+          <HeroVideo src={HERO_VIDEO} className="[filter:saturate(1.35)_contrast(1.15)_brightness(1.18)]" />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/65 via-primary/40 to-[#00214a]/65" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_50%,rgba(0,20,50,0.25)_100%)]" />
           <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-[#00214a]/40" />
         </div>
         <PageContainer className="relative flex flex-col gap-8 pt-6 pb-10 md:items-center md:py-36">
