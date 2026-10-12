@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Figtree } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -7,7 +7,8 @@ import type { ReactNode } from "react";
 import { routing } from "@/i18n/routing";
 import "../globals.css";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+// Professional UI typeface (variable weights 300–900) with normal word spacing; latin-ext covers French accents.
+const brandSans = Figtree({ subsets: ["latin", "latin-ext"], variable: "--font-brand", display: "swap" });
 
 export const viewport: Viewport = { themeColor: "#0057b8" };
 
@@ -28,7 +29,7 @@ export default async function LocaleLayout({ children, params }: { children: Rea
   setRequestLocale(locale);
 
   return (
-    <html lang={locale} className={inter.variable}>
+    <html lang={locale} className={brandSans.variable}>
       <body className="min-h-dvh bg-canvas font-sans text-ink antialiased">
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
       </body>
