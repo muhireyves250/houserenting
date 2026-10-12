@@ -19,4 +19,8 @@ const child = spawn(command, args, {
   stdio: "inherit",
   env: { ...process.env, DATABASE_URL: url },
 });
-child.on("exit", (code) => process.exit(code ?? 1));
+// Forward stop signals so servers started through this wrapper (e.g. by Playwright) actually shut down.
+for (const signal of ["SIGINT", "SIGTERM", "SIGHUP"] as const) {
+  process.on(signal, () => child.kill(signal));
+}
+child.on("exit", (code, signal) => process.exit(code ?? (signal ? 1 : 0)));

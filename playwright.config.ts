@@ -10,13 +10,15 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
+  // Remote dev/test database: server round-trips can exceed the 5s default.
+  expect: { timeout: 15_000 },
   use: { baseURL, trace: "on-first-retry" },
   projects: [
     { name: "mobile", use: { ...devices["Pixel 7"] } },
     { name: "desktop", use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } } },
   ],
   webServer: {
-    command: `tsx scripts/with-test-db.ts sh -c "pnpm build && pnpm start -p ${PORT}"`,
+    command: `pnpm exec tsx scripts/with-test-db.ts sh -c "next build && exec next start -p ${PORT}"`,
     url: `${baseURL}/en`,
     reuseExistingServer: !process.env.CI,
     timeout: 300_000,
