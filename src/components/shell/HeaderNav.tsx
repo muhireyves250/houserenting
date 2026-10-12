@@ -1,17 +1,41 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useState, type FocusEvent, type MouseEvent } from "react";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { isActive, NAV_ITEMS } from "./nav-items";
 
+type Box = { left: number; width: number };
+
 export function HeaderNav() {
   const t = useTranslations("Nav");
   const pathname = usePathname();
+  // Same hover language as the search bar: one pill slides behind the link under the mouse (or focus).
+  const [box, setBox] = useState<Box>({ left: 0, width: 0 });
+  const [visible, setVisible] = useState(false);
+
+  function track(event: MouseEvent<HTMLAnchorElement> | FocusEvent<HTMLAnchorElement>) {
+    const el = event.currentTarget;
+    setBox({ left: el.offsetLeft, width: el.offsetWidth });
+    setVisible(true);
+  }
 
   return (
-    <nav aria-label={t("mainNav")}>
-      <ul className="flex items-center gap-8">
+    <nav aria-label={t("mainNav")} onMouseLeave={() => setVisible(false)}>
+      <ul className="relative flex items-center gap-2" onBlur={() => setVisible(false)}>
+        <span
+          data-testid="nav-hover"
+          data-visible={visible}
+          aria-hidden="true"
+          style={{ width: `${box.width}px`, transform: `translateX(${box.left}px)` }}
+          className={cn(
+            "pointer-events-none absolute inset-y-0 left-0 rounded-full bg-primary/[0.08]",
+            "transition-[transform,width,opacity] duration-500 ease-[cubic-bezier(0.25,0.8,0.25,1)] motion-reduce:transition-none",
+            "group-data-[overlay=true]/header:bg-white/15",
+            visible ? "opacity-100" : "opacity-0",
+          )}
+        />
         {NAV_ITEMS.filter((item) => item.key !== "profile").map(({ key, href }) => {
           const active = isActive(pathname, href);
           return (
@@ -19,11 +43,13 @@ export function HeaderNav() {
               <Link
                 href={href}
                 aria-current={active ? "page" : undefined}
+                onMouseEnter={track}
+                onFocus={track}
                 className={cn(
-                  "relative py-1 text-[15px] font-semibold tracking-[0.01em] transition-colors duration-300",
-                  // Underline grows from the centre on hover; stays for the current page.
-                  "after:absolute after:inset-x-0 after:-bottom-1 after:h-0.5 after:origin-center after:rounded-full after:bg-primary",
-                  "after:transition-transform after:duration-300 after:ease-out hover:after:scale-x-100 motion-reduce:after:transition-none",
+                  "relative block rounded-full px-4 py-2 text-[15px] font-semibold tracking-[0.01em] transition-colors duration-300",
+                  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+                  // Current page keeps a short underline.
+                  "after:absolute after:inset-x-4 after:bottom-0.5 after:h-0.5 after:origin-center after:rounded-full after:bg-primary after:transition-transform after:duration-300",
                   active ? "text-primary after:scale-x-100" : "text-ink/80 after:scale-x-0 hover:text-ink",
                   "group-data-[overlay=true]/header:text-white/85 group-data-[overlay=true]/header:after:bg-white group-data-[overlay=true]/header:hover:text-white",
                   active && "group-data-[overlay=true]/header:text-white",
