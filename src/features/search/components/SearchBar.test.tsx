@@ -141,6 +141,28 @@ describe("SearchBar", () => {
     expect(panel.style.width).toBe("26rem");
   });
 
+  it("is compact at rest and expands while hovered, focused or open", async () => {
+    renderWithIntl(<SearchBar today={TODAY} />);
+    const bar = screen.getByRole("search");
+    expect(bar).toHaveAttribute("data-expanded", "false");
+    // The button keeps its accessible name even when only the icon shows.
+    expect(screen.getByRole("button", { name: "Search" })).toBeInTheDocument();
+
+    await userEvent.hover(screen.getByRole("button", { name: /When/ }));
+    expect(bar).toHaveAttribute("data-expanded", "true");
+    await userEvent.unhover(bar);
+    expect(bar).toHaveAttribute("data-expanded", "false");
+
+    await userEvent.click(screen.getByRole("button", { name: /Who/ }));
+    await userEvent.unhover(bar);
+    expect(bar).toHaveAttribute("data-expanded", "true");
+    await userEvent.keyboard("{Escape}");
+    // Focus is still inside the bar; it shrinks once focus leaves.
+    expect(bar).toHaveAttribute("data-expanded", "true");
+    await userEvent.click(document.body);
+    expect(bar).toHaveAttribute("data-expanded", "false");
+  });
+
   it("opens panels as full-screen dialogs on phones", async () => {
     stubViewport(false);
     renderWithIntl(<SearchBar today={TODAY} />);

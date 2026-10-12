@@ -47,6 +47,11 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
   const [hovered, setHovered] = useState<Panel | null>(null);
   const [hoverAt, setHoverAt] = useState<Panel>("where");
 
+  // Desktop bar is compact and white at rest, and expands while hovered, focused or open.
+  const [barHover, setBarHover] = useState(false);
+  const [focusWithin, setFocusWithin] = useState(false);
+  const expanded = barHover || focusWithin || open !== null;
+
   function hover(panel: Panel | null) {
     setHovered(panel);
     if (panel) setHoverAt(panel);
@@ -130,9 +135,11 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
   });
 
   const segmentClass = cn(
-      "relative z-10 flex flex-col justify-center rounded-xl border border-line-strong px-4 py-3 text-left transition-colors duration-500",
-      // Phones have no hover, so fields stay outlined there; on desktop the sliding pills mark the segment.
-      "md:rounded-full md:border-transparent md:px-6",
+    "relative z-10 flex flex-col justify-center rounded-xl border border-line-strong px-4 py-3 text-left",
+    "transition-[padding,color] duration-500 ease-[cubic-bezier(0.25,0.8,0.25,1)] motion-reduce:transition-none",
+    // Phones have no hover, so fields stay outlined there; on desktop the sliding pills mark the segment.
+    "md:rounded-full md:border-transparent md:px-6",
+    expanded ? "md:py-3" : "md:py-2",
   );
 
   const pillMotion = "transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.25,0.8,0.25,1)] motion-reduce:transition-none";
@@ -154,16 +161,24 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
       />
 
       <form
+        role="search"
+        data-expanded={expanded}
         onSubmit={(event) => {
           event.preventDefault();
           submit();
         }}
+        onMouseEnter={() => setBarHover(true)}
+        onMouseLeave={() => setBarHover(false)}
+        onFocus={() => setFocusWithin(true)}
+        onBlur={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setFocusWithin(false);
+        }}
         className={cn(
           "flex flex-col gap-2 rounded-card border border-line-strong bg-surface p-5 shadow-sm",
-          "md:flex-row md:items-center md:gap-0 md:rounded-full md:border-2 md:border-[#9ea3a9] md:p-2",
-          // Mid-light grey bar with dark text; the hover pill darkens it a little more.
-          "md:transition-colors md:duration-500",
-          "md:bg-[#cfd2d6]",
+          "md:mx-auto md:w-full md:flex-row md:items-center md:gap-0 md:rounded-full md:border-2 md:border-[#9ea3a9]",
+          "md:transition-[max-width,padding,background-color] md:duration-500 md:ease-[cubic-bezier(0.25,0.8,0.25,1)] motion-reduce:transition-none",
+          // Compact white bar at rest; wider, taller, mid-light grey while in use.
+          expanded ? "md:max-w-4xl md:bg-[#cfd2d6] md:p-2" : "md:max-w-3xl md:bg-surface md:p-1",
         )}
       >
         <div
@@ -235,10 +250,23 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
 
         <button
           type="submit"
-          className="mt-3 flex h-12 items-center justify-center gap-2 rounded-full bg-primary px-6 font-semibold text-white hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary md:mt-0 md:ml-2"
+          className={cn(
+            "mt-3 flex h-12 shrink-0 items-center justify-center gap-2 rounded-full bg-primary px-6 font-semibold text-white hover:bg-primary-hover",
+            "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary md:mt-0 md:ml-2",
+            "transition-[height,padding,gap,background-color] duration-500 ease-[cubic-bezier(0.25,0.8,0.25,1)] motion-reduce:transition-none",
+            // Icon only at rest; icon + word while the bar is in use. The word stays in the accessible name.
+            !expanded && "md:h-11 md:gap-0 md:px-3.5",
+          )}
         >
-          <Search className="size-4" aria-hidden="true" />
-          {t("search")}
+          <Search className="size-4 shrink-0" aria-hidden="true" />
+          <span
+            className={cn(
+              "overflow-hidden whitespace-nowrap transition-[max-width,opacity] duration-500 ease-[cubic-bezier(0.25,0.8,0.25,1)] motion-reduce:transition-none",
+              expanded ? "max-w-32 opacity-100" : "max-w-32 opacity-100 md:max-w-0 md:opacity-0",
+            )}
+          >
+            {t("search")}
+          </span>
         </button>
       </form>
 
