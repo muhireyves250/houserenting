@@ -1,6 +1,6 @@
-import { existsSync, readFileSync } from "node:fs";
-import { config, parse } from "dotenv";
+import { config } from "dotenv";
 import { afterAll } from "vitest";
+import { assertSafeTestDatabase, localDevDatabaseUrls } from "./src/test/db-guard";
 
 config({ path: ".env.test", quiet: true });
 
@@ -8,12 +8,7 @@ const testUrl = process.env.TEST_DATABASE_URL;
 if (!testUrl) {
   throw new Error("TEST_DATABASE_URL is not set. Add it to .env.test (see .env.example).");
 }
-if (existsSync(".env")) {
-  const devUrl = parse(readFileSync(".env")).DATABASE_URL;
-  if (devUrl && devUrl === testUrl) {
-    throw new Error("TEST_DATABASE_URL equals the dev DATABASE_URL in .env. Refusing to run tests against dev data.");
-  }
-}
+assertSafeTestDatabase(testUrl, localDevDatabaseUrls());
 
 process.env.DATABASE_URL = testUrl;
 process.env.ALLOW_DB_RESET = "1";

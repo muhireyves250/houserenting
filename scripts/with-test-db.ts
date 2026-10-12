@@ -1,11 +1,19 @@
 import { spawn } from "node:child_process";
 import { config } from "dotenv";
+import { assertSafeTestDatabase, localDevDatabaseUrls } from "../src/test/db-guard";
 
 config({ path: ".env.test", quiet: true });
 
 const url = process.env.TEST_DATABASE_URL;
 if (!url) {
   console.error("TEST_DATABASE_URL is not set. Put it in .env.test (see .env.example).");
+  process.exit(1);
+}
+
+try {
+  assertSafeTestDatabase(url, localDevDatabaseUrls());
+} catch (error) {
+  console.error((error as Error).message);
   process.exit(1);
 }
 

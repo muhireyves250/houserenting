@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { icuArguments as placeholders } from "./icu-args";
 import { catalogs } from "./messages";
 
 type Tree = { [key: string]: string | Tree };
@@ -12,7 +13,6 @@ function flatten(tree: Tree, prefix = ""): Record<string, string> {
   }, {});
 }
 
-const placeholders = (text: string) => [...text.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort();
 
 const en = flatten(catalogs.en as unknown as Tree);
 
