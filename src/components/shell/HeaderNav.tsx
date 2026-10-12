@@ -49,16 +49,18 @@ export function HeaderNav() {
                 onFocus={track}
                 className={cn(
                   "relative block rounded-full px-4 py-2 text-[15px] font-semibold tracking-[0.01em]",
-                  "transition-[background-color,color,box-shadow] duration-300",
+                  "transition-[background-color,border-color,color] duration-300",
                   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+                  // Same footprint for every link so the outline doesn't shift the layout.
+                  "border",
                   active
-                    ? // Current page: solid pill like the selected tab; deepens on hover.
+                    ? // Current page: outlined pill; border deepens and a faint tint appears on hover.
                       cn(
-                        "bg-primary text-white shadow-[0_6px_16px_-8px_rgba(0,87,184,0.7)] hover:bg-primary-hover",
-                        "group-data-[overlay=true]/header:bg-white group-data-[overlay=true]/header:text-primary group-data-[overlay=true]/header:hover:bg-white/90",
+                        "border-primary text-primary hover:border-primary-hover hover:bg-primary/[0.06]",
+                        "group-data-[overlay=true]/header:border-white group-data-[overlay=true]/header:text-white group-data-[overlay=true]/header:hover:bg-white/10",
                       )
                     : cn(
-                        "text-ink/80 hover:text-ink",
+                        "border-transparent text-ink/80 hover:text-ink",
                         "group-data-[overlay=true]/header:text-white/85 group-data-[overlay=true]/header:hover:text-white",
                       ),
                 )}

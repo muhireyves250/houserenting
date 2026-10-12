@@ -53,11 +53,13 @@ describe("HeaderNav hover", () => {
     expect(screen.getByTestId("nav-hover")).toHaveAttribute("data-visible", "true");
   });
 
-  it("marks the current page with a solid pill and keeps the sliding shade off it", async () => {
+  it("marks the current page with an outlined pill and keeps the sliding shade off it", async () => {
     renderWithIntl(<HeaderNav />);
     const current = screen.getByRole("link", { name: "Search" });
     expect(current).toHaveAttribute("aria-current", "page");
-    expect(current).toHaveClass("bg-primary", "text-white");
+    // Outline only: blue border and text, no solid fill.
+    expect(current).toHaveClass("border-primary", "text-primary");
+    expect(current).not.toHaveClass("bg-primary");
     layout(current, 0, 80);
     await userEvent.hover(current);
     expect(screen.getByTestId("nav-hover")).toHaveAttribute("data-visible", "false");
