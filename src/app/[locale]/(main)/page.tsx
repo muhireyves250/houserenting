@@ -34,11 +34,11 @@ export default async function HomePage() {
             className="object-cover object-center [filter:saturate(1.3)_contrast(1.12)_brightness(1.12)]"
           />
           <HeroVideo src={HERO_VIDEO} className="[filter:saturate(1.35)_contrast(1.15)_brightness(1.18)]" />
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/65 via-primary/40 to-[#00214a]/65" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_50%,rgba(0,20,50,0.25)_100%)]" />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/72 via-primary/48 to-[#00214a]/72" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_50%,rgba(0,20,50,0.28)_100%)]" />
           <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-[#00214a]/40" />
         </div>
-        <PageContainer className="relative flex flex-col gap-8 pt-6 pb-10 md:items-center md:py-36">
+        <PageContainer className="relative flex flex-col gap-8 pt-6 pb-10 md:items-center md:py-28">
           <div className="flex justify-end md:hidden">
             <Suspense>
               <LocaleSwitcher />
