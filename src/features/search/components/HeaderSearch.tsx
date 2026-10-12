@@ -54,7 +54,7 @@ export function HeaderSearch() {
       role="group"
       aria-label={t("compactLabel")}
       data-header-search
-      className="hidden items-center rounded-full border border-line bg-surface py-1 pr-1 pl-1 shadow-sm motion-safe:animate-pop-in lg:flex"
+      className="hidden items-center rounded-full border border-primary bg-surface py-1 pr-1 pl-1 shadow-[0_8px_20px_-12px_rgba(0,87,184,0.55)] transition-colors duration-300 hover:bg-primary/[0.03] motion-safe:animate-pop-in lg:flex"
     >
       <button type="button" className={cn(part, "font-medium text-ink")} onClick={() => openInHero("where")}>
         {search.location || t("compactWhere")}
