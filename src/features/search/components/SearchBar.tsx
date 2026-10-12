@@ -279,7 +279,7 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
           data-testid="search-panel"
           style={PANEL_BOX[open]}
           className={cn(
-            "absolute top-full z-30 mt-3 rounded-[2rem] bg-surface p-8 shadow-2xl motion-safe:animate-pop-in",
+            "absolute top-full z-30 mt-3 rounded-[2rem] bg-surface p-8 shadow-[0_18px_50px_rgba(0,0,0,0.28),0_4px_14px_rgba(0,0,0,0.14)] motion-safe:animate-pop-in",
             "transition-[left,width] duration-500 ease-[cubic-bezier(0.25,0.8,0.25,1)] motion-reduce:transition-none",
           )}
         >
