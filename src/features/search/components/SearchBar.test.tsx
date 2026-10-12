@@ -148,10 +148,15 @@ describe("SearchBar", () => {
     // The button keeps its accessible name even when only the icon shows.
     expect(screen.getByRole("button", { name: "Search" })).toBeInTheDocument();
 
+    const backdrop = screen.getByTestId("page-blur");
+    expect(backdrop).toHaveAttribute("data-visible", "false");
     await userEvent.hover(screen.getByRole("button", { name: /When/ }));
     expect(bar).toHaveAttribute("data-expanded", "true");
+    // The rest of the page blurs while the bar is expanded.
+    expect(backdrop).toHaveAttribute("data-visible", "true");
     await userEvent.unhover(bar);
     expect(bar).toHaveAttribute("data-expanded", "false");
+    expect(backdrop).toHaveAttribute("data-visible", "false");
 
     await userEvent.click(screen.getByRole("button", { name: /Who/ }));
     await userEvent.unhover(bar);

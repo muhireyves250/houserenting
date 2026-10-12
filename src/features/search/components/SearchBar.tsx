@@ -145,7 +145,19 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
   const pillMotion = "transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.25,0.8,0.25,1)] motion-reduce:transition-none";
 
   return (
-    <div ref={rootRef} className="relative flex w-full max-w-4xl flex-col gap-4">
+    // z-50 lifts the whole search UI (tabs, bar, panel) above the blur backdrop and the sticky header.
+    <div ref={rootRef} className="relative z-50 flex w-full max-w-4xl flex-col gap-4">
+      {/* Blurs and slightly dims the rest of the page while the bar is expanded (desktop). Clicks pass through. */}
+      <div
+        data-testid="page-blur"
+        data-visible={expanded}
+        aria-hidden="true"
+        className={cn(
+          "pointer-events-none fixed inset-0 hidden bg-black/15 backdrop-blur-[6px] md:block",
+          "transition-opacity duration-500 ease-[cubic-bezier(0.25,0.8,0.25,1)] motion-reduce:transition-none",
+          expanded ? "opacity-100" : "opacity-0",
+        )}
+      />
       <SegmentedTabs
         label={t("modeLabel")}
         value={mode}
@@ -157,11 +169,11 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
           { value: "short", label: t("short") },
           { value: "long", label: t("long") },
         ]}
-        className="md:max-w-md md:self-center"
+        className="relative md:max-w-md md:self-center"
       />
 
       {/* Reserves the expanded bar height so growing on hover never shifts the page. */}
-      <div className="md:flex md:h-[82px] md:items-center">
+      <div className="relative md:flex md:h-[82px] md:items-center">
       <form
         role="search"
         data-expanded={expanded}
