@@ -1,0 +1,151 @@
+{
+  "Metadata": {
+    "title": "Space Rental",
+    "description": "Rent houses, lodges and apartments in Rwanda — by the hour, day, night or month."
+  },
+  "Nav": {
+    "search": "Search",
+    "favorites": "Favorites",
+    "bookings": "Bookings",
+    "chats": "Chats",
+    "profile": "Profile",
+    "login": "Log in",
+    "signup": "Sign up",
+    "language": "Language",
+    "mainNav": "Main navigation",
+    "back": "Back"
+  },
+  "Common": {
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Saved",
+    "next": "Next",
+    "skip": "Skip",
+    "tryAgain": "Try again",
+    "goHome": "Go to home"
+  },
+  "Home": {
+    "titleTop": "Find",
+    "titleBottom": "your new home",
+    "modeLabel": "Rental type",
+    "short": "Short-term",
+    "long": "From 6 months",
+    "location": "Location",
+    "checkIn": "Check-in",
+    "checkOut": "Check-out",
+    "guests": "Number of guests",
+    "search": "Search"
+  },
+  "Search": {
+    "anywhere": "Anywhere in Rwanda",
+    "emptyTitle": "No places here yet",
+    "emptyBody": "Hosts are adding new homes every day. Check back soon."
+  },
+  "Onboarding": {
+    "slide1": "Rent your perfect fit",
+    "slide1Body": "Houses, lodges and apartments — for an hour, a night or a year.",
+    "slide2": "Search by location",
+    "slide2Body": "Find places in the neighborhood you love.",
+    "slide3": "Save favorites",
+    "slide3Body": "Keep the places you like and come back anytime.",
+    "getStarted": "Get started",
+    "progress": "Step {current} of {total}"
+  },
+  "Auth": {
+    "signupTitle": "Sign up",
+    "loginTitle": "Log in",
+    "name": "Full name",
+    "email": "Email",
+    "password": "Password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "passwordHint": "At least 8 characters.",
+    "createAccount": "Create account",
+    "logIn": "Log in",
+    "haveAccount": "Already have an account?",
+    "noAccount": "No account?",
+    "forgotPassword": "Forgot password?",
+    "terms": "By continuing, you agree to our Terms of Service and confirm that you have read our Privacy Policy.",
+    "checkEmailTitle": "Check your email",
+    "checkEmailBody": "We sent a verification link to {email}. Open it to activate your account.",
+    "checkEmailNoAddress": "We sent you a verification link. Open it to activate your account.",
+    "resend": "Resend email",
+    "resent": "Email sent again.",
+    "verifiedTitle": "Email verified",
+    "verifiedBody": "Your account is ready.",
+    "continue": "Continue",
+    "forgotTitle": "Reset your password",
+    "forgotBody": "Enter your email and we'll send you a reset link.",
+    "sendLink": "Send reset link",
+    "linkSent": "If an account exists for that email, a reset link is on its way.",
+    "resetTitle": "Choose a new password",
+    "newPassword": "New password",
+    "resetSubmit": "Update password",
+    "resetDone": "Password updated. You can now log in.",
+    "backToLogin": "Back to log in",
+    "tagline": "Rent your perfect fit",
+    "errors": {
+      "emailTaken": "An account with this email already exists.",
+      "invalidCredentials": "Wrong email or password.",
+      "notVerified": "Please verify your email first. We just sent you a new link.",
+      "passwordShort": "Password must be at least 8 characters.",
+      "passwordLong": "Password is too long.",
+      "passwordCommon": "This password is too common. Choose another one.",
+      "invalidToken": "This link is invalid or has expired. Request a new one.",
+      "tooMany": "Too many attempts. Wait a minute and try again.",
+      "generic": "Something went wrong. Please try again.",
+      "nameRequired": "Enter your name.",
+      "nameTooLong": "Name is too long (80 characters max).",
+      "emailInvalid": "Enter a valid email address."
+    }
+  },
+  "Profile": {
+    "title": "Profile",
+    "name": "Full name",
+    "email": "Email",
+    "verified": "Verified",
+    "notVerified": "Not verified",
+    "phone": "Phone number",
+    "phoneHint": "For example 0788 123 456",
+    "language": "Language",
+    "signOut": "Sign out",
+    "errors": {
+      "nameRequired": "Enter your name.",
+      "nameTooLong": "Name is too long (80 characters max).",
+      "phoneInvalid": "Enter a valid phone number.",
+      "localeInvalid": "Choose a language from the list.",
+      "generic": "Something went wrong. Please try again."
+    }
+  },
+  "Empty": {
+    "favoritesTitle": "No favorites yet",
+    "favoritesBody": "Tap the heart on a place to save it here.",
+    "bookingsTitle": "No bookings yet",
+    "bookingsBody": "Your reservations and viewings will appear here.",
+    "chatsTitle": "No messages yet",
+    "chatsBody": "Conversations with hosts will appear here."
+  },
+  "Errors": {
+    "title": "Something went wrong",
+    "body": "We've been notified and are looking into it.",
+    "notFoundTitle": "Page not found",
+    "notFoundBody": "The page you're looking for doesn't exist."
+  },
+  "Emails": {
+    "greeting": "Hello {name},",
+    "verifySubject": "Confirm your email for Space Rental",
+    "verifyBody": "Confirm your email address to finish creating your account.",
+    "verifyButton": "Confirm email",
+    "resetSubject": "Reset your Space Rental password",
+    "resetBody": "We received a request to reset your password. This link expires in 1 hour.",
+    "resetButton": "Reset password",
+    "linkFallback": "If the button doesn't work, copy this link into your browser:",
+    "ignore": "If you didn't request this, you can ignore this email.",
+    "footer": "Space Rental · Kigali, Rwanda"
+  },
+  "Locale": {
+    "en": "English",
+    "rw": "Kinyarwanda",
+    "fr": "Français"
+  }
+}

@@ -1,0 +1,151 @@
+{
+  "Metadata": {
+    "title": "Space Rental",
+    "description": "Louez maisons, lodges et appartements au Rwanda — à l'heure, à la journée, à la nuit ou au mois."
+  },
+  "Nav": {
+    "search": "Rechercher",
+    "favorites": "Favoris",
+    "bookings": "Réservations",
+    "chats": "Messages",
+    "profile": "Profil",
+    "login": "Se connecter",
+    "signup": "S'inscrire",
+    "language": "Langue",
+    "mainNav": "Navigation principale",
+    "back": "Retour"
+  },
+  "Common": {
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "saved": "Enregistré",
+    "next": "Suivant",
+    "skip": "Passer",
+    "tryAgain": "Réessayer",
+    "goHome": "Aller à l'accueil"
+  },
+  "Home": {
+    "titleTop": "Trouvez",
+    "titleBottom": "votre nouveau chez-vous",
+    "modeLabel": "Type de location",
+    "short": "Courte durée",
+    "long": "À partir de 6 mois",
+    "location": "Lieu",
+    "checkIn": "Arrivée",
+    "checkOut": "Départ",
+    "guests": "Nombre de voyageurs",
+    "search": "Rechercher"
+  },
+  "Search": {
+    "anywhere": "Partout au Rwanda",
+    "emptyTitle": "Aucun logement ici pour l'instant",
+    "emptyBody": "Des hôtes ajoutent de nouveaux logements chaque jour. Revenez bientôt."
+  },
+  "Onboarding": {
+    "slide1": "Louez ce qui vous convient",
+    "slide1Body": "Maisons, lodges et appartements — pour une heure, une nuit ou une année.",
+    "slide2": "Recherchez par lieu",
+    "slide2Body": "Trouvez un logement dans le quartier que vous aimez.",
+    "slide3": "Enregistrez vos favoris",
+    "slide3Body": "Gardez les logements qui vous plaisent et revenez quand vous voulez.",
+    "getStarted": "Commencer",
+    "progress": "Étape {current} sur {total}"
+  },
+  "Auth": {
+    "signupTitle": "Inscription",
+    "loginTitle": "Connexion",
+    "name": "Nom complet",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe",
+    "passwordHint": "Au moins 8 caractères.",
+    "createAccount": "Créer un compte",
+    "logIn": "Se connecter",
+    "haveAccount": "Vous avez déjà un compte ?",
+    "noAccount": "Pas de compte ?",
+    "forgotPassword": "Mot de passe oublié ?",
+    "terms": "En continuant, vous acceptez nos Conditions d'utilisation et confirmez avoir lu notre Politique de confidentialité.",
+    "checkEmailTitle": "Vérifiez votre e-mail",
+    "checkEmailBody": "Nous avons envoyé un lien de vérification à {email}. Ouvrez-le pour activer votre compte.",
+    "checkEmailNoAddress": "Nous vous avons envoyé un lien de vérification. Ouvrez-le pour activer votre compte.",
+    "resend": "Renvoyer l'e-mail",
+    "resent": "E-mail renvoyé.",
+    "verifiedTitle": "E-mail vérifié",
+    "verifiedBody": "Votre compte est prêt.",
+    "continue": "Continuer",
+    "forgotTitle": "Réinitialiser votre mot de passe",
+    "forgotBody": "Saisissez votre e-mail et nous vous enverrons un lien de réinitialisation.",
+    "sendLink": "Envoyer le lien",
+    "linkSent": "Si un compte existe pour cet e-mail, un lien de réinitialisation est en route.",
+    "resetTitle": "Choisissez un nouveau mot de passe",
+    "newPassword": "Nouveau mot de passe",
+    "resetSubmit": "Mettre à jour le mot de passe",
+    "resetDone": "Mot de passe mis à jour. Vous pouvez maintenant vous connecter.",
+    "backToLogin": "Retour à la connexion",
+    "tagline": "Louez ce qui vous convient",
+    "errors": {
+      "emailTaken": "Un compte existe déjà avec cet e-mail.",
+      "invalidCredentials": "E-mail ou mot de passe incorrect.",
+      "notVerified": "Veuillez d'abord vérifier votre e-mail. Nous venons de vous envoyer un nouveau lien.",
+      "passwordShort": "Le mot de passe doit contenir au moins 8 caractères.",
+      "passwordLong": "Le mot de passe est trop long.",
+      "passwordCommon": "Ce mot de passe est trop courant. Choisissez-en un autre.",
+      "invalidToken": "Ce lien est invalide ou a expiré. Demandez-en un nouveau.",
+      "tooMany": "Trop de tentatives. Attendez une minute et réessayez.",
+      "generic": "Une erreur s'est produite. Veuillez réessayer.",
+      "nameRequired": "Saisissez votre nom.",
+      "nameTooLong": "Le nom est trop long (80 caractères maximum).",
+      "emailInvalid": "Saisissez une adresse e-mail valide."
+    }
+  },
+  "Profile": {
+    "title": "Profil",
+    "name": "Nom complet",
+    "email": "E-mail",
+    "verified": "Vérifié",
+    "notVerified": "Non vérifié",
+    "phone": "Numéro de téléphone",
+    "phoneHint": "Par exemple 0788 123 456",
+    "language": "Langue",
+    "signOut": "Se déconnecter",
+    "errors": {
+      "nameRequired": "Saisissez votre nom.",
+      "nameTooLong": "Le nom est trop long (80 caractères maximum).",
+      "phoneInvalid": "Saisissez un numéro de téléphone valide.",
+      "localeInvalid": "Choisissez une langue dans la liste.",
+      "generic": "Une erreur s'est produite. Veuillez réessayer."
+    }
+  },
+  "Empty": {
+    "favoritesTitle": "Aucun favori pour l'instant",
+    "favoritesBody": "Touchez le cœur d'un logement pour l'enregistrer ici.",
+    "bookingsTitle": "Aucune réservation pour l'instant",
+    "bookingsBody": "Vos réservations et visites apparaîtront ici.",
+    "chatsTitle": "Aucun message pour l'instant",
+    "chatsBody": "Vos conversations avec les hôtes apparaîtront ici."
+  },
+  "Errors": {
+    "title": "Une erreur s'est produite",
+    "body": "Nous avons été prévenus et nous examinons le problème.",
+    "notFoundTitle": "Page introuvable",
+    "notFoundBody": "La page que vous cherchez n'existe pas."
+  },
+  "Emails": {
+    "greeting": "Bonjour {name},",
+    "verifySubject": "Confirmez votre e-mail pour Space Rental",
+    "verifyBody": "Confirmez votre adresse e-mail pour terminer la création de votre compte.",
+    "verifyButton": "Confirmer l'e-mail",
+    "resetSubject": "Réinitialisez votre mot de passe Space Rental",
+    "resetBody": "Nous avons reçu une demande de réinitialisation de votre mot de passe. Ce lien expire dans 1 heure.",
+    "resetButton": "Réinitialiser le mot de passe",
+    "linkFallback": "Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :",
+    "ignore": "Si vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail.",
+    "footer": "Space Rental · Kigali, Rwanda"
+  },
+  "Locale": {
+    "en": "English",
+    "rw": "Kinyarwanda",
+    "fr": "Français"
+  }
+}

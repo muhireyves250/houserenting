@@ -1,0 +1,151 @@
+{
+  "Metadata": {
+    "title": "Space Rental",
+    "description": "Kodesha amazu, lodges n'amazu yo guturamo mu Rwanda — ku isaha, ku munsi, ku ijoro cyangwa ku kwezi."
+  },
+  "Nav": {
+    "search": "Shakisha",
+    "favorites": "Ibyo nkunda",
+    "bookings": "Ibyo natumije",
+    "chats": "Ubutumwa",
+    "profile": "Konti",
+    "login": "Injira",
+    "signup": "Iyandikishe",
+    "language": "Ururimi",
+    "mainNav": "Ibice by'ingenzi",
+    "back": "Subira inyuma"
+  },
+  "Common": {
+    "save": "Bika",
+    "saving": "Birabikwa…",
+    "saved": "Byabitswe",
+    "next": "Komeza",
+    "skip": "Simbuka",
+    "tryAgain": "Ongera ugerageze",
+    "goHome": "Jya ahabanza"
+  },
+  "Home": {
+    "titleTop": "Shaka",
+    "titleBottom": "inzu yawe nshya",
+    "modeLabel": "Ubwoko bw'ubukode",
+    "short": "Igihe gito",
+    "long": "Guhera ku mezi 6",
+    "location": "Ahantu",
+    "checkIn": "Kwinjira",
+    "checkOut": "Gusohoka",
+    "guests": "Umubare w'abashyitsi",
+    "search": "Shakisha"
+  },
+  "Search": {
+    "anywhere": "Ahantu hose mu Rwanda",
+    "emptyTitle": "Nta nzu zirahaba",
+    "emptyBody": "Ba nyir'amazu bongeramo amazu mashya buri munsi. Uzagaruke vuba."
+  },
+  "Onboarding": {
+    "slide1": "Kodesha ikubereye",
+    "slide1Body": "Amazu, lodges n'amazu yo guturamo — ku isaha, ijoro cyangwa umwaka.",
+    "slide2": "Shakisha ukurikije ahantu",
+    "slide2Body": "Shaka ahantu mu gace ukunda.",
+    "slide3": "Bika ibyo ukunda",
+    "slide3Body": "Bika ahantu ukunda, uzagaruke igihe cyose.",
+    "getStarted": "Tangira",
+    "progress": "Intambwe {current} kuri {total}"
+  },
+  "Auth": {
+    "signupTitle": "Iyandikishe",
+    "loginTitle": "Injira",
+    "name": "Amazina yose",
+    "email": "Imeyili",
+    "password": "Ijambo ry'ibanga",
+    "showPassword": "Erekana ijambo ry'ibanga",
+    "hidePassword": "Hisha ijambo ry'ibanga",
+    "passwordHint": "Nibura inyuguti 8.",
+    "createAccount": "Fungura konti",
+    "logIn": "Injira",
+    "haveAccount": "Usanzwe ufite konti?",
+    "noAccount": "Nta konti ufite?",
+    "forgotPassword": "Wibagiwe ijambo ry'ibanga?",
+    "terms": "Ukomeje, wemera Amabwiriza yacu kandi wemeza ko wasomye Politiki y'ibanga.",
+    "checkEmailTitle": "Reba imeyili yawe",
+    "checkEmailBody": "Twohereje umurongo wo kwemeza kuri {email}. Ufungure kugira ngo ukoreshe konti yawe.",
+    "checkEmailNoAddress": "Twakoherereje umurongo wo kwemeza. Ufungure kugira ngo ukoreshe konti yawe.",
+    "resend": "Ongera wohereze",
+    "resent": "Imeyili yongeye koherezwa.",
+    "verifiedTitle": "Imeyili yemejwe",
+    "verifiedBody": "Konti yawe iteguye.",
+    "continue": "Komeza",
+    "forgotTitle": "Hindura ijambo ry'ibanga",
+    "forgotBody": "Andika imeyili yawe tukoherereze umurongo wo kurihindura.",
+    "sendLink": "Ohereza umurongo",
+    "linkSent": "Niba hari konti ifite iyo meyili, umurongo uri mu nzira.",
+    "resetTitle": "Hitamo ijambo ry'ibanga rishya",
+    "newPassword": "Ijambo ry'ibanga rishya",
+    "resetSubmit": "Hindura ijambo ry'ibanga",
+    "resetDone": "Ijambo ry'ibanga ryahinduwe. Ubu ushobora kwinjira.",
+    "backToLogin": "Subira ku kwinjira",
+    "tagline": "Kodesha ikubereye",
+    "errors": {
+      "emailTaken": "Hari konti isanzwe ifite iyi meyili.",
+      "invalidCredentials": "Imeyili cyangwa ijambo ry'ibanga si byo.",
+      "notVerified": "Banza wemeze imeyili yawe. Tukoherereje undi murongo.",
+      "passwordShort": "Ijambo ry'ibanga rigomba kuba nibura inyuguti 8.",
+      "passwordLong": "Ijambo ry'ibanga ni rirerire cyane.",
+      "passwordCommon": "Iri jambo ry'ibanga rirakoreshwa cyane. Hitamo irindi.",
+      "invalidToken": "Uyu murongo ntukora cyangwa warangiye. Saba undi.",
+      "tooMany": "Wagerageje inshuro nyinshi. Tegereza umunota wongere ugerageze.",
+      "generic": "Hari ikitagenze neza. Ongera ugerageze.",
+      "nameRequired": "Andika izina ryawe.",
+      "nameTooLong": "Izina ni rirerire cyane (inyuguti 80 ntarengwa).",
+      "emailInvalid": "Andika imeyili yemewe."
+    }
+  },
+  "Profile": {
+    "title": "Konti",
+    "name": "Amazina yose",
+    "email": "Imeyili",
+    "verified": "Yemejwe",
+    "notVerified": "Ntiyemejwe",
+    "phone": "Nimero ya telefoni",
+    "phoneHint": "Urugero 0788 123 456",
+    "language": "Ururimi",
+    "signOut": "Sohoka",
+    "errors": {
+      "nameRequired": "Andika izina ryawe.",
+      "nameTooLong": "Izina ni rirerire cyane (inyuguti 80 ntarengwa).",
+      "phoneInvalid": "Andika nimero ya telefoni yemewe.",
+      "localeInvalid": "Hitamo ururimi ruri ku rutonde.",
+      "generic": "Hari ikitagenze neza. Ongera ugerageze."
+    }
+  },
+  "Empty": {
+    "favoritesTitle": "Nta byo ukunda biraboneka",
+    "favoritesBody": "Kanda ku mutima ku nzu kugira ngo uyibike hano.",
+    "bookingsTitle": "Nta byo watumije biraboneka",
+    "bookingsBody": "Ibyo wafashe n'amasura yawe bizagaragara hano.",
+    "chatsTitle": "Nta butumwa buraboneka",
+    "chatsBody": "Ibiganiro na ba nyir'amazu bizagaragara hano."
+  },
+  "Errors": {
+    "title": "Hari ikitagenze neza",
+    "body": "Twabimenyeshejwe kandi turimo kubikurikirana.",
+    "notFoundTitle": "Paji ntiyabonetse",
+    "notFoundBody": "Paji ushaka ntibaho."
+  },
+  "Emails": {
+    "greeting": "Muraho {name},",
+    "verifySubject": "Emeza imeyili yawe kuri Space Rental",
+    "verifyBody": "Emeza aderesi ya imeyili yawe kugira ngo urangize gufungura konti.",
+    "verifyButton": "Emeza imeyili",
+    "resetSubject": "Hindura ijambo ry'ibanga rya Space Rental",
+    "resetBody": "Twakiriye icyifuzo cyo guhindura ijambo ry'ibanga ryawe. Uyu murongo urangira mu isaha 1.",
+    "resetButton": "Hindura ijambo ry'ibanga",
+    "linkFallback": "Niba buto idakora, koporora uyu murongo uwushyire muri mushakisha yawe:",
+    "ignore": "Niba atari wowe wabisabye, wirengagize iyi meyili.",
+    "footer": "Space Rental · Kigali, Rwanda"
+  },
+  "Locale": {
+    "en": "English",
+    "rw": "Kinyarwanda",
+    "fr": "Français"
+  }
+}

@@ -5,6 +5,8 @@ allowBuilds:
   esbuild: true
   sharp: false
   unrs-resolver: false
+  "@parcel/watcher": false
+  "@swc/core": false
 minimumReleaseAgeExclude:
   - zod@4.6.6
   - '@vitest/mocker@5.0.4'
