@@ -1,0 +1,12 @@
+allowBuilds:
+  "@prisma/engines": true
+  prisma: true
+  "@tailwindcss/oxide": true
+  esbuild: true
+  sharp: false
+  unrs-resolver: false
+minimumReleaseAgeExclude:
+  - zod@4.6.6
+  - '@vitest/mocker@5.0.4'
+  - '@vitest/spy@5.0.4'
+  - vitest@5.0.4
