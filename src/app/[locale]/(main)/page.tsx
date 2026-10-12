@@ -5,7 +5,7 @@ import { PageContainer } from "@/components/ui/PageContainer";
 import { OnboardingGate } from "@/features/onboarding/components/OnboardingGate";
 import { ListingGrid } from "@/features/listings/components/ListingGrid";
 import { featuredListings } from "@/features/listings/service";
-import { SearchBar } from "@/features/search/components/SearchBar";
+import { HERO_SEARCH_ID, SearchBar } from "@/features/search/components/SearchBar";
 import { Link } from "@/i18n/navigation";
 
 export default async function HomePage() {
@@ -24,7 +24,7 @@ export default async function HomePage() {
           <h1 className="sr-only">
             {t("titleTop")} {t("titleBottom")}
           </h1>
-          <SearchBar />
+          <SearchBar id={HERO_SEARCH_ID} />
         </PageContainer>
       </section>
       {featured.length > 0 && (

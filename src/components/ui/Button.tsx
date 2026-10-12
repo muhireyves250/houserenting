@@ -19,7 +19,7 @@ export function buttonClasses({
   className,
 }: { variant?: Variant; size?: Size; fullWidth?: boolean; className?: string } = {}): string {
   return cn(
-    "inline-flex items-center justify-center gap-2 rounded-full font-semibold transition-colors",
+    "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold transition-colors",
     "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
     "disabled:cursor-not-allowed disabled:opacity-50",
     size === "md" ? "h-11 px-5 text-sm" : "h-14 px-8 text-base",

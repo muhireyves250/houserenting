@@ -61,7 +61,10 @@
     "nextMonth": "Ukwezi gutaha",
     "clear": "Siba",
     "done": "Byarangiye",
-    "close": "Funga"
+    "close": "Funga",
+    "compactWhere": "Ahantu hose",
+    "compactWhen": "Igihe icyo ari cyo cyose",
+    "compactLabel": "Shakisha"
   },
   "Search": {
     "anywhere": "Ahantu hose mu Rwanda",

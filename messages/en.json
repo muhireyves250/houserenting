@@ -61,7 +61,10 @@
     "nextMonth": "Next month",
     "clear": "Clear",
     "done": "Done",
-    "close": "Close"
+    "close": "Close",
+    "compactWhere": "Anywhere",
+    "compactWhen": "Any dates",
+    "compactLabel": "Search"
   },
   "Search": {
     "anywhere": "Anywhere in Rwanda",

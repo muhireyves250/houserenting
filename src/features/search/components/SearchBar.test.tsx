@@ -1,6 +1,7 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { resetSearchState } from "@/features/search/search-store";
 import { renderWithIntl } from "@/test/render";
 import { SearchBar } from "./SearchBar";
 
@@ -17,6 +18,7 @@ function stubViewport(desktop: boolean) {
 }
 
 beforeEach(() => {
+  resetSearchState();
   push.mockReset();
   stubViewport(true);
   vi.stubGlobal(

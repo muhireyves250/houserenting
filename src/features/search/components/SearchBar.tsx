@@ -1,12 +1,14 @@
 "use client";
 
 import { Search, X } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
+import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
 import { todayISO, type DateRange } from "@/features/search/date-range";
 import { totalGuests, type GuestCounts } from "@/features/search/guests";
 import { buildSearchQuery, type SearchMode } from "@/features/search/params";
+import { useSearchState } from "@/features/search/search-store";
+import { useSearchSummaries } from "@/features/search/use-search-summaries";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { useMediaQuery } from "@/lib/use-media-query";
@@ -14,7 +16,11 @@ import { DatePanel } from "./DatePanel";
 import { GuestPanel } from "./GuestPanel";
 import { LocationPanel } from "./LocationPanel";
 
-type Panel = "where" | "when" | "who";
+export type SearchPanel = "where" | "when" | "who";
+type Panel = SearchPanel;
+
+/** Wraps the home-page search; the header shows a compact search once this scrolls out of view. */
+export const HERO_SEARCH_ID = "hero-search";
 
 const NO_GUESTS: GuestCounts = { adults: 0, children: 0, pets: 0 };
 // Desktop dropdown position per segment: Where on the left, When full width, Who on the right.
@@ -27,22 +33,39 @@ const PANEL_BOX: Record<Panel, { left: string; width: string }> = {
 // Must match the md:gap-2 between segments (0.5rem).
 const SEGMENT_GAP_PX = 8;
 
-export function SearchBar({ today = todayISO() }: { today?: string }) {
+export function SearchBar({
+  today = todayISO(),
+  id,
+  initialOpen = null,
+  onClose,
+}: {
+  today?: string;
+  id?: string;
+  /** Panel to open on mount (used by the header search). */
+  initialOpen?: Panel | null;
+  /** Called whenever the open panel is dismissed (Esc, outside click, search, Done). */
+  onClose?: () => void;
+}) {
   const t = useTranslations("Home");
-  const locale = useLocale();
   const router = useRouter();
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const rootRef = useRef<HTMLDivElement>(null);
   const listboxId = useId();
+  const whereInputRef = useRef<HTMLInputElement>(null);
 
-  const [mode, setMode] = useState<SearchMode>("short");
-  const [open, setOpen] = useState<Panel | null>(null);
-  const [location, setLocation] = useState("");
-  const [range, setRange] = useState<DateRange>({});
-  const [flex, setFlex] = useState(0);
-  const [guests, setGuests] = useState<GuestCounts>(NO_GUESTS);
+  // Entered values live in a shared store so the hero and header searches stay in sync.
+  const [search, setSearch] = useSearchState();
+  const { mode, location, range, flex, guests } = search;
+  const setMode = (value: SearchMode) => setSearch({ mode: value });
+  const setLocation = (value: string) => setSearch({ location: value });
+  const setRange = (value: DateRange) => setSearch({ range: value });
+  const setFlex = (value: number) => setSearch({ flex: value });
+  const setGuests = (value: GuestCounts) => setSearch({ guests: value });
+  const { whenSummary, whoSummary } = useSearchSummaries(search);
+
+  const [open, setOpen] = useState<Panel | null>(initialOpen);
   // Where the shared highlight sits; kept after closing so the next open fades in place.
-  const [highlightAt, setHighlightAt] = useState<Panel>("where");
+  const [highlightAt, setHighlightAt] = useState<Panel>(initialOpen ?? "where");
   // Segment under the mouse; the bordered hover pill slides to it. Kept on leave so it fades in place.
   const [hovered, setHovered] = useState<Panel | null>(null);
   const [hoverAt, setHoverAt] = useState<Panel>("where");
@@ -57,16 +80,32 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
     if (panel) setHoverAt(panel);
   }
 
+  // Latest onClose without re-subscribing listeners on every render.
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
+  const close = useCallback(() => {
+    setOpen(null);
+    onCloseRef.current?.();
+  }, []);
+
   function openPanel(panel: Panel | null) {
+    if (!panel) return close();
     setOpen(panel);
-    if (panel) setHighlightAt(panel);
+    setHighlightAt(panel);
   }
+
+  // Opened from the header on "Where": put the cursor in the field straight away.
+  useEffect(() => {
+    if (initialOpen === "where") whereInputRef.current?.focus();
+  }, [initialOpen]);
 
   useEffect(() => {
     if (!open) return;
-    const onKey = (event: KeyboardEvent) => event.key === "Escape" && setOpen(null);
+    const onKey = (event: KeyboardEvent) => event.key === "Escape" && close();
     const onPointer = (event: PointerEvent) => {
-      if (isDesktop && !rootRef.current?.contains(event.target as Node)) setOpen(null);
+      if (isDesktop && !rootRef.current?.contains(event.target as Node)) close();
     };
     document.addEventListener("keydown", onKey);
     document.addEventListener("pointerdown", onPointer);
@@ -74,21 +113,13 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
       document.removeEventListener("keydown", onKey);
       document.removeEventListener("pointerdown", onPointer);
     };
-  }, [open, isDesktop]);
+  }, [open, isDesktop, close]);
 
   const short = mode === "short";
-  const shortDate = new Intl.DateTimeFormat(locale, { month: "short", day: "numeric", timeZone: "UTC" });
-  const fmt = (iso: string) => shortDate.format(new Date(`${iso}T00:00:00Z`));
-  const whenSummary = range.checkIn
-    ? [fmt(range.checkIn), range.checkOut && fmt(range.checkOut)].filter(Boolean).join(" – ") + (flex ? ` (${t("flexDays", { days: flex })})` : "")
-    : null;
   const people = totalGuests(guests);
-  const whoSummary = people
-    ? [t("guestsSummary", { count: people }), guests.pets ? t("petsSummary", { count: guests.pets }) : null].filter(Boolean).join(", ")
-    : null;
 
   function submit() {
-    setOpen(null);
+    close();
     router.push({
       pathname: "/search",
       query: buildSearchQuery(mode, {
@@ -146,7 +177,7 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
 
   return (
     // z-50 lifts the whole search UI (tabs, bar, panel) above the blur backdrop and the sticky header.
-    <div ref={rootRef} className="relative z-50 flex w-full max-w-4xl flex-col gap-4">
+    <div ref={rootRef} id={id} className="relative z-50 flex w-full max-w-4xl flex-col gap-4">
       {/* Blurs and slightly dims the rest of the page while the bar is expanded (desktop). Clicks pass through. */}
       <div
         data-testid="page-blur"
@@ -226,6 +257,7 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
             {t("where")}
           </label>
           <input
+            ref={whereInputRef}
             id={`${listboxId}-input`}
             role="combobox"
             aria-expanded={open === "where"}
@@ -305,7 +337,7 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
           closeLabel={t("close")}
           clearLabel={t("clear")}
           doneLabel={t("done")}
-          onClose={() => setOpen(null)}
+          onClose={close}
           onClear={clear[open]}
         >
           {open === "where" && (
