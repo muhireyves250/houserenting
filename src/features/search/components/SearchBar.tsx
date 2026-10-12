@@ -96,9 +96,11 @@ export function SearchBar({
     setHighlightAt(panel);
   }
 
-  // Opened from the header on "Where": put the cursor in the field straight away.
+  // Opened from the header: move keyboard focus into the field or panel straight away.
+  const panelRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (initialOpen === "where") whereInputRef.current?.focus();
+    else if (initialOpen) panelRef.current?.querySelector<HTMLElement>("button:not(:disabled)")?.focus();
   }, [initialOpen]);
 
   useEffect(() => {
@@ -176,8 +178,8 @@ export function SearchBar({
   const pillMotion = "transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.25,0.8,0.25,1)] motion-reduce:transition-none";
 
   return (
-    // z-50 lifts the whole search UI (tabs, bar, panel) above the blur backdrop and the sticky header.
-    <div ref={rootRef} id={id} className="relative z-50 flex w-full max-w-4xl flex-col gap-4">
+    // Only while expanded does the search rise above the sticky header (z-40); at rest it scrolls under it.
+    <div ref={rootRef} id={id} className={cn("relative flex w-full max-w-4xl flex-col gap-4", expanded ? "z-50" : "z-0")}>
       {/* Blurs and slightly dims the rest of the page while the bar is expanded (desktop). Clicks pass through. */}
       <div
         data-testid="page-blur"
@@ -320,6 +322,7 @@ export function SearchBar({
       {open && isDesktop && (
         // One persistent panel: it slides and resizes with the white pill instead of re-mounting per segment.
         <div
+          ref={panelRef}
           data-testid="search-panel"
           style={PANEL_BOX[open]}
           className={cn(

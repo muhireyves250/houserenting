@@ -170,6 +170,15 @@ describe("SearchBar", () => {
     expect(bar).toHaveAttribute("data-expanded", "false");
   });
 
+  it("only rises above the sticky header while expanded", async () => {
+    const { container } = renderWithIntl(<SearchBar today={TODAY} id="hero" />);
+    const root = container.querySelector("#hero")!;
+    expect(root).toHaveClass("z-0");
+    expect(root).not.toHaveClass("z-50");
+    await userEvent.hover(screen.getByRole("button", { name: /When/ }));
+    expect(root).toHaveClass("z-50");
+  });
+
   it("opens panels as full-screen dialogs on phones", async () => {
     stubViewport(false);
     renderWithIntl(<SearchBar today={TODAY} />);
