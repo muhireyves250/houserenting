@@ -17,7 +17,7 @@
   --radius-card: 1rem;
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 
-  --animate-pop-in: pop-in 150ms ease-out;
+  --animate-pop-in: pop-in 500ms cubic-bezier(0.25, 0.8, 0.25, 1);
   --animate-sheet-up: sheet-up 280ms cubic-bezier(0.2, 0.8, 0.2, 1);
 
   @keyframes pop-in {

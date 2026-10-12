@@ -126,6 +126,21 @@ describe("SearchBar", () => {
     expect(pill).toHaveAttribute("data-visible", "false");
   });
 
+  it("keeps one dropdown panel that slides and resizes between segments", async () => {
+    renderWithIntl(<SearchBar today={TODAY} />);
+    await userEvent.click(screen.getByRole("combobox", { name: "Where" }));
+    const panel = screen.getByTestId("search-panel");
+    expect(panel.style.left).toBe("0px");
+    expect(panel.style.width).toBe("26rem");
+    await userEvent.click(screen.getByRole("button", { name: /When/ }));
+    expect(screen.getByTestId("search-panel")).toBe(panel);
+    expect(panel.style.width).toBe("100%");
+    await userEvent.click(screen.getByRole("button", { name: /Who/ }));
+    expect(screen.getByTestId("search-panel")).toBe(panel);
+    expect(panel.style.left).toBe("calc(100% - 26rem)");
+    expect(panel.style.width).toBe("26rem");
+  });
+
   it("opens panels as full-screen dialogs on phones", async () => {
     stubViewport(false);
     renderWithIntl(<SearchBar today={TODAY} />);

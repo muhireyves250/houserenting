@@ -17,6 +17,13 @@ import { LocationPanel } from "./LocationPanel";
 type Panel = "where" | "when" | "who";
 
 const NO_GUESTS: GuestCounts = { adults: 0, children: 0, pets: 0 };
+// Desktop dropdown position per segment: Where on the left, When full width, Who on the right.
+const PANEL_WIDTH = "26rem";
+const PANEL_BOX: Record<Panel, { left: string; width: string }> = {
+  where: { left: "0px", width: PANEL_WIDTH },
+  when: { left: "0px", width: "100%" },
+  who: { left: `calc(100% - ${PANEL_WIDTH})`, width: PANEL_WIDTH },
+};
 // Must match the md:gap-2 between segments (0.5rem).
 const SEGMENT_GAP_PX = 8;
 
@@ -230,13 +237,13 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
       </form>
 
       {open && isDesktop && (
+        // One persistent panel: it slides and resizes with the white pill instead of re-mounting per segment.
         <div
-          key={open}
+          data-testid="search-panel"
+          style={PANEL_BOX[open]}
           className={cn(
             "absolute top-full z-30 mt-3 rounded-[2rem] bg-surface p-8 shadow-2xl motion-safe:animate-pop-in",
-            open === "where" && "left-0 w-[26rem]",
-            open === "when" && "inset-x-0",
-            open === "who" && "right-0 w-[26rem]",
+            "transition-[left,width] duration-500 ease-[cubic-bezier(0.25,0.8,0.25,1)] motion-reduce:transition-none",
           )}
         >
           {panels[open]}
