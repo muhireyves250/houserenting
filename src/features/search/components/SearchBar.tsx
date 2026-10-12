@@ -163,7 +163,7 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
           "md:flex-row md:items-center md:gap-0 md:rounded-full md:border-transparent md:p-2",
           // Light grey bar, lighter than the hover pill (ink at 7%) so the hovered segment still stands out.
           "md:transition-colors md:duration-500",
-          open ? "md:bg-canvas" : "md:bg-[#f7f7f8]",
+          "md:bg-[#ebebeb]",
         )}
       >
         <div
