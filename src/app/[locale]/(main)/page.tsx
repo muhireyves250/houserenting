@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { LocaleSwitcher } from "@/components/shell/LocaleSwitcher";
@@ -8,13 +9,23 @@ import { featuredListings } from "@/features/listings/service";
 import { HERO_SEARCH_ID, SearchBar } from "@/features/search/components/SearchBar";
 import { Link } from "@/i18n/navigation";
 
+// Modern villa (Unsplash, free license), served at up to 3840px for sharp large/retina screens.
+const HERO_PHOTO = "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=3840&q=90";
+
 export default async function HomePage() {
   const [t, tListings, featured] = await Promise.all([getTranslations("Home"), getTranslations("Listings"), featuredListings(6)]);
   return (
     <>
       <OnboardingGate />
-      <section className="md:bg-primary md:bg-[radial-gradient(circle_at_20%_20%,#1f6fd1_0,transparent_50%),radial-gradient(circle_at_80%_80%,#003f86_0,transparent_45%)]">
-        <PageContainer className="flex flex-col gap-8 pt-6 pb-10 md:items-center md:py-28">
+      <section className="relative md:bg-primary">
+        {/* Desktop hero: sharp photo under a brand-blue gradient (phones keep the clean white design). */}
+        <div className="absolute inset-0 hidden overflow-hidden md:block" aria-hidden="true">
+          <Image src={HERO_PHOTO} alt="" fill priority quality={90} sizes="100vw" className="object-cover object-center" />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/90 via-primary/70 to-[#00214a]/90" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(0,20,50,0.35)_100%)]" />
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-[#00214a]/40" />
+        </div>
+        <PageContainer className="relative flex flex-col gap-8 pt-6 pb-10 md:items-center md:py-36">
           <div className="flex justify-end md:hidden">
             <Suspense>
               <LocaleSwitcher />
