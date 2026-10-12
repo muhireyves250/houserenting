@@ -18,7 +18,7 @@ export default defineConfig({
     { name: "desktop", use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } } },
   ],
   webServer: {
-    command: `pnpm exec tsx scripts/with-test-db.ts sh -c "next build && exec next start -p ${PORT}"`,
+    command: `./node_modules/.bin/tsx scripts/with-test-db.ts sh -c "./node_modules/.bin/next build && exec ./node_modules/.bin/next start -p ${PORT}"`,
     url: `${baseURL}/en`,
     reuseExistingServer: !process.env.CI,
     timeout: 300_000,
