@@ -147,5 +147,71 @@
     "en": "English",
     "rw": "Kinyarwanda",
     "fr": "Français"
+  },
+  "Listings": {
+    "featured": "Logements à la une",
+    "seeAll": "Tout voir",
+    "perUnit": {
+      "HOUR": "/ heure",
+      "DAY": "/ jour",
+      "NIGHT": "/ nuit",
+      "MONTH": "/ mois"
+    },
+    "unitName": {
+      "HOUR": "À l'heure",
+      "DAY": "À la journée",
+      "NIGHT": "À la nuit",
+      "MONTH": "Au mois"
+    },
+    "new": "Nouveau",
+    "discount": "-{percent}%",
+    "oldPrice": "Ancien prix",
+    "rooms": "{count, plural, one {# pièce} other {# pièces}}",
+    "size": "{size} m²",
+    "deposit": "{months, plural, one {Caution # mois} other {Caution # mois}}",
+    "guests": "{count, plural, one {Jusqu'à # voyageur} other {Jusqu'à # voyageurs}}",
+    "rating": "Noté {rating} sur 5",
+    "reviews": "{count, plural, one {# avis} other {# avis}}",
+    "description": "Description",
+    "characteristics": "Caractéristiques",
+    "facilities": "Équipements",
+    "terms": "Conditions de location",
+    "location": "Emplacement",
+    "host": "Hôte",
+    "hostSince": "Sur Space Rental depuis {year}",
+    "prices": "Tarifs",
+    "checkIn": "Arrivée à partir de {time}",
+    "checkOut": "Départ avant {time}",
+    "openHours": "Ouvert {start}–{end}",
+    "book": "Réserver",
+    "applyViewing": "Demander une visite",
+    "bookingSoon": "La réservation en ligne arrive bientôt.",
+    "photoCount": "{current}/{total}",
+    "results": "{count, plural, =0 {Aucun logement} one {# logement} other {# logements}}",
+    "back": "Retour aux résultats",
+    "photoAlt": "{title}, photo {number}"
+  },
+  "Facility": {
+    "KITCHEN": "Cuisine",
+    "WIFI": "Wi-Fi",
+    "AIR_CONDITIONER": "Climatisation",
+    "WORKPLACE": "Espace de travail",
+    "WASHING_MACHINE": "Lave-linge",
+    "DISHWASHER": "Lave-vaisselle",
+    "OVEN": "Four",
+    "MICROWAVE": "Micro-ondes",
+    "PARKING": "Parking",
+    "TV": "Télévision",
+    "HOT_WATER": "Eau chaude",
+    "SECURITY": "Sécurité",
+    "GENERATOR": "Groupe électrogène",
+    "POOL": "Piscine"
+  },
+  "ListingType": {
+    "APARTMENT": "Appartement",
+    "DUPLEX": "Duplex",
+    "PRIVATE_HOUSE": "Maison individuelle",
+    "LODGE": "Lodge",
+    "ROOM": "Chambre"
   }
 }

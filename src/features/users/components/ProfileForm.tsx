@@ -61,9 +61,16 @@ export function ProfileForm({ profile }: { profile: Profile }) {
         error={error(state.errors?.phone)}
       />
 
-      <label className="flex flex-col gap-1">
-        <span className="text-sm text-muted">{t("language")}</span>
-        <select name="locale" defaultValue={profile.locale} className="border-b border-line bg-transparent py-2 text-base outline-none focus:border-primary">
+      <div className="flex flex-col gap-1">
+        <label htmlFor="profile-locale" className="text-sm text-muted">
+          {t("language")}
+        </label>
+        <select
+          id="profile-locale"
+          name="locale"
+          defaultValue={profile.locale}
+          className="border-b border-line bg-transparent py-2 text-base outline-none focus:border-primary"
+        >
           {routing.locales.map((value) => (
             <option key={value} value={value}>
               {tLocale(value)}
@@ -75,7 +82,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
             {error(state.errors.locale)}
           </span>
         )}
-      </label>
+      </div>
 
       {state.errors?.form && (
         <p role="alert" className="text-sm text-danger">

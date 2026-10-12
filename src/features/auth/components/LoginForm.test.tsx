@@ -24,9 +24,11 @@ describe("LoginForm", () => {
     signInEmail.mockResolvedValue({ data: {}, error: null });
     renderWithIntl(<LoginForm next="/profile" />);
     await submit();
-    expect(signInEmail).toHaveBeenCalledWith({ email: "a@example.com", password: "whatever-123", callbackURL: "/en/verified" });
+    // No callbackURL: Better Auth would redirect there after sign-in instead of to `next`.
+    expect(signInEmail).toHaveBeenCalledWith({ email: "a@example.com", password: "whatever-123" });
     expect(push).toHaveBeenCalledWith("/profile");
-    expect(refresh).toHaveBeenCalled();
+    // refresh() right after push() re-fetches the login route and cancels the navigation.
+    expect(refresh).not.toHaveBeenCalled();
   });
 
   it("ignores an unsafe `next` path", async () => {

@@ -1,7 +1,7 @@
 "use client";
 
 import { Mail } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/TextField";
@@ -14,7 +14,6 @@ import { PasswordField } from "./PasswordField";
 
 export function LoginForm({ next }: { next?: string }) {
   const t = useTranslations("Auth");
-  const locale = useLocale();
   const router = useRouter();
   const [error, setError] = useState<AuthErrorKey | null>(null);
   const [pending, setPending] = useState(false);
@@ -29,14 +28,13 @@ export function LoginForm({ next }: { next?: string }) {
     }
     setError(null);
     setPending(true);
-    const result = await authClient.signIn.email({ ...parsed.data, callbackURL: `/${locale}/verified` });
+    const result = await authClient.signIn.email(parsed.data);
     setPending(false);
     if (result.error) {
       setError(authErrorKey(result.error));
       return;
     }
     router.push(safeNextPath(next));
-    router.refresh();
   }
 
   return (

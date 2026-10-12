@@ -5,6 +5,12 @@ import { securityHeaders } from "./src/lib/security-headers";
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   serverExternalPackages: ["@node-rs/argon2"],
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "res.cloudinary.com" },
+      { protocol: "https", hostname: "images.unsplash.com" },
+    ],
+  },
   turbopack: {
     rules: {
       "*.css": {

@@ -147,5 +147,71 @@
     "en": "English",
     "rw": "Kinyarwanda",
     "fr": "Français"
+  },
+  "Listings": {
+    "featured": "Amazu yatoranyijwe",
+    "seeAll": "Reba yose",
+    "perUnit": {
+      "HOUR": "/ isaha",
+      "DAY": "/ umunsi",
+      "NIGHT": "/ ijoro",
+      "MONTH": "/ ukwezi"
+    },
+    "unitName": {
+      "HOUR": "Ku isaha",
+      "DAY": "Ku munsi",
+      "NIGHT": "Ku ijoro",
+      "MONTH": "Ku kwezi"
+    },
+    "new": "Gishya",
+    "discount": "-{percent}%",
+    "oldPrice": "Igiciro cya mbere",
+    "rooms": "{count, plural, one {Icyumba #} other {Ibyumba #}}",
+    "size": "{size} m²",
+    "deposit": "{months, plural, one {Ingwate y'ukwezi #} other {Ingwate y'amezi #}}",
+    "guests": "{count, plural, one {Kugeza ku mushyitsi #} other {Kugeza ku bashyitsi #}}",
+    "rating": "Amanota {rating} kuri 5",
+    "reviews": "{count, plural, one {Igitekerezo #} other {Ibitekerezo #}}",
+    "description": "Ibisobanuro",
+    "characteristics": "Ibiranga",
+    "facilities": "Ibikoresho",
+    "terms": "Amabwiriza y'ubukode",
+    "location": "Aho iherereye",
+    "host": "Nyir'inzu",
+    "hostSince": "Kuri Space Rental kuva {year}",
+    "prices": "Ibiciro",
+    "checkIn": "Kwinjira guhera {time}",
+    "checkOut": "Gusohoka mbere ya {time}",
+    "openHours": "Ifunguye {start}–{end}",
+    "book": "Fata",
+    "applyViewing": "Saba gusura",
+    "bookingSoon": "Gufata kuri murandasi biraza vuba.",
+    "photoCount": "{current}/{total}",
+    "results": "{count, plural, =0 {Nta nzu} one {Inzu #} other {Amazu #}}",
+    "back": "Subira ku bisubizo",
+    "photoAlt": "{title}, ifoto {number}"
+  },
+  "Facility": {
+    "KITCHEN": "Igikoni",
+    "WIFI": "Wi-Fi",
+    "AIR_CONDITIONER": "Icyuma gikonjesha",
+    "WORKPLACE": "Aho gukorera",
+    "WASHING_MACHINE": "Imashini imesa",
+    "DISHWASHER": "Imashini yoza amasahani",
+    "OVEN": "Ifuru",
+    "MICROWAVE": "Mikoroweve",
+    "PARKING": "Parikingi",
+    "TV": "Televiziyo",
+    "HOT_WATER": "Amazi ashyushye",
+    "SECURITY": "Umutekano",
+    "GENERATOR": "Moteri y'amashanyarazi",
+    "POOL": "Pisine"
+  },
+  "ListingType": {
+    "APARTMENT": "Apartment",
+    "DUPLEX": "Duplex",
+    "PRIVATE_HOUSE": "Inzu yigenga",
+    "LODGE": "Lodge",
+    "ROOM": "Icyumba"
   }
 }

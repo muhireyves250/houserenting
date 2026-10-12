@@ -13,8 +13,8 @@ describe("securityHeaders", () => {
     expect(h["Content-Security-Policy"]).toContain("object-src 'none'");
   });
 
-  it("allows Cloudinary images", () => {
-    expect(asMap(true)["Content-Security-Policy"]).toContain("img-src 'self' data: blob: https://res.cloudinary.com");
+  it("allows Cloudinary and Unsplash (demo) images", () => {
+    expect(asMap(true)["Content-Security-Policy"]).toContain("img-src 'self' data: blob: https://res.cloudinary.com https://images.unsplash.com");
   });
 
   it("only sends HSTS and forbids eval in production", () => {

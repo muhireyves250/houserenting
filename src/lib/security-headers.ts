@@ -4,7 +4,7 @@ export function securityHeaders({ isProd }: { isProd: boolean }): { key: string;
     // Next.js injects inline bootstrap scripts; tighten to nonces in a later phase.
     `script-src 'self' 'unsafe-inline'${isProd ? "" : " 'unsafe-eval'"}`,
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob: https://res.cloudinary.com",
+    "img-src 'self' data: blob: https://res.cloudinary.com https://images.unsplash.com",
     "font-src 'self'",
     "connect-src 'self' https://*.ingest.sentry.io https://*.ingest.de.sentry.io",
     "frame-ancestors 'none'",

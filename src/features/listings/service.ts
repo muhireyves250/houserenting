@@ -1,0 +1,65 @@
+import "server-only";
+import type { Prisma } from "@/generated/prisma/client";
+import type { SearchQuery } from "@/features/search/params";
+import { db } from "@/lib/db";
+
+const SHORT_UNITS = ["HOUR", "DAY", "NIGHT"] as const;
+const SEARCH_LIMIT = 24;
+
+const CARD_SELECT = {
+  id: true,
+  title: true,
+  type: true,
+  city: true,
+  district: true,
+  maxGuests: true,
+  discountPercent: true,
+  ratingAvg: true,
+  ratingCount: true,
+  publishedAt: true,
+  photos: { orderBy: { position: "asc" }, take: 1, select: { url: true, width: true, height: true } },
+  rates: { select: { unit: true, price: true } },
+} satisfies Prisma.ListingSelect;
+
+export type ListingCardData = Prisma.ListingGetPayload<{ select: typeof CARD_SELECT }>;
+
+function escapeLike(value: string): string {
+  return value.replace(/[\\%_]/g, (char) => `\\${char}`);
+}
+
+export function searchListings(query: SearchQuery, limit = SEARCH_LIMIT): Promise<ListingCardData[]> {
+  const where: Prisma.ListingWhereInput = {
+    status: "PUBLISHED",
+    rates: { some: { unit: query.mode === "long" ? "MONTH" : { in: [...SHORT_UNITS] } } },
+  };
+  if (query.location) {
+    // Prisma's `contains` becomes ILIKE '%…%' without escaping, so escape LIKE wildcards ourselves.
+    const match = { contains: escapeLike(query.location), mode: "insensitive" } as const;
+    where.OR = [{ city: match }, { district: match }, { title: match }];
+  }
+  if (query.guests) where.maxGuests = { gte: query.guests };
+
+  return db.listing.findMany({ where, select: CARD_SELECT, orderBy: [{ publishedAt: "desc" }, { id: "asc" }], take: limit });
+}
+
+export function featuredListings(limit = 6): Promise<ListingCardData[]> {
+  return db.listing.findMany({
+    where: { status: "PUBLISHED" },
+    select: CARD_SELECT,
+    orderBy: [{ publishedAt: "desc" }, { id: "asc" }],
+    take: limit,
+  });
+}
+
+export function getPublishedListing(id: string) {
+  return db.listing.findFirst({
+    where: { id, status: "PUBLISHED" },
+    include: {
+      photos: { orderBy: { position: "asc" } },
+      rates: true,
+      host: { select: { name: true, createdAt: true } },
+    },
+  });
+}
+
+export type ListingDetail = NonNullable<Awaited<ReturnType<typeof getPublishedListing>>>;

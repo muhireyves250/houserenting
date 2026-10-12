@@ -32,6 +32,7 @@ model User {
   updatedAt     DateTime   @updatedAt
   sessions      Session[]
   accounts      Account[]
+  listings      Listing[]
 
   @@map("user")
 }
@@ -90,4 +91,114 @@ model RateLimit {
   lastRequest BigInt
 
   @@map("rateLimit")
+}
+
+enum ListingType {
+  APARTMENT
+  DUPLEX
+  PRIVATE_HOUSE
+  LODGE
+  ROOM
+}
+
+enum ListingStatus {
+  DRAFT
+  PENDING_REVIEW
+  PUBLISHED
+  REJECTED
+  ARCHIVED
+}
+
+enum RateUnit {
+  HOUR
+  DAY
+  NIGHT
+  MONTH
+}
+
+enum Facility {
+  KITCHEN
+  WIFI
+  AIR_CONDITIONER
+  WORKPLACE
+  WASHING_MACHINE
+  DISHWASHER
+  OVEN
+  MICROWAVE
+  PARKING
+  TV
+  HOT_WATER
+  SECURITY
+  GENERATOR
+  POOL
+}
+
+model Listing {
+  id              String        @id @default(cuid())
+  hostId          String
+  host            User          @relation(fields: [hostId], references: [id], onDelete: Cascade)
+  title           String
+  description     String
+  type            ListingType
+  status          ListingStatus @default(DRAFT)
+  rejectionReason String?
+  addressLine     String
+  district        String
+  city            String
+  country         String        @default("RW")
+  lat             Float
+  lng             Float
+  sizeM2          Int
+  rooms           Int
+  bedrooms        Int
+  bathrooms       Int
+  maxGuests       Int
+  petsAllowed     Boolean       @default(false)
+  facilities      Facility[]
+  characteristics String[]
+  termsOfRent     String[]
+  depositMonths   Int?
+  discountPercent Int?
+  ratingAvg       Float         @default(0)
+  ratingCount     Int           @default(0)
+  publishedAt     DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  photos          ListingPhoto[]
+  rates           RateOption[]
+
+  @@index([status, city])
+  @@index([hostId])
+  @@map("listing")
+}
+
+model ListingPhoto {
+  id        String  @id @default(cuid())
+  listingId String
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  url       String
+  publicId  String
+  width     Int
+  height    Int
+  position  Int
+
+  @@unique([listingId, position])
+  @@map("listingPhoto")
+}
+
+model RateOption {
+  id           String   @id @default(cuid())
+  listingId    String
+  listing      Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  unit         RateUnit
+  price        Int
+  minUnits     Int      @default(1)
+  maxUnits     Int?
+  checkInTime  String?
+  checkOutTime String?
+  dayStartTime String?
+  dayEndTime   String?
+
+  @@unique([listingId, unit])
+  @@map("rateOption")
 }

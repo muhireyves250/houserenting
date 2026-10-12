@@ -16,7 +16,9 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio",
-    "db:test:migrate": "tsx scripts/with-test-db.ts prisma migrate deploy"
+    "db:test:migrate": "tsx scripts/with-test-db.ts prisma migrate deploy",
+    "test:e2e": "playwright test",
+    "db:seed": "prisma db seed"
   },
   "dependencies": {
     "@node-rs/argon2": "2.2.2",
@@ -38,6 +40,7 @@
     "zod": "4.6.6"
   },
   "devDependencies": {
+    "@playwright/test": "1.64.0",
     "@tailwindcss/turbopack": "^4",
     "@testing-library/jest-dom": "7.0.1",
     "@testing-library/react": "16.3.3",
