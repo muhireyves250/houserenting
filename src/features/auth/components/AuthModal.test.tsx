@@ -85,4 +85,19 @@ describe("AuthModal", () => {
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     currentPath = "/login";
   });
+
+  it("on a direct visit, closing goes home (next may be a protected page that would loop back)", async () => {
+    push.mockReset();
+    renderWithIntl(<AuthModal initialMode="login" next="/favorites" standalone />);
+    await userEvent.click(screen.getByRole("button", { name: "Close" }));
+    expect(push).toHaveBeenCalledWith("/");
+    expect(back).not.toHaveBeenCalled();
+  });
+
+  it("can open straight on the forgot-password view", () => {
+    currentPath = "/forgot-password";
+    renderWithIntl(<AuthModal initialMode="forgot" next="/" standalone />);
+    expect(screen.getByText("Reset your password")).toBeInTheDocument();
+    currentPath = "/login";
+  });
 });

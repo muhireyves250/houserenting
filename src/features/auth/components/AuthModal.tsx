@@ -17,10 +17,19 @@ const PATH: Record<Mode, string> = { login: "login", signup: "signup", forgot: "
 const MODAL_PATHS = new Set(["/login", "/signup", "/forgot-password"]);
 
 /**
- * Log in / Sign up as a dialog over the current page (opened from the header via an intercepted
- * route). Direct visits to /login or /signup still render the full pages.
+ * Log in / Sign up / Forgot password as a dialog. From inside the site it opens over the current
+ * page (intercepted route); direct visits render it over the home page (`standalone`).
  */
-export function AuthModal({ initialMode, next }: { initialMode: Exclude<Mode, "forgot">; next: string }) {
+export function AuthModal({
+  initialMode,
+  next,
+  standalone = false,
+}: {
+  initialMode: Mode;
+  next: string;
+  /** Direct visit to /login etc. (home page underneath): closing goes home instead of back. */
+  standalone?: boolean;
+}) {
   const t = useTranslations("Auth");
   const tHome = useTranslations("Home");
   const locale = useLocale();
@@ -41,7 +50,7 @@ export function AuthModal({ initialMode, next }: { initialMode: Exclude<Mode, "f
   return (
     <Modal
       closeLabel={tHome("close")}
-      onClose={() => router.back()}
+      onClose={() => (standalone ? router.push("/") : router.back())}
       title={
         <span className="flex flex-col items-center gap-4">
           <LogoMark className="h-16 w-[72px] text-primary" />
