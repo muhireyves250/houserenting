@@ -22,7 +22,8 @@ describe("Modal", () => {
     setup();
     const dialog = screen.getByRole("dialog", { name: "Welcome" });
     expect(dialog).toHaveAttribute("aria-modal", "true");
-    expect(dialog).toContainElement(document.activeElement as HTMLElement);
+    // Focus starts in the first field, not on the close button.
+    expect(screen.getByLabelText("Email")).toHaveFocus();
     expect(document.body.style.overflow).toBe("hidden");
   });
 

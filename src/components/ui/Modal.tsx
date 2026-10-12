@@ -48,9 +48,16 @@ export function Modal({
           type="button"
           aria-label={closeLabel}
           onClick={onClose}
-          className="absolute top-5 right-5 flex size-9 items-center justify-center rounded-full text-ink transition-colors hover:bg-canvas focus-visible:outline-2 focus-visible:outline-primary"
+          className={cn(
+            "group/close absolute top-5 right-5 flex size-10 items-center justify-center rounded-full text-ink",
+            "transition-[background-color,color,transform] duration-300 ease-out hover:bg-primary/10 hover:text-primary active:scale-90",
+            "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+          )}
         >
-          <X className="size-5" aria-hidden="true" />
+          <X
+            className="size-5 transition-transform duration-300 ease-out group-hover/close:rotate-90 motion-reduce:transition-none motion-reduce:group-hover/close:rotate-0"
+            aria-hidden="true"
+          />
         </button>
         <h2 id={titleId} className="mb-6 px-10 text-center text-[28px] leading-tight font-bold tracking-tight text-ink">
           {title}

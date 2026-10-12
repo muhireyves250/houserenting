@@ -19,7 +19,11 @@ export function useModal(ref: RefObject<HTMLElement | null>, onEscape?: () => vo
     if (!dialog) return;
     const previous = document.activeElement as HTMLElement | null;
     const focusables = () => Array.from(dialog.querySelectorAll<HTMLElement>(FOCUSABLE));
-    if (!dialog.contains(document.activeElement)) focusables()[0]?.focus();
+    if (!dialog.contains(document.activeElement)) {
+      // Start in the first field so people can type straight away; otherwise the first control.
+      const items = focusables();
+      (items.find((el) => el.matches("input, select, textarea")) ?? items[0])?.focus();
+    }
 
     const { overflow } = document.body.style;
     document.body.style.overflow = "hidden";
