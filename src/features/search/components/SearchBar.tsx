@@ -138,7 +138,7 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
         }}
         className={cn(
           "flex flex-col gap-2 rounded-card border border-line-strong bg-surface p-5 shadow-sm",
-          "md:flex-row md:items-center md:gap-0 md:rounded-full md:border-transparent md:p-2 md:transition-colors md:hover:border-line-strong",
+          "md:flex-row md:items-center md:gap-0 md:rounded-full md:border-transparent md:p-2",
           open ? "md:bg-canvas" : "md:bg-surface",
         )}
       >
