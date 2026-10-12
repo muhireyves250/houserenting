@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { logger } from "@/lib/logger";
 import { authErrorKey } from "@/features/auth/errors";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -74,11 +75,24 @@ describe("sign up", () => {
     expect(await db.user.count({ where: { email: "dupe@example.com" } })).toBe(1);
   });
 
+  it("emails the existing owner instead of leaving a duplicate sign-up waiting for nothing", async () => {
+    await signUp("owner@example.com", "fr");
+    mailer.clear();
+    await signUp("owner@example.com", "en").catch(() => undefined);
+    const mail = await lastMailTo("owner@example.com");
+    expect(mail.subject).toBe("Vous avez déjà un compte Space Rental");
+    expect(linkIn(mail.text)).toBe(`${BASE}/fr/login`);
+  });
+
   it("still succeeds when the email provider is down", async () => {
     const failing: Mailer = { send: () => Promise.reject(new Error("SMTP down")) };
     setMailerForTests(failing);
+    const logged = vi.spyOn(logger, "error").mockImplementation(() => undefined);
     await expect(signUp("outage@example.com")).resolves.toBeTruthy();
     expect(await db.user.count({ where: { email: "outage@example.com" } })).toBe(1);
+    // The failure is logged, not surfaced to the user.
+    await vi.waitFor(() => expect(logged).toHaveBeenCalledWith(expect.objectContaining({ kind: "verify" }), "auth email failed"));
+    logged.mockRestore();
   });
 });
 

@@ -4,8 +4,10 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { APIError, createAuthMiddleware } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
 import { PASSWORD_MAX, PASSWORD_MIN } from "@/features/auth/constants";
-import { buildPasswordResetEmail, buildVerificationEmail } from "@/features/auth/emails";
+import { buildExistingAccountEmail, buildPasswordResetEmail, buildVerificationEmail } from "@/features/auth/emails";
 import { hashPassword, isCommonPassword, verifyPassword } from "@/features/auth/password";
+import { toAppLocale } from "@/i18n/routing";
+import { runInBackground } from "@/lib/background";
 import { db } from "@/lib/db";
 import { getEnv } from "@/lib/env";
 import { logger } from "@/lib/logger";
@@ -13,12 +15,14 @@ import { getMailer, type MailMessage } from "@/lib/mailer";
 
 const env = getEnv();
 
-// Fire-and-forget: a mail outage must not fail sign-up, and not awaiting avoids
-// leaking account existence through response timing.
-function sendInBackground(message: MailMessage, kind: string) {
-  void getMailer()
+// Never rejects: a mail outage must not fail sign-up; the failure is logged instead.
+// Better Auth hands the returned promise to `advanced.backgroundTasks` (Next's `after`).
+function sendSafely(message: MailMessage, kind: string): Promise<void> {
+  return getMailer()
     .send(message)
-    .catch((err: unknown) => logger.error({ err, kind }, "auth email failed"));
+    .catch((err: unknown) => {
+      logger.error({ err, kind }, "auth email failed");
+    });
 }
 
 const localeOf = (user: unknown) => (user as { locale?: string }).locale;
@@ -48,7 +52,14 @@ export const auth = betterAuth({
       verify: ({ hash, password }) => verifyPassword(hash, password),
     },
     sendResetPassword: async ({ user, url }) => {
-      sendInBackground(buildPasswordResetEmail({ to: user.email, name: user.name, url, locale: localeOf(user) }), "reset");
+      await sendSafely(buildPasswordResetEmail({ to: user.email, name: user.name, url, locale: localeOf(user) }), "reset");
+    },
+    // With required verification, Better Auth answers a duplicate sign-up with a generic success;
+    // tell the real owner so they aren't left waiting for a verification email.
+    onExistingUserSignUp: async ({ user }) => {
+      const locale = toAppLocale(localeOf(user));
+      const url = `${env.BETTER_AUTH_URL}/${locale}/login`;
+      await sendSafely(buildExistingAccountEmail({ to: user.email, name: user.name, url, locale }), "existing");
     },
   },
   emailVerification: {
@@ -57,7 +68,7 @@ export const auth = betterAuth({
     autoSignInAfterVerification: true,
     expiresIn: 60 * 60 * 24,
     sendVerificationEmail: async ({ user, url }) => {
-      sendInBackground(buildVerificationEmail({ to: user.email, name: user.name, url, locale: localeOf(user) }), "verify");
+      await sendSafely(buildVerificationEmail({ to: user.email, name: user.name, url, locale: localeOf(user) }), "verify");
     },
   },
   rateLimit: {
@@ -80,6 +91,9 @@ export const auth = betterAuth({
         throw new APIError("BAD_REQUEST", { code: "PASSWORD_TOO_COMMON", message: "Password is too common" });
       }
     }),
+  },
+  advanced: {
+    backgroundTasks: { handler: runInBackground },
   },
   plugins: [nextCookies()],
 });

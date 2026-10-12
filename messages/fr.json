@@ -171,7 +171,10 @@
     "resetButton": "Réinitialiser le mot de passe",
     "linkFallback": "Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :",
     "ignore": "Si vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail.",
-    "footer": "Space Rental · Kigali, Rwanda"
+    "footer": "Space Rental · Kigali, Rwanda",
+    "existingSubject": "Vous avez déjà un compte Space Rental",
+    "existingBody": "Quelqu'un (peut-être vous) vient d'essayer de créer un compte avec cet e-mail. Vous avez déjà un compte : connectez-vous, ou réinitialisez votre mot de passe si vous l'avez oublié.",
+    "existingButton": "Se connecter"
   },
   "Locale": {
     "en": "English",

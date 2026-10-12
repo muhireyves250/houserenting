@@ -171,7 +171,10 @@
     "resetButton": "Hindura ijambo ry'ibanga",
     "linkFallback": "Niba buto idakora, koporora uyu murongo uwushyire muri mushakisha yawe:",
     "ignore": "Niba atari wowe wabisabye, wirengagize iyi meyili.",
-    "footer": "Space Rental · Kigali, Rwanda"
+    "footer": "Space Rental · Kigali, Rwanda",
+    "existingSubject": "Usanzwe ufite konti kuri Space Rental",
+    "existingBody": "Umuntu (ushobora kuba ari wowe) yagerageje gufungura konti nshya akoresheje iyi meyili. Usanzwe ufite konti — injira, cyangwa uhindure ijambo ry'ibanga niba waryibagiwe.",
+    "existingButton": "Injira"
   },
   "Locale": {
     "en": "English",

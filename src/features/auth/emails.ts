@@ -14,12 +14,20 @@ export function escapeHtml(value: string): string {
     .replaceAll("'", "&#39;");
 }
 
-function render(kind: "verify" | "reset", { to, name, url, locale }: EmailInput): MailMessage {
+type Kind = "verify" | "reset" | "existing";
+
+const COPY = {
+  verify: { subject: "verifySubject", body: "verifyBody", button: "verifyButton" },
+  reset: { subject: "resetSubject", body: "resetBody", button: "resetButton" },
+  existing: { subject: "existingSubject", body: "existingBody", button: "existingButton" },
+} as const;
+
+function render(kind: Kind, { to, name, url, locale }: EmailInput): MailMessage {
   const lang = toAppLocale(locale);
   const t = createTranslator({ locale: lang, messages: catalogs[lang], namespace: "Emails" });
-  const subject = kind === "verify" ? t("verifySubject") : t("resetSubject");
-  const body = kind === "verify" ? t("verifyBody") : t("resetBody");
-  const button = kind === "verify" ? t("verifyButton") : t("resetButton");
+  const subject = t(COPY[kind].subject);
+  const body = t(COPY[kind].body);
+  const button = t(COPY[kind].button);
   const greeting = t("greeting", { name });
   const href = escapeHtml(url);
 
@@ -48,4 +56,9 @@ export function buildVerificationEmail(input: EmailInput): MailMessage {
 
 export function buildPasswordResetEmail(input: EmailInput): MailMessage {
   return render("reset", input);
+}
+
+/** Sent when someone signs up with an email that already has an account (no account enumeration in the UI). */
+export function buildExistingAccountEmail(input: EmailInput): MailMessage {
+  return render("existing", input);
 }

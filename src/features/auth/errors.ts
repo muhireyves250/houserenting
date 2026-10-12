@@ -6,6 +6,7 @@ export function authErrorKey(error?: { code?: string | null; status?: number | n
   if (!error) return "generic";
   if (error.status === 429) return "tooMany";
   const code = error.code ?? "";
+  // Only reachable if email verification is ever turned off: with it on, Better Auth hides duplicates.
   if (code.startsWith("USER_ALREADY_EXISTS")) return "emailTaken";
   if (code === "INVALID_EMAIL_OR_PASSWORD" || code === "INVALID_PASSWORD" || code === "INVALID_EMAIL") return "invalidCredentials";
   if (code === "EMAIL_NOT_VERIFIED") return "notVerified";

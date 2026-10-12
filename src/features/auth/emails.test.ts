@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildPasswordResetEmail, buildVerificationEmail } from "./emails";
+import { buildExistingAccountEmail, buildPasswordResetEmail, buildVerificationEmail } from "./emails";
 
 describe("auth emails", () => {
   const url = "https://app.test/api/auth/verify-email?token=abc&callbackURL=%2Fen%2Fverified";
@@ -22,5 +22,11 @@ describe("auth emails", () => {
     expect(mail.html).not.toContain("<img src=x");
     expect(mail.html).toContain("&lt;img src=x onerror=&quot;alert(1)&quot;&gt;");
     expect(mail.html).toContain('href="https://app.test/api/auth/verify-email?token=abc&amp;callbackURL=%2Fen%2Fverified"');
+  });
+
+  it("builds the 'you already have an account' email with a link to log in", () => {
+    const mail = buildExistingAccountEmail({ to: "a@x.co", name: "Alona", url: "https://app.test/rw/login", locale: "rw" });
+    expect(mail.subject).toBe("Usanzwe ufite konti kuri Space Rental");
+    expect(mail.text).toContain("https://app.test/rw/login");
   });
 });
