@@ -127,8 +127,8 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
       "relative z-10 flex flex-col justify-center rounded-xl border border-line-strong px-4 py-3 text-left transition-colors duration-500",
       // Phones have no hover, so fields stay outlined there; on desktop the sliding pills provide the outline.
       "md:rounded-full md:border-transparent md:px-6",
-      // While another segment is hovered, dim this one.
-      hovered && hovered !== panel && open !== panel && "md:bg-ink/[0.06]",
+      // While another segment is hovered, outline and dim this one; the hovered one sits on the white pill.
+      hovered && hovered !== panel && open !== panel && "md:border-line-strong md:bg-ink/[0.06]",
     );
 
   const pillMotion = "transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.25,0.8,0.25,1)] motion-reduce:transition-none";
@@ -181,7 +181,7 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
           aria-hidden="true"
           style={pillStyle(hoverIndex)}
           className={cn(
-            "pointer-events-none absolute inset-y-0 left-0 z-20 hidden rounded-full border border-line-strong md:block",
+            "pointer-events-none absolute inset-y-0 left-0 hidden rounded-full bg-surface shadow-md md:block",
             pillMotion,
             showHover ? "opacity-100" : "opacity-0",
           )}
