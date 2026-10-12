@@ -19,8 +19,10 @@
     "db:test:migrate": "tsx scripts/with-test-db.ts prisma migrate deploy"
   },
   "dependencies": {
+    "@node-rs/argon2": "2.2.2",
     "@prisma/adapter-pg": "7.10.0",
     "@prisma/client": "7.10.0",
+    "better-auth": "1.7.7",
     "clsx": "2.1.1",
     "lucide-react": "1.55.0",
     "next": "16.4.0",
@@ -38,7 +40,7 @@
     "@testing-library/jest-dom": "7.0.1",
     "@testing-library/react": "16.3.3",
     "@testing-library/user-event": "14.6.7",
-    "@types/node": "^20",
+    "@types/node": "^24.19.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "6.1.2",
