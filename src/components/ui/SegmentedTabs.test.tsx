@@ -46,10 +46,15 @@ describe("SegmentedTabs", () => {
     render(<SegmentedTabs label="Rental type" options={[...options]} value="short" onChange={() => {}} />);
     const shade = screen.getByTestId("tabs-hover");
     expect(shade).toHaveAttribute("data-visible", "false");
+    const group = screen.getByRole("radiogroup", { name: "Rental type" });
+    expect(group).toHaveAttribute("data-hovered", "false");
     await userEvent.hover(screen.getByRole("radio", { name: "From 6 months" }));
     expect(shade).toHaveAttribute("data-visible", "true");
+    // Like the search bar: the whole control tints while the mouse is over it.
+    expect(group).toHaveAttribute("data-hovered", "true");
     expect(shade.style.transform).toBe("translateX(100%)");
     await userEvent.unhover(screen.getByRole("radio", { name: "From 6 months" }));
     expect(shade).toHaveAttribute("data-visible", "false");
+    expect(group).toHaveAttribute("data-hovered", "false");
   });
 });

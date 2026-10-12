@@ -38,14 +38,24 @@ export function SegmentedTabs<T extends string>({
   }
 
   return (
-    <div role="radiogroup" aria-label={label} className={cn("flex w-full rounded-full bg-surface p-1", className)}>
+    <div
+      role="radiogroup"
+      aria-label={label}
+      data-hovered={hovered !== null}
+      className={cn(
+        "flex w-full rounded-full p-1 transition-colors duration-500 motion-reduce:transition-none",
+        // Same hover language as the search bar: the control tints light grey and a darker shade follows the mouse.
+        hovered !== null ? "bg-[#cfd2d6]" : "bg-surface",
+        className,
+      )}
+    >
       <div className="relative grid flex-1" style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }} onMouseLeave={() => setHovered(null)}>
         <span
           data-testid="tabs-hover"
           data-visible={hovered !== null}
           aria-hidden="true"
           style={pill(hoverAt)}
-          className={cn("pointer-events-none absolute inset-y-0 left-0 rounded-full bg-ink/10", MOTION, hovered !== null ? "opacity-100" : "opacity-0")}
+          className={cn("pointer-events-none absolute inset-y-0 left-0 rounded-full bg-black/10", MOTION, hovered !== null ? "opacity-100" : "opacity-0")}
         />
         <span
           data-testid="tabs-selected"
