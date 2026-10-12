@@ -161,9 +161,9 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
         className={cn(
           "flex flex-col gap-2 rounded-card border border-line-strong bg-surface p-5 shadow-sm",
           "md:flex-row md:items-center md:gap-0 md:rounded-full md:border-transparent md:p-2",
-          // Lighter than the hover pill (ink at 7%) so the hovered segment still stands out.
+          // Light grey bar, lighter than the hover pill (ink at 7%) so the hovered segment still stands out.
           "md:transition-colors md:duration-500",
-          open ? "md:bg-canvas" : hovered ? "md:bg-[#f7f7f8]" : "md:bg-surface",
+          open ? "md:bg-canvas" : "md:bg-[#f7f7f8]",
         )}
       >
         <div
