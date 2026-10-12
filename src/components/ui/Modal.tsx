@@ -52,7 +52,7 @@ export function Modal({
         >
           <X className="size-5" aria-hidden="true" />
         </button>
-        <h2 id={titleId} className="mb-6 px-10 text-center font-display text-[28px] leading-tight font-semibold tracking-tight text-ink">
+        <h2 id={titleId} className="mb-6 px-10 text-center text-[28px] leading-tight font-bold tracking-tight text-ink">
           {title}
         </h2>
         {children}

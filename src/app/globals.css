@@ -16,7 +16,6 @@
   --color-danger: #d93025;
   --radius-card: 1rem;
   --font-sans: var(--font-brand), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-fraunces), Georgia, ui-serif, serif;
 
   --animate-pop-in: pop-in 500ms cubic-bezier(0.25, 0.8, 0.25, 1);
   --animate-sheet-up: sheet-up 280ms cubic-bezier(0.2, 0.8, 0.2, 1);
