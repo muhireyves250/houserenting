@@ -20,8 +20,8 @@ export function LocaleSwitcher({ className }: { className?: string }) {
   return (
     <label
       className={cn(
-        "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-muted transition-colors duration-300 hover:bg-ink/[0.05]",
-        "group-data-[overlay=true]/header:text-white/90 group-data-[overlay=true]/header:hover:bg-white/15",
+        "flex h-11 items-center gap-1.5 rounded-full border border-primary/60 px-4 text-[15px] font-semibold tracking-[0.01em] text-primary transition-colors duration-300 hover:border-primary hover:bg-primary/[0.06]",
+        "group-data-[overlay=true]/header:border-[#8cc0ff] group-data-[overlay=true]/header:text-white/90 group-data-[overlay=true]/header:hover:bg-white/10",
         className,
       )}
     >

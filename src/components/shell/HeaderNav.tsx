@@ -11,7 +11,7 @@ export function HeaderNav() {
 
   return (
     <nav aria-label={t("mainNav")}>
-      <ul className="flex items-center gap-6">
+      <ul className="flex items-center gap-8">
         {NAV_ITEMS.filter((item) => item.key !== "profile").map(({ key, href }) => {
           const active = isActive(pathname, href);
           return (
@@ -20,7 +20,7 @@ export function HeaderNav() {
                 href={href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "relative py-1 text-sm font-semibold transition-colors duration-300",
+                  "relative py-1 text-[15px] font-semibold tracking-[0.01em] transition-colors duration-300",
                   // Underline grows from the centre on hover; stays for the current page.
                   "after:absolute after:inset-x-0 after:-bottom-1 after:h-0.5 after:origin-center after:rounded-full after:bg-primary",
                   "after:transition-transform after:duration-300 after:ease-out hover:after:scale-x-100 motion-reduce:after:transition-none",
