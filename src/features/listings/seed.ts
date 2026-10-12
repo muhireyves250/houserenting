@@ -13,16 +13,21 @@ export const DEMO_HOST = {
 } as const;
 
 export async function seedDemoData(db: PrismaClient): Promise<{ listings: number }> {
-  if (process.env.NODE_ENV === "production" && process.env.ALLOW_SEED !== "1") {
-    throw new Error("Refusing to seed demo data in production. Set ALLOW_SEED=1 to override.");
+  // Explicit opt-in: set ALLOW_DEMO_SEED=1 only for dev/test databases, never for production.
+  if (process.env.ALLOW_DEMO_SEED !== "1") {
+    throw new Error("Refusing to seed demo data: set ALLOW_DEMO_SEED=1 (dev/test databases only).");
   }
 
-  await db.user.upsert({
-    where: { email: DEMO_HOST.email },
-    update: { isHost: true, emailVerified: true },
-    create: { id: DEMO_HOST.id, name: DEMO_HOST.name, email: DEMO_HOST.email, emailVerified: true, isHost: true },
-  });
-  const host = await db.user.findUniqueOrThrow({ where: { email: DEMO_HOST.email } });
+  const existing = await db.user.findUnique({ where: { email: DEMO_HOST.email } });
+  if (existing && existing.id !== DEMO_HOST.id) {
+    // Never put the publicly documented demo password on a real person's account.
+    throw new Error(`${DEMO_HOST.email} already belongs to an account the seed did not create. Refusing to continue.`);
+  }
+  const host = existing
+    ? await db.user.update({ where: { id: DEMO_HOST.id }, data: { isHost: true, emailVerified: true } })
+    : await db.user.create({
+        data: { id: DEMO_HOST.id, name: DEMO_HOST.name, email: DEMO_HOST.email, emailVerified: true, isHost: true },
+      });
 
   const hasPassword = await db.account.findFirst({ where: { userId: host.id, providerId: "credential" } });
   if (!hasPassword) {

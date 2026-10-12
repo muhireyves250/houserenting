@@ -13,7 +13,7 @@ pnpm install
 cp .env.example .env           # fill DATABASE_URL (Neon direct URL) and BETTER_AUTH_SECRET
 echo 'TEST_DATABASE_URL="..."' > .env.test   # a separate database for tests
 pnpm db:migrate                # apply migrations to the dev database
-pnpm db:seed                   # demo host + 12 demo listings (safe to re-run)
+pnpm db:seed                   # demo host + 12 demo listings (needs ALLOW_DEMO_SEED=1; safe to re-run)
 pnpm dev                       # http://localhost:3000
 ```
 
@@ -25,7 +25,7 @@ Emails are written to `.mail-outbox/` in development (`MAIL_DRIVER=file`) — op
 |---|---|---|
 | `host@spacerental.rw` | `SpaceRental-demo-2026` | Host of all demo listings |
 
-The seed refuses to run when `NODE_ENV=production` unless `ALLOW_SEED=1`.
+The seed only runs with `ALLOW_DEMO_SEED=1` (set it in `.env` for dev; never for production), and it never puts the demo password on an account it didn't create.
 
 ## Scripts
 
