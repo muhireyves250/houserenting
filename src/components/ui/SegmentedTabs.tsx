@@ -45,13 +45,13 @@ export function SegmentedTabs<T extends string>({
           data-visible={hovered !== null}
           aria-hidden="true"
           style={pill(hoverAt)}
-          className={cn("pointer-events-none absolute inset-y-0 left-0 rounded-full bg-primary/20", MOTION, hovered !== null ? "opacity-100" : "opacity-0")}
+          className={cn("pointer-events-none absolute inset-y-0 left-0 rounded-full bg-ink/10", MOTION, hovered !== null ? "opacity-100" : "opacity-0")}
         />
         <span
           data-testid="tabs-selected"
           aria-hidden="true"
           style={pill(selectedIndex)}
-          className={cn("pointer-events-none absolute inset-y-0 left-0 rounded-full bg-pill", MOTION)}
+          className={cn("pointer-events-none absolute inset-y-0 left-0 rounded-full bg-primary", MOTION)}
         />
         {options.map((option, index) => {
           const selected = index === selectedIndex;
