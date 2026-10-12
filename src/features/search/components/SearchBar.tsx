@@ -14,7 +14,7 @@ import { cn } from "@/lib/cn";
 import { useMediaQuery } from "@/lib/use-media-query";
 import { DatePanel } from "./DatePanel";
 import { GuestPanel } from "./GuestPanel";
-import { LocationPanel } from "./LocationPanel";
+import { LocationPanel, optionId, type Suggestion } from "./LocationPanel";
 
 export type SearchPanel = "where" | "when" | "who";
 type Panel = SearchPanel;
@@ -64,6 +64,13 @@ export function SearchBar({
   const { whenSummary, whoSummary } = useSearchSummaries(search);
 
   const [open, setOpen] = useState<Panel | null>(initialOpen);
+  // Where combobox: suggestions from the API and the option highlighted with the arrow keys.
+  const [suggestions, setSuggestions] = useState<Suggestion[] | null>(null);
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const receiveSuggestions = useCallback((list: Suggestion[]) => {
+    setSuggestions(list);
+    setActiveIndex(-1);
+  }, []);
   // Where the shared highlight sits; kept after closing so the next open fades in place.
   const [highlightAt, setHighlightAt] = useState<Panel>(initialOpen ?? "where");
   // Segment under the mouse; the bordered hover pill slides to it. Kept on leave so it fades in place.
@@ -141,7 +148,16 @@ export function SearchBar({
   }
 
   const panels: Record<Panel, ReactNode> = {
-    where: <LocationPanel id={listboxId} text={location} onPick={pickLocation} />,
+    where: (
+      <LocationPanel
+        id={listboxId}
+        text={location}
+        suggestions={suggestions}
+        activeIndex={activeIndex}
+        onSuggestions={receiveSuggestions}
+        onPick={pickLocation}
+      />
+    ),
     when: <DatePanel today={today} range={range} flex={flex} onRangeChange={setRange} onFlexChange={setFlex} />,
     who: <GuestPanel counts={guests} onChange={setGuests} />,
   };
@@ -265,6 +281,21 @@ export function SearchBar({
             aria-expanded={open === "where"}
             aria-controls={listboxId}
             aria-autocomplete="list"
+            aria-activedescendant={open === "where" && activeIndex >= 0 ? optionId(listboxId, activeIndex) : undefined}
+            onKeyDown={(event) => {
+              const count = suggestions?.length ?? 0;
+              if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+                event.preventDefault();
+                openPanel("where");
+                if (count === 0) return;
+                const step = event.key === "ArrowDown" ? 1 : -1;
+                setActiveIndex((i) => (i < 0 && step < 0 ? count - 1 : (i + step + count) % count));
+              } else if (event.key === "Enter" && open === "where" && activeIndex >= 0 && suggestions?.[activeIndex]) {
+                // Enter on a highlighted suggestion picks it instead of submitting the search.
+                event.preventDefault();
+                pickLocation(suggestions[activeIndex].city);
+              }
+            }}
             autoComplete="off"
             value={location}
             placeholder={t("wherePlaceholder")}
@@ -272,6 +303,7 @@ export function SearchBar({
             onClick={() => openPanel("where")}
             onChange={(event) => {
               setLocation(event.target.value);
+              setActiveIndex(-1);
               openPanel("where");
             }}
             className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-muted md:placeholder:text-[#4a4e54]"
@@ -378,8 +410,42 @@ function MobileSheet({
   children: ReactNode;
 }) {
   const titleId = useId();
+  const sheetRef = useRef<HTMLDivElement>(null);
+
+  // Modal behaviour: focus inside, Tab cycles within, page behind doesn't scroll, focus returns on close.
+  useEffect(() => {
+    const sheet = sheetRef.current;
+    if (!sheet) return;
+    const previous = document.activeElement as HTMLElement | null;
+    const focusables = () =>
+      Array.from(sheet.querySelectorAll<HTMLElement>('button:not(:disabled), input, [tabindex="0"]')).filter((el) => !el.hasAttribute("inert"));
+    if (!sheet.contains(document.activeElement)) focusables()[0]?.focus();
+    const { overflow } = document.body.style;
+    document.body.style.overflow = "hidden";
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Tab") return;
+      const items = focusables();
+      if (items.length === 0) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = overflow;
+      previous?.focus({ preventScroll: true });
+    };
+  }, []);
+
   return (
-    <div role="dialog" aria-modal="true" aria-labelledby={titleId} className="fixed inset-0 z-50 flex flex-col bg-surface motion-safe:animate-sheet-up">
+    <div ref={sheetRef} role="dialog" aria-modal="true" aria-labelledby={titleId} className="fixed inset-0 z-50 flex flex-col bg-surface motion-safe:animate-sheet-up">
       <div className="flex items-center justify-between border-b border-line px-4 py-3">
         <h2 id={titleId} className="text-lg font-semibold">
           {title}

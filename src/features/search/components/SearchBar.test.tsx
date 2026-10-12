@@ -179,6 +179,47 @@ describe("SearchBar", () => {
     expect(root).toHaveClass("z-50");
   });
 
+  it("Where works as a keyboard combobox: arrows move, Enter picks without submitting", async () => {
+    renderWithIntl(<SearchBar today={TODAY} />);
+    const input = screen.getByRole("combobox", { name: "Where" });
+    await userEvent.click(input);
+    const [kigali, musanze] = await screen.findAllByRole("option");
+    await userEvent.keyboard("{ArrowDown}");
+    expect(input).toHaveAttribute("aria-activedescendant", kigali.id);
+    expect(kigali).toHaveAttribute("aria-selected", "true");
+    await userEvent.keyboard("{ArrowDown}");
+    expect(input).toHaveAttribute("aria-activedescendant", musanze.id);
+    await userEvent.keyboard("{ArrowUp}{Enter}");
+    expect(input).toHaveValue("Kigali");
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it("keeps the listbox in the DOM when nothing matches, so aria-controls always resolves", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ locations: [] }))));
+    renderWithIntl(<SearchBar today={TODAY} />);
+    const input = screen.getByRole("combobox", { name: "Where" });
+    await userEvent.type(input, "zzz");
+    expect(await screen.findByText(/No places match/)).toBeInTheDocument();
+    expect(document.getElementById(input.getAttribute("aria-controls")!)).not.toBeNull();
+  });
+
+  it("phone sheets trap focus, lock page scroll and return focus on close", async () => {
+    stubViewport(false);
+    renderWithIntl(<SearchBar today={TODAY} />);
+    const who = screen.getByRole("button", { name: /Who/ });
+    await userEvent.click(who);
+    const sheet = screen.getByRole("dialog", { name: "Who" });
+    expect(sheet).toContainElement(document.activeElement as HTMLElement);
+    expect(document.body.style.overflow).toBe("hidden");
+    for (let i = 0; i < 12; i++) {
+      await userEvent.tab();
+      expect(sheet).toContainElement(document.activeElement as HTMLElement);
+    }
+    await userEvent.click(screen.getByRole("button", { name: "Done" }));
+    expect(document.body.style.overflow).toBe("");
+    expect(who).toHaveFocus();
+  });
+
   it("opens panels as full-screen dialogs on phones", async () => {
     stubViewport(false);
     renderWithIntl(<SearchBar today={TODAY} />);
