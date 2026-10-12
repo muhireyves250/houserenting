@@ -20,9 +20,9 @@ export default async function HomePage() {
               <LocaleSwitcher />
             </Suspense>
           </div>
-          <h1 className="mt-16 text-3xl leading-tight md:mt-0 md:text-center md:text-5xl md:text-white">
-            <span className="block font-bold">{t("titleTop")}</span>{" "}
-            <span className="block">{t("titleBottom")}</span>
+          {/* Visually hidden: the search bar is the hero, but the page still needs a heading for screen readers and SEO. */}
+          <h1 className="sr-only">
+            {t("titleTop")} {t("titleBottom")}
           </h1>
           <SearchBar />
         </PageContainer>

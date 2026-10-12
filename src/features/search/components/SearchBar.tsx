@@ -139,7 +139,7 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
           submit();
         }}
         className={cn(
-          "flex flex-col gap-2 rounded-card bg-surface p-5 shadow-sm",
+          "flex flex-col gap-2 rounded-card border border-line bg-surface p-5 shadow-sm",
           "md:flex-row md:items-center md:gap-0 md:rounded-full md:p-1.5",
           open ? "md:bg-canvas" : "md:bg-surface",
         )}
