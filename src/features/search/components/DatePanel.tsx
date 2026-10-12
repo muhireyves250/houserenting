@@ -47,6 +47,9 @@ export function DatePanel({
   }
 
   const months = [base, addMonths(base.year, base.month, 1)];
+  const shortDate = new Intl.DateTimeFormat(locale, { month: "short", day: "numeric", timeZone: "UTC" });
+  const nights =
+    range.checkIn && range.checkOut ? Math.round((utc(range.checkOut).getTime() - utc(range.checkIn).getTime()) / DAY_MS) : 0;
 
   return (
     <div className="flex flex-col gap-6" data-calendar>
@@ -56,7 +59,7 @@ export function DatePanel({
           aria-label={t("prevMonth")}
           disabled={atFirstMonth}
           onClick={() => setBase(addMonths(base.year, base.month, -1))}
-          className="absolute top-0 left-0 flex size-8 items-center justify-center rounded-full hover:bg-canvas disabled:opacity-30"
+          className="absolute top-0 left-0 flex size-9 items-center justify-center rounded-full border border-line text-ink transition-colors duration-200 hover:border-primary hover:text-primary disabled:pointer-events-none disabled:opacity-30"
         >
           <ChevronLeft className="size-4" aria-hidden="true" />
         </button>
@@ -64,19 +67,19 @@ export function DatePanel({
           type="button"
           aria-label={t("nextMonth")}
           onClick={() => setBase(addMonths(base.year, base.month, 1))}
-          className="absolute top-0 right-0 flex size-8 items-center justify-center rounded-full hover:bg-canvas"
+          className="absolute top-0 right-0 flex size-9 items-center justify-center rounded-full border border-line text-ink transition-colors duration-200 hover:border-primary hover:text-primary"
         >
           <ChevronRight className="size-4" aria-hidden="true" />
         </button>
 
         {months.map(({ year, month }) => (
           <div key={`${year}-${month}`} className="flex flex-col gap-3">
-            <h3 className="text-center text-base font-semibold">{monthLabel.format(Date.UTC(year, month, 1))}</h3>
+            <h3 className="pt-1.5 text-center text-[15px] font-bold tracking-tight text-ink">{monthLabel.format(Date.UTC(year, month, 1))}</h3>
             <table className="w-full table-fixed border-collapse text-center text-sm">
               <thead>
                 <tr>
                   {weekdays.map((d, i) => (
-                    <th key={i} scope="col" className="pb-2 text-xs font-medium text-muted">
+                    <th key={i} scope="col" className="pb-3 text-[11px] font-bold tracking-[0.1em] text-muted uppercase">
                       {d}
                     </th>
                   ))}
@@ -97,14 +100,18 @@ export function DatePanel({
                             data-date={day}
                             aria-label={dayLabel.format(utc(day))}
                             aria-pressed={isEdge}
+                            aria-current={day === today ? "date" : undefined}
                             disabled={past}
                             onClick={() => onRangeChange(pickDate(range, day))}
                             onKeyDown={(event) => moveFocus(event, day)}
                             className={cn(
-                              "mx-auto flex size-10 items-center justify-center rounded-full text-sm transition-colors",
-                              "focus-visible:outline-2 focus-visible:outline-primary",
-                              past ? "cursor-not-allowed text-line" : "hover:border hover:border-ink",
-                              isEdge && "bg-primary font-semibold text-white hover:border-transparent",
+                              "relative mx-auto flex size-10 items-center justify-center rounded-full text-sm font-medium transition-[background-color,box-shadow,color] duration-200",
+                              "focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary",
+                              past ? "cursor-not-allowed text-ink/25" : "text-ink hover:ring-2 hover:ring-primary/40",
+                              // Today: bold with a small dot underneath.
+                              day === today && "font-bold after:absolute after:bottom-1 after:size-1 after:rounded-full after:bg-primary",
+                              isEdge &&
+                                "bg-primary font-semibold text-white shadow-[0_6px_14px_-6px_rgba(0,87,184,0.85)] after:bg-white hover:ring-0",
                             )}
                           >
                             {Number(day.slice(8))}
@@ -129,13 +136,39 @@ export function DatePanel({
             aria-checked={flex === days}
             onClick={() => onFlexChange(days)}
             className={cn(
-              "rounded-full border px-4 py-1.5 text-sm transition-colors",
-              flex === days ? "border-ink bg-canvas font-medium" : "border-line hover:border-ink",
+              "rounded-full border px-4 py-1.5 text-sm transition-colors duration-200",
+              flex === days
+                ? "border-primary bg-primary/[0.08] font-semibold text-primary"
+                : "border-line text-ink hover:border-primary/60",
             )}
           >
             {days === 0 ? t("exactDates") : t("flexDays", { days })}
           </button>
         ))}
+      </div>
+
+      {/* Summary of the chosen stay and a quick way to start over. */}
+      <div className="flex items-center justify-between border-t border-line pt-4">
+        <p className="text-sm text-muted" aria-live="polite">
+          {nights > 0 && range.checkIn && range.checkOut && (
+            <>
+              <span className="font-semibold text-ink">{t("nights", { count: nights })}</span>
+              {" · "}
+              {shortDate.format(utc(range.checkIn))} – {shortDate.format(utc(range.checkOut))}
+            </>
+          )}
+        </p>
+        <button
+          type="button"
+          disabled={!range.checkIn}
+          onClick={() => {
+            onRangeChange({});
+            onFlexChange(0);
+          }}
+          className="text-sm font-semibold text-ink underline underline-offset-4 transition-colors hover:text-primary disabled:pointer-events-none disabled:opacity-30"
+        >
+          {t("clearDates")}
+        </button>
       </div>
     </div>
   );

@@ -128,20 +128,24 @@ describe("suggestLocations", () => {
     await listing({ city: "Rubavu", district: "Rubavu", status: "DRAFT" });
   });
 
-  it("lists cities with published places, most places first", async () => {
-    expect(await suggestLocations("")).toEqual([
+  it("lists cities with published places, most places first, with a cover photo", async () => {
+    const suggestions = await suggestLocations("");
+    expect(suggestions.map(({ city, count }) => ({ city, count }))).toEqual([
       { city: "Kigali", count: 2 },
       { city: "Musanze", count: 1 },
     ]);
+    // Cover = first photo of the newest published listing in that city.
+    expect(suggestions[0].photo).toBe("https://images.unsplash.com/p2");
+    expect(suggestions[1].photo).toBe("https://images.unsplash.com/p3");
   });
 
   it("filters by the typed text, ignoring case", async () => {
-    expect(await suggestLocations("mus")).toEqual([{ city: "Musanze", count: 1 }]);
+    expect(await suggestLocations("mus")).toMatchObject([{ city: "Musanze", count: 1 }]);
     expect(await suggestLocations("rubavu")).toEqual([]);
   });
 
   it("matches districts too and treats wildcards literally", async () => {
-    expect(await suggestLocations("gasabo")).toEqual([{ city: "Kigali", count: 2 }]);
+    expect(await suggestLocations("gasabo")).toMatchObject([{ city: "Kigali", count: 2 }]);
     expect(await suggestLocations("%")).toEqual([]);
   });
 });

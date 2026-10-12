@@ -43,7 +43,7 @@ export function searchListings(query: SearchQuery, limit = SEARCH_LIMIT): Promis
   return db.listing.findMany({ where, select: CARD_SELECT, orderBy: [{ publishedAt: "desc" }, { id: "asc" }], take: limit });
 }
 
-export type LocationSuggestion = { city: string; count: number };
+export type LocationSuggestion = { city: string; count: number; photo: string | null };
 
 /** Cities that have published places, optionally filtered by typed text (city or district). */
 export async function suggestLocations(text: string, limit = 6): Promise<LocationSuggestion[]> {
@@ -60,7 +60,17 @@ export async function suggestLocations(text: string, limit = 6): Promise<Locatio
     orderBy: [{ _count: { city: "desc" } }, { city: "asc" }],
     take: limit,
   });
-  return groups.map((g) => ({ city: g.city, count: g._count._all }));
+  // Cover photo per city: first photo of its newest published listing (one query for all cities).
+  const newest = await db.listing.findMany({
+    where: { status: "PUBLISHED", city: { in: groups.map((g) => g.city) } },
+    orderBy: [{ publishedAt: "desc" }, { id: "asc" }],
+    select: { city: true, photos: { orderBy: { position: "asc" }, take: 1, select: { url: true } } },
+  });
+  const cover = new Map<string, string>();
+  for (const listing of newest) {
+    if (!cover.has(listing.city) && listing.photos[0]) cover.set(listing.city, listing.photos[0].url);
+  }
+  return groups.map((g) => ({ city: g.city, count: g._count._all, photo: cover.get(g.city) ?? null }));
 }
 
 export function featuredListings(limit = 6): Promise<ListingCardData[]> {

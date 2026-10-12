@@ -51,7 +51,7 @@
     "children": "Children",
     "childrenHint": "Ages 2–12",
     "pets": "Pets",
-    "petsHint": "Only places that allow pets",
+    "petsHint": "Pet-friendly places only",
     "increase": "Add one: {label}",
     "decrease": "Remove one: {label}",
     "guestsSummary": "{count, plural, one {# guest} other {# guests}}",
@@ -65,7 +65,9 @@
     "close": "Close",
     "compactWhere": "Anywhere",
     "compactWhen": "Any dates",
-    "compactLabel": "Search"
+    "compactLabel": "Search",
+    "nights": "{count, plural, one {# night} other {# nights}}",
+    "clearDates": "Clear dates"
   },
   "Search": {
     "anywhere": "Anywhere in Rwanda",

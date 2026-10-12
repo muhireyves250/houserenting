@@ -65,7 +65,9 @@
     "close": "Funga",
     "compactWhere": "Ahantu hose",
     "compactWhen": "Igihe icyo ari cyo cyose",
-    "compactLabel": "Shakisha"
+    "compactLabel": "Shakisha",
+    "nights": "{count, plural, one {Ijoro #} other {Amajoro #}}",
+    "clearDates": "Siba amatariki"
   },
   "Search": {
     "anywhere": "Ahantu hose mu Rwanda",

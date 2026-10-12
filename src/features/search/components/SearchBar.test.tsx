@@ -23,7 +23,17 @@ beforeEach(() => {
   stubViewport(true);
   vi.stubGlobal(
     "fetch",
-    vi.fn(async () => new Response(JSON.stringify({ locations: [{ city: "Kigali", count: 5 }, { city: "Musanze", count: 2 }] }))),
+    vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            locations: [
+              { city: "Kigali", count: 5, photo: "https://images.unsplash.com/photo-kigali" },
+              { city: "Musanze", count: 2, photo: null },
+            ],
+          }),
+        ),
+    ),
   );
 });
 afterEach(() => vi.unstubAllGlobals());
@@ -219,6 +229,24 @@ describe("SearchBar", () => {
     await userEvent.click(screen.getByRole("button", { name: "Done" }));
     expect(document.body.style.overflow).toBe("");
     expect(who).toHaveFocus();
+  });
+
+  it("marks today, summarises the stay in nights and can clear the dates", async () => {
+    renderWithIntl(<SearchBar today={TODAY} />);
+    await userEvent.click(screen.getByRole("button", { name: /When/ }));
+    expect(screen.getByRole("button", { name: "Monday, October 12, 2026" })).toHaveAttribute("aria-current", "date");
+    await userEvent.click(screen.getByRole("button", { name: "Wednesday, October 14, 2026" }));
+    await userEvent.click(screen.getByRole("button", { name: "Sunday, October 18, 2026" }));
+    expect(screen.getByText("4 nights")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Clear dates" }));
+    expect(screen.getByRole("button", { name: /When/ })).toHaveTextContent("Add dates");
+  });
+
+  it("shows each suggested city with its cover photo", async () => {
+    renderWithIntl(<SearchBar today={TODAY} />);
+    await userEvent.click(screen.getByRole("combobox", { name: "Where" }));
+    const kigali = await screen.findByRole("option", { name: /Kigali, Rwanda/ });
+    expect(kigali.querySelector("img")).toHaveAttribute("src", expect.stringContaining("photo-kigali"));
   });
 
   it("opens panels as full-screen dialogs on phones", async () => {

@@ -51,7 +51,7 @@
     "children": "Enfants",
     "childrenHint": "De 2 à 12 ans",
     "pets": "Animaux",
-    "petsHint": "Uniquement les logements qui les acceptent",
+    "petsHint": "Logements acceptant les animaux",
     "increase": "Ajouter : {label}",
     "decrease": "Retirer : {label}",
     "guestsSummary": "{count, plural, one {# voyageur} other {# voyageurs}}",
@@ -65,7 +65,9 @@
     "close": "Fermer",
     "compactWhere": "N'importe où",
     "compactWhen": "N'importe quand",
-    "compactLabel": "Rechercher"
+    "compactLabel": "Rechercher",
+    "nights": "{count, plural, one {# nuit} other {# nuits}}",
+    "clearDates": "Effacer les dates"
   },
   "Search": {
     "anywhere": "Partout au Rwanda",
