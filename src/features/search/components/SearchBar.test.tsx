@@ -113,6 +113,19 @@ describe("SearchBar", () => {
     expect(highlight.style.transform).toBe("translateX(calc(200% + 16px))");
   });
 
+  it("slides a bordered hover pill to the segment under the mouse", async () => {
+    renderWithIntl(<SearchBar today={TODAY} />);
+    const pill = screen.getByTestId("hover-pill");
+    expect(pill).toHaveAttribute("data-visible", "false");
+    await userEvent.hover(screen.getByRole("button", { name: /When/ }));
+    expect(pill).toHaveAttribute("data-visible", "true");
+    expect(pill.style.transform).toBe("translateX(calc(100% + 8px))");
+    await userEvent.hover(screen.getByRole("button", { name: /Who/ }));
+    expect(pill.style.transform).toBe("translateX(calc(200% + 16px))");
+    await userEvent.unhover(screen.getByRole("button", { name: /Who/ }));
+    expect(pill).toHaveAttribute("data-visible", "false");
+  });
+
   it("opens panels as full-screen dialogs on phones", async () => {
     stubViewport(false);
     renderWithIntl(<SearchBar today={TODAY} />);

@@ -36,6 +36,14 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
   const [guests, setGuests] = useState<GuestCounts>(NO_GUESTS);
   // Where the shared highlight sits; kept after closing so the next open fades in place.
   const [highlightAt, setHighlightAt] = useState<Panel>("where");
+  // Segment under the mouse; the bordered hover pill slides to it. Kept on leave so it fades in place.
+  const [hovered, setHovered] = useState<Panel | null>(null);
+  const [hoverAt, setHoverAt] = useState<Panel>("where");
+
+  function hover(panel: Panel | null) {
+    setHovered(panel);
+    if (panel) setHoverAt(panel);
+  }
 
   function openPanel(panel: Panel | null) {
     setOpen(panel);
@@ -105,15 +113,25 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
   const highlightIndex = Math.max(0, order.indexOf(highlightAt));
   const showHighlight = Boolean(open && isDesktop);
 
+  const hoverIndex = Math.max(0, order.indexOf(hoverAt));
+  const showHover = Boolean(hovered && isDesktop);
+
+  // Width and offset of a pill covering segment `index`, accounting for the gap between segments.
+  const pillStyle = (index: number) => ({
+    width: `calc((100% - ${(order.length - 1) * SEGMENT_GAP_PX}px) / ${order.length})`,
+    transform: `translateX(calc(${index * 100}% + ${index * SEGMENT_GAP_PX}px))`,
+  });
+
   const segment = (panel: Panel) =>
     cn(
-      "relative z-10 flex flex-col justify-center rounded-xl border border-line-strong px-4 py-3 text-left transition-colors duration-200",
-      // Phones have no hover, so fields stay outlined there; on desktop the outline appears on hover only.
+      "relative z-10 flex flex-col justify-center rounded-xl border border-line-strong px-4 py-3 text-left transition-colors duration-500",
+      // Phones have no hover, so fields stay outlined there; on desktop the sliding pills provide the outline.
       "md:rounded-full md:border-transparent md:px-6",
-      // Hovering one segment dims the others and lifts and outlines the hovered one.
-      "md:group-hover/segs:bg-ink/[0.06] md:hover:border-line-strong md:hover:bg-surface! md:hover:shadow-md",
-      open === panel && "md:group-hover/segs:bg-transparent md:hover:border-transparent md:hover:shadow-none",
+      // While another segment is hovered, dim this one.
+      hovered && hovered !== panel && open !== panel && "md:bg-ink/[0.06]",
     );
+
+  const pillMotion = "transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.25,0.8,0.25,1)] motion-reduce:transition-none";
 
   return (
     <div ref={rootRef} className="relative flex w-full max-w-4xl flex-col gap-4">
@@ -142,22 +160,33 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
           open ? "md:bg-canvas" : "md:bg-surface",
         )}
       >
-        <div className={cn("group/segs relative grid flex-1 gap-3 md:gap-2", short ? "md:grid-cols-3" : "md:grid-cols-1")}>
+        <div
+          className={cn("relative grid flex-1 gap-3 md:gap-2", short ? "md:grid-cols-3" : "md:grid-cols-1")}
+          onMouseLeave={() => hover(null)}
+        >
         <span
           data-testid="segment-highlight"
           data-visible={showHighlight}
           aria-hidden="true"
-          style={{
-            width: `calc((100% - ${(order.length - 1) * SEGMENT_GAP_PX}px) / ${order.length})`,
-            transform: `translateX(calc(${highlightIndex * 100}% + ${highlightIndex * SEGMENT_GAP_PX}px))`,
-          }}
+          style={pillStyle(highlightIndex)}
           className={cn(
             "pointer-events-none absolute inset-y-0 left-0 hidden rounded-full bg-surface shadow-lg md:block",
-            "transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:transition-none",
+            pillMotion,
             showHighlight ? "opacity-100" : "opacity-0",
           )}
         />
-        <div className={segment("where")}>
+        <span
+          data-testid="hover-pill"
+          data-visible={showHover}
+          aria-hidden="true"
+          style={pillStyle(hoverIndex)}
+          className={cn(
+            "pointer-events-none absolute inset-y-0 left-0 z-20 hidden rounded-full border border-line-strong md:block",
+            pillMotion,
+            showHover ? "opacity-100" : "opacity-0",
+          )}
+        />
+        <div className={segment("where")} onMouseEnter={() => hover("where")}>
           <label htmlFor={`${listboxId}-input`} className="text-xs font-semibold text-ink">
             {t("where")}
           </label>
@@ -182,11 +211,11 @@ export function SearchBar({ today = todayISO() }: { today?: string }) {
 
         {short && (
           <>
-            <button type="button" className={segment("when")} aria-expanded={open === "when"} onClick={() => openPanel(open === "when" ? null : "when")}>
+            <button type="button" className={segment("when")} onMouseEnter={() => hover("when")} aria-expanded={open === "when"} onClick={() => openPanel(open === "when" ? null : "when")}>
               <span className="text-xs font-semibold text-ink">{t("when")}</span>
               <span className={cn("text-sm", whenSummary ? "text-ink" : "text-muted")}>{whenSummary ?? t("whenPlaceholder")}</span>
             </button>
-            <button type="button" className={segment("who")} aria-expanded={open === "who"} onClick={() => openPanel(open === "who" ? null : "who")}>
+            <button type="button" className={segment("who")} onMouseEnter={() => hover("who")} aria-expanded={open === "who"} onClick={() => openPanel(open === "who" ? null : "who")}>
               <span className="text-xs font-semibold text-ink">{t("who")}</span>
               <span className={cn("text-sm", whoSummary ? "text-ink" : "text-muted")}>{whoSummary ?? t("whoPlaceholder")}</span>
             </button>
