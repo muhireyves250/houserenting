@@ -20,6 +20,7 @@ export function SignOutButton() {
         setPending(true);
         await authClient.signOut();
         // Full load: a client push to "/" keeps the shared (main) layout, which would still show the signed-in header.
+        // eslint-disable-next-line @next/next/no-location-assign-relative-destination
         window.location.assign(`/${locale}`);
       }}
     >

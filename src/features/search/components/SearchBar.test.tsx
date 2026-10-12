@@ -1,0 +1,107 @@
+import { screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { renderWithIntl } from "@/test/render";
+import { SearchBar } from "./SearchBar";
+
+const { push } = vi.hoisted(() => ({ push: vi.fn() }));
+vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push }) }));
+
+const TODAY = "2026-10-12";
+
+function stubViewport(desktop: boolean) {
+  vi.stubGlobal(
+    "matchMedia",
+    vi.fn(() => ({ matches: desktop, addEventListener: () => {}, removeEventListener: () => {} })),
+  );
+}
+
+beforeEach(() => {
+  push.mockReset();
+  stubViewport(true);
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async () => new Response(JSON.stringify({ locations: [{ city: "Kigali", count: 5 }, { city: "Musanze", count: 2 }] }))),
+  );
+});
+afterEach(() => vi.unstubAllGlobals());
+
+describe("SearchBar", () => {
+  it("builds a short-term search from where, when and who", async () => {
+    renderWithIntl(<SearchBar today={TODAY} />);
+    await userEvent.type(screen.getByRole("combobox", { name: "Where" }), "Kigali");
+
+    await userEvent.click(screen.getByRole("button", { name: /When/ }));
+    await userEvent.click(screen.getByRole("button", { name: "Wednesday, October 14, 2026" }));
+    await userEvent.click(screen.getByRole("button", { name: "Sunday, October 18, 2026" }));
+    expect(screen.getByRole("button", { name: /When/ })).toHaveTextContent("Oct 14 – Oct 18");
+
+    await userEvent.click(screen.getByRole("button", { name: /Who/ }));
+    await userEvent.click(screen.getByRole("button", { name: "Add one: Adults" }));
+    await userEvent.click(screen.getByRole("button", { name: "Add one: Adults" }));
+    await userEvent.click(screen.getByRole("button", { name: "Add one: Pets" }));
+    expect(screen.getByRole("button", { name: /Who/ })).toHaveTextContent("2 guests, 1 pet");
+
+    await userEvent.click(screen.getByRole("button", { name: "Search" }));
+    expect(push).toHaveBeenCalledWith({
+      pathname: "/search",
+      query: { mode: "short", location: "Kigali", checkIn: "2026-10-14", checkOut: "2026-10-18", guests: "2", pets: "1" },
+    });
+  });
+
+  it("disables days before today and can move between months", async () => {
+    renderWithIntl(<SearchBar today={TODAY} />);
+    await userEvent.click(screen.getByRole("button", { name: /When/ }));
+    expect(screen.getByRole("button", { name: "Sunday, October 11, 2026" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Previous month" })).toBeDisabled();
+    await userEvent.click(screen.getByRole("button", { name: "Next month" }));
+    expect(screen.getByText("December 2026")).toBeInTheDocument();
+  });
+
+  it("adds date flexibility from the chips", async () => {
+    renderWithIntl(<SearchBar today={TODAY} />);
+    await userEvent.click(screen.getByRole("button", { name: /When/ }));
+    await userEvent.click(screen.getByRole("button", { name: "Wednesday, October 14, 2026" }));
+    await userEvent.click(screen.getByRole("radio", { name: "± 2 days" }));
+    await userEvent.click(screen.getByRole("button", { name: "Search" }));
+    expect(push).toHaveBeenCalledWith({ pathname: "/search", query: { mode: "short", checkIn: "2026-10-14", flex: "2" } });
+  });
+
+  it("shows only Where for 'From 6 months'", async () => {
+    renderWithIntl(<SearchBar today={TODAY} />);
+    await userEvent.click(screen.getByRole("radio", { name: "From 6 months" }));
+    expect(screen.queryByRole("button", { name: /When/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Who/ })).not.toBeInTheDocument();
+    await userEvent.type(screen.getByRole("combobox", { name: "Where" }), "Huye");
+    await userEvent.click(screen.getByRole("button", { name: "Search" }));
+    expect(push).toHaveBeenCalledWith({ pathname: "/search", query: { mode: "long", location: "Huye" } });
+  });
+
+  it("suggests destinations from real listings and fills the field on pick", async () => {
+    renderWithIntl(<SearchBar today={TODAY} />);
+    await userEvent.click(screen.getByRole("combobox", { name: "Where" }));
+    expect(await screen.findByText("Suggested destinations")).toBeInTheDocument();
+    const option = await screen.findByRole("option", { name: /Kigali, Rwanda/ });
+    expect(option).toHaveTextContent("5 places");
+    await userEvent.click(option);
+    expect(screen.getByRole("combobox", { name: "Where" })).toHaveValue("Kigali");
+    await waitFor(() => expect(fetch).toHaveBeenCalled());
+  });
+
+  it("closes the open panel with Escape", async () => {
+    renderWithIntl(<SearchBar today={TODAY} />);
+    await userEvent.click(screen.getByRole("button", { name: /Who/ }));
+    expect(screen.getByText("Ages 13 or above")).toBeInTheDocument();
+    await userEvent.keyboard("{Escape}");
+    expect(screen.queryByText("Ages 13 or above")).not.toBeInTheDocument();
+  });
+
+  it("opens panels as full-screen dialogs on phones", async () => {
+    stubViewport(false);
+    renderWithIntl(<SearchBar today={TODAY} />);
+    await userEvent.click(screen.getByRole("button", { name: /Who/ }));
+    expect(screen.getByRole("dialog", { name: "Who" })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Done" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+});

@@ -47,3 +47,29 @@ describe("parseSearchParams", () => {
     expect(parseSearchParams({ mode: "long", checkIn: "2026-11-01", guests: "2" })).toEqual({ mode: "long" });
   });
 });
+
+describe("pets and date flexibility", () => {
+  it("parses pets (1–5) and flex (1–3 days) for short-term searches", () => {
+    expect(parseSearchParams({ pets: "2", flex: "3", checkIn: "2026-11-01" })).toEqual({ mode: "short", pets: 2, flex: 3, checkIn: "2026-11-01" });
+  });
+
+  it("drops out-of-range or garbage values", () => {
+    expect(parseSearchParams({ pets: "9", flex: "7" })).toEqual({ mode: "short" });
+    expect(parseSearchParams({ pets: "-1", flex: "x" })).toEqual({ mode: "short" });
+  });
+
+  it("builds pets and flex into the query, and drops them for long-term", () => {
+    expect(buildSearchQuery("short", { location: "Kigali", guests: 3, pets: 1, flex: 2 })).toEqual({
+      mode: "short",
+      location: "Kigali",
+      guests: "3",
+      pets: "1",
+      flex: "2",
+    });
+    expect(buildSearchQuery("long", { location: "Kigali", pets: 1, flex: 2 })).toEqual({ mode: "long", location: "Kigali" });
+  });
+
+  it("omits zero counts", () => {
+    expect(buildSearchQuery("short", { guests: 0, pets: 0, flex: 0 })).toEqual({ mode: "short" });
+  });
+});

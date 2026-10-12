@@ -6,10 +6,15 @@ export type SearchQuery = {
   checkIn?: string;
   checkOut?: string;
   guests?: number;
+  pets?: number;
+  /** ± days of date flexibility (1–3). */
+  flex?: number;
 };
 
 const MAX_GUESTS = 30;
 const MAX_LOCATION = 100;
+const MAX_PETS = 5;
+const MAX_FLEX_DAYS = 3;
 
 type Raw = string | string[] | undefined;
 const first = (value: Raw) => (Array.isArray(value) ? value[0] : value);
@@ -21,11 +26,11 @@ function isoDate(value: Raw): string | undefined {
   return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === v ? v : undefined;
 }
 
-function guestCount(value: Raw): number | undefined {
+function intBetween(value: Raw, min: number, max: number): number | undefined {
   const v = first(value);
   if (!v || !/^\d+$/.test(v)) return undefined;
   const n = Number(v);
-  return n >= 1 && n <= MAX_GUESTS ? n : undefined;
+  return n >= min && n <= max ? n : undefined;
 }
 
 export function parseSearchParams(params: Record<string, Raw>): SearchQuery {
@@ -39,17 +44,25 @@ export function parseSearchParams(params: Record<string, Raw>): SearchQuery {
   const checkOut = isoDate(params.checkOut);
   if (checkIn) query.checkIn = checkIn;
   if (checkOut && (!checkIn || checkOut > checkIn)) query.checkOut = checkOut;
-  const guests = guestCount(params.guests);
+  const guests = intBetween(params.guests, 1, MAX_GUESTS);
   if (guests) query.guests = guests;
+  const pets = intBetween(params.pets, 1, MAX_PETS);
+  if (pets) query.pets = pets;
+  const flex = intBetween(params.flex, 1, MAX_FLEX_DAYS);
+  if (flex) query.flex = flex;
   return query;
 }
 
-export function buildSearchQuery(mode: SearchMode, values: Record<string, FormDataEntryValue | undefined>): Record<string, string> {
+export function buildSearchQuery(
+  mode: SearchMode,
+  values: Record<string, FormDataEntryValue | number | undefined>,
+): Record<string, string> {
   const query: Record<string, string> = { mode };
-  const keys = mode === "short" ? ["location", "checkIn", "checkOut", "guests"] : ["location"];
+  const keys = mode === "short" ? ["location", "checkIn", "checkOut", "guests", "pets", "flex"] : ["location"];
   for (const key of keys) {
     const value = values[key];
-    if (typeof value === "string" && value.trim()) query[key] = value.trim();
+    if (typeof value === "number" && value > 0) query[key] = String(value);
+    else if (typeof value === "string" && value.trim()) query[key] = value.trim();
   }
   return query;
 }

@@ -5,7 +5,7 @@ import { PageContainer } from "@/components/ui/PageContainer";
 import { OnboardingGate } from "@/features/onboarding/components/OnboardingGate";
 import { ListingGrid } from "@/features/listings/components/ListingGrid";
 import { featuredListings } from "@/features/listings/service";
-import { HomeSearch } from "@/features/search/components/HomeSearch";
+import { SearchBar } from "@/features/search/components/SearchBar";
 import { Link } from "@/i18n/navigation";
 
 export default async function HomePage() {
@@ -21,10 +21,10 @@ export default async function HomePage() {
             </Suspense>
           </div>
           <h1 className="mt-16 text-3xl leading-tight md:mt-0 md:text-center md:text-5xl md:text-white">
-            <span className="block font-bold">{t("titleTop")}</span>
+            <span className="block font-bold">{t("titleTop")}</span>{" "}
             <span className="block">{t("titleBottom")}</span>
           </h1>
-          <HomeSearch />
+          <SearchBar />
         </PageContainer>
       </section>
       {featured.length > 0 && (

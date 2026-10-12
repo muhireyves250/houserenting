@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import type { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import { resetDb } from "@/test/db";
-import { featuredListings, getPublishedListing, searchListings } from "./service";
+import { featuredListings, getPublishedListing, searchListings, suggestLocations } from "./service";
 
 let n = 0;
 async function listing(overrides: Partial<Prisma.ListingUncheckedCreateInput> = {}, units: ("HOUR" | "DAY" | "NIGHT" | "MONTH")[] = ["NIGHT"]) {
@@ -109,5 +109,39 @@ describe("getPublishedListing", () => {
     const draft = await listing({ status: "DRAFT" });
     expect(await getPublishedListing(draft.id)).toBeNull();
     expect(await getPublishedListing("does-not-exist")).toBeNull();
+  });
+});
+
+describe("pets filter", () => {
+  it("only returns pet-friendly places when pets are coming", async () => {
+    const friendly = await listing({ petsAllowed: true });
+    await listing({ petsAllowed: false });
+    expect((await searchListings({ mode: "short", pets: 1 })).map((r) => r.id)).toEqual([friendly.id]);
+  });
+});
+
+describe("suggestLocations", () => {
+  beforeEach(async () => {
+    await listing({ city: "Kigali" });
+    await listing({ city: "Kigali" });
+    await listing({ city: "Musanze", district: "Musanze" });
+    await listing({ city: "Rubavu", district: "Rubavu", status: "DRAFT" });
+  });
+
+  it("lists cities with published places, most places first", async () => {
+    expect(await suggestLocations("")).toEqual([
+      { city: "Kigali", count: 2 },
+      { city: "Musanze", count: 1 },
+    ]);
+  });
+
+  it("filters by the typed text, ignoring case", async () => {
+    expect(await suggestLocations("mus")).toEqual([{ city: "Musanze", count: 1 }]);
+    expect(await suggestLocations("rubavu")).toEqual([]);
+  });
+
+  it("matches districts too and treats wildcards literally", async () => {
+    expect(await suggestLocations("gasabo")).toEqual([{ city: "Kigali", count: 2 }]);
+    expect(await suggestLocations("%")).toEqual([]);
   });
 });

@@ -38,8 +38,29 @@ export function searchListings(query: SearchQuery, limit = SEARCH_LIMIT): Promis
     where.OR = [{ city: match }, { district: match }, { title: match }];
   }
   if (query.guests) where.maxGuests = { gte: query.guests };
+  if (query.pets) where.petsAllowed = true;
 
   return db.listing.findMany({ where, select: CARD_SELECT, orderBy: [{ publishedAt: "desc" }, { id: "asc" }], take: limit });
+}
+
+export type LocationSuggestion = { city: string; count: number };
+
+/** Cities that have published places, optionally filtered by typed text (city or district). */
+export async function suggestLocations(text: string, limit = 6): Promise<LocationSuggestion[]> {
+  const where: Prisma.ListingWhereInput = { status: "PUBLISHED" };
+  const q = text.trim().slice(0, 100);
+  if (q) {
+    const match = { contains: escapeLike(q), mode: "insensitive" } as const;
+    where.OR = [{ city: match }, { district: match }];
+  }
+  const groups = await db.listing.groupBy({
+    by: ["city"],
+    where,
+    _count: { _all: true },
+    orderBy: [{ _count: { city: "desc" } }, { city: "asc" }],
+    take: limit,
+  });
+  return groups.map((g) => ({ city: g.city, count: g._count._all }));
 }
 
 export function featuredListings(limit = 6): Promise<ListingCardData[]> {
