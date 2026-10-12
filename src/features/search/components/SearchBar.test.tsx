@@ -29,7 +29,8 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 
 describe("SearchBar", () => {
-  it("builds a short-term search from where, when and who", async () => {
+  // Many typed and clicked steps; allow headroom when the whole suite runs in parallel.
+  it("builds a short-term search from where, when and who", { timeout: 15_000 }, async () => {
     renderWithIntl(<SearchBar today={TODAY} />);
     await userEvent.type(screen.getByRole("combobox", { name: "Where" }), "Kigali");
 
