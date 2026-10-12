@@ -4,17 +4,22 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resetSearchState, useSearchState } from "@/features/search/search-store";
 import { renderWithIntl } from "@/test/render";
 import { HeaderSearch } from "./HeaderSearch";
-import { HERO_SEARCH_ID } from "./SearchBar";
+import { HERO_SEARCH_ID, SearchBar } from "./SearchBar";
 
 let currentPath = "/";
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: vi.fn() }), usePathname: () => currentPath }));
 
 let report: (visible: boolean) => void = () => {};
+let placeholderHero: HTMLElement | null = null;
 
 beforeEach(() => {
   currentPath = "/";
   resetSearchState();
-  vi.stubGlobal("matchMedia", vi.fn(() => ({ matches: true, addEventListener: () => {}, removeEventListener: () => {} })));
+  // Desktop viewport, motion allowed.
+  vi.stubGlobal(
+    "matchMedia",
+    vi.fn((query: string) => ({ matches: !query.includes("reduce"), addEventListener: () => {}, removeEventListener: () => {} })),
+  );
   vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ locations: [] }))));
   vi.stubGlobal(
     "IntersectionObserver",
@@ -26,14 +31,16 @@ beforeEach(() => {
       disconnect() {}
     },
   );
-  const hero = document.createElement("div");
-  hero.id = HERO_SEARCH_ID;
-  document.body.appendChild(hero);
+  placeholderHero = document.createElement("div");
+  placeholderHero.id = HERO_SEARCH_ID;
+  document.body.appendChild(placeholderHero);
 });
 
 afterEach(() => {
   vi.unstubAllGlobals();
-  document.getElementById(HERO_SEARCH_ID)?.remove();
+  // Only remove the placeholder this file created; React unmounts its own elements.
+  placeholderHero?.remove();
+  placeholderHero = null;
 });
 
 function Wrapper() {
@@ -65,25 +72,37 @@ describe("HeaderSearch", () => {
     expect(pill).toHaveTextContent("Musanze");
   });
 
-  it("expands into the full search with the clicked panel open, and collapses on Escape", async () => {
-    renderWithIntl(<HeaderSearch />);
+  it("smoothly scrolls back to the hero and opens the clicked panel there", async () => {
+    document.getElementById(HERO_SEARCH_ID)?.remove();
+    const scrollTo = vi.fn();
+    vi.stubGlobal("scrollTo", scrollTo);
+    renderWithIntl(
+      <>
+        <SearchBar id={HERO_SEARCH_ID} today="2026-10-12" />
+        <HeaderSearch />
+      </>,
+    );
     act(() => report(false));
     await userEvent.click(screen.getByRole("button", { name: "Any dates" }));
-    expect(screen.getByRole("search")).toBeInTheDocument();
+    expect(scrollTo).toHaveBeenCalledWith({ top: 0, behavior: "smooth" });
+    // The hero's own calendar opens; no second search bar is created.
+    expect(screen.getAllByRole("search")).toHaveLength(1);
     expect(screen.getByRole("button", { name: "Next month" })).toBeInTheDocument();
-    await userEvent.keyboard("{Escape}");
-    expect(screen.queryByRole("search")).not.toBeInTheDocument();
-    expect(screen.getByRole("group", { name: "Search" })).toBeInTheDocument();
+    expect(screen.getByTestId("search-panel")).toContainElement(document.activeElement as HTMLElement);
   });
 
-  it("moves focus into the opened panel and back to the pill part on Escape", async () => {
-    renderWithIntl(<HeaderSearch />);
+  it("opening Where from the header focuses the hero's Where field", async () => {
+    document.getElementById(HERO_SEARCH_ID)?.remove();
+    vi.stubGlobal("scrollTo", vi.fn());
+    renderWithIntl(
+      <>
+        <SearchBar id={HERO_SEARCH_ID} today="2026-10-12" />
+        <HeaderSearch />
+      </>,
+    );
     act(() => report(false));
-    const trigger = screen.getByRole("button", { name: "Any dates" });
-    await userEvent.click(trigger);
-    expect(screen.getByTestId("search-panel")).toContainElement(document.activeElement as HTMLElement);
-    await userEvent.keyboard("{Escape}");
-    expect(screen.getByRole("button", { name: "Any dates" })).toHaveFocus();
+    await userEvent.click(screen.getByRole("button", { name: "Anywhere" }));
+    expect(screen.getByRole("combobox", { name: "Where" })).toHaveFocus();
   });
 
   it("follows client-side navigation: starts watching a hero that appears later", () => {

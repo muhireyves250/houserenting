@@ -7,7 +7,7 @@ import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
 import { todayISO, type DateRange } from "@/features/search/date-range";
 import { totalGuests, type GuestCounts } from "@/features/search/guests";
 import { buildSearchQuery, type SearchMode } from "@/features/search/params";
-import { useSearchState } from "@/features/search/search-store";
+import { useSearchState, type SearchPanel } from "@/features/search/search-store";
 import { useSearchSummaries } from "@/features/search/use-search-summaries";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
@@ -16,7 +16,7 @@ import { DatePanel } from "./DatePanel";
 import { GuestPanel } from "./GuestPanel";
 import { LocationPanel, optionId, type Suggestion } from "./LocationPanel";
 
-export type SearchPanel = "where" | "when" | "who";
+export type { SearchPanel };
 type Panel = SearchPanel;
 
 /** Wraps the home-page search; the header shows a compact search once this scrolls out of view. */
@@ -64,6 +64,8 @@ export function SearchBar({
   const { whenSummary, whoSummary } = useSearchSummaries(search);
 
   const [open, setOpen] = useState<Panel | null>(initialOpen);
+  // Panel to move keyboard focus into once it is open (set when opened programmatically).
+  const [focusPanel, setFocusPanel] = useState<Panel | null>(initialOpen);
   // Where combobox: suggestions from the API and the option highlighted with the arrow keys.
   const [suggestions, setSuggestions] = useState<Suggestion[] | null>(null);
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -94,6 +96,7 @@ export function SearchBar({
   });
   const close = useCallback(() => {
     setOpen(null);
+    setFocusPanel(null);
     onCloseRef.current?.();
   }, []);
 
@@ -101,14 +104,28 @@ export function SearchBar({
     if (!panel) return close();
     setOpen(panel);
     setHighlightAt(panel);
+    setFocusPanel(null);
   }
 
-  // Opened from the header: move keyboard focus into the field or panel straight away.
+  // Opened programmatically (initialOpen, or the header pill): move keyboard focus into the field or panel.
+  // preventScroll keeps the header's smooth scroll from being cut short.
   const panelRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (initialOpen === "where") whereInputRef.current?.focus();
-    else if (initialOpen) panelRef.current?.querySelector<HTMLElement>("button:not(:disabled)")?.focus();
-  }, [initialOpen]);
+    if (!focusPanel || open !== focusPanel) return;
+    if (focusPanel === "where") whereInputRef.current?.focus({ preventScroll: true });
+    else panelRef.current?.querySelector<HTMLElement>("button:not(:disabled)")?.focus({ preventScroll: true });
+  }, [focusPanel, open]);
+
+  // The hero search answers "open this panel" requests from the header pill
+  // (handled during render, React's pattern for responding to a changed value).
+  const openRequest = search.openRequest;
+  const [handledRequestAt, setHandledRequestAt] = useState<number | null>(null);
+  if (id === HERO_SEARCH_ID && openRequest && openRequest.at !== handledRequestAt) {
+    setHandledRequestAt(openRequest.at);
+    setOpen(openRequest.panel);
+    setHighlightAt(openRequest.panel);
+    setFocusPanel(openRequest.panel);
+  }
 
   useEffect(() => {
     if (!open) return;

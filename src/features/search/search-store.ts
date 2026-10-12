@@ -5,6 +5,8 @@ import type { DateRange } from "./date-range";
 import type { GuestCounts } from "./guests";
 import type { SearchMode } from "./params";
 
+export type SearchPanel = "where" | "when" | "who";
+
 /** What the user has entered so far; shared by the hero search and the header search. */
 export type SearchState = {
   mode: SearchMode;
@@ -12,9 +14,18 @@ export type SearchState = {
   range: DateRange;
   flex: number;
   guests: GuestCounts;
+  /** Set by the header pill to ask the hero search to open a panel; `at` makes repeat clicks distinct. */
+  openRequest: { panel: SearchPanel; at: number } | null;
 };
 
-const INITIAL: SearchState = { mode: "short", location: "", range: {}, flex: 0, guests: { adults: 0, children: 0, pets: 0 } };
+const INITIAL: SearchState = {
+  mode: "short",
+  location: "",
+  range: {},
+  flex: 0,
+  guests: { adults: 0, children: 0, pets: 0 },
+  openRequest: null,
+};
 
 let state = INITIAL;
 const listeners = new Set<() => void>();
