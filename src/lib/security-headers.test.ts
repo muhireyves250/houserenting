@@ -23,4 +23,8 @@ describe("securityHeaders", () => {
     expect(asMap(false)["Strict-Transport-Security"]).toBeUndefined();
     expect(asMap(false)["Content-Security-Policy"]).toContain("'unsafe-eval'");
   });
+
+  it("allows the hero background video host", () => {
+    expect(asMap(true)["Content-Security-Policy"]).toContain("media-src 'self' https://assets.mixkit.co https://res.cloudinary.com");
+  });
 });

@@ -6,6 +6,8 @@ export function securityHeaders({ isProd }: { isProd: boolean }): { key: string;
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https://res.cloudinary.com https://images.unsplash.com",
     "font-src 'self'",
+    // Hero background video (demo host now; Cloudinary when our own media lands).
+    "media-src 'self' https://assets.mixkit.co https://res.cloudinary.com",
     "connect-src 'self' https://*.ingest.sentry.io https://*.ingest.de.sentry.io",
     "frame-ancestors 'none'",
     "base-uri 'self'",

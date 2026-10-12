@@ -255,7 +255,9 @@ export function SearchBar({
         }}
         className={cn(
           "flex flex-col gap-2 rounded-card border border-primary bg-surface p-5 shadow-sm",
-          "md:mx-auto md:w-full md:flex-row md:items-center md:gap-0 md:rounded-full md:border-2 md:border-primary",
+          // Desktop: crisp white hairline, soft frosted halo and a deep floating shadow.
+          "md:mx-auto md:w-full md:flex-row md:items-center md:gap-0 md:rounded-full md:border md:border-white/80",
+          "md:ring-[6px] md:ring-white/20 md:shadow-[0_24px_60px_-18px_rgba(0,18,48,0.6),0_2px_6px_rgba(0,18,48,0.12)]",
           "md:transition-[max-width,padding,background-color] md:duration-500 md:ease-[cubic-bezier(0.25,0.8,0.25,1)] motion-reduce:transition-none",
           // Compact white bar at rest; wider, taller, mid-light grey while in use.
           expanded ? "md:max-w-4xl md:bg-[#cfd2d6] md:p-2" : "md:max-w-3xl md:bg-surface md:p-1",
