@@ -118,7 +118,7 @@ export function CompactListingCard({
             <p className="truncate text-xs leading-4 text-muted">{listing.title}</p>
           </div>
 
-          <div className="flex gap-1.5 overflow-hidden text-[10.5px] font-medium text-ink/70">
+          <div className="flex gap-1.5 overflow-hidden text-[11px] font-medium text-ink/85">
             <span className="inline-flex min-w-0 items-center gap-1 rounded-full bg-canvas px-1.5 py-px">
               <MapPin className="size-3 shrink-0" aria-hidden="true" />
               <span className="truncate">{listing.district}</span>

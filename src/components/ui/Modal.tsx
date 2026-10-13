@@ -39,8 +39,8 @@ export function Modal({
         className={cn(
           "relative z-10 max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto rounded-[2rem] bg-surface p-8",
           "shadow-[0_30px_80px_-20px_rgba(0,20,60,0.55)] motion-safe:animate-pop-in",
-          // Pro form typography inside dialogs: spaced-caps labels, slightly larger input text.
-          "[&_label]:text-[11px] [&_label]:font-bold [&_label]:tracking-[0.12em] [&_label]:text-ink/70 [&_label]:uppercase [&_input]:text-[15px]",
+          // Form typography inside dialogs: clear sentence-case labels, slightly larger input text.
+          "[&_label]:text-[13px] [&_label]:font-semibold [&_label]:text-ink [&_input]:text-[15px]",
           className,
         )}
       >

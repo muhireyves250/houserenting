@@ -99,7 +99,7 @@ export function LocaleSwitcher({ className }: { className?: string }) {
           onKeyDown={onMenuKeyDown}
           className="absolute top-full right-0 z-50 mt-2 w-64 rounded-2xl border border-line/70 bg-surface p-2 shadow-[0_18px_50px_-12px_rgba(0,20,60,0.35)] motion-safe:animate-pop-in"
         >
-          <p className="px-3 pt-2 pb-2 text-xs font-bold tracking-[0.12em] text-muted uppercase" aria-hidden="true">
+          <p className="px-3 pt-2 pb-2 text-[13px] font-semibold text-muted" aria-hidden="true">
             {tNav("chooseLanguage")}
           </p>
           {routing.locales.map((value, index) => {

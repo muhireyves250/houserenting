@@ -123,13 +123,13 @@ export function BookingCard({ rates, discountPercent, maxGuests }: { rates: Book
                   onClick={scrollToCalendar}
                   className="flex flex-col items-start gap-0.5 px-3.5 py-2.5 text-left transition-colors hover:bg-canvas"
                 >
-                  <span className="text-[10px] font-bold tracking-[0.1em] text-ink uppercase">{t(label)}</span>
+                  <span className="text-xs font-semibold text-ink">{t(label)}</span>
                   <span className={cn("text-sm", value ? "text-ink" : "text-muted")}>{date(value)}</span>
                 </button>
               ))}
             </div>
             <label htmlFor={guestsId} className="flex flex-col gap-0.5 border-t border-line-strong px-3.5 py-2.5 transition-colors hover:bg-canvas">
-              <span className="text-[10px] font-bold tracking-[0.1em] text-ink uppercase">{t("guestsLabel")}</span>
+              <span className="text-xs font-semibold text-ink">{t("guestsLabel")}</span>
               <select
                 id={guestsId}
                 value={guests}
@@ -172,7 +172,7 @@ export function BookingCard({ rates, discountPercent, maxGuests }: { rates: Book
         {/* Other ways to rent: hourly / daily / monthly */}
         {others.length > 0 && (
           <div className="mt-5 border-t border-line pt-4">
-            <p className="mb-2 text-[11px] font-bold tracking-[0.12em] text-muted uppercase">{t("otherRates")}</p>
+            <p className="mb-2 text-[13px] font-semibold text-ink">{t("otherRates")}</p>
             <ul className="flex flex-col gap-1.5 text-sm tabular-nums">
               {others.map((rate) => (
                 <li key={rate.unit} className="flex justify-between gap-3">

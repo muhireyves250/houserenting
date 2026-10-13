@@ -28,7 +28,7 @@ export function FooterLanguages() {
                 className={cn(
                   "block rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors duration-300",
                   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white",
-                  active ? "bg-white text-primary shadow-sm" : "text-white/70 hover:bg-white/10 hover:text-white",
+                  active ? "bg-white text-primary shadow-sm" : "text-white/80 hover:bg-white/10 hover:text-white",
                 )}
               >
                 {NATIVE_NAMES[locale]}

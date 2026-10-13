@@ -4,8 +4,9 @@
   --color-primary: #0057b8;
   --color-primary-hover: #004a9c;
   --color-primary-soft: #dce6f5;
-  --color-ink: #1a1c1e;
-  --color-muted: #6b7075;
+  /* Text: near-black ink and a secondary grey that keeps ~6:1 contrast on the canvas (WCAG AA with room to spare). */
+  --color-ink: #14171a;
+  --color-muted: #565c63;
   --color-line: #d9dbde;
   --color-line-strong: #b9bdc2;
   --color-surface: #ffffff;
@@ -71,6 +72,13 @@ html {
   font-feature-settings: "kern", "liga", "calt";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Placeholders: one readable grey everywhere (Firefox otherwise fades them further). */
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-muted);
+  opacity: 1;
 }
 
 /* Vector icons: precise geometry so thin strokes stay sharp on high-density screens. */

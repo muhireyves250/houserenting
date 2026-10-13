@@ -25,12 +25,12 @@ const STAYS: { key: FooterKey; href: SearchHref }[] = [
 const EASE = "ease-[cubic-bezier(0.32,0.72,0,1)]";
 
 // Underline slides in from the left on hover.
-const LINK = `bg-[linear-gradient(currentColor,currentColor)] bg-[length:0%_1px] bg-left-bottom bg-no-repeat pb-0.5 text-[15px] text-white/70 transition-[background-size,color] duration-500 ${EASE} hover:bg-[length:100%_1px] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white`;
+const LINK = `bg-[linear-gradient(currentColor,currentColor)] bg-[length:0%_1px] bg-left-bottom bg-no-repeat pb-0.5 text-[15px] text-white/80 transition-[background-size,color] duration-500 ${EASE} hover:bg-[length:100%_1px] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white`;
 
 function Column({ title, links }: { title: string; links: { key: string; label: string; href: NavHref | SearchHref }[] }) {
   return (
     <div className="flex flex-col gap-5">
-      <h2 className="text-[11px] font-semibold tracking-[0.18em] text-white/45 uppercase">{title}</h2>
+      <h2 className="text-sm font-semibold text-white">{title}</h2>
       <ul className="flex flex-col gap-3.5">
         {links.map(({ key, label, href }) => (
           <li key={key}>
@@ -65,7 +65,7 @@ export function SiteFooter({ signedIn, year = new Date().getFullYear() }: { sign
         <div className="flex flex-col gap-6 border-b border-white/10 py-12 md:flex-row md:items-end md:justify-between md:py-16">
           <div className="flex max-w-xl flex-col gap-3">
             <p className="font-display text-3xl leading-tight font-bold tracking-[-0.03em] md:text-[40px] md:leading-[1.1]">{tAuth("tagline")}</p>
-            <p className="text-[15px] leading-6 text-white/65">{t("about")}</p>
+            <p className="text-[15px] leading-6 text-white/80">{t("about")}</p>
           </div>
           <Link
             href="/"
@@ -84,7 +84,7 @@ export function SiteFooter({ signedIn, year = new Date().getFullYear() }: { sign
             <Link href="/" className="w-fit rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
               <Logo withWordmark className="text-white [&_svg]:h-8 [&_svg]:w-9" wordmarkClassName="font-display text-xl text-white" />
             </Link>
-            <p className="inline-flex items-center gap-2 text-sm text-white/55">
+            <p className="inline-flex items-center gap-2 text-sm text-white/75">
               {/* Rwanda flag colours. */}
               <span className="flex h-3 w-5 overflow-hidden rounded-[2px]" aria-hidden="true">
                 <span className="w-1/2 bg-[#00a1de]" />
@@ -110,7 +110,7 @@ export function SiteFooter({ signedIn, year = new Date().getFullYear() }: { sign
 
         {/* Bottom bar */}
         <div className="flex flex-col gap-5 border-t border-white/10 py-6 md:flex-row md:items-center md:justify-between">
-          <p className="text-[13px] text-white/55">{t("rights", { year })}</p>
+          <p className="text-[13px] text-white/70">{t("rights", { year })}</p>
           <FooterLanguages />
         </div>
       </div>
