@@ -23,11 +23,14 @@ type Reveal = "idle" | "hidden" | "shown";
 
 /** One home-page row: title linking to the matching search, and a swipeable track of cards with prev/next arrows. */
 export function HomeRow({
+  icon,
   title,
   subtitle,
   query,
   children,
 }: {
+  /** Decorative icon for the row's theme (city, mountains, lake…). */
+  icon: ReactNode;
   title: string;
   subtitle: string;
   query: Record<string, string>;
@@ -85,33 +88,41 @@ export function HomeRow({
     <section ref={sectionRef} className="flex flex-col gap-4">
       <div
         className={cn(
-          "flex items-end justify-between gap-4",
+          "flex items-center justify-between gap-4",
           animated && `transition-[opacity,transform] duration-700 ${EASE_OUT}`,
           hidden && "translate-y-3 opacity-0",
         )}
       >
-        <div className="min-w-0">
-          <h2>
-            <Link
-              href={{ pathname: "/search", query }}
-              className="group/title inline-flex items-center gap-2 text-xl font-bold tracking-[-0.02em] text-ink md:text-[22px]"
-            >
-              {title}
-              <span className="flex size-7 items-center justify-center rounded-full bg-canvas transition-[background-color,color,transform] duration-300 group-hover/title:translate-x-1 group-hover/title:bg-primary group-hover/title:text-white">
-                <ArrowRight className="size-3.5" aria-hidden="true" />
-              </span>
-            </Link>
-          </h2>
-          <p className="mt-0.5 truncate text-sm text-muted">{subtitle}</p>
+        <div className="flex min-w-0 items-center gap-3 md:gap-4">
+          <span
+            className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/[0.12] to-primary/[0.04] text-primary ring-1 ring-primary/10 md:size-12 md:rounded-2xl [&_svg]:size-5 md:[&_svg]:size-6"
+            aria-hidden="true"
+          >
+            {icon}
+          </span>
+          <div className="min-w-0">
+            <h2 className="truncate text-lg leading-6 font-bold tracking-[-0.02em] text-ink md:text-[22px] md:leading-7">{title}</h2>
+            <p className="line-clamp-2 text-[13px] text-muted md:truncate md:text-sm">{subtitle}</p>
+          </div>
         </div>
-        {/* No arrows when every card already fits. */}
-        <div className={cn("hidden shrink-0 gap-2", !(edges.start && edges.end) && "md:flex")}>
-          <button type="button" aria-label={t("previous")} disabled={edges.start} onClick={() => page(-1)} className={ARROW}>
-            <ChevronLeft className="size-4" aria-hidden="true" />
-          </button>
-          <button type="button" aria-label={t("next")} disabled={edges.end} onClick={() => page(1)} className={ARROW}>
-            <ChevronRight className="size-4" aria-hidden="true" />
-          </button>
+        <div className="flex shrink-0 items-center gap-3">
+          <Link
+            href={{ pathname: "/search", query }}
+            aria-label={t("seeRow", { title })}
+            className="group/all inline-flex items-center gap-1.5 rounded-full border border-line bg-surface py-1.5 pr-2.5 pl-3.5 text-[13px] font-semibold text-ink shadow-[0_1px_2px_rgba(16,24,40,0.06)] transition-[border-color,background-color,color,box-shadow] duration-300 hover:border-primary hover:bg-primary hover:text-white hover:shadow-[0_8px_18px_-8px_rgba(0,87,184,0.6)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          >
+            {t("seeAll")}
+            <ArrowRight className="size-3.5 transition-transform duration-300 group-hover/all:translate-x-0.5" aria-hidden="true" />
+          </Link>
+          {/* No arrows when every card already fits. */}
+          <div className={cn("hidden gap-2", !(edges.start && edges.end) && "md:flex")}>
+            <button type="button" aria-label={t("previous")} disabled={edges.start} onClick={() => page(-1)} className={ARROW}>
+              <ChevronLeft className="size-4" aria-hidden="true" />
+            </button>
+            <button type="button" aria-label={t("next")} disabled={edges.end} onClick={() => page(1)} className={ARROW}>
+              <ChevronRight className="size-4" aria-hidden="true" />
+            </button>
+          </div>
         </div>
       </div>
       <ul

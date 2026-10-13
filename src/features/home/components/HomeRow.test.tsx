@@ -18,7 +18,7 @@ vi.mock("@/i18n/navigation", () => ({
 
 function setup() {
   renderWithIntl(
-    <HomeRow title="Popular homes in Kigali" subtitle="Rwanda's capital" query={{ mode: "short", location: "Kigali" }}>
+    <HomeRow icon={<svg data-testid="row-icon" />} title="Popular homes in Kigali" subtitle="Rwanda's capital" query={{ mode: "short", location: "Kigali" }}>
       {[1, 2, 3].map((n) => (
         <div key={n}>card {n}</div>
       ))}
@@ -31,9 +31,13 @@ function setup() {
 }
 
 describe("HomeRow", () => {
-  it("shows the title as a link to the matching search, with a subtitle", () => {
+  it("shows icon, heading and subtitle, with a See all link to the matching search", () => {
     setup();
-    expect(screen.getByRole("link", { name: /Popular homes in Kigali/ })).toHaveAttribute("href", "/search");
+    expect(screen.getByRole("heading", { level: 2, name: "Popular homes in Kigali" })).toBeInTheDocument();
+    expect(screen.getByTestId("row-icon")).toBeInTheDocument();
+    const seeAll = screen.getByRole("link", { name: "See all: Popular homes in Kigali" });
+    expect(seeAll).toHaveAttribute("href", "/search");
+    expect(seeAll).toHaveTextContent("See all");
     expect(screen.getByText("Rwanda's capital")).toBeInTheDocument();
     expect(screen.getAllByRole("listitem")).toHaveLength(3);
   });
