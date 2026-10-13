@@ -17,7 +17,7 @@ const SAMPLE_NIGHTS = 2;
 const SIZES = "(min-width: 1280px) 20vw, (min-width: 768px) 25vw, (min-width: 640px) 40vw, 62vw";
 const SLIDE_EASE = "ease-[cubic-bezier(0.22,1,0.36,1)]";
 
-const bold = (chunks: ReactNode) => <span className="text-[15px] font-bold tracking-[-0.01em] text-ink">{chunks}</span>;
+const bold = (chunks: ReactNode) => <span className="text-sm font-bold tracking-[-0.01em] text-ink">{chunks}</span>;
 
 /** Square-photo card for the home page rows and the favorites page. */
 export function CompactListingCard({
@@ -103,27 +103,27 @@ export function CompactListingCard({
           )}
         </div>
 
-        <div className="flex flex-1 flex-col gap-2 px-1.5 pt-3 pb-1 tabular-nums">
+        <div className="flex flex-1 flex-col gap-1.5 px-1 pt-2 pb-0.5 tabular-nums">
           <div className="min-w-0">
-            <h3 className="truncate text-[15px] leading-5 font-semibold tracking-[-0.01em] text-ink">
+            <h3 className="truncate text-sm leading-[18px] font-semibold tracking-[-0.01em] text-ink">
               {t("typeIn", { type: tType(listing.type), city: listing.city })}
             </h3>
-            <p className="truncate text-[13px] leading-5 text-muted">{listing.title}</p>
+            <p className="truncate text-xs leading-4 text-muted">{listing.title}</p>
           </div>
 
-          <div className="flex gap-1.5 overflow-hidden text-[11px] font-medium text-ink/70">
-            <span className="inline-flex min-w-0 items-center gap-1 rounded-full bg-canvas px-2 py-0.5">
+          <div className="flex gap-1.5 overflow-hidden text-[10.5px] font-medium text-ink/70">
+            <span className="inline-flex min-w-0 items-center gap-1 rounded-full bg-canvas px-1.5 py-px">
               <MapPin className="size-3 shrink-0" aria-hidden="true" />
               <span className="truncate">{listing.district}</span>
             </span>
-            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-canvas px-2 py-0.5">
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-canvas px-1.5 py-px">
               <Users className="size-3 shrink-0" aria-hidden="true" />
               {t("guests", { count: listing.maxGuests })}
             </span>
           </div>
 
-          <div className="mt-auto border-t border-line/70 pt-2.5">
-            {price && <p className="truncate text-[13px] text-muted">{price}</p>}
+          <div className="mt-auto pt-0.5">
+            {price && <p className="truncate text-xs text-muted">{price}</p>}
           </div>
         </div>
       </Link>
