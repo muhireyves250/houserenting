@@ -31,11 +31,23 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
 
   return (
     <>
-      {/* Filter bar: sticks under the 73px desktop header (top of the screen on phones). */}
+      {/* Filter bar: sticks under the 73px header (top of the screen on phones). Title and count on the left,
+          filters centred; phones stack them in two rows (112px), tablets and up use one row (72px). */}
       <div className="sticky top-0 z-30 border-b border-line/70 bg-surface/90 backdrop-blur-md md:top-[73px]">
-        <div className="mx-auto flex h-[72px] max-w-7xl items-center gap-3 px-4 md:px-6">
-          <SlidersHorizontal className="hidden size-4 text-muted sm:block" aria-hidden="true" />
-          <FilterBar base={base} mode={query.mode} filters={{ types: query.types, minPrice: query.minPrice, maxPrice: query.maxPrice }} />
+        <div className="mx-auto flex h-[112px] max-w-7xl flex-col justify-center gap-2.5 px-4 md:grid md:h-[72px] md:grid-cols-[1fr_auto_1fr] md:items-center md:gap-6 md:px-6">
+          <div className="min-w-0">
+            <h1 className="truncate font-display text-lg leading-6 font-bold tracking-[-0.02em] text-ink">
+              {t("title", { place: query.location ?? tHome("country") })}
+            </h1>
+            <p className="truncate text-[13px] text-muted">
+              {tListings("results", { count: listings.length })} · {query.mode === "short" ? tHome("short") : tHome("long")}
+            </p>
+          </div>
+          <div className="flex justify-center">
+            <FilterBar base={base} mode={query.mode} filters={{ types: query.types, minPrice: query.minPrice, maxPrice: query.maxPrice }} />
+          </div>
+          {/* Balances the title column so the filters sit in the true centre. */}
+          <div className="hidden md:block" aria-hidden="true" />
         </div>
       </div>
 
@@ -44,16 +56,6 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
         mode={query.mode}
         signedIn={user !== null}
         savedIds={[...saved]}
-        header={
-          <div className="mb-6">
-            <h1 className="font-display text-[22px] leading-7 font-bold tracking-[-0.02em] text-ink md:text-[26px] md:leading-8">
-              {t("title", { place: query.location ?? tHome("country") })}
-            </h1>
-            <p className="mt-1 text-sm text-muted">
-              {tListings("results", { count: listings.length })} · {query.mode === "short" ? tHome("short") : tHome("long")}
-            </p>
-          </div>
-        }
         empty={
           filtered ? (
             <EmptyState icon={<SlidersHorizontal />} title={t("noFilterResults")} body={t("noFilterResultsBody")} />

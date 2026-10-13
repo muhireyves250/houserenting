@@ -24,15 +24,12 @@ export function SearchResults({
   mode,
   signedIn,
   savedIds,
-  header,
   empty,
 }: {
   listings: ListingCardData[];
   mode: SearchMode;
   signedIn: boolean;
   savedIds: string[];
-  /** Title and count, shown above the list. */
-  header: ReactNode;
   empty: ReactNode;
 }) {
   const t = useTranslations("Search");
@@ -46,8 +43,7 @@ export function SearchResults({
     // held in place (sticky) under the 73px header + 72px filter bar while the list scrolls.
     <div className="mx-auto max-w-7xl px-4 md:px-6 lg:grid lg:grid-cols-2 lg:gap-8">
       {/* At least a screen tall, so the sticky map always has room and never slides under the filter bar. */}
-      <div className={cn("pt-6 pb-10 md:pt-8 lg:min-h-[calc(100dvh-145px)]", view === "map" && "hidden lg:block")}>
-        {header}
+      <div className={cn("pt-6 pb-10 lg:min-h-[calc(100dvh-145px)]", view === "map" && "hidden lg:block")}>
         {listings.length === 0 ? (
           empty
         ) : (
@@ -69,10 +65,10 @@ export function SearchResults({
         )}
       </div>
 
-      {/* 24px gap above and below the map on desktop; on phones it fills the space between the filter bar and tab bar. */}
+      {/* 24px gap above and below the map on desktop; on phones it fills the space between the filter bar (112px) and tab bar. */}
       <div
         className={cn(
-          "mt-4 h-[calc(100dvh-72px-64px-32px)] overflow-hidden rounded-2xl border border-line/70 shadow-[0_1px_3px_rgba(16,24,40,0.08)]",
+          "mt-4 h-[calc(100dvh-112px-64px-32px)] md:h-[calc(100dvh-73px-72px-48px)] overflow-hidden rounded-2xl border border-line/70 shadow-[0_1px_3px_rgba(16,24,40,0.08)]",
           "lg:sticky lg:top-[calc(145px+24px)] lg:mt-6 lg:h-[calc(100dvh-145px-48px)]",
           view === "list" && "hidden lg:block",
         )}
