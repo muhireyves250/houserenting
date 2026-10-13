@@ -32,7 +32,7 @@ export function HomeRow({
   /** Phones: "large" shows two cards and a peek of the next; "small" three (recently viewed). */
   size?: "large" | "small";
   title: string;
-  subtitle: string;
+  subtitle?: string;
   /** Search the See all pill opens; no pill without one. */
   query?: Record<string, string>;
   children: ReactNode;
@@ -96,7 +96,7 @@ export function HomeRow({
       >
         <div className="min-w-0">
           <h2 className="font-display text-[19px] leading-6 font-bold tracking-[-0.02em] text-ink md:text-[22px] md:leading-7">{title}</h2>
-          <p className="mt-0.5 line-clamp-2 text-[13px] leading-5 text-muted md:truncate md:text-sm">{subtitle}</p>
+          {subtitle && <p className="mt-0.5 line-clamp-2 text-[13px] leading-5 text-muted md:truncate md:text-sm">{subtitle}</p>}
         </div>
         <div className="flex shrink-0 items-center gap-3">
           {query && (

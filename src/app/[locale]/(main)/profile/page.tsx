@@ -6,7 +6,9 @@ import { PageContainer } from "@/components/ui/PageContainer";
 import { ProfileForm } from "@/features/users/components/ProfileForm";
 import { SignOutButton } from "@/features/users/components/SignOutButton";
 import { getProfile } from "@/features/users/service";
+import { LocaleSwitcher } from "@/components/shell/LocaleSwitcher";
 import { Link } from "@/i18n/navigation";
+import { Suspense } from "react";
 import { toAppLocale } from "@/i18n/routing";
 import { requireUser } from "@/lib/session";
 
@@ -65,6 +67,12 @@ export default async function ProfilePage() {
             <span className="flex-1">{tNav("chats")}</span>
             <ChevronRight className="size-5 text-ink/60" aria-hidden="true" />
           </Link>
+        </li>
+        <li className="flex items-center justify-between gap-4 py-3 md:hidden">
+          <span className="text-[17px] text-ink">{tNav("language")}</span>
+          <Suspense>
+            <LocaleSwitcher />
+          </Suspense>
         </li>
       </ul>
 

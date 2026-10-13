@@ -5,6 +5,7 @@ export type RecentListing = {
   type: string;
   city: string;
   photo: string | null;
+  bedrooms?: number;
   ratingAvg: number;
   ratingCount: number;
 };

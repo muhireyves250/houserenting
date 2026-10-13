@@ -74,7 +74,13 @@
     "whoQ": "Bangahe?",
     "clearAll": "Siba byose",
     "closeSearch": "Funga gushakisha",
-    "homesCount": "{count, plural, =0 {Nta macumbi} one {Icumbi #} other {Amacumbi #}}"
+    "homesCount": "{count, plural, =0 {Nta macumbi} one {Icumbi #} other {Amacumbi #}}",
+    "catAll": "Byose",
+    "catApartments": "Apartema",
+    "catHouses": "Amazu",
+    "catLodges": "Lodges",
+    "catRooms": "Ibyumba",
+    "categories": "Ibyiciro"
   },
   "Search": {
     "anywhere": "Ahantu hose mu Rwanda",
@@ -363,7 +369,8 @@
     "showMore": "Reba ibindi",
     "showLess": "Reba bike",
     "moreNearby": "Andi macumbi hafi aha",
-    "moreNearbySub": "Andi macumbi ari hafi y'aha hantu"
+    "moreNearbySub": "Andi macumbi ari hafi y'aha hantu",
+    "bedsShort": "{count, plural, one {Uburiri #} other {Ibitanda #}}"
   },
   "Facility": {
     "KITCHEN": "Igikoni",

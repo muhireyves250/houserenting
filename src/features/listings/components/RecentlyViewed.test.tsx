@@ -25,6 +25,6 @@ describe("Recently viewed", () => {
     });
     expect(screen.getByRole("heading", { name: "Recently viewed" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Kigali, Rwanda/ })).toHaveAttribute("href", "/listings/abc");
-    expect(screen.getByText("4.80")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Kigali, Rwanda/ })).toHaveTextContent("4.80");
   });
 });

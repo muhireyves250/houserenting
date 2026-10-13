@@ -74,7 +74,13 @@
     "whoQ": "Qui ?",
     "clearAll": "Tout effacer",
     "closeSearch": "Fermer la recherche",
-    "homesCount": "{count, plural, =0 {Aucun logement} one {# logement} other {# logements}}"
+    "homesCount": "{count, plural, =0 {Aucun logement} one {# logement} other {# logements}}",
+    "catAll": "Tout",
+    "catApartments": "Appartements",
+    "catHouses": "Maisons",
+    "catLodges": "Lodges",
+    "catRooms": "Chambres",
+    "categories": "Catégories"
   },
   "Search": {
     "anywhere": "Partout au Rwanda",
@@ -363,7 +369,8 @@
     "showMore": "Afficher plus",
     "showLess": "Afficher moins",
     "moreNearby": "Autres logements à proximité",
-    "moreNearbySub": "D'autres logements autour de celui-ci"
+    "moreNearbySub": "D'autres logements autour de celui-ci",
+    "bedsShort": "{count, plural, one {# chambre} other {# chambres}}"
   },
   "Facility": {
     "KITCHEN": "Cuisine",

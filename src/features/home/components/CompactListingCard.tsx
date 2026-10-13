@@ -133,16 +133,17 @@ export function CompactListingCard({
         {/* Phones: minimal text under the photo. */}
         {layout === "row" ? (
           <div className="px-0.5 pt-2 tabular-nums md:hidden">
-            <div className="flex items-center justify-between gap-2">
-              <h3 className="truncate text-[15px] leading-5 font-semibold text-ink">{t("typeIn", { type: tType(listing.type), city: listing.city })}</h3>
+            <h3 className="truncate text-[15px] leading-5 font-medium text-ink">{t("typeIn", { type: tType(listing.type), city: listing.city })}</h3>
+            <p className="flex items-center gap-1 text-[13px] leading-5 text-muted [&_span.font-bold]:font-normal [&_span.font-bold]:text-[13px] [&_span.font-bold]:text-muted">
+              {shortPrice && <span className="truncate">{shortPrice}</span>}
               {listing.ratingCount > 0 && (
-                <span className="flex shrink-0 items-center gap-0.5 text-[13px] text-ink" aria-label={t("rating", { rating: listing.ratingAvg })}>
-                  <Star className="size-3 fill-current" aria-hidden="true" />
-                  <span aria-hidden="true">{listing.ratingAvg.toFixed(2)}</span>
+                <span className="flex shrink-0 items-center gap-0.5" aria-label={t("rating", { rating: listing.ratingAvg })}>
+                  <span aria-hidden="true">·</span>
+                  <Star className="size-2.5 fill-current" aria-hidden="true" />
+                  <span aria-hidden="true">{listing.ratingAvg.toFixed(1)}</span>
                 </span>
               )}
-            </div>
-            {shortPrice && <p className="truncate text-[13px] leading-5 text-muted">{shortPrice}</p>}
+            </p>
           </div>
         ) : (
           <div className="flex flex-col gap-0.5 px-0.5 pt-3 text-[15px] tabular-nums md:hidden">

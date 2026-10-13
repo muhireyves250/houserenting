@@ -160,6 +160,7 @@ export default async function ListingPage({ params }: Props) {
           type: listing.type,
           city: listing.city,
           photo: listing.photos[0]?.url ?? null,
+          bedrooms: listing.bedrooms,
           ratingAvg: listing.ratingAvg,
           ratingCount: listing.ratingCount,
         }}
