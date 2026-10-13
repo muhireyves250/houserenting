@@ -12,7 +12,7 @@ export default async function ChatsPage() {
   const tFooter = await getTranslations("Footer");
   return (
     <PageContainer className="py-6">
-      <h1 className="text-[32px] leading-10 font-bold tracking-[-0.03em]">{tNav("chats")}</h1>
+      <h1 className="text-[26px] leading-8 font-bold tracking-[-0.03em] md:text-[32px] md:leading-10">{tNav("chats")}</h1>
       <EmptyState icon={<MessageSquare />} title={t("chatsTitle")} body={t("chatsBody")}
           action={<Link
             href="/"

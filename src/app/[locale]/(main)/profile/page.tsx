@@ -23,16 +23,16 @@ export default async function ProfilePage() {
   if (!profile) notFound();
   const [t, tNav] = await Promise.all([getTranslations("Profile"), getTranslations("Nav")]);
   const card = "rounded-3xl bg-surface shadow-[0_10px_30px_-14px_rgba(16,24,40,0.3)] ring-1 ring-black/[0.04]";
-  const row = "flex w-full items-center gap-4 py-4 text-[17px] text-ink transition-colors active:bg-ink/5";
+  const row = "flex w-full items-center gap-4 py-4 text-[15px] text-ink transition-colors active:bg-ink/5";
 
   return (
     <PageContainer className="max-w-2xl pt-6 pb-10 md:py-10">
-      <h1 className="mb-6 text-[32px] leading-10 font-bold tracking-[-0.03em] text-ink">{t("title")}</h1>
+      <h1 className="mb-6 text-[26px] leading-8 md:text-[32px] md:leading-10 font-bold tracking-[-0.03em] text-ink">{t("title")}</h1>
 
       {/* Who you are */}
       <section className={`${card} flex flex-col items-center px-6 py-8 text-center`}>
         <Avatar name={profile.name} className="size-24 bg-orange-100 text-4xl text-orange-800" />
-        <p className="mt-4 text-[28px] leading-9 font-bold tracking-[-0.02em] text-ink">{profile.name.split(" ")[0]}</p>
+        <p className="mt-4 text-2xl leading-8 font-bold tracking-[-0.02em] text-ink">{profile.name.split(" ")[0]}</p>
         <p className="text-sm text-muted">{user.isHost ? t("roleHost") : t("roleGuest")}</p>
       </section>
 
@@ -42,7 +42,7 @@ export default async function ProfilePage() {
           <Link
             key={key}
             href={href}
-            className={`${card} flex aspect-square flex-col items-center justify-center gap-4 p-4 text-[17px] font-semibold text-ink transition-transform duration-300 active:scale-[0.97]`}
+            className={`${card} flex aspect-square flex-col items-center justify-center gap-4 p-4 text-[15px] font-semibold text-ink transition-transform duration-300 active:scale-[0.97]`}
           >
             <span className={`flex size-20 items-center justify-center rounded-3xl ${tint}`}>
               <Icon className="size-10" strokeWidth={1.6} aria-hidden="true" />
@@ -69,7 +69,7 @@ export default async function ProfilePage() {
           </Link>
         </li>
         <li className="flex items-center justify-between gap-4 py-3 md:hidden">
-          <span className="text-[17px] text-ink">{tNav("language")}</span>
+          <span className="text-[15px] text-ink">{tNav("language")}</span>
           <Suspense>
             <LocaleSwitcher />
           </Suspense>

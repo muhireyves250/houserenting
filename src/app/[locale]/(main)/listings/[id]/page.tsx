@@ -208,7 +208,7 @@ export default async function ListingPage({ params }: Props) {
           <div className="min-w-0">
             {/* Summary */}
             <div className="pb-8 text-center md:text-left">
-              <h1 className="mb-3 font-display text-[26px] leading-8 font-bold tracking-[-0.025em] md:hidden">{listing.title}</h1>
+              <h1 className="mb-3 font-display text-[22px] leading-7 font-bold tracking-[-0.025em] md:hidden">{listing.title}</h1>
               <h2 className="text-[15px] font-semibold text-ink/80 md:font-display md:text-[22px] md:leading-7 md:font-bold md:tracking-[-0.02em] md:text-ink">
                 {t("typeInPlace", { type: tType(listing.type), place })}
               </h2>

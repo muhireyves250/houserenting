@@ -133,8 +133,8 @@ export function CompactListingCard({
         {/* Phones: minimal text under the photo. */}
         {layout === "row" ? (
           <div className="px-0.5 pt-2 tabular-nums md:hidden">
-            <h3 className="truncate text-[15px] leading-5 font-medium text-ink">{t("typeIn", { type: tType(listing.type), city: listing.city })}</h3>
-            <p className="flex items-center gap-1 text-[13px] leading-5 text-muted [&_span.font-bold]:font-normal [&_span.font-bold]:text-[13px] [&_span.font-bold]:text-muted">
+            <h3 className="truncate text-sm leading-5 font-medium text-ink">{t("typeIn", { type: tType(listing.type), city: listing.city })}</h3>
+            <p className="flex items-center gap-1 text-xs leading-4 text-muted [&_span.font-bold]:font-normal [&_span.font-bold]:text-xs [&_span.font-bold]:text-muted">
               {shortPrice && <span className="truncate">{shortPrice}</span>}
               {listing.ratingCount > 0 && (
                 <span className="flex shrink-0 items-center gap-0.5" aria-label={t("rating", { rating: listing.ratingAvg })}>
@@ -146,7 +146,7 @@ export function CompactListingCard({
             </p>
           </div>
         ) : (
-          <div className="flex flex-col gap-0.5 px-0.5 pt-3 text-[15px] tabular-nums md:hidden">
+          <div className="flex flex-col gap-0.5 px-0.5 pt-2.5 text-sm tabular-nums md:hidden">
             <div className="flex items-start justify-between gap-3">
               <h3 className="truncate leading-6 font-semibold text-ink">{t("typeIn", { type: tType(listing.type), city: listing.city })}</h3>
               {listing.ratingCount > 0 && (

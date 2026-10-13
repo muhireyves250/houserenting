@@ -47,17 +47,17 @@ export function MobileSearch({
         onClick={() => setOpen(true)}
         aria-label={chosen || results ? undefined : t("startSearch")}
         className={cn(
-          "flex h-14 w-full items-center justify-center gap-3 rounded-full bg-surface px-5 shadow-[0_6px_20px_-6px_rgba(16,24,40,0.25)] ring-1 ring-black/[0.06] transition-transform duration-300 active:scale-[0.98]",
+          "flex h-12 w-full items-center justify-center gap-3 rounded-full bg-surface px-5 shadow-[0_6px_20px_-6px_rgba(16,24,40,0.25)] ring-1 ring-black/[0.06] transition-transform duration-300 active:scale-[0.98]",
           className,
         )}
       >
         {!results && <Search className="size-[18px] shrink-0 text-ink" strokeWidth={2.4} aria-hidden="true" />}
         {results ? (
           <span className="min-w-0 text-center">
-            <span className="block truncate text-[15px] font-semibold text-ink">
+            <span className="block truncate text-sm font-semibold text-ink">
               {tSearch("title", { place: search.location || t("country") })}
             </span>
-            <span className="block truncate text-[13px] text-muted">{details}</span>
+            <span className="block truncate text-xs text-muted">{details}</span>
           </span>
         ) : chosen ? (
           <span className="min-w-0 text-left">
@@ -65,7 +65,7 @@ export function MobileSearch({
             <span className="block truncate text-xs text-muted">{details}</span>
           </span>
         ) : (
-          <span className="text-[15px] font-semibold text-ink">{t("startSearch")}</span>
+          <span className="text-sm font-semibold text-ink">{t("startSearch")}</span>
         )}
       </button>
       {open && createPortal(<SearchSheet today={today} onClose={() => setOpen(false)} />, document.body)}
@@ -123,7 +123,7 @@ function SearchSheet({ today, onClose }: { today: string; onClose: () => void })
   );
   const expanded = (heading: string, body: ReactNode) => (
     <section className={cn(card, "p-5 motion-safe:animate-pop-in")}>
-      <h3 className="mb-4 text-[22px] font-bold tracking-[-0.02em] text-ink">{heading}</h3>
+      <h3 className="mb-4 text-xl font-bold tracking-[-0.02em] text-ink">{heading}</h3>
       {body}
     </section>
   );

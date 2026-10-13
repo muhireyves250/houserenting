@@ -95,7 +95,7 @@ export function HomeRow({
         )}
       >
         <div className="min-w-0">
-          <h2 className="font-display text-[19px] leading-6 font-bold tracking-[-0.02em] text-ink md:text-[22px] md:leading-7">{title}</h2>
+          <h2 className="font-display text-[17px] leading-6 font-bold tracking-[-0.02em] text-ink md:text-[22px] md:leading-7">{title}</h2>
           {subtitle && <p className="mt-0.5 hidden truncate text-sm text-muted md:block">{subtitle}</p>}
         </div>
         <div className="flex shrink-0 items-center gap-3">

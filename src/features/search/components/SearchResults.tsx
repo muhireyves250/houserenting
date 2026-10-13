@@ -99,7 +99,7 @@ export function SearchResults({
       <div
         className={cn(
           "relative order-first -mx-4 h-[44vh] overflow-hidden md:-mx-6",
-          "sticky top-[140px] md:top-[145px]",
+          "sticky top-[132px] md:top-[145px]",
           "lg:order-none lg:mx-0 lg:mt-6 lg:h-[calc(100dvh-145px-48px)] lg:rounded-2xl lg:border lg:border-line/70 lg:shadow-[0_1px_3px_rgba(16,24,40,0.08)] lg:top-[calc(145px+24px)]",
         )}
       >

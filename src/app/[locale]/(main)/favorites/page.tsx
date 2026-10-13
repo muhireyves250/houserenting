@@ -14,7 +14,7 @@ export default async function FavoritesPage() {
   const tFooter = await getTranslations("Footer");
   return (
     <PageContainer className="flex flex-col gap-6 py-6 md:py-10">
-      <h1 className="text-[32px] leading-10 font-bold tracking-[-0.03em]">{tNav("favorites")}</h1>
+      <h1 className="text-[26px] leading-8 font-bold tracking-[-0.03em] md:text-[32px] md:leading-10">{tNav("favorites")}</h1>
       {favorites.length === 0 ? (
         <EmptyState icon={<Heart />} title={t("favoritesTitle")} body={t("favoritesBody")}
           action={<Link

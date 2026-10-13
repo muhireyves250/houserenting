@@ -3,6 +3,8 @@
 import { Check, ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useId, useRef, useState, type MouseEvent, type ReactNode } from "react";
+import { createPortal } from "react-dom";
+import { useMediaQuery } from "@/lib/use-media-query";
 import { filterParams, PLACE_TYPES, type PlaceType, type SearchFilters, type SearchMode } from "@/features/search/params";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
@@ -36,7 +38,8 @@ export function FilterBar({ base, mode, filters }: { base: Record<string, string
   useEffect(() => {
     if (!open) return;
     const onPointer = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(null);
+      const target = event.target as Element;
+      if (!rootRef.current?.contains(target) && !target.closest?.("[data-filter-sheet]")) setOpen(null);
     };
     const onKey = (event: KeyboardEvent) => event.key === "Escape" && setOpen(null);
     document.addEventListener("pointerdown", onPointer);
@@ -62,7 +65,7 @@ export function FilterBar({ base, mode, filters }: { base: Record<string, string
   return (
     <div
       ref={rootRef}
-      className="relative flex flex-wrap items-center gap-2"
+      className="relative flex w-full min-w-0 items-center gap-2 overflow-x-auto max-md:justify-center-safe md:w-auto [scrollbar-width:none] max-md:-mx-4 max-md:px-4 md:flex-wrap md:overflow-visible [&::-webkit-scrollbar]:hidden"
       onMouseLeave={() => setShade((current) => ({ ...current, visible: false }))}
     >
       <span
@@ -72,7 +75,15 @@ export function FilterBar({ base, mode, filters }: { base: Record<string, string
         style={{ width: `${shade.width}px`, transform: `translateX(${shade.left}px)` }}
         className={cn("pointer-events-none absolute top-0 left-0 h-full rounded-full bg-ink/[0.07]", SLIDE, shade.visible ? "opacity-100" : "opacity-0")}
       />
-      <FilterButton onHover={hover} label={t("price")} active={priceActive} badge={priceSummary} open={open === "price"} onToggle={() => setOpen(open === "price" ? null : "price")}>
+      <FilterButton
+        onHover={hover}
+        label={t("price")}
+        active={priceActive}
+        badge={priceSummary}
+        open={open === "price"}
+        onToggle={() => setOpen(open === "price" ? null : "price")}
+        onClose={() => setOpen(null)}
+      >
         <PricePanel
           hint={mode === "long" ? t("priceHintLong") : t("priceHintShort")}
           initial={filters}
@@ -86,6 +97,7 @@ export function FilterBar({ base, mode, filters }: { base: Record<string, string
         badge={typeCount > 0 ? String(typeCount) : null}
         open={open === "type"}
         onToggle={() => setOpen(open === "type" ? null : "type")}
+        onClose={() => setOpen(null)}
       >
         <TypePanel labels={(type) => tType(type)} initial={filters.types ?? []} onApply={(types) => apply({ ...filters, types })} />
       </FilterButton>
@@ -94,7 +106,7 @@ export function FilterBar({ base, mode, filters }: { base: Record<string, string
           type="button"
           onMouseEnter={hover}
           onClick={() => apply({})}
-          className="relative rounded-full px-4 py-2 text-[13px] font-semibold text-ink underline underline-offset-4 transition-colors hover:text-primary"
+          className="relative shrink-0 rounded-full px-4 py-2 text-[13px] font-semibold whitespace-nowrap text-ink underline underline-offset-4 transition-colors hover:text-primary"
         >
           {t("clearAll")}
         </button>
@@ -110,9 +122,11 @@ function FilterButton({
   badge,
   open,
   onToggle,
+  onClose,
   children,
 }: {
   onHover: (event: MouseEvent<HTMLButtonElement>) => void;
+  onClose: () => void;
   label: string;
   active: boolean;
   badge: string | null;
@@ -121,6 +135,7 @@ function FilterButton({
   children: ReactNode;
 }) {
   const panelId = useId();
+  const isDesktop = useMediaQuery("(min-width: 768px)");
   return (
     <div className="relative">
       <button
@@ -131,7 +146,7 @@ function FilterButton({
         onMouseEnter={onHover}
         onClick={onToggle}
         className={cn(
-          "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[13px] font-semibold transition-[border-color,background-color,color,box-shadow] duration-300",
+          "inline-flex shrink-0 items-center gap-2 rounded-full border px-3.5 py-2 text-[13px] font-semibold whitespace-nowrap transition-[border-color,background-color,color,box-shadow] duration-300",
           "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
           active || open
             ? "border-primary bg-primary/[0.06] text-primary"
@@ -146,16 +161,36 @@ function FilterButton({
         )}
         <ChevronDown className={cn(`size-4 transition-transform duration-300 ${EASE}`, open && "rotate-180")} aria-hidden="true" />
       </button>
-      {open && (
-        <div
-          id={panelId}
-          role="dialog"
-          aria-label={label}
-          className="absolute top-[calc(100%+8px)] left-0 z-50 w-[min(92vw,340px)] animate-pop-in rounded-2xl border border-line/70 bg-surface p-5 shadow-[0_18px_48px_-12px_rgba(16,24,40,0.3)]"
-        >
-          {children}
-        </div>
-      )}
+      {open &&
+        (isDesktop ? (
+          <div
+            id={panelId}
+            role="dialog"
+            aria-label={label}
+            className="absolute top-[calc(100%+8px)] left-0 z-50 w-[340px] animate-pop-in rounded-2xl border border-line/70 bg-surface p-5 shadow-[0_18px_48px_-12px_rgba(16,24,40,0.3)]"
+          >
+            {children}
+          </div>
+        ) : (
+          // Phones: a bottom sheet over a dimmed page (portalled: the sticky, blurred filter bar would trap it).
+          createPortal(
+            <div data-filter-sheet className="fixed inset-0 z-[60] flex items-end md:hidden">
+              <div aria-hidden="true" onClick={onClose} className="absolute inset-0 bg-[#00142e]/40 motion-safe:animate-[fade-in_250ms_ease-out]" />
+              <div
+                id={panelId}
+                role="dialog"
+                aria-modal="true"
+                aria-label={label}
+                className="relative w-full rounded-t-[28px] bg-surface px-5 pt-3 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-[0_-12px_40px_-12px_rgba(16,24,40,0.4)] motion-safe:animate-sheet-up"
+              >
+                <span className="mx-auto mb-4 block h-1.5 w-10 rounded-full bg-line-strong" aria-hidden="true" />
+                <h2 className="mb-4 text-center text-lg font-bold text-ink">{label}</h2>
+                {children}
+              </div>
+            </div>,
+            document.body,
+          )
+        ))}
     </div>
   );
 }

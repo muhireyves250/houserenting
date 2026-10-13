@@ -38,7 +38,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
           filters centred; phones stack them in two rows (112px), tablets and up use one row (72px). */}
       {/* Filter bar: phones stick it under the 80px search pill bar (filters only, centred); tablets and up under
           the 73px header, with the title and count on the left. */}
-      <div className="sticky top-20 z-30 border-b border-line/70 bg-surface/90 backdrop-blur-md md:top-[73px]">
+      <div className="sticky top-[72px] z-30 border-b border-line/70 bg-surface/90 backdrop-blur-md md:top-[73px]">
         <div className="mx-auto flex h-[60px] max-w-7xl items-center justify-center px-4 md:grid md:h-[72px] md:grid-cols-[1fr_auto_1fr] md:gap-6 md:px-6">
           <div className="hidden min-w-0 md:block">
             <h1 className="truncate font-display text-lg leading-6 font-bold tracking-[-0.02em] text-ink">{title}</h1>
@@ -46,7 +46,8 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
               {tListings("results", { count: listings.length })} · {query.mode === "short" ? tHome("short") : tHome("long")}
             </p>
           </div>
-          <div className="flex justify-center">
+          {/* Phones: the filter row scrolls sideways inside the screen. */}
+          <div className="flex w-full min-w-0 md:w-auto md:justify-center">
             <FilterBar base={base} mode={query.mode} filters={{ types: query.types, minPrice: query.minPrice, maxPrice: query.maxPrice }} />
           </div>
           {/* Balances the title column so the filters sit in the true centre. */}

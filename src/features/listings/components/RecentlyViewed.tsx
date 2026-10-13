@@ -56,8 +56,8 @@ function RecentCard({ item }: { item: RecentListing }) {
         )}
       </span>
       <span className="px-0.5">
-        <span className="block truncate text-sm font-semibold text-ink">{item.city}, Rwanda</span>
-        <span className="flex items-center gap-1 truncate text-[13px] text-muted">
+        <span className="block truncate text-[13px] font-semibold text-ink">{item.city}, Rwanda</span>
+        <span className="flex items-center gap-1 truncate text-xs text-muted">
           {typeof item.bedrooms === "number" ? t("bedsShort", { count: item.bedrooms }) : type}
           {item.ratingCount > 0 && (
             <>

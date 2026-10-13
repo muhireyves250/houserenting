@@ -12,7 +12,7 @@ export default async function BookingsPage() {
   const tFooter = await getTranslations("Footer");
   return (
     <PageContainer className="py-6">
-      <h1 className="text-[32px] leading-10 font-bold tracking-[-0.03em]">{tNav("bookings")}</h1>
+      <h1 className="text-[26px] leading-8 font-bold tracking-[-0.03em] md:text-[32px] md:leading-10">{tNav("bookings")}</h1>
       <EmptyState icon={<House />} title={t("bookingsTitle")} body={t("bookingsBody")}
           action={<Link
             href="/"

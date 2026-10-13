@@ -38,11 +38,12 @@ function Categories() {
             href={type ? { pathname: "/search", query: { mode: "short", type } } : "/"}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex shrink-0 items-center gap-2 rounded-full px-4 py-2.5 text-[15px] font-medium text-ink shadow-[0_2px_8px_-2px_rgba(16,24,40,0.18)] ring-1 transition-colors",
-              active ? "bg-ink/[0.08] ring-ink/15" : "bg-surface ring-black/[0.06]",
+              // Same border as the website's filter buttons.
+              "flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[13px] font-semibold transition-colors",
+              active ? "border-primary bg-primary/[0.06] text-primary" : "border-line bg-surface text-ink active:border-ink/30",
             )}
           >
-            <Icon className={cn("size-5", tint)} strokeWidth={2} aria-hidden="true" />
+            <Icon className={cn("size-4", active ? "text-primary" : tint)} strokeWidth={2} aria-hidden="true" />
             {t(key)}
           </Link>
         );
@@ -58,7 +59,7 @@ export function MobileTopBar() {
   if (!EXPLORE_PATHS.has(pathname)) return null;
   if (pathname === "/search") {
     return (
-      <div className="sticky top-0 z-40 flex h-20 items-center gap-3 bg-canvas/90 px-4 backdrop-blur-md md:hidden">
+      <div className="sticky top-0 z-40 flex h-[72px] items-center gap-3 bg-canvas/90 px-4 backdrop-blur-md md:hidden">
         <Link href="/" aria-label={t("back")} className="flex size-11 shrink-0 items-center justify-center rounded-full transition-colors active:bg-ink/10">
           <ArrowLeft className="size-5 text-ink" aria-hidden="true" />
         </Link>
