@@ -37,3 +37,15 @@ describe("FilterBar", () => {
     expect(push).toHaveBeenCalledWith({ pathname: "/search", query: base });
   });
 });
+
+describe("FilterBar hover", () => {
+  it("slides one shade behind the hovered filter and fades it out on leave", async () => {
+    renderWithIntl(<FilterBar base={base} mode="short" filters={{}} />);
+    const shade = screen.getByTestId("filter-hover");
+    expect(shade).toHaveAttribute("data-visible", "false");
+    await userEvent.hover(screen.getByRole("button", { name: "Type of place" }));
+    expect(shade).toHaveAttribute("data-visible", "true");
+    await userEvent.unhover(screen.getByRole("button", { name: "Type of place" }));
+    expect(shade).toHaveAttribute("data-visible", "false");
+  });
+});

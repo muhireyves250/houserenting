@@ -2,7 +2,7 @@
 
 import { Check, ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type MouseEvent, type ReactNode } from "react";
 import { filterParams, PLACE_TYPES, type PlaceType, type SearchFilters, type SearchMode } from "@/features/search/params";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
@@ -10,6 +10,8 @@ import { cn } from "@/lib/cn";
 type Panel = "price" | "type" | null;
 
 const EASE = "ease-[cubic-bezier(0.32,0.72,0,1)]";
+// Same motion as the search bar's hover pill.
+const SLIDE = "transition-[transform,width,opacity] duration-500 ease-[cubic-bezier(0.25,0.8,0.25,1)] motion-reduce:transition-none";
 
 /**
  * Results-page filters (type of place, price). Each panel edits a draft and "Show results" pushes
@@ -21,6 +23,14 @@ export function FilterBar({ base, mode, filters }: { base: Record<string, string
   const router = useRouter();
   const [open, setOpen] = useState<Panel>(null);
   const rootRef = useRef<HTMLDivElement>(null);
+  // Hover shade (like the search bar): one pill slides to the filter under the mouse; kept in place as it fades out.
+  const [shade, setShade] = useState({ left: 0, width: 0, visible: false });
+  const hover = (event: MouseEvent<HTMLButtonElement>) => {
+    const el = event.currentTarget;
+    const root = rootRef.current?.getBoundingClientRect();
+    const box = el.getBoundingClientRect();
+    setShade({ left: box.left - (root?.left ?? 0), width: box.width, visible: true });
+  };
 
   // Close on outside click or Esc.
   useEffect(() => {
@@ -50,8 +60,19 @@ export function FilterBar({ base, mode, filters }: { base: Record<string, string
     : null;
 
   return (
-    <div ref={rootRef} className="flex flex-wrap items-center gap-2">
-      <FilterButton label={t("price")} active={priceActive} badge={priceSummary} open={open === "price"} onToggle={() => setOpen(open === "price" ? null : "price")}>
+    <div
+      ref={rootRef}
+      className="relative flex flex-wrap items-center gap-2"
+      onMouseLeave={() => setShade((current) => ({ ...current, visible: false }))}
+    >
+      <span
+        data-testid="filter-hover"
+        data-visible={shade.visible}
+        aria-hidden="true"
+        style={{ width: `${shade.width}px`, transform: `translateX(${shade.left}px)` }}
+        className={cn("pointer-events-none absolute top-0 left-0 h-full rounded-full bg-ink/[0.07]", SLIDE, shade.visible ? "opacity-100" : "opacity-0")}
+      />
+      <FilterButton onHover={hover} label={t("price")} active={priceActive} badge={priceSummary} open={open === "price"} onToggle={() => setOpen(open === "price" ? null : "price")}>
         <PricePanel
           hint={mode === "long" ? t("priceHintLong") : t("priceHintShort")}
           initial={filters}
@@ -59,6 +80,7 @@ export function FilterBar({ base, mode, filters }: { base: Record<string, string
         />
       </FilterButton>
       <FilterButton
+        onHover={hover}
         label={t("typeOfPlace")}
         active={typeCount > 0}
         badge={typeCount > 0 ? String(typeCount) : null}
@@ -70,8 +92,9 @@ export function FilterBar({ base, mode, filters }: { base: Record<string, string
       {(typeCount > 0 || priceActive) && (
         <button
           type="button"
+          onMouseEnter={hover}
           onClick={() => apply({})}
-          className="px-2 text-[13px] font-semibold text-ink underline underline-offset-4 transition-colors hover:text-primary"
+          className="relative rounded-full px-4 py-2 text-[13px] font-semibold text-ink underline underline-offset-4 transition-colors hover:text-primary"
         >
           {t("clearAll")}
         </button>
@@ -81,6 +104,7 @@ export function FilterBar({ base, mode, filters }: { base: Record<string, string
 }
 
 function FilterButton({
+  onHover,
   label,
   active,
   badge,
@@ -88,6 +112,7 @@ function FilterButton({
   onToggle,
   children,
 }: {
+  onHover: (event: MouseEvent<HTMLButtonElement>) => void;
   label: string;
   active: boolean;
   badge: string | null;
@@ -103,13 +128,14 @@ function FilterButton({
         aria-expanded={open}
         aria-controls={panelId}
         aria-label={label}
+        onMouseEnter={onHover}
         onClick={onToggle}
         className={cn(
           "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[13px] font-semibold transition-[border-color,background-color,color,box-shadow] duration-300",
           "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
           active || open
             ? "border-primary bg-primary/[0.06] text-primary"
-            : "border-line bg-surface text-ink hover:border-ink/40 hover:shadow-[0_2px_8px_rgba(16,24,40,0.08)]",
+            : "border-line text-ink hover:border-ink/30",
         )}
       >
         {label}
