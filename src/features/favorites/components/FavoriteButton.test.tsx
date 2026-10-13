@@ -41,14 +41,3 @@ describe("FavoriteButton", () => {
     await waitFor(() => expect(screen.getByRole("button", { name: "Save Volcano lodge" })).toHaveAttribute("aria-pressed", "false"));
   });
 });
-
-describe("FavoriteButton label variant", () => {
-  it("shows Save / Saved text next to the heart", async () => {
-    toggleFavoriteAction.mockResolvedValue({ saved: true });
-    renderWithIntl(<FavoriteButton variant="label" listingId="abc" title="Sunny flat" initialSaved={false} signedIn />);
-    const button = screen.getByRole("button", { name: "Save Sunny flat" });
-    expect(button).toHaveTextContent("Save");
-    await userEvent.click(button);
-    expect(screen.getByRole("button", { name: "Remove Sunny flat from favorites" })).toHaveTextContent("Saved");
-  });
-});

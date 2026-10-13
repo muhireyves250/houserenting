@@ -25,12 +25,12 @@ import { getLocale, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { PageContainer } from "@/components/ui/PageContainer";
-import { FavoriteButton } from "@/features/favorites/components/FavoriteButton";
 import { savedListingIds } from "@/features/favorites/service";
 import { isGuestFavorite } from "@/features/home/sections";
 import { BookingCard, MobileBookingBar, StayCalendar, StayProvider } from "@/features/listings/components/detail/Booking";
 import { ListingPhotos } from "@/features/listings/components/detail/ListingPhotos";
 import { LocationMapLazy } from "@/features/listings/components/detail/LocationMapLazy";
+import { SaveButton } from "@/features/listings/components/detail/SaveButton";
 import { ShareButton } from "@/features/listings/components/detail/ShareButton";
 import { discountedPrice } from "@/features/listings/pricing";
 import { getPublishedListing } from "@/features/listings/service";
@@ -107,6 +107,21 @@ export default async function ListingPage({ params }: Props) {
     .filter((h): h is { icon: LucideIcon; title: string; body: string } => Boolean(h))
     .slice(0, 3);
 
+  // Share / Save windows show the place: cover, name, and "Room in Gasabo, Kigali · ★ 4.50".
+  const preview = {
+    title: listing.title,
+    subtitle: [t("typeInPlace", { type: tType(listing.type), place }), listing.ratingCount > 0 && `★ ${listing.ratingAvg.toFixed(2)}`]
+      .filter(Boolean)
+      .join(" · "),
+    photo: listing.photos[0]?.url ?? null,
+  };
+  const actions = (
+    <>
+      <ShareButton {...preview} />
+      <SaveButton listingId={listing.id} initialSaved={saved} signedIn={user !== null} {...preview} />
+    </>
+  );
+
   const bookingRates = rates.map(({ unit, price, checkInTime, checkOutTime, dayStartTime, dayEndTime }) => ({
     unit,
     price,
@@ -129,8 +144,7 @@ export default async function ListingPage({ params }: Props) {
             <h1 className="font-display text-[28px] leading-9 font-bold tracking-[-0.025em] text-ink">{listing.title}</h1>
           </div>
           <div className="flex shrink-0 items-center gap-1">
-            <ShareButton title={listing.title} />
-            <FavoriteButton variant="label" listingId={listing.id} title={listing.title} initialSaved={saved} signedIn={user !== null} />
+            {actions}
           </div>
         </div>
 
@@ -142,8 +156,7 @@ export default async function ListingPage({ params }: Props) {
             <div className="pb-8">
               <h1 className="font-display text-2xl leading-8 font-bold tracking-[-0.02em] md:hidden">{listing.title}</h1>
               <div className="mb-3 -ml-3 flex items-center gap-1 md:hidden">
-                <ShareButton title={listing.title} />
-                <FavoriteButton variant="label" listingId={listing.id} title={listing.title} initialSaved={saved} signedIn={user !== null} />
+                {actions}
               </div>
               <h2 className="font-display text-[22px] leading-7 font-bold tracking-[-0.02em] text-ink">
                 {t("typeInPlace", { type: tType(listing.type), place })}
