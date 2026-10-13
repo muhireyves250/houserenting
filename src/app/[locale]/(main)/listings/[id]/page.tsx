@@ -1,42 +1,76 @@
-import { BedDouble, ChevronLeft, MapPin, Ruler, Star, Users, Wallet } from "lucide-react";
+import {
+  AirVent,
+  CalendarClock,
+  ChevronLeft,
+  CookingPot,
+  KeyRound,
+  Laptop,
+  type LucideIcon,
+  Microwave,
+  PawPrint,
+  ShieldCheck,
+  ShowerHead,
+  SquareParking,
+  Star,
+  Tv,
+  Utensils,
+  WashingMachine,
+  WavesLadder,
+  Wifi,
+  Zap,
+} from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 import { Avatar } from "@/components/ui/Avatar";
-import { Button } from "@/components/ui/Button";
 import { PageContainer } from "@/components/ui/PageContainer";
-import { ListingGallery } from "@/features/listings/components/ListingGallery";
-import { PriceTag } from "@/features/listings/components/PriceTag";
-import { rentalModes } from "@/features/listings/pricing";
+import { FavoriteButton } from "@/features/favorites/components/FavoriteButton";
+import { savedListingIds } from "@/features/favorites/service";
+import { isGuestFavorite } from "@/features/home/sections";
+import { BookingCard, MobileBookingBar, StayCalendar, StayProvider } from "@/features/listings/components/detail/Booking";
+import { ListingPhotos } from "@/features/listings/components/detail/ListingPhotos";
+import { LocationMapLazy } from "@/features/listings/components/detail/LocationMapLazy";
+import { ShareButton } from "@/features/listings/components/detail/ShareButton";
+import { discountedPrice } from "@/features/listings/pricing";
 import { getPublishedListing } from "@/features/listings/service";
+import { navHref } from "@/components/shell/nav-items";
 import { Link } from "@/i18n/navigation";
+import { formatRWF } from "@/lib/format";
+import { getCurrentUser } from "@/lib/session";
 
 type Props = { params: Promise<{ id: string }> };
 
 const UNIT_ORDER = ["HOUR", "DAY", "NIGHT", "MONTH"] as const;
+
+const FACILITY_ICONS: Record<string, LucideIcon> = {
+  KITCHEN: CookingPot,
+  WIFI: Wifi,
+  AIR_CONDITIONER: AirVent,
+  WORKPLACE: Laptop,
+  WASHING_MACHINE: WashingMachine,
+  DISHWASHER: Utensils,
+  OVEN: CookingPot,
+  MICROWAVE: Microwave,
+  PARKING: SquareParking,
+  TV: Tv,
+  HOT_WATER: ShowerHead,
+  SECURITY: ShieldCheck,
+  GENERATOR: Zap,
+  POOL: WavesLadder,
+};
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const listing = await getPublishedListing((await params).id);
   return listing ? { title: listing.title, description: listing.description.slice(0, 160) } : {};
 }
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+function Section({ title, children, id }: { title?: string; children: ReactNode; id?: string }) {
   return (
-    <section className="border-t border-line py-6">
-      <h2 className="mb-3 text-lg font-semibold">{title}</h2>
+    <section id={id} className="border-t border-line py-10">
+      {title && <h2 className="mb-6 font-display text-[22px] leading-7 font-bold tracking-[-0.02em] text-ink">{title}</h2>}
       {children}
     </section>
-  );
-}
-
-function BulletList({ items }: { items: string[] }) {
-  return (
-    <ul className="list-disc space-y-1 pl-5 text-sm text-ink">
-      {items.map((item) => (
-        <li key={item}>{item}</li>
-      ))}
-    </ul>
   );
 }
 
@@ -44,135 +78,217 @@ export default async function ListingPage({ params }: Props) {
   const listing = await getPublishedListing((await params).id);
   if (!listing) notFound();
 
-  const [t, tFacility, tType] = await Promise.all([
+  const [t, tFacility, tType, user, locale] = await Promise.all([
     getTranslations("Listings"),
     getTranslations("Facility"),
     getTranslations("ListingType"),
+    getCurrentUser(),
+    getLocale(),
   ]);
-  const modes = rentalModes(listing.rates);
+  const saved = user ? (await savedListingIds(user.id, [listing.id])).has(listing.id) : false;
   const rates = [...listing.rates].sort((a, b) => UNIT_ORDER.indexOf(a.unit) - UNIT_ORDER.indexOf(b.unit));
-  const tags = [
-    { icon: <BedDouble />, label: t("rooms", { count: listing.rooms }) },
-    { icon: <Ruler />, label: t("size", { size: listing.sizeM2 }) },
-    { icon: <Users />, label: t("guests", { count: listing.maxGuests }) },
-    ...(listing.depositMonths ? [{ icon: <Wallet />, label: t("deposit", { months: listing.depositMonths }) }] : []),
+  const night = rates.find((r) => r.unit === "NIGHT");
+  const place = `${listing.district}, ${listing.city}`;
+
+  const stats = [
+    t("statGuests", { count: listing.maxGuests }),
+    t("statBedrooms", { count: listing.bedrooms }),
+    t("statBaths", { count: listing.bathrooms }),
+    t("size", { size: listing.sizeM2 }),
   ];
 
-  const actions = (
-    <div className="flex flex-col gap-2">
-      {modes.short && (
-        <Button size="lg" fullWidth disabled>
-          {t("book")}
-        </Button>
-      )}
-      {modes.long && (
-        <Button size="lg" fullWidth disabled variant={modes.short ? "outline" : "primary"}>
-          {t("applyViewing")}
-        </Button>
-      )}
-      <p className="text-center text-xs text-muted">{t("bookingSoon")}</p>
-    </div>
-  );
+  // Up to three highlights the data can honestly back.
+  const highlights = [
+    listing.facilities.includes("POOL") && { icon: WavesLadder, title: t("highlightPool"), body: t("highlightPoolBody") },
+    listing.facilities.includes("PARKING") && { icon: SquareParking, title: t("highlightParking"), body: t("highlightParkingBody") },
+    listing.facilities.includes("WORKPLACE") && { icon: Laptop, title: t("highlightWorkspace"), body: t("highlightWorkspaceBody") },
+    listing.petsAllowed && { icon: PawPrint, title: t("highlightPets"), body: t("highlightPetsBody") },
+  ]
+    .filter((h): h is { icon: LucideIcon; title: string; body: string } => Boolean(h))
+    .slice(0, 3);
+
+  const bookingRates = rates.map(({ unit, price, checkInTime, checkOutTime, dayStartTime, dayEndTime }) => ({
+    unit,
+    price,
+    checkInTime,
+    checkOutTime,
+    dayStartTime,
+    dayEndTime,
+  }));
 
   return (
-    <PageContainer className="pt-0 pb-40 md:py-6">
-      <Link href="/search" className="mb-4 hidden items-center gap-1 text-sm text-muted hover:text-ink md:inline-flex">
-        <ChevronLeft className="size-4" aria-hidden="true" />
-        {t("back")}
-      </Link>
-
-      <ListingGallery title={listing.title} photos={listing.photos} />
-
-      <div className="mt-6 grid gap-10 md:grid-cols-[1fr_360px]">
-        <div>
-          <p className="text-sm text-muted">{tType(listing.type)}</p>
-          <h1 className="mt-1 text-2xl font-semibold leading-tight md:text-3xl">{listing.title}</h1>
-          <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-            <span className="inline-flex items-center gap-1 text-primary">
-              <MapPin className="size-4" aria-hidden="true" />
-              {listing.district}, {listing.city}
-            </span>
-            {listing.ratingCount > 0 && (
-              <span className="inline-flex items-center gap-1">
-                <Star className="size-4 fill-ink" aria-hidden="true" />
-                {listing.ratingAvg.toFixed(1)} · <span className="underline">{t("reviews", { count: listing.ratingCount })}</span>
-              </span>
-            )}
+    <StayProvider>
+      <PageContainer className="pt-0 pb-40 md:pt-8 md:pb-16">
+        {/* Title row */}
+        <div className="mb-6 hidden items-end justify-between gap-6 md:flex">
+          <div className="min-w-0">
+            <Link href="/search" className="mb-2 inline-flex items-center gap-1 text-sm text-muted transition-colors hover:text-ink">
+              <ChevronLeft className="size-4" aria-hidden="true" />
+              {t("back")}
+            </Link>
+            <h1 className="font-display text-[28px] leading-9 font-bold tracking-[-0.025em] text-ink">{listing.title}</h1>
           </div>
-          <ul className="mt-4 flex flex-wrap gap-2">
-            {tags.map((tag) => (
-              <li key={tag.label} className="inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1 text-xs [&>svg]:size-3.5">
-                {tag.icon}
-                {tag.label}
-              </li>
-            ))}
-          </ul>
-
-          <div className="py-6">
-            <h2 className="mb-2 text-lg font-semibold">{t("description")}</h2>
-            <p className="text-sm leading-relaxed whitespace-pre-line text-ink">{listing.description}</p>
+          <div className="flex shrink-0 items-center gap-1">
+            <ShareButton title={listing.title} />
+            <FavoriteButton variant="label" listingId={listing.id} title={listing.title} initialSaved={saved} signedIn={user !== null} />
           </div>
-
-          {listing.characteristics.length > 0 && (
-            <Section title={t("characteristics")}>
-              <BulletList items={listing.characteristics} />
-            </Section>
-          )}
-          {listing.facilities.length > 0 && (
-            <Section title={t("facilities")}>
-              <BulletList items={listing.facilities.map((f) => tFacility(f))} />
-            </Section>
-          )}
-          {listing.termsOfRent.length > 0 && (
-            <Section title={t("terms")}>
-              <BulletList items={listing.termsOfRent} />
-            </Section>
-          )}
-          <Section title={t("location")}>
-            <p className="text-sm">
-              {listing.addressLine}
-              <br />
-              {listing.district}, {listing.city}, Rwanda
-            </p>
-          </Section>
-          <Section title={t("host")}>
-            <div className="flex items-center gap-3">
-              <Avatar name={listing.host.name} className="size-12" />
-              <div>
-                <p className="font-medium">{listing.host.name}</p>
-                <p className="text-sm text-muted">{t("hostSince", { year: listing.host.createdAt.getFullYear() })}</p>
-              </div>
-            </div>
-          </Section>
         </div>
 
-        <aside className="md:sticky md:top-24 md:self-start">
-          <div className="rounded-card bg-surface p-5 shadow-sm">
-            <h2 className="mb-3 font-semibold">{t("prices")}</h2>
-            <ul className="mb-5 flex flex-col gap-4">
-              {rates.map((rate) => (
-                <li key={rate.id} className="flex flex-col gap-1">
-                  <span className="text-xs font-medium tracking-wide text-muted uppercase">{t(`unitName.${rate.unit}`)}</span>
-                  <PriceTag rate={rate} discountPercent={listing.discountPercent} />
-                  {rate.unit === "NIGHT" && rate.checkInTime && rate.checkOutTime && (
-                    <span className="text-xs text-muted">
-                      {t("checkIn", { time: rate.checkInTime })} · {t("checkOut", { time: rate.checkOutTime })}
-                    </span>
-                  )}
-                  {(rate.unit === "DAY" || rate.unit === "HOUR") && rate.dayStartTime && rate.dayEndTime && (
-                    <span className="text-xs text-muted">{t("openHours", { start: rate.dayStartTime, end: rate.dayEndTime })}</span>
-                  )}
-                </li>
-              ))}
-            </ul>
-            <div className="hidden md:block">{actions}</div>
-          </div>
-        </aside>
-      </div>
+        <ListingPhotos title={listing.title} photos={listing.photos} />
 
-      <div className="fixed inset-x-0 bottom-[calc(57px+env(safe-area-inset-bottom))] z-30 border-t border-line bg-surface p-4 md:hidden">
-        {actions}
-      </div>
-    </PageContainer>
+        <div className="mt-8 grid gap-x-16 md:mt-10 md:grid-cols-[minmax(0,1fr)_minmax(320px,380px)]">
+          <div className="min-w-0">
+            {/* Summary */}
+            <div className="pb-8">
+              <h1 className="font-display text-2xl leading-8 font-bold tracking-[-0.02em] md:hidden">{listing.title}</h1>
+              <div className="mb-3 -ml-3 flex items-center gap-1 md:hidden">
+                <ShareButton title={listing.title} />
+                <FavoriteButton variant="label" listingId={listing.id} title={listing.title} initialSaved={saved} signedIn={user !== null} />
+              </div>
+              <h2 className="font-display text-[22px] leading-7 font-bold tracking-[-0.02em] text-ink">
+                {t("typeInPlace", { type: tType(listing.type), place })}
+              </h2>
+              <p className="mt-1 text-[15px] text-ink/80">{stats.join(" · ")}</p>
+              <p className="mt-2 flex items-center gap-1.5 text-[15px] font-semibold text-ink">
+                <Star className="size-4 fill-ink" aria-hidden="true" />
+                {listing.ratingCount > 0 ? (
+                  <>
+                    {listing.ratingAvg.toFixed(2)} · <span className="underline underline-offset-4">{t("reviews", { count: listing.ratingCount })}</span>
+                  </>
+                ) : (
+                  t("noReviews")
+                )}
+                {isGuestFavorite(listing) && (
+                  <span className="ml-2 rounded-full bg-primary/[0.08] px-2.5 py-0.5 text-xs font-semibold text-primary">{t("guestFavorite")}</span>
+                )}
+              </p>
+            </div>
+
+            {/* Host */}
+            <div className="flex items-center gap-4 border-t border-line py-6">
+              <Avatar name={listing.host.name} className="size-12 text-base" />
+              <div>
+                <p className="text-[15px] font-semibold text-ink">{t("hostedBy", { name: listing.host.name })}</p>
+                <p className="text-sm text-muted">{t("hostingSince", { year: listing.host.createdAt.getFullYear() })}</p>
+              </div>
+            </div>
+
+            {highlights.length > 0 && (
+              <ul className="flex flex-col gap-6 border-t border-line py-8">
+                {highlights.map(({ icon: Icon, title, body }) => (
+                  <li key={title} className="flex gap-5">
+                    <Icon className="mt-0.5 size-6 shrink-0 text-ink" strokeWidth={1.6} aria-hidden="true" />
+                    <div>
+                      <p className="text-[15px] font-semibold text-ink">{title}</p>
+                      <p className="text-sm text-muted">{body}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <Section>
+              <p className="text-[15px] leading-7 whitespace-pre-line text-ink">{listing.description}</p>
+              {listing.characteristics.length > 0 && (
+                <ul className="mt-5 flex flex-wrap gap-2">
+                  {listing.characteristics.map((c) => (
+                    <li key={c} className="rounded-full bg-surface px-3 py-1 text-[13px] font-medium text-ink/80 ring-1 ring-line/80">
+                      {c}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Section>
+
+            {listing.facilities.length > 0 && (
+              <Section title={t("offers")}>
+                <ul className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
+                  {listing.facilities.map((facility) => {
+                    const Icon = FACILITY_ICONS[facility] ?? ShieldCheck;
+                    return (
+                      <li key={facility} className="flex items-center gap-4 text-[15px] text-ink">
+                        <Icon className="size-6 shrink-0" strokeWidth={1.6} aria-hidden="true" />
+                        {tFacility(facility)}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </Section>
+            )}
+
+            {night && <StayCalendar city={listing.city} />}
+          </div>
+
+          <div className="hidden md:block">
+            <div className="sticky top-[97px]">
+              <BookingCard rates={bookingRates} discountPercent={listing.discountPercent} maxGuests={listing.maxGuests} />
+            </div>
+          </div>
+        </div>
+
+        {/* Where you'll be */}
+        <Section title={t("whereYoullBe")}>
+          <p className="-mt-3 mb-5 text-[15px] text-ink">
+            {listing.addressLine}, {place}, Rwanda
+          </p>
+          <div className="h-[clamp(300px,40vw,480px)] overflow-hidden rounded-2xl border border-line/70">
+            <LocationMapLazy lat={listing.lat} lng={listing.lng} label={t("whereYoullBe")} />
+          </div>
+        </Section>
+
+        {/* Meet your host */}
+        <Section title={t("meetHost")}>
+          <div className="flex flex-col gap-6 md:flex-row md:items-center md:gap-12">
+            <div className="flex w-full max-w-sm flex-col items-center gap-2 rounded-3xl bg-surface px-8 py-8 shadow-[0_12px_36px_-14px_rgba(16,24,40,0.35)]">
+              <Avatar name={listing.host.name} className="size-24 text-3xl" />
+              <p className="mt-2 font-display text-[26px] font-bold tracking-[-0.02em] text-ink">{listing.host.name}</p>
+              <p className="text-sm text-muted">{t("hostingSince", { year: listing.host.createdAt.getFullYear() })}</p>
+            </div>
+            <Link
+              href={navHref("/chats", user !== null)}
+              className="inline-flex w-fit items-center rounded-xl border border-ink/80 bg-surface px-6 py-3 text-[15px] font-semibold text-ink transition-[background-color,transform] duration-300 hover:bg-canvas active:scale-95"
+            >
+              {t("messageHost")}
+            </Link>
+          </div>
+        </Section>
+
+        {/* Things to know */}
+        <Section title={t("thingsToKnow")}>
+          <div className="grid gap-10 md:grid-cols-2 lg:max-w-4xl">
+            <div>
+              <KeyRound className="mb-4 size-6 text-ink" strokeWidth={1.6} aria-hidden="true" />
+              <h3 className="mb-2 text-[15px] font-semibold text-ink">{t("houseRules")}</h3>
+              <ul className="flex flex-col gap-1.5 text-[15px] text-ink/80">
+                {night?.checkInTime && <li>{t("checkIn", { time: night.checkInTime })}</li>}
+                {night?.checkOutTime && <li>{t("checkOut", { time: night.checkOutTime })}</li>}
+                <li>{t("maxGuests", { count: listing.maxGuests })}</li>
+                <li>{listing.petsAllowed ? t("petsAllowed") : t("noPets")}</li>
+                {listing.termsOfRent.map((term) => (
+                  <li key={term}>{term}</li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <CalendarClock className="mb-4 size-6 text-ink" strokeWidth={1.6} aria-hidden="true" />
+              <h3 className="mb-2 text-[15px] font-semibold text-ink">{t("prices")}</h3>
+              <ul className="flex flex-col gap-1.5 text-[15px] text-ink/80 tabular-nums">
+                {rates.map((rate) => (
+                  <li key={rate.id}>
+                    {t(`unitName.${rate.unit}`)} · {formatRWF(discountedPrice(rate.price, listing.discountPercent), locale)} {t(`perUnit.${rate.unit}`)}
+                    {rate.dayStartTime && rate.dayEndTime && (
+                      <span className="block text-sm text-muted">{t("openHours", { start: rate.dayStartTime, end: rate.dayEndTime })}</span>
+                    )}
+                  </li>
+                ))}
+                {listing.depositMonths && <li>{t("deposit", { months: listing.depositMonths })}</li>}
+              </ul>
+            </div>
+          </div>
+        </Section>
+      </PageContainer>
+
+      {rates.length > 0 && <MobileBookingBar rates={bookingRates} discountPercent={listing.discountPercent} />}
+    </StayProvider>
   );
 }

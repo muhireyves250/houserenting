@@ -9,6 +9,21 @@ import { cn } from "@/lib/cn";
 
 const SHELL =
   "flex size-9 items-center justify-center rounded-full transition-transform duration-200 hover:scale-110 active:scale-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white";
+// Text button for page headers ("♡ Save" next to Share).
+const LABEL_SHELL =
+  "group/save inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-ink underline underline-offset-4 transition-colors hover:bg-canvas focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
+
+function LabelHeart({ saved }: { saved: boolean }) {
+  return (
+    <Heart
+      className={cn(
+        "size-4 transition-[fill,stroke,transform] duration-300 group-active/save:scale-90",
+        saved ? "scale-110 fill-[#e11d48] stroke-[#e11d48]" : "fill-transparent stroke-ink",
+      )}
+      aria-hidden="true"
+    />
+  );
+}
 
 function HeartIcon({ saved }: { saved: boolean }) {
   return (
@@ -32,7 +47,10 @@ export function FavoriteButton({
   initialSaved,
   signedIn,
   className,
+  variant = "photo",
 }: {
+  /** "photo": white heart over a photo. "label": heart + Save / Saved text, for page headers. */
+  variant?: "photo" | "label";
   listingId: string;
   title: string;
   initialSaved: boolean;
@@ -46,8 +64,19 @@ export function FavoriteButton({
 
   if (!signedIn) {
     return (
-      <Link href={{ pathname: "/login", query: { next: pathname } }} aria-label={t("save", { title })} className={cn(SHELL, className)}>
-        <HeartIcon saved={false} />
+      <Link
+        href={{ pathname: "/login", query: { next: pathname } }}
+        aria-label={t("save", { title })}
+        className={cn(variant === "label" ? LABEL_SHELL : SHELL, className)}
+      >
+        {variant === "label" ? (
+          <>
+            <LabelHeart saved={false} />
+            {t("saveShort")}
+          </>
+        ) : (
+          <HeartIcon saved={false} />
+        )}
       </Link>
     );
   }
@@ -57,7 +86,7 @@ export function FavoriteButton({
       type="button"
       aria-pressed={saved}
       aria-label={saved ? t("unsave", { title }) : t("save", { title })}
-      className={cn(SHELL, className)}
+      className={cn(variant === "label" ? LABEL_SHELL : SHELL, className)}
       onClick={() => {
         const next = !saved;
         setSaved(next);
@@ -67,7 +96,14 @@ export function FavoriteButton({
         });
       }}
     >
-      <HeartIcon saved={saved} />
+      {variant === "label" ? (
+        <>
+          <LabelHeart saved={saved} />
+          {saved ? t("savedShort") : t("saveShort")}
+        </>
+      ) : (
+        <HeartIcon saved={saved} />
+      )}
     </button>
   );
 }

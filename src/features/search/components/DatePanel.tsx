@@ -19,12 +19,15 @@ export function DatePanel({
   flex,
   onRangeChange,
   onFlexChange,
+  showFlex = true,
 }: {
   today: ISODate;
   range: DateRange;
   flex: number;
   onRangeChange: (range: DateRange) => void;
   onFlexChange: (days: number) => void;
+  /** The "± days" flexibility chips (search only; a listing's calendar books exact dates). */
+  showFlex?: boolean;
 }) {
   const t = useTranslations("Home");
   const locale = useLocale();
@@ -127,6 +130,7 @@ export function DatePanel({
         ))}
       </div>
 
+      {showFlex && (
       <div role="radiogroup" aria-label={t("when")} className="flex flex-wrap justify-center gap-2">
         {FLEX_OPTIONS.map((days) => (
           <button
@@ -146,6 +150,7 @@ export function DatePanel({
           </button>
         ))}
       </div>
+      )}
 
       {/* Summary of the chosen stay and a quick way to start over. */}
       <div className="flex items-center justify-between border-t border-line pt-4">
