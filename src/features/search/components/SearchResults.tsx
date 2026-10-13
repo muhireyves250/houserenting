@@ -1,6 +1,6 @@
 "use client";
 
-import { List, LoaderCircle, Map as MapIcon } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { useState, useTransition, type ReactNode } from "react";
@@ -27,6 +27,7 @@ export function SearchResults({
   savedIds,
   query,
   bbox,
+  countLabel,
   empty,
 }: {
   listings: ListingCardData[];
@@ -37,10 +38,11 @@ export function SearchResults({
   query: Record<string, string>;
   /** Map area the results are limited to, when the map is being used as the filter. */
   bbox?: Bbox;
+  /** "7 homes", shown on the phone list sheet. */
+  countLabel?: string;
   empty: ReactNode;
 }) {
   const t = useTranslations("Search");
-  const [view, setView] = useState<"list" | "map">("list");
   // Which place is highlighted, and whether that came from the list (pin turns blue) or the map (card gets a frame).
   const [active, setActive] = useState<{ id: string; from: "list" | "map" } | null>(null);
   const saved = new Set(savedIds);
@@ -57,11 +59,20 @@ export function SearchResults({
   }
 
   return (
-    // Same width and side margins as the header. Desktop: list on the left half, map on the right half,
-    // held in place (sticky) under the 73px header + 72px filter bar while the list scrolls.
-    <div className="mx-auto max-w-7xl px-4 md:px-6 lg:grid lg:grid-cols-2 lg:gap-8">
+    // Desktop: list on the left half, map on the right half, held in place (sticky) under the 73px header + 72px
+    // filter bar. Phones and tablets: the map sits at the top (sticky) and the list slides up over it as a sheet.
+    <div className="mx-auto flex max-w-7xl flex-col px-4 md:px-6 lg:grid lg:grid-cols-2 lg:gap-8">
       {/* At least a screen tall, so the sticky map always has room and never slides under the filter bar. */}
-      <div className={cn("pt-6 pb-10 lg:min-h-[calc(100dvh-145px)]", view === "map" && "hidden lg:block")}>
+      <div
+        className={cn(
+          "relative z-10 -mx-4 -mt-6 rounded-t-[28px] bg-canvas px-4 pt-3 pb-10 shadow-[0_-10px_30px_-12px_rgba(16,24,40,0.3)] md:-mx-6 md:px-6",
+          "lg:mx-0 lg:mt-0 lg:min-h-[calc(100dvh-145px)] lg:rounded-none lg:px-0 lg:pt-6 lg:shadow-none",
+        )}
+      >
+        <div className="mb-5 flex flex-col items-center gap-3 lg:hidden">
+          <span className="h-1.5 w-10 rounded-full bg-line-strong" aria-hidden="true" />
+          {countLabel && <p className="text-[15px] font-semibold text-ink">{countLabel}</p>}
+        </div>
         {listings.length === 0 ? (
           empty
         ) : (
@@ -83,12 +94,13 @@ export function SearchResults({
         )}
       </div>
 
-      {/* 24px gap above and below the map on desktop; on phones it fills the space between the filter bar (112px) and tab bar. */}
+      {/* Phones: full-bleed under the 80px pill bar + 60px filter bar. Tablets: under the 73px header + 72px filters.
+          Desktop: a rounded panel with a 24px gap above and below. */}
       <div
         className={cn(
-          "relative mt-4 h-[calc(100dvh-112px-64px-32px)] md:h-[calc(100dvh-73px-72px-48px)] overflow-hidden rounded-2xl border border-line/70 shadow-[0_1px_3px_rgba(16,24,40,0.08)]",
-          "lg:sticky lg:top-[calc(145px+24px)] lg:mt-6 lg:h-[calc(100dvh-145px-48px)]",
-          view === "list" && "hidden lg:block",
+          "relative order-first -mx-4 h-[44vh] overflow-hidden md:-mx-6",
+          "sticky top-[140px] md:top-[145px]",
+          "lg:order-none lg:mx-0 lg:mt-6 lg:h-[calc(100dvh-145px-48px)] lg:rounded-2xl lg:border lg:border-line/70 lg:shadow-[0_1px_3px_rgba(16,24,40,0.08)] lg:top-[calc(145px+24px)]",
         )}
       >
         <ResultsMap
@@ -96,7 +108,7 @@ export function SearchResults({
           mode={mode}
           activeId={active?.id ?? null}
           onActive={(id) => setActive(id ? { id, from: "map" } : null)}
-          visibleKey={view}
+          visibleKey="map"
           bbox={bbox}
           onBoundsChange={searchArea}
         />
@@ -112,23 +124,13 @@ export function SearchResults({
         {updating && (
           <p
             role="status"
-            className="absolute top-3 left-1/2 z-10 inline-flex -translate-x-1/2 items-center gap-2 rounded-full bg-ink px-4 py-2 text-[13px] font-semibold text-white shadow-lg motion-safe:animate-pop-in max-lg:top-16"
+            className="absolute top-14 left-1/2 z-10 inline-flex -translate-x-1/2 items-center gap-2 rounded-full bg-ink px-4 py-2 text-[13px] font-semibold text-white shadow-lg motion-safe:animate-pop-in lg:top-3"
           >
             <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />
             {t("updating")}
           </p>
         )}
       </div>
-
-      {/* Phones: Airbnb-style floating toggle above the tab bar. */}
-      <button
-        type="button"
-        onClick={() => setView(view === "list" ? "map" : "list")}
-        className="fixed bottom-24 left-1/2 z-30 inline-flex -translate-x-1/2 items-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_-8px_rgba(0,0,0,0.55)] transition-transform duration-300 active:scale-95 lg:hidden"
-      >
-        {view === "list" ? t("showMap") : t("showList")}
-        {view === "list" ? <MapIcon className="size-4" aria-hidden="true" /> : <List className="size-4" aria-hidden="true" />}
-      </button>
     </div>
   );
 }

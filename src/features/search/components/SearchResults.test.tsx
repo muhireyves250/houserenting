@@ -64,13 +64,10 @@ const listing = (id: string): ListingCardData => ({
 });
 
 describe("SearchResults", () => {
-  it("toggles between list and map on phones", async () => {
-    renderWithIntl(<SearchResults listings={[listing("a")]} mode="short" signedIn={false} savedIds={[]} query={{ mode: "short", location: "Kigali" }} empty={null} />);
-    const map = screen.getByTestId("map").parentElement!;
-    expect(map).toHaveClass("hidden");
-    await userEvent.click(screen.getByRole("button", { name: "Show map" }));
-    expect(map).not.toHaveClass("hidden");
-    expect(screen.getByRole("button", { name: "Show list" })).toBeInTheDocument();
+  it("shows the home count on the phone list sheet", () => {
+    renderWithIntl(<SearchResults listings={[listing("a")]} mode="short" signedIn={false} savedIds={[]} query={{ mode: "short" }} countLabel="1 home" empty={null} />);
+    expect(screen.getByText("1 home")).toBeInTheDocument();
+    expect(screen.getByTestId("map")).toBeInTheDocument();
   });
 
   it("frames the card whose pin is hovered", async () => {

@@ -1,7 +1,5 @@
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
-import { Suspense } from "react";
-import { LocaleSwitcher } from "@/components/shell/LocaleSwitcher";
 import { PageContainer } from "@/components/ui/PageContainer";
 import { HeroVideo } from "@/features/home/components/HeroVideo";
 import { savedListingIds } from "@/features/favorites/service";
@@ -41,7 +39,12 @@ export async function HomeContent({ onboarding = true }: { onboarding?: boolean 
     <>
       {onboarding && <OnboardingGate />}
       {/* md:-mt-[73px] (72px header + 1px border) tucks the hero under the transparent sticky header; the extra top padding keeps content clear of it. */}
-      <section className="relative md:-mt-[73px] md:bg-primary">
+      {/* Visually hidden: the search is the hero, but the page still needs a heading for screen readers and SEO. */}
+      <h1 className="sr-only">
+        {t("titleTop")} {t("titleBottom")}
+      </h1>
+      {/* Phones use the sticky "Start your search" pill instead of the hero. */}
+      <section className="relative hidden md:-mt-[73px] md:block md:bg-primary">
         {/* Desktop hero: sharp photo under a brand-blue gradient (phones keep the clean white design). */}
         <div className="absolute inset-0 hidden overflow-hidden md:block" aria-hidden="true">
           {/* Footage graded to "pop" through the blue: a little more colour, contrast and light. */}
@@ -67,21 +70,12 @@ export async function HomeContent({ onboarding = true }: { onboarding?: boolean 
             }}
           />
         </div>
-        <PageContainer className="relative flex flex-col gap-8 pt-6 pb-10 md:items-center md:pt-44 md:pb-28">
-          <div className="flex justify-end md:hidden">
-            <Suspense>
-              <LocaleSwitcher />
-            </Suspense>
-          </div>
-          {/* Visually hidden: the search bar is the hero, but the page still needs a heading for screen readers and SEO. */}
-          <h1 className="sr-only">
-            {t("titleTop")} {t("titleBottom")}
-          </h1>
+        <PageContainer className="relative flex flex-col gap-8 md:items-center md:pt-44 md:pb-28">
           <SearchBar id={HERO_SEARCH_ID} />
         </PageContainer>
       </section>
       {sections.length > 0 && (
-        <PageContainer className="flex flex-col gap-10 py-10 md:gap-12 md:py-14">
+        <PageContainer className="flex flex-col gap-9 pt-4 pb-8 md:gap-12 md:py-14">
           {sections.map((section) => {
             const { title, subtitle } = ROWS[section.key];
             return (

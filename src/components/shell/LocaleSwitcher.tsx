@@ -11,7 +11,8 @@ import { cn } from "@/lib/cn";
 /** Each language in its own name, so people recognise theirs whatever the current UI language. */
 const NATIVE_NAMES: Record<AppLocale, string> = { en: "English", rw: "Ikinyarwanda", fr: "Français" };
 
-export function LocaleSwitcher({ className }: { className?: string }) {
+/** `compact`: a round globe-only button (phone top bar). */
+export function LocaleSwitcher({ className, compact = false }: { className?: string; compact?: boolean }) {
   const t = useTranslations("Locale");
   const tNav = useTranslations("Nav");
   const locale = useLocale();
@@ -78,7 +79,8 @@ export function LocaleSwitcher({ className }: { className?: string }) {
         disabled={isPending}
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          "flex h-11 items-center gap-2 rounded-full border border-primary/60 px-4 text-[15px] font-semibold tracking-[0.01em] text-primary",
+          "flex h-11 items-center gap-2 rounded-full border border-primary/60 text-[15px] font-semibold tracking-[0.01em] text-primary",
+          compact ? "w-12 h-12 justify-center bg-surface shadow-[0_6px_20px_-6px_rgba(16,24,40,0.25)]" : "px-4",
           "transition-colors duration-300 hover:border-primary hover:bg-primary/[0.06]",
           "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
           "group-data-[overlay=true]/header:border-[#8cc0ff] group-data-[overlay=true]/header:text-white group-data-[overlay=true]/header:hover:bg-white/10",
@@ -86,9 +88,13 @@ export function LocaleSwitcher({ className }: { className?: string }) {
           className,
         )}
       >
-        <Globe className="size-4" aria-hidden="true" />
-        <span>{NATIVE_NAMES[locale]}</span>
-        <ChevronDown className={cn("size-4 transition-transform duration-300", open && "rotate-180")} aria-hidden="true" />
+        <Globe className={compact ? "size-5" : "size-4"} aria-hidden="true" />
+        {!compact && (
+          <>
+            <span>{NATIVE_NAMES[locale]}</span>
+            <ChevronDown className={cn("size-4 transition-transform duration-300", open && "rotate-180")} aria-hidden="true" />
+          </>
+        )}
       </button>
 
       {open && (

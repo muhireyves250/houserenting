@@ -28,6 +28,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
     pets: query.pets,
     flex: query.flex,
   });
+  const title = query.bbox ? t("titleMapArea") : t("title", { place: query.location ?? tHome("country") });
   const filtered = Boolean(query.types?.length || query.minPrice || query.maxPrice);
 
   return (
@@ -35,12 +36,12 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
       <SearchStateSync query={query} />
       {/* Filter bar: sticks under the 73px header (top of the screen on phones). Title and count on the left,
           filters centred; phones stack them in two rows (112px), tablets and up use one row (72px). */}
-      <div className="sticky top-0 z-30 border-b border-line/70 bg-surface/90 backdrop-blur-md md:top-[73px]">
-        <div className="mx-auto flex h-[112px] max-w-7xl flex-col justify-center gap-2.5 px-4 md:grid md:h-[72px] md:grid-cols-[1fr_auto_1fr] md:items-center md:gap-6 md:px-6">
-          <div className="min-w-0">
-            <h1 className="truncate font-display text-lg leading-6 font-bold tracking-[-0.02em] text-ink">
-              {query.bbox ? t("titleMapArea") : t("title", { place: query.location ?? tHome("country") })}
-            </h1>
+      {/* Filter bar: phones stick it under the 80px search pill bar (filters only, centred); tablets and up under
+          the 73px header, with the title and count on the left. */}
+      <div className="sticky top-20 z-30 border-b border-line/70 bg-surface/90 backdrop-blur-md md:top-[73px]">
+        <div className="mx-auto flex h-[60px] max-w-7xl items-center justify-center px-4 md:grid md:h-[72px] md:grid-cols-[1fr_auto_1fr] md:gap-6 md:px-6">
+          <div className="hidden min-w-0 md:block">
+            <h1 className="truncate font-display text-lg leading-6 font-bold tracking-[-0.02em] text-ink">{title}</h1>
             <p className="truncate text-[13px] text-muted">
               {tListings("results", { count: listings.length })} · {query.mode === "short" ? tHome("short") : tHome("long")}
             </p>
@@ -52,12 +53,15 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
           <div className="hidden md:block" aria-hidden="true" />
         </div>
       </div>
+      {/* Phones: the title lives in the list sheet; keep one h1 for screen readers. */}
+      <h1 className="sr-only md:hidden">{title}</h1>
 
       <SearchResults
         listings={listings}
         mode={query.mode}
         signedIn={user !== null}
         savedIds={[...saved]}
+        countLabel={tHome("homesCount", { count: listings.length })}
         query={{ ...base, ...filterParams(query) }}
         bbox={query.bbox}
         empty={

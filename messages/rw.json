@@ -67,7 +67,14 @@
     "compactWhen": "Igihe icyo ari cyo cyose",
     "compactLabel": "Shakisha",
     "nights": "{count, plural, one {Ijoro #} other {Amajoro #}}",
-    "clearDates": "Siba amatariki"
+    "clearDates": "Siba amatariki",
+    "startSearch": "Tangira gushakisha",
+    "whereQ": "Hehe?",
+    "whenQ": "Ryari?",
+    "whoQ": "Bangahe?",
+    "clearAll": "Siba byose",
+    "closeSearch": "Funga gushakisha",
+    "homesCount": "{count, plural, =0 {Nta macumbi} one {Icumbi #} other {Amacumbi #}}"
   },
   "Search": {
     "anywhere": "Ahantu hose mu Rwanda",

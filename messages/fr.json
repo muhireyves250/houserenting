@@ -67,7 +67,14 @@
     "compactWhen": "N'importe quand",
     "compactLabel": "Rechercher",
     "nights": "{count, plural, one {# nuit} other {# nuits}}",
-    "clearDates": "Effacer les dates"
+    "clearDates": "Effacer les dates",
+    "startSearch": "Commencez votre recherche",
+    "whereQ": "Où ?",
+    "whenQ": "Quand ?",
+    "whoQ": "Qui ?",
+    "clearAll": "Tout effacer",
+    "closeSearch": "Fermer la recherche",
+    "homesCount": "{count, plural, =0 {Aucun logement} one {# logement} other {# logements}}"
   },
   "Search": {
     "anywhere": "Partout au Rwanda",
