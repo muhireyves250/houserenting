@@ -23,14 +23,11 @@ type Reveal = "idle" | "hidden" | "shown";
 
 /** One home-page row: title linking to the matching search, and a swipeable track of cards with prev/next arrows. */
 export function HomeRow({
-  icon,
   title,
   subtitle,
   query,
   children,
 }: {
-  /** Decorative icon for the row's theme (city, mountains, lake…). */
-  icon: ReactNode;
   title: string;
   subtitle: string;
   query: Record<string, string>;
@@ -88,22 +85,14 @@ export function HomeRow({
     <section ref={sectionRef} className="flex flex-col gap-4">
       <div
         className={cn(
-          "flex items-center justify-between gap-4",
+          "flex items-end justify-between gap-4",
           animated && `transition-[opacity,transform] duration-700 ${EASE_OUT}`,
           hidden && "translate-y-3 opacity-0",
         )}
       >
-        <div className="flex min-w-0 items-center gap-3 md:gap-4">
-          <span
-            className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/[0.12] to-primary/[0.04] text-primary ring-1 ring-primary/10 md:size-12 md:rounded-2xl [&_svg]:size-5 md:[&_svg]:size-6"
-            aria-hidden="true"
-          >
-            {icon}
-          </span>
-          <div className="min-w-0">
-            <h2 className="truncate text-lg leading-6 font-bold tracking-[-0.02em] text-ink md:text-[22px] md:leading-7">{title}</h2>
-            <p className="line-clamp-2 text-[13px] text-muted md:truncate md:text-sm">{subtitle}</p>
-          </div>
+        <div className="min-w-0">
+          <h2 className="font-display text-[22px] leading-7 font-bold tracking-[-0.025em] text-ink md:text-[28px] md:leading-9">{title}</h2>
+          <p className="mt-0.5 line-clamp-2 text-sm leading-5 text-muted md:mt-1 md:truncate md:text-[15px]">{subtitle}</p>
         </div>
         <div className="flex shrink-0 items-center gap-3">
           <Link

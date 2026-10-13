@@ -1,4 +1,3 @@
-import { Building2, CalendarDays, Mountain, Waves } from "lucide-react";
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
@@ -22,11 +21,11 @@ const HERO_VIDEO = process.env.NEXT_PUBLIC_HERO_VIDEO_URL || "https://assets.mix
 const ROW_POOL = 80;
 
 const ROWS = {
-  kigali: { title: "rowKigali", subtitle: "rowKigaliSub", Icon: Building2 },
-  volcanoes: { title: "rowVolcanoes", subtitle: "rowVolcanoesSub", Icon: Mountain },
-  kivu: { title: "rowKivu", subtitle: "rowKivuSub", Icon: Waves },
-  long: { title: "rowLong", subtitle: "rowLongSub", Icon: CalendarDays },
-} as const satisfies Record<HomeSectionKey, { title: string; subtitle: string; Icon: unknown }>;
+  kigali: { title: "rowKigali", subtitle: "rowKigaliSub" },
+  volcanoes: { title: "rowVolcanoes", subtitle: "rowVolcanoesSub" },
+  kivu: { title: "rowKivu", subtitle: "rowKivuSub" },
+  long: { title: "rowLong", subtitle: "rowLongSub" },
+} as const satisfies Record<HomeSectionKey, { title: string; subtitle: string }>;
 
 /** Home page body: hero search and rows of homes by destination. Also the backdrop for direct /login, /signup visits. */
 export async function HomeContent({ onboarding = true }: { onboarding?: boolean }) {
@@ -84,11 +83,10 @@ export async function HomeContent({ onboarding = true }: { onboarding?: boolean 
       {sections.length > 0 && (
         <PageContainer className="flex flex-col gap-10 py-10 md:gap-12 md:py-14">
           {sections.map((section) => {
-            const { title, subtitle, Icon } = ROWS[section.key];
+            const { title, subtitle } = ROWS[section.key];
             return (
               <HomeRow
                 key={section.key}
-                icon={<Icon strokeWidth={1.75} />}
                 title={tListings(title)}
                 subtitle={tListings(subtitle)}
                 query={section.query}
