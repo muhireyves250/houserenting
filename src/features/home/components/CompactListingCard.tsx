@@ -15,8 +15,8 @@ import { formatRWF } from "@/lib/format";
 const SAMPLE_NIGHTS = 2;
 
 const SIZES = "(min-width: 1280px) 20vw, (min-width: 768px) 25vw, (min-width: 640px) 40vw, 62vw";
-// The site's soft ease (same as the sliding pills): gentle start, long settle.
-const SLIDE_EASE = "ease-[cubic-bezier(0.25,0.8,0.25,1)]";
+// Spring-like ease-out (iOS sheet curve): moves at once, then settles very softly.
+const SLIDE_EASE = "ease-[cubic-bezier(0.32,0.72,0,1)]";
 
 const bold = (chunks: ReactNode) => <span className="text-sm font-bold tracking-[-0.01em] text-ink">{chunks}</span>;
 
@@ -65,7 +65,7 @@ export function CompactListingCard({
         )}
       >
         <div className="relative isolate aspect-[4/3] overflow-hidden rounded-[14px] bg-canvas">
-          {/* Hover slides the cover out to the left and the next photo in from the right (or zooms a lone cover). */}
+          {/* Hover pushes the next photo in over the cover, which drifts back a third (parallax); a lone cover zooms. */}
           {cover && (
             <Image
               src={cover.url}
@@ -74,9 +74,9 @@ export function CompactListingCard({
               sizes={SIZES}
               // text-transparent hides the alt text if the photo fails to load.
               className={cn(
-                "transform-gpu object-cover text-transparent transition-transform duration-[800ms] will-change-transform motion-reduce:transition-none",
+                "transform-gpu object-cover text-transparent transition-transform duration-700 will-change-transform [backface-visibility:hidden] motion-reduce:transition-none",
                 SLIDE_EASE,
-                next ? "group-hover:-translate-x-full" : "group-hover:scale-[1.05]",
+                next ? "group-hover:-translate-x-1/3" : "group-hover:scale-[1.05]",
               )}
             />
           )}
@@ -86,23 +86,25 @@ export function CompactListingCard({
               alt=""
               data-slide="next"
               fill
+              // Loaded with the card so it never pops in mid-slide.
+              loading="eager"
               sizes={SIZES}
               className={cn(
-                "translate-x-full transform-gpu object-cover text-transparent transition-transform duration-[800ms] will-change-transform group-hover:translate-x-0 motion-reduce:transition-none",
+                "z-[1] translate-x-full transform-gpu object-cover text-transparent shadow-[-12px_0_24px_rgba(0,0,0,0.25)] transition-transform duration-700 will-change-transform [backface-visibility:hidden] group-hover:translate-x-0 motion-reduce:transition-none",
                 SLIDE_EASE,
               )}
             />
           )}
           {/* Soft top shade keeps the white heart and badge readable on bright photos. */}
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-black/25 to-transparent" aria-hidden="true" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-[2] h-16 bg-gradient-to-b from-black/25 to-transparent" aria-hidden="true" />
           {isGuestFavorite(listing) && (
-            <span className="absolute top-2.5 left-2.5 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-ink shadow-[0_2px_8px_rgba(0,0,0,0.18)] backdrop-blur">
+            <span className="absolute top-2.5 left-2.5 z-[2] rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-ink shadow-[0_2px_8px_rgba(0,0,0,0.18)] backdrop-blur">
               {t("guestFavorite")}
             </span>
           )}
           {listing.ratingCount > 0 && (
             <span
-              className="absolute bottom-2.5 left-2.5 flex items-center gap-1 rounded-full bg-white/95 px-2 py-0.5 text-xs font-semibold text-ink tabular-nums shadow-[0_2px_8px_rgba(0,0,0,0.18)] backdrop-blur"
+              className="absolute bottom-2.5 left-2.5 z-[2] flex items-center gap-1 rounded-full bg-white/95 px-2 py-0.5 text-xs font-semibold text-ink tabular-nums shadow-[0_2px_8px_rgba(0,0,0,0.18)] backdrop-blur"
               aria-label={t("rating", { rating: listing.ratingAvg })}
             >
               <Star className="size-3 fill-amber-400 text-amber-400" aria-hidden="true" />
