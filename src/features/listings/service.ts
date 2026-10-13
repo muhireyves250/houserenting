@@ -17,7 +17,8 @@ export const CARD_SELECT = {
   ratingAvg: true,
   ratingCount: true,
   publishedAt: true,
-  photos: { orderBy: { position: "asc" }, take: 1, select: { url: true, width: true, height: true } },
+  // Cover plus the next photo, which cards slide to on hover.
+  photos: { orderBy: { position: "asc" }, take: 2, select: { url: true, width: true, height: true } },
   rates: { select: { unit: true, price: true } },
 } satisfies Prisma.ListingSelect;
 

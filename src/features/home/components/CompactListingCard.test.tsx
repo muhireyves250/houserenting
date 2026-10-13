@@ -53,3 +53,13 @@ describe("CompactListingCard", () => {
     expect(screen.getByRole("button", { name: "Remove Sunny flat from favorites" })).toHaveAttribute("aria-pressed", "true");
   });
 });
+
+describe("CompactListingCard hover slide", () => {
+  it("stacks the next photo behind the cover so hover can slide to it", () => {
+    const photos = [...base.photos, { url: "https://images.unsplash.com/photo-2", width: 1600, height: 1067 }];
+    const { container } = renderWithIntl(<CompactListingCard listing={{ ...base, photos }} mode="short" signedIn={false} saved={false} />);
+    expect(screen.getByRole("img", { name: "Sunny flat, photo 1" })).toBeInTheDocument();
+    expect(container.querySelectorAll("img")).toHaveLength(2);
+    expect(container.querySelector('[data-slide="next"]')).not.toBeNull();
+  });
+});
