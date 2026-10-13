@@ -15,7 +15,8 @@ import { formatRWF } from "@/lib/format";
 const SAMPLE_NIGHTS = 2;
 
 const SIZES = "(min-width: 1280px) 20vw, (min-width: 768px) 25vw, (min-width: 640px) 40vw, 62vw";
-const SLIDE_EASE = "ease-[cubic-bezier(0.22,1,0.36,1)]";
+// The site's soft ease (same as the sliding pills): gentle start, long settle.
+const SLIDE_EASE = "ease-[cubic-bezier(0.25,0.8,0.25,1)]";
 
 const bold = (chunks: ReactNode) => <span className="text-sm font-bold tracking-[-0.01em] text-ink">{chunks}</span>;
 
@@ -46,17 +47,24 @@ export function CompactListingCard({
   }
 
   return (
-    <div className="group relative h-full">
+    // The whole card (heart included) lifts together on hover.
+    <div
+      className={cn(
+        "group relative h-full transform-gpu transition-transform duration-500 hover:-translate-y-1 motion-reduce:transition-none motion-reduce:hover:translate-y-0",
+        SLIDE_EASE,
+      )}
+    >
       <Link
         href={`/listings/${listing.id}`}
         className={cn(
           "flex h-full flex-col rounded-[20px] border border-black/[0.06] bg-surface p-2 shadow-[0_1px_2px_rgba(16,24,40,0.05)]",
-          "transition-[transform,box-shadow,border-color] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-          "hover:-translate-y-1 hover:border-primary/20 hover:shadow-[0_18px_36px_-16px_rgba(16,24,40,0.28)] motion-reduce:transition-none motion-reduce:hover:translate-y-0",
+          // The hover shadow is pre-rendered on a pseudo-element and faded in: smoother than animating box-shadow.
+          "relative transition-[border-color] duration-500 group-hover:border-primary/20",
+          "after:pointer-events-none after:absolute after:inset-0 after:-z-10 after:rounded-[20px] after:opacity-0 after:shadow-[0_18px_36px_-16px_rgba(16,24,40,0.28)] after:transition-opacity after:duration-500 group-hover:after:opacity-100",
           "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
         )}
       >
-        <div className="relative aspect-[4/3] overflow-hidden rounded-[14px] bg-canvas">
+        <div className="relative isolate aspect-[4/3] overflow-hidden rounded-[14px] bg-canvas">
           {/* Hover slides the cover out to the left and the next photo in from the right (or zooms a lone cover). */}
           {cover && (
             <Image
@@ -66,7 +74,7 @@ export function CompactListingCard({
               sizes={SIZES}
               // text-transparent hides the alt text if the photo fails to load.
               className={cn(
-                "object-cover text-transparent transition-transform duration-700 motion-reduce:transition-none",
+                "transform-gpu object-cover text-transparent transition-transform duration-[800ms] will-change-transform motion-reduce:transition-none",
                 SLIDE_EASE,
                 next ? "group-hover:-translate-x-full" : "group-hover:scale-[1.05]",
               )}
@@ -80,7 +88,7 @@ export function CompactListingCard({
               fill
               sizes={SIZES}
               className={cn(
-                "translate-x-full object-cover text-transparent transition-transform duration-700 group-hover:translate-x-0 motion-reduce:transition-none",
+                "translate-x-full transform-gpu object-cover text-transparent transition-transform duration-[800ms] will-change-transform group-hover:translate-x-0 motion-reduce:transition-none",
                 SLIDE_EASE,
               )}
             />

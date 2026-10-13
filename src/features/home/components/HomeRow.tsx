@@ -118,7 +118,7 @@ export function HomeRow({
         ref={trackRef}
         onScroll={update}
         className={cn(
-          "-mx-4 -mb-4 grid snap-x snap-mandatory scroll-px-4 auto-cols-[62%] grid-flow-col gap-4 overflow-x-auto px-4 pt-2 pb-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+          "-mx-4 -mb-8 grid snap-x snap-mandatory scroll-px-4 auto-cols-[62%] grid-flow-col gap-4 overflow-x-auto px-4 pt-2 pb-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
           "sm:auto-cols-[40%] md:-mx-2 md:scroll-px-2 md:px-2 md:auto-cols-[calc((100%-3*16px)/4)] lg:auto-cols-[calc((100%-3*16px)/4)] xl:auto-cols-[calc((100%-4*16px)/5)]",
         )}
       >
