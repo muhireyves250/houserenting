@@ -4,15 +4,12 @@ import { useLocale, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { FavoriteButton } from "@/features/favorites/components/FavoriteButton";
 import { isGuestFavorite } from "@/features/home/sections";
-import { discountedPrice, headlineRate } from "@/features/listings/pricing";
+import { discountedPrice, headlineRate, SAMPLE_NIGHTS } from "@/features/listings/pricing";
 import type { ListingCardData } from "@/features/listings/service";
 import type { SearchMode } from "@/features/search/params";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { formatRWF } from "@/lib/format";
-
-/** Nights priced on short-stay cards ("RWF 100,000 for 2 nights"), as on the big travel sites. */
-const SAMPLE_NIGHTS = 2;
 
 const SIZES = "(min-width: 1280px) 20vw, (min-width: 768px) 25vw, (min-width: 640px) 40vw, 62vw";
 // Spring-like ease-out (iOS sheet curve): moves at once, then settles very softly.

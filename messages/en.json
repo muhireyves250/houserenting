@@ -72,7 +72,23 @@
   "Search": {
     "anywhere": "Anywhere in Rwanda",
     "emptyTitle": "No places here yet",
-    "emptyBody": "Hosts are adding new homes every day. Check back soon."
+    "emptyBody": "Hosts are adding new homes every day. Check back soon.",
+    "title": "Homes in {place}",
+    "price": "Price",
+    "typeOfPlace": "Type of place",
+    "minPrice": "Minimum",
+    "maxPrice": "Maximum",
+    "priceHintShort": "Per night, day or hour, in RWF",
+    "priceHintLong": "Per month, in RWF",
+    "apply": "Show results",
+    "clear": "Clear",
+    "clearAll": "Clear filters",
+    "showMap": "Show map",
+    "showList": "Show list",
+    "mapLabel": "Map of results",
+    "filters": "Filters",
+    "noFilterResults": "No homes match these filters",
+    "noFilterResultsBody": "Try a wider price range or more types of place."
   },
   "Onboarding": {
     "slide1": "Rent your perfect fit",

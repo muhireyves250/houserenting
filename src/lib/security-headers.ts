@@ -4,7 +4,8 @@ export function securityHeaders({ isProd }: { isProd: boolean }): { key: string;
     // Next.js injects inline bootstrap scripts; tighten to nonces in a later phase.
     `script-src 'self' 'unsafe-inline'${isProd ? "" : " 'unsafe-eval'"}`,
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob: https://res.cloudinary.com https://images.unsplash.com",
+    // tile.openstreetmap.org: map tiles on the search page.
+    "img-src 'self' data: blob: https://res.cloudinary.com https://images.unsplash.com https://tile.openstreetmap.org",
     "font-src 'self'",
     // Hero background video (demo host now; Cloudinary when our own media lands).
     "media-src 'self' https://assets.mixkit.co https://res.cloudinary.com",

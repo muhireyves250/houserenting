@@ -76,3 +76,57 @@ html {
 svg {
   shape-rendering: geometricPrecision;
 }
+
+/* Search map (Leaflet): price pins and the listing preview popup. */
+.leaflet-container {
+  font-family: var(--font-sans);
+  background: #eef1f4;
+}
+/* Calmer, lighter basemap so the price pins stand out. */
+.leaflet-tile-pane {
+  filter: saturate(0.5) contrast(0.92) brightness(1.05);
+}
+.price-pin {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+  border-radius: 9999px;
+  background: #fff;
+  color: var(--color-ink);
+  padding: 7px 11px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  box-shadow:
+    0 0 0 1px rgba(16, 24, 40, 0.08),
+    0 3px 10px rgba(16, 24, 40, 0.2);
+  transition:
+    transform 400ms cubic-bezier(0.32, 0.72, 0, 1),
+    background-color 250ms,
+    color 250ms;
+}
+.price-pin:hover,
+.price-pin[data-active="true"] {
+  transform: translate(-50%, -50%) scale(1.1);
+}
+.price-pin[data-active="true"] {
+  background: var(--color-primary);
+  color: #fff;
+}
+.listing-popup .leaflet-popup-content-wrapper {
+  padding: 0;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 18px 40px -12px rgba(16, 24, 40, 0.4);
+}
+.listing-popup .leaflet-popup-content {
+  margin: 0;
+  width: auto !important;
+}
+.leaflet-container .listing-popup a {
+  color: inherit;
+}
+.listing-popup .leaflet-popup-tip {
+  box-shadow: none;
+}

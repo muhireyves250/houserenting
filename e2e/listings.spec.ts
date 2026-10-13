@@ -50,5 +50,5 @@ test("search bar: pick a suggested city, dates and guests", async ({ page }, tes
   await page.getByRole("button", { name: "Search", exact: true }).click();
 
   await expect(page).toHaveURL(new RegExp(`/en/search\\?mode=short&location=Kigali&checkIn=${checkIn}&checkOut=${checkOut}&guests=2`));
-  await expect(page.getByRole("heading", { level: 1, name: "Kigali" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Homes in Kigali" })).toBeVisible();
 });

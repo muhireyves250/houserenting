@@ -13,6 +13,10 @@ export const CARD_SELECT = {
   city: true,
   district: true,
   maxGuests: true,
+  bedrooms: true,
+  bathrooms: true,
+  lat: true,
+  lng: true,
   discountPercent: true,
   ratingAvg: true,
   ratingCount: true,
@@ -29,10 +33,13 @@ function escapeLike(value: string): string {
 }
 
 export function searchListings(query: SearchQuery, limit = SEARCH_LIMIT): Promise<ListingCardData[]> {
+  // A place qualifies through any rate for the mode; the price range applies to that same rate.
+  const price = query.minPrice || query.maxPrice ? { gte: query.minPrice, lte: query.maxPrice } : undefined;
   const where: Prisma.ListingWhereInput = {
     status: "PUBLISHED",
-    rates: { some: { unit: query.mode === "long" ? "MONTH" : { in: [...SHORT_UNITS] } } },
+    rates: { some: { unit: query.mode === "long" ? "MONTH" : { in: [...SHORT_UNITS] }, price } },
   };
+  if (query.types?.length) where.type = { in: query.types };
   if (query.location) {
     // Prisma's `contains` becomes ILIKE '%…%' without escaping, so escape LIKE wildcards ourselves.
     const match = { contains: escapeLike(query.location), mode: "insensitive" } as const;

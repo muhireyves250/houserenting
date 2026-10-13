@@ -4,6 +4,9 @@ export type Unit = "HOUR" | "DAY" | "NIGHT" | "MONTH";
 export type Rate = { unit: Unit; price: number };
 
 const SHORT_PREFERENCE: Unit[] = ["NIGHT", "DAY", "HOUR"];
+/** Nights priced on cards and map pins ("RWF 100,000 for 2 nights"), as on the big travel sites. */
+export const SAMPLE_NIGHTS = 2;
+
 const NEW_FOR_MS = 14 * 24 * 60 * 60 * 1000;
 
 /** The rate shown on cards: nightly → daily → hourly for short stays, monthly for long stays. */

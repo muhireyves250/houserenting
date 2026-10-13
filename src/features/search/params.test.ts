@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildSearchQuery, parseSearchParams } from "./params";
+import { buildSearchQuery, filterParams, parseSearchParams } from "./params";
 
 describe("buildSearchQuery", () => {
   it("keeps only filled short-term fields", () => {
@@ -71,5 +71,28 @@ describe("pets and date flexibility", () => {
 
   it("omits zero counts", () => {
     expect(buildSearchQuery("short", { guests: 0, pets: 0, flex: 0 })).toEqual({ mode: "short" });
+  });
+});
+
+describe("type of place and price filters", () => {
+  it("parses a comma list of known types and a price range, in both modes", () => {
+    expect(parseSearchParams({ type: "LODGE,APARTMENT", minPrice: "20000", maxPrice: "150000" })).toEqual({
+      mode: "short",
+      types: ["LODGE", "APARTMENT"],
+      minPrice: 20000,
+      maxPrice: 150000,
+    });
+    expect(parseSearchParams({ mode: "long", type: "ROOM", maxPrice: "500000" })).toEqual({ mode: "long", types: ["ROOM"], maxPrice: 500000 });
+  });
+
+  it("drops unknown types, duplicates, garbage prices and an inverted range's max", () => {
+    expect(parseSearchParams({ type: "CASTLE,ROOM,ROOM" })).toEqual({ mode: "short", types: ["ROOM"] });
+    expect(parseSearchParams({ type: "CASTLE", minPrice: "abc", maxPrice: "-5" })).toEqual({ mode: "short" });
+    expect(parseSearchParams({ minPrice: "90000", maxPrice: "10000" })).toEqual({ mode: "short", minPrice: 90000 });
+  });
+
+  it("serialises filters back to URL params", () => {
+    expect(filterParams({ types: ["LODGE", "ROOM"], minPrice: 1000 })).toEqual({ type: "LODGE,ROOM", minPrice: "1000" });
+    expect(filterParams({ types: [] })).toEqual({});
   });
 });

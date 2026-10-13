@@ -72,7 +72,23 @@
   "Search": {
     "anywhere": "Partout au Rwanda",
     "emptyTitle": "Aucun logement ici pour l'instant",
-    "emptyBody": "Des hôtes ajoutent de nouveaux logements chaque jour. Revenez bientôt."
+    "emptyBody": "Des hôtes ajoutent de nouveaux logements chaque jour. Revenez bientôt.",
+    "title": "Logements à {place}",
+    "price": "Prix",
+    "typeOfPlace": "Type de logement",
+    "minPrice": "Minimum",
+    "maxPrice": "Maximum",
+    "priceHintShort": "Par nuit, jour ou heure, en RWF",
+    "priceHintLong": "Par mois, en RWF",
+    "apply": "Afficher les résultats",
+    "clear": "Effacer",
+    "clearAll": "Effacer les filtres",
+    "showMap": "Afficher la carte",
+    "showList": "Afficher la liste",
+    "mapLabel": "Carte des résultats",
+    "filters": "Filtres",
+    "noFilterResults": "Aucun logement ne correspond à ces filtres",
+    "noFilterResultsBody": "Essayez une fourchette de prix plus large ou d'autres types de logement."
   },
   "Onboarding": {
     "slide1": "Louez ce qui vous convient",

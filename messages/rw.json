@@ -72,7 +72,23 @@
   "Search": {
     "anywhere": "Ahantu hose mu Rwanda",
     "emptyTitle": "Nta nzu zirahaba",
-    "emptyBody": "Ba nyir'amazu bongeramo amazu mashya buri munsi. Uzagaruke vuba."
+    "emptyBody": "Ba nyir'amazu bongeramo amazu mashya buri munsi. Uzagaruke vuba.",
+    "title": "Amacumbi i {place}",
+    "price": "Igiciro",
+    "typeOfPlace": "Ubwoko bw'icumbi",
+    "minPrice": "Ntoya",
+    "maxPrice": "Nini",
+    "priceHintShort": "Ku ijoro, ku munsi cyangwa ku isaha, mu RWF",
+    "priceHintLong": "Ku kwezi, mu RWF",
+    "apply": "Erekana ibisubizo",
+    "clear": "Siba",
+    "clearAll": "Siba ibyo wahisemo",
+    "showMap": "Erekana ikarita",
+    "showList": "Erekana urutonde",
+    "mapLabel": "Ikarita y'ibisubizo",
+    "filters": "Muyunguruzi",
+    "noFilterResults": "Nta macumbi ahuye n'ibyo wahisemo",
+    "noFilterResultsBody": "Gerageza igiciro kinini cyangwa ubwoko bwinshi bw'amacumbi."
   },
   "Onboarding": {
     "slide1": "Kodesha ikubereye",

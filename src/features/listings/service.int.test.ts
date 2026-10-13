@@ -149,3 +149,34 @@ describe("suggestLocations", () => {
     expect(await suggestLocations("%")).toEqual([]);
   });
 });
+
+describe("type and price filters", () => {
+  async function priced(price: number, overrides: Partial<Prisma.ListingUncheckedCreateInput> = {}, units: ("NIGHT" | "MONTH")[] = ["NIGHT"]) {
+    const created = await listing(overrides, units);
+    await db.listing.update({ where: { id: created.id }, data: { rates: { updateMany: { where: {}, data: { price } } } } });
+    return created;
+  }
+
+  it("only returns the chosen types of place", async () => {
+    const lodge = await listing({ type: "LODGE" });
+    const room = await listing({ type: "ROOM" });
+    await listing({ type: "APARTMENT" });
+    const ids = (await searchListings({ mode: "short", types: ["LODGE", "ROOM"] })).map((r) => r.id);
+    expect(ids.sort()).toEqual([lodge.id, room.id].sort());
+  });
+
+  it("keeps places with a rate for the mode inside the price range", async () => {
+    await priced(10000);
+    const mid = await priced(50000);
+    await priced(200000);
+    expect((await searchListings({ mode: "short", minPrice: 20000, maxPrice: 100000 })).map((r) => r.id)).toEqual([mid.id]);
+    const monthly = await priced(400000, {}, ["MONTH"]);
+    expect((await searchListings({ mode: "long", maxPrice: 500000 })).map((r) => r.id)).toEqual([monthly.id]);
+  });
+
+  it("gives cards the map position and room counts", async () => {
+    await listing({ lat: -1.5, lng: 29.6, bedrooms: 3, bathrooms: 2 });
+    const [card] = await searchListings({ mode: "short" });
+    expect(card).toMatchObject({ lat: -1.5, lng: 29.6, bedrooms: 3, bathrooms: 2 });
+  });
+});
