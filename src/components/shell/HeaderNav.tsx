@@ -70,7 +70,7 @@ export function HeaderNav({ signedIn = true }: { signedIn?: boolean }) {
 
   return (
     <nav aria-label={t("mainNav")} onMouseLeave={leave}>
-      <ul ref={listRef} className="relative flex items-center gap-2" onBlur={leave}>
+      <ul ref={listRef} className="relative flex items-center gap-1 xl:gap-2" onBlur={leave}>
         <span
           data-testid="nav-hover"
           data-visible={visible}
@@ -105,7 +105,7 @@ export function HeaderNav({ signedIn = true }: { signedIn?: boolean }) {
                 onMouseEnter={track}
                 onFocus={track}
                 className={cn(
-                  "relative block rounded-full px-4 py-2 text-[15px] font-semibold tracking-[0.01em] transition-colors duration-300",
+                  "relative block rounded-full px-3 py-2 text-[15px] font-semibold xl:px-4 tracking-[0.01em] transition-colors duration-300",
                   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
                   active
                     ? "text-primary group-data-[overlay=true]/header:text-white"

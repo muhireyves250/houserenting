@@ -105,28 +105,40 @@ describe("HeaderSearch", () => {
     await vi.waitFor(() => expect(screen.getByRole("combobox", { name: "Where" })).toHaveFocus());
   });
 
-  it("follows client-side navigation: starts watching a hero that appears later", () => {
+  it("is always in the header on pages without a hero search", () => {
+    document.getElementById(HERO_SEARCH_ID)?.remove();
+    currentPath = "/listings/abc";
+    renderWithIntl(<HeaderSearch />);
+    expect(screen.getByRole("group", { name: "Search" })).toHaveTextContent("Anywhere");
+  });
+
+  it("there, opens the full search under the header on the clicked part, and closes with Escape", async () => {
+    document.getElementById(HERO_SEARCH_ID)?.remove();
+    currentPath = "/search";
+    renderWithIntl(<HeaderSearch today="2026-10-12" />);
+    await userEvent.click(screen.getByRole("button", { name: "Any dates" }));
+    expect(animateScrollTo).not.toHaveBeenCalled();
+    expect(screen.getByRole("search")).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Next month" })).toBeInTheDocument();
+    await userEvent.keyboard("{Escape}");
+    expect(screen.queryByRole("search")).not.toBeInTheDocument();
+  });
+
+  it("follows client-side navigation into a page with a hero: hidden while the hero shows", () => {
     document.getElementById(HERO_SEARCH_ID)?.remove();
     currentPath = "/search";
     const view = renderWithIntl(<HeaderSearch />);
-    expect(screen.queryByRole("group", { name: "Search" })).not.toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Search" })).toBeInTheDocument();
 
     const hero = document.createElement("div");
     hero.id = HERO_SEARCH_ID;
     document.body.appendChild(hero);
     currentPath = "/";
     view.rerender(<HeaderSearch />);
-    act(() => report(false));
-    expect(screen.getByRole("group", { name: "Search" })).toBeInTheDocument();
-  });
-
-  it("hides the pill on pages without a hero search, even if it was showing before", () => {
-    const view = renderWithIntl(<HeaderSearch />);
-    act(() => report(false));
-    expect(screen.getByRole("group", { name: "Search" })).toBeInTheDocument();
-    document.getElementById(HERO_SEARCH_ID)?.remove();
-    currentPath = "/listings/abc";
-    view.rerender(<HeaderSearch />);
+    act(() => report(true));
     expect(screen.queryByRole("group", { name: "Search" })).not.toBeInTheDocument();
+    act(() => report(false));
+    expect(screen.getByRole("group", { name: "Search" })).toBeInTheDocument();
+    hero.remove();
   });
 });

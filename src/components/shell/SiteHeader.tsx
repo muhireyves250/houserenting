@@ -14,15 +14,12 @@ export async function SiteHeader({ user }: { user: { name: string } | null }) {
 
   return (
     <HeaderFrame>
-      <div className="mx-auto flex h-[72px] max-w-7xl items-center gap-10 px-6">
+      <div className="mx-auto flex h-[72px] max-w-7xl items-center gap-6 px-6 xl:gap-8">
         <Link href="/" className="shrink-0">
           {/* Icon-only logo; "Space Rental" stays as the accessible name. */}
           <Logo className="transition-colors duration-500 group-data-[overlay=true]/header:text-white [&_svg]:h-9 [&_svg]:w-10" />
         </Link>
-        {/* When the compact search pill is showing, narrower screens drop the text links to make room. */}
-        <div className="max-[1535px]:group-has-[[data-header-search]]/header:hidden">
-          <HeaderNav signedIn={Boolean(user)} />
-        </div>
+        <HeaderNav signedIn={Boolean(user)} />
         <div className="flex flex-1 justify-center">
           <HeaderSearch />
         </div>

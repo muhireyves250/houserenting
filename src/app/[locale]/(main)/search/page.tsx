@@ -5,6 +5,7 @@ import { savedListingIds } from "@/features/favorites/service";
 import { searchListings } from "@/features/listings/service";
 import { FilterBar } from "@/features/search/components/FilterBar";
 import { SearchResults } from "@/features/search/components/SearchResults";
+import { SearchStateSync } from "@/features/search/components/SearchStateSync";
 import { buildSearchQuery, parseSearchParams } from "@/features/search/params";
 import { getCurrentUser } from "@/lib/session";
 
@@ -31,6 +32,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
 
   return (
     <>
+      <SearchStateSync query={query} />
       {/* Filter bar: sticks under the 73px header (top of the screen on phones). Title and count on the left,
           filters centred; phones stack them in two rows (112px), tablets and up use one row (72px). */}
       <div className="sticky top-0 z-30 border-b border-line/70 bg-surface/90 backdrop-blur-md md:top-[73px]">
