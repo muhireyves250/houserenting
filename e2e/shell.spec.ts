@@ -43,7 +43,7 @@ test("language switcher keeps the query string (desktop header)", async ({ page 
 test("search with garbage params still renders", async ({ page }) => {
   await skipOnboarding(page);
   await page.goto("/en/search?mode=zzz&guests=-4&checkIn=2026-02-31");
-  await expect(page.getByRole("heading", { level: 1, name: "Anywhere in Rwanda" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Homes in Rwanda" })).toBeVisible();
 });
 
 test("first mobile visit shows onboarding once", async ({ page }, testInfo) => {
