@@ -259,7 +259,8 @@
     "rowKivuSub": "Beaches, sunsets and boat trips",
     "rowLong": "Homes for long stays",
     "rowLongSub": "Monthly rentals from 6 months",
-    "seeRow": "See all: {title}"
+    "seeRow": "See all: {title}",
+    "forNightsShort": "for {count, plural, one {# night} other {# nights}}"
   },
   "Facility": {
     "KITCHEN": "Kitchen",

@@ -77,18 +77,23 @@ svg {
   shape-rendering: geometricPrecision;
 }
 
-/* Search map (Leaflet): price pins and the listing preview popup. */
-.leaflet-container {
-  font-family: var(--font-sans);
-  background: #eef1f4;
+/* Search page on desktop: the map is fixed to the right half, so the footer would sit under it; hide it there (as Airbnb does). */
+@media (min-width: 1024px) {
+  body:has([data-results-map]) .site-footer {
+    display: none;
+  }
 }
-/* Calmer, lighter basemap so the price pins stand out. */
-.leaflet-tile-pane {
-  filter: saturate(0.5) contrast(0.92) brightness(1.05);
+
+/* Search map (MapLibre): price pins and the listing preview popup. */
+.maplibregl-map {
+  font-family: var(--font-sans);
+}
+.price-pin-root {
+  cursor: pointer;
 }
 .price-pin {
-  position: absolute;
-  transform: translate(-50%, -50%);
+  display: block;
+  cursor: pointer;
   white-space: nowrap;
   border-radius: 9999px;
   background: #fff;
@@ -100,33 +105,78 @@ svg {
   font-variant-numeric: tabular-nums;
   box-shadow:
     0 0 0 1px rgba(16, 24, 40, 0.08),
-    0 3px 10px rgba(16, 24, 40, 0.2);
+    0 3px 10px rgba(16, 24, 40, 0.18);
   transition:
     transform 400ms cubic-bezier(0.32, 0.72, 0, 1),
     background-color 250ms,
-    color 250ms;
+    color 250ms,
+    box-shadow 250ms;
 }
 .price-pin:hover,
 .price-pin[data-active="true"] {
-  transform: translate(-50%, -50%) scale(1.1);
+  transform: scale(1.1);
+  box-shadow:
+    0 0 0 1px rgba(16, 24, 40, 0.08),
+    0 8px 18px rgba(16, 24, 40, 0.25);
 }
 .price-pin[data-active="true"] {
-  background: var(--color-primary);
+  background: var(--color-ink);
   color: #fff;
 }
-.listing-popup .leaflet-popup-content-wrapper {
+.price-pin:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.listing-popup .maplibregl-popup-content {
   padding: 0;
   border-radius: 1rem;
   overflow: hidden;
-  box-shadow: 0 18px 40px -12px rgba(16, 24, 40, 0.4);
+  box-shadow: 0 18px 40px -12px rgba(16, 24, 40, 0.45);
 }
-.listing-popup .leaflet-popup-content {
-  margin: 0;
-  width: auto !important;
+.listing-popup .maplibregl-popup-tip {
+  display: none;
 }
-.leaflet-container .listing-popup a {
-  color: inherit;
+.listing-preview {
+  display: block;
+  width: 240px;
+  color: var(--color-ink);
+  text-decoration: none;
 }
-.listing-popup .leaflet-popup-tip {
-  box-shadow: none;
+.listing-preview-photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: var(--color-canvas);
+}
+.listing-preview-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px 14px;
+}
+.listing-preview-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+.listing-preview-name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  color: var(--color-muted);
+}
+.listing-preview-price {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+}
+.listing-preview-price b {
+  color: var(--color-ink);
+}
+.maplibregl-ctrl-group {
+  border-radius: 12px !important;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(16, 24, 40, 0.15) !important;
 }

@@ -52,7 +52,7 @@ const listing = (id: string): ListingCardData => ({
 
 describe("SearchResults", () => {
   it("toggles between list and map on phones", async () => {
-    renderWithIntl(<SearchResults listings={[listing("a")]} mode="short" signedIn={false} savedIds={[]} empty={null} />);
+    renderWithIntl(<SearchResults listings={[listing("a")]} mode="short" signedIn={false} savedIds={[]} header={null} empty={null} />);
     const map = screen.getByTestId("map").parentElement!;
     expect(map).toHaveClass("hidden");
     await userEvent.click(screen.getByRole("button", { name: "Show map" }));
@@ -61,7 +61,7 @@ describe("SearchResults", () => {
   });
 
   it("frames the card whose pin is hovered", async () => {
-    renderWithIntl(<SearchResults listings={[listing("a"), listing("b")]} mode="short" signedIn={false} savedIds={[]} empty={null} />);
+    renderWithIntl(<SearchResults listings={[listing("a"), listing("b")]} mode="short" signedIn={false} savedIds={[]} header={null} empty={null} />);
     await userEvent.hover(screen.getByRole("button", { name: "pin b" }));
     const [first, second] = screen.getAllByRole("listitem");
     expect(second).toHaveClass("ring-primary/50");
@@ -69,7 +69,7 @@ describe("SearchResults", () => {
   });
 
   it("shows the empty state when nothing matches", () => {
-    renderWithIntl(<SearchResults listings={[]} mode="short" signedIn={false} savedIds={[]} empty={<p>Nothing here</p>} />);
+    renderWithIntl(<SearchResults listings={[]} mode="short" signedIn={false} savedIds={[]} header={<h1>Homes</h1>} empty={<p>Nothing here</p>} />);
     expect(screen.getByText("Nothing here")).toBeInTheDocument();
   });
 });

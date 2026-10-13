@@ -4,12 +4,14 @@ export function securityHeaders({ isProd }: { isProd: boolean }): { key: string;
     // Next.js injects inline bootstrap scripts; tighten to nonces in a later phase.
     `script-src 'self' 'unsafe-inline'${isProd ? "" : " 'unsafe-eval'"}`,
     "style-src 'self' 'unsafe-inline'",
-    // tile.openstreetmap.org: map tiles on the search page.
-    "img-src 'self' data: blob: https://res.cloudinary.com https://images.unsplash.com https://tile.openstreetmap.org",
+    "img-src 'self' data: blob: https://res.cloudinary.com https://images.unsplash.com",
     "font-src 'self'",
     // Hero background video (demo host now; Cloudinary when our own media lands).
     "media-src 'self' https://assets.mixkit.co https://res.cloudinary.com",
-    "connect-src 'self' https://*.ingest.sentry.io https://*.ingest.de.sentry.io",
+    // tiles.openfreemap.org: search map style, vector tiles, fonts and icons (MapLibre fetches them).
+    "connect-src 'self' https://*.ingest.sentry.io https://*.ingest.de.sentry.io https://tiles.openfreemap.org",
+    // MapLibre decodes tiles in web workers created from blob: URLs.
+    "worker-src 'self' blob:",
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",

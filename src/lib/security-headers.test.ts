@@ -14,7 +14,9 @@ describe("securityHeaders", () => {
   });
 
   it("allows Cloudinary and Unsplash (demo) images", () => {
-    expect(asMap(true)["Content-Security-Policy"]).toContain("img-src 'self' data: blob: https://res.cloudinary.com https://images.unsplash.com https://tile.openstreetmap.org");
+    expect(asMap(true)["Content-Security-Policy"]).toContain("img-src 'self' data: blob: https://res.cloudinary.com https://images.unsplash.com");
+    expect(asMap(true)["Content-Security-Policy"]).toContain("https://tiles.openfreemap.org");
+    expect(asMap(true)["Content-Security-Policy"]).toContain("worker-src 'self' blob:");
   });
 
   it("only sends HSTS and forbids eval in production", () => {

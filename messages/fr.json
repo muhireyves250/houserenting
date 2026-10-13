@@ -259,7 +259,8 @@
     "rowKivuSub": "Plages, couchers de soleil et balades en bateau",
     "rowLong": "Logements pour longs séjours",
     "rowLongSub": "Locations au mois à partir de 6 mois",
-    "seeRow": "Tout voir : {title}"
+    "seeRow": "Tout voir : {title}",
+    "forNightsShort": "pour {count, plural, one {# nuit} other {# nuits}}"
   },
   "Facility": {
     "KITCHEN": "Cuisine",

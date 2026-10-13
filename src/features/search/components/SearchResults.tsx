@@ -9,10 +9,10 @@ import type { ListingCardData } from "@/features/listings/service";
 import type { SearchMode } from "@/features/search/params";
 import { cn } from "@/lib/cn";
 
-// Leaflet needs the browser (window); load it client-side only.
+// MapLibre needs the browser (window, WebGL); load it client-side only.
 const ResultsMap = dynamic(() => import("./ResultsMap").then((m) => m.ResultsMap), {
   ssr: false,
-  loading: () => <div className="size-full animate-pulse bg-[#eef1f4]" />,
+  loading: () => <div className="size-full animate-pulse bg-[#eceef1]" />,
 });
 
 /**
@@ -24,12 +24,15 @@ export function SearchResults({
   mode,
   signedIn,
   savedIds,
+  header,
   empty,
 }: {
   listings: ListingCardData[];
   mode: SearchMode;
   signedIn: boolean;
   savedIds: string[];
+  /** Title and count, shown above the list. */
+  header: ReactNode;
   empty: ReactNode;
 }) {
   const t = useTranslations("Search");
@@ -39,8 +42,11 @@ export function SearchResults({
   const saved = new Set(savedIds);
 
   return (
-    <div className="lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:gap-8">
-      <div className={cn(view === "map" && "hidden lg:block")}>
+    // Desktop: list on the left half; the map is fixed to the right half of the screen (edge to edge,
+    // under the 73px header + 72px filter bar), so it never moves while the list scrolls.
+    <div data-results-map>
+      <div className={cn("px-4 pt-6 pb-10 md:px-6 md:pt-8 lg:w-1/2 lg:pr-8", view === "map" && "hidden lg:block")}>
+        {header}
         {listings.length === 0 ? (
           empty
         ) : (
@@ -62,11 +68,10 @@ export function SearchResults({
         )}
       </div>
 
-      {/* Desktop: sticky beside the list, below the header (73px) and filter bar. Phones: full view when toggled. */}
+      {/* Phones: the whole screen between the filter bar (72px) and the tab bar (64px) when toggled. */}
       <div
         className={cn(
-          "overflow-hidden rounded-2xl border border-line/70 shadow-[0_1px_2px_rgba(16,24,40,0.05)]",
-          "h-[calc(100dvh-230px)] min-h-[360px] lg:sticky lg:top-[calc(73px+72px)] lg:h-[calc(100dvh-73px-72px-24px)]",
+          "h-[calc(100dvh-72px-64px)] lg:fixed lg:top-[calc(73px+72px)] lg:right-0 lg:bottom-0 lg:h-auto lg:w-1/2 lg:border-l lg:border-line/70",
           view === "list" && "hidden lg:block",
         )}
       >

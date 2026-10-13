@@ -259,7 +259,8 @@
     "rowKivuSub": "Inkombe, izuba rirenga n'ubwato",
     "rowLong": "Amazu yo kuba igihe kirekire",
     "rowLongSub": "Ubukode bw'ukwezi guhera ku mezi 6",
-    "seeRow": "Reba byose: {title}"
+    "seeRow": "Reba byose: {title}",
+    "forNightsShort": "ku {count, plural, one {joro #} other {majoro #}}"
   },
   "Facility": {
     "KITCHEN": "Igikoni",

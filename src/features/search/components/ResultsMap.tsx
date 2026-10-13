@@ -1,46 +1,27 @@
 "use client";
 
-import "leaflet/dist/leaflet.css";
-import L from "leaflet";
-import Image from "next/image";
+import "maplibre-gl/dist/maplibre-gl.css";
+import maplibregl from "maplibre-gl";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useMemo, type ReactNode } from "react";
-import { MapContainer, Marker, Popup, TileLayer, useMap, ZoomControl } from "react-leaflet";
+import { useEffect, useRef } from "react";
+import { SAMPLE_NIGHTS } from "@/features/listings/pricing";
 import type { ListingCardData } from "@/features/listings/service";
 import { pinLabel, pinPrice, resultsBounds, RWANDA_CENTER } from "@/features/search/map";
 import type { SearchMode } from "@/features/search/params";
-import { Link } from "@/i18n/navigation";
-import { SAMPLE_NIGHTS } from "@/features/listings/pricing";
+import { useRouter } from "@/i18n/navigation";
 import { formatRWF } from "@/lib/format";
 
-// OpenStreetMap's standard tiles: no key, attribution required, fine for normal traffic
-// (https://operations.osmfoundation.org/policies/tiles/). Swap for a keyed provider at scale; update the CSP too.
-const TILES = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
-const ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+// OpenFreeMap "Positron": clean light-grey vector basemap; free, no key, commercial use allowed.
+const STYLE = "https://tiles.openfreemap.org/styles/positron";
 
-const bold = (chunks: ReactNode) => <span className="font-bold text-ink">{chunks}</span>;
+// The marker root is positioned by MapLibre (it owns its transform); the pin inside it can scale freely.
+type Pin = { marker: maplibregl.Marker; root: HTMLDivElement; pin: HTMLButtonElement };
 
-const escapeHtml = (text: string) => text.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
-
-function pinIcon(label: string, active: boolean) {
-  return L.divIcon({
-    className: "price-pin-anchor",
-    html: `<span class="price-pin" data-active="${active}">${escapeHtml(label)}</span>`,
-    iconSize: [0, 0],
-  });
-}
-
-/** Frames all results (or Rwanda when there are none); re-measures when the map is shown again. */
-function FitResults({ listings, visibleKey }: { listings: ListingCardData[]; visibleKey: string }) {
-  const map = useMap();
-  useEffect(() => {
-    map.invalidateSize();
-    const bounds = resultsBounds(listings);
-    if (!bounds) map.setView(RWANDA_CENTER, 8);
-    else if (listings.length === 1) map.setView(bounds[0], 14);
-    else map.fitBounds(bounds, { padding: [56, 56], maxZoom: 14 });
-  }, [map, listings, visibleKey]);
-  return null;
+function el<K extends keyof HTMLElementTagNameMap>(tag: K, className: string, text?: string): HTMLElementTagNameMap[K] {
+  const node = document.createElement(tag);
+  node.className = className;
+  if (text) node.textContent = text;
+  return node;
 }
 
 export function ResultsMap({
@@ -61,60 +42,118 @@ export function ResultsMap({
   const tListings = useTranslations("Listings");
   const tType = useTranslations("ListingType");
   const locale = useLocale();
-  const pins = useMemo(
-    () => listings.map((listing) => ({ listing, price: pinPrice(listing, mode) })).flatMap(({ listing, price }) => (price ? [{ listing, price }] : [])),
-    [listings, mode],
-  );
+  const router = useRouter();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<maplibregl.Map | null>(null);
+  const pinsRef = useRef(new Map<string, Pin>());
+  // Latest callbacks for listeners attached once per marker.
+  const onActiveRef = useRef(onActive);
+  useEffect(() => {
+    onActiveRef.current = onActive;
+  }, [onActive]);
 
-  return (
-    <MapContainer
-      center={RWANDA_CENTER}
-      zoom={8}
-      zoomControl={false}
-      scrollWheelZoom
-      className="size-full"
-      aria-label={t("mapLabel")}
-    >
-      <TileLayer url={TILES} attribution={ATTRIBUTION} maxZoom={19} />
-      <ZoomControl position="topright" />
-      <FitResults listings={listings} visibleKey={visibleKey} />
-      {pins.map(({ listing, price }) => {
-        const active = listing.id === activeId;
-        return (
-          <Marker
-            key={listing.id}
-            position={[listing.lat, listing.lng]}
-            icon={pinIcon(pinLabel(price.amount, locale), active)}
-            zIndexOffset={active ? 1000 : 0}
-            title={listing.title}
-            alt={listing.title}
-            eventHandlers={{ mouseover: () => onActive(listing.id), mouseout: () => onActive(null) }}
-          >
-            <Popup closeButton={false} offset={[0, -14]} className="listing-popup">
-              <Link href={`/listings/${listing.id}`} className="block w-60 overflow-hidden rounded-2xl text-ink no-underline">
-                {listing.photos[0] && (
-                  <span className="relative block aspect-[4/3] bg-canvas">
-                    <Image src={listing.photos[0].url} alt="" fill sizes="240px" className="object-cover" />
-                  </span>
-                )}
-                <span className="flex flex-col gap-0.5 px-3.5 py-3">
-                  <span className="text-sm font-semibold">{tListings("typeIn", { type: tType(listing.type), city: listing.city })}</span>
-                  <span className="truncate text-xs text-muted">{listing.title}</span>
-                  <span className="mt-1 text-sm text-muted tabular-nums">
-                    {price.unit === "NIGHT" ? (
-                      tListings.rich("forNights", { price: formatRWF(price.amount, locale), count: SAMPLE_NIGHTS, b: bold })
-                    ) : (
-                      <>
-                        {bold(formatRWF(price.amount, locale))} {tListings(`perUnit.${price.unit}`)}
-                      </>
-                    )}
-                  </span>
-                </span>
-              </Link>
-            </Popup>
-          </Marker>
-        );
-      })}
-    </MapContainer>
-  );
+  // Create the map once.
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const map = new maplibregl.Map({
+      container: containerRef.current,
+      style: STYLE,
+      center: [RWANDA_CENTER[1], RWANDA_CENTER[0]],
+      zoom: 7.5,
+      attributionControl: { compact: true },
+      dragRotate: false,
+      pitchWithRotate: false,
+    });
+    map.touchZoomRotate.disableRotation();
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+    mapRef.current = map;
+    return () => {
+      map.remove();
+      mapRef.current = null;
+    };
+  }, []);
+
+  // Pins and their previews, rebuilt when the results change; then frame them.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const pins = pinsRef.current;
+    for (const { marker } of pins.values()) marker.remove();
+    pins.clear();
+
+    for (const listing of listings) {
+      const price = pinPrice(listing, mode);
+      if (!price) continue;
+
+      const root = el("div", "price-pin-root");
+      const pin = el("button", "price-pin", pinLabel(price.amount, locale));
+      pin.type = "button";
+      pin.setAttribute("aria-label", `${listing.title}, ${formatRWF(price.amount, locale)}`);
+      root.append(pin);
+      root.addEventListener("mouseenter", () => onActiveRef.current(listing.id));
+      root.addEventListener("mouseleave", () => onActiveRef.current(null));
+
+      // Preview card, built with DOM APIs (text never parsed as HTML).
+      const href = `/listings/${listing.id}`;
+      const card = el("a", "listing-preview");
+      card.href = `/${locale}${href}`;
+      card.addEventListener("click", (event) => {
+        event.preventDefault();
+        router.push(href);
+      });
+      const cover = listing.photos[0];
+      if (cover) {
+        const img = el("img", "listing-preview-photo");
+        img.src = `${cover.url}${cover.url.includes("?") ? "&" : "?"}w=480&q=70&auto=format&fit=crop`;
+        img.alt = "";
+        card.append(img);
+      }
+      const body = el("span", "listing-preview-body");
+      body.append(
+        el("span", "listing-preview-title", tListings("typeIn", { type: tType(listing.type), city: listing.city })),
+        el("span", "listing-preview-name", listing.title),
+      );
+      const priceLine = el("span", "listing-preview-price");
+      priceLine.append(
+        el("b", "", formatRWF(price.amount, locale)),
+        document.createTextNode(
+          ` ${price.unit === "NIGHT" ? tListings("forNightsShort", { count: SAMPLE_NIGHTS }) : tListings(`perUnit.${price.unit}`)}`,
+        ),
+      );
+      body.append(priceLine);
+      card.append(body);
+
+      const popup = new maplibregl.Popup({ offset: 22, closeButton: false, maxWidth: "260px", className: "listing-popup" }).setDOMContent(card);
+      const marker = new maplibregl.Marker({ element: root, anchor: "center" }).setLngLat([listing.lng, listing.lat]).setPopup(popup).addTo(map);
+      pins.set(listing.id, { marker, root, pin });
+    }
+
+    const bounds = resultsBounds(listings);
+    if (!bounds) map.jumpTo({ center: [RWANDA_CENTER[1], RWANDA_CENTER[0]], zoom: 7.5 });
+    else if (listings.length === 1) map.jumpTo({ center: [bounds[0][1], bounds[0][0]], zoom: 13.5 });
+    else
+      map.fitBounds(
+        [
+          [bounds[0][1], bounds[0][0]],
+          [bounds[1][1], bounds[1][0]],
+        ],
+        { padding: 72, maxZoom: 13.5, duration: 0 },
+      );
+  }, [listings, mode, locale, router, tListings, tType]);
+
+  // Highlight the active pin and lift it above its neighbours.
+  useEffect(() => {
+    for (const [id, { root, pin }] of pinsRef.current) {
+      const active = id === activeId;
+      pin.setAttribute("data-active", String(active));
+      root.style.setProperty("z-index", active ? "10" : "");
+    }
+  }, [activeId, listings]);
+
+  // Shown again (phones' Map / List toggle): re-measure the canvas.
+  useEffect(() => {
+    mapRef.current?.resize();
+  }, [visibleKey]);
+
+  return <div ref={containerRef} className="size-full" role="region" aria-label={t("mapLabel")} />;
 }

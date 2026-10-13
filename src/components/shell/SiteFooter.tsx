@@ -53,7 +53,7 @@ export function SiteFooter({ signedIn, year = new Date().getFullYear() }: { sign
 
   return (
     // Deep brand navy, echoing the bottom of the hero. Phones get room above the tab bar.
-    <footer aria-label={t("label")} className="relative isolate overflow-hidden bg-[#001a3d] pb-24 text-white md:pb-0">
+    <footer aria-label={t("label")} className="site-footer relative isolate overflow-hidden bg-[#001a3d] pb-24 text-white md:pb-0">
       {/* Soft brand glows. */}
       <div
         className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(60%_80%_at_0%_0%,rgba(0,87,184,0.45),transparent_60%),radial-gradient(40%_60%_at_100%_100%,rgba(0,87,184,0.25),transparent_70%)]"
