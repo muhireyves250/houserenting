@@ -77,13 +77,6 @@ svg {
   shape-rendering: geometricPrecision;
 }
 
-/* Search page on desktop: the map is fixed to the right half, so the footer would sit under it; hide it there (as Airbnb does). */
-@media (min-width: 1024px) {
-  body:has([data-results-map]) .site-footer {
-    display: none;
-  }
-}
-
 /* Search map (MapLibre): price pins and the listing preview popup. */
 .maplibregl-map {
   font-family: var(--font-sans);

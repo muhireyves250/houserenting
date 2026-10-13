@@ -33,7 +33,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
     <>
       {/* Filter bar: sticks under the 73px desktop header (top of the screen on phones). */}
       <div className="sticky top-0 z-30 border-b border-line/70 bg-surface/90 backdrop-blur-md md:top-[73px]">
-        <div className="flex h-[72px] items-center gap-3 px-4 md:px-6">
+        <div className="mx-auto flex h-[72px] max-w-7xl items-center gap-3 px-4 md:px-6">
           <SlidersHorizontal className="hidden size-4 text-muted sm:block" aria-hidden="true" />
           <FilterBar base={base} mode={query.mode} filters={{ types: query.types, minPrice: query.minPrice, maxPrice: query.maxPrice }} />
         </div>

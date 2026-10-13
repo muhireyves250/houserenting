@@ -42,10 +42,11 @@ export function SearchResults({
   const saved = new Set(savedIds);
 
   return (
-    // Desktop: list on the left half; the map is fixed to the right half of the screen (edge to edge,
-    // under the 73px header + 72px filter bar), so it never moves while the list scrolls.
-    <div data-results-map>
-      <div className={cn("px-4 pt-6 pb-10 md:px-6 md:pt-8 lg:w-1/2 lg:pr-8", view === "map" && "hidden lg:block")}>
+    // Same width and side margins as the header. Desktop: list on the left half, map on the right half,
+    // held in place (sticky) under the 73px header + 72px filter bar while the list scrolls.
+    <div className="mx-auto max-w-7xl px-4 md:px-6 lg:grid lg:grid-cols-2 lg:gap-8">
+      {/* At least a screen tall, so the sticky map always has room and never slides under the filter bar. */}
+      <div className={cn("pt-6 pb-10 md:pt-8 lg:min-h-[calc(100dvh-145px)]", view === "map" && "hidden lg:block")}>
         {header}
         {listings.length === 0 ? (
           empty
@@ -68,10 +69,11 @@ export function SearchResults({
         )}
       </div>
 
-      {/* Phones: the whole screen between the filter bar (72px) and the tab bar (64px) when toggled. */}
+      {/* 24px gap above and below the map on desktop; on phones it fills the space between the filter bar and tab bar. */}
       <div
         className={cn(
-          "h-[calc(100dvh-72px-64px)] lg:fixed lg:top-[calc(73px+72px)] lg:right-0 lg:bottom-0 lg:h-auto lg:w-1/2 lg:border-l lg:border-line/70",
+          "mt-4 h-[calc(100dvh-72px-64px-32px)] overflow-hidden rounded-2xl border border-line/70 shadow-[0_1px_3px_rgba(16,24,40,0.08)]",
+          "lg:sticky lg:top-[calc(145px+24px)] lg:mt-6 lg:h-[calc(100dvh-145px-48px)]",
           view === "list" && "hidden lg:block",
         )}
       >
