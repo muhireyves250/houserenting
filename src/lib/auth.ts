@@ -9,6 +9,7 @@ import { hashPassword, isCommonPassword, verifyPassword } from "@/features/auth/
 import { toAppLocale } from "@/i18n/routing";
 import { runInBackground } from "@/lib/background";
 import { db } from "@/lib/db";
+import { vercelOrigins } from "@/lib/vercel-origins";
 import { getEnv } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { getMailer, type MailMessage } from "@/lib/mailer";
@@ -30,6 +31,7 @@ const localeOf = (user: unknown) => (user as { locale?: string }).locale;
 export const auth = betterAuth({
   appName: "Space Rental",
   baseURL: env.BETTER_AUTH_URL,
+  trustedOrigins: vercelOrigins(),
   secret: env.BETTER_AUTH_SECRET,
   database: prismaAdapter(db, { provider: "postgresql" }),
   user: {
