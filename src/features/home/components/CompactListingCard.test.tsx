@@ -41,6 +41,8 @@ describe("CompactListingCard", () => {
     expect(screen.getByLabelText("Rated 4.92 out of 5")).toBeInTheDocument();
     expect(screen.getByText("Guest favorite")).toBeInTheDocument();
     expect(screen.getByText("Sunny flat")).toBeInTheDocument();
+    expect(screen.getByText("Gasabo")).toBeInTheDocument();
+    expect(screen.getByText("Up to 4 guests")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Save Sunny flat" })).toBeInTheDocument();
   });
 

@@ -15,7 +15,7 @@ export default async function FavoritesPage() {
       {favorites.length === 0 ? (
         <EmptyState icon={<Heart />} title={t("favoritesTitle")} body={t("favoritesBody")} />
       ) : (
-        <ul className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+        <ul className="grid grid-cols-1 gap-5 min-[480px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {favorites.map((listing) => (
             <li key={listing.id}>
               <CompactListingCard listing={listing} mode="short" signedIn saved />
