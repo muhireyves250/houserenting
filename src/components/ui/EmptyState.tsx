@@ -8,7 +8,7 @@ export function EmptyState({ icon, title, body, action }: { icon?: ReactNode; ti
           {icon}
         </div>
       )}
-      <h2 className="text-lg font-semibold text-ink">{title}</h2>
+      <h2 className="text-lg font-bold tracking-[-0.01em] text-ink">{title}</h2>
       <p className="text-sm text-muted">{body}</p>
       {action}
     </div>

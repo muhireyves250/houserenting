@@ -439,7 +439,7 @@ function MobileSheet({
   return (
     <div ref={sheetRef} role="dialog" aria-modal="true" aria-labelledby={titleId} className="fixed inset-0 z-50 flex flex-col bg-surface motion-safe:animate-sheet-up">
       <div className="flex items-center justify-between border-b border-line px-4 py-3">
-        <h2 id={titleId} className="text-lg font-semibold">
+        <h2 id={titleId} className="text-lg font-bold tracking-[-0.01em]">
           {title}
         </h2>
         <button type="button" aria-label={closeLabel} onClick={onClose} className="flex size-10 items-center justify-center rounded-full hover:bg-canvas">

@@ -10,7 +10,7 @@ export default async function ChatsPage() {
   const tNav = await getTranslations("Nav");
   return (
     <PageContainer className="py-6">
-      <h1 className="text-2xl font-semibold">{tNav("chats")}</h1>
+      <h1 className="text-2xl font-bold tracking-[-0.02em]">{tNav("chats")}</h1>
       <EmptyState icon={<MessageSquare />} title={t("chatsTitle")} body={t("chatsBody")} />
     </PageContainer>
   );

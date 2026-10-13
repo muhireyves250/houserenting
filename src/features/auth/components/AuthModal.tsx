@@ -61,7 +61,7 @@ export function AuthModal({
       {mode === "forgot" ? (
         <div className="flex flex-col gap-5">
           <div className="text-center">
-            <h3 className="text-xl font-semibold text-ink">{t("forgotTitle")}</h3>
+            <h3 className="text-xl font-bold tracking-[-0.02em] text-ink">{t("forgotTitle")}</h3>
             <p className="mt-1 text-sm text-muted">{t("forgotBody")}</p>
           </div>
           <ForgotPasswordForm />

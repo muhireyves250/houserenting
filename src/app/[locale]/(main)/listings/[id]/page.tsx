@@ -275,7 +275,8 @@ export default async function ListingPage({ params }: Props) {
               <ul className="flex flex-col gap-1.5 text-[15px] text-ink/80 tabular-nums">
                 {rates.map((rate) => (
                   <li key={rate.id}>
-                    {t(`unitName.${rate.unit}`)} · {formatRWF(discountedPrice(rate.price, listing.discountPercent), locale)} {t(`perUnit.${rate.unit}`)}
+                    {t(`unitName.${rate.unit}`)} · <b className="font-semibold text-ink">{formatRWF(discountedPrice(rate.price, listing.discountPercent), locale)}</b>{" "}
+                    {t(`perUnit.${rate.unit}`)}
                     {rate.dayStartTime && rate.dayEndTime && (
                       <span className="block text-sm text-muted">{t("openHours", { start: rate.dayStartTime, end: rate.dayEndTime })}</span>
                     )}

@@ -25,7 +25,7 @@ export function OnboardingCarousel({ onFinish }: { onFinish: () => void }) {
         <div className="flex size-48 items-center justify-center rounded-full bg-primary-soft text-primary" aria-hidden="true">
           <slide.Icon className="size-24" strokeWidth={1.25} />
         </div>
-        <h1 className="text-2xl font-semibold text-primary">{t(slide.title)}</h1>
+        <h1 className="text-2xl font-bold tracking-[-0.02em] text-primary">{t(slide.title)}</h1>
         <p className="max-w-xs text-muted">{t(slide.body)}</p>
         <div className="flex gap-1.5" aria-hidden="true">
           {SLIDES.map((s, i) => (

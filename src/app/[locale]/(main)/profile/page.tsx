@@ -19,7 +19,7 @@ export default async function ProfilePage() {
       <div className="mb-8 flex items-center gap-4">
         <Avatar name={profile.name} className="size-16 text-xl" />
         <div>
-          <h1 className="text-2xl font-semibold">{t("title")}</h1>
+          <h1 className="text-2xl font-bold tracking-[-0.02em]">{t("title")}</h1>
           <p className="text-sm text-muted">{profile.email}</p>
         </div>
       </div>

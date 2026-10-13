@@ -10,7 +10,7 @@ export default async function BookingsPage() {
   const tNav = await getTranslations("Nav");
   return (
     <PageContainer className="py-6">
-      <h1 className="text-2xl font-semibold">{tNav("bookings")}</h1>
+      <h1 className="text-2xl font-bold tracking-[-0.02em]">{tNav("bookings")}</h1>
       <EmptyState icon={<House />} title={t("bookingsTitle")} body={t("bookingsBody")} />
     </PageContainer>
   );

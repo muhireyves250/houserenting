@@ -11,7 +11,7 @@ export default async function FavoritesPage() {
   const [t, tNav, favorites] = await Promise.all([getTranslations("Empty"), getTranslations("Nav"), listFavorites(user.id)]);
   return (
     <PageContainer className="flex flex-col gap-6 py-6 md:py-10">
-      <h1 className="text-2xl font-semibold md:text-3xl">{tNav("favorites")}</h1>
+      <h1 className="text-2xl font-bold tracking-[-0.02em] md:text-3xl">{tNav("favorites")}</h1>
       {favorites.length === 0 ? (
         <EmptyState icon={<Heart />} title={t("favoritesTitle")} body={t("favoritesBody")} />
       ) : (
