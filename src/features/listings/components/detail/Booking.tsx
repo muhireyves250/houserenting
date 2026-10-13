@@ -7,9 +7,12 @@ import { discountedPrice, headlineRate, type Unit } from "@/features/listings/pr
 import { stayQuote } from "@/features/listings/quote";
 import { DatePanel } from "@/features/search/components/DatePanel";
 import { todayISO, type DateRange } from "@/features/search/date-range";
+import { Link, usePathname } from "@/i18n/navigation";
 import { animateScrollTo } from "@/lib/animate-scroll";
 import { cn } from "@/lib/cn";
 import { formatRWF } from "@/lib/format";
+import type { PlacePreviewData } from "./PlacePreview";
+import { ReserveDialog } from "./Reserve";
 
 export type BookingRate = {
   unit: Unit;
@@ -65,8 +68,84 @@ function scrollToCalendar() {
   if (el) void animateScrollTo(el.getBoundingClientRect().top + window.scrollY - 112);
 }
 
-/** Sticky booking card (right column): price, dates, guests, Reserve (online booking isn't live yet). */
-export function BookingCard({ rates, discountPercent, maxGuests }: { rates: BookingRate[]; discountPercent: number | null; maxGuests: number }) {
+/**
+ * Reserve: opens "Confirm and pay" once dates are chosen, otherwise takes you to the calendar.
+ * Signed-out visitors log in first. Long-term only places keep "Apply for viewing" (not live yet).
+ */
+function ReserveButton({
+  rates,
+  discountPercent,
+  place,
+  signedIn,
+  className,
+}: {
+  rates: BookingRate[];
+  discountPercent: number | null;
+  place: PlacePreviewData;
+  signedIn: boolean;
+  className: string;
+}) {
+  const t = useTranslations("Listings");
+  const pathname = usePathname();
+  const { range, guests } = useStay();
+  const [open, setOpen] = useState(false);
+  const quote = stayQuote(rates, discountPercent, range);
+  const night = rates.find((r) => r.unit === "NIGHT");
+  const longOnly = !rates.some((r) => r.unit !== "MONTH");
+
+  if (longOnly || !night) {
+    return (
+      <button type="button" disabled className={className}>
+        {longOnly ? t("applyViewing") : t("reserve")}
+      </button>
+    );
+  }
+  if (!signedIn) {
+    return (
+      <Link href={{ pathname: "/login", query: { next: pathname } }} className={cn(className, "block text-center")}>
+        {t("reserve")}
+      </Link>
+    );
+  }
+  return (
+    <>
+      <button type="button" onClick={() => (quote ? setOpen(true) : scrollToCalendar())} className={className}>
+        {t("reserve")}
+      </button>
+      {open && quote && (
+        <ReserveDialog
+          place={place}
+          quote={quote}
+          range={range}
+          guests={guests}
+          checkInTime={night.checkInTime}
+          checkOutTime={night.checkOutTime}
+          savings={quote.originalTotal ? quote.originalTotal - quote.total : null}
+          onClose={() => setOpen(false)}
+          onChangeDates={() => {
+            setOpen(false);
+            scrollToCalendar();
+          }}
+        />
+      )}
+    </>
+  );
+}
+
+/** Sticky booking card (right column): price, dates, guests, Reserve (payments aren't live yet). */
+export function BookingCard({
+  rates,
+  discountPercent,
+  maxGuests,
+  place,
+  signedIn,
+}: {
+  rates: BookingRate[];
+  discountPercent: number | null;
+  maxGuests: number;
+  place: PlacePreviewData;
+  signedIn: boolean;
+}) {
   const t = useTranslations("Listings");
   const locale = useLocale();
   const guestsId = useId();
@@ -146,14 +225,16 @@ export function BookingCard({ rates, discountPercent, maxGuests }: { rates: Book
           </div>
         )}
 
-        <button
-          type="button"
-          disabled
-          className="mt-4 w-full rounded-full bg-gradient-to-r from-primary to-[#0a6fe0] py-3.5 text-[15px] font-semibold text-white shadow-[0_10px_24px_-10px_rgba(0,87,184,0.8)] disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {longOnly ? t("applyViewing") : t("reserve")}
-        </button>
-        <p className="mt-3 text-center text-[13px] text-muted">{t("bookingSoon")}</p>
+        <ReserveButton
+          rates={rates}
+          discountPercent={discountPercent}
+          place={place}
+          signedIn={signedIn}
+          className="mt-4 w-full rounded-full bg-gradient-to-r from-primary to-[#0a6fe0] py-3.5 text-[15px] font-semibold text-white shadow-[0_10px_24px_-10px_rgba(0,87,184,0.8)] transition-[filter,transform] duration-300 hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+        />
+        <p className="mt-3 text-center text-[13px] text-muted">
+          {rates.some((r) => r.unit === "NIGHT") ? t("wontBeCharged") : t("bookingSoon")}
+        </p>
 
         {/* Breakdown */}
         {quote && (
@@ -193,7 +274,17 @@ export function BookingCard({ rates, discountPercent, maxGuests }: { rates: Book
 }
 
 /** Phones: price and Reserve pinned above the tab bar. */
-export function MobileBookingBar({ rates, discountPercent }: { rates: BookingRate[]; discountPercent: number | null }) {
+export function MobileBookingBar({
+  rates,
+  discountPercent,
+  place,
+  signedIn,
+}: {
+  rates: BookingRate[];
+  discountPercent: number | null;
+  place: PlacePreviewData;
+  signedIn: boolean;
+}) {
   const t = useTranslations("Listings");
   const locale = useLocale();
   const { range } = useStay();
@@ -212,9 +303,13 @@ export function MobileBookingBar({ rates, discountPercent }: { rates: BookingRat
               </>
             )}
       </p>
-      <button type="button" disabled className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white disabled:opacity-60">
-        {longOnly ? t("applyViewing") : t("reserve")}
-      </button>
+      <ReserveButton
+        rates={rates}
+        discountPercent={discountPercent}
+        place={place}
+        signedIn={signedIn}
+        className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white disabled:opacity-60"
+      />
     </div>
   );
 }

@@ -13,7 +13,8 @@ test("search Kigali short-term, open a listing and see its prices", async ({ pag
 
   await expect(page.getByRole("heading", { level: 1, name: "Bright 2-bedroom flat in Kimihurura" })).toBeVisible();
   await expect(page.getByText("RWF 55,250").first()).toBeVisible();
-  await expect(page.getByRole("button", { name: "Book" }).filter({ visible: true })).toBeDisabled();
+  // Signed out: Reserve asks to log in first (and comes back here).
+  await expect(page.getByRole("link", { name: "Reserve" }).filter({ visible: true }).first()).toHaveAttribute("href", /\/en\/login\?next=/);
 });
 
 test("long-term search only shows monthly listings with the viewing action", async ({ page }) => {
@@ -22,7 +23,7 @@ test("long-term search only shows monthly listings with the viewing action", asy
   await page.getByRole("link", { name: /Family villa with garden in Nyarutarama/ }).click();
   await expect(page.getByText("/ month").first()).toBeVisible();
   await expect(page.getByRole("button", { name: "Apply for viewing" }).filter({ visible: true })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Book" })).toHaveCount(0);
+  await expect(page.getByText("Reserve", { exact: true })).toHaveCount(0);
 });
 
 test("unknown listings return 404", async ({ page }) => {

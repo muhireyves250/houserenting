@@ -234,7 +234,13 @@ export default async function ListingPage({ params }: Props) {
 
           <div className="hidden md:block">
             <div className="sticky top-[97px]">
-              <BookingCard rates={bookingRates} discountPercent={listing.discountPercent} maxGuests={listing.maxGuests} />
+              <BookingCard
+                rates={bookingRates}
+                discountPercent={listing.discountPercent}
+                maxGuests={listing.maxGuests}
+                place={preview}
+                signedIn={user !== null}
+              />
             </div>
           </div>
         </div>
@@ -302,7 +308,7 @@ export default async function ListingPage({ params }: Props) {
         </Section>
       </PageContainer>
 
-      {rates.length > 0 && <MobileBookingBar rates={bookingRates} discountPercent={listing.discountPercent} />}
+      {rates.length > 0 && <MobileBookingBar rates={bookingRates} discountPercent={listing.discountPercent} place={preview} signedIn={user !== null} />}
     </StayProvider>
   );
 }
