@@ -88,7 +88,12 @@
     "mapLabel": "Carte des résultats",
     "filters": "Filtres",
     "noFilterResults": "Aucun logement ne correspond à ces filtres",
-    "noFilterResultsBody": "Essayez une fourchette de prix plus large ou d'autres types de logement."
+    "noFilterResultsBody": "Essayez une fourchette de prix plus large ou d'autres types de logement.",
+    "searchAsMove": "Rechercher en déplaçant la carte",
+    "titleMapArea": "Logements dans la zone de la carte",
+    "updating": "Mise à jour des logements…",
+    "noAreaResults": "Aucun logement dans cette partie de la carte",
+    "noAreaResultsBody": "Dézoomez ou déplacez la carte pour voir plus de logements."
   },
   "Onboarding": {
     "slide1": "Louez ce qui vous convient",

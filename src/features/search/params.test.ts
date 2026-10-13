@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildSearchQuery, filterParams, parseSearchParams } from "./params";
+import { buildSearchQuery, filterParams, formatBbox, parseSearchParams } from "./params";
 
 describe("buildSearchQuery", () => {
   it("keeps only filled short-term fields", () => {
@@ -94,5 +94,23 @@ describe("type of place and price filters", () => {
   it("serialises filters back to URL params", () => {
     expect(filterParams({ types: ["LODGE", "ROOM"], minPrice: 1000 })).toEqual({ type: "LODGE,ROOM", minPrice: "1000" });
     expect(filterParams({ types: [] })).toEqual({});
+  });
+});
+
+describe("map area (bbox)", () => {
+  it("parses south,west,north,east in both modes", () => {
+    expect(parseSearchParams({ bbox: "-2.1,29.3,-1.5,30.1" })).toEqual({ mode: "short", bbox: [-2.1, 29.3, -1.5, 30.1] });
+    expect(parseSearchParams({ mode: "long", bbox: "-2.1,29.3,-1.5,30.1" })).toMatchObject({ bbox: [-2.1, 29.3, -1.5, 30.1] });
+  });
+
+  it("drops malformed, out-of-range or inverted boxes", () => {
+    expect(parseSearchParams({ bbox: "a,b,c,d" })).toEqual({ mode: "short" });
+    expect(parseSearchParams({ bbox: "-2,29,-1" })).toEqual({ mode: "short" });
+    expect(parseSearchParams({ bbox: "-95,29,-1,30" })).toEqual({ mode: "short" });
+    expect(parseSearchParams({ bbox: "-1,29,-2,30" })).toEqual({ mode: "short" });
+  });
+
+  it("formats a box for the URL, rounded to 4 decimals", () => {
+    expect(formatBbox([-2.123456, 29.300001, -1.5, 30.1])).toBe("-2.1235,29.3,-1.5,30.1");
   });
 });

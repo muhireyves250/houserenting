@@ -88,7 +88,12 @@
     "mapLabel": "Ikarita y'ibisubizo",
     "filters": "Muyunguruzi",
     "noFilterResults": "Nta macumbi ahuye n'ibyo wahisemo",
-    "noFilterResultsBody": "Gerageza igiciro kinini cyangwa ubwoko bwinshi bw'amacumbi."
+    "noFilterResultsBody": "Gerageza igiciro kinini cyangwa ubwoko bwinshi bw'amacumbi.",
+    "searchAsMove": "Shakisha uko nimura ikarita",
+    "titleMapArea": "Amacumbi ari ku ikarita",
+    "updating": "Turimo kuvugurura amacumbi…",
+    "noAreaResults": "Nta macumbi ari muri iki gice cy'ikarita",
+    "noAreaResultsBody": "Gabanya ikarita cyangwa uyimure kugira ngo ubone ahandi."
   },
   "Onboarding": {
     "slide1": "Kodesha ikubereye",

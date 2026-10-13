@@ -1,4 +1,4 @@
-import { Building2, SlidersHorizontal } from "lucide-react";
+import { Building2, MapPinned, SlidersHorizontal } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { savedListingIds } from "@/features/favorites/service";
@@ -6,7 +6,7 @@ import { searchListings } from "@/features/listings/service";
 import { FilterBar } from "@/features/search/components/FilterBar";
 import { SearchResults } from "@/features/search/components/SearchResults";
 import { SearchStateSync } from "@/features/search/components/SearchStateSync";
-import { buildSearchQuery, parseSearchParams } from "@/features/search/params";
+import { buildSearchQuery, filterParams, parseSearchParams } from "@/features/search/params";
 import { getCurrentUser } from "@/lib/session";
 
 export default async function SearchPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
@@ -39,7 +39,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
         <div className="mx-auto flex h-[112px] max-w-7xl flex-col justify-center gap-2.5 px-4 md:grid md:h-[72px] md:grid-cols-[1fr_auto_1fr] md:items-center md:gap-6 md:px-6">
           <div className="min-w-0">
             <h1 className="truncate font-display text-lg leading-6 font-bold tracking-[-0.02em] text-ink">
-              {t("title", { place: query.location ?? tHome("country") })}
+              {query.bbox ? t("titleMapArea") : t("title", { place: query.location ?? tHome("country") })}
             </h1>
             <p className="truncate text-[13px] text-muted">
               {tListings("results", { count: listings.length })} · {query.mode === "short" ? tHome("short") : tHome("long")}
@@ -58,8 +58,12 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
         mode={query.mode}
         signedIn={user !== null}
         savedIds={[...saved]}
+        query={{ ...base, ...filterParams(query) }}
+        bbox={query.bbox}
         empty={
-          filtered ? (
+          query.bbox ? (
+            <EmptyState icon={<MapPinned />} title={t("noAreaResults")} body={t("noAreaResultsBody")} />
+          ) : filtered ? (
             <EmptyState icon={<SlidersHorizontal />} title={t("noFilterResults")} body={t("noFilterResultsBody")} />
           ) : (
             <EmptyState icon={<Building2 />} title={t("emptyTitle")} body={t("emptyBody")} />

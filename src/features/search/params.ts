@@ -3,6 +3,9 @@ export type SearchMode = "short" | "long";
 export const PLACE_TYPES = ["APARTMENT", "DUPLEX", "PRIVATE_HOUSE", "LODGE", "ROOM"] as const;
 export type PlaceType = (typeof PLACE_TYPES)[number];
 
+/** Visible map area: [south, west, north, east] in degrees. */
+export type Bbox = [number, number, number, number];
+
 /** Results-page filters; they work in both modes (price is per night/day/hour short-term, per month long-term). */
 export type SearchFilters = {
   types?: PlaceType[];
@@ -12,6 +15,8 @@ export type SearchFilters = {
 
 export type SearchQuery = SearchFilters & {
   mode: SearchMode;
+  /** Set when the map is used as the filter ("search as I move the map"). */
+  bbox?: Bbox;
   location?: string;
   checkIn?: string;
   checkOut?: string;
@@ -57,6 +62,19 @@ function parseFilters(params: Record<string, Raw>): SearchFilters {
   return filters;
 }
 
+function parseBbox(value: Raw): Bbox | undefined {
+  const parts = (first(value) ?? "").split(",");
+  if (parts.length !== 4 || parts.some((p) => !/^-?\d+(\.\d+)?$/.test(p.trim()))) return undefined;
+  const [south, west, north, east] = parts.map(Number) as Bbox;
+  const valid = south >= -90 && north <= 90 && west >= -180 && east <= 180 && south < north && west < east;
+  return valid ? [south, west, north, east] : undefined;
+}
+
+/** A map area for the URL, rounded to 4 decimals (~11 m). */
+export function formatBbox(bbox: Bbox): string {
+  return bbox.map((n) => Number(n.toFixed(4))).join(",");
+}
+
 /** URL params for the results-page filters (empty ones left out). */
 export function filterParams(filters: SearchFilters): Record<string, string> {
   const params: Record<string, string> = {};
@@ -72,6 +90,8 @@ export function parseSearchParams(params: Record<string, Raw>): SearchQuery {
   const location = first(params.location)?.trim().slice(0, MAX_LOCATION);
   if (location) query.location = location;
   Object.assign(query, parseFilters(params));
+  const bbox = parseBbox(params.bbox);
+  if (bbox) query.bbox = bbox;
   if (mode === "long") return query;
 
   const checkIn = isoDate(params.checkIn);

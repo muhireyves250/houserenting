@@ -40,6 +40,11 @@ export function searchListings(query: SearchQuery, limit = SEARCH_LIMIT): Promis
     rates: { some: { unit: query.mode === "long" ? "MONTH" : { in: [...SHORT_UNITS] }, price } },
   };
   if (query.types?.length) where.type = { in: query.types };
+  if (query.bbox) {
+    const [south, west, north, east] = query.bbox;
+    where.lat = { gte: south, lte: north };
+    where.lng = { gte: west, lte: east };
+  }
   if (query.location) {
     // Prisma's `contains` becomes ILIKE '%…%' without escaping, so escape LIKE wildcards ourselves.
     const match = { contains: escapeLike(query.location), mode: "insensitive" } as const;

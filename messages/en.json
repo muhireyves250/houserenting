@@ -88,7 +88,12 @@
     "mapLabel": "Map of results",
     "filters": "Filters",
     "noFilterResults": "No homes match these filters",
-    "noFilterResultsBody": "Try a wider price range or more types of place."
+    "noFilterResultsBody": "Try a wider price range or more types of place.",
+    "searchAsMove": "Search as I move the map",
+    "titleMapArea": "Homes in the map area",
+    "updating": "Updating homes…",
+    "noAreaResults": "No homes in this part of the map",
+    "noAreaResultsBody": "Zoom out or move the map to see more places."
   },
   "Onboarding": {
     "slide1": "Rent your perfect fit",

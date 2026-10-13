@@ -180,3 +180,12 @@ describe("type and price filters", () => {
     expect(card).toMatchObject({ lat: -1.5, lng: 29.6, bedrooms: 3, bathrooms: 2 });
   });
 });
+
+describe("map area filter", () => {
+  it("only returns places inside the box", async () => {
+    const inside = await listing({ lat: -1.95, lng: 30.06 });
+    await listing({ lat: -1.5, lng: 29.6 });
+    const ids = (await searchListings({ mode: "short", bbox: [-2.0, 30.0, -1.9, 30.1] })).map((r) => r.id);
+    expect(ids).toEqual([inside.id]);
+  });
+});

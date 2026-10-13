@@ -7,7 +7,7 @@ import { useEffect, useRef } from "react";
 import { SAMPLE_NIGHTS } from "@/features/listings/pricing";
 import type { ListingCardData } from "@/features/listings/service";
 import { pinLabel, pinPrice, resultsBounds, RWANDA_CENTER } from "@/features/search/map";
-import type { SearchMode } from "@/features/search/params";
+import type { Bbox, SearchMode } from "@/features/search/params";
 import { useRouter } from "@/i18n/navigation";
 import { formatRWF } from "@/lib/format";
 
@@ -30,6 +30,8 @@ export function ResultsMap({
   activeId,
   onActive,
   visibleKey,
+  bbox,
+  onBoundsChange,
 }: {
   listings: ListingCardData[];
   mode: SearchMode;
@@ -37,6 +39,10 @@ export function ResultsMap({
   /** A pin is hovered (id) or left (null). */
   onActive: (id: string | null) => void;
   visibleKey: string;
+  /** Results come from this map area: keep the map where the user put it (don't re-frame the pins). */
+  bbox?: Bbox;
+  /** The user moved or zoomed the map: its new visible area. */
+  onBoundsChange?: (bbox: Bbox) => void;
 }) {
   const t = useTranslations("Search");
   const tListings = useTranslations("Listings");
@@ -48,9 +54,14 @@ export function ResultsMap({
   const pinsRef = useRef(new Map<string, Pin>());
   // Latest callbacks for listeners attached once per marker.
   const onActiveRef = useRef(onActive);
+  const onBoundsRef = useRef(onBoundsChange);
   useEffect(() => {
     onActiveRef.current = onActive;
-  }, [onActive]);
+    onBoundsRef.current = onBoundsChange;
+  }, [onActive, onBoundsChange]);
+  // Only the first render's area matters for setting up the map (later ones come from the map itself).
+  const initialBbox = useRef(bbox);
+  const followsArea = Boolean(bbox);
 
   // Create the map once.
   useEffect(() => {
@@ -66,8 +77,37 @@ export function ResultsMap({
     });
     map.touchZoomRotate.disableRotation();
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+    // Opened from a shared map-area link: show exactly that area.
+    const start = initialBbox.current;
+    if (start)
+      map.fitBounds(
+        [
+          [start[1], start[0]],
+          [start[3], start[2]],
+        ],
+        { padding: 0, duration: 0 },
+      );
+
+    // Report moves the user started (drag, wheel, double-click, zoom buttons carry an originalEvent when they
+    // start; our own fitBounds doesn't). Checked at the start because a drag's inertia glide ends without one.
+    // Settled for 400ms so one gesture makes one search.
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let userMove = false;
+    map.on("movestart", (event) => {
+      if ("originalEvent" in event && event.originalEvent) userMove = true;
+    });
+    map.on("moveend", (event) => {
+      if (!userMove && !("originalEvent" in event && event.originalEvent)) return;
+      userMove = false;
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        const b = map.getBounds();
+        onBoundsRef.current?.([b.getSouth(), b.getWest(), b.getNorth(), b.getEast()]);
+      }, 400);
+    });
     mapRef.current = map;
     return () => {
+      clearTimeout(timer);
       map.remove();
       mapRef.current = null;
     };
@@ -128,6 +168,8 @@ export function ResultsMap({
       pins.set(listing.id, { marker, root, pin });
     }
 
+    // Results from the visible area: the user placed the map; don't move it.
+    if (followsArea) return;
     const bounds = resultsBounds(listings);
     if (!bounds) map.jumpTo({ center: [RWANDA_CENTER[1], RWANDA_CENTER[0]], zoom: 7.5 });
     else if (listings.length === 1) map.jumpTo({ center: [bounds[0][1], bounds[0][0]], zoom: 13.5 });
@@ -139,7 +181,7 @@ export function ResultsMap({
         ],
         { padding: 72, maxZoom: 13.5, duration: 0 },
       );
-  }, [listings, mode, locale, router, tListings, tType]);
+  }, [listings, mode, locale, router, tListings, tType, followsArea]);
 
   // Highlight the active pin and lift it above its neighbours.
   useEffect(() => {
