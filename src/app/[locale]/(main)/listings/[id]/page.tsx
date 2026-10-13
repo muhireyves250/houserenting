@@ -29,12 +29,16 @@ import { PageContainer } from "@/components/ui/PageContainer";
 import { savedListingIds } from "@/features/favorites/service";
 import { isGuestFavorite } from "@/features/home/sections";
 import { BookingCard, MobileBookingBar, StayCalendar, StayProvider } from "@/features/listings/components/detail/Booking";
+import { TrackView } from "@/features/listings/components/RecentlyViewed";
 import { ListingPhotos } from "@/features/listings/components/detail/ListingPhotos";
 import { LocationMapLazy } from "@/features/listings/components/detail/LocationMapLazy";
 import { SaveButton } from "@/features/listings/components/detail/SaveButton";
 import { ShareButton } from "@/features/listings/components/detail/ShareButton";
 import { discountedPrice } from "@/features/listings/pricing";
-import { getPublishedListing } from "@/features/listings/service";
+import { getPublishedListing, nearbyListings } from "@/features/listings/service";
+import { CollapsibleText } from "@/features/listings/components/detail/CollapsibleText";
+import { CompactListingCard } from "@/features/home/components/CompactListingCard";
+import { HomeRow } from "@/features/home/components/HomeRow";
 import { navHref } from "@/components/shell/nav-items";
 import { Link } from "@/i18n/navigation";
 import { formatRWF } from "@/lib/format";
@@ -86,7 +90,9 @@ export default async function ListingPage({ params }: Props) {
     getCurrentUser(),
     getLocale(),
   ]);
-  const saved = user ? (await savedListingIds(user.id, [listing.id])).has(listing.id) : false;
+  const nearby = await nearbyListings(listing);
+  const savedIds = user ? await savedListingIds(user.id, [listing.id, ...nearby.map((l) => l.id)]) : new Set<string>();
+  const saved = savedIds.has(listing.id);
   const rates = [...listing.rates].sort((a, b) => UNIT_ORDER.indexOf(a.unit) - UNIT_ORDER.indexOf(b.unit));
   const night = rates.find((r) => r.unit === "NIGHT");
   const place = `${listing.district}, ${listing.city}`;
@@ -123,6 +129,19 @@ export default async function ListingPage({ params }: Props) {
     </>
   );
 
+  // House rules, without repeats (hosts often also write the check-in time as a rule).
+  const houseRules = [
+    ...new Set(
+      [
+        night?.checkInTime && t("checkIn", { time: night.checkInTime }),
+        night?.checkOutTime && t("checkOut", { time: night.checkOutTime }),
+        t("maxGuests", { count: listing.maxGuests }),
+        listing.petsAllowed ? t("petsAllowed") : t("noPets"),
+        ...listing.termsOfRent,
+      ].filter((rule): rule is string => Boolean(rule)),
+    ),
+  ];
+
   const bookingRates = rates.map(({ unit, price, checkInTime, checkOutTime, dayStartTime, dayEndTime }) => ({
     unit,
     price,
@@ -134,6 +153,17 @@ export default async function ListingPage({ params }: Props) {
 
   return (
     <StayProvider>
+      <TrackView
+        listing={{
+          id: listing.id,
+          title: listing.title,
+          type: listing.type,
+          city: listing.city,
+          photo: listing.photos[0]?.url ?? null,
+          ratingAvg: listing.ratingAvg,
+          ratingCount: listing.ratingCount,
+        }}
+      />
       <PageContainer className="pt-0 pb-40 md:pt-8 md:pb-16">
         {/* Title row */}
         <div className="mb-6 hidden items-end justify-between gap-6 md:flex">
@@ -221,7 +251,7 @@ export default async function ListingPage({ params }: Props) {
             )}
 
             <Section>
-              <p className="text-[15px] leading-7 whitespace-pre-line text-ink">{listing.description}</p>
+              <CollapsibleText text={listing.description} />
               {listing.characteristics.length > 0 && (
                 <ul className="mt-5 flex flex-wrap gap-2">
                   {listing.characteristics.map((c) => (
@@ -299,12 +329,8 @@ export default async function ListingPage({ params }: Props) {
               <KeyRound className="mb-4 size-6 text-ink" strokeWidth={1.6} aria-hidden="true" />
               <h3 className="mb-2 text-[15px] font-semibold text-ink">{t("houseRules")}</h3>
               <ul className="flex flex-col gap-1.5 text-[15px] text-ink/80">
-                {night?.checkInTime && <li>{t("checkIn", { time: night.checkInTime })}</li>}
-                {night?.checkOutTime && <li>{t("checkOut", { time: night.checkOutTime })}</li>}
-                <li>{t("maxGuests", { count: listing.maxGuests })}</li>
-                <li>{listing.petsAllowed ? t("petsAllowed") : t("noPets")}</li>
-                {listing.termsOfRent.map((term) => (
-                  <li key={term}>{term}</li>
+                {houseRules.map((rule) => (
+                  <li key={rule}>{rule}</li>
                 ))}
               </ul>
             </div>
@@ -326,6 +352,21 @@ export default async function ListingPage({ params }: Props) {
             </div>
           </div>
         </Section>
+        {nearby.length > 0 && (
+          <section className="border-t border-line py-10">
+            <HomeRow title={t("moreNearby")} subtitle={t("moreNearbySub")}>
+              {nearby.map((home) => (
+                <CompactListingCard
+                  key={home.id}
+                  listing={home}
+                  mode={rates.some((r) => r.unit !== "MONTH") ? "short" : "long"}
+                  signedIn={user !== null}
+                  saved={savedIds.has(home.id)}
+                />
+              ))}
+            </HomeRow>
+          </section>
+        )}
       </PageContainer>
 
       {rates.length > 0 && <MobileBookingBar rates={bookingRates} discountPercent={listing.discountPercent} place={preview} signedIn={user !== null} />}

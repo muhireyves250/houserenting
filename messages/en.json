@@ -354,7 +354,13 @@
     "youSave": "You save {amount} on this stay",
     "agree": "By selecting the button below, I agree to the host's house rules and to pay the total shown.",
     "paymentsSoon": "Mobile money payments open soon. You won't be charged.",
-    "wontBeCharged": "You won't be charged yet"
+    "wontBeCharged": "You won't be charged yet",
+    "recentlyViewed": "Recently viewed",
+    "recentlyViewedSub": "Homes you looked at on this device",
+    "showMore": "Show more",
+    "showLess": "Show less",
+    "moreNearby": "More stays nearby",
+    "moreNearbySub": "Other homes around this place"
   },
   "Facility": {
     "KITCHEN": "Kitchen",

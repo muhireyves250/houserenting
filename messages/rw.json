@@ -354,7 +354,13 @@
     "youSave": "Uzigama {amount} kuri uru rugendo",
     "agree": "Uhitamo buto iri hasi, wemeye amategeko y'inzu kandi wemeye kwishyura igiteranyo kigaragara.",
     "paymentsSoon": "Kwishyura na mobile money biraza vuba. Nta mafaranga uri bucibwe.",
-    "wontBeCharged": "Nta mafaranga uracibwa"
+    "wontBeCharged": "Nta mafaranga uracibwa",
+    "recentlyViewed": "Ibyo uherutse kureba",
+    "recentlyViewedSub": "Amacumbi warebye kuri iki gikoresho",
+    "showMore": "Reba ibindi",
+    "showLess": "Reba bike",
+    "moreNearby": "Andi macumbi hafi aha",
+    "moreNearbySub": "Andi macumbi ari hafi y'aha hantu"
   },
   "Facility": {
     "KITCHEN": "Igikoni",

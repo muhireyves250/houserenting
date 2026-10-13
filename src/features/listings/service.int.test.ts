@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import type { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 import { resetDb } from "@/test/db";
-import { featuredListings, getPublishedListing, searchListings, suggestLocations } from "./service";
+import { featuredListings, getPublishedListing, nearbyListings, searchListings, suggestLocations } from "./service";
 
 let n = 0;
 async function listing(overrides: Partial<Prisma.ListingUncheckedCreateInput> = {}, units: ("HOUR" | "DAY" | "NIGHT" | "MONTH")[] = ["NIGHT"]) {
@@ -187,5 +187,18 @@ describe("map area filter", () => {
     await listing({ lat: -1.5, lng: 29.6 });
     const ids = (await searchListings({ mode: "short", bbox: [-2.0, 30.0, -1.9, 30.1] })).map((r) => r.id);
     expect(ids).toEqual([inside.id]);
+  });
+});
+
+describe("nearbyListings", () => {
+  it("returns other published places around this one, closest first", async () => {
+    const here = await listing({ lat: -1.95, lng: 30.06 });
+    const far = await listing({ lat: -1.5, lng: 29.6 });
+    const near = await listing({ lat: -1.951, lng: 30.061 });
+    const mid = await listing({ lat: -1.99, lng: 30.1 });
+    await listing({ lat: -1.952, lng: 30.062, status: "DRAFT" });
+    const ids = (await nearbyListings(here, 2)).map((r) => r.id);
+    expect(ids).toEqual([near.id, mid.id]);
+    expect(ids).not.toContain(far.id);
   });
 });

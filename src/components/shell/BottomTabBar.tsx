@@ -13,7 +13,7 @@ export function BottomTabBar({ signedIn = true }: { signedIn?: boolean }) {
   return (
     <nav
       aria-label={t("mainNav")}
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-line/70 bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
     >
       <ul className="grid grid-cols-5">
         {NAV_ITEMS.map(({ key, href, icon: Icon }) => {
@@ -23,10 +23,12 @@ export function BottomTabBar({ signedIn = true }: { signedIn?: boolean }) {
               <Link
                 href={navHref(href, signedIn)}
                 aria-current={active ? "page" : undefined}
-                className={cn("relative flex flex-col items-center gap-1 py-2 text-xs", active ? "font-semibold text-primary" : "text-muted")}
+                className={cn(
+                  "flex flex-col items-center gap-1 pt-2.5 pb-2 text-xs transition-colors duration-200 active:scale-95",
+                  active ? "font-semibold text-primary" : "font-medium text-ink/60",
+                )}
               >
-                {active && <span className="absolute inset-x-4 top-0 h-0.5 rounded-full bg-primary" aria-hidden="true" />}
-                <Icon className="size-6" aria-hidden="true" />
+                <Icon className={cn("size-6 transition-transform duration-300", active && "scale-110")} strokeWidth={active ? 2.3 : 1.8} aria-hidden="true" />
                 {t(key)}
               </Link>
             </li>

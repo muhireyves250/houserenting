@@ -107,3 +107,22 @@ export function getPublishedListing(id: string) {
 }
 
 export type ListingDetail = NonNullable<Awaited<ReturnType<typeof getPublishedListing>>>;
+
+// ~65 km around a place: wide enough for a district, narrow enough to stay "nearby".
+const NEARBY_DEGREES = 0.6;
+
+/** Other published places around this one, closest first. */
+export async function nearbyListings(place: { id: string; lat: number; lng: number }, limit = 8): Promise<ListingCardData[]> {
+  const candidates = await db.listing.findMany({
+    where: {
+      status: "PUBLISHED",
+      id: { not: place.id },
+      lat: { gte: place.lat - NEARBY_DEGREES, lte: place.lat + NEARBY_DEGREES },
+      lng: { gte: place.lng - NEARBY_DEGREES, lte: place.lng + NEARBY_DEGREES },
+    },
+    select: CARD_SELECT,
+    take: 60,
+  });
+  const distance = (l: { lat: number; lng: number }) => (l.lat - place.lat) ** 2 + ((l.lng - place.lng) * Math.cos((place.lat * Math.PI) / 180)) ** 2;
+  return candidates.sort((a, b) => distance(a) - distance(b)).slice(0, limit);
+}

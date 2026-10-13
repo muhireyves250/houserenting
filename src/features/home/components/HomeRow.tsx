@@ -30,7 +30,8 @@ export function HomeRow({
 }: {
   title: string;
   subtitle: string;
-  query: Record<string, string>;
+  /** Search the See all pill opens; no pill without one. */
+  query?: Record<string, string>;
   children: ReactNode;
 }) {
   const t = useTranslations("Listings");
@@ -95,14 +96,16 @@ export function HomeRow({
           <p className="mt-0.5 line-clamp-2 text-[13px] leading-5 text-muted md:truncate md:text-sm">{subtitle}</p>
         </div>
         <div className="flex shrink-0 items-center gap-3">
-          <Link
-            href={{ pathname: "/search", query }}
-            aria-label={t("seeRow", { title })}
-            className="group/all inline-flex items-center gap-1.5 rounded-full border border-line bg-surface py-1.5 pr-2.5 pl-3.5 text-[13px] font-semibold text-ink shadow-[0_1px_2px_rgba(16,24,40,0.06)] transition-[border-color,background-color,color,box-shadow] duration-300 hover:border-primary hover:bg-primary hover:text-white hover:shadow-[0_8px_18px_-8px_rgba(0,87,184,0.6)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-          >
-            {t("seeAll")}
-            <ArrowRight className="size-3.5 transition-transform duration-300 group-hover/all:translate-x-0.5" aria-hidden="true" />
-          </Link>
+          {query && (
+            <Link
+              href={{ pathname: "/search", query }}
+              aria-label={t("seeRow", { title })}
+              className="group/all inline-flex items-center gap-1.5 rounded-full border border-line bg-surface py-1.5 pr-2.5 pl-3.5 text-[13px] font-semibold text-ink shadow-[0_1px_2px_rgba(16,24,40,0.06)] transition-[border-color,background-color,color,box-shadow] duration-300 hover:border-primary hover:bg-primary hover:text-white hover:shadow-[0_8px_18px_-8px_rgba(0,87,184,0.6)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            >
+              {t("seeAll")}
+              <ArrowRight className="size-3.5 transition-transform duration-300 group-hover/all:translate-x-0.5" aria-hidden="true" />
+            </Link>
+          )}
           {/* No arrows when every card already fits. */}
           <div className={cn("hidden gap-2", !(edges.start && edges.end) && "md:flex")}>
             <button type="button" aria-label={t("previous")} disabled={edges.start} onClick={() => page(-1)} className={ARROW}>

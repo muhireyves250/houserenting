@@ -6,6 +6,7 @@ import { savedListingIds } from "@/features/favorites/service";
 import { CompactListingCard } from "@/features/home/components/CompactListingCard";
 import { HomeRow } from "@/features/home/components/HomeRow";
 import { buildHomeSections, type HomeSectionKey } from "@/features/home/sections";
+import { RecentlyViewedRow } from "@/features/listings/components/RecentlyViewed";
 import { OnboardingGate } from "@/features/onboarding/components/OnboardingGate";
 import { featuredListings } from "@/features/listings/service";
 import { HERO_SEARCH_ID, SearchBar } from "@/features/search/components/SearchBar";
@@ -76,6 +77,7 @@ export async function HomeContent({ onboarding = true }: { onboarding?: boolean 
       </section>
       {sections.length > 0 && (
         <PageContainer className="flex flex-col gap-9 pt-4 pb-8 md:gap-12 md:py-14">
+          <RecentlyViewedRow />
           {sections.map((section) => {
             const { title, subtitle } = ROWS[section.key];
             return (

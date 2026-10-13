@@ -354,7 +354,13 @@
     "youSave": "Vous économisez {amount} sur ce séjour",
     "agree": "En sélectionnant le bouton ci-dessous, j'accepte le règlement intérieur de l'hôte et de payer le total indiqué.",
     "paymentsSoon": "Le paiement mobile money arrive bientôt. Vous ne serez pas débité.",
-    "wontBeCharged": "Vous ne serez pas encore débité"
+    "wontBeCharged": "Vous ne serez pas encore débité",
+    "recentlyViewed": "Consultés récemment",
+    "recentlyViewedSub": "Logements vus sur cet appareil",
+    "showMore": "Afficher plus",
+    "showLess": "Afficher moins",
+    "moreNearby": "Autres logements à proximité",
+    "moreNearbySub": "D'autres logements autour de celui-ci"
   },
   "Facility": {
     "KITCHEN": "Cuisine",
