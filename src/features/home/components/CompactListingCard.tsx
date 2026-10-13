@@ -95,7 +95,7 @@ export function CompactListingCard({
           {/* Soft top shade keeps the white heart and badge readable on bright photos. */}
           <div className="pointer-events-none absolute inset-x-0 top-0 z-[2] h-16 bg-gradient-to-b from-black/25 to-transparent" aria-hidden="true" />
           {isGuestFavorite(listing) && (
-            <span className="absolute top-2.5 left-2.5 z-[2] rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-ink shadow-[0_2px_8px_rgba(0,0,0,0.18)] backdrop-blur">
+            <span className="absolute top-2.5 left-2.5 z-[2] rounded-full bg-white/95 px-2.5 py-1 text-xs font-semibold text-ink shadow-[0_2px_8px_rgba(0,0,0,0.18)] backdrop-blur">
               {t("guestFavorite")}
             </span>
           )}
@@ -118,7 +118,7 @@ export function CompactListingCard({
             <p className="truncate text-xs leading-4 text-muted">{listing.title}</p>
           </div>
 
-          <div className="flex gap-1.5 overflow-hidden text-[11px] font-medium text-ink/85">
+          <div className="flex gap-1.5 overflow-hidden text-xs font-medium text-ink/85">
             <span className="inline-flex min-w-0 items-center gap-1 rounded-full bg-canvas px-1.5 py-px">
               <MapPin className="size-3 shrink-0" aria-hidden="true" />
               <span className="truncate">{listing.district}</span>

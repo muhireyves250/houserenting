@@ -23,7 +23,7 @@ export function BottomTabBar({ signedIn = true }: { signedIn?: boolean }) {
               <Link
                 href={navHref(href, signedIn)}
                 aria-current={active ? "page" : undefined}
-                className={cn("relative flex flex-col items-center gap-1 py-2 text-[11px]", active ? "font-semibold text-primary" : "text-muted")}
+                className={cn("relative flex flex-col items-center gap-1 py-2 text-xs", active ? "font-semibold text-primary" : "text-muted")}
               >
                 {active && <span className="absolute inset-x-4 top-0 h-0.5 rounded-full bg-primary" aria-hidden="true" />}
                 <Icon className="size-6" aria-hidden="true" />
