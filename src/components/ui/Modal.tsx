@@ -2,6 +2,7 @@
 
 import { X } from "lucide-react";
 import { useId, useRef, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { useModal } from "@/lib/use-modal";
 import { cn } from "@/lib/cn";
 
@@ -23,8 +24,9 @@ export function Modal({
   const dialogRef = useRef<HTMLDivElement>(null);
   useModal(dialogRef, onClose);
 
-  return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+  // Portalled to <body> so no positioned parent (e.g. buttons over a photo) can trap it under the page.
+  return createPortal(
+    <div className="fixed inset-0 z-[60] flex items-end justify-center md:items-center md:p-4">
       <div
         data-testid="modal-backdrop"
         aria-hidden="true"
@@ -37,8 +39,10 @@ export function Modal({
         aria-modal="true"
         aria-labelledby={titleId}
         className={cn(
-          "relative z-10 max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto rounded-[2rem] bg-surface p-8",
-          "shadow-[0_30px_80px_-20px_rgba(0,20,60,0.55)] motion-safe:animate-pop-in",
+          // Phones: a bottom sheet rising from the bottom edge. Larger screens: a centred card.
+          "relative z-10 max-h-[92dvh] w-full overflow-y-auto rounded-t-[2rem] bg-surface p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] motion-safe:animate-sheet-up",
+          "md:max-h-[calc(100dvh-2rem)] md:max-w-md md:rounded-[2rem] md:p-8 md:motion-safe:animate-pop-in",
+          "shadow-[0_30px_80px_-20px_rgba(0,20,60,0.55)]",
           // Form typography inside dialogs: clear sentence-case labels, slightly larger input text.
           "[&_label]:text-[13px] [&_label]:font-semibold [&_label]:text-ink [&_input]:text-[15px]",
           className,
@@ -64,6 +68,7 @@ export function Modal({
         </h2>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

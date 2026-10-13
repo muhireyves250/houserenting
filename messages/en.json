@@ -177,7 +177,8 @@
       "phoneInvalid": "Enter a valid phone number.",
       "localeInvalid": "Choose a language from the list.",
       "generic": "Something went wrong. Please try again."
-    }
+    },
+    "personalInfo": "Personal information"
   },
   "Empty": {
     "favoritesTitle": "No favorites yet",

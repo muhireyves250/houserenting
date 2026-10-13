@@ -177,7 +177,8 @@
       "phoneInvalid": "Andika nimero ya telefoni yemewe.",
       "localeInvalid": "Hitamo ururimi ruri ku rutonde.",
       "generic": "Hari ikitagenze neza. Ongera ugerageze."
-    }
+    },
+    "personalInfo": "Amakuru yawe bwite"
   },
   "Empty": {
     "favoritesTitle": "Nta byo ukunda biraboneka",

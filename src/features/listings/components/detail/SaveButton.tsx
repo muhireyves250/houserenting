@@ -9,6 +9,8 @@ import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { PlacePreview, type PlacePreviewData } from "./PlacePreview";
 
+const ICON_TRIGGER =
+  "flex size-10 items-center justify-center rounded-full bg-white/95 text-ink shadow-[0_4px_14px_rgba(0,0,0,0.25)] backdrop-blur transition-transform duration-200 active:scale-90";
 const TRIGGER =
   "inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-ink underline underline-offset-4 transition-colors hover:bg-canvas focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
 
@@ -26,8 +28,9 @@ export function SaveButton({
   listingId,
   initialSaved,
   signedIn,
+  variant = "text",
   ...preview
-}: PlacePreviewData & { listingId: string; initialSaved: boolean; signedIn: boolean }) {
+}: PlacePreviewData & { listingId: string; initialSaved: boolean; signedIn: boolean; variant?: "text" | "icon" }) {
   const t = useTranslations("Listings");
   const pathname = usePathname();
   const [saved, setSaved] = useState(initialSaved);
@@ -38,9 +41,13 @@ export function SaveButton({
 
   if (!signedIn) {
     return (
-      <Link href={{ pathname: "/login", query: { next: pathname } }} className={TRIGGER}>
+      <Link
+        href={{ pathname: "/login", query: { next: pathname } }}
+        aria-label={variant === "icon" ? t("saveShort") : undefined}
+        className={variant === "icon" ? ICON_TRIGGER : TRIGGER}
+      >
         <HeartMark saved={false} />
-        {t("saveShort")}
+        {variant === "text" && t("saveShort")}
       </Link>
     );
   }
@@ -62,13 +69,14 @@ export function SaveButton({
           setStatus("idle");
           setOpen(true);
         }}
-        className={TRIGGER}
+        aria-label={variant === "icon" ? (saved ? t("savedShort") : t("saveShort")) : undefined}
+        className={variant === "icon" ? ICON_TRIGGER : TRIGGER}
       >
         <HeartMark saved={saved} />
-        {saved ? t("savedShort") : t("saveShort")}
+        {variant === "text" && (saved ? t("savedShort") : t("saveShort"))}
       </button>
       {open && (
-        <Modal title={t("saveTitle")} closeLabel={t("close")} onClose={() => setOpen(false)} className="max-w-lg">
+        <Modal title={t("saveTitle")} closeLabel={t("close")} onClose={() => setOpen(false)} className="md:max-w-lg">
           <PlacePreview {...preview} />
 
           {(status === "saved" || status === "removed") && (

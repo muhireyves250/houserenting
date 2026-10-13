@@ -27,7 +27,7 @@ const OPTION =
   "flex items-center gap-3.5 rounded-xl border border-line px-4 py-3.5 text-[15px] font-semibold text-ink transition-[border-color,background-color,transform] duration-300 hover:border-ink/40 hover:bg-canvas active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
 
 /** Share opens a window: the place, then copy link, email, WhatsApp, SMS, Facebook, X and the phone's own share sheet. */
-export function ShareButton(preview: PlacePreviewData) {
+export function ShareButton({ variant = "text", ...preview }: PlacePreviewData & { variant?: "text" | "icon" }) {
   const t = useTranslations("Listings");
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -57,16 +57,22 @@ export function ShareButton(preview: PlacePreviewData) {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={show}
-        className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-ink underline underline-offset-4 transition-colors hover:bg-canvas"
-      >
-        <Share className="size-4" aria-hidden="true" />
-        {t("share")}
-      </button>
+      {variant === "icon" ? (
+        <button type="button" onClick={show} aria-label={t("share")} className="flex size-10 items-center justify-center rounded-full bg-white/95 text-ink shadow-[0_4px_14px_rgba(0,0,0,0.25)] backdrop-blur transition-transform duration-200 active:scale-90">
+          <Share className="size-[18px]" aria-hidden="true" />
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={show}
+          className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-ink underline underline-offset-4 transition-colors hover:bg-canvas"
+        >
+          <Share className="size-4" aria-hidden="true" />
+          {t("share")}
+        </button>
+      )}
       {open && (
-        <Modal title={t("shareTitle")} closeLabel={t("close")} onClose={() => setOpen(false)} className="max-w-lg">
+        <Modal title={t("shareTitle")} closeLabel={t("close")} onClose={() => setOpen(false)} className="md:max-w-lg">
           <PlacePreview {...preview} />
           <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
             <button type="button" onClick={copy} className={cn(OPTION, copied && "border-success/60")}>

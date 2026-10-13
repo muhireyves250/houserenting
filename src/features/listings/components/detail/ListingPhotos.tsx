@@ -34,7 +34,7 @@ export function ListingPhotos({ title, photos }: { title: string; photos: Photo[
             </button>
           ))}
         </div>
-        <span className="absolute right-3 bottom-3 rounded-full bg-ink/70 px-2.5 py-1 text-xs font-medium text-white tabular-nums">
+        <span className="absolute right-3 bottom-9 rounded-full bg-ink/70 px-2.5 py-1 text-xs font-medium text-white tabular-nums">
           {t("photoCount", { current, total: photos.length })}
         </span>
       </div>

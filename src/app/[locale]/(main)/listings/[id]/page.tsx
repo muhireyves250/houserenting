@@ -1,5 +1,6 @@
 import {
   AirVent,
+  ArrowLeft,
   CalendarClock,
   ChevronLeft,
   CookingPot,
@@ -148,21 +149,40 @@ export default async function ListingPage({ params }: Props) {
           </div>
         </div>
 
-        <ListingPhotos title={listing.title} photos={listing.photos} />
+        <div className="relative">
+          <ListingPhotos title={listing.title} photos={listing.photos} />
+          {/* Phones: round back / share / save buttons over the photo. */}
+          <div className="absolute inset-x-0 top-4 z-10 flex items-center justify-between md:hidden">
+            <Link
+              href="/search"
+              aria-label={t("back")}
+              className="flex size-10 items-center justify-center rounded-full bg-white/95 text-ink shadow-[0_4px_14px_rgba(0,0,0,0.25)] backdrop-blur transition-transform duration-200 active:scale-90"
+            >
+              <ArrowLeft className="size-[18px]" aria-hidden="true" />
+            </Link>
+            <div className="flex gap-3">
+              <ShareButton variant="icon" {...preview} />
+              <SaveButton variant="icon" listingId={listing.id} initialSaved={saved} signedIn={user !== null} {...preview} />
+            </div>
+          </div>
+        </div>
 
-        <div className="mt-8 grid gap-x-16 md:mt-10 md:grid-cols-[minmax(0,1fr)_minmax(320px,380px)]">
+        {/* Phones: the details sit on a rounded sheet that overlaps the photo. */}
+        <div
+          className={
+            "relative z-[1] -mx-4 -mt-6 grid gap-x-16 rounded-t-[28px] bg-canvas px-4 pt-8 " +
+            "md:mx-0 md:mt-10 md:grid-cols-[minmax(0,1fr)_minmax(320px,380px)] md:rounded-none md:bg-transparent md:px-0 md:pt-0"
+          }
+        >
           <div className="min-w-0">
             {/* Summary */}
-            <div className="pb-8">
-              <h1 className="font-display text-2xl leading-8 font-bold tracking-[-0.02em] md:hidden">{listing.title}</h1>
-              <div className="mb-3 -ml-3 flex items-center gap-1 md:hidden">
-                {actions}
-              </div>
-              <h2 className="font-display text-[22px] leading-7 font-bold tracking-[-0.02em] text-ink">
+            <div className="pb-8 text-center md:text-left">
+              <h1 className="mb-3 font-display text-[26px] leading-8 font-bold tracking-[-0.025em] md:hidden">{listing.title}</h1>
+              <h2 className="text-[15px] font-semibold text-ink/80 md:font-display md:text-[22px] md:leading-7 md:font-bold md:tracking-[-0.02em] md:text-ink">
                 {t("typeInPlace", { type: tType(listing.type), place })}
               </h2>
               <p className="mt-1 text-[15px] text-ink/80">{stats.join(" · ")}</p>
-              <p className="mt-2 flex items-center gap-1.5 text-[15px] font-semibold text-ink">
+              <p className="mt-2 flex items-center justify-center gap-1.5 text-[15px] font-semibold text-ink md:justify-start">
                 <Star className="size-4 fill-ink" aria-hidden="true" />
                 {listing.ratingCount > 0 ? (
                   <>
