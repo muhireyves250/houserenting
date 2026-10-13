@@ -120,8 +120,14 @@ describe("HeaderSearch", () => {
     expect(animateScrollTo).not.toHaveBeenCalled();
     expect(screen.getByRole("search")).toBeInTheDocument();
     expect(await screen.findByRole("button", { name: "Next month" })).toBeInTheDocument();
+    // The whole page behind is blurred by one backdrop (not the bar's own blur).
+    expect(screen.getByTestId("search-backdrop")).toBeInTheDocument();
+    expect(screen.queryByTestId("page-blur")).not.toBeInTheDocument();
     await userEvent.keyboard("{Escape}");
-    expect(screen.queryByRole("search")).not.toBeInTheDocument();
+    // Plays its exit animation, then unmounts.
+    expect(screen.getByTestId("search-backdrop")).toHaveAttribute("data-closing", "true");
+    await vi.waitFor(() => expect(screen.queryByRole("search")).not.toBeInTheDocument());
+    expect(screen.queryByTestId("search-backdrop")).not.toBeInTheDocument();
   });
 
   it("follows client-side navigation into a page with a hero: hidden while the hero shows", () => {

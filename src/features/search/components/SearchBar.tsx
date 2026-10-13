@@ -39,6 +39,7 @@ export function SearchBar({
   id,
   initialOpen = null,
   onClose,
+  blurPage = true,
 }: {
   today?: string;
   id?: string;
@@ -46,6 +47,8 @@ export function SearchBar({
   initialOpen?: Panel | null;
   /** Called whenever the open panel is dismissed (Esc, outside click, search, Done). */
   onClose?: () => void;
+  /** Blur the page while expanded; off when the caller provides its own full-page backdrop. */
+  blurPage?: boolean;
 }) {
   const t = useTranslations("Home");
   const router = useRouter();
@@ -215,6 +218,7 @@ export function SearchBar({
     // Only while expanded does the search rise above the sticky header (z-40); at rest it scrolls under it.
     <div ref={rootRef} id={id} className={cn("relative flex w-full max-w-4xl flex-col gap-4", expanded ? "z-50" : "z-0")}>
       {/* Blurs and slightly dims the rest of the page while the bar is expanded (desktop). Clicks pass through. */}
+      {blurPage && (
       <div
         data-testid="page-blur"
         data-visible={expanded}
@@ -225,6 +229,7 @@ export function SearchBar({
           expanded ? "opacity-100" : "opacity-0",
         )}
       />
+      )}
       <SegmentedTabs
         label={t("modeLabel")}
         value={mode}

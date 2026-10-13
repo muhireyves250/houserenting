@@ -195,3 +195,45 @@ svg {
     0 0 0 14px rgba(0, 87, 184, 0.16),
     0 8px 20px rgba(16, 24, 40, 0.35);
 }
+
+/* Header search over the page: the backdrop blurs in/out and the bar drops in/lifts away. */
+@keyframes backdrop-in {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(10px);
+  }
+}
+@keyframes backdrop-out {
+  from {
+    opacity: 1;
+    backdrop-filter: blur(10px);
+  }
+  to {
+    opacity: 0;
+    backdrop-filter: blur(0);
+  }
+}
+@keyframes search-in {
+  from {
+    opacity: 0;
+    transform: translateY(-18px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes search-out {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.98);
+  }
+}

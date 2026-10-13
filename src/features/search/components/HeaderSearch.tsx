@@ -2,7 +2,8 @@
 
 import { Search } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useSearchState, type SearchPanel } from "@/features/search/search-store";
 import { useSearchSummaries } from "@/features/search/use-search-summaries";
 import { usePathname } from "@/i18n/navigation";
@@ -12,6 +13,8 @@ import { HERO_SEARCH_ID, SearchBar } from "./SearchBar";
 
 // Pages whose body starts with the big hero search (home, and the direct login/signup/forgot backdrops).
 const HERO_PATHS = new Set(["/", "/login", "/signup", "/forgot-password"]);
+// Matches the exit animations below.
+const CLOSE_MS = 320;
 
 /**
  * Compact "Anywhere | Any dates | Add guests" search in the header.
@@ -29,9 +32,20 @@ export function HeaderSearch({ today }: { today?: string }) {
   // The header stays mounted across client navigations, so hero visibility is keyed by pathname.
   const [observed, setObserved] = useState<{ path: string; visible: boolean } | null>(null);
   const heroHidden = observed?.path === pathname && !observed.visible;
-  // Full search open under the header (pages without a hero), keyed by pathname so navigating closes it.
-  const [dropdown, setDropdown] = useState<{ path: string; panel: SearchPanel } | null>(null);
+  // Full search floating over the blurred page (pages without a hero), keyed by pathname so navigating closes it.
+  // `closing` plays the exit animation before it unmounts.
+  const [dropdown, setDropdown] = useState<{ path: string; panel: SearchPanel; closing?: boolean } | null>(null);
   const openPanel = dropdown?.path === pathname ? dropdown.panel : null;
+  const closing = Boolean(dropdown?.closing);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+  }, []);
+  function closeDropdown() {
+    setDropdown((current) => (current ? { ...current, closing: true } : null));
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    closeTimer.current = setTimeout(() => setDropdown(null), CLOSE_MS);
+  }
 
   useEffect(() => {
     if (!hasHero) return;
@@ -49,7 +63,10 @@ export function HeaderSearch({ today }: { today?: string }) {
   if (hasHero && !heroHidden) return null;
 
   async function open(panel: SearchPanel) {
-    if (!hasHero) return setDropdown({ path: pathname, panel });
+    if (!hasHero) {
+      if (closeTimer.current) clearTimeout(closeTimer.current);
+      return setDropdown({ path: pathname, panel });
+    }
     // Eased glide back to the hero, then open the panel there so the two motions don't fight.
     await animateScrollTo(0);
     setSearch({ openRequest: { panel, at: Date.now() } });
@@ -97,11 +114,31 @@ export function HeaderSearch({ today }: { today?: string }) {
         </button>
       </div>
 
-      {/* Pages without a hero: the full search opens in a band under the header. */}
-      {openPanel && (
-        <div className="fixed inset-x-0 top-[72px] z-50 flex justify-center border-b border-line/70 bg-surface px-6 pt-5 pb-7 shadow-[0_24px_48px_-24px_rgba(16,24,40,0.35)] motion-safe:animate-pop-in">
-          <SearchBar today={today} initialOpen={openPanel} onClose={() => setDropdown(null)} />
-        </div>
+      {/* Pages without a hero: the full search floats over the whole page, which blurs and dims behind it.
+          Portalled to <body>: the header's own backdrop-filter would otherwise trap these fixed layers inside it. */}
+      {openPanel &&
+        createPortal(
+        <>
+          <div
+            data-testid="search-backdrop"
+            data-closing={closing}
+            aria-hidden="true"
+            onClick={closeDropdown}
+            className={cn(
+              "fixed inset-0 z-[45] bg-[#00142e]/30 backdrop-blur-[10px]",
+              closing ? "motion-safe:animate-[backdrop-out_320ms_ease-in_forwards]" : "motion-safe:animate-[backdrop-in_450ms_cubic-bezier(0.25,0.8,0.25,1)]",
+            )}
+          />
+          <div
+            className={cn(
+              "pointer-events-none fixed inset-x-0 top-[88px] z-50 flex justify-center px-6 [&>*]:pointer-events-auto",
+              closing ? "motion-safe:animate-[search-out_320ms_ease-in_forwards]" : "motion-safe:animate-[search-in_550ms_cubic-bezier(0.25,0.8,0.25,1)]",
+            )}
+          >
+            <SearchBar today={today} initialOpen={openPanel} onClose={closeDropdown} blurPage={false} />
+          </div>
+        </>,
+        document.body,
       )}
     </>
   );
