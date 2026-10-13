@@ -43,7 +43,6 @@ export function TrackView({ listing }: { listing: RecentListing }) {
 
 function RecentCard({ item }: { item: RecentListing }) {
   const tType = useTranslations("ListingType");
-  const t = useTranslations("Listings");
   // Stored data is untrusted: only translate known types.
   const type = (PLACE_TYPES as readonly string[]).includes(item.type) ? tType(item.type as PlaceType) : "";
   return (
@@ -56,7 +55,7 @@ function RecentCard({ item }: { item: RecentListing }) {
         )}
       </span>
       <span className="px-0.5">
-        <span className="block truncate text-sm font-semibold text-ink">{type ? t("typeIn", { type, city: item.city }) : item.city}</span>
+        <span className="block truncate text-sm font-semibold text-ink">{item.city}, Rwanda</span>
         <span className="flex items-center gap-1 text-[13px] text-muted">
           {item.ratingCount > 0 ? (
             <>
@@ -64,7 +63,7 @@ function RecentCard({ item }: { item: RecentListing }) {
               {item.ratingAvg.toFixed(2)}
             </>
           ) : (
-            <span className="truncate">{item.title}</span>
+            <span className="truncate">{type}</span>
           )}
         </span>
       </span>
@@ -78,7 +77,7 @@ export function RecentlyViewedRow() {
   const recent = useRecent();
   if (recent.length === 0) return null;
   return (
-    <HomeRow title={t("recentlyViewed")} subtitle={t("recentlyViewedSub")}>
+    <HomeRow title={t("recentlyViewed")} subtitle={t("recentlyViewedSub")} size="small">
       {recent.map((item) => (
         <RecentCard key={item.id} item={item} />
       ))}

@@ -26,8 +26,11 @@ export function HomeRow({
   title,
   subtitle,
   query,
+  size = "large",
   children,
 }: {
+  /** Phones: "large" shows two cards and a peek of the next; "small" three (recently viewed). */
+  size?: "large" | "small";
   title: string;
   subtitle: string;
   /** Search the See all pill opens; no pill without one. */
@@ -100,9 +103,9 @@ export function HomeRow({
             <Link
               href={{ pathname: "/search", query }}
               aria-label={t("seeRow", { title })}
-              className="group/all inline-flex items-center gap-1.5 rounded-full border border-line bg-surface py-1.5 pr-2.5 pl-3.5 text-[13px] font-semibold text-ink shadow-[0_1px_2px_rgba(16,24,40,0.06)] transition-[border-color,background-color,color,box-shadow] duration-300 hover:border-primary hover:bg-primary hover:text-white hover:shadow-[0_8px_18px_-8px_rgba(0,87,184,0.6)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              className="group/all inline-flex size-9 items-center justify-center rounded-full max-md:bg-ink/[0.06] md:size-auto md:gap-1.5 md:border md:border-line md:bg-surface md:py-1.5 md:pr-2.5 md:pl-3.5 text-[13px] font-semibold text-ink shadow-[0_1px_2px_rgba(16,24,40,0.06)] transition-[border-color,background-color,color,box-shadow] duration-300 hover:border-primary hover:bg-primary hover:text-white hover:shadow-[0_8px_18px_-8px_rgba(0,87,184,0.6)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             >
-              {t("seeAll")}
+              <span className="hidden md:inline">{t("seeAll")}</span>
               <ArrowRight className="size-3.5 transition-transform duration-300 group-hover/all:translate-x-0.5" aria-hidden="true" />
             </Link>
           )}
@@ -121,7 +124,8 @@ export function HomeRow({
         ref={trackRef}
         onScroll={update}
         className={cn(
-          "-mx-4 -mb-8 grid snap-x snap-mandatory scroll-px-4 auto-cols-[62%] grid-flow-col gap-4 overflow-x-auto px-4 pt-2 pb-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+          "-mx-4 -mb-8 grid snap-x snap-mandatory scroll-px-4 grid-flow-col gap-3 md:gap-4 overflow-x-auto px-4 pt-2 pb-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+          size === "large" ? "auto-cols-[46%]" : "auto-cols-[30%]",
           "sm:auto-cols-[40%] md:-mx-2 md:scroll-px-2 md:px-2 md:auto-cols-[calc((100%-3*16px)/4)] lg:auto-cols-[calc((100%-3*16px)/4)] xl:auto-cols-[calc((100%-4*16px)/5)]",
         )}
       >

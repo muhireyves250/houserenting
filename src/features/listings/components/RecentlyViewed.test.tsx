@@ -24,7 +24,7 @@ describe("Recently viewed", () => {
       render(<TrackView listing={home} />);
     });
     expect(screen.getByRole("heading", { name: "Recently viewed" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Apartment in Kigali/ })).toHaveAttribute("href", "/listings/abc");
+    expect(screen.getByRole("link", { name: /Kigali, Rwanda/ })).toHaveAttribute("href", "/listings/abc");
     expect(screen.getByText("4.80")).toBeInTheDocument();
   });
 });

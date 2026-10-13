@@ -178,7 +178,10 @@
       "localeInvalid": "Choisissez une langue dans la liste.",
       "generic": "Une erreur s'est produite. Veuillez réessayer."
     },
-    "personalInfo": "Informations personnelles"
+    "personalInfo": "Informations personnelles",
+    "roleGuest": "Voyageur",
+    "roleHost": "Hôte",
+    "accountSettings": "Paramètres du compte"
   },
   "Empty": {
     "favoritesTitle": "Aucun favori pour l'instant",

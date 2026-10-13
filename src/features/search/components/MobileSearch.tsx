@@ -22,11 +22,22 @@ import { LocationPanel, type Suggestion } from "./LocationPanel";
  * cards (one open at a time, the others collapsed to a summary), Clear all and Search at the bottom.
  * Shares the search store with the desktop search, so both always show the same values.
  */
-export function MobileSearch({ today = todayISO(), className }: { today?: string; className?: string }) {
+export function MobileSearch({
+  today = todayISO(),
+  className,
+  results = false,
+}: {
+  today?: string;
+  className?: string;
+  /** Results page: "Homes in Kigali" over the dates and guests, centred. */
+  results?: boolean;
+}) {
   const t = useTranslations("Home");
+  const tSearch = useTranslations("Search");
   const [search] = useSearchState();
   const { whenSummary, whoSummary } = useSearchSummaries(search);
   const [open, setOpen] = useState(false);
+  const details = [whenSummary ?? t("compactWhen"), whoSummary ?? t("whoPlaceholder")].join(" · ");
   const chosen = Boolean(search.location || whenSummary || whoSummary);
 
   return (
@@ -34,19 +45,24 @@ export function MobileSearch({ today = todayISO(), className }: { today?: string
       <button
         type="button"
         onClick={() => setOpen(true)}
-        aria-label={chosen ? undefined : t("startSearch")}
+        aria-label={chosen || results ? undefined : t("startSearch")}
         className={cn(
           "flex h-14 w-full items-center justify-center gap-3 rounded-full bg-surface px-5 shadow-[0_6px_20px_-6px_rgba(16,24,40,0.25)] ring-1 ring-black/[0.06] transition-transform duration-300 active:scale-[0.98]",
           className,
         )}
       >
-        <Search className="size-[18px] shrink-0 text-ink" strokeWidth={2.4} aria-hidden="true" />
-        {chosen ? (
+        {!results && <Search className="size-[18px] shrink-0 text-ink" strokeWidth={2.4} aria-hidden="true" />}
+        {results ? (
+          <span className="min-w-0 text-center">
+            <span className="block truncate text-[15px] font-semibold text-ink">
+              {tSearch("title", { place: search.location || t("country") })}
+            </span>
+            <span className="block truncate text-[13px] text-muted">{details}</span>
+          </span>
+        ) : chosen ? (
           <span className="min-w-0 text-left">
             <span className="block truncate text-sm font-semibold text-ink">{search.location || t("compactWhere")}</span>
-            <span className="block truncate text-xs text-muted">
-              {[whenSummary ?? t("compactWhen"), whoSummary ?? t("whoPlaceholder")].join(" · ")}
-            </span>
+            <span className="block truncate text-xs text-muted">{details}</span>
           </span>
         ) : (
           <span className="text-[15px] font-semibold text-ink">{t("startSearch")}</span>

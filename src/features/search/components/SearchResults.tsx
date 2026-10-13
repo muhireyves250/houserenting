@@ -76,7 +76,7 @@ export function SearchResults({
         {listings.length === 0 ? (
           empty
         ) : (
-          <ul className="grid grid-cols-1 gap-x-5 gap-y-6 min-[480px]:grid-cols-2">
+          <ul className="grid grid-cols-1 gap-x-5 gap-y-8 min-[480px]:grid-cols-2 md:gap-y-6">
             {listings.map((listing) => (
               <li
                 key={listing.id}
@@ -87,7 +87,7 @@ export function SearchResults({
                   active?.from === "map" && active.id === listing.id && "ring-primary/50",
                 )}
               >
-                <CompactListingCard listing={listing} mode={mode} signedIn={signedIn} saved={saved.has(listing.id)} />
+                <CompactListingCard listing={listing} mode={mode} signedIn={signedIn} saved={saved.has(listing.id)} layout="list" />
               </li>
             ))}
           </ul>

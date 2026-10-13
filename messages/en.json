@@ -178,7 +178,10 @@
       "localeInvalid": "Choose a language from the list.",
       "generic": "Something went wrong. Please try again."
     },
-    "personalInfo": "Personal information"
+    "personalInfo": "Personal information",
+    "roleGuest": "Guest",
+    "roleHost": "Host",
+    "accountSettings": "Account settings"
   },
   "Empty": {
     "favoritesTitle": "No favorites yet",

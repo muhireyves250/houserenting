@@ -41,18 +41,19 @@ describe("CompactListingCard", () => {
   it("shows type and city, the 2-night price, rating, badge and heart", () => {
     renderWithIntl(<CompactListingCard listing={base} mode="short" signedIn={false} saved={false} />);
     expect(screen.getByRole("link", { name: /Apartment in Kigali/ })).toHaveAttribute("href", "/listings/abc");
-    expect(screen.getByText(/for 2 nights/)).toHaveTextContent(/100,000/);
-    expect(screen.getByLabelText("Rated 4.92 out of 5")).toBeInTheDocument();
+    expect(screen.getAllByText(/for 2 nights/).map((el) => el.textContent)).toEqual(expect.arrayContaining([expect.stringMatching(/100,000/), expect.stringMatching(/100K/)]));
+    expect(screen.getAllByLabelText("Rated 4.92 out of 5")[0]).toBeInTheDocument();
     expect(screen.getByText("Guest favorite")).toBeInTheDocument();
-    expect(screen.getByText("Sunny flat")).toBeInTheDocument();
+    expect(screen.getAllByText("Sunny flat")[0]).toBeInTheDocument();
     expect(screen.getByText("Gasabo")).toBeInTheDocument();
     expect(screen.getByText("Up to 4 guests")).toBeInTheDocument();
+    // Phones: the full-width results card adds bedrooms and guests.
     expect(screen.getByRole("link", { name: "Save Sunny flat" })).toBeInTheDocument();
   });
 
   it("shows the monthly price for long stays and no badge for few reviews", () => {
     renderWithIntl(<CompactListingCard listing={{ ...base, ratingCount: 3 }} mode="long" signedIn saved />);
-    expect(screen.getByText(/\/ month/)).toHaveTextContent(/900,000/);
+    expect(screen.getAllByText(/\/ month/).map((el) => el.textContent)).toEqual(expect.arrayContaining([expect.stringMatching(/900,000/), expect.stringMatching(/900K/)]));
     expect(screen.queryByText("Guest favorite")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Remove Sunny flat from favorites" })).toHaveAttribute("aria-pressed", "true");
   });
