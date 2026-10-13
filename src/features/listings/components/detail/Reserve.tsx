@@ -156,7 +156,7 @@ export function ReserveDialog({
                     <div>
                       <div
                         className={cn(
-                          "flex flex-col gap-0.5 rounded-xl border px-4 py-3 transition-colors focus-within:border-ink",
+                          "flex flex-col gap-0.5 rounded-xl border px-4 py-3 transition-colors focus-within:border-ink max-md:focus-within:border-primary",
                           error ? "border-danger" : "border-line-strong",
                         )}
                       >

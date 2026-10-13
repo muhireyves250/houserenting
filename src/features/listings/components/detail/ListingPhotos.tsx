@@ -66,7 +66,7 @@ export function ListingPhotos({ title, photos }: { title: string; photos: Photo[
         <button
           type="button"
           onClick={() => setViewerAt(0)}
-          className="absolute right-4 bottom-4 inline-flex items-center gap-2 rounded-lg border border-ink/80 bg-surface px-4 py-2 text-sm font-semibold text-ink shadow-sm transition-[transform,background-color] duration-300 hover:bg-canvas active:scale-95"
+          className="absolute right-4 bottom-4 inline-flex items-center gap-2 rounded-lg border border-ink/80 max-md:border-primary bg-surface px-4 py-2 text-sm font-semibold text-ink shadow-sm transition-[transform,background-color] duration-300 hover:bg-canvas active:scale-95"
         >
           <LayoutGrid className="size-4" aria-hidden="true" />
           {t("showAllPhotos")}

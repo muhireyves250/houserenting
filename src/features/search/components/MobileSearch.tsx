@@ -47,7 +47,7 @@ export function MobileSearch({
         onClick={() => setOpen(true)}
         aria-label={chosen || results ? undefined : t("startSearch")}
         className={cn(
-          "flex h-12 w-full items-center justify-center gap-3 rounded-full bg-surface px-5 shadow-[0_6px_20px_-6px_rgba(16,24,40,0.25)] ring-1 ring-black/[0.06] transition-transform duration-300 active:scale-[0.98]",
+          "flex h-12 w-full items-center justify-center gap-3 rounded-full bg-surface px-5 shadow-[0_6px_20px_-6px_rgba(16,24,40,0.25)] ring-1 ring-black/[0.06] max-md:ring-line transition-transform duration-300 active:scale-[0.98]",
           className,
         )}
       >
@@ -109,7 +109,7 @@ function SearchSheet({ today, onClose }: { today: string; onClose: () => void })
     setStep("where");
   }
 
-  const card = "rounded-3xl bg-surface shadow-[0_10px_30px_-12px_rgba(16,24,40,0.25)] ring-1 ring-black/[0.04]";
+  const card = "rounded-3xl bg-surface shadow-[0_10px_30px_-12px_rgba(16,24,40,0.25)] ring-1 ring-black/[0.04] max-md:ring-line";
   const collapsed = (panel: SearchPanel, label: string, value: string, placeholder: boolean) => (
     <button
       type="button"
@@ -163,7 +163,7 @@ function SearchSheet({ today, onClose }: { today: string; onClose: () => void })
             ? expanded(
                 t("whereQ"),
                 <>
-                  <label className="mb-4 flex items-center gap-3 rounded-2xl border border-line-strong px-4 py-3 focus-within:border-ink">
+                  <label className="mb-4 flex items-center gap-3 rounded-2xl border border-line-strong px-4 py-3 focus-within:border-ink max-md:focus-within:border-primary">
                     <Search className="size-5 text-ink" aria-hidden="true" />
                     <span className="sr-only">{t("where")}</span>
                     <input

@@ -40,7 +40,7 @@ function Categories() {
             className={cn(
               // Same border as the website's filter buttons.
               "flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[13px] font-semibold transition-colors",
-              active ? "border-primary bg-primary/[0.06] text-primary" : "border-line bg-surface text-ink active:border-ink/30",
+              active ? "border-primary bg-primary/[0.06] text-primary" : "border-line bg-surface text-ink active:border-ink/30 max-md:active:border-primary",
             )}
           >
             <Icon className={cn("size-4", active ? "text-primary" : tint)} strokeWidth={2} aria-hidden="true" />

@@ -98,7 +98,7 @@ export function SaveButton({
               onClick={toggle}
               className={cn(
                 "inline-flex items-center justify-center gap-2 rounded-full py-3.5 text-[15px] font-semibold transition-[background-color,transform,opacity] duration-300 active:scale-[0.98] disabled:opacity-60",
-                saved ? "border border-ink/80 bg-surface text-ink hover:bg-canvas" : "bg-primary text-white shadow-[0_10px_24px_-10px_rgba(0,87,184,0.8)] hover:bg-primary-hover",
+                saved ? "border border-ink/80 max-md:border-primary bg-surface text-ink hover:bg-canvas" : "bg-primary text-white shadow-[0_10px_24px_-10px_rgba(0,87,184,0.8)] hover:bg-primary-hover",
               )}
             >
               <Heart className={cn("size-4", saved ? "fill-[#e11d48] stroke-[#e11d48]" : "fill-white/20")} aria-hidden="true" />

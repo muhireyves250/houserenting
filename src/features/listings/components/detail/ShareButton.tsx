@@ -24,7 +24,7 @@ const XIcon = () => (
 );
 
 const OPTION =
-  "flex items-center gap-3.5 rounded-xl border border-line px-4 py-3.5 text-[15px] font-semibold text-ink transition-[border-color,background-color,transform] duration-300 hover:border-ink/40 hover:bg-canvas active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
+  "flex items-center gap-3.5 rounded-xl border border-line px-4 py-3.5 text-[15px] font-semibold text-ink transition-[border-color,background-color,transform] duration-300 hover:border-ink/40 max-md:hover:border-primary hover:bg-canvas active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
 
 /** Share opens a window: the place, then copy link, email, WhatsApp, SMS, Facebook, X and the phone's own share sheet. */
 export function ShareButton({ variant = "text", ...preview }: PlacePreviewData & { variant?: "text" | "icon" }) {

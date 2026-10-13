@@ -316,7 +316,7 @@ export default async function ListingPage({ params }: Props) {
             </div>
             <Link
               href={navHref("/chats", user !== null)}
-              className="inline-flex w-fit items-center rounded-xl border border-ink/80 bg-surface px-6 py-3 text-[15px] font-semibold text-ink transition-[background-color,transform] duration-300 hover:bg-canvas active:scale-95"
+              className="inline-flex w-fit items-center rounded-xl border border-ink/80 max-md:border-primary bg-surface px-6 py-3 text-[15px] font-semibold text-ink transition-[background-color,transform] duration-300 hover:bg-canvas active:scale-95"
             >
               {t("messageHost")}
             </Link>

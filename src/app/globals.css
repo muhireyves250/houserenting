@@ -250,4 +250,9 @@ svg {
     --color-line: #99bce3;
     --color-line-strong: #4d89cd;
   }
+  .price-pin {
+    box-shadow:
+      0 0 0 1px rgba(0, 87, 184, 0.4),
+      0 3px 10px rgba(16, 24, 40, 0.18);
+  }
 }

@@ -150,7 +150,7 @@ function FilterButton({
           "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
           active || open
             ? "border-primary bg-primary/[0.06] text-primary"
-            : "border-line text-ink hover:border-ink/30",
+            : "border-line text-ink hover:border-ink/30 max-md:hover:border-primary",
         )}
       >
         {label}

@@ -67,7 +67,7 @@ export function CompactListingCard({
       <Link
         href={`/listings/${listing.id}`}
         className={cn(
-          "flex h-full flex-col rounded-[20px] border border-black/[0.06] bg-surface p-2 shadow-[0_1px_2px_rgba(16,24,40,0.05)]",
+          "flex h-full flex-col rounded-[20px] border border-black/[0.06] max-md:border-line bg-surface p-2 shadow-[0_1px_2px_rgba(16,24,40,0.05)]",
           // Phones: no panel, just photo and a few words (Airbnb app style).
           "max-md:border-0 max-md:bg-transparent max-md:p-0 max-md:shadow-none max-md:after:hidden",
           // The hover shadow is pre-rendered on a pseudo-element and faded in: smoother than animating box-shadow.

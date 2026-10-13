@@ -22,7 +22,7 @@ export default async function ProfilePage() {
   const profile = await getProfile(user.id);
   if (!profile) notFound();
   const [t, tNav] = await Promise.all([getTranslations("Profile"), getTranslations("Nav")]);
-  const card = "rounded-3xl bg-surface shadow-[0_10px_30px_-14px_rgba(16,24,40,0.3)] ring-1 ring-black/[0.04]";
+  const card = "rounded-3xl bg-surface shadow-[0_10px_30px_-14px_rgba(16,24,40,0.3)] ring-1 ring-black/[0.04] max-md:ring-line";
   const row = "flex w-full items-center gap-4 py-4 text-[15px] text-ink transition-colors active:bg-ink/5";
 
   return (
