@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { ReactNode } from "react";
+import { SmoothScroll } from "@/components/shell/SmoothScroll";
 import { routing } from "@/i18n/routing";
 import "../globals.css";
 
@@ -33,6 +34,7 @@ export default async function LocaleLayout({ children, params }: { children: Rea
   return (
     <html lang={locale} className={`${brandSans.variable} ${displaySans.variable}`}>
       <body className="min-h-dvh bg-canvas font-sans text-ink antialiased">
+        <SmoothScroll />
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
       </body>
     </html>
