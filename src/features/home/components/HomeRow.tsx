@@ -85,7 +85,7 @@ export function HomeRow({
     <section ref={sectionRef} className="flex flex-col gap-4">
       <div
         className={cn(
-          "flex items-end justify-between gap-4",
+          "flex items-start justify-between gap-4",
           animated && `transition-[opacity,transform] duration-700 ${EASE_OUT}`,
           hidden && "translate-y-3 opacity-0",
         )}
