@@ -6,7 +6,7 @@ import { db } from "@/lib/db";
 const SHORT_UNITS = ["HOUR", "DAY", "NIGHT"] as const;
 const SEARCH_LIMIT = 24;
 
-const CARD_SELECT = {
+export const CARD_SELECT = {
   id: true,
   title: true,
   type: true,

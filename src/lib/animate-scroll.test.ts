@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { animateScrollTo, easeInOutCubic, scrollDuration } from "./animate-scroll";
+import { animateScrollTo, easeInOutCubic, scrollDuration, slideDuration, slideScrollLeft } from "./animate-scroll";
 
 describe("easeInOutCubic", () => {
   it("starts and ends gently and is symmetric", () => {
@@ -57,5 +57,42 @@ describe("animateScrollTo", () => {
     vi.stubGlobal("matchMedia", () => ({ matches: true }));
     await animateScrollTo(0);
     expect(y).toBe(0);
+  });
+});
+
+describe("slideScrollLeft", () => {
+  function track(scrollLeft: number) {
+    const el = document.createElement("div");
+    Object.defineProperty(el, "clientWidth", { value: 600 });
+    Object.defineProperty(el, "scrollWidth", { value: 1800 });
+    let left = scrollLeft;
+    Object.defineProperty(el, "scrollLeft", { get: () => left, set: (v: number) => (left = v) });
+    return el;
+  }
+
+  it("jumps straight there, clamped to the end, when the user prefers reduced motion", () => {
+    vi.stubGlobal("matchMedia", () => ({ matches: true }));
+    const el = track(1000);
+    slideScrollLeft(el, 600);
+    expect(el.scrollLeft).toBe(1200);
+    vi.unstubAllGlobals();
+  });
+
+  it("eases there over a few frames and restores scroll snapping", () => {
+    vi.stubGlobal("matchMedia", () => ({ matches: false }));
+    const frames: FrameRequestCallback[] = [];
+    vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => frames.push(cb));
+    const began = performance.now();
+    const el = track(0);
+    el.style.scrollSnapType = "x mandatory";
+    slideScrollLeft(el, 600);
+    expect(el.style.scrollSnapType).toBe("none");
+    frames.shift()!(began + slideDuration(600) / 2);
+    expect(el.scrollLeft).toBeGreaterThan(0);
+    expect(el.scrollLeft).toBeLessThan(600);
+    frames.shift()!(began + 10_000);
+    expect(el.scrollLeft).toBe(600);
+    expect(el.style.scrollSnapType).toBe("x mandatory");
+    vi.unstubAllGlobals();
   });
 });

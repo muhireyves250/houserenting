@@ -43,3 +43,34 @@ export function animateScrollTo(top: number): Promise<void> {
     frame = requestAnimationFrame(step);
   });
 }
+
+/** Snappier than page scrolls: a row slides a page of cards in 550–850ms. */
+export function slideDuration(distance: number): number {
+  return Math.round(Math.min(850, Math.max(550, 450 + Math.abs(distance) * 0.35)));
+}
+
+/**
+ * Eased horizontal slide of a scroll track by `distance` px, clamped to its ends. Scroll snapping is
+ * paused while it moves (it would fight the per-frame updates). Instant when the user prefers reduced motion.
+ */
+export function slideScrollLeft(track: HTMLElement, distance: number): void {
+  const start = track.scrollLeft;
+  const target = Math.max(0, Math.min(track.scrollWidth - track.clientWidth, start + distance));
+  if (target === start) return;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    track.scrollLeft = target;
+    return;
+  }
+
+  const duration = slideDuration(target - start);
+  const snap = track.style.scrollSnapType;
+  track.style.scrollSnapType = "none";
+  const began = performance.now();
+  const step = (now: number) => {
+    const progress = Math.min(1, (now - began) / duration);
+    track.scrollLeft = start + (target - start) * easeInOutCubic(progress);
+    if (progress < 1) requestAnimationFrame(step);
+    else track.style.scrollSnapType = snap;
+  };
+  requestAnimationFrame(step);
+}

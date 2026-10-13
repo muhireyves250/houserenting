@@ -4,20 +4,39 @@ import { Suspense } from "react";
 import { LocaleSwitcher } from "@/components/shell/LocaleSwitcher";
 import { PageContainer } from "@/components/ui/PageContainer";
 import { HeroVideo } from "@/features/home/components/HeroVideo";
+import { savedListingIds } from "@/features/favorites/service";
+import { CompactListingCard } from "@/features/home/components/CompactListingCard";
+import { HomeRow } from "@/features/home/components/HomeRow";
+import { buildHomeSections, type HomeSectionKey } from "@/features/home/sections";
 import { OnboardingGate } from "@/features/onboarding/components/OnboardingGate";
-import { ListingGrid } from "@/features/listings/components/ListingGrid";
 import { featuredListings } from "@/features/listings/service";
 import { HERO_SEARCH_ID, SearchBar } from "@/features/search/components/SearchBar";
-import { Link } from "@/i18n/navigation";
+import { getCurrentUser } from "@/lib/session";
 
 // Modern villa (Unsplash, free license), served at up to 3840px for sharp large/retina screens.
 const HERO_PHOTO = "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=3840&q=90";
 // Looping drone shot of a modern house (Mixkit free stock video). Override with your own hosted file.
 const HERO_VIDEO = process.env.NEXT_PUBLIC_HERO_VIDEO_URL || "https://assets.mixkit.co/videos/27543/27543-720.mp4";
+// Newest homes the rows are built from (each row shows up to 10).
+const ROW_POOL = 80;
 
-/** Home page body: hero search and featured homes. Also the backdrop for direct /login, /signup visits. */
+const ROW_TEXT = {
+  kigali: ["rowKigali", "rowKigaliSub"],
+  volcanoes: ["rowVolcanoes", "rowVolcanoesSub"],
+  kivu: ["rowKivu", "rowKivuSub"],
+  long: ["rowLong", "rowLongSub"],
+} as const satisfies Record<HomeSectionKey, readonly [string, string]>;
+
+/** Home page body: hero search and rows of homes by destination. Also the backdrop for direct /login, /signup visits. */
 export async function HomeContent({ onboarding = true }: { onboarding?: boolean }) {
-  const [t, tListings, featured] = await Promise.all([getTranslations("Home"), getTranslations("Listings"), featuredListings(6)]);
+  const [t, tListings, pool, user] = await Promise.all([
+    getTranslations("Home"),
+    getTranslations("Listings"),
+    featuredListings(ROW_POOL),
+    getCurrentUser(),
+  ]);
+  const sections = buildHomeSections(pool);
+  const saved = user ? await savedListingIds(user.id, pool.map((l) => l.id)) : new Set<string>();
   return (
     <>
       {onboarding && <OnboardingGate />}
@@ -61,15 +80,24 @@ export async function HomeContent({ onboarding = true }: { onboarding?: boolean 
           <SearchBar id={HERO_SEARCH_ID} />
         </PageContainer>
       </section>
-      {featured.length > 0 && (
-        <PageContainer className="py-10">
-          <div className="mb-5 flex items-baseline justify-between">
-            <h2 className="text-xl font-semibold md:text-2xl">{tListings("featured")}</h2>
-            <Link href="/search" className="text-sm font-medium text-primary underline">
-              {tListings("seeAll")}
-            </Link>
-          </div>
-          <ListingGrid listings={featured} mode="short" />
+      {sections.length > 0 && (
+        <PageContainer className="flex flex-col gap-10 py-10 md:gap-12 md:py-14">
+          {sections.map((section) => {
+            const [titleKey, subKey] = ROW_TEXT[section.key];
+            return (
+              <HomeRow key={section.key} title={tListings(titleKey)} subtitle={tListings(subKey)} query={section.query}>
+                {section.listings.map((listing) => (
+                  <CompactListingCard
+                    key={listing.id}
+                    listing={listing}
+                    mode={section.mode}
+                    signedIn={user !== null}
+                    saved={saved.has(listing.id)}
+                  />
+                ))}
+              </HomeRow>
+            );
+          })}
         </PageContainer>
       )}
     </>

@@ -33,6 +33,7 @@ model User {
   sessions      Session[]
   accounts      Account[]
   listings      Listing[]
+  favorites     Favorite[]
 
   @@map("user")
 }
@@ -166,6 +167,7 @@ model Listing {
   updatedAt       DateTime      @updatedAt
   photos          ListingPhoto[]
   rates           RateOption[]
+  favoritedBy     Favorite[]
 
   @@index([status, city])
   @@index([hostId])
@@ -201,4 +203,16 @@ model RateOption {
 
   @@unique([listingId, unit])
   @@map("rateOption")
+}
+
+model Favorite {
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, listingId])
+  @@index([listingId])
+  @@map("favorite")
 }
