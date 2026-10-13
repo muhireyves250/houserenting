@@ -1,13 +1,37 @@
 "use client";
 
 import { X } from "lucide-react";
-import { useId, useRef, type ReactNode } from "react";
+import { useId, useRef, useSyncExternalStore, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { useModal } from "@/lib/use-modal";
 import { cn } from "@/lib/cn";
 
 /** Centered dialog over a blurred, dimmed page. Closes on Escape, the ✕ button or a backdrop click. */
 export function Modal({
+  title,
+  closeLabel,
+  onClose,
+  children,
+  className,
+}: {
+  title: ReactNode;
+  closeLabel: string;
+  onClose: () => void;
+  children: ReactNode;
+  className?: string;
+}) {
+  // The portal needs <body>: render it only in the browser (direct /login visits are server-rendered first).
+  const inBrowser = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+  if (!inBrowser) return null;
+  return <ModalDialog title={title} closeLabel={closeLabel} onClose={onClose} className={className}>{children}</ModalDialog>;
+}
+
+/** The dialog itself; mounted only in the browser so focus, Escape and scroll lock attach to a real element. */
+function ModalDialog({
   title,
   closeLabel,
   onClose,

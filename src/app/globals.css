@@ -242,3 +242,12 @@ svg {
     transform: translateY(-14px) scale(0.98);
   }
 }
+
+/* Phones: borders and dividers use the brand blue, like the login window, instead of grey. */
+@media (max-width: 767px) {
+  :root {
+    /* Brand blue at 40% on white (as border-primary/40 on the login tabs). */
+    --color-line: #99bce3;
+    --color-line-strong: #4d89cd;
+  }
+}
