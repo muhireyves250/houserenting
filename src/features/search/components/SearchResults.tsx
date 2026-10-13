@@ -51,7 +51,7 @@ export function SearchResults({
         {listings.length === 0 ? (
           empty
         ) : (
-          <ul className="grid grid-cols-1 gap-x-5 gap-y-6 min-[480px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-2 2xl:grid-cols-3">
+          <ul className="grid grid-cols-1 gap-x-5 gap-y-6 min-[480px]:grid-cols-2">
             {listings.map((listing) => (
               <li
                 key={listing.id}
