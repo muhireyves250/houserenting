@@ -256,3 +256,23 @@ svg {
       0 3px 10px rgba(16, 24, 40, 0.18);
   }
 }
+
+/* Phones: icons in the brand blue. Icons with their own colour class keep it (utilities win over this base
+   rule), and icons on blue or dark fills, or in white text, keep inheriting so they stay visible. */
+@layer base {
+  @media (max-width: 767px) {
+    svg.lucide {
+      color: var(--color-primary);
+    }
+    :is([class*="text-white"], [class*="bg-primary"]:not([class*="bg-primary/"]):not([class*="bg-primary-soft"]), [class*=" bg-ink "], [class^="bg-ink "]) svg.lucide {
+      color: inherit;
+    }
+  }
+}
+
+/* Phones: icons explicitly coloured dark or grey also turn blue. */
+@media (max-width: 767px) {
+  svg.lucide:is(.text-ink, .text-muted, [class*="text-ink/"]) {
+    color: var(--color-primary);
+  }
+}
