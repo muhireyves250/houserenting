@@ -122,15 +122,7 @@ export function CompactListingCard({
             </span>
           </div>
 
-          <div className="relative mt-auto border-t border-line/70 pt-2.5">
-            {/* Brand line slides across the divider on hover. */}
-            <span
-              className={cn(
-                "absolute inset-x-0 -top-px h-0.5 origin-left scale-x-0 rounded-full bg-primary transition-transform duration-500 group-hover:scale-x-100 motion-reduce:transition-none",
-                SLIDE_EASE,
-              )}
-              aria-hidden="true"
-            />
+          <div className="mt-auto border-t border-line/70 pt-2.5">
             {price && <p className="truncate text-[13px] text-muted">{price}</p>}
           </div>
         </div>
