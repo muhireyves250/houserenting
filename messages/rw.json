@@ -267,5 +267,18 @@
     "PRIVATE_HOUSE": "Inzu yigenga",
     "LODGE": "Lodge",
     "ROOM": "Icyumba"
+  },
+  "Footer": {
+    "label": "Ibirenge by'urubuga",
+    "about": "Amazu, lodges n'amacumbi hirya no hino mu Rwanda — ku isaha, ku munsi, ku ijoro cyangwa ku kwezi.",
+    "explore": "Shakisha",
+    "account": "Konti yawe",
+    "kigali": "Kigali",
+    "musanze": "Musanze · Ibirunga",
+    "rubavu": "Rubavu · Ikiyaga cya Kivu",
+    "longStays": "Gukodesha igihe kirekire",
+    "language": "Ururimi",
+    "rights": "© {year} Space Rental. Uburenganzira bwose burasigasiwe.",
+    "madeIn": "Byakorewe mu Rwanda"
   }
 }

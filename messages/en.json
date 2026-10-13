@@ -267,5 +267,18 @@
     "PRIVATE_HOUSE": "Private house",
     "LODGE": "Lodge",
     "ROOM": "Room"
+  },
+  "Footer": {
+    "label": "Site footer",
+    "about": "Houses, lodges and apartments across Rwanda — by the hour, day, night or month.",
+    "explore": "Explore",
+    "account": "Your account",
+    "kigali": "Kigali",
+    "musanze": "Musanze · Volcanoes",
+    "rubavu": "Rubavu · Lake Kivu",
+    "longStays": "Long stays",
+    "language": "Language",
+    "rights": "© {year} Space Rental. All rights reserved.",
+    "madeIn": "Made in Rwanda"
   }
 }
