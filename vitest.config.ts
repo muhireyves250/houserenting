@@ -18,6 +18,9 @@ export default defineConfig({
           exclude: ["src/**/*.int.test.ts", "node_modules/**"],
           environment: "jsdom",
           setupFiles: ["./vitest.setup.ts"],
+          // Run afterEach hooks in registration order: the setup file's cleanup() unmounts components
+          // before a test file's own afterEach removes stubs (e.g. matchMedia) they may still read.
+          sequence: { hooks: "list" },
         },
       },
       {
