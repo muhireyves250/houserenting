@@ -30,6 +30,10 @@ export async function seedDemoData(db: PrismaClient): Promise<{ listings: number
       });
 
   const hasPassword = await db.account.findFirst({ where: { userId: host.id, providerId: "credential" } });
+  if (hasPassword && process.env.DEMO_HOST_PASSWORD) {
+    // A new private password replaces the one already stored (e.g. the public demo password).
+    await db.account.update({ where: { id: hasPassword.id }, data: { password: await hashPassword(process.env.DEMO_HOST_PASSWORD) } });
+  }
   if (!hasPassword) {
     await db.account.create({
       data: {

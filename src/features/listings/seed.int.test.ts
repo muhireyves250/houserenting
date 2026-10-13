@@ -47,9 +47,10 @@ describe("seedDemoData", () => {
 
   it("uses DEMO_HOST_PASSWORD for the demo host when given", async () => {
     process.env.ALLOW_DEMO_SEED = "1";
+    await seedDemoData(db); // first seed: public demo password
     process.env.DEMO_HOST_PASSWORD = "a-private-password-for-prod-2026";
     try {
-      await seedDemoData(db);
+      await seedDemoData(db); // re-seed replaces it
       const ok = await auth.api.signInEmail({ body: { email: DEMO_HOST.email, password: "a-private-password-for-prod-2026" } });
       expect(ok.user.email).toBe(DEMO_HOST.email);
       await expect(auth.api.signInEmail({ body: { email: DEMO_HOST.email, password: DEMO_HOST.password } })).rejects.toThrow();
