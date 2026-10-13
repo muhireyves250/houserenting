@@ -274,11 +274,15 @@
     "explore": "Shakisha",
     "account": "Konti yawe",
     "kigali": "Kigali",
-    "musanze": "Musanze · Ibirunga",
-    "rubavu": "Rubavu · Ikiyaga cya Kivu",
+    "musanze": "Musanze",
+    "rubavu": "Rubavu",
     "longStays": "Gukodesha igihe kirekire",
     "language": "Ururimi",
     "rights": "© {year} Space Rental. Uburenganzira bwose burasigasiwe.",
-    "madeIn": "Byakorewe mu Rwanda"
+    "madeIn": "Byakorewe mu Rwanda",
+    "startSearching": "Tangira gushakisha",
+    "stays": "Amacumbi",
+    "shortStays": "Gukodesha igihe gito",
+    "karongi": "Karongi"
   }
 }

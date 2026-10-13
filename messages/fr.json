@@ -274,11 +274,15 @@
     "explore": "Explorer",
     "account": "Votre compte",
     "kigali": "Kigali",
-    "musanze": "Musanze · Volcans",
-    "rubavu": "Rubavu · Lac Kivu",
+    "musanze": "Musanze",
+    "rubavu": "Rubavu",
     "longStays": "Séjours longue durée",
     "language": "Langue",
     "rights": "© {year} Space Rental. Tous droits réservés.",
-    "madeIn": "Fait au Rwanda"
+    "madeIn": "Fait au Rwanda",
+    "startSearching": "Commencer la recherche",
+    "stays": "Séjours",
+    "shortStays": "Courts séjours",
+    "karongi": "Karongi"
   }
 }

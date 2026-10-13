@@ -15,7 +15,7 @@ export function FooterLanguages() {
   const pathname = usePathname();
   return (
     <nav aria-label={t("language")}>
-      <ul className="flex flex-wrap gap-1.5">
+      <ul className="inline-flex flex-wrap gap-1 rounded-full bg-white/[0.06] p-1 ring-1 ring-white/10">
         {routing.locales.map((locale) => {
           const active = locale === current;
           return (
@@ -26,9 +26,9 @@ export function FooterLanguages() {
                 lang={locale}
                 aria-current={active ? "true" : undefined}
                 className={cn(
-                  "block rounded-full border px-3 py-1 text-[13px] font-medium transition-colors duration-300",
-                  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
-                  active ? "border-primary bg-primary/[0.06] text-primary" : "border-line text-ink/70 hover:border-primary/60 hover:text-ink",
+                  "block rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors duration-300",
+                  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white",
+                  active ? "bg-white text-primary shadow-sm" : "text-white/70 hover:bg-white/10 hover:text-white",
                 )}
               >
                 {NATIVE_NAMES[locale]}

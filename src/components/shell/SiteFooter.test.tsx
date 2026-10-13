@@ -22,6 +22,8 @@ describe("SiteFooter", () => {
     renderWithIntl(<SiteFooter signedIn year={2026} />);
     expect(screen.getByRole("link", { name: "Kigali" })).toHaveAttribute("href", "/search?mode=short&location=Kigali");
     expect(screen.getByRole("link", { name: "Long stays" })).toHaveAttribute("href", "/search?mode=long");
+    expect(screen.getByRole("link", { name: "Short stays" })).toHaveAttribute("href", "/search?mode=short");
+    expect(screen.getByRole("link", { name: "Start searching" })).toHaveAttribute("href", "/");
     expect(screen.getByText("© 2026 Space Rental. All rights reserved.")).toBeInTheDocument();
   });
 
