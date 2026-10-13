@@ -53,7 +53,7 @@ export function LocationPanel({
 
   return (
     <div className="flex flex-col gap-2">
-      <p className="px-2 text-[11px] font-bold tracking-[0.14em] text-muted uppercase">{t("suggested")}</p>
+      <p className="px-2 text-[13px] font-semibold text-muted">{t("suggested")}</p>
       {empty && <p className="px-2 py-4 text-sm text-muted">{t("noMatches", { text: text.trim() })}</p>}
       {/* Always rendered so the combobox's aria-controls resolves even when there are no matches. */}
       <ul id={id} role="listbox" aria-label={t("suggested")} className="flex flex-col gap-0.5">

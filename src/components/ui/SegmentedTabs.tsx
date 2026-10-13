@@ -82,7 +82,7 @@ export function SegmentedTabs<T extends string>({
                 setHoverAt(index);
               }}
               className={cn(
-                "relative z-10 rounded-full px-4 py-2 text-sm font-semibold tracking-[0.02em] transition-colors duration-500",
+                "relative z-10 rounded-full px-4 py-2 text-sm font-semibold transition-colors duration-500",
                 "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
                 selected ? "text-white" : "text-ink",
               )}

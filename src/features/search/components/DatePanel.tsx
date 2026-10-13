@@ -82,7 +82,7 @@ export function DatePanel({
               <thead>
                 <tr>
                   {weekdays.map((d, i) => (
-                    <th key={i} scope="col" className="pb-3 text-[11px] font-bold tracking-[0.1em] text-muted uppercase">
+                    <th key={i} scope="col" className="pb-3 text-xs font-semibold text-muted">
                       {d}
                     </th>
                   ))}
