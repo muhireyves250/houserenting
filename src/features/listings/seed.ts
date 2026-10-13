@@ -37,7 +37,8 @@ export async function seedDemoData(db: PrismaClient): Promise<{ listings: number
         accountId: host.id,
         providerId: "credential",
         userId: host.id,
-        password: await hashPassword(DEMO_HOST.password),
+        // DEMO_HOST_PASSWORD keeps the public demo password off a production database.
+        password: await hashPassword(process.env.DEMO_HOST_PASSWORD || DEMO_HOST.password),
       },
     });
   }

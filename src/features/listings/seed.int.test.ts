@@ -44,4 +44,17 @@ describe("seedDemoData", () => {
     await expect(seedDemoData(db)).rejects.toThrow(/already belongs/);
     expect(await db.account.count({ where: { userId: "real-person" } })).toBe(0);
   });
+
+  it("uses DEMO_HOST_PASSWORD for the demo host when given", async () => {
+    process.env.ALLOW_DEMO_SEED = "1";
+    process.env.DEMO_HOST_PASSWORD = "a-private-password-for-prod-2026";
+    try {
+      await seedDemoData(db);
+      const ok = await auth.api.signInEmail({ body: { email: DEMO_HOST.email, password: "a-private-password-for-prod-2026" } });
+      expect(ok.user.email).toBe(DEMO_HOST.email);
+      await expect(auth.api.signInEmail({ body: { email: DEMO_HOST.email, password: DEMO_HOST.password } })).rejects.toThrow();
+    } finally {
+      delete process.env.DEMO_HOST_PASSWORD;
+    }
+  });
 });
