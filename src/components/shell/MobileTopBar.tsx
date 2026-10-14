@@ -3,7 +3,7 @@
 import { ArrowLeft, BedSingle, Building2, House, LayoutGrid, Trees } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Suspense, useState, type FocusEvent, type PointerEvent } from "react";
+import { Suspense, useLayoutEffect, useRef, useState } from "react";
 import { Logo } from "@/components/ui/Logo";
 import { MobileSearch } from "@/features/search/components/MobileSearch";
 import { LocaleSwitcher } from "./LocaleSwitcher";
@@ -32,51 +32,56 @@ function Categories() {
   const pathname = usePathname();
   // Chips filter the home page in place (?type=…); "All" clears it.
   const current = params.get("type");
-  // The site's hover: one soft pill slides to the chip under the finger / mouse (as in the search bar and filters).
-  const [shade, setShade] = useState({ left: 0, width: 0, visible: false });
-  const slideTo = (event: PointerEvent<HTMLAnchorElement> | FocusEvent<HTMLAnchorElement>) => {
-    const el = event.currentTarget;
-    setShade({ left: el.offsetLeft, width: el.offsetWidth, visible: true });
-  };
-  const fade = () => setShade((current) => ({ ...current, visible: false }));
+  const activeIndex = CATEGORIES.findIndex(({ type }) => type === current || (type === null && !current && pathname === "/"));
+  const navRef = useRef<HTMLElement>(null);
+  // The one indicator: a pill under the active chip that slides to whichever chip is tapped
+  // (it moves on press, so the motion starts before the filtered rows load).
+  // A press counts until the URL catches up (the active chip changes), then the active chip drives the pill.
+  const [pressed, setPressed] = useState<{ index: number; from: number } | null>(null);
+  const target = pressed && pressed.from === activeIndex ? pressed.index : activeIndex;
+  const [pill, setPill] = useState<{ left: number; width: number; ready: boolean } | null>(null);
+  useLayoutEffect(() => {
+    const chip = navRef.current?.querySelectorAll<HTMLElement>("[data-chip]")[target];
+    if (!chip) return setPill(null);
+    setPill((prev) => ({ left: chip.offsetLeft, width: chip.offsetWidth, ready: prev !== null }));
+  }, [target]);
+
   return (
     <nav
+      ref={navRef}
       aria-label={t("categories")}
-      onPointerLeave={fade}
-      onBlur={fade}
       className="relative -mx-4 flex gap-2.5 overflow-x-auto px-4 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
-      <span
-        data-testid="category-hover"
-        data-visible={shade.visible}
-        aria-hidden="true"
-        style={{ width: `${shade.width}px`, transform: `translateX(${shade.left}px)` }}
-        className={cn(
-          "pointer-events-none absolute top-0 left-0 h-[calc(100%-0.75rem)] rounded-full bg-primary/[0.1]",
-          "transition-[transform,width,opacity] duration-500 ease-[cubic-bezier(0.25,0.8,0.25,1)] motion-reduce:transition-none",
-          shade.visible ? "opacity-100" : "opacity-0",
-        )}
-      />
-      {CATEGORIES.map(({ key, type, icon: Icon, tint }) => {
-        const active = type === current || (type === null && !current && pathname === "/");
+      {pill && (
+        <span
+          data-testid="category-pill"
+          aria-hidden="true"
+          style={{ width: `${pill.width}px`, transform: `translateX(${pill.left}px)` }}
+          className={cn(
+            "pointer-events-none absolute top-0 left-0 h-[calc(100%-0.75rem)] rounded-full border border-primary bg-primary/[0.08]",
+            // First placement snaps; later moves slide with the site's easing.
+            pill.ready && "transition-[transform,width] duration-500 ease-[cubic-bezier(0.25,0.8,0.25,1)] motion-reduce:transition-none",
+          )}
+        />
+      )}
+      {CATEGORIES.map(({ key, type, icon: Icon, tint }, index) => {
+        const active = index === target;
         return (
           <Link
             key={key}
             href={type ? { pathname: "/", query: { type } } : "/"}
             replace
             scroll={false}
-            onPointerEnter={slideTo}
-            onPointerDown={slideTo}
-            onFocus={slideTo}
-            aria-current={active ? "page" : undefined}
+            data-chip
+            onPointerDown={() => setPressed({ index, from: activeIndex })}
+            aria-current={index === activeIndex ? "page" : undefined}
             className={cn(
-              // Same border as the website's filter buttons.
               "relative flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[13px] font-semibold",
               "transition-[border-color,color,transform] duration-500 ease-[cubic-bezier(0.25,0.8,0.25,1)] active:scale-95",
-              active ? "border-primary bg-primary/[0.06] text-primary" : "border-line text-ink hover:border-primary",
+              active ? "border-transparent text-primary" : "border-line text-ink",
             )}
           >
-            <Icon className={cn("size-4", active ? "text-primary" : tint)} strokeWidth={2} aria-hidden="true" />
+            <Icon className={cn("size-4 transition-colors duration-500", active ? "text-primary" : tint)} strokeWidth={2} aria-hidden="true" />
             {t(key)}
           </Link>
         );
