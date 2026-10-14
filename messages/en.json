@@ -118,8 +118,7 @@
     "slide3": "Save favorites",
     "slide3Body": "Keep the places you like and come back anytime.",
     "getStarted": "Get started",
-    "progress": "Step {current} of {total}",
-    "haveAccount": "I already have an account"
+    "progress": "Step {current} of {total}"
   },
   "Auth": {
     "signupTitle": "Sign up",

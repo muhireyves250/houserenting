@@ -16,10 +16,10 @@ const SWIPE_PX = 50;
 const EASE = "ease-[cubic-bezier(0.32,0.72,0,1)]";
 
 /**
- * The original welcome layout - round picture, blue title, text, progress, Next / Skip - with animated line
- * drawings that draw themselves on every slide, soft breathing rings, text rising in and a stretching dot.
+ * The original welcome layout - illustration, blue title, text, progress, Next / Skip - with large animated
+ * illustrations that draw themselves on every slide, text rising in and a stretching progress dot.
  */
-export function OnboardingCarousel({ onFinish, onLogin }: { onFinish: () => void; onLogin?: () => void }) {
+export function OnboardingCarousel({ onFinish }: { onFinish: () => void }) {
   const t = useTranslations("Onboarding");
   const tCommon = useTranslations("Common");
   const [index, setIndex] = useState(0);
@@ -47,14 +47,9 @@ export function OnboardingCarousel({ onFinish, onLogin }: { onFinish: () => void
         onPointerDown={onPointerDown}
         onPointerUp={onPointerUp}
       >
-        {/* Round photo with softly breathing brand rings. */}
-        <div className="relative flex size-64 items-center justify-center" aria-hidden="true">
-          <span className="welcome-ring absolute inset-0 rounded-full bg-primary-soft" />
-          <span className="welcome-ring absolute -inset-4 rounded-full bg-primary-soft/50 [animation-delay:600ms]" />
-          <div className="relative flex size-56 items-center justify-center overflow-hidden rounded-full bg-surface p-6 shadow-[0_24px_50px_-20px_rgba(0,60,140,0.45)] ring-4 ring-surface">
-            {/* Keyed by slide so the drawing animates in again each time. */}
-            <Art key={index} />
-          </div>
+        {/* Large illustration (keyed by slide so it draws itself again on every step). */}
+        <div className="aspect-[4/3] w-full max-w-[22rem]">
+          <Art key={index} />
         </div>
 
         {/* Keyed by slide: the text rises in again on every step. */}
@@ -82,22 +77,34 @@ export function OnboardingCarousel({ onFinish, onLogin }: { onFinish: () => void
         <button
           type="button"
           onClick={() => (last ? onFinish() : go(index + 1))}
-          className="group inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-primary text-[16px] font-semibold text-white shadow-[0_12px_28px_-12px_rgba(0,87,184,0.85)] transition-[transform,background-color] duration-300 hover:bg-primary-hover active:scale-[0.98]"
+          className={cn(
+            "group inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-primary text-[16px] font-semibold text-white",
+            "shadow-[0_12px_28px_-12px_rgba(0,87,184,0.85)] transition-[transform,background-color,box-shadow] duration-300",
+            EASE,
+            "hover:-translate-y-0.5 hover:bg-primary-hover hover:shadow-[0_18px_34px_-12px_rgba(0,87,184,0.95)]",
+            "active:translate-y-0 active:scale-[0.97] active:shadow-[0_6px_16px_-8px_rgba(0,87,184,0.9)]",
+            "focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary",
+          )}
         >
           {last ? t("getStarted") : tCommon("next")}
-          <ArrowRight className="size-5 transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />
+          <ArrowRight className={cn("size-5 transition-transform duration-300 group-hover:translate-x-1 group-active:translate-x-1.5", EASE)} aria-hidden="true" />
         </button>
-        {!last ? (
-          <button type="button" onClick={onFinish} className="h-12 rounded-full text-[15px] font-semibold text-primary transition-colors hover:bg-primary/[0.06]">
-            {tCommon("skip")}
-          </button>
-        ) : (
-          onLogin && (
-            <button type="button" onClick={onLogin} className="h-12 rounded-full text-[15px] font-semibold text-primary transition-colors hover:bg-primary/[0.06]">
-              {t("haveAccount")}
-            </button>
-          )
-        )}
+        {/* Same height on every slide so Next never jumps; Skip fades out on the last one. */}
+        <button
+          type="button"
+          onClick={onFinish}
+          tabIndex={last ? -1 : 0}
+          aria-hidden={last || undefined}
+          className={cn(
+            "h-12 rounded-full text-[15px] font-semibold text-primary transition-[background-color,transform,opacity] duration-300",
+            EASE,
+            "hover:bg-primary/[0.08] active:scale-[0.96] active:bg-primary/[0.14]",
+            "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+            last && "pointer-events-none opacity-0",
+          )}
+        >
+          {tCommon("skip")}
+        </button>
       </div>
     </div>
   );

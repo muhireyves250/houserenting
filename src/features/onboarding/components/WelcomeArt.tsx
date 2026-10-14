@@ -1,92 +1,134 @@
 /**
- * Animated line drawings for the welcome slides (brand blue on white). Strokes draw themselves
- * (pathLength=1 + stroke-dashoffset), then small details move. All motion is CSS and stops with reduced motion.
+ * Animated illustrations for the welcome slides. Outlines draw themselves (pathLength=1 + stroke-dashoffset),
+ * then shapes fill with soft brand tones and small details move. All motion is CSS and stops with reduced motion.
  */
 
-const STROKE = { fill: "none", stroke: "currentColor", strokeWidth: 3, strokeLinecap: "round", strokeLinejoin: "round" } as const;
+const STROKE = { stroke: "currentColor", strokeWidth: 2.5, strokeLinecap: "round", strokeLinejoin: "round" } as const;
+const SOFT = "var(--color-primary-soft)";
 
-/** A stroke that draws itself after `delay` ms. */
-function Draw({ d, delay = 0 }: { d: string; delay?: number }) {
-  return <path d={d} pathLength={1} className="art-draw" style={{ animationDelay: `${delay}ms` }} {...STROKE} />;
+/** An outline that draws itself after `delay` ms, then (optionally) fills. */
+function Shape({ d, delay = 0, fill = "none" }: { d: string; delay?: number; fill?: string }) {
+  return (
+    <path
+      d={d}
+      pathLength={1}
+      className={fill === "none" ? "art-draw" : "art-draw art-fill"}
+      style={{ animationDelay: fill === "none" ? `${delay}ms` : `${delay}ms, ${delay + 700}ms`, ["--art-fill" as string]: fill }}
+      fill={fill === "none" ? "none" : "transparent"}
+      {...STROKE}
+    />
+  );
 }
 
-/** Slide 1: a little neighbourhood - house, apartment block and lodge - whose windows light up. */
-function Homes() {
+/** Soft background blob and ground shadow shared by all scenes. */
+function Backdrop() {
   return (
-    <svg viewBox="0 0 200 160" className="size-full text-primary" aria-hidden="true">
-      {/* Sun and cloud */}
+    <>
+      <ellipse cx="160" cy="120" rx="140" ry="92" fill={SOFT} opacity="0.45" className="art-pop" />
+      <ellipse cx="160" cy="214" rx="120" ry="9" fill="var(--color-primary)" opacity="0.08" className="art-pop" style={{ animationDelay: "200ms" }} />
+    </>
+  );
+}
+
+/** Slide 1: a neighbourhood - house, apartment block and lodge - whose windows light up at dusk. */
+function Homes() {
+  const windows = [
+    [146, 92], [170, 92], [146, 116], [170, 116], [146, 140], [170, 140], [146, 164], [170, 164],
+    [70, 152], [104, 152], [232, 172], [252, 172],
+  ];
+  return (
+    <svg viewBox="0 0 320 240" className="size-full text-primary" aria-hidden="true">
+      <Backdrop />
       <g className="art-float">
-        <circle cx="160" cy="34" r="12" fill="#ffd166" className="art-pop" style={{ animationDelay: "1300ms" }} />
+        <circle cx="262" cy="52" r="16" fill="#ffd166" className="art-pop" style={{ animationDelay: "1300ms" }} />
       </g>
       <g className="art-float-slow">
-        <Draw d="M24 40h26a8 8 0 0 0-8-10 10 10 0 0 0-18 4 6 6 0 0 0 0 6z" delay={1100} />
+        <Shape d="M40 62h44a12 12 0 0 0-12-14 16 16 0 0 0-29 6 9 9 0 0 0-3 8z" fill="#fff" delay={1100} />
       </g>
-      {/* Ground */}
-      <Draw d="M10 138h180" />
+      <Shape d="M24 212h272" />
       {/* Apartment block */}
-      <Draw d="M84 138V58h44v80" delay={150} />
+      <Shape d="M134 212V78a6 6 0 0 1 6-6h48a6 6 0 0 1 6 6v134" fill="#fff" delay={150} />
+      <Shape d="M154 212v-22h20v22" delay={700} />
       {/* House */}
-      <Draw d="M24 138V96l26-22 26 22v42" delay={300} />
-      <Draw d="M44 138v-20h12v20" delay={500} />
-      {/* Lodge with tree */}
-      <Draw d="M136 138v-30l20-16 20 16v30" delay={450} />
-      <Draw d="M184 138v-26M184 112c-9 0-12-10-6-16 0-8 12-8 12 0 6 6 3 16-6 16z" delay={700} />
-      {/* Windows light up one after another */}
-      {[
-        [92, 68], [112, 68], [92, 86], [112, 86], [92, 104], [112, 104], [32, 100], [60, 100], [148, 116], [160, 116],
-      ].map(([x, y], i) => (
-        <rect key={`${x}-${y}`} x={x} y={y} width="9" height="9" rx="2" className="art-light" style={{ animationDelay: `${1000 + i * 110}ms` }} />
+      <Shape d="M56 212v-62l38-30 38 30v62" fill="#fff" delay={300} />
+      <Shape d="M48 156l46-38 46 38" delay={450} />
+      <Shape d="M84 212v-30h20v30" delay={650} />
+      {/* Lodge */}
+      <Shape d="M222 212v-44l30-24 30 24v44" fill="#fff" delay={450} />
+      {/* Tree */}
+      <Shape d="M296 212v-34" delay={800} />
+      <Shape d="M296 180c-14 0-18-14-9-22 0-12 18-12 18 0 9 8 5 22-9 22z" fill="#cfe7d8" delay={850} />
+      {windows.map(([x, y], i) => (
+        <rect key={`${x}-${y}`} x={x} y={y} width="12" height="12" rx="2.5" className="art-light" style={{ animationDelay: `${1100 + i * 90}ms` }} />
       ))}
     </svg>
   );
 }
 
-/** Slide 2: a map draws its roads, a pin drops in and bounces, a magnifier glides over. */
+/** Slide 2: a map unfolds, a route traces across it, a pin drops in and a magnifier glides over. */
 function Location() {
   return (
-    <svg viewBox="0 0 200 160" className="size-full text-primary" aria-hidden="true">
-      {/* Folded map */}
-      <Draw d="M20 46l50-16 60 16 50-16v100l-50 16-60-16-50 16z" />
-      <Draw d="M70 30v100M130 46v100" delay={250} />
-      {/* Roads */}
-      <path d="M28 104c30-6 40-34 70-30s40 30 74 18" pathLength={1} className="art-draw art-dash" style={{ animationDelay: "500ms" }} {...STROKE} strokeWidth={2.5} />
+    <svg viewBox="0 0 320 240" className="size-full text-primary" aria-hidden="true">
+      <Backdrop />
+      {/* Folded map, three panels */}
+      <Shape d="M44 64l76-24v148l-76 24z" fill="#fff" />
+      <Shape d="M120 40l80 24v148l-80-24z" fill="#f4f8fd" delay={150} />
+      <Shape d="M200 64l76-24v148l-76 24z" fill="#fff" delay={300} />
+      {/* Park and lake */}
+      <Shape d="M62 150c10-12 30-12 40 0s-6 26-20 26-30-14-20-26z" fill="#cfe7d8" delay={600} />
+      <Shape d="M222 96c12-8 34-6 40 6s-8 22-24 20-26-18-16-26z" fill="#cde3f7" delay={700} />
+      {/* Route */}
+      <path d="M58 118c40-4 56-46 100-42s58 54 104 40" pathLength={1} className="art-draw art-route" style={{ animationDelay: "800ms" }} fill="none" {...STROKE} strokeWidth={3} />
       {/* Pin */}
-      <g className="art-drop" style={{ animationDelay: "1000ms" }}>
-        <path d="M100 86c-14-16-20-24-20-34a20 20 0 0 1 40 0c0 10-6 18-20 34z" fill="var(--color-primary)" />
-        <circle cx="100" cy="52" r="7" fill="#fff" />
+      <g className="art-drop" style={{ animationDelay: "1300ms" }}>
+        <path d="M160 120c-20-22-28-34-28-48a28 28 0 0 1 56 0c0 14-8 26-28 48z" fill="var(--color-primary)" />
+        <circle cx="160" cy="72" r="10" fill="#fff" />
       </g>
-      <ellipse cx="100" cy="92" rx="10" ry="3" fill="currentColor" opacity="0.18" className="art-shadow" style={{ animationDelay: "1000ms" }} />
+      <ellipse cx="160" cy="128" rx="14" ry="4" fill="currentColor" opacity="0.18" className="art-shadow" style={{ animationDelay: "1300ms" }} />
       {/* Magnifier */}
-      <g className="art-glide" style={{ animationDelay: "1500ms" }}>
-        <circle cx="150" cy="104" r="13" {...STROKE} fill="#fff" />
-        <path d="M159 114l12 12" {...STROKE} strokeWidth={5} />
+      <g className="art-glide" style={{ animationDelay: "1800ms" }}>
+        <circle cx="234" cy="160" r="20" fill="#fff" {...STROKE} strokeWidth={3} />
+        <circle cx="234" cy="160" r="12" fill={SOFT} opacity="0.7" />
+        <path d="M249 175l16 16" {...STROKE} strokeWidth={7} />
       </g>
     </svg>
   );
 }
 
-/** Slide 3: a home card draws itself, a heart pops in and beats, small hearts float up. */
+/** Slide 3: a listing card draws itself, a heart pops in and beats, small hearts float up. */
 function Favorites() {
   const heart = "M0 6C-6-2-16 2-12 10L0 22 12 10C16 2 6-2 0 6z";
   return (
-    <svg viewBox="0 0 200 160" className="size-full text-primary" aria-hidden="true">
-      {/* Card */}
-      <Draw d="M48 30h104a10 10 0 0 1 10 10v84a10 10 0 0 1-10 10H48a10 10 0 0 1-10-10V40a10 10 0 0 1 10-10z" />
-      <Draw d="M62 92V70l20-16 20 16v22z" delay={300} />
-      <Draw d="M58 108h56M58 118h36" delay={550} />
-      {/* Big heart: pops in, then beats */}
-      <g transform="translate(136 64)">
-        <g className="art-beat" style={{ animationDelay: "900ms" }}>
-          <path d={heart} fill="#e11d48" transform="scale(1.6)" />
+    <svg viewBox="0 0 320 240" className="size-full text-primary" aria-hidden="true">
+      <Backdrop />
+      {/* Second card behind for depth */}
+      <Shape d="M96 52h136a12 12 0 0 1 12 12v120a12 12 0 0 1-12 12H96a12 12 0 0 1-12-12V64a12 12 0 0 1 12-12z" fill="#eef4fb" />
+      {/* Main card */}
+      <Shape d="M78 66h136a12 12 0 0 1 12 12v120a12 12 0 0 1-12 12H78a12 12 0 0 1-12-12V78a12 12 0 0 1 12-12z" fill="#fff" delay={200} />
+      {/* Photo area with a house */}
+      <Shape d="M82 82h128v66H82z" fill={SOFT} delay={400} />
+      <Shape d="M122 142v-26l24-20 24 20v26z" fill="#fff" delay={650} />
+      <Shape d="M140 142v-14h12v14" delay={850} />
+      {/* Text lines and rating stars */}
+      <Shape d="M84 166h92M84 182h60" delay={900} />
+      {[0, 1, 2, 3, 4].map((i) => (
+        <circle key={i} cx={186 + i * 8} cy="182" r="2.6" fill="#ffd166" className="art-pop" style={{ animationDelay: `${1200 + i * 80}ms` }} />
+      ))}
+      {/* Heart badge: pops in, then beats */}
+      <g transform="translate(212 76)">
+        <circle r="22" fill="#fff" {...STROKE} strokeWidth={2} className="art-pop" style={{ animationDelay: "1100ms" }} />
+        <g transform="translate(0 -9)">
+          <g className="art-beat" style={{ animationDelay: "1300ms" }}>
+            <path d={heart} fill="#e11d48" transform="scale(1.05)" />
+          </g>
         </g>
       </g>
-      {/* Floating little hearts */}
       {[
-        [120, 46, 0], [150, 40, 500], [166, 58, 1000],
+        [242, 58, 0], [262, 84, 600], [228, 40, 1200],
       ].map(([x, y, delay]) => (
-        <g key={`${x}`} transform={`translate(${x} ${y})`}>
-          <g className="art-rise" style={{ animationDelay: `${1400 + delay}ms` }}>
-            <path d={heart} fill="#e11d48" opacity="0.7" transform="scale(0.5)" />
+        <g key={x} transform={`translate(${x} ${y})`}>
+          <g className="art-rise" style={{ animationDelay: `${1700 + delay}ms` }}>
+            <path d={heart} fill="#e11d48" opacity="0.65" transform="scale(0.45)" />
           </g>
         </g>
       ))}

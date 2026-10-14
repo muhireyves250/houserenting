@@ -26,9 +26,8 @@ describe("OnboardingCarousel", () => {
     expect(onFinish).toHaveBeenCalledOnce();
   });
 
-  it("offers logging in, and swipes between slides", async () => {
-    const onLogin = vi.fn();
-    renderWithIntl(<OnboardingCarousel onFinish={vi.fn()} onLogin={onLogin} />);
+  it("swipes between slides, and has no account button", async () => {
+    renderWithIntl(<OnboardingCarousel onFinish={vi.fn()} />);
     const stage = screen.getByTestId("welcome-stage");
     fireEvent.pointerDown(stage, { clientX: 300, pointerId: 1 });
     fireEvent.pointerUp(stage, { clientX: 100, pointerId: 1 });
@@ -36,10 +35,6 @@ describe("OnboardingCarousel", () => {
     fireEvent.pointerDown(stage, { clientX: 100, pointerId: 1 });
     fireEvent.pointerUp(stage, { clientX: 300, pointerId: 1 });
     expect(screen.getByRole("heading", { name: "Space Rental" })).toBeInTheDocument();
-    // "I already have an account" is offered on the last slide (where Skip was).
-    await userEvent.click(screen.getByRole("button", { name: "Next" }));
-    await userEvent.click(screen.getByRole("button", { name: "Next" }));
-    await userEvent.click(screen.getByRole("button", { name: "I already have an account" }));
-    expect(onLogin).toHaveBeenCalledOnce();
+    expect(screen.queryByRole("button", { name: "I already have an account" })).not.toBeInTheDocument();
   });
 });

@@ -24,10 +24,7 @@ export function Welcome({ next = "/" }: { next?: string }) {
   return (
     <>
       {intro !== "in" && (
-        <OnboardingCarousel
-          onFinish={() => router.replace(target)}
-          onLogin={() => router.replace({ pathname: "/login", query: { next: target } })}
-        />
+        <OnboardingCarousel onFinish={() => router.replace(target)} />
       )}
       {intro && <LogoReveal testId="logo-reveal" leaving={intro === "out"} />}
     </>
