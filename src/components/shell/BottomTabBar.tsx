@@ -10,7 +10,7 @@ import { isActive, NAV_ITEMS, navHref } from "./nav-items";
 const SLIDE = "duration-500 ease-[cubic-bezier(0.25,0.8,0.25,1)] motion-reduce:transition-none";
 
 /**
- * Phones: a floating navy glass bar. Tabs are icons; the current one is a blue pill with its name,
+ * Phones: a floating white glass bar in the brand colours (blue edge and icons). Tabs are icons; the current one is a blue pill with its name,
  * and that pill slides and stretches to the tapped tab. Members-only tabs open the login modal when signed out.
  */
 export function BottomTabBar({ signedIn = true }: { signedIn?: boolean }) {
@@ -49,7 +49,7 @@ export function BottomTabBar({ signedIn = true }: { signedIn?: boolean }) {
     >
       <ul
         ref={listRef}
-        className="relative flex items-center gap-1 rounded-full bg-[#001a3d]/88 p-1.5 shadow-[0_18px_40px_-14px_rgba(0,20,60,0.7),inset_0_1px_0_rgba(255,255,255,0.12)] ring-1 ring-white/10 backdrop-blur-xl"
+        className="relative flex items-center gap-1 rounded-full bg-surface/90 p-1.5 shadow-[0_14px_36px_-12px_rgba(0,40,100,0.45)] ring-1 ring-line backdrop-blur-xl"
       >
         <span
           ref={pillRef}
@@ -70,10 +70,10 @@ export function BottomTabBar({ signedIn = true }: { signedIn?: boolean }) {
                 aria-label={t(key)}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "relative flex h-12 items-center justify-center gap-2 rounded-full text-white/70 transition-[padding,color]",
+                  "relative flex h-12 items-center justify-center gap-2 rounded-full text-primary transition-[padding,color]",
                   SLIDE,
-                  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white active:scale-95",
-                  active ? "px-4 text-white" : "w-12",
+                  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-95",
+                  active ? "px-4 text-white" : "w-12 hover:bg-primary/[0.08]",
                 )}
               >
                 <Icon className="size-[22px] shrink-0" strokeWidth={active ? 2.2 : 1.9} aria-hidden="true" />
