@@ -54,7 +54,8 @@ export function AuthModal({
       title={
         <span className="flex flex-col items-center gap-4">
           <LogoMark className="h-16 w-[72px] text-primary" />
-          {t("tagline")}
+          {/* Not shown, but still names the dialog for screen readers. */}
+          <span className="sr-only">{t("tagline")}</span>
         </span>
       }
     >

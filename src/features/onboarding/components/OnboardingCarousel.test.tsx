@@ -8,7 +8,7 @@ describe("OnboardingCarousel", () => {
   it("walks through three slides and finishes on 'Get started'", async () => {
     const onFinish = vi.fn();
     renderWithIntl(<OnboardingCarousel onFinish={onFinish} />);
-    expect(screen.getByRole("heading", { name: "Rent your perfect fit" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Space Rental" })).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Next" }));
     expect(screen.getByRole("heading", { name: "Search by location" })).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Next" }));

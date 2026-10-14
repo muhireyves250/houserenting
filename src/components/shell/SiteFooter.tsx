@@ -48,7 +48,6 @@ function Column({ title, links }: { title: string; links: { key: string; label: 
 export function SiteFooter({ signedIn, year = new Date().getFullYear() }: { signedIn: boolean; year?: number }) {
   const t = useTranslations("Footer");
   const tNav = useTranslations("Nav");
-  const tAuth = useTranslations("Auth");
   const links = (items: { key: FooterKey; href: SearchHref }[]) => items.map(({ key, href }) => ({ key, label: t(key), href }));
 
   return (
@@ -64,7 +63,6 @@ export function SiteFooter({ signedIn, year = new Date().getFullYear() }: { sign
         {/* Headline band */}
         <div className="flex flex-col gap-6 border-b border-white/10 py-12 md:flex-row md:items-end md:justify-between md:py-16">
           <div className="flex max-w-xl flex-col gap-3">
-            <p className="font-display text-3xl leading-tight font-bold tracking-[-0.03em] md:text-[40px] md:leading-[1.1]">{tAuth("tagline")}</p>
             <p className="text-[15px] leading-6 text-white/80">{t("about")}</p>
           </div>
           <Link

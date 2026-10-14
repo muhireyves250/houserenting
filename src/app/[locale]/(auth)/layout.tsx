@@ -6,7 +6,6 @@ import { LogoMark } from "@/components/ui/Logo";
 import { Link } from "@/i18n/navigation";
 
 export default async function AuthLayout({ children }: { children: ReactNode }) {
-  const t = await getTranslations("Auth");
   const tNav = await getTranslations("Nav");
 
   return (
@@ -16,7 +15,6 @@ export default async function AuthLayout({ children }: { children: ReactNode }) 
           <LogoMark className="h-8 w-9 text-primary-soft" />
           <span className="text-xl font-bold">Space Rental</span>
         </Link>
-        <p className="max-w-md text-5xl font-semibold leading-tight">{t("tagline")}</p>
         <p className="text-sm text-primary-soft">Kigali · Musanze · Rubavu · Huye</p>
       </aside>
       <section className="flex flex-col bg-surface px-6 py-6 md:px-16 md:py-10">
