@@ -20,6 +20,27 @@ export function BottomTabBar({ signedIn = true }: { signedIn?: boolean }) {
   const pillRef = useRef<HTMLSpanElement>(null);
   // Tab under the mouse / finger: it shows its name too (the bar's width never changes; tabs share it).
   const [hovered, setHovered] = useState<string | null>(null);
+  const shadeRef = useRef<HTMLSpanElement>(null);
+
+  // Hover: one soft shade slides to the tab under the pointer (the site's sliding hover), following its
+  // width as the name appears. It stays where it was while fading out.
+  useLayoutEffect(() => {
+    const list = listRef.current;
+    const shade = shadeRef.current;
+    if (!list || !shade) return;
+    const tab = hovered ? list.querySelector<HTMLElement>(`a[data-tab="${hovered}"]`) : null;
+    const isCurrent = tab?.getAttribute("aria-current") === "page";
+    shade.style.opacity = tab && !isCurrent ? "1" : "0";
+    if (!tab || isCurrent) return;
+    const place = () => {
+      shade.style.width = `${tab.offsetWidth}px`;
+      shade.style.transform = `translateX(${tab.offsetLeft}px)`;
+    };
+    place();
+    const resize = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(place);
+    resize?.observe(tab);
+    return () => resize?.disconnect();
+  }, [hovered]);
 
   // Place the pill under the current tab, measured from layout (no re-render). It follows the tab's
   // width as its name expands, and slides after the first placement.
@@ -52,8 +73,15 @@ export function BottomTabBar({ signedIn = true }: { signedIn?: boolean }) {
       <ul
         ref={listRef}
         onPointerLeave={() => setHovered(null)}
-        className="relative mx-auto flex w-full max-w-md items-center gap-1 rounded-full bg-surface/90 p-1.5 shadow-[0_14px_36px_-12px_rgba(0,40,100,0.45)] ring-1 ring-line backdrop-blur-xl"
+        className="relative mx-auto flex w-full max-w-md items-center justify-between rounded-full bg-surface/90 p-1.5 shadow-[0_14px_36px_-12px_rgba(0,40,100,0.45)] ring-1 ring-line backdrop-blur-xl"
       >
+        <span
+          ref={shadeRef}
+          data-testid="tab-hover"
+          aria-hidden="true"
+          style={{ opacity: 0 }}
+          className={cn("pointer-events-none absolute top-1.5 bottom-1.5 left-0 rounded-full bg-primary/[0.1] transition-[transform,width,opacity]", SLIDE)}
+        />
         <span
           ref={pillRef}
           data-testid="tab-pill"
@@ -68,29 +96,30 @@ export function BottomTabBar({ signedIn = true }: { signedIn?: boolean }) {
           const active = isActive(pathname, href);
           const labelled = active || hovered === key;
           return (
-            // Equal shares of a fixed-width bar; a tab showing its name takes a bigger share.
+            // Natural sizes, spread with equal gaps across the fixed-width bar.
             <li
               key={key}
-              className={cn("min-w-0 transition-[flex-grow]", SLIDE, labelled ? "grow-[2.2]" : "grow")}
               onPointerEnter={() => setHovered(key)}
               onPointerDown={() => setHovered(key)}
             >
               <Link
                 href={navHref(href, signedIn)}
                 aria-label={t(key)}
+                data-tab={key}
                 aria-current={active ? "page" : undefined}
                 onFocus={() => setHovered(key)}
                 onBlur={() => setHovered(null)}
                 className={cn(
-                  "relative flex h-12 w-full items-center justify-center gap-2 overflow-hidden rounded-full px-2 transition-[background-color,color]",
+                  "relative flex h-12 items-center justify-center gap-2 rounded-full transition-[background-color,color,padding,width]",
                   SLIDE,
                   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-95",
-                  active ? "text-white" : cn("text-primary", labelled && "bg-primary/[0.08]"),
+                  labelled ? "px-4" : "w-12",
+                  active ? "text-white" : "text-primary",
                 )}
               >
                 <Icon className="size-[22px] shrink-0" strokeWidth={2} aria-hidden="true" />
                 {labelled && (
-                  <span aria-hidden="true" className="truncate text-sm font-semibold motion-safe:animate-[fade-in_400ms_ease-out]">
+                  <span aria-hidden="true" className="text-sm font-semibold whitespace-nowrap motion-safe:animate-[fade-in_400ms_ease-out]">
                     {t(key)}
                   </span>
                 )}
