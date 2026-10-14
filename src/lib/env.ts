@@ -28,6 +28,10 @@ const schema = z
       .transform((value) => value === "true"),
     // How long unpaid bookings hold their dates before they are released.
     BOOKING_HOLD_MINUTES: z.coerce.number().int().min(5).max(24 * 60).default(30),
+    // Photo uploads from hosts (all three, or none: uploads stay off).
+    CLOUDINARY_CLOUD_NAME: z.string().min(1).optional(),
+    CLOUDINARY_API_KEY: z.string().min(1).optional(),
+    CLOUDINARY_API_SECRET: z.string().min(1).optional(),
     LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
     SENTRY_DSN: z.string().optional(),
   })

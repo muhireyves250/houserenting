@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Copy, Ellipsis, Mail, MessageSquare, Share } from "lucide-react";
+import { Check, Copy, Download, Ellipsis, Mail, MessageSquare, QrCode, Share } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, type ReactNode } from "react";
 import { Modal } from "@/components/ui/Modal";
@@ -26,16 +26,26 @@ const XIcon = () => (
 const OPTION =
   "flex items-center gap-3.5 rounded-xl border border-line px-4 py-3.5 text-[15px] font-semibold text-ink transition-[border-color,background-color,transform] duration-300 hover:border-ink/40 max-md:hover:border-primary hover:bg-canvas active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
 
-/** Share opens a window: the place, then copy link, email, WhatsApp, SMS, Facebook, X and the phone's own share sheet. */
-export function ShareButton({ variant = "text", ...preview }: PlacePreviewData & { variant?: "text" | "icon" }) {
+/**
+ * Share opens a window: the place, then copy link, email, WhatsApp, SMS, Facebook, X, a QR code and the phone's own
+ * share sheet. `link` is the place's permanent link; `qrSvg` its QR code (a locator only, no private data).
+ */
+export function ShareButton({
+  variant = "text",
+  link,
+  qrSvg,
+  ...preview
+}: PlacePreviewData & { variant?: "text" | "icon"; link?: string; qrSvg?: string }) {
   const t = useTranslations("Listings");
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showQr, setShowQr] = useState(false);
   const [url, setUrl] = useState("");
 
   function show() {
-    setUrl(window.location.href);
+    setUrl(link ?? window.location.href);
     setCopied(false);
+    setShowQr(false);
     setOpen(true);
   }
 
@@ -85,6 +95,12 @@ export function ShareButton({ variant = "text", ...preview }: PlacePreviewData &
                 {label}
               </a>
             ))}
+            {qrSvg && (
+              <button type="button" onClick={() => setShowQr((v) => !v)} aria-expanded={showQr} className={cn(OPTION, showQr && "border-primary")}>
+                <QrCode className="size-5" aria-hidden="true" />
+                {t("qrCode")}
+              </button>
+            )}
             {typeof navigator !== "undefined" && typeof navigator.share === "function" && (
               <button
                 type="button"
@@ -96,6 +112,20 @@ export function ShareButton({ variant = "text", ...preview }: PlacePreviewData &
               </button>
             )}
           </div>
+          {qrSvg && showQr && (
+            <div className="mt-5 flex flex-col items-center gap-3 motion-safe:animate-pop-in">
+              {/* SVG made on our server by the QR library from the link above. */}
+              <div role="img" aria-label={t("qrCodeFor", { title: preview.title })} className="size-48 rounded-2xl bg-white p-2 ring-1 ring-line [&>svg]:size-full" dangerouslySetInnerHTML={{ __html: qrSvg }} />
+              <a
+                href={`data:image/svg+xml;charset=utf-8,${encodeURIComponent(qrSvg)}`}
+                download={`${preview.title.replace(/[^\w-]+/g, "-").toLowerCase()}-qr.svg`}
+                className="inline-flex items-center gap-2 rounded-lg bg-canvas px-3.5 py-1.5 text-[13px] font-semibold text-ink transition-colors hover:bg-line/70"
+              >
+                <Download className="size-4" aria-hidden="true" />
+                {t("downloadQr")}
+              </a>
+            </div>
+          )}
         </Modal>
       )}
     </>

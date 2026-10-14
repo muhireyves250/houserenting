@@ -79,7 +79,7 @@ export default async function BookingsPage() {
                 <Navigation className="size-4" aria-hidden="true" />
                 {t("directions")}
               </a>
-              <Link href="/chats" className={pillLink}>
+              <Link href={{ pathname: "/support", query: { booking: current.reference } }} className={pillLink}>
                 <LifeBuoy className="size-4" aria-hidden="true" />
                 {t("getHelp")}
               </Link>

@@ -8,8 +8,8 @@ export function securityHeaders({ isProd }: { isProd: boolean }): { key: string;
     "font-src 'self'",
     // Hero background video (demo host now; Cloudinary when our own media lands).
     "media-src 'self' https://assets.mixkit.co https://res.cloudinary.com",
-    // tiles.openfreemap.org: search map style, vector tiles, fonts and icons (MapLibre fetches them).
-    "connect-src 'self' https://*.ingest.sentry.io https://*.ingest.de.sentry.io https://tiles.openfreemap.org",
+    // tiles.openfreemap.org: map style, tiles, fonts and icons (MapLibre). api.cloudinary.com: hosts upload listing photos.
+    "connect-src 'self' https://*.ingest.sentry.io https://*.ingest.de.sentry.io https://tiles.openfreemap.org https://api.cloudinary.com",
     // MapLibre decodes tiles in web workers created from blob: URLs.
     "worker-src 'self' blob:",
     "frame-ancestors 'none'",

@@ -30,7 +30,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
     flex: query.flex,
   });
   const title = query.bbox ? t("titleMapArea") : t("title", { place: query.location ?? tHome("country") });
-  const filtered = Boolean(query.types?.length || query.minPrice || query.maxPrice);
+  const filtered = Boolean(query.types?.length || query.minPrice || query.maxPrice || query.bedrooms || query.amenities?.length);
 
   return (
     <>
@@ -53,7 +53,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
           </div>
           {/* Phones: the filter row scrolls sideways inside the screen. */}
           <div className="flex w-full min-w-0 md:w-auto md:justify-center">
-            <FilterBar base={base} mode={query.mode} filters={{ types: query.types, minPrice: query.minPrice, maxPrice: query.maxPrice }} />
+            <FilterBar base={base} mode={query.mode} filters={{ types: query.types, minPrice: query.minPrice, maxPrice: query.maxPrice, bedrooms: query.bedrooms, amenities: query.amenities }} />
           </div>
           {/* Balances the title column so the filters sit in the true centre. */}
           <div className="hidden md:block" aria-hidden="true" />

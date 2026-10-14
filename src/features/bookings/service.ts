@@ -7,8 +7,10 @@ import { todayISO, type BookedRange, type ISODate } from "@/features/search/date
 import { db } from "@/lib/db";
 import { getEnv } from "@/lib/env";
 import { logger } from "@/lib/logger";
+import { notify } from "@/features/notifications/service";
 import { newBookingReference } from "./reference";
-import { BLOCKING_STATUSES } from "./status";
+import { audit } from "@/features/audit/service";
+import { BLOCKING_STATUSES, canTransition } from "./status";
 
 export type BookingRequest = {
   guestId: string;
@@ -46,12 +48,13 @@ type Tx = Prisma.TransactionClient;
 async function expireHolds(tx: Tx, where: Prisma.BookingWhereInput, now: Date): Promise<void> {
   const stale = await tx.booking.findMany({
     where: { ...where, status: "PENDING_PAYMENT", holdExpiresAt: { lte: now } },
-    select: { id: true },
+    select: { id: true, guestId: true, reference: true, listing: { select: { title: true } } },
   });
-  for (const { id } of stale) {
+  for (const { id, guestId, reference, listing } of stale) {
     const { count } = await tx.booking.updateMany({ where: { id, status: "PENDING_PAYMENT" }, data: { status: "EXPIRED" } });
     if (count === 1) {
       await tx.bookingEvent.create({ data: { bookingId: id, fromStatus: "PENDING_PAYMENT", toStatus: "EXPIRED", reason: "payment hold expired" } });
+      await notify(tx, guestId, "bookingExpired", { title: listing.title, reference }, `/bookings/${reference}`);
     }
   }
 }
@@ -82,7 +85,7 @@ export async function createBooking(request: BookingRequest, now: Date = new Dat
 
   const listing = await db.listing.findFirst({
     where: { id: listingId, status: "PUBLISHED" },
-    select: { hostId: true, maxGuests: true, discountPercent: true, termsOfRent: true, rates: { where: { unit: "NIGHT" } } },
+    select: { title: true, hostId: true, maxGuests: true, discountPercent: true, termsOfRent: true, rates: { where: { unit: "NIGHT" } } },
   });
   const night = listing?.rates[0];
   if (!listing || !night) return { ok: false, error: "notFound" };
@@ -125,6 +128,7 @@ export async function createBooking(request: BookingRequest, now: Date = new Dat
             events: { create: { fromStatus: null, toStatus: "PENDING_PAYMENT", actorId: guestId, reason: "booked by guest" } },
           },
         });
+        await notify(tx, guestId, "bookingHeld", { title: listing.title, reference }, `/bookings/${reference}`);
       });
       return { ok: true, reference };
     } catch (error) {
@@ -229,3 +233,42 @@ export async function cancelPendingBooking(guestId: string, reference: string, n
 }
 
 export { BLOCKING_STATUSES };
+
+/** Reception: check a paid guest in (from the check-in day), then out. Every move is logged with who made it. */
+export async function staffMoveBooking(
+  staffId: string,
+  reference: string,
+  to: "CHECKED_IN" | "COMPLETED",
+  now: Date = new Date(),
+): Promise<boolean> {
+  return db.$transaction(async (tx) => {
+    const booking = await tx.booking.findUnique({ where: { reference }, select: { id: true, status: true, checkIn: true, guestId: true } });
+    if (!booking || !canTransition(booking.status, to)) return false;
+    if (to === "CHECKED_IN" && asISO(booking.checkIn) > todayISO(now)) return false;
+    const { count } = await tx.booking.updateMany({ where: { id: booking.id, status: booking.status }, data: { status: to } });
+    if (count !== 1) return false;
+    await tx.bookingEvent.create({
+      data: { bookingId: booking.id, fromStatus: booking.status, toStatus: to, actorId: staffId, reason: to === "CHECKED_IN" ? "checked in" : "checked out" },
+    });
+    await audit(tx, { actorId: staffId, action: to === "CHECKED_IN" ? "booking.checkIn" : "booking.checkOut", entityType: "booking", entityId: reference });
+    return true;
+  });
+}
+
+/** Staff list: bookings that are live or coming up first. */
+export function staffBookings(take = 100) {
+  return db.booking.findMany({
+    orderBy: [{ checkIn: "desc" }],
+    take,
+    select: {
+      reference: true,
+      status: true,
+      checkIn: true,
+      checkOut: true,
+      total: true,
+      holdExpiresAt: true,
+      guest: { select: { name: true, email: true } },
+      listing: { select: { id: true, title: true } },
+    },
+  });
+}

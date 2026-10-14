@@ -1,4 +1,4 @@
-import { ChevronRight, Heart, House, MessageSquare, UserRound } from "lucide-react";
+import { Bell, ChevronRight, Heart, House, KeyRound, LifeBuoy, MessageSquare, ShieldCheck, UserRound } from "lucide-react";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Avatar } from "@/components/ui/Avatar";
@@ -11,6 +11,8 @@ import { Link } from "@/i18n/navigation";
 import { Suspense } from "react";
 import { toAppLocale } from "@/i18n/routing";
 import { requireUser } from "@/lib/session";
+import { unreadCount } from "@/features/notifications/service";
+import { isAdmin } from "@/lib/roles";
 
 const TILES = [
   { key: "bookings", href: "/bookings", icon: House, tint: "bg-primary/[0.08] text-primary" },
@@ -21,7 +23,7 @@ export default async function ProfilePage() {
   const user = await requireUser("/profile");
   const profile = await getProfile(user.id);
   if (!profile) notFound();
-  const [t, tNav] = await Promise.all([getTranslations("Profile"), getTranslations("Nav")]);
+  const [t, tNav, unread] = await Promise.all([getTranslations("Profile"), getTranslations("Nav"), unreadCount(user.id)]);
   const card = "rounded-3xl bg-surface shadow-[0_10px_30px_-14px_rgba(16,24,40,0.3)] ring-1 ring-black/[0.04] max-md:ring-line";
   const row = "flex w-full items-center gap-4 py-4 text-[15px] text-ink transition-colors active:bg-ink/5";
 
@@ -62,12 +64,47 @@ export default async function ProfilePage() {
           </a>
         </li>
         <li>
+          <Link href="/notifications" className={row}>
+            <Bell className="size-6" strokeWidth={1.6} aria-hidden="true" />
+            <span className="flex-1">{t("notifications")}</span>
+            {unread > 0 && (
+              <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-white tabular-nums" aria-label={t("unread", { count: unread })}>
+                {unread}
+              </span>
+            )}
+            <ChevronRight className="size-5 text-ink/60" aria-hidden="true" />
+          </Link>
+        </li>
+        <li>
+          <Link href="/host" className={row}>
+            <KeyRound className="size-6" strokeWidth={1.6} aria-hidden="true" />
+            <span className="flex-1">{user.isHost ? t("yourListings") : t("hostYourPlace")}</span>
+            <ChevronRight className="size-5 text-ink/60" aria-hidden="true" />
+          </Link>
+        </li>
+        <li>
+          <Link href="/support" className={row}>
+            <LifeBuoy className="size-6" strokeWidth={1.6} aria-hidden="true" />
+            <span className="flex-1">{t("help")}</span>
+            <ChevronRight className="size-5 text-ink/60" aria-hidden="true" />
+          </Link>
+        </li>
+        <li>
           <Link href="/chats" className={row}>
             <MessageSquare className="size-6" strokeWidth={1.6} aria-hidden="true" />
             <span className="flex-1">{tNav("chats")}</span>
             <ChevronRight className="size-5 text-ink/60" aria-hidden="true" />
           </Link>
         </li>
+        {isAdmin(user) && (
+          <li>
+            <Link href="/admin" className={row}>
+              <ShieldCheck className="size-6" strokeWidth={1.6} aria-hidden="true" />
+              <span className="flex-1">{t("admin")}</span>
+              <ChevronRight className="size-5 text-ink/60" aria-hidden="true" />
+            </Link>
+          </li>
+        )}
         <li className="flex items-center justify-between gap-4 py-3 md:hidden">
           <span className="text-[15px] text-ink">{tNav("language")}</span>
           <Suspense>

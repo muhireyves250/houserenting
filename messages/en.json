@@ -108,7 +108,11 @@
     "titleMapArea": "Homes in the map area",
     "updating": "Updating homes…",
     "noAreaResults": "No homes in this part of the map",
-    "noAreaResultsBody": "Zoom out or move the map to see more places."
+    "noAreaResultsBody": "Zoom out or move the map to see more places.",
+    "moreFilters": "More filters",
+    "bedrooms": "Bedrooms",
+    "any": "Any",
+    "amenities": "Amenities"
   },
   "Onboarding": {
     "slide1": "Space Rental",
@@ -199,7 +203,13 @@
     "logOutTitle": "Log out?",
     "logOutBody": "You'll need to log in again to see your favorites and bookings.",
     "cancel": "Cancel",
-    "logOutFailed": "Couldn't log you out. Check your connection and try again."
+    "logOutFailed": "Couldn't log you out. Check your connection and try again.",
+    "notifications": "Notifications",
+    "unread": "{count} unread",
+    "yourListings": "Your listings",
+    "hostYourPlace": "List your place",
+    "help": "Help and support",
+    "admin": "Admin"
   },
   "Empty": {
     "favoritesTitle": "No favorites yet",
@@ -396,7 +406,10 @@
       "unavailable": "Someone just booked some of these nights. Choose other dates.",
       "auth": "Log in again to book.",
       "failed": "Couldn't book. Try again."
-    }
+    },
+    "qrCode": "QR code",
+    "qrCodeFor": "QR code for {title}",
+    "downloadQr": "Download QR code"
   },
   "Facility": {
     "KITCHEN": "Kitchen",
@@ -489,5 +502,257 @@
     "cancelBody": "The dates will be released for other guests.",
     "keep": "Keep booking",
     "cancelFailed": "Couldn't cancel. Try again."
+  },
+  "Host": {
+    "title": "Your listings",
+    "newListing": "List a place",
+    "newIntro": "Tell guests about your place. Our team checks every listing before guests can see it.",
+    "emptyTitle": "You haven't listed a place yet",
+    "emptyBody": "List a house, apartment, lodge or room. Our team checks every listing before it goes live.",
+    "status": {
+      "DRAFT": "Draft",
+      "PENDING_REVIEW": "In review",
+      "PUBLISHED": "Live",
+      "REJECTED": "Needs changes",
+      "ARCHIVED": "Removed"
+    },
+    "needsChanges": "Needs changes: {reason}",
+    "viewLive": "View live",
+    "inReviewNote": "Our team is checking this listing. We'll let you know when it's live.",
+    "reviewNote": "This listing is live. If you save changes, it goes back to review and is hidden from guests until our team approves it.",
+    "sections": {
+      "basics": "The basics",
+      "location": "Location",
+      "space": "The space",
+      "amenities": "Amenities",
+      "prices": "Prices",
+      "extras": "Highlights and house rules",
+      "photos": "Photos"
+    },
+    "fields": {
+      "title": "Title",
+      "type": "Type of place",
+      "description": "Description",
+      "address": "Street address",
+      "district": "District",
+      "city": "City",
+      "pin": "Tap the map or drag the pin to the exact spot.",
+      "size": "Size (m²)",
+      "rooms": "Rooms",
+      "bedrooms": "Bedrooms",
+      "bathrooms": "Bathrooms",
+      "maxGuests": "Maximum guests",
+      "pets": "Pets allowed",
+      "price": "Price (RWF)",
+      "min": {
+        "HOUR": "Minimum hours",
+        "DAY": "Minimum days",
+        "NIGHT": "Minimum nights",
+        "MONTH": "Minimum months"
+      },
+      "max": {
+        "HOUR": "Maximum hours",
+        "DAY": "Maximum days",
+        "NIGHT": "Maximum nights",
+        "MONTH": "Maximum months"
+      },
+      "checkIn": "Check-in from",
+      "checkOut": "Check-out until",
+      "dayStart": "Open from",
+      "dayEnd": "Open until",
+      "discount": "Discount (%)",
+      "deposit": "Deposit (months)",
+      "characteristics": "Highlights (one per line)",
+      "terms": "House rules (one per line)"
+    },
+    "pricesHint": "Choose how guests can rent: by the hour, day, night or month.",
+    "errors": {
+      "field": "Check this field.",
+      "maxBelowMin": "The maximum must be at least the minimum.",
+      "duplicateUnit": "Each way of renting can only be added once.",
+      "pin": "Put the pin on a spot in Rwanda.",
+      "noRates": "Add at least one price.",
+      "check": "Check the highlighted fields.",
+      "failed": "Couldn't save. Try again."
+    },
+    "save": "Save",
+    "saved": "Saved",
+    "photosOff": "Photo uploads aren't switched on yet. You can save and send the listing; photos can be added later.",
+    "photoAlt": "Photo {n}",
+    "removePhoto": "Remove photo",
+    "uploading": "Uploading {count}…",
+    "addPhotos": "Add photos",
+    "photoFailed": "Some photos couldn't be uploaded (images up to 10 MB).",
+    "submit": "Send for review",
+    "submitted": "Sent for review. We'll let you know when it's live.",
+    "archive": "Remove listing",
+    "archiveTitle": "Remove this listing?",
+    "archiveBody": "Guests won't see it any more. Past bookings stay in your history.",
+    "cancel": "Cancel",
+    "questionsTitle": "Questions from guests"
+  },
+  "Admin": {
+    "title": "Admin",
+    "nav": {
+      "label": "Admin sections",
+      "overview": "Listings",
+      "moderation": "Moderation",
+      "support": "Support",
+      "bookings": "Bookings",
+      "users": "Users",
+      "audit": "Audit log"
+    },
+    "count": {
+      "listings": "Listings to review",
+      "questions": "Questions to check",
+      "reviews": "Feedback to check",
+      "tickets": "Open support requests"
+    },
+    "toReview": "Waiting for review",
+    "nothingToReview": "Nothing waiting for review.",
+    "noPhotos": "This listing has no photos.",
+    "host": "Host",
+    "decision": "Decision",
+    "takeDown": "Take this listing down",
+    "history": "History",
+    "system": "System",
+    "reason": "Reason (the host sees this)",
+    "reasonNeeded": "Write a reason for the host.",
+    "actionFailed": "That didn't work. Refresh and try again.",
+    "approve": "Approve and publish",
+    "reject": "Send back to the host",
+    "unpublish": "Take down",
+    "searchUsers": "Search by name or email",
+    "staff": "Staff",
+    "hostBadge": "Host",
+    "you": "You",
+    "makeAdmin": "Make staff",
+    "removeAdmin": "Remove staff",
+    "noAudit": "Nothing recorded yet.",
+    "questions": "Questions",
+    "feedback": "Feedback",
+    "nothingHere": "Nothing here.",
+    "waitingForHost": "Waiting for the host's answer. You can answer it yourself.",
+    "publish": "Publish",
+    "rejectShort": "Reject",
+    "status": "Status",
+    "activeTickets": "Open and in progress",
+    "checkIn": "Check in",
+    "checkOut": "Check out",
+    "action": {
+      "listing": {
+        "create": "Listing created",
+        "update": "Listing edited",
+        "submit": "Sent for review",
+        "approve": "Approved",
+        "reject": "Sent back",
+        "unpublish": "Taken down",
+        "archive": "Removed"
+      },
+      "user": {
+        "role": "Role changed"
+      },
+      "question": {
+        "answer": "Question answered",
+        "publish": "Question published",
+        "reject": "Question rejected"
+      },
+      "review": {
+        "publish": "Feedback published",
+        "reject": "Feedback rejected"
+      },
+      "ticket": {
+        "open": "Request opened",
+        "reply": "Staff replied",
+        "status": "Status changed"
+      },
+      "booking": {
+        "checkIn": "Guest checked in",
+        "checkOut": "Guest checked out"
+      }
+    }
+  },
+  "Questions": {
+    "title": "Questions and answers",
+    "none": "No questions answered yet.",
+    "loginToAsk": "Log in to ask the host a question",
+    "askLabel": "Ask the host a question",
+    "ask": "Ask",
+    "sent": "Sent. The host answers, then our team checks it before it shows here.",
+    "moderationNote": "Answers show here after our team checks them.",
+    "error": {
+      "invalid": "Write between 5 and 500 characters.",
+      "notFound": "This place can't take questions right now.",
+      "ownListing": "This is your own place.",
+      "tooMany": "You already have questions waiting for an answer here.",
+      "auth": "Log in again to ask."
+    },
+    "answerLabel": "Your answer",
+    "answer": "Send answer",
+    "answerFailed": "Couldn't send the answer. Try again."
+  },
+  "Reviews": {
+    "title": "{count, plural, one {★ {rating} · # review} other {★ {rating} · # reviews}}",
+    "leave": "How was your stay?",
+    "rating": "Rating",
+    "stars": "{count, plural, one {# star} other {# stars}}",
+    "comment": "Tell other guests about your stay",
+    "moderationNote": "Our team checks feedback before it shows on the listing.",
+    "send": "Send feedback",
+    "error": {
+      "invalid": "Choose a rating and write at least 10 characters.",
+      "notAllowed": "Feedback is only for finished stays, once per booking.",
+      "auth": "Log in again to send feedback."
+    }
+  },
+  "Support": {
+    "title": "Help and support",
+    "intro": "Ask a question or tell us about a problem. Our team replies here.",
+    "new": "New request",
+    "yours": "Your requests",
+    "category": "Topic",
+    "categories": {
+      "QUESTION": "Question",
+      "BOOKING": "A booking",
+      "PAYMENT": "Payment",
+      "COMPLAINT": "Complaint",
+      "OTHER": "Something else"
+    },
+    "booking": "Booking",
+    "noBooking": "Not about a booking",
+    "subject": "Subject",
+    "message": "Message",
+    "send": "Send",
+    "reply": "Your reply",
+    "sendFailed": "Couldn't send. Try again.",
+    "status": {
+      "OPEN": "Open",
+      "IN_PROGRESS": "In progress",
+      "RESOLVED": "Resolved",
+      "CLOSED": "Closed"
+    },
+    "staff": "Space Rental team",
+    "closedNote": "This request is closed. Start a new one if you need more help."
+  },
+  "Notifications": {
+    "title": "Notifications",
+    "emptyTitle": "No notifications yet",
+    "emptyBody": "Updates about your bookings, listings and requests show here.",
+    "kind": {
+      "bookingHeld": "Your dates at {title} are held. Booking {reference}.",
+      "bookingCancelled": "Booking {reference} at {title} was cancelled.",
+      "bookingExpired": "The hold on {title} ended and the dates were released ({reference}).",
+      "listingApproved": "{title} is live. Guests can find it now.",
+      "listingRejected": "{title} needs changes: {reason}",
+      "listingSubmitted": "{title} is waiting for review.",
+      "questionAsked": "A guest asked a question about {title}.",
+      "questionAnswered": "Your question about {title} was answered.",
+      "questionToCheck": "An answer about {title} is ready to check.",
+      "reviewSubmitted": "New feedback about {title} is ready to check.",
+      "reviewPublished": "Your feedback about {title} is published. Thank you!",
+      "ticketOpened": "New support request: {subject} ({reference}).",
+      "ticketReply": "New reply on “{subject}”.",
+      "ticketStatus": "“{subject}” is now: {statusLabel}."
+    }
   }
 }

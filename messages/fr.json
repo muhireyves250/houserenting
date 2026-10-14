@@ -108,7 +108,11 @@
     "titleMapArea": "Logements dans la zone de la carte",
     "updating": "Mise à jour des logements…",
     "noAreaResults": "Aucun logement dans cette partie de la carte",
-    "noAreaResultsBody": "Dézoomez ou déplacez la carte pour voir plus de logements."
+    "noAreaResultsBody": "Dézoomez ou déplacez la carte pour voir plus de logements.",
+    "moreFilters": "Plus de filtres",
+    "bedrooms": "Chambres",
+    "any": "Peu importe",
+    "amenities": "Équipements"
   },
   "Onboarding": {
     "slide1": "Space Rental",
@@ -199,7 +203,13 @@
     "logOutTitle": "Se déconnecter ?",
     "logOutBody": "Vous devrez vous reconnecter pour voir vos favoris et vos réservations.",
     "cancel": "Annuler",
-    "logOutFailed": "Impossible de vous déconnecter. Vérifiez votre connexion et réessayez."
+    "logOutFailed": "Impossible de vous déconnecter. Vérifiez votre connexion et réessayez.",
+    "notifications": "Notifications",
+    "unread": "{count} non lues",
+    "yourListings": "Vos annonces",
+    "hostYourPlace": "Proposer votre logement",
+    "help": "Aide et assistance",
+    "admin": "Administration"
   },
   "Empty": {
     "favoritesTitle": "Aucun favori pour l'instant",
@@ -396,7 +406,10 @@
       "unavailable": "Quelqu'un vient de réserver certaines de ces nuits. Choisissez d'autres dates.",
       "auth": "Reconnectez-vous pour réserver.",
       "failed": "Réservation impossible. Réessayez."
-    }
+    },
+    "qrCode": "Code QR",
+    "qrCodeFor": "Code QR pour {title}",
+    "downloadQr": "Télécharger le code QR"
   },
   "Facility": {
     "KITCHEN": "Cuisine",
@@ -489,5 +502,257 @@
     "cancelBody": "Les dates seront libérées pour d'autres voyageurs.",
     "keep": "Garder la réservation",
     "cancelFailed": "Annulation impossible. Réessayez."
+  },
+  "Host": {
+    "title": "Vos annonces",
+    "newListing": "Proposer un logement",
+    "newIntro": "Présentez votre logement. Notre équipe vérifie chaque annonce avant qu'elle soit visible.",
+    "emptyTitle": "Vous n'avez encore proposé aucun logement",
+    "emptyBody": "Proposez une maison, un appartement, un lodge ou une chambre. Notre équipe vérifie chaque annonce avant sa mise en ligne.",
+    "status": {
+      "DRAFT": "Brouillon",
+      "PENDING_REVIEW": "En vérification",
+      "PUBLISHED": "En ligne",
+      "REJECTED": "À modifier",
+      "ARCHIVED": "Retirée"
+    },
+    "needsChanges": "À modifier : {reason}",
+    "viewLive": "Voir en ligne",
+    "inReviewNote": "Notre équipe vérifie cette annonce. Nous vous préviendrons dès qu'elle sera en ligne.",
+    "reviewNote": "Cette annonce est en ligne. Si vous enregistrez des modifications, elle repasse en vérification et reste masquée jusqu'à l'accord de notre équipe.",
+    "sections": {
+      "basics": "L'essentiel",
+      "location": "Emplacement",
+      "space": "Le logement",
+      "amenities": "Équipements",
+      "prices": "Prix",
+      "extras": "Points forts et règlement",
+      "photos": "Photos"
+    },
+    "fields": {
+      "title": "Titre",
+      "type": "Type de logement",
+      "description": "Description",
+      "address": "Adresse",
+      "district": "District",
+      "city": "Ville",
+      "pin": "Touchez la carte ou déplacez le repère à l'endroit exact.",
+      "size": "Surface (m²)",
+      "rooms": "Pièces",
+      "bedrooms": "Chambres",
+      "bathrooms": "Salles de bain",
+      "maxGuests": "Voyageurs maximum",
+      "pets": "Animaux acceptés",
+      "price": "Prix (RWF)",
+      "min": {
+        "HOUR": "Heures minimum",
+        "DAY": "Jours minimum",
+        "NIGHT": "Nuits minimum",
+        "MONTH": "Mois minimum"
+      },
+      "max": {
+        "HOUR": "Heures maximum",
+        "DAY": "Jours maximum",
+        "NIGHT": "Nuits maximum",
+        "MONTH": "Mois maximum"
+      },
+      "checkIn": "Arrivée à partir de",
+      "checkOut": "Départ avant",
+      "dayStart": "Ouvert de",
+      "dayEnd": "Ouvert jusqu'à",
+      "discount": "Réduction (%)",
+      "deposit": "Caution (mois)",
+      "characteristics": "Points forts (un par ligne)",
+      "terms": "Règlement intérieur (un par ligne)"
+    },
+    "pricesHint": "Choisissez comment louer : à l'heure, à la journée, à la nuit ou au mois.",
+    "errors": {
+      "field": "Vérifiez ce champ.",
+      "maxBelowMin": "Le maximum doit être au moins égal au minimum.",
+      "duplicateUnit": "Chaque mode de location ne peut être ajouté qu'une fois.",
+      "pin": "Placez le repère au Rwanda.",
+      "noRates": "Ajoutez au moins un prix.",
+      "check": "Vérifiez les champs signalés.",
+      "failed": "Enregistrement impossible. Réessayez."
+    },
+    "save": "Enregistrer",
+    "saved": "Enregistré",
+    "photosOff": "L'envoi de photos n'est pas encore activé. Vous pouvez enregistrer et envoyer l'annonce ; les photos pourront être ajoutées plus tard.",
+    "photoAlt": "Photo {n}",
+    "removePhoto": "Retirer la photo",
+    "uploading": "Envoi de {count}…",
+    "addPhotos": "Ajouter des photos",
+    "photoFailed": "Certaines photos n'ont pas pu être envoyées (images jusqu'à 10 Mo).",
+    "submit": "Envoyer pour vérification",
+    "submitted": "Envoyée pour vérification. Nous vous préviendrons dès sa mise en ligne.",
+    "archive": "Retirer l'annonce",
+    "archiveTitle": "Retirer cette annonce ?",
+    "archiveBody": "Les voyageurs ne la verront plus. Les réservations passées restent dans votre historique.",
+    "cancel": "Annuler",
+    "questionsTitle": "Questions des voyageurs"
+  },
+  "Admin": {
+    "title": "Administration",
+    "nav": {
+      "label": "Sections d'administration",
+      "overview": "Annonces",
+      "moderation": "Modération",
+      "support": "Assistance",
+      "bookings": "Réservations",
+      "users": "Utilisateurs",
+      "audit": "Journal d'audit"
+    },
+    "count": {
+      "listings": "Annonces à vérifier",
+      "questions": "Questions à vérifier",
+      "reviews": "Avis à vérifier",
+      "tickets": "Demandes d'aide ouvertes"
+    },
+    "toReview": "En attente de vérification",
+    "nothingToReview": "Rien en attente.",
+    "noPhotos": "Cette annonce n'a pas de photo.",
+    "host": "Hôte",
+    "decision": "Décision",
+    "takeDown": "Retirer cette annonce",
+    "history": "Historique",
+    "system": "Système",
+    "reason": "Motif (visible par l'hôte)",
+    "reasonNeeded": "Écrivez un motif pour l'hôte.",
+    "actionFailed": "Échec. Actualisez et réessayez.",
+    "approve": "Approuver et publier",
+    "reject": "Renvoyer à l'hôte",
+    "unpublish": "Retirer",
+    "searchUsers": "Rechercher par nom ou e-mail",
+    "staff": "Équipe",
+    "hostBadge": "Hôte",
+    "you": "Vous",
+    "makeAdmin": "Ajouter à l'équipe",
+    "removeAdmin": "Retirer de l'équipe",
+    "noAudit": "Rien d'enregistré pour l'instant.",
+    "questions": "Questions",
+    "feedback": "Avis",
+    "nothingHere": "Rien ici.",
+    "waitingForHost": "En attente de la réponse de l'hôte. Vous pouvez répondre vous-même.",
+    "publish": "Publier",
+    "rejectShort": "Refuser",
+    "status": "Statut",
+    "activeTickets": "Ouvertes et en cours",
+    "checkIn": "Enregistrer l'arrivée",
+    "checkOut": "Enregistrer le départ",
+    "action": {
+      "listing": {
+        "create": "Annonce créée",
+        "update": "Annonce modifiée",
+        "submit": "Envoyée pour vérification",
+        "approve": "Approuvée",
+        "reject": "Renvoyée",
+        "unpublish": "Retirée du site",
+        "archive": "Supprimée"
+      },
+      "user": {
+        "role": "Rôle modifié"
+      },
+      "question": {
+        "answer": "Réponse à une question",
+        "publish": "Question publiée",
+        "reject": "Question refusée"
+      },
+      "review": {
+        "publish": "Avis publié",
+        "reject": "Avis refusé"
+      },
+      "ticket": {
+        "open": "Demande ouverte",
+        "reply": "Réponse de l'équipe",
+        "status": "Statut modifié"
+      },
+      "booking": {
+        "checkIn": "Arrivée enregistrée",
+        "checkOut": "Départ enregistré"
+      }
+    }
+  },
+  "Questions": {
+    "title": "Questions et réponses",
+    "none": "Aucune question répondue pour l'instant.",
+    "loginToAsk": "Connectez-vous pour poser une question à l'hôte",
+    "askLabel": "Poser une question à l'hôte",
+    "ask": "Envoyer",
+    "sent": "Envoyée. L'hôte répond, puis notre équipe vérifie avant publication.",
+    "moderationNote": "Les réponses s'affichent après vérification par notre équipe.",
+    "error": {
+      "invalid": "Écrivez entre 5 et 500 caractères.",
+      "notFound": "Ce logement ne peut pas recevoir de questions pour le moment.",
+      "ownListing": "C'est votre propre logement.",
+      "tooMany": "Vous avez déjà des questions en attente ici.",
+      "auth": "Reconnectez-vous pour poser une question."
+    },
+    "answerLabel": "Votre réponse",
+    "answer": "Envoyer la réponse",
+    "answerFailed": "Envoi impossible. Réessayez."
+  },
+  "Reviews": {
+    "title": "{count, plural, one {★ {rating} · # avis} other {★ {rating} · # avis}}",
+    "leave": "Comment s'est passé votre séjour ?",
+    "rating": "Note",
+    "stars": "{count, plural, one {# étoile} other {# étoiles}}",
+    "comment": "Parlez de votre séjour aux autres voyageurs",
+    "moderationNote": "Notre équipe vérifie les avis avant leur publication.",
+    "send": "Envoyer l'avis",
+    "error": {
+      "invalid": "Choisissez une note et écrivez au moins 10 caractères.",
+      "notAllowed": "Les avis sont réservés aux séjours terminés, un par réservation.",
+      "auth": "Reconnectez-vous pour envoyer un avis."
+    }
+  },
+  "Support": {
+    "title": "Aide et assistance",
+    "intro": "Posez une question ou signalez un problème. Notre équipe vous répond ici.",
+    "new": "Nouvelle demande",
+    "yours": "Vos demandes",
+    "category": "Sujet",
+    "categories": {
+      "QUESTION": "Question",
+      "BOOKING": "Une réservation",
+      "PAYMENT": "Paiement",
+      "COMPLAINT": "Réclamation",
+      "OTHER": "Autre"
+    },
+    "booking": "Réservation",
+    "noBooking": "Sans rapport avec une réservation",
+    "subject": "Objet",
+    "message": "Message",
+    "send": "Envoyer",
+    "reply": "Votre réponse",
+    "sendFailed": "Envoi impossible. Réessayez.",
+    "status": {
+      "OPEN": "Ouverte",
+      "IN_PROGRESS": "En cours",
+      "RESOLVED": "Résolue",
+      "CLOSED": "Fermée"
+    },
+    "staff": "Équipe Space Rental",
+    "closedNote": "Cette demande est fermée. Ouvrez-en une nouvelle si besoin."
+  },
+  "Notifications": {
+    "title": "Notifications",
+    "emptyTitle": "Aucune notification",
+    "emptyBody": "Les nouvelles de vos réservations, annonces et demandes s'affichent ici.",
+    "kind": {
+      "bookingHeld": "Vos dates à {title} sont bloquées. Réservation {reference}.",
+      "bookingCancelled": "La réservation {reference} à {title} a été annulée.",
+      "bookingExpired": "Le blocage pour {title} a pris fin et les dates ont été libérées ({reference}).",
+      "listingApproved": "{title} est en ligne. Les voyageurs peuvent le trouver.",
+      "listingRejected": "{title} est à modifier : {reason}",
+      "listingSubmitted": "{title} attend une vérification.",
+      "questionAsked": "Un voyageur a posé une question sur {title}.",
+      "questionAnswered": "Votre question sur {title} a reçu une réponse.",
+      "questionToCheck": "Une réponse sur {title} est à vérifier.",
+      "reviewSubmitted": "Un nouvel avis sur {title} est à vérifier.",
+      "reviewPublished": "Votre avis sur {title} est publié. Merci !",
+      "ticketOpened": "Nouvelle demande d'aide : {subject} ({reference}).",
+      "ticketReply": "Nouvelle réponse à « {subject} ».",
+      "ticketStatus": "« {subject} » est maintenant : {statusLabel}."
+    }
   }
 }

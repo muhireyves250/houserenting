@@ -108,7 +108,11 @@
     "titleMapArea": "Amacumbi ari ku ikarita",
     "updating": "Turimo kuvugurura amacumbi…",
     "noAreaResults": "Nta macumbi ari muri iki gice cy'ikarita",
-    "noAreaResultsBody": "Gabanya ikarita cyangwa uyimure kugira ngo ubone ahandi."
+    "noAreaResultsBody": "Gabanya ikarita cyangwa uyimure kugira ngo ubone ahandi.",
+    "moreFilters": "Ibindi byo gutoranya",
+    "bedrooms": "Ibyumba byo kuraramo",
+    "any": "Byose",
+    "amenities": "Ibikoresho"
   },
   "Onboarding": {
     "slide1": "Space Rental",
@@ -199,7 +203,13 @@
     "logOutTitle": "Urashaka gusohoka?",
     "logOutBody": "Uzongera kwinjira kugira ngo ubone ibyo ukunda n'ibyo wateguye.",
     "cancel": "Reka",
-    "logOutFailed": "Ntibyakunze kugusohora. Reba murandasi wongere ugerageze."
+    "logOutFailed": "Ntibyakunze kugusohora. Reba murandasi wongere ugerageze.",
+    "notifications": "Imenyesha",
+    "unread": "{count} bitarasomwa",
+    "yourListings": "Aho wakira abashyitsi",
+    "hostYourPlace": "Shyiraho aho ukodesha",
+    "help": "Ubufasha",
+    "admin": "Ubuyobozi"
   },
   "Empty": {
     "favoritesTitle": "Nta byo ukunda biraboneka",
@@ -396,7 +406,10 @@
       "unavailable": "Hari umaze kubika amwe muri aya majoro. Hitamo indi minsi.",
       "auth": "Ongera winjire kugira ngo ubike.",
       "failed": "Kubika byanze. Ongera ugerageze."
-    }
+    },
+    "qrCode": "Kode ya QR",
+    "qrCodeFor": "Kode ya QR ya {title}",
+    "downloadQr": "Kuramo kode ya QR"
   },
   "Facility": {
     "KITCHEN": "Igikoni",
@@ -489,5 +502,257 @@
     "cancelBody": "Iminsi izarekurirwa abandi bashyitsi.",
     "keep": "Bigumeho",
     "cancelFailed": "Guhagarika byanze. Ongera ugerageze."
+  },
+  "Host": {
+    "title": "Aho wakira abashyitsi",
+    "newListing": "Shyiraho ahantu",
+    "newIntro": "Bwira abashyitsi ibyerekeye aho hantu. Itsinda ryacu rigenzura buri hantu mbere y'uko abashyitsi bahabona.",
+    "emptyTitle": "Ntabwo urashyiraho ahantu",
+    "emptyBody": "Shyiraho inzu, apartema, lodge cyangwa icyumba. Itsinda ryacu rigenzura buri hantu mbere y'uko hagaragara.",
+    "status": {
+      "DRAFT": "Agateganyo",
+      "PENDING_REVIEW": "Biri kugenzurwa",
+      "PUBLISHED": "Biragaragara",
+      "REJECTED": "Bikeneye guhindurwa",
+      "ARCHIVED": "Byavanyweho"
+    },
+    "needsChanges": "Bikeneye guhindurwa: {reason}",
+    "viewLive": "Reba uko bigaragara",
+    "inReviewNote": "Itsinda ryacu riri kugenzura aha hantu. Tuzakumenyesha nihagaragara.",
+    "reviewNote": "Aha hantu hararagaragara. Nubika impinduka, bisubira mu igenzura kandi abashyitsi ntibabibona kugeza itsinda ryacu ryemeje.",
+    "sections": {
+      "basics": "Iby'ibanze",
+      "location": "Aho biherereye",
+      "space": "Aho hantu",
+      "amenities": "Ibikoresho",
+      "prices": "Ibiciro",
+      "extras": "Ibyiza n'amabwiriza",
+      "photos": "Amafoto"
+    },
+    "fields": {
+      "title": "Umutwe",
+      "type": "Ubwoko bw'ahantu",
+      "description": "Ibisobanuro",
+      "address": "Aderesi",
+      "district": "Akarere",
+      "city": "Umujyi",
+      "pin": "Kanda ku ikarita cyangwa ukurure akamenyetso ugere aho nyirizina.",
+      "size": "Ingano (m²)",
+      "rooms": "Ibyumba",
+      "bedrooms": "Ibyumba byo kuraramo",
+      "bathrooms": "Ubwiherero",
+      "maxGuests": "Abashyitsi benshi",
+      "pets": "Amatungo yemewe",
+      "price": "Igiciro (RWF)",
+      "min": {
+        "HOUR": "Amasaha make",
+        "DAY": "Iminsi mike",
+        "NIGHT": "Amajoro make",
+        "MONTH": "Amezi make"
+      },
+      "max": {
+        "HOUR": "Amasaha menshi",
+        "DAY": "Iminsi myinshi",
+        "NIGHT": "Amajoro menshi",
+        "MONTH": "Amezi menshi"
+      },
+      "checkIn": "Kwinjira guhera",
+      "checkOut": "Gusohoka mbere ya",
+      "dayStart": "Hafunguye guhera",
+      "dayEnd": "Hafunguye kugeza",
+      "discount": "Igabanywa (%)",
+      "deposit": "Ingwate (amezi)",
+      "characteristics": "Ibyiza (kimwe ku murongo)",
+      "terms": "Amabwiriza y'inzu (rimwe ku murongo)"
+    },
+    "pricesHint": "Hitamo uko abashyitsi bakodesha: ku isaha, ku munsi, ku ijoro cyangwa ku kwezi.",
+    "errors": {
+      "field": "Reba aha.",
+      "maxBelowMin": "Umubare munini ugomba kuba nibura ungana n'umuto.",
+      "duplicateUnit": "Buri buryo bwo gukodesha bushyirwaho rimwe.",
+      "pin": "Shyira akamenyetso ahantu mu Rwanda.",
+      "noRates": "Shyiraho nibura igiciro kimwe.",
+      "check": "Reba ahagaragajwe.",
+      "failed": "Kubika byanze. Ongera ugerageze."
+    },
+    "save": "Bika",
+    "saved": "Byabitswe",
+    "photosOff": "Kohereza amafoto ntibiratangira. Ushobora kubika no kohereza; amafoto azongerwaho nyuma.",
+    "photoAlt": "Ifoto ya {n}",
+    "removePhoto": "Kuraho ifoto",
+    "uploading": "Kohereza {count}…",
+    "addPhotos": "Ongeraho amafoto",
+    "photoFailed": "Amwe mu mafoto ntiyoherejwe (amafoto agera kuri 10 MB).",
+    "submit": "Ohereza ngo bigenzurwe",
+    "submitted": "Byoherejwe ngo bigenzurwe. Tuzakumenyesha nibigaragara.",
+    "archive": "Kuraho aha hantu",
+    "archiveTitle": "Uhakureho?",
+    "archiveBody": "Abashyitsi ntibazongera kuhabona. Ibyabitswe mbere bigumaho.",
+    "cancel": "Reka",
+    "questionsTitle": "Ibibazo by'abashyitsi"
+  },
+  "Admin": {
+    "title": "Ubuyobozi",
+    "nav": {
+      "label": "Ibice by'ubuyobozi",
+      "overview": "Ahantu",
+      "moderation": "Igenzura",
+      "support": "Ubufasha",
+      "bookings": "Ibyabitswe",
+      "users": "Abakoresha",
+      "audit": "Inyandiko z'ibikorwa"
+    },
+    "count": {
+      "listings": "Ahantu ho kugenzura",
+      "questions": "Ibibazo byo kugenzura",
+      "reviews": "Ibitekerezo byo kugenzura",
+      "tickets": "Ubusabe bw'ubufasha bufunguye"
+    },
+    "toReview": "Bitegereje igenzura",
+    "nothingToReview": "Nta kintu gitegereje.",
+    "noPhotos": "Aha hantu nta mafoto hafite.",
+    "host": "Nyir'inzu",
+    "decision": "Icyemezo",
+    "takeDown": "Kuraho aha hantu",
+    "history": "Amateka",
+    "system": "Sisitemu",
+    "reason": "Impamvu (nyir'inzu arayibona)",
+    "reasonNeeded": "Andika impamvu kuri nyir'inzu.",
+    "actionFailed": "Byanze. Ongera ufungure page ugerageze.",
+    "approve": "Emeza kandi ushyireho",
+    "reject": "Subiza nyir'inzu",
+    "unpublish": "Kuraho",
+    "searchUsers": "Shakisha izina cyangwa imeli",
+    "staff": "Itsinda",
+    "hostBadge": "Nyir'inzu",
+    "you": "Wowe",
+    "makeAdmin": "Shyira mu itsinda",
+    "removeAdmin": "Kura mu itsinda",
+    "noAudit": "Nta kirabikwa.",
+    "questions": "Ibibazo",
+    "feedback": "Ibitekerezo",
+    "nothingHere": "Nta kintu kirimo.",
+    "waitingForHost": "Bitegereje igisubizo cya nyir'inzu. Ushobora gusubiza ubwawe.",
+    "publish": "Shyiraho",
+    "rejectShort": "Anga",
+    "status": "Uko bihagaze",
+    "activeTickets": "Bifunguye n'ibiri gukorwa",
+    "checkIn": "Andika ko yageze",
+    "checkOut": "Andika ko yavuyeyo",
+    "action": {
+      "listing": {
+        "create": "Ahantu hashyizweho",
+        "update": "Ahantu hahinduwe",
+        "submit": "Byoherejwe kugenzurwa",
+        "approve": "Byemejwe",
+        "reject": "Byasubijwe",
+        "unpublish": "Byakuweho ku rubuga",
+        "archive": "Byavanyweho"
+      },
+      "user": {
+        "role": "Uruhare rwahinduwe"
+      },
+      "question": {
+        "answer": "Ikibazo cyasubijwe",
+        "publish": "Ikibazo cyashyizweho",
+        "reject": "Ikibazo cyanzwe"
+      },
+      "review": {
+        "publish": "Igitekerezo cyashyizweho",
+        "reject": "Igitekerezo cyanzwe"
+      },
+      "ticket": {
+        "open": "Ubusabe bwafunguwe",
+        "reply": "Itsinda ryasubije",
+        "status": "Uko bihagaze byahindutse"
+      },
+      "booking": {
+        "checkIn": "Umushyitsi yageze",
+        "checkOut": "Umushyitsi yavuyeyo"
+      }
+    }
+  },
+  "Questions": {
+    "title": "Ibibazo n'ibisubizo",
+    "none": "Nta kibazo kirasubizwa.",
+    "loginToAsk": "Injira kugira ngo ubaze nyir'inzu",
+    "askLabel": "Baza nyir'inzu",
+    "ask": "Baza",
+    "sent": "Byoherejwe. Nyir'inzu arasubiza, hanyuma itsinda ryacu rikagenzura mbere y'uko bigaragara.",
+    "moderationNote": "Ibisubizo bigaragara hano itsinda ryacu rimaze kubigenzura.",
+    "error": {
+      "invalid": "Andika inyuguti hagati ya 5 na 500.",
+      "notFound": "Aha ntihashobora kubazwa ubu.",
+      "ownListing": "Aha ni ahawe.",
+      "tooMany": "Usanzwe ufite ibibazo bitegereje igisubizo hano.",
+      "auth": "Ongera winjire kugira ngo ubaze."
+    },
+    "answerLabel": "Igisubizo cyawe",
+    "answer": "Ohereza igisubizo",
+    "answerFailed": "Kohereza byanze. Ongera ugerageze."
+  },
+  "Reviews": {
+    "title": "{count, plural, one {★ {rating} · igitekerezo #} other {★ {rating} · ibitekerezo #}}",
+    "leave": "Byakugendekeye bite?",
+    "rating": "Amanota",
+    "stars": "{count, plural, one {inyenyeri #} other {inyenyeri #}}",
+    "comment": "Bwira abandi bashyitsi uko byakugendekeye",
+    "moderationNote": "Itsinda ryacu rigenzura ibitekerezo mbere y'uko bigaragara.",
+    "send": "Ohereza igitekerezo",
+    "error": {
+      "invalid": "Hitamo amanota kandi wandike nibura inyuguti 10.",
+      "notAllowed": "Igitekerezo gitangwa nyuma yo kurangiza, rimwe kuri buri gikorwa.",
+      "auth": "Ongera winjire kugira ngo wohereze."
+    }
+  },
+  "Support": {
+    "title": "Ubufasha",
+    "intro": "Baza ikibazo cyangwa utubwire ikibazo wahuye na cyo. Itsinda ryacu rigusubiza hano.",
+    "new": "Ubusabe bushya",
+    "yours": "Ubusabe bwawe",
+    "category": "Ingingo",
+    "categories": {
+      "QUESTION": "Ikibazo",
+      "BOOKING": "Ibyo nabitse",
+      "PAYMENT": "Kwishyura",
+      "COMPLAINT": "Ikirego",
+      "OTHER": "Ikindi"
+    },
+    "booking": "Ibyo wabitse",
+    "noBooking": "Ntibijyanye n'ibyo wabitse",
+    "subject": "Umutwe",
+    "message": "Ubutumwa",
+    "send": "Ohereza",
+    "reply": "Igisubizo cyawe",
+    "sendFailed": "Kohereza byanze. Ongera ugerageze.",
+    "status": {
+      "OPEN": "Bifunguye",
+      "IN_PROGRESS": "Biri gukorwa",
+      "RESOLVED": "Byakemutse",
+      "CLOSED": "Byafunzwe"
+    },
+    "staff": "Itsinda rya Space Rental",
+    "closedNote": "Ubu busabe bwarafunzwe. Fungura ubundi niba ukeneye ubufasha."
+  },
+  "Notifications": {
+    "title": "Imenyesha",
+    "emptyTitle": "Nta menyesha",
+    "emptyBody": "Amakuru y'ibyo wabitse, aho wakira abashyitsi n'ubusabe bwawe agaragara hano.",
+    "kind": {
+      "bookingHeld": "Iminsi yawe kuri {title} irafashwe. Nimero {reference}.",
+      "bookingCancelled": "{reference} kuri {title} byahagaritswe.",
+      "bookingExpired": "Igihe cyo gufata {title} cyarangiye, iminsi irarekurwa ({reference}).",
+      "listingApproved": "{title} hararagaragara. Abashyitsi bashobora kuhabona.",
+      "listingRejected": "{title} hakeneye guhindurwa: {reason}",
+      "listingSubmitted": "{title} hategereje igenzura.",
+      "questionAsked": "Umushyitsi yabajije ikibazo kuri {title}.",
+      "questionAnswered": "Ikibazo wabajije kuri {title} cyasubijwe.",
+      "questionToCheck": "Igisubizo kuri {title} gitegereje igenzura.",
+      "reviewSubmitted": "Igitekerezo gishya kuri {title} gitegereje igenzura.",
+      "reviewPublished": "Igitekerezo cyawe kuri {title} cyashyizweho. Murakoze!",
+      "ticketOpened": "Ubusabe bushya: {subject} ({reference}).",
+      "ticketReply": "Igisubizo gishya kuri “{subject}”.",
+      "ticketStatus": "“{subject}” ubu: {statusLabel}."
+    }
   }
 }

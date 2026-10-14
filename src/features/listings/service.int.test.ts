@@ -202,3 +202,47 @@ describe("nearbyListings", () => {
     expect(ids).not.toContain(far.id);
   });
 });
+
+describe("bedroom, amenity and availability filters", () => {
+  it("keeps places with enough bedrooms and every chosen amenity", async () => {
+    const big = await listing({ bedrooms: 3, facilities: ["WIFI", "POOL", "PARKING"] });
+    await listing({ bedrooms: 1, facilities: ["WIFI", "POOL"] });
+    await listing({ bedrooms: 3, facilities: ["WIFI"] });
+    const results = await searchListings({ mode: "short", bedrooms: 2, amenities: ["WIFI", "POOL"] });
+    expect(results.map((r) => r.id)).toEqual([big.id]);
+  });
+
+  it("hides places booked on the chosen nights or that don't take that stay length", async () => {
+    await db.user.create({ data: { id: "guest", name: "Guest", email: "guest@example.com" } });
+    const free = await listing();
+    const booked = await listing();
+    const longOnly = await listing();
+    await db.rateOption.updateMany({ where: { listingId: longOnly.id }, data: { minUnits: 7 } });
+    const now = new Date("2026-10-14T08:00:00Z");
+    const stay = (listingId: string, status: "CONFIRMED" | "PENDING_PAYMENT" | "EXPIRED", holdExpiresAt: Date | null = null) =>
+      db.booking.create({
+        data: {
+          reference: `SR-${listingId.slice(-6).toUpperCase().replace(/[^A-Z2-9]/g, "Z").padEnd(6, "Z")}`,
+          listingId,
+          guestId: "guest",
+          status,
+          checkIn: new Date("2026-10-20T00:00:00Z"),
+          checkOut: new Date("2026-10-23T00:00:00Z"),
+          nights: 3,
+          guests: 1,
+          nightlyPrice: 45000,
+          total: 135000,
+          policySnapshot: {},
+          holdExpiresAt,
+        },
+      });
+    await stay(booked.id, "CONFIRMED");
+    const query = { mode: "short" as const, checkIn: "2026-10-21", checkOut: "2026-10-24" };
+    expect((await searchListings(query, 50, now)).map((r) => r.id)).toEqual([free.id]);
+    // A checkout day is free for the next guest; without dates everything shows.
+    expect((await searchListings({ ...query, checkIn: "2026-10-23", checkOut: "2026-10-25" }, 50, now)).map((r) => r.id).sort()).toEqual(
+      [free.id, booked.id].sort(),
+    );
+    expect(await searchListings({ mode: "short" }, 50, now)).toHaveLength(3);
+  });
+});

@@ -16,6 +16,8 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { formatRWF } from "@/lib/format";
 import { requireUser } from "@/lib/session";
+import { ReviewForm } from "@/features/reviews/components/ReviewForm";
+import { canReview } from "@/features/reviews/service";
 
 type Props = { params: Promise<{ reference: string }> };
 
@@ -43,11 +45,13 @@ export default async function BookingPage({ params }: Props) {
   const booking = await getGuestBooking(user.id, reference, now);
   if (!booking) notFound();
 
-  const [t, tListings, tType, locale] = await Promise.all([
+  const [t, tListings, tType, tReviews, locale, reviewable] = await Promise.all([
     getTranslations("Bookings"),
     getTranslations("Listings"),
     getTranslations("ListingType"),
+    getTranslations("Reviews"),
     getLocale(),
+    canReview(user.id, reference),
   ]);
   const { listing, policySnapshot: policy } = booking;
   const holding = isHoldActive(booking, now);
@@ -87,7 +91,7 @@ export default async function BookingPage({ params }: Props) {
                 {t("directions")}
               </a>
             )}
-            <Link href="/chats" className={pillLink}>
+            <Link href={{ pathname: "/support", query: { booking: booking.reference } }} className={pillLink}>
               <LifeBuoy className="size-4" aria-hidden="true" />
               {t("getHelp")}
             </Link>
@@ -180,6 +184,13 @@ export default async function BookingPage({ params }: Props) {
           ))}
         </ol>
       </section>
+
+      {reviewable && (
+        <section className={cn(card, "mt-4 print:hidden")}>
+          <h2 className="mb-3 text-lg font-bold text-ink">{tReviews("leave")}</h2>
+          <ReviewForm reference={booking.reference} />
+        </section>
+      )}
 
       {holding && (
         <div className="mt-6 print:hidden">

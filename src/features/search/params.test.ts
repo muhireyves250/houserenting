@@ -114,3 +114,13 @@ describe("map area (bbox)", () => {
     expect(formatBbox([-2.123456, 29.300001, -1.5, 30.1])).toBe("-2.1235,29.3,-1.5,30.1");
   });
 });
+
+describe("bedroom and amenity filters", () => {
+  it("read and write minimum bedrooms and required amenities", () => {
+    const query = parseSearchParams({ beds: "2", amenities: "WIFI,POOL,NOPE,WIFI" });
+    expect(query).toMatchObject({ bedrooms: 2, amenities: ["WIFI", "POOL"] });
+    expect(filterParams({ bedrooms: 2, amenities: ["WIFI", "POOL"] })).toEqual({ beds: "2", amenities: "WIFI,POOL" });
+    expect(parseSearchParams({ beds: "0" }).bedrooms).toBeUndefined();
+    expect(parseSearchParams({ beds: "99" }).bedrooms).toBeUndefined();
+  });
+});

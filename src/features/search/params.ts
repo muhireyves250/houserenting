@@ -6,11 +6,33 @@ export type PlaceType = (typeof PLACE_TYPES)[number];
 /** Visible map area: [south, west, north, east] in degrees. */
 export type Bbox = [number, number, number, number];
 
+export const AMENITIES = [
+  "WIFI",
+  "KITCHEN",
+  "PARKING",
+  "HOT_WATER",
+  "WASHING_MACHINE",
+  "AIR_CONDITIONER",
+  "WORKPLACE",
+  "TV",
+  "SECURITY",
+  "GENERATOR",
+  "POOL",
+  "DISHWASHER",
+  "OVEN",
+  "MICROWAVE",
+] as const;
+export type Amenity = (typeof AMENITIES)[number];
+
 /** Results-page filters; they work in both modes (price is per night/day/hour short-term, per month long-term). */
 export type SearchFilters = {
   types?: PlaceType[];
   minPrice?: number;
   maxPrice?: number;
+  /** At least this many bedrooms. */
+  bedrooms?: number;
+  /** Must have all of these. */
+  amenities?: Amenity[];
 };
 
 export type SearchQuery = SearchFilters & {
@@ -31,6 +53,7 @@ const MAX_LOCATION = 100;
 const MAX_PETS = 5;
 const MAX_FLEX_DAYS = 3;
 const MAX_PRICE = 100_000_000;
+const MAX_BEDROOMS = 10;
 
 type Raw = string | string[] | undefined;
 const first = (value: Raw) => (Array.isArray(value) ? value[0] : value);
@@ -59,6 +82,10 @@ function parseFilters(params: Record<string, Raw>): SearchFilters {
   const maxPrice = intBetween(params.maxPrice, 1, MAX_PRICE);
   if (minPrice) filters.minPrice = minPrice;
   if (maxPrice && (!minPrice || maxPrice >= minPrice)) filters.maxPrice = maxPrice;
+  const bedrooms = intBetween(params.beds, 1, MAX_BEDROOMS);
+  if (bedrooms) filters.bedrooms = bedrooms;
+  const amenities = AMENITIES.filter((a) => (first(params.amenities) ?? "").split(",").includes(a));
+  if (amenities.length > 0) filters.amenities = amenities;
   return filters;
 }
 
@@ -81,6 +108,8 @@ export function filterParams(filters: SearchFilters): Record<string, string> {
   if (filters.types?.length) params.type = filters.types.join(",");
   if (filters.minPrice) params.minPrice = String(filters.minPrice);
   if (filters.maxPrice) params.maxPrice = String(filters.maxPrice);
+  if (filters.bedrooms) params.beds = String(filters.bedrooms);
+  if (filters.amenities?.length) params.amenities = filters.amenities.join(",");
   return params;
 }
 

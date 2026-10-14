@@ -6,11 +6,11 @@ import { useEffect, useId, useRef, useState, useTransition, type MouseEvent, typ
 import { setResultsPending } from "@/features/search/results-pending";
 import { createPortal } from "react-dom";
 import { useMediaQuery } from "@/lib/use-media-query";
-import { filterParams, PLACE_TYPES, type PlaceType, type SearchFilters, type SearchMode } from "@/features/search/params";
+import { AMENITIES, filterParams, PLACE_TYPES, type Amenity, type PlaceType, type SearchFilters, type SearchMode } from "@/features/search/params";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 
-type Panel = "price" | "type" | null;
+type Panel = "price" | "type" | "more" | null;
 
 const EASE = "ease-[cubic-bezier(0.32,0.72,0,1)]";
 // Same motion as the search bar's hover pill.
@@ -23,6 +23,7 @@ const SLIDE = "transition-[transform,width,opacity] duration-500 ease-[cubic-bez
 export function FilterBar({ base, mode, filters }: { base: Record<string, string>; mode: SearchMode; filters: SearchFilters }) {
   const t = useTranslations("Search");
   const tType = useTranslations("ListingType");
+  const tFacility = useTranslations("Facility");
   const router = useRouter();
   const [open, setOpen] = useState<Panel>(null);
   // Apply in a transition so the results list can show a skeleton until the filtered results arrive.
@@ -61,6 +62,7 @@ export function FilterBar({ base, mode, filters }: { base: Record<string, string
   }
 
   const typeCount = filters.types?.length ?? 0;
+  const moreCount = (filters.bedrooms ? 1 : 0) + (filters.amenities?.length ?? 0);
   const priceActive = Boolean(filters.minPrice || filters.maxPrice);
   const formatter = new Intl.NumberFormat();
   const priceSummary = priceActive
@@ -106,7 +108,22 @@ export function FilterBar({ base, mode, filters }: { base: Record<string, string
       >
         <TypePanel labels={(type) => tType(type)} initial={filters.types ?? []} onApply={(types) => apply({ ...filters, types })} />
       </FilterButton>
-      {(typeCount > 0 || priceActive) && (
+      <FilterButton
+        onHover={hover}
+        label={t("moreFilters")}
+        active={moreCount > 0}
+        badge={moreCount > 0 ? String(moreCount) : null}
+        open={open === "more"}
+        onToggle={() => setOpen(open === "more" ? null : "more")}
+        onClose={() => setOpen(null)}
+      >
+        <MorePanel
+          amenityLabel={(a) => tFacility(a)}
+          initial={filters}
+          onApply={(more) => apply({ ...filters, ...more })}
+        />
+      </FilterButton>
+      {(typeCount > 0 || priceActive || moreCount > 0) && (
         <button
           type="button"
           onMouseEnter={hover}
@@ -288,6 +305,81 @@ function TypePanel({ labels, initial, onApply }: { labels: (type: PlaceType) => 
           {t("clear")}
         </button>
         <button type="button" onClick={() => onApply(chosen)} className={APPLY}>
+          {t("apply")}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+const BEDROOM_CHOICES = [0, 1, 2, 3, 4, 5] as const;
+
+/** Bedrooms (at least) and amenities (all of them). */
+function MorePanel({
+  amenityLabel,
+  initial,
+  onApply,
+}: {
+  amenityLabel: (a: Amenity) => string;
+  initial: SearchFilters;
+  onApply: (more: Pick<SearchFilters, "bedrooms" | "amenities">) => void;
+}) {
+  const t = useTranslations("Search");
+  const [bedrooms, setBedrooms] = useState(initial.bedrooms ?? 0);
+  const [amenities, setAmenities] = useState<Amenity[]>(initial.amenities ?? []);
+  const toggle = (a: Amenity) => setAmenities((current) => (current.includes(a) ? current.filter((x) => x !== a) : AMENITIES.filter((x) => x === a || current.includes(x))));
+  return (
+    <div className="flex flex-col gap-5">
+      <div>
+        <p className="mb-2 text-sm font-semibold text-ink">{t("bedrooms")}</p>
+        <div role="radiogroup" aria-label={t("bedrooms")} className="flex flex-wrap gap-2">
+          {BEDROOM_CHOICES.map((n) => (
+            <button
+              key={n}
+              type="button"
+              role="radio"
+              aria-checked={bedrooms === n}
+              onClick={() => setBedrooms(n)}
+              className={cn(
+                "min-w-12 rounded-full border px-3.5 py-1.5 text-sm transition-colors duration-200",
+                bedrooms === n ? "border-primary bg-primary/[0.08] font-semibold text-primary" : "border-line text-ink hover:border-primary/60",
+              )}
+            >
+              {n === 0 ? t("any") : n === 5 ? "5+" : n}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div>
+        <p className="mb-2 text-sm font-semibold text-ink">{t("amenities")}</p>
+        <ul className="grid max-h-56 grid-cols-2 gap-1 overflow-y-auto">
+          {AMENITIES.map((a) => {
+            const checked = amenities.includes(a);
+            return (
+              <li key={a}>
+                <label className="flex cursor-pointer items-center gap-2.5 rounded-xl px-2 py-1.5 transition-colors hover:bg-canvas">
+                  <input type="checkbox" checked={checked} onChange={() => toggle(a)} className="peer sr-only" />
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      "flex size-5 shrink-0 items-center justify-center rounded-md border transition-colors duration-200 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-primary",
+                      checked ? "border-primary bg-primary text-white" : "border-line-strong bg-surface",
+                    )}
+                  >
+                    {checked && <Check className="size-3.5" strokeWidth={3} />}
+                  </span>
+                  <span className="text-sm text-ink">{amenityLabel(a)}</span>
+                </label>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+      <div className="flex items-center justify-between">
+        <button type="button" disabled={bedrooms === 0 && amenities.length === 0} onClick={() => (setBedrooms(0), setAmenities([]))} className={CLEAR}>
+          {t("clear")}
+        </button>
+        <button type="button" onClick={() => onApply({ bedrooms: bedrooms || undefined, amenities: amenities.length ? amenities : undefined })} className={APPLY}>
           {t("apply")}
         </button>
       </div>

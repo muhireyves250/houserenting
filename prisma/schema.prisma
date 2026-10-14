@@ -35,6 +35,13 @@ model User {
   listings      Listing[]
   favorites     Favorite[]
   bookings      Booking[]
+  auditLogs     AuditLog[]
+  questions     ListingQuestion[] @relation("asker")
+  answers       ListingQuestion[] @relation("answerer")
+  reviews       Review[]
+  notifications Notification[]
+  tickets       SupportTicket[]
+  ticketMessages SupportMessage[]
 
   @@map("user")
 }
@@ -170,6 +177,8 @@ model Listing {
   rates           RateOption[]
   favoritedBy     Favorite[]
   bookings        Booking[]
+  questions       ListingQuestion[]
+  reviews         Review[]
 
   @@index([status, city])
   @@index([hostId])
@@ -256,6 +265,7 @@ model Booking {
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
   events         BookingEvent[]
+  review         Review?
 
   @@index([guestId, checkIn])
   @@index([listingId, checkIn])
@@ -275,4 +285,129 @@ model BookingEvent {
 
   @@index([bookingId, createdAt])
   @@map("bookingEvent")
+}
+
+/// Who did what to which record, kept for admins (publication, moderation, roles, support, bookings).
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actor      User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  /// e.g. "listing.approve", "question.answer", "ticket.status"
+  action     String
+  entityType String
+  entityId   String
+  data       Json?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId, createdAt])
+  @@index([createdAt])
+  @@map("auditLog")
+}
+
+/// Questions, feedback: nothing shows publicly until staff publish it.
+enum ModerationStatus {
+  PENDING
+  PUBLISHED
+  REJECTED
+}
+
+model ListingQuestion {
+  id           String           @id @default(cuid())
+  listingId    String
+  listing      Listing          @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  askerId      String
+  asker        User             @relation("asker", fields: [askerId], references: [id], onDelete: Cascade)
+  question     String
+  answer       String?
+  answeredById String?
+  answeredBy   User?            @relation("answerer", fields: [answeredById], references: [id], onDelete: SetNull)
+  answeredAt   DateTime?
+  status       ModerationStatus @default(PENDING)
+  createdAt    DateTime         @default(now())
+
+  @@index([listingId, status, createdAt])
+  @@index([status, createdAt])
+  @@map("listingQuestion")
+}
+
+/// Post-stay feedback: one per completed booking, published after moderation.
+model Review {
+  id        String           @id @default(cuid())
+  bookingId String           @unique
+  booking   Booking          @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  listingId String
+  listing   Listing          @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User             @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  rating    Int
+  comment   String
+  status    ModerationStatus @default(PENDING)
+  createdAt DateTime         @default(now())
+
+  @@index([listingId, status, createdAt])
+  @@index([status, createdAt])
+  @@map("review")
+}
+
+/// In-app notices; the text is written at display time in the reader's language from `kind` and `data`.
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      String
+  data      Json
+  href      String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, createdAt])
+  @@map("notification")
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum TicketCategory {
+  QUESTION
+  BOOKING
+  PAYMENT
+  COMPLAINT
+  OTHER
+}
+
+model SupportTicket {
+  id               String           @id @default(cuid())
+  /// Short code shown to the customer, e.g. "HL-7K2M9Q".
+  reference        String           @unique
+  userId           String
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category         TicketCategory
+  subject          String
+  bookingReference String?
+  status           TicketStatus     @default(OPEN)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  messages         SupportMessage[]
+
+  @@index([userId, updatedAt])
+  @@index([status, updatedAt])
+  @@map("supportTicket")
+}
+
+model SupportMessage {
+  id        String        @id @default(cuid())
+  ticketId  String
+  ticket    SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  fromStaff Boolean       @default(false)
+  body      String
+  createdAt DateTime      @default(now())
+
+  @@index([ticketId, createdAt])
+  @@map("supportMessage")
 }

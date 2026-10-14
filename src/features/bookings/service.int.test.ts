@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { db } from "@/lib/db";
 import { resetDb } from "@/test/db";
-import { bookedRanges, cancelPendingBooking, createBooking, getGuestBooking, guestBookings } from "./service";
+import { bookedRanges, cancelPendingBooking, createBooking, getGuestBooking, guestBookings, staffMoveBooking } from "./service";
 
 const NOW = new Date("2026-10-14T08:00:00Z");
 
@@ -139,5 +139,23 @@ describe("cancelPendingBooking", () => {
     expect(await bookedRanges("a", NOW)).toEqual([]);
     const events = await db.bookingEvent.findMany({ where: { booking: { reference } }, orderBy: { createdAt: "asc" } });
     expect(events.map((e) => [e.fromStatus, e.toStatus])).toEqual([[null, "PENDING_PAYMENT"], ["PENDING_PAYMENT", "CANCELLED"]]);
+  });
+});
+
+describe("staffMoveBooking", () => {
+  it("checks a paid guest in from the check-in day, then out, and never an unpaid one", async () => {
+    const result = await createBooking(stay(), NOW);
+    const reference = result.ok ? result.reference : "";
+    expect(await staffMoveBooking("host", reference, "CHECKED_IN", new Date("2026-10-20T10:00:00Z"))).toBe(false); // unpaid
+    await db.booking.update({ where: { reference }, data: { status: "CONFIRMED" } });
+    expect(await staffMoveBooking("host", reference, "CHECKED_IN", new Date("2026-10-19T10:00:00Z"))).toBe(false); // too early
+    expect(await staffMoveBooking("host", reference, "COMPLETED", new Date("2026-10-20T10:00:00Z"))).toBe(false); // not in yet
+    expect(await staffMoveBooking("host", reference, "CHECKED_IN", new Date("2026-10-20T10:00:00Z"))).toBe(true);
+    expect(await staffMoveBooking("host", reference, "COMPLETED", new Date("2026-10-23T08:00:00Z"))).toBe(true);
+    const events = await db.bookingEvent.findMany({ where: { booking: { reference } }, orderBy: { createdAt: "asc" } });
+    expect(events.slice(-2).map((e) => [e.fromStatus, e.toStatus, e.actorId])).toEqual([
+      ["CONFIRMED", "CHECKED_IN", "host"],
+      ["CHECKED_IN", "COMPLETED", "host"],
+    ]);
   });
 });

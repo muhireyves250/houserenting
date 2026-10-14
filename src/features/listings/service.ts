@@ -32,7 +32,7 @@ function escapeLike(value: string): string {
   return value.replace(/[\\%_]/g, (char) => `\\${char}`);
 }
 
-export function searchListings(query: SearchQuery, limit = SEARCH_LIMIT): Promise<ListingCardData[]> {
+export function searchListings(query: SearchQuery, limit = SEARCH_LIMIT, now: Date = new Date()): Promise<ListingCardData[]> {
   // A place qualifies through any rate for the mode; the price range applies to that same rate.
   const price = query.minPrice || query.maxPrice ? { gte: query.minPrice, lte: query.maxPrice } : undefined;
   const where: Prisma.ListingWhereInput = {
@@ -52,6 +52,25 @@ export function searchListings(query: SearchQuery, limit = SEARCH_LIMIT): Promis
   }
   if (query.guests) where.maxGuests = { gte: query.guests };
   if (query.pets) where.petsAllowed = true;
+  if (query.bedrooms) where.bedrooms = { gte: query.bedrooms };
+  if (query.amenities?.length) where.facilities = { hasEvery: query.amenities };
+
+  // Exact dates: only places free on those nights that take a stay of that length.
+  if (query.mode === "short" && query.checkIn && query.checkOut && !query.flex) {
+    const checkIn = new Date(`${query.checkIn}T00:00:00Z`);
+    const checkOut = new Date(`${query.checkOut}T00:00:00Z`);
+    const nights = Math.round((checkOut.getTime() - checkIn.getTime()) / 86_400_000);
+    where.bookings = {
+      none: {
+        checkIn: { lt: checkOut },
+        checkOut: { gt: checkIn },
+        OR: [{ status: { in: ["CONFIRMED", "CHECKED_IN"] } }, { status: "PENDING_PAYMENT", holdExpiresAt: { gt: now } }],
+      },
+    };
+    where.AND = [
+      { rates: { some: { unit: "NIGHT", minUnits: { lte: nights }, OR: [{ maxUnits: null }, { maxUnits: { gte: nights } }] } } },
+    ];
+  }
 
   return db.listing.findMany({ where, select: CARD_SELECT, orderBy: [{ publishedAt: "desc" }, { id: "asc" }], take: limit });
 }

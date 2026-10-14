@@ -38,6 +38,12 @@ import { discountedPrice } from "@/features/listings/pricing";
 import { getPublishedListing, nearbyListings } from "@/features/listings/service";
 import { bookedRanges } from "@/features/bookings/service";
 import { getEnv } from "@/lib/env";
+import QRCode from "qrcode";
+import { listingIdFromParam, listingPath } from "@/features/listings/links";
+import { AskQuestion } from "@/features/questions/components/AskQuestion";
+import { publishedQuestions } from "@/features/questions/service";
+import { Stars } from "@/features/reviews/components/Stars";
+import { publishedReviews } from "@/features/reviews/service";
 import { CollapsibleText } from "@/features/listings/components/detail/CollapsibleText";
 import { CompactListingCard } from "@/features/home/components/CompactListingCard";
 import { HomeRow } from "@/features/home/components/HomeRow";
@@ -68,8 +74,10 @@ const FACILITY_ICONS: Record<string, LucideIcon> = {
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const listing = await getPublishedListing((await params).id);
-  return listing ? { title: listing.title, description: listing.description.slice(0, 160) } : {};
+  const listing = await getPublishedListing(listingIdFromParam((await params).id));
+  return listing
+    ? { title: listing.title, description: listing.description.slice(0, 160), alternates: { canonical: listingPath(listing.id, listing.title) } }
+    : {};
 }
 
 function Section({ title, children, id }: { title?: string; children: ReactNode; id?: string }) {
@@ -82,7 +90,7 @@ function Section({ title, children, id }: { title?: string; children: ReactNode;
 }
 
 export default async function ListingPage({ params }: Props) {
-  const listing = await getPublishedListing((await params).id);
+  const listing = await getPublishedListing(listingIdFromParam((await params).id));
   if (!listing) notFound();
 
   const [t, tFacility, tType, user, locale] = await Promise.all([
@@ -92,7 +100,15 @@ export default async function ListingPage({ params }: Props) {
     getCurrentUser(),
     getLocale(),
   ]);
-  const [nearby, booked] = await Promise.all([nearbyListings(listing), bookedRanges(listing.id)]);
+  const [nearby, booked, questions, reviews, tQuestions, tReviews] = await Promise.all([
+    nearbyListings(listing),
+    bookedRanges(listing.id),
+    publishedQuestions(listing.id),
+    publishedReviews(listing.id),
+    getTranslations("Questions"),
+    getTranslations("Reviews"),
+  ]);
+  const monthYear = new Intl.DateTimeFormat(locale, { month: "long", year: "numeric", timeZone: "Africa/Kigali" });
   const savedIds = user ? await savedListingIds(user.id, [listing.id, ...nearby.map((l) => l.id)]) : new Set<string>();
   const saved = savedIds.has(listing.id);
   const rates = [...listing.rates].sort((a, b) => UNIT_ORDER.indexOf(a.unit) - UNIT_ORDER.indexOf(b.unit));
@@ -124,9 +140,12 @@ export default async function ListingPage({ params }: Props) {
       .join(" · "),
     photo: listing.photos[0]?.url ?? null,
   };
+  // Permanent link without a language, so each visitor gets their own; the QR code points to the same link.
+  const shareLink = `${getEnv().BETTER_AUTH_URL}${listingPath(listing.id, listing.title)}`;
+  const qrSvg = await QRCode.toString(shareLink, { type: "svg", margin: 1, color: { dark: "#0b1b33", light: "#ffffff" } });
   const actions = (
     <>
-      <ShareButton {...preview} />
+      <ShareButton {...preview} link={shareLink} qrSvg={qrSvg} />
       <SaveButton listingId={listing.id} initialSaved={saved} signedIn={user !== null} {...preview} />
     </>
   );
@@ -194,7 +213,7 @@ export default async function ListingPage({ params }: Props) {
               <ArrowLeft className="size-[18px]" aria-hidden="true" />
             </Link>
             <div className="flex gap-3">
-              <ShareButton variant="icon" {...preview} />
+              <ShareButton variant="icon" {...preview} link={shareLink} qrSvg={qrSvg} />
               <SaveButton variant="icon" listingId={listing.id} initialSaved={saved} signedIn={user !== null} {...preview} />
             </div>
           </div>
@@ -219,7 +238,10 @@ export default async function ListingPage({ params }: Props) {
                 <Star className="size-4 fill-ink" aria-hidden="true" />
                 {listing.ratingCount > 0 ? (
                   <>
-                    {listing.ratingAvg.toFixed(2)} · <span className="underline underline-offset-4">{t("reviews", { count: listing.ratingCount })}</span>
+                    {listing.ratingAvg.toFixed(2)} ·{" "}
+                    <a href="#reviews" className="underline underline-offset-4">
+                      {t("reviews", { count: listing.ratingCount })}
+                    </a>
                   </>
                 ) : (
                   t("noReviews")
@@ -298,6 +320,27 @@ export default async function ListingPage({ params }: Props) {
           </div>
         </div>
 
+        {/* Guest feedback (published after staff check it) */}
+        {reviews.length > 0 && (
+          <Section title={tReviews("title", { count: listing.ratingCount, rating: listing.ratingAvg.toFixed(2) })} id="reviews">
+            <ul className="grid gap-8 md:grid-cols-2">
+              {reviews.map((review) => (
+                <li key={review.id} className="flex flex-col gap-2">
+                  <div className="flex items-center gap-3">
+                    <Avatar name={review.author.name} className="size-10 text-sm" />
+                    <div>
+                      <p className="text-[15px] font-semibold text-ink">{review.author.name.split(" ")[0]}</p>
+                      <p className="text-[13px] text-muted">{monthYear.format(review.createdAt)}</p>
+                    </div>
+                  </div>
+                  <Stars rating={review.rating} label={tReviews("stars", { count: review.rating })} />
+                  <p className="text-[15px] leading-6 text-ink/90">{review.comment}</p>
+                </li>
+              ))}
+            </ul>
+          </Section>
+        )}
+
         {/* Where you'll be */}
         <Section title={t("whereYoullBe")}>
           <p className="-mt-3 mb-5 text-[15px] text-ink">
@@ -323,6 +366,23 @@ export default async function ListingPage({ params }: Props) {
               {t("messageHost")}
             </Link>
           </div>
+        </Section>
+
+        {/* Questions and answers (answered by the host, published by staff) */}
+        <Section title={tQuestions("title")} id="questions">
+          {questions.length > 0 ? (
+            <ul className="mb-8 flex max-w-3xl flex-col gap-6">
+              {questions.map((q) => (
+                <li key={q.id}>
+                  <p className="text-[15px] font-semibold text-ink">{q.question}</p>
+                  <p className="mt-1 border-l-2 border-primary/40 pl-3 text-[15px] leading-6 text-ink/80">{q.answer}</p>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mb-5 text-[15px] text-muted">{tQuestions("none")}</p>
+          )}
+          <AskQuestion listingId={listing.id} signedIn={user !== null} />
         </Section>
 
         {/* Things to know */}

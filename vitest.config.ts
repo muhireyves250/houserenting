@@ -31,8 +31,9 @@ export default defineConfig({
           environment: "node",
           setupFiles: ["./vitest.int.setup.ts"],
           fileParallelism: false,
-          testTimeout: 30_000,
-          hookTimeout: 30_000,
+          // The test database is remote; on slow links a single query can take ~0.5s.
+          testTimeout: 60_000,
+          hookTimeout: 60_000,
         },
       },
     ],
