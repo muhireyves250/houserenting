@@ -132,7 +132,7 @@
     "createAccount": "Create account",
     "logIn": "Log in",
     "haveAccount": "Already have an account?",
-    "noAccount": "No account?",
+    "noAccount": "New to Space Rental?",
     "forgotPassword": "Forgot password?",
     "terms": "By continuing, you agree to our Terms of Service and confirm that you have read our Privacy Policy.",
     "checkEmailTitle": "Check your email",
@@ -167,7 +167,12 @@
       "nameTooLong": "Name is too long (80 characters max).",
       "emailInvalid": "Enter a valid email address."
     },
-    "modalTitle": "Welcome to Space Rental"
+    "modalTitle": "Welcome to Space Rental",
+    "welcomeBack": "Welcome back, {name}",
+    "notYou": "Not you?",
+    "createOne": "Create an account",
+    "loginHeading": "Log in to your account",
+    "signupHeading": "Create your account"
   },
   "Profile": {
     "title": "Profile",
@@ -189,7 +194,11 @@
     "personalInfo": "Personal information",
     "roleGuest": "Guest",
     "roleHost": "Host",
-    "accountSettings": "Account settings"
+    "accountSettings": "Account settings",
+    "logOut": "Log out",
+    "logOutTitle": "Log out?",
+    "logOutBody": "You'll need to log in again to see your favorites and bookings.",
+    "cancel": "Cancel"
   },
   "Empty": {
     "favoritesTitle": "No favorites yet",

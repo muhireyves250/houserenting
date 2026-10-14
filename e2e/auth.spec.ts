@@ -7,7 +7,9 @@ test("sign up → verify → signed in → sign out → log in", async ({ page }
   await page.goto("/en/profile");
   await expect(page.getByText(email).first()).toBeVisible();
 
-  await page.getByRole("button", { name: "Sign out" }).click();
+  // Log out asks for confirmation first.
+  await page.getByRole("button", { name: "Log out" }).click();
+  await page.getByRole("dialog", { name: "Log out?" }).getByRole("button", { name: "Log out" }).click();
   await expect(page).toHaveURL(/\/en$/);
 
   await page.goto("/en/login");

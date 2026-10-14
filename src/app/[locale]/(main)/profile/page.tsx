@@ -82,7 +82,7 @@ export default async function ProfilePage() {
         <ProfileForm profile={{ ...profile, locale: toAppLocale(profile.locale) }} />
       </section>
 
-      <div className="mt-6">
+      <div className="mt-4 border-t border-line/70 pt-2">
         <SignOutButton />
       </div>
     </PageContainer>

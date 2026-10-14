@@ -132,7 +132,7 @@
     "createAccount": "Créer un compte",
     "logIn": "Se connecter",
     "haveAccount": "Vous avez déjà un compte ?",
-    "noAccount": "Pas de compte ?",
+    "noAccount": "Nouveau sur Space Rental ?",
     "forgotPassword": "Mot de passe oublié ?",
     "terms": "En continuant, vous acceptez nos Conditions d'utilisation et confirmez avoir lu notre Politique de confidentialité.",
     "checkEmailTitle": "Vérifiez votre e-mail",
@@ -167,7 +167,12 @@
       "nameTooLong": "Le nom est trop long (80 caractères maximum).",
       "emailInvalid": "Saisissez une adresse e-mail valide."
     },
-    "modalTitle": "Bienvenue sur Space Rental"
+    "modalTitle": "Bienvenue sur Space Rental",
+    "welcomeBack": "Bon retour, {name}",
+    "notYou": "Ce n'est pas vous ?",
+    "createOne": "Créer un compte",
+    "loginHeading": "Connectez-vous à votre compte",
+    "signupHeading": "Créez votre compte"
   },
   "Profile": {
     "title": "Profil",
@@ -189,7 +194,11 @@
     "personalInfo": "Informations personnelles",
     "roleGuest": "Voyageur",
     "roleHost": "Hôte",
-    "accountSettings": "Paramètres du compte"
+    "accountSettings": "Paramètres du compte",
+    "logOut": "Se déconnecter",
+    "logOutTitle": "Se déconnecter ?",
+    "logOutBody": "Vous devrez vous reconnecter pour voir vos favoris et vos réservations.",
+    "cancel": "Annuler"
   },
   "Empty": {
     "favoritesTitle": "Aucun favori pour l'instant",

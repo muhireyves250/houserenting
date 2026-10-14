@@ -18,6 +18,7 @@ describe("LoginForm", () => {
   beforeEach(() => {
     signInEmail.mockReset();
     push.mockReset();
+    localStorage.clear();
   });
 
   it("goes to the safe `next` path after signing in", async () => {
@@ -60,5 +61,32 @@ describe("LoginForm", () => {
     await submit();
     expect(onSuccess).toHaveBeenCalledOnce();
     expect(push).not.toHaveBeenCalled();
+  });
+
+  it("remembers the account after logging in", async () => {
+    signInEmail.mockResolvedValue({ data: { user: { name: "Sabrina Ghilaci", email: "host@spacerental.rw" } }, error: null });
+    renderWithIntl(<LoginForm next="/" />);
+    await submit("host@spacerental.rw");
+    expect(JSON.parse(localStorage.getItem("sr_last_account")!)).toEqual({ name: "Sabrina Ghilaci", email: "host@spacerental.rw" });
+  });
+
+  it("welcomes a remembered account back and only asks for the password; Not you? shows the full form", async () => {
+    localStorage.setItem("sr_last_account", JSON.stringify({ name: "Sabrina Ghilaci", email: "host@spacerental.rw" }));
+    signInEmail.mockResolvedValue({ data: { user: { name: "Sabrina Ghilaci", email: "host@spacerental.rw" } }, error: null });
+    renderWithIntl(<LoginForm next="/" />);
+    expect(await screen.findByText("Welcome back, Sabrina")).toBeInTheDocument();
+    expect(screen.getByText("h***t@spacerental.rw")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Email")).not.toBeInTheDocument();
+    await userEvent.type(screen.getByLabelText("Password"), "whatever-123");
+    await userEvent.click(screen.getByRole("button", { name: "Log in" }));
+    expect(signInEmail).toHaveBeenCalledWith({ email: "host@spacerental.rw", password: "whatever-123" });
+  });
+
+  it("Not you? forgets the remembered account", async () => {
+    localStorage.setItem("sr_last_account", JSON.stringify({ name: "Sabrina Ghilaci", email: "host@spacerental.rw" }));
+    renderWithIntl(<LoginForm next="/" />);
+    await userEvent.click(await screen.findByRole("button", { name: "Not you?" }));
+    expect(screen.getByLabelText("Email")).toBeInTheDocument();
+    expect(localStorage.getItem("sr_last_account")).toBeNull();
   });
 });

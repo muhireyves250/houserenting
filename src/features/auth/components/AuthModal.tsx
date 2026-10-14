@@ -98,6 +98,12 @@ export function AuthModal({
           ) : (
             <SignupForm />
           )}
+          <p className="mt-5 text-center text-sm text-muted">
+            {mode === "login" ? t("noAccount") : t("haveAccount")}{" "}
+            <button type="button" onClick={() => go(mode === "login" ? "signup" : "login")} className="font-semibold text-primary underline-offset-4 hover:underline">
+              {mode === "login" ? t("createOne") : t("loginTitle")}
+            </button>
+          </p>
         </>
       )}
     </Modal>

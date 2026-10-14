@@ -132,7 +132,7 @@
     "createAccount": "Fungura konti",
     "logIn": "Injira",
     "haveAccount": "Usanzwe ufite konti?",
-    "noAccount": "Nta konti ufite?",
+    "noAccount": "Ubwa mbere kuri Space Rental?",
     "forgotPassword": "Wibagiwe ijambo ry'ibanga?",
     "terms": "Ukomeje, wemera Amabwiriza yacu kandi wemeza ko wasomye Politiki y'ibanga.",
     "checkEmailTitle": "Reba imeyili yawe",
@@ -167,7 +167,12 @@
       "nameTooLong": "Izina ni rirerire cyane (inyuguti 80 ntarengwa).",
       "emailInvalid": "Andika imeyili yemewe."
     },
-    "modalTitle": "Murakaza neza kuri Space Rental"
+    "modalTitle": "Murakaza neza kuri Space Rental",
+    "welcomeBack": "Murakaza neza, {name}",
+    "notYou": "Si wowe?",
+    "createOne": "Fungura konti",
+    "loginHeading": "Injira muri konti yawe",
+    "signupHeading": "Fungura konti yawe"
   },
   "Profile": {
     "title": "Konti",
@@ -189,7 +194,11 @@
     "personalInfo": "Amakuru yawe bwite",
     "roleGuest": "Umushyitsi",
     "roleHost": "Nyiri inzu",
-    "accountSettings": "Igenamiterere rya konti"
+    "accountSettings": "Igenamiterere rya konti",
+    "logOut": "Sohoka",
+    "logOutTitle": "Urashaka gusohoka?",
+    "logOutBody": "Uzongera kwinjira kugira ngo ubone ibyo ukunda n'ibyo wateguye.",
+    "cancel": "Reka"
   },
   "Empty": {
     "favoritesTitle": "Nta byo ukunda biraboneka",
