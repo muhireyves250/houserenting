@@ -62,8 +62,12 @@ const NO_HEADER_PREFIXES = ["/listings/"];
 function HeaderRow() {
   return (
     <div className="flex items-center gap-2.5">
-      <Link href="/" className="shrink-0 rounded-lg text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">
-        <Logo className="[&_svg]:h-8 [&_svg]:w-9" />
+      {/* Same 48px height and edge as the search pill. */}
+      <Link
+        href="/"
+        className="flex size-12 shrink-0 items-center justify-center rounded-full bg-surface text-primary shadow-[0_6px_20px_-6px_rgba(16,24,40,0.25)] ring-1 ring-line focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+      >
+        <Logo className="[&_svg]:h-6 [&_svg]:w-7" />
       </Link>
       <MobileSearch className="min-w-0 flex-1" />
       <Suspense>

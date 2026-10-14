@@ -83,7 +83,7 @@ export function LocaleSwitcher({ className, compact = false }: { className?: str
         onClick={() => setOpen((v) => !v)}
         className={cn(
           "flex h-11 items-center gap-2 rounded-full border border-primary/60 text-[15px] font-semibold tracking-[0.01em] text-primary",
-          compact ? "size-10 justify-center bg-surface shadow-[0_4px_14px_-6px_rgba(16,24,40,0.3)]" : "px-4",
+          compact ? "size-12 justify-center border-0 bg-surface shadow-[0_6px_20px_-6px_rgba(16,24,40,0.25)] ring-1 ring-line" : "px-4",
           "transition-colors duration-300 hover:border-primary hover:bg-primary/[0.06]",
           "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
           "group-data-[overlay=true]/header:border-[#8cc0ff] group-data-[overlay=true]/header:text-white group-data-[overlay=true]/header:hover:bg-white/10",
@@ -91,7 +91,7 @@ export function LocaleSwitcher({ className, compact = false }: { className?: str
           className,
         )}
       >
-        {compact ? <Flag locale={locale as AppLocale} className="size-7" /> : <Globe className="size-4" aria-hidden="true" />}
+        {compact ? <Flag locale={locale as AppLocale} className="size-8" /> : <Globe className="size-4" aria-hidden="true" />}
         {!compact && (
           <>
             <span>{NATIVE_NAMES[locale]}</span>
