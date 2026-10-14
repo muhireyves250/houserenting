@@ -20,27 +20,6 @@ export function BottomTabBar({ signedIn = true }: { signedIn?: boolean }) {
   const pillRef = useRef<HTMLSpanElement>(null);
   // Tab under the mouse / finger: it shows its name too (the bar's width never changes; tabs share it).
   const [hovered, setHovered] = useState<string | null>(null);
-  const shadeRef = useRef<HTMLSpanElement>(null);
-
-  // Hover: one soft shade slides to the tab under the pointer (the site's sliding hover), following its
-  // width as the name appears. It stays where it was while fading out.
-  useLayoutEffect(() => {
-    const list = listRef.current;
-    const shade = shadeRef.current;
-    if (!list || !shade) return;
-    const tab = hovered ? list.querySelector<HTMLElement>(`a[data-tab="${hovered}"]`) : null;
-    const isCurrent = tab?.getAttribute("aria-current") === "page";
-    shade.style.opacity = tab && !isCurrent ? "1" : "0";
-    if (!tab || isCurrent) return;
-    const place = () => {
-      shade.style.width = `${tab.offsetWidth}px`;
-      shade.style.transform = `translateX(${tab.offsetLeft}px)`;
-    };
-    place();
-    const resize = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(place);
-    resize?.observe(tab);
-    return () => resize?.disconnect();
-  }, [hovered]);
 
   // Place the pill under the current tab, measured from layout (no re-render). It follows the tab's
   // width as its name expands, and slides after the first placement.
@@ -49,7 +28,10 @@ export function BottomTabBar({ signedIn = true }: { signedIn?: boolean }) {
     const pill = pillRef.current;
     if (!list || !pill) return;
     const place = () => {
-      const current = list.querySelector<HTMLElement>('a[aria-current="page"]');
+      // One indicator: the blue pill sits on the hovered tab, otherwise on the current one.
+      const current =
+        (hovered ? list.querySelector<HTMLElement>(`a[data-tab="${hovered}"]`) : null) ??
+        list.querySelector<HTMLElement>('a[aria-current="page"]');
       pill.style.opacity = current ? "1" : "0";
       if (!current) return;
       pill.style.width = `${current.offsetWidth}px`;
@@ -63,7 +45,7 @@ export function BottomTabBar({ signedIn = true }: { signedIn?: boolean }) {
       cancelAnimationFrame(frame);
       resize?.disconnect();
     };
-  }, [pathname]);
+  }, [pathname, hovered]);
 
   return (
     <nav
@@ -76,13 +58,6 @@ export function BottomTabBar({ signedIn = true }: { signedIn?: boolean }) {
         className="relative mx-auto flex w-full max-w-md items-center rounded-full bg-surface/90 p-1.5 shadow-[0_14px_36px_-12px_rgba(0,40,100,0.45)] ring-1 ring-line backdrop-blur-xl"
       >
         <span
-          ref={shadeRef}
-          data-testid="tab-hover"
-          aria-hidden="true"
-          style={{ opacity: 0 }}
-          className={cn("pointer-events-none absolute top-1.5 bottom-1.5 left-0 rounded-full bg-primary/[0.1] transition-[transform,width,opacity]", SLIDE)}
-        />
-        <span
           ref={pillRef}
           data-testid="tab-pill"
           aria-hidden="true"
@@ -94,6 +69,8 @@ export function BottomTabBar({ signedIn = true }: { signedIn?: boolean }) {
         />
         {NAV_ITEMS.map(({ key, href, icon: Icon }) => {
           const active = isActive(pathname, href);
+          // White while the pill is under it: the hovered tab, or the current tab when nothing is hovered.
+          const onPill = hovered ? hovered === key : active;
           return (
             // Equal widths across the fixed-width bar.
             <li
@@ -113,12 +90,12 @@ export function BottomTabBar({ signedIn = true }: { signedIn?: boolean }) {
                   "relative flex h-14 w-full flex-col items-center justify-center gap-0.5 rounded-full transition-[color]",
                   SLIDE,
                   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-95",
-                  active ? "text-white" : "text-primary",
+                  onPill ? "text-white" : "text-primary",
                 )}
               >
                 <Icon className="size-[22px] shrink-0" strokeWidth={2} aria-hidden="true" />
                 {/* Name under the icon, on every tab. */}
-                <span aria-hidden="true" className={cn("max-w-full truncate text-[11px] leading-tight", active ? "font-semibold" : "font-medium")}>
+                <span aria-hidden="true" className={cn("max-w-full truncate text-[11px] leading-tight", onPill ? "font-semibold" : "font-medium")}>
                   {t(key)}
                 </span>
               </Link>
