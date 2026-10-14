@@ -585,3 +585,13 @@ svg {
     fill: var(--art-fill);
   }
 }
+
+/* Printing a receipt: only the page content, no site header, phone bars or footer. */
+@media print {
+  header,
+  footer,
+  nav[aria-label],
+  [data-print-hide] {
+    display: none !important;
+  }
+}

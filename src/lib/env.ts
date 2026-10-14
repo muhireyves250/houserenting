@@ -26,6 +26,8 @@ const schema = z
       .enum(["true", "false"])
       .default("true")
       .transform((value) => value === "true"),
+    // How long unpaid bookings hold their dates before they are released.
+    BOOKING_HOLD_MINUTES: z.coerce.number().int().min(5).max(24 * 60).default(30),
     LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
     SENTRY_DSN: z.string().optional(),
   })

@@ -39,3 +39,22 @@ export function todayISO(now: Date = new Date(), timeZone = "Africa/Kigali"): IS
   // en-CA formats as YYYY-MM-DD.
   return new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
 }
+
+export type BookedRange = { checkIn: ISODate; checkOut: ISODate };
+
+/** Whether the stay shares a night with any booking (a checkout day can be the next check-in). */
+export function rangeOverlaps(range: DateRange, booked: BookedRange[]): boolean {
+  if (!range.checkIn || !range.checkOut) return false;
+  return booked.some((b) => range.checkIn! < b.checkOut && b.checkIn < range.checkOut!);
+}
+
+/**
+ * Days the calendar can't offer: booked nights when choosing check-in, and, once check-in is set,
+ * checkout days that would run over the next booking.
+ */
+export function isDayBlocked(range: DateRange, day: ISODate, booked: BookedRange[]): boolean {
+  if (range.checkIn && !range.checkOut && day > range.checkIn) {
+    return rangeOverlaps({ checkIn: range.checkIn, checkOut: day }, booked);
+  }
+  return booked.some((b) => b.checkIn <= day && day < b.checkOut);
+}

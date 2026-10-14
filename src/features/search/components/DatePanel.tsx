@@ -20,6 +20,7 @@ export function DatePanel({
   onRangeChange,
   onFlexChange,
   showFlex = true,
+  isBlocked,
 }: {
   today: ISODate;
   range: DateRange;
@@ -28,6 +29,8 @@ export function DatePanel({
   onFlexChange: (days: number) => void;
   /** The "± days" flexibility chips (search only; a listing's calendar books exact dates). */
   showFlex?: boolean;
+  /** Days that can't be chosen (a listing's booked nights). */
+  isBlocked?: (day: ISODate) => boolean;
 }) {
   const t = useTranslations("Home");
   const locale = useLocale();
@@ -94,6 +97,7 @@ export function DatePanel({
                     {week.map((day, d) => {
                       if (!day) return <td key={d} />;
                       const past = day < today;
+                      const blocked = !past && Boolean(isBlocked?.(day)) && day !== range.checkIn;
                       const isEdge = day === range.checkIn || day === range.checkOut;
                       const between = inRange(range, day);
                       return (
@@ -104,13 +108,13 @@ export function DatePanel({
                             aria-label={dayLabel.format(utc(day))}
                             aria-pressed={isEdge}
                             aria-current={day === today ? "date" : undefined}
-                            disabled={past}
+                            disabled={past || blocked}
                             onClick={() => onRangeChange(pickDate(range, day))}
                             onKeyDown={(event) => moveFocus(event, day)}
                             className={cn(
                               "relative mx-auto flex size-10 items-center justify-center rounded-full text-sm font-medium transition-[background-color,box-shadow,color] duration-200",
                               "focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary",
-                              past ? "cursor-not-allowed text-ink/30 line-through decoration-ink/20" : "text-ink hover:ring-2 hover:ring-primary/40",
+                              past || blocked ? "cursor-not-allowed text-ink/30 line-through decoration-ink/20" : "text-ink hover:ring-2 hover:ring-primary/40",
                               // Today: bold with a small dot underneath.
                               day === today && "font-bold after:absolute after:bottom-1 after:size-1 after:rounded-full after:bg-primary",
                               isEdge &&

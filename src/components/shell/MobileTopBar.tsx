@@ -132,7 +132,7 @@ export function MobileTopBar() {
   if (!EXPLORE_PATHS.has(pathname)) {
     // Other pages (Favorites, Bookings, Chats, Profile): a slim header with the logo and language.
     return (
-      <div
+      <div data-print-hide
         className={cn(
           "sticky top-0 z-40 bg-canvas/90 px-4 py-2.5 backdrop-blur-md transition-shadow duration-500 md:hidden",
           scrolled && "shadow-[0_8px_20px_-14px_rgba(0,30,80,0.35)]",
@@ -144,7 +144,7 @@ export function MobileTopBar() {
   }
   if (pathname === "/search") {
     return (
-      <div className="sticky top-0 z-40 flex h-[72px] items-center gap-3 bg-canvas/90 px-4 backdrop-blur-md md:hidden">
+      <div data-print-hide className="sticky top-0 z-40 flex h-[72px] items-center gap-3 bg-canvas/90 px-4 backdrop-blur-md md:hidden">
         <Link href="/" aria-label={t("back")} className="flex size-11 shrink-0 items-center justify-center rounded-full transition-colors active:bg-ink/10">
           <ArrowLeft className="size-5 text-ink" aria-hidden="true" />
         </Link>
@@ -154,7 +154,7 @@ export function MobileTopBar() {
     );
   }
   return (
-    <div
+    <div data-print-hide
       className={cn(
         "sticky top-0 z-40 bg-gradient-to-b from-[#ececec] to-canvas/95 px-4 pt-3 backdrop-blur-md transition-shadow duration-500 md:hidden",
         scrolled && "shadow-[0_8px_20px_-14px_rgba(0,30,80,0.35)]",

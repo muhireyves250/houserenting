@@ -36,6 +36,8 @@ import { SaveButton } from "@/features/listings/components/detail/SaveButton";
 import { ShareButton } from "@/features/listings/components/detail/ShareButton";
 import { discountedPrice } from "@/features/listings/pricing";
 import { getPublishedListing, nearbyListings } from "@/features/listings/service";
+import { bookedRanges } from "@/features/bookings/service";
+import { getEnv } from "@/lib/env";
 import { CollapsibleText } from "@/features/listings/components/detail/CollapsibleText";
 import { CompactListingCard } from "@/features/home/components/CompactListingCard";
 import { HomeRow } from "@/features/home/components/HomeRow";
@@ -90,7 +92,7 @@ export default async function ListingPage({ params }: Props) {
     getCurrentUser(),
     getLocale(),
   ]);
-  const nearby = await nearbyListings(listing);
+  const [nearby, booked] = await Promise.all([nearbyListings(listing), bookedRanges(listing.id)]);
   const savedIds = user ? await savedListingIds(user.id, [listing.id, ...nearby.map((l) => l.id)]) : new Set<string>();
   const saved = savedIds.has(listing.id);
   const rates = [...listing.rates].sort((a, b) => UNIT_ORDER.indexOf(a.unit) - UNIT_ORDER.indexOf(b.unit));
@@ -152,7 +154,7 @@ export default async function ListingPage({ params }: Props) {
   }));
 
   return (
-    <StayProvider>
+    <StayProvider listingId={listing.id} booked={booked} holdMinutes={getEnv().BOOKING_HOLD_MINUTES}>
       <TrackView
         listing={{
           id: listing.id,

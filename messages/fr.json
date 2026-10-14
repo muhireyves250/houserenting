@@ -382,7 +382,21 @@
     "showLess": "Afficher moins",
     "moreNearby": "Autres logements à proximité",
     "moreNearbySub": "D'autres logements autour de celui-ci",
-    "bedsShort": "{count, plural, one {# chambre} other {# chambres}}"
+    "bedsShort": "{count, plural, one {# chambre} other {# chambres}}",
+    "holdDates": "Réserver et bloquer ces dates",
+    "holdNote": "Nous bloquons vos dates pendant {minutes} minutes. Le paiement mobile money n'est pas encore activé, vous ne serez donc pas débité.",
+    "cancellation": "Annulation",
+    "cancelWhileUnpaid": "Annulation gratuite tant que la réservation n'est pas payée.",
+    "bookError": {
+      "invalid": "Vérifiez vos dates et le nombre de voyageurs, puis réessayez.",
+      "notFound": "Ce logement ne peut pas être réservé pour le moment.",
+      "ownListing": "Vous ne pouvez pas réserver votre propre logement.",
+      "stayLength": "L'hôte n'accepte pas des séjours de cette durée. Essayez d'autres dates.",
+      "phone": "Vérifiez votre numéro mobile money.",
+      "unavailable": "Quelqu'un vient de réserver certaines de ces nuits. Choisissez d'autres dates.",
+      "auth": "Reconnectez-vous pour réserver.",
+      "failed": "Réservation impossible. Réessayez."
+    }
   },
   "Facility": {
     "KITCHEN": "Cuisine",
@@ -423,5 +437,57 @@
     "stays": "Séjours",
     "shortStays": "Courts séjours",
     "karongi": "Karongi"
+  },
+  "Bookings": {
+    "myStay": "Mon séjour",
+    "noActiveStay": "Aucun séjour en cours",
+    "noActiveStayBody": "Pendant votre séjour, ses détails, l'itinéraire et l'aide s'affichent ici.",
+    "directions": "Itinéraire",
+    "getHelp": "Obtenir de l'aide",
+    "upcoming": "À venir",
+    "past": "Passées",
+    "noUpcoming": "Aucune réservation à venir",
+    "noPast": "Aucune réservation passée",
+    "nightsGuests": "{nights, plural, one {# nuit} other {# nuits}} · {guests, plural, one {# voyageur} other {# voyageurs}}",
+    "heldUntil": "Dates bloquées jusqu'à {time}",
+    "status": {
+      "PENDING_PAYMENT": "En attente de paiement",
+      "CONFIRMED": "Confirmée",
+      "CHECKED_IN": "Arrivé",
+      "COMPLETED": "Terminée",
+      "CANCELLED": "Annulée",
+      "EXPIRED": "Blocage expiré"
+    },
+    "back": "Réservations",
+    "reference": "Référence de réservation",
+    "bookedOn": "Réservé le {date}",
+    "viewPlace": "Voir le logement",
+    "yourStay": "Votre séjour",
+    "agreed": "Ce que vous avez accepté",
+    "cancelPaid": "Les conditions d'annulation des réservations payées sont affichées avant le paiement.",
+    "timeline": "Historique",
+    "event": {
+      "PENDING_PAYMENT": "Réservé, en attente de paiement",
+      "CONFIRMED": "Paiement confirmé",
+      "CHECKED_IN": "Arrivée enregistrée",
+      "COMPLETED": "Départ enregistré",
+      "CANCELLED": "Annulée",
+      "EXPIRED": "Blocage expiré, dates libérées"
+    },
+    "receipt": "Reçu",
+    "amount": "Montant",
+    "paymentMethod": "Moyen de paiement",
+    "paymentStatus": "Statut du paiement",
+    "paid": "Payé",
+    "unpaid": "Non payé",
+    "transactionRef": "Référence de transaction",
+    "notYet": "Pas encore",
+    "print": "Imprimer ou enregistrer en PDF",
+    "awaitingNote": "Le paiement mobile money n'est pas encore activé : cette réservation ne peut pas être payée. Les dates sont libérées à la fin du blocage.",
+    "cancel": "Annuler la réservation",
+    "cancelTitle": "Annuler cette réservation ?",
+    "cancelBody": "Les dates seront libérées pour d'autres voyageurs.",
+    "keep": "Garder la réservation",
+    "cancelFailed": "Annulation impossible. Réessayez."
   }
 }

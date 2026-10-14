@@ -6,7 +6,7 @@ import { createContext, useContext, useId, useState, type ReactNode } from "reac
 import { discountedPrice, headlineRate, type Unit } from "@/features/listings/pricing";
 import { stayQuote } from "@/features/listings/quote";
 import { DatePanel } from "@/features/search/components/DatePanel";
-import { todayISO, type DateRange } from "@/features/search/date-range";
+import { isDayBlocked, todayISO, type BookedRange, type DateRange } from "@/features/search/date-range";
 import { Link, usePathname } from "@/i18n/navigation";
 import { animateScrollTo } from "@/lib/animate-scroll";
 import { cn } from "@/lib/cn";
@@ -23,7 +23,17 @@ export type BookingRate = {
   dayEndTime: string | null;
 };
 
-type Stay = { range: DateRange; setRange: (range: DateRange) => void; guests: number; setGuests: (n: number) => void };
+type Stay = {
+  range: DateRange;
+  setRange: (range: DateRange) => void;
+  guests: number;
+  setGuests: (n: number) => void;
+  /** Nights other guests already hold. */
+  booked: BookedRange[];
+  listingId: string;
+  /** Minutes an unpaid booking holds its dates. */
+  holdMinutes: number;
+};
 
 const StayContext = createContext<Stay | null>(null);
 const CALENDAR_ID = "stay-calendar";
@@ -35,17 +45,29 @@ function useStay(): Stay {
 }
 
 /** Dates and guests shared by the page's calendar section and the booking card. */
-export function StayProvider({ children }: { children: ReactNode }) {
+export function StayProvider({
+  children,
+  listingId = "",
+  booked = [],
+  holdMinutes = 30,
+}: {
+  children: ReactNode;
+  listingId?: string;
+  booked?: BookedRange[];
+  holdMinutes?: number;
+}) {
   const [range, setRange] = useState<DateRange>({});
   const [guests, setGuests] = useState(1);
-  return <StayContext.Provider value={{ range, setRange, guests, setGuests }}>{children}</StayContext.Provider>;
+  return (
+    <StayContext.Provider value={{ range, setRange, guests, setGuests, booked, listingId, holdMinutes }}>{children}</StayContext.Provider>
+  );
 }
 
 /** "2 nights in Kigali" calendar section (left column). */
 export function StayCalendar({ city, today = todayISO() }: { city: string; today?: string }) {
   const t = useTranslations("Listings");
   const locale = useLocale();
-  const { range, setRange } = useStay();
+  const { range, setRange, booked } = useStay();
   const quoteNights = stayQuote([{ unit: "NIGHT", price: 1 }], null, range)?.nights ?? 0;
   const short = new Intl.DateTimeFormat(locale, { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
   const utc = (iso: string) => new Date(`${iso}T00:00:00Z`);
@@ -58,7 +80,15 @@ export function StayCalendar({ city, today = todayISO() }: { city: string; today
       <p className="mt-1 mb-6 text-sm text-muted">
         {range.checkIn && range.checkOut ? `${short.format(utc(range.checkIn))} – ${short.format(utc(range.checkOut))}` : t("datesHint")}
       </p>
-      <DatePanel today={today} range={range} flex={0} onRangeChange={setRange} onFlexChange={() => {}} showFlex={false} />
+      <DatePanel
+        today={today}
+        range={range}
+        flex={0}
+        onRangeChange={setRange}
+        onFlexChange={() => {}}
+        showFlex={false}
+        isBlocked={booked.length > 0 ? (day) => isDayBlocked(range, day, booked) : undefined}
+      />
     </section>
   );
 }
@@ -87,7 +117,7 @@ function ReserveButton({
 }) {
   const t = useTranslations("Listings");
   const pathname = usePathname();
-  const { range, guests } = useStay();
+  const { range, guests, listingId, holdMinutes } = useStay();
   const [open, setOpen] = useState(false);
   const quote = stayQuote(rates, discountPercent, range);
   const night = rates.find((r) => r.unit === "NIGHT");
@@ -114,6 +144,8 @@ function ReserveButton({
       </button>
       {open && quote && (
         <ReserveDialog
+          listingId={listingId}
+          holdMinutes={holdMinutes}
           place={place}
           quote={quote}
           range={range}

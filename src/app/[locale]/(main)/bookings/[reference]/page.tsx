@@ -1,0 +1,191 @@
+import { ChevronLeft, House, LifeBuoy, Navigation } from "lucide-react";
+import type { Metadata } from "next";
+import Image from "next/image";
+import { notFound } from "next/navigation";
+import { getLocale, getTranslations } from "next-intl/server";
+import type { ReactNode } from "react";
+import { PageContainer } from "@/components/ui/PageContainer";
+import { CancelBooking } from "@/features/bookings/components/CancelBooking";
+import { PrintReceipt } from "@/features/bookings/components/PrintReceipt";
+import { StatusBadge } from "@/features/bookings/components/StatusBadge";
+import { directionsUrl, formatDay, formatKigaliDateTime, formatKigaliTime, formatStayDates } from "@/features/bookings/format";
+import { isBookingReference } from "@/features/bookings/reference";
+import { getGuestBooking } from "@/features/bookings/service";
+import { isHoldActive } from "@/features/bookings/status";
+import { Link } from "@/i18n/navigation";
+import { cn } from "@/lib/cn";
+import { formatRWF } from "@/lib/format";
+import { requireUser } from "@/lib/session";
+
+type Props = { params: Promise<{ reference: string }> };
+
+// Booking pages are private: keep them out of search engines.
+export const metadata: Metadata = { robots: { index: false, follow: false } };
+
+const card = "rounded-3xl bg-surface p-6 shadow-[0_10px_30px_-14px_rgba(16,24,40,0.3)] ring-1 ring-black/[0.04] max-md:ring-line print:shadow-none";
+const pillLink =
+  "inline-flex items-center gap-2 rounded-full border border-line bg-surface px-4 py-2 text-[13px] font-semibold text-ink transition-[background-color,transform] duration-300 hover:bg-canvas active:scale-95 max-md:border-primary max-md:text-primary print:hidden";
+
+function Row({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="flex items-start justify-between gap-4 py-3">
+      <dt className="text-[15px] text-muted">{label}</dt>
+      <dd className="text-right text-[15px] font-medium text-ink">{children}</dd>
+    </div>
+  );
+}
+
+export default async function BookingPage({ params }: Props) {
+  const { reference } = await params;
+  const user = await requireUser(`/bookings/${reference}`);
+  if (!isBookingReference(reference)) notFound();
+  const now = new Date();
+  const booking = await getGuestBooking(user.id, reference, now);
+  if (!booking) notFound();
+
+  const [t, tListings, tType, locale] = await Promise.all([
+    getTranslations("Bookings"),
+    getTranslations("Listings"),
+    getTranslations("ListingType"),
+    getLocale(),
+  ]);
+  const { listing, policySnapshot: policy } = booking;
+  const holding = isHoldActive(booking, now);
+  const paid = ["CONFIRMED", "CHECKED_IN", "COMPLETED"].includes(booking.status);
+  const live = holding || booking.status === "CONFIRMED" || booking.status === "CHECKED_IN";
+  const methodName = booking.paymentMethod === "mtn" ? tListings("mtnMomo") : booking.paymentMethod === "airtel" ? tListings("airtelMoney") : null;
+
+  return (
+    <PageContainer className="max-w-3xl pt-6 pb-10 md:py-10">
+      <Link href="/bookings" className="mb-4 inline-flex items-center gap-1 text-sm text-muted transition-colors hover:text-ink print:hidden">
+        <ChevronLeft className="size-4" aria-hidden="true" />
+        {t("back")}
+      </Link>
+
+      {/* The place and where the booking stands */}
+      <section className={cn(card, "flex flex-col gap-5 p-4 md:flex-row md:items-center md:p-5")}>
+        <span className="relative flex aspect-[4/3] w-full shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-primary-soft text-primary md:size-32 md:aspect-auto">
+          {listing.photos[0] ? (
+            <Image src={listing.photos[0].url} alt="" fill sizes="(min-width: 768px) 128px, 100vw" className="object-cover" priority />
+          ) : (
+            <House className="size-8" aria-hidden="true" />
+          )}
+        </span>
+        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+          <StatusBadge status={booking.status} label={t(`status.${booking.status}`)} className="self-start" />
+          <h1 className="text-[22px] leading-7 font-bold tracking-[-0.02em] text-ink">{listing.title}</h1>
+          <p className="text-[13px] text-muted">
+            {tType(listing.type)} · {listing.addressLine}, {listing.district}, {listing.city}
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <Link href={`/listings/${listing.id}`} className={pillLink}>
+              {t("viewPlace")}
+            </Link>
+            {live && (
+              <a href={directionsUrl(listing.lat, listing.lng)} target="_blank" rel="noopener noreferrer" className={pillLink}>
+                <Navigation className="size-4" aria-hidden="true" />
+                {t("directions")}
+              </a>
+            )}
+            <Link href="/chats" className={pillLink}>
+              <LifeBuoy className="size-4" aria-hidden="true" />
+              {t("getHelp")}
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {holding && booking.holdExpiresAt && (
+        <p className="mt-4 rounded-2xl bg-amber-50 px-5 py-3.5 text-sm leading-5 text-amber-900 ring-1 ring-amber-200/70 print:hidden">
+          <b className="font-semibold">{t("heldUntil", { time: formatKigaliTime(locale, booking.holdExpiresAt) })}.</b> {t("awaitingNote")}
+        </p>
+      )}
+
+      {/* Your stay */}
+      <section className={cn(card, "mt-4")}>
+        <h2 className="mb-2 text-lg font-bold text-ink">{t("yourStay")}</h2>
+        <dl className="divide-y divide-line">
+          <Row label={tListings("checkInLabel")}>
+            {formatDay(locale, booking.checkIn)}
+            {policy.checkInTime && <span className="block text-[13px] font-normal text-muted">{tListings("checkIn", { time: policy.checkInTime })}</span>}
+          </Row>
+          <Row label={tListings("checkOutLabel")}>
+            {formatDay(locale, booking.checkOut)}
+            {policy.checkOutTime && <span className="block text-[13px] font-normal text-muted">{tListings("checkOut", { time: policy.checkOutTime })}</span>}
+          </Row>
+          <Row label={tListings("guestsLabel")}>{tListings("statGuests", { count: booking.guests })}</Row>
+        </dl>
+      </section>
+
+      {/* Electronic receipt */}
+      <section id="receipt" className={cn(card, "mt-4")}>
+        <div className="mb-2 flex items-center justify-between gap-4">
+          <h2 className="text-lg font-bold text-ink">{t("receipt")}</h2>
+          <PrintReceipt label={t("print")} />
+        </div>
+        <dl className="divide-y divide-line tabular-nums">
+          <Row label={t("reference")}>
+            <span className="font-mono tracking-wider">{booking.reference}</span>
+          </Row>
+          <Row label={tListings("dates")}>{formatStayDates(locale, booking.checkIn, booking.checkOut)}</Row>
+          <Row label={tListings("nightsTimes", { price: formatRWF(booking.nightlyPrice, locale), count: booking.nights })}>
+            {formatRWF(booking.total, locale)}
+          </Row>
+          <Row label={`${t("amount")} (${booking.currency})`}>
+            <span className="font-bold">{formatRWF(booking.total, locale)}</span>
+          </Row>
+          {methodName && (
+            <Row label={t("paymentMethod")}>
+              {methodName}
+              {booking.payerPhone && <span className="block text-[13px] font-normal text-muted">{booking.payerPhone}</span>}
+            </Row>
+          )}
+          <Row label={t("paymentStatus")}>{paid ? t("paid") : t("unpaid")}</Row>
+          <Row label={t("transactionRef")}>{t("notYet")}</Row>
+        </dl>
+        <p className="mt-3 text-[13px] text-muted">{t("bookedOn", { date: formatKigaliDateTime(locale, booking.createdAt) })}</p>
+      </section>
+
+      {/* What the guest agreed to, as it was at booking time */}
+      <section className={cn(card, "mt-4")}>
+        <h2 className="mb-3 text-lg font-bold text-ink">{t("agreed")}</h2>
+        <h3 className="mb-1.5 text-[15px] font-semibold text-ink">{tListings("houseRules")}</h3>
+        <ul className="mb-4 flex flex-col gap-1 text-[15px] text-ink/80">
+          {policy.checkInTime && <li>{tListings("checkIn", { time: policy.checkInTime })}</li>}
+          {policy.checkOutTime && <li>{tListings("checkOut", { time: policy.checkOutTime })}</li>}
+          {policy.houseRules.map((rule) => (
+            <li key={rule}>{rule}</li>
+          ))}
+        </ul>
+        <h3 className="mb-1.5 text-[15px] font-semibold text-ink">{tListings("cancellation")}</h3>
+        <p className="text-[15px] text-ink/80">{policy.cancellationPolicy ?? `${tListings("cancelWhileUnpaid")} ${t("cancelPaid")}`}</p>
+      </section>
+
+      {/* Status history */}
+      <section className={cn(card, "mt-4")}>
+        <h2 className="mb-4 text-lg font-bold text-ink">{t("timeline")}</h2>
+        <ol className="relative flex flex-col gap-5 border-l-2 border-line pl-6">
+          {booking.events.map((event, index) => (
+            <li key={index} className="relative">
+              <span
+                aria-hidden="true"
+                className={cn(
+                  "absolute top-1 -left-[31px] size-3.5 rounded-full ring-4 ring-surface",
+                  index === booking.events.length - 1 ? "bg-primary" : "bg-line-strong",
+                )}
+              />
+              <p className="text-[15px] font-semibold text-ink">{t(`event.${event.toStatus}`)}</p>
+              <p className="text-[13px] text-muted">{formatKigaliDateTime(locale, event.createdAt)}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      {holding && (
+        <div className="mt-6 print:hidden">
+          <CancelBooking reference={booking.reference} />
+        </div>
+      )}
+    </PageContainer>
+  );
+}

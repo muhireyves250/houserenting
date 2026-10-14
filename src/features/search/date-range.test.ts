@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addMonths, inRange, monthGrid, pickDate, todayISO } from "./date-range";
+import { addMonths, inRange, isDayBlocked, monthGrid, pickDate, rangeOverlaps, todayISO } from "./date-range";
 
 describe("monthGrid", () => {
   it("lays out October 2026 in Sunday-first weeks", () => {
@@ -51,5 +51,32 @@ describe("inRange", () => {
 describe("todayISO", () => {
   it("uses Kigali time, not UTC", () => {
     expect(todayISO(new Date("2026-10-11T23:30:00Z"))).toBe("2026-10-12");
+  });
+});
+
+describe("isDayBlocked", () => {
+  const booked = [{ checkIn: "2026-10-20", checkOut: "2026-10-23" }];
+
+  it("blocks booked nights for check-in, but the checkout day is free", () => {
+    expect(isDayBlocked({}, "2026-10-19", booked)).toBe(false);
+    expect(isDayBlocked({}, "2026-10-20", booked)).toBe(true);
+    expect(isDayBlocked({}, "2026-10-22", booked)).toBe(true);
+    expect(isDayBlocked({}, "2026-10-23", booked)).toBe(false);
+  });
+
+  it("while choosing checkout, blocks days past the next booking", () => {
+    const picking = { checkIn: "2026-10-17" };
+    expect(isDayBlocked(picking, "2026-10-19", booked)).toBe(false);
+    expect(isDayBlocked(picking, "2026-10-20", booked)).toBe(false);
+    expect(isDayBlocked(picking, "2026-10-21", booked)).toBe(true);
+    expect(isDayBlocked(picking, "2026-10-25", booked)).toBe(true);
+    // Earlier days start a new check-in instead.
+    expect(isDayBlocked(picking, "2026-10-15", booked)).toBe(false);
+  });
+
+  it("rangeOverlaps tells whether a chosen stay collides with a booking", () => {
+    expect(rangeOverlaps({ checkIn: "2026-10-18", checkOut: "2026-10-20" }, booked)).toBe(false);
+    expect(rangeOverlaps({ checkIn: "2026-10-22", checkOut: "2026-10-24" }, booked)).toBe(true);
+    expect(rangeOverlaps({ checkIn: "2026-10-23", checkOut: "2026-10-24" }, booked)).toBe(false);
   });
 });

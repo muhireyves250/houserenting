@@ -1,13 +1,15 @@
 "use client";
 
-import { ArrowLeft, House, Smartphone, Tag } from "lucide-react";
+import { ArrowLeft, House, LoaderCircle, Smartphone, Tag } from "lucide-react";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
-import { useId, useRef, useState, type ReactNode } from "react";
+import { useId, useRef, useState, useTransition, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { bookStayAction } from "@/features/bookings/actions";
 import { maskPhone, parseMobileMoney, type MoMoProvider } from "@/features/listings/mobile-money";
 import type { StayQuote } from "@/features/listings/quote";
 import type { DateRange } from "@/features/search/date-range";
+import { useRouter } from "@/i18n/navigation";
 import { useModal } from "@/lib/use-modal";
 import { cn } from "@/lib/cn";
 import { formatRWF } from "@/lib/format";
@@ -25,10 +27,12 @@ const PROVIDERS: { id: MoMoProvider; badge: ReactNode }[] = [
 ];
 
 /**
- * "Confirm and pay" window: 1. choose MTN Mobile Money or Airtel Money and the number, 2. review.
- * Payment isn't connected yet, so the final button stays disabled and says nothing will be charged.
+ * "Confirm and pay" window: 1. choose MTN Mobile Money or Airtel Money and the number, 2. review and book.
+ * Booking holds the dates for a while (the server rechecks them); payment isn't connected yet, so nothing is charged.
  */
 export function ReserveDialog({
+  listingId,
+  holdMinutes,
   place,
   quote,
   range,
@@ -39,6 +43,8 @@ export function ReserveDialog({
   onClose,
   onChangeDates,
 }: {
+  listingId: string;
+  holdMinutes: number;
   place: PlacePreviewData;
   quote: StayQuote;
   range: DateRange;
@@ -62,6 +68,9 @@ export function ReserveDialog({
   const [number, setNumber] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState<string | null>(null);
+  const [bookError, setBookError] = useState<string | null>(null);
+  const [booking, startBooking] = useTransition();
+  const router = useRouter();
 
   const providerName = (id: MoMoProvider) => (id === "mtn" ? t("mtnMomo") : t("airtelMoney"));
   const dateFmt = new Intl.DateTimeFormat(locale, { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
@@ -79,6 +88,25 @@ export function ReserveDialog({
     setError(null);
     setConfirmed(result.number);
     setStep(2);
+  }
+
+  function book() {
+    if (!range.checkIn || !range.checkOut) return;
+    setBookError(null);
+    startBooking(async () => {
+      const result = await bookStayAction({
+        listingId,
+        checkIn: range.checkIn,
+        checkOut: range.checkOut,
+        guests,
+        payment: { method: provider, phone: number },
+      });
+      if ("reference" in result) {
+        router.push(`/bookings/${result.reference}`);
+        return;
+      }
+      setBookError(t(`bookError.${result.error}`));
+    });
   }
 
   const card = "rounded-2xl border border-line/80 bg-surface p-6";
@@ -213,15 +241,26 @@ export function ReserveDialog({
                         {checkOutTime && <li>{t("checkOut", { time: checkOutTime })}</li>}
                       </ul>
                     </div>
+                    <div>
+                      <p className="mb-1.5 text-[15px] font-semibold text-ink">{t("cancellation")}</p>
+                      <p className="text-[15px] text-ink/80">{t("cancelWhileUnpaid")}</p>
+                    </div>
                     <p className="border-t border-line pt-5 text-[13px] leading-5 text-muted">{t("agree")}</p>
                     <button
                       type="button"
-                      disabled
-                      className="w-full rounded-xl bg-gradient-to-r from-primary to-[#0a6fe0] py-3.5 text-[15px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+                      onClick={book}
+                      disabled={booking}
+                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-[#0a6fe0] py-3.5 text-[15px] font-semibold text-white shadow-[0_10px_24px_-10px_rgba(0,87,184,0.8)] transition-[filter,transform] duration-300 hover:brightness-110 active:scale-[0.98] disabled:cursor-wait disabled:opacity-70"
                     >
-                      {t("confirmAndPay")}
+                      {booking && <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />}
+                      {t("holdDates")}
                     </button>
-                    <p className="text-center text-[13px] text-muted">{t("paymentsSoon")}</p>
+                    {bookError && (
+                      <p role="alert" className="text-center text-[13px] font-medium text-danger">
+                        {bookError}
+                      </p>
+                    )}
+                    <p className="text-center text-[13px] text-muted">{t("holdNote", { minutes: holdMinutes })}</p>
                   </div>
                 )}
               </section>

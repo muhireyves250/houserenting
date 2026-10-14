@@ -382,7 +382,21 @@
     "showLess": "Reba bike",
     "moreNearby": "Andi macumbi hafi aha",
     "moreNearbySub": "Andi macumbi ari hafi y'aha hantu",
-    "bedsShort": "{count, plural, one {Uburiri #} other {Ibitanda #}}"
+    "bedsShort": "{count, plural, one {Uburiri #} other {Ibitanda #}}",
+    "holdDates": "Bika kandi ufate iyi minsi",
+    "holdNote": "Iyi minsi tuyigufatira iminota {minutes}. Kwishyura na mobile money ntibiratangira, ntuzakatwa amafaranga.",
+    "cancellation": "Guhagarika",
+    "cancelWhileUnpaid": "Ushobora guhagarika ku buntu igihe utarishyura.",
+    "bookError": {
+      "invalid": "Reba amatariki n'umubare w'abashyitsi, wongere ugerageze.",
+      "notFound": "Aha ntihashobora kubikwa ubu.",
+      "ownListing": "Ntushobora kubika aho wakiriye abashyitsi.",
+      "stayLength": "Nyir'inzu ntiyakira igihe kingana gutya. Gerageza indi minsi.",
+      "phone": "Reba nimero yawe ya mobile money.",
+      "unavailable": "Hari umaze kubika amwe muri aya majoro. Hitamo indi minsi.",
+      "auth": "Ongera winjire kugira ngo ubike.",
+      "failed": "Kubika byanze. Ongera ugerageze."
+    }
   },
   "Facility": {
     "KITCHEN": "Igikoni",
@@ -423,5 +437,57 @@
     "stays": "Amacumbi",
     "shortStays": "Gukodesha igihe gito",
     "karongi": "Karongi"
+  },
+  "Bookings": {
+    "myStay": "Aho ndi",
+    "noActiveStay": "Nta hantu urimo ubu",
+    "noActiveStayBody": "Igihe urimo aho wabitse, amakuru yaho, inzira n'ubufasha bigaragara hano.",
+    "directions": "Inzira",
+    "getHelp": "Saba ubufasha",
+    "upcoming": "Biri imbere",
+    "past": "Byarangiye",
+    "noUpcoming": "Nta byo wabitse biri imbere",
+    "noPast": "Nta byo wabitse byarangiye",
+    "nightsGuests": "{nights, plural, one {ijoro #} other {amajoro #}} · {guests, plural, one {umushyitsi #} other {abashyitsi #}}",
+    "heldUntil": "Iminsi ifashwe kugeza {time}",
+    "status": {
+      "PENDING_PAYMENT": "Bitegereje kwishyurwa",
+      "CONFIRMED": "Byemejwe",
+      "CHECKED_IN": "Wageze",
+      "COMPLETED": "Byarangiye",
+      "CANCELLED": "Byahagaritswe",
+      "EXPIRED": "Igihe cyarangiye"
+    },
+    "back": "Ibyo nabitse",
+    "reference": "Nimero y'ibyo wabitse",
+    "bookedOn": "Byabitswe ku wa {date}",
+    "viewPlace": "Reba aho hantu",
+    "yourStay": "Igihe uzamara",
+    "agreed": "Ibyo wemeye",
+    "cancelPaid": "Amabwiriza yo guhagarika ibyishyuwe agaragazwa mbere yo kwishyura.",
+    "timeline": "Uko byagenze",
+    "event": {
+      "PENDING_PAYMENT": "Byabitswe, bitegereje kwishyurwa",
+      "CONFIRMED": "Kwishyura byemejwe",
+      "CHECKED_IN": "Yageze",
+      "COMPLETED": "Yavuyeyo",
+      "CANCELLED": "Byahagaritswe",
+      "EXPIRED": "Igihe cyarangiye, iminsi irarekurwa"
+    },
+    "receipt": "Inyemezabwishyu",
+    "amount": "Amafaranga",
+    "paymentMethod": "Uburyo bwo kwishyura",
+    "paymentStatus": "Uko kwishyura bihagaze",
+    "paid": "Byishyuwe",
+    "unpaid": "Ntibyishyuwe",
+    "transactionRef": "Nimero y'igikorwa",
+    "notYet": "Ntibiraba",
+    "print": "Sohora cyangwa ubike nka PDF",
+    "awaitingNote": "Kwishyura na mobile money ntibiratangira, ntushobora kwishyura ibi. Iminsi irarekurwa igihe cyo kuyifata kirangiye.",
+    "cancel": "Hagarika",
+    "cancelTitle": "Uhagarike ibi wabitse?",
+    "cancelBody": "Iminsi izarekurirwa abandi bashyitsi.",
+    "keep": "Bigumeho",
+    "cancelFailed": "Guhagarika byanze. Ongera ugerageze."
   }
 }

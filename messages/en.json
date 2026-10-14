@@ -382,7 +382,21 @@
     "showLess": "Show less",
     "moreNearby": "More stays nearby",
     "moreNearbySub": "Other homes around this place",
-    "bedsShort": "{count, plural, one {# bed} other {# beds}}"
+    "bedsShort": "{count, plural, one {# bed} other {# beds}}",
+    "holdDates": "Book and hold these dates",
+    "holdNote": "We hold your dates for {minutes} minutes. Mobile money payment isn't connected yet, so you won't be charged.",
+    "cancellation": "Cancellation",
+    "cancelWhileUnpaid": "Free to cancel while the booking is unpaid.",
+    "bookError": {
+      "invalid": "Check your dates and guests, then try again.",
+      "notFound": "This place can't be booked right now.",
+      "ownListing": "You can't book your own place.",
+      "stayLength": "The host doesn't take stays of this length. Try other dates.",
+      "phone": "Check your mobile money number.",
+      "unavailable": "Someone just booked some of these nights. Choose other dates.",
+      "auth": "Log in again to book.",
+      "failed": "Couldn't book. Try again."
+    }
   },
   "Facility": {
     "KITCHEN": "Kitchen",
@@ -423,5 +437,57 @@
     "stays": "Stays",
     "shortStays": "Short stays",
     "karongi": "Karongi"
+  },
+  "Bookings": {
+    "myStay": "My stay",
+    "noActiveStay": "No active stay",
+    "noActiveStayBody": "While you're staying somewhere, its details, directions and help show here.",
+    "directions": "Directions",
+    "getHelp": "Get help",
+    "upcoming": "Upcoming",
+    "past": "Past",
+    "noUpcoming": "No upcoming bookings",
+    "noPast": "No past bookings",
+    "nightsGuests": "{nights, plural, one {# night} other {# nights}} · {guests, plural, one {# guest} other {# guests}}",
+    "heldUntil": "Dates held until {time}",
+    "status": {
+      "PENDING_PAYMENT": "Awaiting payment",
+      "CONFIRMED": "Confirmed",
+      "CHECKED_IN": "Checked in",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled",
+      "EXPIRED": "Hold expired"
+    },
+    "back": "Bookings",
+    "reference": "Booking reference",
+    "bookedOn": "Booked on {date}",
+    "viewPlace": "View place",
+    "yourStay": "Your stay",
+    "agreed": "What you agreed to",
+    "cancelPaid": "Cancellation terms for paid bookings are shown before you pay.",
+    "timeline": "Timeline",
+    "event": {
+      "PENDING_PAYMENT": "Booked, awaiting payment",
+      "CONFIRMED": "Payment confirmed",
+      "CHECKED_IN": "Checked in",
+      "COMPLETED": "Checked out",
+      "CANCELLED": "Cancelled",
+      "EXPIRED": "Hold expired, dates released"
+    },
+    "receipt": "Receipt",
+    "amount": "Amount",
+    "paymentMethod": "Payment method",
+    "paymentStatus": "Payment status",
+    "paid": "Paid",
+    "unpaid": "Not paid",
+    "transactionRef": "Transaction reference",
+    "notYet": "Not yet",
+    "print": "Print or save as PDF",
+    "awaitingNote": "Mobile money payment isn't connected yet, so this booking can't be paid. The dates are released when the hold ends.",
+    "cancel": "Cancel booking",
+    "cancelTitle": "Cancel this booking?",
+    "cancelBody": "The dates will be released for other guests.",
+    "keep": "Keep booking",
+    "cancelFailed": "Couldn't cancel. Try again."
   }
 }

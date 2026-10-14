@@ -34,6 +34,7 @@ model User {
   accounts      Account[]
   listings      Listing[]
   favorites     Favorite[]
+  bookings      Booking[]
 
   @@map("user")
 }
@@ -168,6 +169,7 @@ model Listing {
   photos          ListingPhoto[]
   rates           RateOption[]
   favoritedBy     Favorite[]
+  bookings        Booking[]
 
   @@index([status, city])
   @@index([hostId])
@@ -215,4 +217,62 @@ model Favorite {
   @@id([userId, listingId])
   @@index([listingId])
   @@map("favorite")
+}
+
+/// PENDING_PAYMENT holds the dates until holdExpiresAt; only a verified payment moves it to CONFIRMED.
+enum BookingStatus {
+  PENDING_PAYMENT
+  CONFIRMED
+  CHECKED_IN
+  COMPLETED
+  CANCELLED
+  EXPIRED
+}
+
+/// Overlapping active bookings of one listing are refused by the database (exclusion constraint "booking_no_overlap").
+model Booking {
+  id             String         @id @default(cuid())
+  /// Short code shown to guests and on receipts, e.g. "SR-7K2M9Q".
+  reference      String         @unique
+  listingId      String
+  listing        Listing        @relation(fields: [listingId], references: [id], onDelete: Restrict)
+  guestId        String
+  guest          User           @relation(fields: [guestId], references: [id], onDelete: Restrict)
+  status         BookingStatus  @default(PENDING_PAYMENT)
+  checkIn        DateTime       @db.Date
+  checkOut       DateTime       @db.Date
+  nights         Int
+  guests         Int
+  /// Prices in whole RWF, worked out on the server when booked.
+  nightlyPrice   Int
+  total          Int
+  currency       String         @default("RWF")
+  paymentMethod  String?
+  /// Masked payer number ("078 ••• 4567"); the full number is not stored.
+  payerPhone     String?
+  /// What the guest saw and agreed to: check-in/out times, house rules, cancellation terms.
+  policySnapshot Json
+  holdExpiresAt  DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  events         BookingEvent[]
+
+  @@index([guestId, checkIn])
+  @@index([listingId, checkIn])
+  @@map("booking")
+}
+
+/// Every status change of a booking: who, when, from what, to what, and why.
+model BookingEvent {
+  id         String         @id @default(cuid())
+  bookingId  String
+  booking    Booking        @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  fromStatus BookingStatus?
+  toStatus   BookingStatus
+  actorId    String?
+  reason     String?
+  createdAt  DateTime       @default(now())
+
+  @@index([bookingId, createdAt])
+  @@map("bookingEvent")
 }
