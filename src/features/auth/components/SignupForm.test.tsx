@@ -54,4 +54,15 @@ describe("SignupForm", () => {
     expect(screen.getByLabelText("Password")).toHaveAccessibleDescription("This password is too common. Choose another one.");
     expect(push).not.toHaveBeenCalled();
   });
+
+  it("goes straight in when the account is signed in at once (email verification off)", async () => {
+    const assign = vi.fn();
+    vi.stubGlobal("location", { ...window.location, assign });
+    signUpEmail.mockResolvedValue({ data: { token: "session-token", user: { name: "Alona" } }, error: null });
+    renderWithIntl(<SignupForm />);
+    await fill("Alona", "alona@example.com", "umuganda-blue-42");
+    expect(assign).toHaveBeenCalledWith("/en");
+    expect(push).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
+  });
 });

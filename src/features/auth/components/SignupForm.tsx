@@ -32,11 +32,18 @@ export function SignupForm() {
     }
     setErrors({});
     setPending(true);
-    const { error } = await authClient.signUp.email({ ...parsed.data, locale, callbackURL: `/${locale}/verified` });
+    const { data, error } = await authClient.signUp.email({ ...parsed.data, locale, callbackURL: `/${locale}/verified` });
     setPending(false);
     if (error) {
       const key = authErrorKey(error);
       setErrors({ [fieldForAuthError(key)]: key });
+      return;
+    }
+    // Email verification off: the new account is already signed in (a session token comes back). Full load so
+    // the header and layout show it.
+    if (data && "token" in data && data.token) {
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+      window.location.assign(`/${locale}`);
       return;
     }
     router.push({ pathname: "/check-email", query: { email: parsed.data.email } });

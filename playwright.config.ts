@@ -27,6 +27,8 @@ export default defineConfig({
       MAIL_DRIVER: "file",
       MAIL_OUTBOX_DIR: ".e2e-mail",
       RATE_LIMIT_ENABLED: "false",
+      // e2e covers the sign-up -> verify email flow.
+      EMAIL_VERIFICATION: "on",
     },
   },
 });

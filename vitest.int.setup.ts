@@ -13,6 +13,8 @@ assertSafeTestDatabase(testUrl, localDevDatabaseUrls());
 process.env.DATABASE_URL = testUrl;
 process.env.ALLOW_DB_RESET = "1";
 process.env.MAIL_DRIVER = "memory";
+// The auth tests cover the verification flow.
+process.env.EMAIL_VERIFICATION = "on";
 process.env.BETTER_AUTH_URL ??= "http://localhost:3100";
 process.env.BETTER_AUTH_SECRET ??= "integration-test-secret-0123456789abcdef";
 

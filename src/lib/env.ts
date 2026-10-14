@@ -17,6 +17,11 @@ const schema = z
     MAIL_FROM: z.string().min(3).default("Space Rental <no-reply@spacerental.rw>"),
     MAIL_OUTBOX_DIR: z.string().min(1).default(".mail-outbox"),
     RESEND_API_KEY: z.string().optional(),
+    // Email verification for new accounts ("on" to require it). Off: sign-up signs people in at once, no email sent.
+    EMAIL_VERIFICATION: z
+      .enum(["on", "off"])
+      .default("off")
+      .transform((value) => value === "on"),
     RATE_LIMIT_ENABLED: z
       .enum(["true", "false"])
       .default("true")

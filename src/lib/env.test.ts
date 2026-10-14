@@ -35,4 +35,9 @@ describe("parseEnv", () => {
     expect(parseEnv({ ...base, BETTER_AUTH_URL: "http://localhost:3000/" }).BETTER_AUTH_URL).toBe("http://localhost:3000");
     expect(() => parseEnv({ ...base, BETTER_AUTH_URL: "not a url at all" })).toThrow();
   });
+
+  it("keeps email verification off unless EMAIL_VERIFICATION=on", () => {
+    expect(parseEnv(base).EMAIL_VERIFICATION).toBe(false);
+    expect(parseEnv({ ...base, EMAIL_VERIFICATION: "on" }).EMAIL_VERIFICATION).toBe(true);
+  });
 });

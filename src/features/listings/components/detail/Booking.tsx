@@ -293,7 +293,7 @@ export function MobileBookingBar({
   const headline = headlineRate(rates, longOnly ? "long" : "short") ?? rates[0];
   const bold = (chunks: ReactNode) => <b className="text-ink">{chunks}</b>;
   return (
-    <div className="fixed inset-x-0 bottom-[calc(80px+env(safe-area-inset-bottom))] z-30 mx-3 flex items-center justify-between gap-4 rounded-2xl border border-line bg-surface px-4 py-3 shadow-[0_10px_30px_-12px_rgba(16,24,40,0.35)] md:hidden">
+    <div className="fixed inset-x-0 bottom-[calc(88px+env(safe-area-inset-bottom))] z-30 mx-3 flex items-center justify-between gap-4 rounded-2xl border border-line bg-surface px-4 py-3 shadow-[0_10px_30px_-12px_rgba(16,24,40,0.35)] md:hidden">
       <p className="text-sm text-muted">
         {quote
           ? t.rich("perStay", { price: formatRWF(quote.total, locale), count: quote.nights, b: bold })
