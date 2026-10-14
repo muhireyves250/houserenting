@@ -6,7 +6,8 @@ export const PASSWORD = "umuganda-blue-lake-42";
 const BASE_URL = "http://localhost:3100";
 
 export async function skipOnboarding(page: Page) {
-  await page.context().addCookies([{ name: "sr_onboarded", value: "1", url: BASE_URL }]);
+  // Start straight on the requested page (the welcome page otherwise opens first on phones when signed out).
+  await page.context().addCookies([{ name: "sr_skip_welcome", value: "1", url: BASE_URL }]);
 }
 
 /** Signs up through the UI, follows the verification link and ends signed in. Returns the email. */

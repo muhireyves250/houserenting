@@ -118,7 +118,8 @@
     "slide3": "Enregistrez vos favoris",
     "slide3Body": "Gardez les logements qui vous plaisent et revenez quand vous voulez.",
     "getStarted": "Commencer",
-    "progress": "Étape {current} sur {total}"
+    "progress": "Étape {current} sur {total}",
+    "haveAccount": "J'ai déjà un compte"
   },
   "Auth": {
     "signupTitle": "Inscription",

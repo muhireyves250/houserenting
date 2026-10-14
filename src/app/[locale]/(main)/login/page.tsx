@@ -12,7 +12,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   if (await getCurrentUser()) redirect({ href: next, locale: await getLocale() });
   return (
     <>
-      <HomeContent onboarding={false} />
+      <HomeContent />
       <AuthModal initialMode="login" next={next} standalone />
     </>
   );

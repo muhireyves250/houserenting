@@ -12,7 +12,7 @@ export default async function SignupPage({ searchParams }: { searchParams: Promi
   if (await getCurrentUser()) redirect({ href: next, locale: await getLocale() });
   return (
     <>
-      <HomeContent onboarding={false} />
+      <HomeContent />
       <AuthModal initialMode="signup" next={next} standalone />
     </>
   );

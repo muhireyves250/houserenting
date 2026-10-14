@@ -118,7 +118,8 @@
     "slide3": "Bika ibyo ukunda",
     "slide3Body": "Bika ahantu ukunda, uzagaruke igihe cyose.",
     "getStarted": "Tangira",
-    "progress": "Intambwe {current} kuri {total}"
+    "progress": "Intambwe {current} kuri {total}",
+    "haveAccount": "Nsanzwe mfite konti"
   },
   "Auth": {
     "signupTitle": "Iyandikishe",

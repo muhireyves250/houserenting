@@ -7,7 +7,7 @@ export default async function ForgotPasswordPage({ searchParams }: { searchParam
   const next = safeNextPath((await searchParams).next);
   return (
     <>
-      <HomeContent onboarding={false} />
+      <HomeContent />
       <AuthModal initialMode="forgot" next={next} standalone />
     </>
   );

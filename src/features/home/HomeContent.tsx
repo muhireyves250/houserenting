@@ -12,7 +12,6 @@ import { PendingArea, RowsSkeleton } from "@/components/ui/Skeletons";
 import { House } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { RecentlyViewedRow } from "@/features/listings/components/RecentlyViewed";
-import { OnboardingGate } from "@/features/onboarding/components/OnboardingGate";
 import { featuredListings } from "@/features/listings/service";
 import { HERO_SEARCH_ID, SearchBar } from "@/features/search/components/SearchBar";
 import { getCurrentUser } from "@/lib/session";
@@ -32,7 +31,7 @@ const ROWS = {
 } as const satisfies Record<HomeSectionKey, { title: string; subtitle: string }>;
 
 /** Home page body: hero search and rows of homes by destination. Also the backdrop for direct /login, /signup visits. */
-export async function HomeContent({ onboarding = true, type = null }: { onboarding?: boolean; type?: PlaceType | null }) {
+export async function HomeContent({ type = null }: { type?: PlaceType | null }) {
   const [t, tListings, pool, user] = await Promise.all([
     getTranslations("Home"),
     getTranslations("Listings"),
@@ -44,7 +43,6 @@ export async function HomeContent({ onboarding = true, type = null }: { onboardi
   const saved = user ? await savedListingIds(user.id, pool.map((l) => l.id)) : new Set<string>();
   return (
     <>
-      {onboarding && <OnboardingGate />}
       {/* md:-mt-[73px] (72px header + 1px border) tucks the hero under the transparent sticky header; the extra top padding keeps content clear of it. */}
       {/* Visually hidden: the search is the hero, but the page still needs a heading for screen readers and SEO. */}
       <h1 className="sr-only">

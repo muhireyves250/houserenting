@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { renderWithIntl } from "@/test/render";
@@ -24,5 +24,19 @@ describe("OnboardingCarousel", () => {
     expect(screen.getByText("Step 1 of 3")).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Skip" }));
     expect(onFinish).toHaveBeenCalledOnce();
+  });
+
+  it("offers logging in, and swipes between slides", async () => {
+    const onLogin = vi.fn();
+    renderWithIntl(<OnboardingCarousel onFinish={vi.fn()} onLogin={onLogin} />);
+    const stage = screen.getByTestId("welcome-stage");
+    fireEvent.pointerDown(stage, { clientX: 300, pointerId: 1 });
+    fireEvent.pointerUp(stage, { clientX: 100, pointerId: 1 });
+    expect(screen.getByRole("heading", { name: "Search by location" })).toBeInTheDocument();
+    fireEvent.pointerDown(stage, { clientX: 100, pointerId: 1 });
+    fireEvent.pointerUp(stage, { clientX: 300, pointerId: 1 });
+    expect(screen.getByRole("heading", { name: "Space Rental" })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "I already have an account" }));
+    expect(onLogin).toHaveBeenCalledOnce();
   });
 });
