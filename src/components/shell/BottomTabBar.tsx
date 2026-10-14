@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { isActive, NAV_ITEMS, navHref } from "./nav-items";
@@ -18,6 +18,8 @@ export function BottomTabBar({ signedIn = true }: { signedIn?: boolean }) {
   const pathname = usePathname();
   const listRef = useRef<HTMLUListElement>(null);
   const pillRef = useRef<HTMLSpanElement>(null);
+  // Tab under the mouse / finger: it shows its name too (the bar's width never changes; tabs share it).
+  const [hovered, setHovered] = useState<string | null>(null);
 
   // Place the pill under the current tab, measured from layout (no re-render). It follows the tab's
   // width as its name expands, and slides after the first placement.
@@ -45,11 +47,12 @@ export function BottomTabBar({ signedIn = true }: { signedIn?: boolean }) {
   return (
     <nav
       aria-label={t("mainNav")}
-      className="fixed inset-x-0 bottom-[calc(12px+env(safe-area-inset-bottom))] z-40 flex justify-center px-4 md:hidden"
+      className="fixed inset-x-0 bottom-[calc(12px+env(safe-area-inset-bottom))] z-40 px-4 md:hidden"
     >
       <ul
         ref={listRef}
-        className="relative flex items-center gap-1 rounded-full bg-surface/90 p-1.5 shadow-[0_14px_36px_-12px_rgba(0,40,100,0.45)] ring-1 ring-line backdrop-blur-xl"
+        onPointerLeave={() => setHovered(null)}
+        className="relative mx-auto flex w-full max-w-md items-center gap-1 rounded-full bg-surface/90 p-1.5 shadow-[0_14px_36px_-12px_rgba(0,40,100,0.45)] ring-1 ring-line backdrop-blur-xl"
       >
         <span
           ref={pillRef}
@@ -63,22 +66,31 @@ export function BottomTabBar({ signedIn = true }: { signedIn?: boolean }) {
         />
         {NAV_ITEMS.map(({ key, href, icon: Icon }) => {
           const active = isActive(pathname, href);
+          const labelled = active || hovered === key;
           return (
-            <li key={key}>
+            // Equal shares of a fixed-width bar; a tab showing its name takes a bigger share.
+            <li
+              key={key}
+              className={cn("min-w-0 transition-[flex-grow]", SLIDE, labelled ? "grow-[2.6]" : "grow")}
+              onPointerEnter={() => setHovered(key)}
+              onPointerDown={() => setHovered(key)}
+            >
               <Link
                 href={navHref(href, signedIn)}
                 aria-label={t(key)}
                 aria-current={active ? "page" : undefined}
+                onFocus={() => setHovered(key)}
+                onBlur={() => setHovered(null)}
                 className={cn(
-                  "relative flex h-12 items-center justify-center gap-2 rounded-full text-primary transition-[padding,color]",
+                  "relative flex h-12 w-full items-center justify-center gap-2 overflow-hidden rounded-full px-2 transition-[background-color,color]",
                   SLIDE,
                   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-95",
-                  active ? "px-4 text-white" : "w-12 hover:bg-primary/[0.08]",
+                  active ? "text-white" : cn("text-primary", labelled && "bg-primary/[0.08]"),
                 )}
               >
                 <Icon className="size-[22px] shrink-0" strokeWidth={active ? 2.2 : 1.9} aria-hidden="true" />
-                {active && (
-                  <span aria-hidden="true" className="text-[15px] font-semibold whitespace-nowrap motion-safe:animate-[fade-in_400ms_ease-out]">
+                {labelled && (
+                  <span aria-hidden="true" className="truncate text-sm font-semibold motion-safe:animate-[fade-in_400ms_ease-out]">
                     {t(key)}
                   </span>
                 )}
