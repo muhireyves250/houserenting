@@ -73,7 +73,7 @@ export function BottomTabBar({ signedIn = true }: { signedIn?: boolean }) {
       <ul
         ref={listRef}
         onPointerLeave={() => setHovered(null)}
-        className="relative mx-auto flex w-full max-w-md items-center justify-between rounded-full bg-surface/90 p-1.5 shadow-[0_14px_36px_-12px_rgba(0,40,100,0.45)] ring-1 ring-line backdrop-blur-xl"
+        className="relative mx-auto flex w-full max-w-md items-center rounded-full bg-surface/90 p-1.5 shadow-[0_14px_36px_-12px_rgba(0,40,100,0.45)] ring-1 ring-line backdrop-blur-xl"
       >
         <span
           ref={shadeRef}
@@ -94,11 +94,11 @@ export function BottomTabBar({ signedIn = true }: { signedIn?: boolean }) {
         />
         {NAV_ITEMS.map(({ key, href, icon: Icon }) => {
           const active = isActive(pathname, href);
-          const labelled = active || hovered === key;
           return (
-            // Natural sizes, spread with equal gaps across the fixed-width bar.
+            // Equal widths across the fixed-width bar.
             <li
               key={key}
+              className="min-w-0 flex-1"
               onPointerEnter={() => setHovered(key)}
               onPointerDown={() => setHovered(key)}
             >
@@ -110,19 +110,17 @@ export function BottomTabBar({ signedIn = true }: { signedIn?: boolean }) {
                 onFocus={() => setHovered(key)}
                 onBlur={() => setHovered(null)}
                 className={cn(
-                  "relative flex h-12 items-center justify-center gap-2 rounded-full transition-[background-color,color,padding,width]",
+                  "relative flex h-14 w-full flex-col items-center justify-center gap-0.5 rounded-full transition-[color]",
                   SLIDE,
                   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:scale-95",
-                  labelled ? "px-4" : "w-12",
                   active ? "text-white" : "text-primary",
                 )}
               >
                 <Icon className="size-[22px] shrink-0" strokeWidth={2} aria-hidden="true" />
-                {labelled && (
-                  <span aria-hidden="true" className="text-sm font-semibold whitespace-nowrap motion-safe:animate-[fade-in_400ms_ease-out]">
-                    {t(key)}
-                  </span>
-                )}
+                {/* Name under the icon, on every tab. */}
+                <span aria-hidden="true" className={cn("max-w-full truncate text-[11px] leading-tight", active ? "font-semibold" : "font-medium")}>
+                  {t(key)}
+                </span>
               </Link>
             </li>
           );

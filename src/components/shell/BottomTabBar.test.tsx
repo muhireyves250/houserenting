@@ -27,11 +27,10 @@ describe("BottomTabBar", () => {
     expect(screen.getByRole("link", { name: "Search" })).not.toHaveAttribute("aria-current");
   });
 
-  it("shows only the current tab's name; the others are icons with accessible names", () => {
+  it("shows every tab's name under its icon, with the current one on the sliding pill", () => {
     renderWithIntl(<BottomTabBar />);
-    const current = screen.getByRole("link", { name: "Favorites" });
-    expect(current).toHaveTextContent("Favorites");
-    expect(screen.getByRole("link", { name: "Chats" })).not.toHaveTextContent("Chats");
+    expect(screen.getByRole("link", { name: "Favorites" })).toHaveTextContent("Favorites");
+    expect(screen.getByRole("link", { name: "Chats" })).toHaveTextContent("Chats");
     expect(screen.getByTestId("tab-pill")).toBeInTheDocument();
   });
 });
