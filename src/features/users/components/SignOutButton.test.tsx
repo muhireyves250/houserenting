@@ -33,4 +33,15 @@ describe("SignOutButton", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(signOut).not.toHaveBeenCalled();
   });
+
+  it("stays on the page and says so when the server refuses to log out", async () => {
+    const assign = vi.fn();
+    vi.stubGlobal("location", { ...window.location, assign });
+    signOut.mockResolvedValue({ data: null, error: { status: 403, message: "Invalid origin" } });
+    renderWithIntl(<SignOutButton />);
+    await userEvent.click(screen.getByRole("button", { name: "Log out" }));
+    await userEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "Log out" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Couldn't log you out");
+    expect(assign).not.toHaveBeenCalled();
+  });
 });

@@ -14,10 +14,18 @@ export function SignOutButton() {
   const locale = useLocale();
   const [confirming, setConfirming] = useState(false);
   const [pending, setPending] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   async function signOut() {
     setPending(true);
-    await authClient.signOut();
+    setFailed(false);
+    // Only leave once the server has really ended the session (it can refuse, e.g. an untrusted origin).
+    const result = await authClient.signOut().catch(() => ({ error: true }));
+    if (result?.error) {
+      setPending(false);
+      setFailed(true);
+      return;
+    }
     // Full load: a client push to "/" keeps the shared (main) layout, which would still show the signed-in header.
     // eslint-disable-next-line @next/next/no-location-assign-relative-destination
     window.location.assign(`/${locale}`);
@@ -37,6 +45,11 @@ export function SignOutButton() {
       {confirming && (
         <Modal title={t("logOutTitle")} closeLabel={tHome("close")} onClose={() => setConfirming(false)}>
           <p className="-mt-2 text-center text-[15px] leading-6 text-muted">{t("logOutBody")}</p>
+          {failed && (
+            <p role="alert" className="mt-4 text-center text-sm font-medium text-danger">
+              {t("logOutFailed")}
+            </p>
+          )}
           <div className="mt-6 flex flex-col gap-3">
             <Button size="lg" fullWidth loading={pending} onClick={signOut} className="bg-danger hover:bg-danger/90">
               {t("logOut")}

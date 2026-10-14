@@ -198,7 +198,8 @@
     "logOut": "Log out",
     "logOutTitle": "Log out?",
     "logOutBody": "You'll need to log in again to see your favorites and bookings.",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "logOutFailed": "Couldn't log you out. Check your connection and try again."
   },
   "Empty": {
     "favoritesTitle": "No favorites yet",

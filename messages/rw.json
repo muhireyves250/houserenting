@@ -198,7 +198,8 @@
     "logOut": "Sohoka",
     "logOutTitle": "Urashaka gusohoka?",
     "logOutBody": "Uzongera kwinjira kugira ngo ubone ibyo ukunda n'ibyo wateguye.",
-    "cancel": "Reka"
+    "cancel": "Reka",
+    "logOutFailed": "Ntibyakunze kugusohora. Reba murandasi wongere ugerageze."
   },
   "Empty": {
     "favoritesTitle": "Nta byo ukunda biraboneka",
