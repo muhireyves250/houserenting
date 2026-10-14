@@ -7,6 +7,7 @@ import { Suspense } from "react";
 import { MobileSearch } from "@/features/search/components/MobileSearch";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
+import { useScrollDirection } from "@/lib/use-scroll-direction";
 
 // Explore pages: home (and its login/signup backdrops) and the results page.
 const EXPLORE_PATHS = new Set(["/", "/search", "/login", "/signup", "/forgot-password"]);
@@ -56,6 +57,7 @@ function Categories() {
 export function MobileTopBar() {
   const pathname = usePathname();
   const t = useTranslations("Nav");
+  const { hidden, scrolled } = useScrollDirection();
   if (!EXPLORE_PATHS.has(pathname)) return null;
   if (pathname === "/search") {
     return (
@@ -69,11 +71,27 @@ export function MobileTopBar() {
     );
   }
   return (
-    <div className="sticky top-0 z-40 bg-gradient-to-b from-[#ececec] to-canvas/95 px-4 pt-3 backdrop-blur-md md:hidden">
+    <div
+      className={cn(
+        "sticky top-0 z-40 bg-gradient-to-b from-[#ececec] to-canvas/95 px-4 pt-3 backdrop-blur-md transition-shadow duration-300 md:hidden",
+        scrolled && "shadow-[0_8px_20px_-14px_rgba(0,30,80,0.35)]",
+      )}
+    >
       <MobileSearch className="mb-3" />
-      <Suspense>
-        <Categories />
-      </Suspense>
+      {/* Tucked away while scrolling down (more room for homes), back on the way up. */}
+      <div
+        className={cn(
+          "grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none",
+          hidden ? "grid-rows-[0fr] opacity-0" : "grid-rows-[1fr] opacity-100",
+        )}
+        inert={hidden}
+      >
+        <div className="min-h-0 overflow-hidden">
+          <Suspense>
+            <Categories />
+          </Suspense>
+        </div>
+      </div>
     </div>
   );
 }

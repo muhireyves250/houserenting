@@ -83,7 +83,7 @@ export function SearchResults({
                 onMouseEnter={() => setActive({ id: listing.id, from: "list" })}
                 onMouseLeave={() => setActive(null)}
                 className={cn(
-                  "rounded-[22px] ring-2 ring-transparent transition-[box-shadow] duration-300",
+                  "scroll-reveal rounded-[22px] ring-2 ring-transparent transition-[box-shadow] duration-300",
                   active?.from === "map" && active.id === listing.id && "ring-primary/50",
                 )}
               >

@@ -33,7 +33,7 @@ describe("MobileSearch", () => {
 
     await userEvent.click(within(sheet).getByRole("button", { name: "Search" }));
     expect(push).toHaveBeenCalledWith({ pathname: "/search", query: { mode: "short", location: "Kigali", guests: "1" } });
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    await vi.waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
   });
 
   it("clears everything and closes with the close button", async () => {
@@ -43,6 +43,6 @@ describe("MobileSearch", () => {
     await userEvent.click(screen.getByRole("button", { name: "Clear all" }));
     expect(screen.getByRole("combobox", { name: "Where" })).toHaveValue("");
     await userEvent.click(screen.getByRole("button", { name: "Close search" }));
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    await vi.waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
   });
 });

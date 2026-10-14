@@ -72,7 +72,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 function Section({ title, children, id }: { title?: string; children: ReactNode; id?: string }) {
   return (
-    <section id={id} className="border-t border-line py-10">
+    <section id={id} className="scroll-reveal border-t border-line py-10">
       {title && <h2 className="mb-6 font-display text-[22px] leading-7 font-bold tracking-[-0.02em] text-ink">{title}</h2>}
       {children}
     </section>

@@ -2,7 +2,7 @@
 
 import { Search, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useCallback, useId, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
 import { todayISO } from "@/features/search/date-range";
@@ -36,15 +36,32 @@ export function MobileSearch({
   const tSearch = useTranslations("Search");
   const [search] = useSearchState();
   const { whenSummary, whoSummary } = useSearchSummaries(search);
-  const [open, setOpen] = useState(false);
+  // "open" / "closing" (exit animation playing) / null; origin = the pill's centre, so the sheet grows from it.
+  const [sheet, setSheet] = useState<{ state: "open" | "closing"; origin: string } | null>(null);
+  const pillRef = useRef<HTMLButtonElement>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+  }, []);
+  function openSheet() {
+    const box = pillRef.current?.getBoundingClientRect();
+    const origin = box ? `${Math.round(box.left + box.width / 2)}px ${Math.round(box.top + box.height / 2)}px` : "50% 0px";
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    setSheet({ state: "open", origin });
+  }
+  function closeSheet() {
+    setSheet((current) => (current ? { ...current, state: "closing" } : null));
+    closeTimer.current = setTimeout(() => setSheet(null), SHEET_CLOSE_MS);
+  }
   const details = [whenSummary ?? t("compactWhen"), whoSummary ?? t("whoPlaceholder")].join(" · ");
   const chosen = Boolean(search.location || whenSummary || whoSummary);
 
   return (
     <>
       <button
+        ref={pillRef}
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={openSheet}
         aria-label={chosen || results ? undefined : t("startSearch")}
         className={cn(
           "flex h-12 w-full items-center justify-center gap-3 rounded-full bg-surface px-5 shadow-[0_6px_20px_-6px_rgba(16,24,40,0.25)] ring-1 ring-black/[0.06] max-md:ring-line transition-transform duration-300 active:scale-[0.98]",
@@ -68,12 +85,29 @@ export function MobileSearch({
           <span className="text-sm font-semibold text-ink">{t("startSearch")}</span>
         )}
       </button>
-      {open && createPortal(<SearchSheet today={today} onClose={() => setOpen(false)} />, document.body)}
+      {sheet &&
+        createPortal(
+          <SearchSheet today={today} origin={sheet.origin} closing={sheet.state === "closing"} onClose={closeSheet} />,
+          document.body,
+        )}
     </>
   );
 }
 
-function SearchSheet({ today, onClose }: { today: string; onClose: () => void }) {
+// Matches the search-collapse animation in globals.css.
+const SHEET_CLOSE_MS = 260;
+
+function SearchSheet({
+  today,
+  origin,
+  closing,
+  onClose,
+}: {
+  today: string;
+  origin: string;
+  closing: boolean;
+  onClose: () => void;
+}) {
   const t = useTranslations("Home");
   const router = useRouter();
   const ref = useRef<HTMLDivElement>(null);
@@ -115,21 +149,29 @@ function SearchSheet({ today, onClose }: { today: string; onClose: () => void })
       type="button"
       onClick={() => setStep(panel)}
       aria-label={`${label} ${value}`}
-      className={cn(card, "flex w-full items-center justify-between gap-4 px-5 py-4 text-left motion-safe:animate-pop-in")}
+      className={cn(card, "search-card flex w-full items-center justify-between gap-4 px-5 py-4 text-left")}
     >
       <span className="text-sm text-muted">{label}</span>
       <span className={cn("truncate text-sm font-semibold", placeholder ? "text-ink/70" : "text-ink")}>{value}</span>
     </button>
   );
   const expanded = (heading: string, body: ReactNode) => (
-    <section className={cn(card, "p-5 motion-safe:animate-pop-in")}>
+    <section className={cn(card, "search-card p-5")}>
       <h3 className="mb-4 text-xl font-bold tracking-[-0.02em] text-ink">{heading}</h3>
       {body}
     </section>
   );
 
   return (
-    <div ref={ref} role="dialog" aria-modal="true" aria-labelledby={titleId} className="fixed inset-0 z-[60] flex flex-col bg-canvas motion-safe:animate-sheet-up">
+    <div
+      ref={ref}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
+      data-closing={closing}
+      style={{ transformOrigin: origin }}
+      className="search-sheet fixed inset-0 z-[60] flex flex-col bg-canvas"
+    >
       <h2 id={titleId} className="sr-only">
         {t("startSearch")}
       </h2>
@@ -158,7 +200,7 @@ function SearchSheet({ today, onClose }: { today: string; onClose: () => void })
       </div>
 
       <div className="flex-1 overflow-y-auto overscroll-contain px-4 pb-6" data-lenis-prevent>
-        <div className="flex flex-col gap-3">
+        <div className="search-cards flex flex-col gap-3">
           {step === "where"
             ? expanded(
                 t("whereQ"),
@@ -214,7 +256,7 @@ function SearchSheet({ today, onClose }: { today: string; onClose: () => void })
         </div>
       </div>
 
-      <div className="flex items-center justify-between border-t border-line bg-surface px-5 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+      <div className="search-footer flex items-center justify-between border-t border-line bg-surface px-5 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
         <button type="button" onClick={clearAll} className="text-[15px] font-semibold text-ink underline underline-offset-4">
           {t("clearAll")}
         </button>

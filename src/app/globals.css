@@ -276,3 +276,85 @@ svg {
     color: var(--color-primary);
   }
 }
+
+/* Phone search sheet: grows out of the pill, cards arrive one after another, and it shrinks back on close. */
+@keyframes search-expand {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+    border-radius: 28px;
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    border-radius: 0;
+  }
+}
+@keyframes search-collapse {
+  to {
+    opacity: 0;
+    transform: scale(0.92);
+    border-radius: 28px;
+  }
+}
+@keyframes search-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes search-footer-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .search-sheet {
+    animation: search-expand 420ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+  .search-sheet[data-closing="true"] {
+    animation: search-collapse 260ms cubic-bezier(0.4, 0, 1, 1) forwards;
+    pointer-events: none;
+  }
+  .search-card {
+    animation: search-card-in 480ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+  .search-cards > :nth-child(2) {
+    animation-delay: 70ms;
+  }
+  .search-cards > :nth-child(3) {
+    animation-delay: 140ms;
+  }
+  .search-footer {
+    animation: search-footer-in 460ms cubic-bezier(0.32, 0.72, 0, 1) 120ms both;
+  }
+}
+
+/* Phones: cards and sections fade and rise in as they scroll into view. CSS scroll-driven animation:
+   no JavaScript, and browsers without support simply show everything as usual. */
+@keyframes scroll-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(32px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (max-width: 767px) and (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .scroll-reveal {
+      animation: scroll-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 45%;
+    }
+  }
+}
