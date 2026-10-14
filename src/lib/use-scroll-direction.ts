@@ -9,7 +9,7 @@ const SHOW_NEAR_TOP_PX = 80;
 const JITTER_PX = 6;
 // Hiding/showing changes the bar's height and the browser shifts the scroll position to match; ignore scroll
 // changes until that settles, or the shift reads as a scroll the other way and the bar flickers.
-const SETTLE_MS = 450;
+const SETTLE_MS = 650;
 
 /** Pure step: hide while scrolling down, show on any real scroll up or near the top. */
 export function nextScrollState(state: ScrollState, y: number, now = 0): ScrollState {

@@ -317,23 +317,23 @@ svg {
 }
 @media (prefers-reduced-motion: no-preference) {
   .search-sheet {
-    animation: search-expand 420ms cubic-bezier(0.32, 0.72, 0, 1) both;
+    animation: search-expand 650ms cubic-bezier(0.32, 0.72, 0, 1) both;
   }
   .search-sheet[data-closing="true"] {
-    animation: search-collapse 260ms cubic-bezier(0.4, 0, 1, 1) forwards;
+    animation: search-collapse 400ms cubic-bezier(0.4, 0, 1, 1) forwards;
     pointer-events: none;
   }
   .search-card {
-    animation: search-card-in 480ms cubic-bezier(0.32, 0.72, 0, 1) both;
+    animation: search-card-in 750ms cubic-bezier(0.32, 0.72, 0, 1) both;
   }
   .search-cards > :nth-child(2) {
-    animation-delay: 70ms;
+    animation-delay: 110ms;
   }
   .search-cards > :nth-child(3) {
-    animation-delay: 140ms;
+    animation-delay: 220ms;
   }
   .search-footer {
-    animation: search-footer-in 460ms cubic-bezier(0.32, 0.72, 0, 1) 120ms both;
+    animation: search-footer-in 700ms cubic-bezier(0.32, 0.72, 0, 1) 180ms both;
   }
 }
 
@@ -354,7 +354,7 @@ svg {
     .scroll-reveal {
       animation: scroll-reveal linear both;
       animation-timeline: view();
-      animation-range: entry 0% entry 45%;
+      animation-range: entry 0% entry 80%;
     }
   }
 }

@@ -95,7 +95,7 @@ export function MobileSearch({
 }
 
 // Matches the search-collapse animation in globals.css.
-const SHEET_CLOSE_MS = 260;
+const SHEET_CLOSE_MS = 400;
 
 function SearchSheet({
   today,

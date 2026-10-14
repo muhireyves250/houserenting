@@ -73,7 +73,7 @@ export function MobileTopBar() {
   return (
     <div
       className={cn(
-        "sticky top-0 z-40 bg-gradient-to-b from-[#ececec] to-canvas/95 px-4 pt-3 backdrop-blur-md transition-shadow duration-300 md:hidden",
+        "sticky top-0 z-40 bg-gradient-to-b from-[#ececec] to-canvas/95 px-4 pt-3 backdrop-blur-md transition-shadow duration-500 md:hidden",
         scrolled && "shadow-[0_8px_20px_-14px_rgba(0,30,80,0.35)]",
       )}
     >
@@ -81,7 +81,7 @@ export function MobileTopBar() {
       {/* Tucked away while scrolling down (more room for homes), back on the way up. */}
       <div
         className={cn(
-          "grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none",
+          "grid transition-[grid-template-rows,opacity] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none",
           hidden ? "grid-rows-[0fr] opacity-0" : "grid-rows-[1fr] opacity-100",
         )}
         inert={hidden}
