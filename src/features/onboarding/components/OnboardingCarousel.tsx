@@ -1,25 +1,23 @@
 "use client";
 
 import { ArrowRight } from "lucide-react";
-import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useRef, useState, type PointerEvent } from "react";
 import { cn } from "@/lib/cn";
+import { WELCOME_ART } from "./WelcomeArt";
 
-// Free Unsplash photos (allowed by the CSP and next/image): a modern home, a lakeside cottage, a cosy living room.
 const SLIDES = [
-  { title: "slide1", body: "slide1Body", photo: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c" },
-  { title: "slide2", body: "slide2Body", photo: "https://images.unsplash.com/photo-1518780664697-55e3ad937233" },
-  { title: "slide3", body: "slide3Body", photo: "https://images.unsplash.com/photo-1493809842364-78817add7ffb" },
+  { title: "slide1", body: "slide1Body" },
+  { title: "slide2", body: "slide2Body" },
+  { title: "slide3", body: "slide3Body" },
 ] as const;
 
 const SWIPE_PX = 50;
 const EASE = "ease-[cubic-bezier(0.32,0.72,0,1)]";
 
 /**
- * The original welcome layout - round picture, blue title, text, progress, Next / Skip - with real photos:
- * the photo cross-fades and settles from a slight zoom, soft rings breathe around it, the text rises in,
- * and the active dot stretches. Swipe or Next to move on.
+ * The original welcome layout - round picture, blue title, text, progress, Next / Skip - with animated line
+ * drawings that draw themselves on every slide, soft breathing rings, text rising in and a stretching dot.
  */
 export function OnboardingCarousel({ onFinish, onLogin }: { onFinish: () => void; onLogin?: () => void }) {
   const t = useTranslations("Onboarding");
@@ -28,6 +26,7 @@ export function OnboardingCarousel({ onFinish, onLogin }: { onFinish: () => void
   const startX = useRef<number | null>(null);
   const last = index === SLIDES.length - 1;
   const slide = SLIDES[index];
+  const Art = WELCOME_ART[index];
 
   const go = (next: number) => setIndex(Math.min(SLIDES.length - 1, Math.max(0, next)));
   const onPointerDown = (event: PointerEvent) => {
@@ -52,22 +51,9 @@ export function OnboardingCarousel({ onFinish, onLogin }: { onFinish: () => void
         <div className="relative flex size-64 items-center justify-center" aria-hidden="true">
           <span className="welcome-ring absolute inset-0 rounded-full bg-primary-soft" />
           <span className="welcome-ring absolute -inset-4 rounded-full bg-primary-soft/50 [animation-delay:600ms]" />
-          <div className="relative size-56 overflow-hidden rounded-full shadow-[0_24px_50px_-20px_rgba(0,60,140,0.55)] ring-4 ring-surface">
-            {SLIDES.map((s, i) => (
-              <Image
-                key={s.photo}
-                src={s.photo}
-                alt=""
-                fill
-                priority={i === 0}
-                sizes="224px"
-                className={cn(
-                  "object-cover transition-[opacity,transform] duration-[900ms] motion-reduce:transition-none",
-                  EASE,
-                  i === index ? "scale-100 opacity-100" : "scale-110 opacity-0",
-                )}
-              />
-            ))}
+          <div className="relative flex size-56 items-center justify-center overflow-hidden rounded-full bg-surface p-6 shadow-[0_24px_50px_-20px_rgba(0,60,140,0.45)] ring-4 ring-surface">
+            {/* Keyed by slide so the drawing animates in again each time. */}
+            <Art key={index} />
           </div>
         </div>
 

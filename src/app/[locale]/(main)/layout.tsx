@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 import { BottomTabBar } from "@/components/shell/BottomTabBar";
 import { MobileTopBar } from "@/components/shell/MobileTopBar";
 import { WelcomeGate } from "@/features/onboarding/components/WelcomeGate";
@@ -10,7 +10,9 @@ export default async function MainLayout({ children, modal }: { children: ReactN
   const user = await getCurrentUser();
   return (
     <>
-      <WelcomeGate signedIn={Boolean(user)} />
+      <Suspense>
+        <WelcomeGate />
+      </Suspense>
       <SiteHeader user={user ? { name: user.name } : null} />
       <MobileTopBar />
       <main className="min-h-dvh pb-24 md:pb-12">{children}</main>

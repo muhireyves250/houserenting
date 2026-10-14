@@ -430,3 +430,160 @@ svg {
     animation: none;
   }
 }
+
+/* Welcome drawings: strokes draw in, then details move. */
+@keyframes art-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes art-pop {
+  0% {
+    transform: scale(0);
+  }
+  70% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes art-light {
+  from {
+    fill: transparent;
+  }
+  to {
+    fill: #ffd166;
+  }
+}
+@keyframes art-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+@keyframes art-drop {
+  0% {
+    transform: translateY(-60px);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(4px);
+    opacity: 1;
+  }
+  75% {
+    transform: translateY(-6px);
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes art-shadow {
+  from {
+    transform: scaleX(0.3);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes art-glide {
+  0% {
+    transform: translate(30px, 10px);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-6px, -4px);
+  }
+  100% {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+}
+@keyframes art-beat {
+  0% {
+    transform: scale(0);
+  }
+  12% {
+    transform: scale(1.2);
+  }
+  20%,
+  60%,
+  100% {
+    transform: scale(1);
+  }
+  40%,
+  80% {
+    transform: scale(1.12);
+  }
+}
+@keyframes art-rise {
+  0% {
+    transform: translateY(0) scale(0.6);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-34px) scale(1);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .art-draw {
+    stroke-dasharray: 1;
+    animation: art-draw 1100ms cubic-bezier(0.65, 0, 0.35, 1) both;
+  }
+  .art-dash {
+    stroke-dasharray: 1;
+  }
+  .art-pop {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: art-pop 700ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+  .art-light {
+    animation: art-light 500ms ease-out both;
+  }
+  .art-float {
+    animation: art-float 3.5s ease-in-out infinite;
+  }
+  .art-float-slow {
+    animation: art-float 5s ease-in-out 0.8s infinite;
+  }
+  .art-drop {
+    animation: art-drop 900ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+  .art-shadow {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: art-shadow 900ms ease-out both;
+  }
+  .art-glide {
+    animation: art-glide 1800ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+  .art-beat {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: art-beat 2.4s ease-in-out infinite both;
+  }
+  .art-rise {
+    animation: art-rise 2.6s ease-out infinite both;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .art-light {
+    fill: #ffd166;
+  }
+}

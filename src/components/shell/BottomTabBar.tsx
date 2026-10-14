@@ -50,7 +50,7 @@ export function BottomTabBar({ signedIn = true }: { signedIn?: boolean }) {
   return (
     <nav
       aria-label={t("mainNav")}
-      className="fixed inset-x-0 bottom-0 z-40 px-4 pb-[calc(2.5px+env(safe-area-inset-bottom))] md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 px-4 pb-[calc(1.5px+env(safe-area-inset-bottom))] md:hidden"
     >
       <ul
         ref={listRef}
