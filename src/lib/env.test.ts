@@ -27,4 +27,12 @@ describe("parseEnv", () => {
     expect(() => parseEnv({ ...base, MAIL_DRIVER: "resend", RESEND_API_KEY: "" })).toThrow(/RESEND_API_KEY/);
     expect(parseEnv({ ...base, MAIL_DRIVER: "resend", RESEND_API_KEY: "re_123" }).MAIL_DRIVER).toBe("resend");
   });
+
+  it("tidies common slips in BETTER_AUTH_URL (quotes, spaces, missing https://, trailing slash)", () => {
+    for (const value of ['"https://site.vercel.app/"', "  site.vercel.app ", "https://site.vercel.app/", "'site.vercel.app'"]) {
+      expect(parseEnv({ ...base, BETTER_AUTH_URL: value }).BETTER_AUTH_URL).toBe("https://site.vercel.app");
+    }
+    expect(parseEnv({ ...base, BETTER_AUTH_URL: "http://localhost:3000/" }).BETTER_AUTH_URL).toBe("http://localhost:3000");
+    expect(() => parseEnv({ ...base, BETTER_AUTH_URL: "not a url at all" })).toThrow();
+  });
 });
