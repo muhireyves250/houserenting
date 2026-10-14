@@ -4,7 +4,9 @@ import { ArrowLeft, BedSingle, Building2, House, LayoutGrid, Trees } from "lucid
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Suspense } from "react";
+import { Logo } from "@/components/ui/Logo";
 import { MobileSearch } from "@/features/search/components/MobileSearch";
+import { LocaleSwitcher } from "./LocaleSwitcher";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { useScrollDirection } from "@/lib/use-scroll-direction";
@@ -53,12 +55,42 @@ function Categories() {
   );
 }
 
+// Pages with their own full-bleed top (listing photos) get no header.
+const NO_HEADER_PREFIXES = ["/listings/"];
+
+/** Logo on the left, the language (flag) button on the right. */
+function BrandRow({ className }: { className?: string }) {
+  return (
+    <div className={cn("flex items-center justify-between", className)}>
+      <Link href="/" className="rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">
+        <Logo withWordmark className="[&_svg]:h-7 [&_svg]:w-8" wordmarkClassName="text-[17px] font-bold tracking-[-0.02em] text-primary" />
+      </Link>
+      <Suspense>
+        <LocaleSwitcher compact />
+      </Suspense>
+    </div>
+  );
+}
+
 /** Phones only: sticky search on the explore pages (pill + categories on home; back + pill on results). */
 export function MobileTopBar() {
   const pathname = usePathname();
   const t = useTranslations("Nav");
   const { hidden, scrolled } = useScrollDirection();
-  if (!EXPLORE_PATHS.has(pathname)) return null;
+  if (NO_HEADER_PREFIXES.some((prefix) => pathname.startsWith(prefix))) return null;
+  if (!EXPLORE_PATHS.has(pathname)) {
+    // Other pages (Favorites, Bookings, Chats, Profile): a slim header with the logo and language.
+    return (
+      <div
+        className={cn(
+          "sticky top-0 z-40 bg-canvas/90 px-4 py-2.5 backdrop-blur-md transition-shadow duration-500 md:hidden",
+          scrolled && "shadow-[0_8px_20px_-14px_rgba(0,30,80,0.35)]",
+        )}
+      >
+        <BrandRow />
+      </div>
+    );
+  }
   if (pathname === "/search") {
     return (
       <div className="sticky top-0 z-40 flex h-[72px] items-center gap-3 bg-canvas/90 px-4 backdrop-blur-md md:hidden">
@@ -77,6 +109,17 @@ export function MobileTopBar() {
         scrolled && "shadow-[0_8px_20px_-14px_rgba(0,30,80,0.35)]",
       )}
     >
+      <div
+        className={cn(
+          "grid transition-[grid-template-rows,opacity] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none",
+          hidden ? "grid-rows-[0fr] opacity-0" : "grid-rows-[1fr] opacity-100",
+        )}
+        inert={hidden}
+      >
+        <div className="min-h-0 overflow-hidden">
+          <BrandRow className="pb-3" />
+        </div>
+      </div>
       <MobileSearch className="mb-3" />
       {/* Tucked away while scrolling down (more room for homes), back on the way up. */}
       <div
