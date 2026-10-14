@@ -26,4 +26,10 @@ describe("welcomeRedirect", () => {
     expect(welcomeRedirect(page("/en/reset-password", { "sec-fetch-site": "none" }))).toBeNull();
     expect(welcomeRedirect(page("/en", { "sec-fetch-site": "none" }, "sr_skip_welcome=1"))).toBeNull();
   });
+
+  it("logged-in users never see it (local and secure cookie names)", () => {
+    expect(welcomeRedirect(page("/en/search", { "sec-fetch-site": "none" }, "better-auth.session_token=abc"))).toBeNull();
+    expect(welcomeRedirect(page("/en", { "sec-fetch-site": "cross-site" }, "x=1; __Secure-better-auth.session_token=abc"))).toBeNull();
+    expect(welcomeRedirect(page("/en", { "cache-control": "no-cache", "sec-fetch-site": "same-origin" }, "better-auth.session_token=abc"))).toBeNull();
+  });
 });
