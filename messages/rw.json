@@ -80,7 +80,9 @@
     "catHouses": "Amazu",
     "catLodges": "Lodges",
     "catRooms": "Ibyumba",
-    "categories": "Ibyiciro"
+    "categories": "Ibyiciro",
+    "noTypeTitle": "Nta macumbi y'ubu bwoko aragera",
+    "noTypeBody": "Gerageza ikindi cyiciro, cyangwa urebe amacumbi yose."
   },
   "Search": {
     "anywhere": "Ahantu hose mu Rwanda",

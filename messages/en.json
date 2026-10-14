@@ -80,7 +80,9 @@
     "catHouses": "Houses",
     "catLodges": "Lodges",
     "catRooms": "Rooms",
-    "categories": "Categories"
+    "categories": "Categories",
+    "noTypeTitle": "No homes of this type yet",
+    "noTypeBody": "Try another category, or see every home."
   },
   "Search": {
     "anywhere": "Anywhere in Rwanda",

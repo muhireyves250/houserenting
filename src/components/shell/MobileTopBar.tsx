@@ -3,7 +3,7 @@
 import { ArrowLeft, BedSingle, Building2, House, LayoutGrid, Trees } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Suspense } from "react";
+import { Suspense, useState, type FocusEvent, type PointerEvent } from "react";
 import { Logo } from "@/components/ui/Logo";
 import { MobileSearch } from "@/features/search/components/MobileSearch";
 import { LocaleSwitcher } from "./LocaleSwitcher";
@@ -30,20 +30,50 @@ function Categories() {
   const t = useTranslations("Home");
   const params = useSearchParams();
   const pathname = usePathname();
-  const current = pathname === "/search" ? params.get("type") : null;
+  // Chips filter the home page in place (?type=…); "All" clears it.
+  const current = params.get("type");
+  // The site's hover: one soft pill slides to the chip under the finger / mouse (as in the search bar and filters).
+  const [shade, setShade] = useState({ left: 0, width: 0, visible: false });
+  const slideTo = (event: PointerEvent<HTMLAnchorElement> | FocusEvent<HTMLAnchorElement>) => {
+    const el = event.currentTarget;
+    setShade({ left: el.offsetLeft, width: el.offsetWidth, visible: true });
+  };
+  const fade = () => setShade((current) => ({ ...current, visible: false }));
   return (
-    <nav aria-label={t("categories")} className="-mx-4 flex gap-2.5 overflow-x-auto px-4 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <nav
+      aria-label={t("categories")}
+      onPointerLeave={fade}
+      onBlur={fade}
+      className="relative -mx-4 flex gap-2.5 overflow-x-auto px-4 pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+    >
+      <span
+        data-testid="category-hover"
+        data-visible={shade.visible}
+        aria-hidden="true"
+        style={{ width: `${shade.width}px`, transform: `translateX(${shade.left}px)` }}
+        className={cn(
+          "pointer-events-none absolute top-0 left-0 h-[calc(100%-0.75rem)] rounded-full bg-primary/[0.1]",
+          "transition-[transform,width,opacity] duration-500 ease-[cubic-bezier(0.25,0.8,0.25,1)] motion-reduce:transition-none",
+          shade.visible ? "opacity-100" : "opacity-0",
+        )}
+      />
       {CATEGORIES.map(({ key, type, icon: Icon, tint }) => {
-        const active = type === current || (type === null && pathname === "/");
+        const active = type === current || (type === null && !current && pathname === "/");
         return (
           <Link
             key={key}
-            href={type ? { pathname: "/search", query: { mode: "short", type } } : "/"}
+            href={type ? { pathname: "/", query: { type } } : "/"}
+            replace
+            scroll={false}
+            onPointerEnter={slideTo}
+            onPointerDown={slideTo}
+            onFocus={slideTo}
             aria-current={active ? "page" : undefined}
             className={cn(
               // Same border as the website's filter buttons.
-              "flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[13px] font-semibold transition-colors",
-              active ? "border-primary bg-primary/[0.06] text-primary" : "border-line bg-surface text-ink active:border-ink/30 max-md:active:border-primary",
+              "relative flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[13px] font-semibold",
+              "transition-[border-color,color,transform] duration-500 ease-[cubic-bezier(0.25,0.8,0.25,1)] active:scale-95",
+              active ? "border-primary bg-primary/[0.06] text-primary" : "border-line text-ink hover:border-primary",
             )}
           >
             <Icon className={cn("size-4", active ? "text-primary" : tint)} strokeWidth={2} aria-hidden="true" />

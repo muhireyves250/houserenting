@@ -52,7 +52,8 @@ export function FilterBar({ base, mode, filters }: { base: Record<string, string
 
   function apply(next: SearchFilters) {
     setOpen(null);
-    router.push({ pathname: "/search", query: { ...base, ...filterParams(next) } });
+    // Results update right here: same page, same scroll position.
+    router.replace({ pathname: "/search", query: { ...base, ...filterParams(next) } }, { scroll: false });
   }
 
   const typeCount = filters.types?.length ?? 0;
@@ -150,7 +151,7 @@ function FilterButton({
           "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
           active || open
             ? "border-primary bg-primary/[0.06] text-primary"
-            : "border-line text-ink hover:border-ink/30 max-md:hover:border-primary",
+            : "border-line text-ink hover:border-primary hover:text-primary active:scale-95",
         )}
       >
         {label}

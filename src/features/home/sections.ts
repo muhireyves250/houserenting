@@ -1,5 +1,5 @@
 import type { ListingCardData } from "@/features/listings/service";
-import type { SearchMode } from "@/features/search/params";
+import { PLACE_TYPES, type PlaceType, type SearchMode } from "@/features/search/params";
 
 export type HomeSectionKey = "kigali" | "volcanoes" | "kivu" | "long";
 
@@ -31,4 +31,10 @@ export function buildHomeSections(listings: ListingCardData[]): HomeSection[] {
 /** "Guest favorite" badge: highly rated by enough guests. */
 export function isGuestFavorite({ ratingAvg, ratingCount }: { ratingAvg: number; ratingCount: number }): boolean {
   return ratingAvg >= 4.8 && ratingCount >= 20;
+}
+
+/** The home page's category filter (?type=LODGE): one known type of place, or null for All. */
+export function homeTypeFilter(value: string | string[] | undefined): PlaceType | null {
+  const first = Array.isArray(value) ? value[0] : value;
+  return (PLACE_TYPES as readonly string[]).includes(first ?? "") ? (first as PlaceType) : null;
 }

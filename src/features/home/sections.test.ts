@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildHomeSections, isGuestFavorite } from "./sections";
+import { buildHomeSections, homeTypeFilter, isGuestFavorite } from "./sections";
 
 type L = Parameters<typeof buildHomeSections>[0][number];
 const home = (id: string, city: string, units: ("NIGHT" | "MONTH" | "DAY")[] = ["NIGHT"], extra: Partial<L> = {}): L =>
@@ -59,5 +59,14 @@ describe("isGuestFavorite", () => {
     expect(isGuestFavorite({ ratingAvg: 4.8, ratingCount: 20 })).toBe(true);
     expect(isGuestFavorite({ ratingAvg: 4.9, ratingCount: 5 })).toBe(false);
     expect(isGuestFavorite({ ratingAvg: 4.5, ratingCount: 200 })).toBe(false);
+  });
+});
+
+describe("homeTypeFilter", () => {
+  it("accepts one known type of place and ignores anything else", () => {
+    expect(homeTypeFilter("LODGE")).toBe("LODGE");
+    expect(homeTypeFilter(["ROOM", "LODGE"])).toBe("ROOM");
+    expect(homeTypeFilter("CASTLE")).toBeNull();
+    expect(homeTypeFilter(undefined)).toBeNull();
   });
 });

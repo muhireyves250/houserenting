@@ -5,7 +5,8 @@ import { renderWithIntl } from "@/test/render";
 import { FilterBar } from "./FilterBar";
 
 const push = vi.fn();
-vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push }) }));
+// The bar replaces the URL in place (no scroll jump); `push` names the spy for brevity.
+vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ replace: (...args: unknown[]) => push(args[0]) }) }));
 
 const base = { mode: "short", location: "Kigali" };
 

@@ -6,6 +6,10 @@ import { savedListingIds } from "@/features/favorites/service";
 import { CompactListingCard } from "@/features/home/components/CompactListingCard";
 import { HomeRow } from "@/features/home/components/HomeRow";
 import { buildHomeSections, type HomeSectionKey } from "@/features/home/sections";
+import type { PlaceType } from "@/features/search/params";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { House } from "lucide-react";
+import { Link } from "@/i18n/navigation";
 import { RecentlyViewedRow } from "@/features/listings/components/RecentlyViewed";
 import { OnboardingGate } from "@/features/onboarding/components/OnboardingGate";
 import { featuredListings } from "@/features/listings/service";
@@ -27,14 +31,15 @@ const ROWS = {
 } as const satisfies Record<HomeSectionKey, { title: string; subtitle: string }>;
 
 /** Home page body: hero search and rows of homes by destination. Also the backdrop for direct /login, /signup visits. */
-export async function HomeContent({ onboarding = true }: { onboarding?: boolean }) {
+export async function HomeContent({ onboarding = true, type = null }: { onboarding?: boolean; type?: PlaceType | null }) {
   const [t, tListings, pool, user] = await Promise.all([
     getTranslations("Home"),
     getTranslations("Listings"),
     featuredListings(ROW_POOL),
     getCurrentUser(),
   ]);
-  const sections = buildHomeSections(pool);
+  // Category chips (phones) filter the rows right here, without leaving the page.
+  const sections = buildHomeSections(type ? pool.filter((listing) => listing.type === type) : pool);
   const saved = user ? await savedListingIds(user.id, pool.map((l) => l.id)) : new Set<string>();
   return (
     <>
@@ -75,9 +80,24 @@ export async function HomeContent({ onboarding = true }: { onboarding?: boolean 
           <SearchBar id={HERO_SEARCH_ID} />
         </PageContainer>
       </section>
+      {type && sections.length === 0 && (
+        <PageContainer className="motion-safe:animate-pop-in">
+          <EmptyState
+            icon={<House />}
+            title={t("noTypeTitle")}
+            body={t("noTypeBody")}
+            action={
+              <Link href="/" scroll={false} className="inline-flex items-center rounded-xl bg-primary px-7 py-3 text-[15px] font-semibold text-white">
+                {t("catAll")}
+              </Link>
+            }
+          />
+        </PageContainer>
+      )}
       {sections.length > 0 && (
-        <PageContainer className="flex flex-col gap-9 pt-4 pb-8 md:gap-12 md:py-14">
-          <RecentlyViewedRow />
+        // Keyed by category: switching chips fades the new rows in.
+        <PageContainer key={type ?? "all"} className="flex flex-col gap-9 pt-4 pb-8 motion-safe:animate-pop-in md:gap-12 md:py-14">
+          {!type && <RecentlyViewedRow />}
           {sections.map((section) => {
             const { title, subtitle } = ROWS[section.key];
             return (
