@@ -9,6 +9,7 @@ import type { ListingCardData } from "@/features/listings/service";
 import { formatBbox, type Bbox, type SearchMode } from "@/features/search/params";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
+import { ListSkeleton, PendingArea } from "@/components/ui/Skeletons";
 
 // MapLibre needs the browser (window, WebGL); load it client-side only.
 const ResultsMap = dynamic(() => import("./ResultsMap").then((m) => m.ResultsMap), {
@@ -73,25 +74,27 @@ export function SearchResults({
           <span className="h-1.5 w-10 rounded-full bg-line-strong" aria-hidden="true" />
           {countLabel && <p className="text-[15px] font-semibold text-ink">{countLabel}</p>}
         </div>
-        {listings.length === 0 ? (
-          empty
-        ) : (
-          <ul className="grid grid-cols-1 gap-x-5 gap-y-8 min-[480px]:grid-cols-2 md:gap-y-6">
-            {listings.map((listing) => (
-              <li
-                key={listing.id}
-                onMouseEnter={() => setActive({ id: listing.id, from: "list" })}
-                onMouseLeave={() => setActive(null)}
-                className={cn(
-                  "scroll-reveal rounded-[22px] ring-2 ring-transparent transition-[box-shadow] duration-300",
-                  active?.from === "map" && active.id === listing.id && "ring-primary/50",
-                )}
-              >
-                <CompactListingCard listing={listing} mode={mode} signedIn={signedIn} saved={saved.has(listing.id)} layout="list" />
-              </li>
-            ))}
-          </ul>
-        )}
+        <PendingArea skeleton={<ListSkeleton />} pending={updating}>
+          {listings.length === 0 ? (
+            empty
+          ) : (
+            <ul className="grid grid-cols-1 gap-x-5 gap-y-8 min-[480px]:grid-cols-2 md:gap-y-6">
+              {listings.map((listing) => (
+                <li
+                  key={listing.id}
+                  onMouseEnter={() => setActive({ id: listing.id, from: "list" })}
+                  onMouseLeave={() => setActive(null)}
+                  className={cn(
+                    "scroll-reveal rounded-[22px] ring-2 ring-transparent transition-[box-shadow] duration-300",
+                    active?.from === "map" && active.id === listing.id && "ring-primary/50",
+                  )}
+                >
+                  <CompactListingCard listing={listing} mode={mode} signedIn={signedIn} saved={saved.has(listing.id)} layout="list" />
+                </li>
+              ))}
+            </ul>
+          )}
+        </PendingArea>
       </div>
 
       {/* Phones: full-bleed under the 80px pill bar + 60px filter bar. Tablets: under the 73px header + 72px filters.

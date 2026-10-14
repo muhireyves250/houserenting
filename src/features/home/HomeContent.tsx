@@ -8,6 +8,7 @@ import { HomeRow } from "@/features/home/components/HomeRow";
 import { buildHomeSections, type HomeSectionKey } from "@/features/home/sections";
 import type { PlaceType } from "@/features/search/params";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { PendingArea, RowsSkeleton } from "@/components/ui/Skeletons";
 import { House } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { RecentlyViewedRow } from "@/features/listings/components/RecentlyViewed";
@@ -80,6 +81,13 @@ export async function HomeContent({ onboarding = true, type = null }: { onboardi
           <SearchBar id={HERO_SEARCH_ID} />
         </PageContainer>
       </section>
+      <PendingArea
+        skeleton={
+          <PageContainer className="pt-4 pb-8 md:py-14">
+            <RowsSkeleton />
+          </PageContainer>
+        }
+      >
       {type && sections.length === 0 && (
         <PageContainer className="motion-safe:animate-pop-in">
           <EmptyState
@@ -121,6 +129,7 @@ export async function HomeContent({ onboarding = true, type = null }: { onboardi
           })}
         </PageContainer>
       )}
+      </PendingArea>
     </>
   );
 }

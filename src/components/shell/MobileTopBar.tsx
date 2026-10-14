@@ -3,11 +3,12 @@
 import { ArrowLeft, BedSingle, Building2, House, LayoutGrid, Trees } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Suspense, useLayoutEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useLayoutEffect, useRef, useState, useTransition } from "react";
+import { setResultsPending } from "@/features/search/results-pending";
 import { Logo } from "@/components/ui/Logo";
 import { MobileSearch } from "@/features/search/components/MobileSearch";
 import { LocaleSwitcher } from "./LocaleSwitcher";
-import { Link, usePathname } from "@/i18n/navigation";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { useScrollDirection } from "@/lib/use-scroll-direction";
 
@@ -34,6 +35,10 @@ function Categories() {
   const current = params.get("type");
   const activeIndex = CATEGORIES.findIndex(({ type }) => type === current || (type === null && !current && pathname === "/"));
   const navRef = useRef<HTMLElement>(null);
+  const router = useRouter();
+  // Filter in a transition so the home rows can show a skeleton until the new ones arrive.
+  const [loading, startLoading] = useTransition();
+  useEffect(() => setResultsPending(loading), [loading]);
   // The one indicator: a pill under the active chip that slides to whichever chip is tapped
   // (it moves on press, so the motion starts before the filtered rows load).
   // A press counts until the URL catches up (the active chip changes), then the active chip drives the pill.
@@ -74,6 +79,12 @@ function Categories() {
             scroll={false}
             data-chip
             onPointerDown={() => setPressed({ index, from: activeIndex })}
+            onClick={(event) => {
+              if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
+              event.preventDefault();
+              setPressed({ index, from: activeIndex });
+              startLoading(() => router.replace(type ? { pathname: "/", query: { type } } : "/", { scroll: false }));
+            }}
             aria-current={index === activeIndex ? "page" : undefined}
             className={cn(
               "relative flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[13px] font-semibold",

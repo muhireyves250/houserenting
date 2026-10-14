@@ -2,7 +2,8 @@
 
 import { Check, ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useId, useRef, useState, type MouseEvent, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, useTransition, type MouseEvent, type ReactNode } from "react";
+import { setResultsPending } from "@/features/search/results-pending";
 import { createPortal } from "react-dom";
 import { useMediaQuery } from "@/lib/use-media-query";
 import { filterParams, PLACE_TYPES, type PlaceType, type SearchFilters, type SearchMode } from "@/features/search/params";
@@ -24,6 +25,9 @@ export function FilterBar({ base, mode, filters }: { base: Record<string, string
   const tType = useTranslations("ListingType");
   const router = useRouter();
   const [open, setOpen] = useState<Panel>(null);
+  // Apply in a transition so the results list can show a skeleton until the filtered results arrive.
+  const [loading, startLoading] = useTransition();
+  useEffect(() => setResultsPending(loading), [loading]);
   const rootRef = useRef<HTMLDivElement>(null);
   // Hover shade (like the search bar): one pill slides to the filter under the mouse; kept in place as it fades out.
   const [shade, setShade] = useState({ left: 0, width: 0, visible: false });
@@ -53,7 +57,7 @@ export function FilterBar({ base, mode, filters }: { base: Record<string, string
   function apply(next: SearchFilters) {
     setOpen(null);
     // Results update right here: same page, same scroll position.
-    router.replace({ pathname: "/search", query: { ...base, ...filterParams(next) } }, { scroll: false });
+    startLoading(() => router.replace({ pathname: "/search", query: { ...base, ...filterParams(next) } }, { scroll: false }));
   }
 
   const typeCount = filters.types?.length ?? 0;
