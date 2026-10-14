@@ -58,3 +58,20 @@ export function PendingArea({ skeleton, pending: alsoPending = false, children }
     </div>
   );
 }
+
+/** Text that turns into a skeleton bar while results load (titles, counts). */
+export function PendingText({ children, className }: { children: ReactNode; className?: string }) {
+  const pending = useResultsPending();
+  return pending ? <span className={cn(BLOCK, "inline-block h-[0.9em] rounded-md align-middle", className)} aria-hidden="true" /> : <>{children}</>;
+}
+
+/** Covers its parent (e.g. the map) with a pulsing skeleton layer while results load. */
+export function PendingCover({ pending: alsoPending = false }: { pending?: boolean }) {
+  const pending = useResultsPending() || alsoPending;
+  if (!pending) return null;
+  return (
+    <div className="absolute inset-0 z-20 bg-canvas motion-safe:animate-[fade-in_200ms_ease-out]" aria-hidden="true">
+      <div className="size-full bg-line/45 motion-safe:animate-pulse" />
+    </div>
+  );
+}

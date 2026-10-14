@@ -9,7 +9,7 @@ import type { ListingCardData } from "@/features/listings/service";
 import { formatBbox, type Bbox, type SearchMode } from "@/features/search/params";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
-import { ListSkeleton, PendingArea } from "@/components/ui/Skeletons";
+import { ListSkeleton, PendingArea, PendingCover, PendingText } from "@/components/ui/Skeletons";
 
 // MapLibre needs the browser (window, WebGL); load it client-side only.
 const ResultsMap = dynamic(() => import("./ResultsMap").then((m) => m.ResultsMap), {
@@ -72,7 +72,11 @@ export function SearchResults({
       >
         <div className="mb-5 flex flex-col items-center gap-3 lg:hidden">
           <span className="h-1.5 w-10 rounded-full bg-line-strong" aria-hidden="true" />
-          {countLabel && <p className="text-[15px] font-semibold text-ink">{countLabel}</p>}
+          {countLabel && (
+            <p className="text-[15px] font-semibold text-ink">
+              <PendingText className="w-24">{countLabel}</PendingText>
+            </p>
+          )}
         </div>
         <PendingArea skeleton={<ListSkeleton />} pending={updating}>
           {listings.length === 0 ? (
@@ -115,6 +119,8 @@ export function SearchResults({
           bbox={bbox}
           onBoundsChange={searchArea}
         />
+        {/* The map stays mounted underneath (no reload flash); the cover hides stale pins while results load. */}
+        <PendingCover />
         <label className="absolute top-3 left-3 z-10 inline-flex cursor-pointer items-center gap-2.5 rounded-full bg-surface py-2 pr-4 pl-3 text-[13px] font-semibold text-ink shadow-[0_4px_14px_rgba(16,24,40,0.18)] select-none">
           <input
             type="checkbox"
