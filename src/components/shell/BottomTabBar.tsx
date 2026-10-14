@@ -71,7 +71,7 @@ export function BottomTabBar({ signedIn = true }: { signedIn?: boolean }) {
             // Equal shares of a fixed-width bar; a tab showing its name takes a bigger share.
             <li
               key={key}
-              className={cn("min-w-0 transition-[flex-grow]", SLIDE, labelled ? "grow-[2.6]" : "grow")}
+              className={cn("min-w-0 transition-[flex-grow]", SLIDE, labelled ? "grow-[2.2]" : "grow")}
               onPointerEnter={() => setHovered(key)}
               onPointerDown={() => setHovered(key)}
             >
@@ -88,7 +88,7 @@ export function BottomTabBar({ signedIn = true }: { signedIn?: boolean }) {
                   active ? "text-white" : cn("text-primary", labelled && "bg-primary/[0.08]"),
                 )}
               >
-                <Icon className="size-[22px] shrink-0" strokeWidth={active ? 2.2 : 1.9} aria-hidden="true" />
+                <Icon className="size-[22px] shrink-0" strokeWidth={2} aria-hidden="true" />
                 {labelled && (
                   <span aria-hidden="true" className="truncate text-sm font-semibold motion-safe:animate-[fade-in_400ms_ease-out]">
                     {t(key)}

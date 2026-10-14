@@ -1,4 +1,4 @@
-import { ChevronRight, Heart, House, MessageSquare, UserRound } from "lucide-react";
+import { CalendarCheck, ChevronRight, Heart, MessageSquare, UserRound } from "lucide-react";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Avatar } from "@/components/ui/Avatar";
@@ -13,7 +13,7 @@ import { toAppLocale } from "@/i18n/routing";
 import { requireUser } from "@/lib/session";
 
 const TILES = [
-  { key: "bookings", href: "/bookings", icon: House, tint: "bg-primary/[0.08] text-primary" },
+  { key: "bookings", href: "/bookings", icon: CalendarCheck, tint: "bg-primary/[0.08] text-primary" },
   { key: "favorites", href: "/favorites", icon: Heart, tint: "bg-rose-50 text-rose-600" },
 ] as const;
 
