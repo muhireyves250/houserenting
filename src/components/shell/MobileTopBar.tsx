@@ -58,13 +58,14 @@ function Categories() {
 // Pages with their own full-bleed top (listing photos) get no header.
 const NO_HEADER_PREFIXES = ["/listings/"];
 
-/** Logo on the left, the language (flag) button on the right. */
-function BrandRow({ className }: { className?: string }) {
+/** Logo (icon only), the search pill, and the language (flag) button, on one row. */
+function HeaderRow() {
   return (
-    <div className={cn("flex items-center justify-between", className)}>
-      <Link href="/" className="rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">
-        <Logo withWordmark className="[&_svg]:h-7 [&_svg]:w-8" wordmarkClassName="text-[17px] font-bold tracking-[-0.02em] text-primary" />
+    <div className="flex items-center gap-2.5">
+      <Link href="/" className="shrink-0 rounded-lg text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">
+        <Logo className="[&_svg]:h-8 [&_svg]:w-9" />
       </Link>
+      <MobileSearch className="min-w-0 flex-1" />
       <Suspense>
         <LocaleSwitcher compact />
       </Suspense>
@@ -87,7 +88,7 @@ export function MobileTopBar() {
           scrolled && "shadow-[0_8px_20px_-14px_rgba(0,30,80,0.35)]",
         )}
       >
-        <BrandRow />
+        <HeaderRow />
       </div>
     );
   }
@@ -109,18 +110,8 @@ export function MobileTopBar() {
         scrolled && "shadow-[0_8px_20px_-14px_rgba(0,30,80,0.35)]",
       )}
     >
-      <div
-        className={cn(
-          "grid transition-[grid-template-rows,opacity] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none",
-          hidden ? "grid-rows-[0fr] opacity-0" : "grid-rows-[1fr] opacity-100",
-        )}
-        inert={hidden}
-      >
-        <div className="min-h-0 overflow-hidden">
-          <BrandRow className="pb-3" />
-        </div>
-      </div>
-      <MobileSearch className="mb-3" />
+      <HeaderRow />
+      <div className="h-3" aria-hidden="true" />
       {/* Tucked away while scrolling down (more room for homes), back on the way up. */}
       <div
         className={cn(
