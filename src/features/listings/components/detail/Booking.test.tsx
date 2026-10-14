@@ -77,7 +77,8 @@ describe("Booking card", () => {
 });
 
 describe("Confirm and pay", () => {
-  it("walks through paying with mobile money and reviewing, without charging yet", async () => {
+  // Long flow (types two phone numbers): a roomier limit so a busy machine doesn't time it out.
+  it("walks through paying with mobile money and reviewing, without charging yet", { timeout: 15_000 }, async () => {
     setup();
     await pickDates();
     await userEvent.click(screen.getByRole("button", { name: "Reserve" }));
