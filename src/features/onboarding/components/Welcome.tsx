@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { safeNextPath } from "@/lib/safe-redirect";
+import { markWelcomeShown } from "../welcome-state";
 import { LogoReveal } from "./LogoReveal";
 import { OnboardingCarousel } from "./OnboardingCarousel";
 
@@ -15,6 +16,8 @@ export function Welcome({ next = "/" }: { next?: string }) {
   const target = safeNextPath(next);
   // Intro timeline: logo reveal, fade out, then the slides.
   const [intro, setIntro] = useState<"in" | "out" | null>("in");
+  // Shown once per load: going on into the app must not bring the visitor back here.
+  useEffect(() => markWelcomeShown(), []);
   useEffect(() => {
     if (!intro) return;
     const timer = setTimeout(() => setIntro(intro === "in" ? "out" : null), intro === "in" ? INTRO_MS : INTRO_OUT_MS);

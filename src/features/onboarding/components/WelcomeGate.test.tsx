@@ -13,7 +13,14 @@ async function load() {
   return (await import("./WelcomeGate")).WelcomeGate;
 }
 
+// How this page load happened: "navigate" (opened a link / new tab) or "reload" (refresh).
+function navType(type: string) {
+  vi.spyOn(performance, "getEntriesByType").mockReturnValue([{ type } as PerformanceNavigationTiming]);
+}
+
 beforeEach(() => {
+  vi.restoreAllMocks();
+  navType("navigate");
   replace.mockReset();
   pathname = "/";
   search = "";
@@ -46,5 +53,25 @@ describe("WelcomeGate", () => {
     WelcomeGate = await load();
     render(<WelcomeGate />);
     expect(replace).not.toHaveBeenCalled();
+  });
+
+  it("doesn't show again after the welcome page itself was opened in this load", async () => {
+    vi.resetModules();
+    const { markWelcomeShown } = await import("../welcome-state");
+    markWelcomeShown(); // full load landed on /welcome, then Get started went back into the app
+    const { WelcomeGate } = await import("./WelcomeGate");
+    render(<WelcomeGate />);
+    expect(replace).not.toHaveBeenCalled();
+  });
+
+  it("a normal refresh stays on the page; a hard refresh starts on the welcome page", async () => {
+    pathname = "/search";
+    navType("reload");
+    let WelcomeGate = await load();
+    render(<WelcomeGate />);
+    expect(replace).not.toHaveBeenCalled();
+    WelcomeGate = await load();
+    render(<WelcomeGate hardReload />);
+    expect(replace).toHaveBeenCalledWith({ pathname: "/welcome", query: { next: "/search" } });
   });
 });
