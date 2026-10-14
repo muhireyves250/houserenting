@@ -36,6 +36,9 @@ describe("OnboardingCarousel", () => {
     fireEvent.pointerDown(stage, { clientX: 100, pointerId: 1 });
     fireEvent.pointerUp(stage, { clientX: 300, pointerId: 1 });
     expect(screen.getByRole("heading", { name: "Space Rental" })).toBeInTheDocument();
+    // "I already have an account" is offered on the last slide (where Skip was).
+    await userEvent.click(screen.getByRole("button", { name: "Next" }));
+    await userEvent.click(screen.getByRole("button", { name: "Next" }));
     await userEvent.click(screen.getByRole("button", { name: "I already have an account" }));
     expect(onLogin).toHaveBeenCalledOnce();
   });

@@ -402,28 +402,31 @@ svg {
   }
 }
 
-/* Welcome page: slow photo zoom (Ken Burns), text rising in, logo popping in. */
-@keyframes welcome-kenburns {
-  from {
-    transform: scale(1.02);
+/* Welcome page: breathing rings around the photo, text rising in, page fading in after the logo intro. */
+@keyframes welcome-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
   }
-  to {
-    transform: scale(1.14) translate(-1.5%, -1%);
+  50% {
+    transform: scale(1.06);
+    opacity: 0.55;
   }
 }
-.welcome-kenburns {
-  animation: welcome-kenburns 9s ease-out both;
+.welcome-ring {
+  animation: welcome-breathe 3.2s ease-in-out infinite;
 }
 .welcome-rise {
   animation: splash-rise 800ms cubic-bezier(0.32, 0.72, 0, 1) both;
 }
-.welcome-pop {
-  animation: pop-in 700ms cubic-bezier(0.25, 0.8, 0.25, 1) both;
+.welcome-fade {
+  animation: fade-in 600ms ease-out both;
 }
 @media (prefers-reduced-motion: reduce) {
-  .welcome-kenburns,
+  .welcome-ring,
   .welcome-rise,
-  .welcome-pop {
+  .welcome-fade {
     animation: none;
   }
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "@/i18n/navigation";
+import { LogoReveal } from "./LogoReveal";
 
 /** Set by end-to-end tests to start straight on the requested page. */
 export const SKIP_WELCOME_COOKIE = "sr_skip_welcome";
@@ -46,19 +47,5 @@ export function WelcomeGate({ signedIn }: { signedIn: boolean }) {
   }, [splash]);
 
   if (!splash) return null;
-  return (
-    <div
-      data-testid="welcome-splash"
-      data-leaving={splash === "out"}
-      aria-hidden="true"
-      className="welcome-splash fixed inset-0 z-[90] flex flex-col items-center justify-center gap-5 bg-gradient-to-b from-surface to-primary-soft"
-    >
-      <svg viewBox="0 0 64 56" fill="none" stroke="currentColor" strokeWidth={5} strokeLinecap="square" className="welcome-logo h-20 w-[92px] text-primary">
-        {["M4 28 32 6l28 22", "M14 23v29h14v-9", "M23 26v12h18", "M41 26v26h9V23"].map((d, i) => (
-          <path key={d} d={d} pathLength={1} style={{ animationDelay: `${i * 140}ms` }} />
-        ))}
-      </svg>
-      <p className="welcome-name text-2xl font-bold tracking-[-0.02em] text-primary">Space Rental</p>
-    </div>
-  );
+  return <LogoReveal testId="welcome-splash" leaving={splash === "out"} />;
 }
