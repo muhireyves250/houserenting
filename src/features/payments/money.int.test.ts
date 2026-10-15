@@ -150,6 +150,24 @@ describe("monthly rentals", () => {
   });
 });
 
+describe("identity details for monthly rentals", () => {
+  it("asks for exactly what staff chose and keeps it apart from the booking", async () => {
+    await settings({ commissionPercent: null, monthlyUpfrontMonths: 1, monthlyIdentity: "ID_NATIONALITY" });
+    const base = { guestId: "g1", listingId: "flat", start: "2026-12-01", months: 6, payment: pay };
+    expect(await createMonthlyBooking({ ...base, identity: { idNumber: "1199", nationality: null } }, NOW)).toEqual({ ok: false, error: "identity" });
+    const r = await createMonthlyBooking({ ...base, identity: { idNumber: "1199080012345678", nationality: "Rwandan" } }, NOW);
+    expect(r.ok).toBe(true);
+    const b = await db.booking.findFirstOrThrow({ include: { identity: true } });
+    expect(b.identity).toMatchObject({ idNumber: "1199080012345678", nationality: "Rwandan" });
+  });
+
+  it("stores nothing when no details are required", async () => {
+    await settings({ commissionPercent: null, monthlyUpfrontMonths: 1 });
+    await createMonthlyBooking({ guestId: "g1", listingId: "flat", start: "2026-12-01", months: 6, payment: pay, identity: { idNumber: "999999", nationality: "X" } }, NOW);
+    expect(await db.bookingIdentity.count()).toBe(0);
+  });
+});
+
 describe("referrals", () => {
   it("credit an inviter once, never self, and reward only after the friend's first finished stay when enabled", async () => {
     const code = await ensureReferralCode("g1");

@@ -30,7 +30,13 @@ export default async function AdminBookingsPage() {
             <span className="block text-[13px] text-muted">
               {b.guest.name} · {formatStayDates(locale, asISO(b.checkIn), asISO(b.checkOut))}
               {b.room && ` · ${b.room.name}`}
+              {b.rentalMode === "MONTHLY" && ` · ${t("monthlyRental", { months: b.months ?? 0 })}`}
             </span>
+            {b.identity && (
+              <span className="block text-[13px] text-ink/80">
+                {t("identityLine", { id: b.identity.idNumber, nationality: b.identity.nationality ?? "—" })}
+              </span>
+            )}
             <span className="block text-[13px] text-muted tabular-nums">
               {t("money", { total: formatRWF(b.total, locale), payout: formatRWF(b.hostPayout, locale), commission: formatRWF(b.commission, locale) })}
             </span>

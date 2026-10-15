@@ -303,6 +303,7 @@ model Booking {
   payments       Payment[]
   ledger         LedgerEntry[]
   referralReward ReferralReward?
+  identity       BookingIdentity?
 
   @@index([guestId, checkIn])
   @@index([listingId, checkIn])
@@ -497,6 +498,8 @@ model PlatformConfig {
   cancellationPolicy    Json?
   /// Monthly rentals: months paid when booking (null = monthly booking not offered yet).
   monthlyUpfrontMonths  Int?
+  /// Identity details asked from monthly renters (only what the business approved).
+  monthlyIdentity       IdentityRequirement @default(NONE)
   /// Referrals: on/off, and the reward (RWF) for the inviter after the friend's first finished stay (null = no reward).
   referralEnabled       Boolean  @default(false)
   referralRewardAmount  Int?
@@ -651,4 +654,21 @@ model ReferralReward {
   decidedAt  DateTime?
 
   @@map("referralReward")
+}
+
+enum IdentityRequirement {
+  NONE
+  ID
+  ID_NATIONALITY
+}
+
+/// Identity details for a monthly rental, kept apart from the booking; staff only.
+model BookingIdentity {
+  bookingId   String   @id
+  booking     Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  idNumber    String
+  nationality String?
+  createdAt   DateTime @default(now())
+
+  @@map("bookingIdentity")
 }

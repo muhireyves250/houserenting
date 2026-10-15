@@ -54,7 +54,7 @@ export function ReserveDialog({
   /** Platform fee on top of the (discounted) price, in basis points. */
   guestFeeBps?: number | null;
   /** Monthly rental: length, months paid now, deposit due now. Null = a nightly stay. */
-  monthly?: { months: number; upfrontMonths: number; monthlyPrice: number; deposit: number } | null;
+  monthly?: { months: number; upfrontMonths: number; monthlyPrice: number; deposit: number; identity?: "NONE" | "ID" | "ID_NATIONALITY" } | null;
   /** Published cancellation terms; when null, the unpaid-hold rule is shown. */
   cancellationPolicy?: string | null;
   place: PlacePreviewData;
@@ -81,6 +81,11 @@ export function ReserveDialog({
   const [error, setError] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState<string | null>(null);
   const [bookError, setBookError] = useState<string | null>(null);
+  const [idNumber, setIdNumber] = useState("");
+  const [nationality, setNationality] = useState("");
+  const needsId = monthly?.identity === "ID" || monthly?.identity === "ID_NATIONALITY";
+  const needsNationality = monthly?.identity === "ID_NATIONALITY";
+  const identityMissing = (needsId && idNumber.trim().length < 4) || (needsNationality && nationality.trim().length < 2);
   const [promoInput, setPromoInput] = useState("");
   const [promo, setPromo] = useState<{ code: string; discount: number } | null>(null);
   const [promoError, setPromoError] = useState<string | null>(null);
@@ -131,7 +136,14 @@ export function ReserveDialog({
       const payment = { method: provider, phone: number };
       const promoCode = promo?.code ?? null;
       const result = monthly
-        ? await bookMonthlyAction({ listingId, start: range.checkIn, months: monthly.months, promoCode, payment })
+        ? await bookMonthlyAction({
+            listingId,
+            start: range.checkIn,
+            months: monthly.months,
+            promoCode,
+            payment,
+            identity: needsId ? { idNumber, nationality: needsNationality ? nationality : null } : null,
+          })
         : await bookStayAction({ listingId, checkIn: range.checkIn, checkOut: range.checkOut, guests, roomId: room?.id ?? null, promoCode, payment });
       if ("reference" in result) {
         router.push(`/bookings/${result.reference}`);
@@ -277,11 +289,27 @@ export function ReserveDialog({
                       <p className="mb-1.5 text-[15px] font-semibold text-ink">{t("cancellation")}</p>
                       <p className="text-[15px] whitespace-pre-line text-ink/80">{cancellationPolicy ?? t("cancelWhileUnpaid")}</p>
                     </div>
+                    {needsId && (
+                      <div className="flex flex-col gap-3 border-t border-line pt-5">
+                        <p className="text-[15px] font-semibold text-ink">{t("yourDetails")}</p>
+                        <label className="flex flex-col gap-0.5 rounded-xl border border-line-strong px-4 py-2.5 focus-within:border-ink max-md:focus-within:border-primary">
+                          <span className="text-xs font-semibold text-muted">{t("idNumber")}</span>
+                          <input value={idNumber} onChange={(e) => setIdNumber(e.target.value)} maxLength={40} autoComplete="off" className="w-full bg-transparent text-[15px] text-ink outline-none" />
+                        </label>
+                        {needsNationality && (
+                          <label className="flex flex-col gap-0.5 rounded-xl border border-line-strong px-4 py-2.5 focus-within:border-ink max-md:focus-within:border-primary">
+                            <span className="text-xs font-semibold text-muted">{t("nationality")}</span>
+                            <input value={nationality} onChange={(e) => setNationality(e.target.value)} maxLength={60} autoComplete="country-name" className="w-full bg-transparent text-[15px] text-ink outline-none" />
+                          </label>
+                        )}
+                        <p className="text-[13px] text-muted">{t("identityPrivacy")}</p>
+                      </div>
+                    )}
                     <p className="border-t border-line pt-5 text-[13px] leading-5 text-muted">{t("agree")}</p>
                     <button
                       type="button"
                       onClick={book}
-                      disabled={booking}
+                      disabled={booking || identityMissing}
                       className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary to-[#0a6fe0] py-3.5 text-[15px] font-semibold text-white shadow-[0_10px_24px_-10px_rgba(0,87,184,0.8)] transition-[filter,transform] duration-300 hover:brightness-110 active:scale-[0.98] disabled:cursor-wait disabled:opacity-70"
                     >
                       {booking && <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />}

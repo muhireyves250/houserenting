@@ -16,6 +16,7 @@ export default async function AdminSettingsPage() {
         holdMinutes: settings.holdMinutes,
         monthlyDepositPercent: settings.monthlyDepositPercent,
         monthlyUpfrontMonths: settings.monthlyUpfrontMonths,
+        monthlyIdentity: settings.monthlyIdentity,
         referralEnabled: settings.referralEnabled,
         referralRewardAmount: settings.referralRewardAmount,
         cancellationPolicy: settings.cancellationPolicy,

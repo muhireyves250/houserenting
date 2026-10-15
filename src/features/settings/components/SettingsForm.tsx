@@ -4,7 +4,7 @@ import { Check } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/Button";
-import { AreaField, Card, Field } from "@/features/hosting/components/fields";
+import { AreaField, Card, Field, SelectField } from "@/features/hosting/components/fields";
 import { useRouter } from "@/i18n/navigation";
 import { updateSettingsAction } from "../actions";
 import type { SettingsInput } from "../validation";
@@ -56,7 +56,20 @@ export function SettingsForm({ initial, envHoldMinutes }: { initial: SettingsInp
           onChange={(e) => set("monthlyUpfrontMonths", num(e.target.value))}
           error={err("monthlyUpfrontMonths")}
         />
+        <SelectField
+          label={t("identity")}
+          className="mt-3"
+          value={form.monthlyIdentity ?? "NONE"}
+          onChange={(e) => set("monthlyIdentity", e.target.value as "NONE" | "ID" | "ID_NATIONALITY")}
+        >
+          {(["NONE", "ID", "ID_NATIONALITY"] as const).map((option) => (
+            <option key={option} value={option}>
+              {t(`identityOption.${option}`)}
+            </option>
+          ))}
+        </SelectField>
         <p className="mt-3 text-[13px] text-muted">{t("monthlyHint")}</p>
+        <p className="mt-1 text-[13px] text-muted">{t("identityHint")}</p>
       </Card>
       <Card title={t("referrals")}>
         <label className="mb-3 flex cursor-pointer items-center gap-3 text-[15px] text-ink">

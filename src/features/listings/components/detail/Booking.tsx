@@ -51,7 +51,7 @@ type Stay = {
   /** Published cancellation terms in the reader's language. */
   cancellationPolicy: string | null;
   /** Monthly rentals, when staff have set the months paid upfront (null = not offered). */
-  monthlyConfig: { upfrontMonths: number; depositPercent: number | null } | null;
+  monthlyConfig: { upfrontMonths: number; depositPercent: number | null; identity?: "NONE" | "ID" | "ID_NATIONALITY" } | null;
   mode: "stay" | "monthly";
   setMode: (mode: "stay" | "monthly") => void;
   plan: { start: string; months: number };
@@ -90,7 +90,7 @@ export function StayProvider({
   bookingModel?: BookingModel;
   guestFeeBps?: number | null;
   cancellationPolicy?: string | null;
-  monthlyConfig?: { upfrontMonths: number; depositPercent: number | null } | null;
+  monthlyConfig?: { upfrontMonths: number; depositPercent: number | null; identity?: "NONE" | "ID" | "ID_NATIONALITY" } | null;
   /** The place rents by the month only. */
   monthlyOnly?: boolean;
   minMonths?: number;
@@ -296,6 +296,7 @@ function ReserveButton({
               upfrontMonths,
               monthlyPrice,
               deposit: monthlyConfig.depositPercent ? Math.round((monthlyPrice * monthlyConfig.depositPercent) / 100) : 0,
+              identity: monthlyConfig.identity ?? "NONE",
             }}
             place={place}
             quote={{ nights: nightsBetween({ checkIn: plan.start, checkOut: moveOut }), nightly: monthlyPrice, total: monthlyPrice * upfrontMonths, originalTotal: null }}

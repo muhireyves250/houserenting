@@ -407,7 +407,8 @@
       "auth": "Reconnectez-vous pour réserver.",
       "failed": "Réservation impossible. Réessayez.",
       "promo": "Ce code promo ne peut pas être utilisé.",
-      "notOffered": "Les locations au mois ne se réservent pas encore en ligne."
+      "notOffered": "Les locations au mois ne se réservent pas encore en ligne.",
+      "identity": "Renseignez vos informations pour réserver."
     },
     "qrCode": "Code QR",
     "qrCodeFor": "Code QR pour {title}",
@@ -434,7 +435,11 @@
     "byMonth": "Au mois",
     "moveIn": "Date d'entrée",
     "rentalLength": "Durée",
-    "monthsCount": "{count, plural, one {# mois} other {# mois}}"
+    "monthsCount": "{count, plural, one {# mois} other {# mois}}",
+    "yourDetails": "Vos informations",
+    "idNumber": "Numéro de carte d'identité ou de passeport",
+    "nationality": "Nationalité",
+    "identityPrivacy": "Seule notre équipe voit ces informations. Elles servent au contrat de location."
   },
   "Facility": {
     "KITCHEN": "Cuisine",
@@ -530,7 +535,8 @@
     "room": "Chambre",
     "serviceFee": "Frais de service",
     "rental": "Location",
-    "rentalTerms": "{months} mois, {upfront} payé(s) à la réservation"
+    "rentalTerms": "{months} mois, {upfront} payé(s) à la réservation",
+    "payTitle": "Payer pour confirmer"
   },
   "Host": {
     "title": "Vos annonces",
@@ -741,7 +747,9 @@
         "claim": "Parrainage enregistré"
       }
     },
-    "money": "Le voyageur paie {total} · propriétaire {payout} · plateforme {commission}"
+    "money": "Le voyageur paie {total} · propriétaire {payout} · plateforme {commission}",
+    "identityLine": "Identité/passeport {id} · nationalité {nationality}",
+    "monthlyRental": "Location de {months} mois"
   },
   "Questions": {
     "title": "Questions et réponses",
@@ -883,7 +891,14 @@
     "referrals": "Parrainage",
     "referralEnabled": "Afficher les liens d'invitation aux membres",
     "referralReward": "Récompense par ami (RWF)",
-    "referralHint": "Une récompense n'est créée qu'après le premier séjour terminé de l'ami invité, et l'équipe approuve chacune. Laissez vide pour aucune récompense."
+    "referralHint": "Une récompense n'est créée qu'après le premier séjour terminé de l'ami invité, et l'équipe approuve chacune. Laissez vide pour aucune récompense.",
+    "identity": "Informations demandées aux locataires au mois",
+    "identityOption": {
+      "NONE": "Aucune",
+      "ID": "Numéro d'identité ou de passeport",
+      "ID_NATIONALITY": "Numéro d'identité ou de passeport et nationalité"
+    },
+    "identityHint": "Ne demandez que ce que l'entreprise et la loi exigent. Seule l'équipe voit ces informations."
   },
   "Money": {
     "notConnected": "Les paiements ne sont pas encore connectés : définissez PAYMENT_WEBHOOK_SECRET et connectez un prestataire. D'ici là, rien ne change ici automatiquement.",
@@ -962,5 +977,19 @@
     "code": "Votre code {code}",
     "invited": "{count, plural, =0 {aucun ami inscrit} one {# ami inscrit} other {# amis inscrits}}",
     "earned": "gagné {amount}"
+  },
+  "Pay": {
+    "notConnected": "Le paiement mobile money n'est pas encore connecté : cette réservation ne peut pas être payée en ligne. Les dates sont libérées à la fin du blocage.",
+    "method": "Payer avec",
+    "approveOnPhone": "Regardez votre téléphone et approuvez le paiement",
+    "approveHint": "Entrez votre code mobile money pour payer {amount}. Cette page se met à jour toute seule.",
+    "pay": "Payer {amount}",
+    "error": {
+      "auth": "Reconnectez-vous pour payer.",
+      "notConnected": "Les paiements ne sont pas encore connectés.",
+      "notPayable": "Cette réservation ne peut plus être payée.",
+      "phone": "Vérifiez votre numéro mobile money.",
+      "providerDown": "Le service de paiement n'a pas répondu. Réessayez dans un instant."
+    }
   }
 }

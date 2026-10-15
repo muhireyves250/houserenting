@@ -34,6 +34,8 @@ const schema = z
     CLOUDINARY_API_SECRET: z.string().min(1).optional(),
     // Shared secret for signed payment provider callbacks (unset = payments not connected).
     PAYMENT_WEBHOOK_SECRET: z.string().min(16).optional(),
+    // Which provider asks the guest's phone to pay. "sandbox" (development/test only) pretends the guest approved.
+    PAYMENT_PROVIDER: z.enum(["sandbox"]).optional(),
     // Lets the scheduler run background jobs (Vercel Cron sends it as a Bearer token).
     CRON_SECRET: z.string().min(16).optional(),
     LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),

@@ -12,6 +12,7 @@ export type PlatformSettings = FeeConfig & {
   holdMinutes: number | null;
   monthlyDepositPercent: number | null;
   monthlyUpfrontMonths: number | null;
+  monthlyIdentity: "NONE" | "ID" | "ID_NATIONALITY";
   referralEnabled: boolean;
   referralRewardAmount: number | null;
   cancellationPolicy: CancellationPolicy;
@@ -28,6 +29,7 @@ async function load(): Promise<PlatformSettings> {
     holdMinutes: row?.holdMinutes ?? null,
     monthlyDepositPercent: row?.monthlyDepositPercent ?? null,
     monthlyUpfrontMonths: row?.monthlyUpfrontMonths ?? null,
+    monthlyIdentity: row?.monthlyIdentity ?? "NONE",
     referralEnabled: row?.referralEnabled ?? false,
     referralRewardAmount: row?.referralRewardAmount ?? null,
     cancellationPolicy: { ...EMPTY_POLICY, ...((row?.cancellationPolicy as Partial<CancellationPolicy> | null) ?? {}) },
@@ -67,6 +69,7 @@ export async function updateSettings(adminId: string, raw: SettingsInput): Promi
     holdMinutes: v.holdMinutes,
     monthlyDepositPercent: v.monthlyDepositPercent,
     monthlyUpfrontMonths: v.monthlyUpfrontMonths,
+    monthlyIdentity: v.monthlyIdentity,
     referralEnabled: v.referralEnabled,
     referralRewardAmount: v.referralRewardAmount,
     cancellationPolicy: v.cancellationPolicy,
@@ -80,6 +83,7 @@ export async function updateSettings(adminId: string, raw: SettingsInput): Promi
       holdMinutes: before?.holdMinutes ?? null,
       monthlyDepositPercent: before?.monthlyDepositPercent ?? null,
       monthlyUpfrontMonths: before?.monthlyUpfrontMonths ?? null,
+      monthlyIdentity: before?.monthlyIdentity ?? "NONE",
       referralEnabled: before?.referralEnabled ?? false,
       referralRewardAmount: before?.referralRewardAmount ?? null,
       cancellationPolicy: (before?.cancellationPolicy as CancellationPolicy | null) ?? null,

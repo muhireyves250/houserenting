@@ -407,7 +407,8 @@
       "auth": "Ongera winjire kugira ngo ubike.",
       "failed": "Kubika byanze. Ongera ugerageze.",
       "promo": "Iyo kode ntishobora gukoreshwa.",
-      "notOffered": "Ubukode bw'ukwezi ntiburabikwa kuri internet."
+      "notOffered": "Ubukode bw'ukwezi ntiburabikwa kuri internet.",
+      "identity": "Uzuza amakuru yawe kugira ngo ubike."
     },
     "qrCode": "Kode ya QR",
     "qrCodeFor": "Kode ya QR ya {title}",
@@ -434,7 +435,11 @@
     "byMonth": "Ku kwezi",
     "moveIn": "Itariki yo kwinjira",
     "rentalLength": "Igihe",
-    "monthsCount": "{count, plural, one {ukwezi #} other {amezi #}}"
+    "monthsCount": "{count, plural, one {ukwezi #} other {amezi #}}",
+    "yourDetails": "Amakuru yawe",
+    "idNumber": "Nimero y'indangamuntu cyangwa pasiporo",
+    "nationality": "Ubwenegihugu",
+    "identityPrivacy": "Itsinda ryacu ryonyine ni ryo ribona aya makuru. Akoreshwa mu masezerano y'ubukode."
   },
   "Facility": {
     "KITCHEN": "Igikoni",
@@ -530,7 +535,8 @@
     "room": "Icyumba",
     "serviceFee": "Amafaranga ya serivisi",
     "rental": "Ubukode",
-    "rentalTerms": "Amezi {months}, {upfront} yishyurwa ubika"
+    "rentalTerms": "Amezi {months}, {upfront} yishyurwa ubika",
+    "payTitle": "Ishyura kugira ngo byemezwe"
   },
   "Host": {
     "title": "Aho wakira abashyitsi",
@@ -741,7 +747,9 @@
         "claim": "Ubutumire bwanditswe"
       }
     },
-    "money": "Umushyitsi yishyura {total} · nyir'inzu {payout} · urubuga {commission}"
+    "money": "Umushyitsi yishyura {total} · nyir'inzu {payout} · urubuga {commission}",
+    "identityLine": "Indangamuntu/pasiporo {id} · ubwenegihugu {nationality}",
+    "monthlyRental": "Ubukode bw'amezi {months}"
   },
   "Questions": {
     "title": "Ibibazo n'ibisubizo",
@@ -883,7 +891,14 @@
     "referrals": "Ubutumire",
     "referralEnabled": "Erekana amahuza y'ubutumire",
     "referralReward": "Igihembo kuri buri nshuti (RWF)",
-    "referralHint": "Igihembo gishyirwaho nyuma y'uko inshuti yatumiwe irangiza bwa mbere, kandi itsinda ryemeza buri kimwe. Siga ubusa niba nta gihembo."
+    "referralHint": "Igihembo gishyirwaho nyuma y'uko inshuti yatumiwe irangiza bwa mbere, kandi itsinda ryemeza buri kimwe. Siga ubusa niba nta gihembo.",
+    "identity": "Amakuru asabwa abakodesha ku kwezi",
+    "identityOption": {
+      "NONE": "Nta na kimwe",
+      "ID": "Nimero y'indangamuntu cyangwa pasiporo",
+      "ID_NATIONALITY": "Nimero y'indangamuntu cyangwa pasiporo n'ubwenegihugu"
+    },
+    "identityHint": "Saba gusa ibyo ikigo n'amategeko bisaba. Itsinda ryonyine ni ryo ribona aya makuru."
   },
   "Money": {
     "notConnected": "Kwishyura ntikurahuzwa: shyiraho PAYMENT_WEBHOOK_SECRET kandi uhuze utanga serivisi. Kugeza icyo gihe, nta kintu gihinduka hano ubwacyo.",
@@ -962,5 +977,19 @@
     "code": "Kode yawe {code}",
     "invited": "{count, plural, =0 {nta nshuti irinjira} one {inshuti # yinjiye} other {inshuti # zinjiye}}",
     "earned": "wabonye {amount}"
+  },
+  "Pay": {
+    "notConnected": "Kwishyura na mobile money ntibirahuzwa, ntushobora kwishyura kuri internet. Iminsi irarekurwa igihe cyo kuyifata kirangiye.",
+    "method": "Ishyura na",
+    "approveOnPhone": "Reba telefoni yawe wemeze kwishyura",
+    "approveHint": "Andika PIN ya mobile money wishyure {amount}. Iyi page yivugurura ubwayo.",
+    "pay": "Ishyura {amount}",
+    "error": {
+      "auth": "Ongera winjire kugira ngo wishyure.",
+      "notConnected": "Kwishyura ntikurahuzwa.",
+      "notPayable": "Ibi ntibigishobora kwishyurwa.",
+      "phone": "Reba nimero yawe ya mobile money.",
+      "providerDown": "Serivisi yo kwishyura ntiyasubije. Ongera ugerageze."
+    }
   }
 }

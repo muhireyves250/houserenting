@@ -10,6 +10,8 @@ export const settingsInput = z.object({
   holdMinutes: optional(z.number().int().min(5).max(1440)),
   monthlyDepositPercent: optional(z.number().int().min(0).max(1200)),
   monthlyUpfrontMonths: optional(z.number().int().min(1).max(24)).optional().default(null),
+  /** Identity details asked for monthly rentals (only what the business has approved). */
+  monthlyIdentity: z.enum(["NONE", "ID", "ID_NATIONALITY"]).optional().default("NONE"),
   referralEnabled: z.boolean().optional().default(false),
   referralRewardAmount: optional(z.number().int().min(1).max(10_000_000)).optional().default(null),
   cancellationPolicy: z.object({ en: policyText, fr: policyText, rw: policyText }),

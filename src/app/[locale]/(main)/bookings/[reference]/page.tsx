@@ -19,6 +19,8 @@ import { requireUser } from "@/lib/session";
 import { ReviewForm } from "@/features/reviews/components/ReviewForm";
 import { canReview } from "@/features/reviews/service";
 import { policyText } from "@/features/settings/service";
+import { PayNow } from "@/features/payments/components/PayNow";
+import { getPaymentProvider } from "@/features/payments/providers";
 
 type Props = { params: Promise<{ reference: string }> };
 
@@ -101,9 +103,18 @@ export default async function BookingPage({ params }: Props) {
       </section>
 
       {holding && booking.holdExpiresAt && (
-        <p className="mt-4 rounded-2xl bg-amber-50 px-5 py-3.5 text-sm leading-5 text-amber-900 ring-1 ring-amber-200/70 print:hidden">
-          <b className="font-semibold">{t("heldUntil", { time: formatKigaliTime(locale, booking.holdExpiresAt) })}.</b> {t("awaitingNote")}
-        </p>
+        <section className={cn(card, "mt-4 print:hidden")}>
+          <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="text-lg font-bold text-ink">{t("payTitle")}</h2>
+            <p className="text-[13px] font-semibold text-amber-800">{t("heldUntil", { time: formatKigaliTime(locale, booking.holdExpiresAt) })}</p>
+          </div>
+          <PayNow
+            reference={booking.reference}
+            amount={booking.total}
+            method={booking.paymentMethod === "airtel" ? "airtel" : booking.paymentMethod === "mtn" ? "mtn" : null}
+            connected={getPaymentProvider() !== null}
+          />
+        </section>
       )}
 
       {/* Your stay */}

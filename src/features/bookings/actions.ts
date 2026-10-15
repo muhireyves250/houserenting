@@ -57,6 +57,7 @@ const monthlyInput = z.object({
   months: z.number().int().min(1).max(60),
   promoCode: z.string().max(40).nullable().optional(),
   payment: z.object({ method: z.enum(["mtn", "airtel"]), phone: z.string().max(20) }),
+  identity: z.object({ idNumber: z.string().trim().max(40), nationality: z.string().trim().max(60).nullable() }).nullable().optional(),
 });
 
 export async function bookMonthlyAction(raw: unknown): Promise<BookStayResult> {

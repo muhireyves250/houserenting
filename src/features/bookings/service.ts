@@ -28,7 +28,7 @@ export type BookingRequest = {
   payment: { method: MoMoProvider; phone: string };
 };
 
-export type BookingError = "invalid" | "notFound" | "ownListing" | "stayLength" | "phone" | "unavailable" | "promo" | "notOffered";
+export type BookingError = "invalid" | "notFound" | "ownListing" | "stayLength" | "phone" | "unavailable" | "promo" | "notOffered" | "identity";
 export type CreateBookingResult = { ok: true; reference: string } | { ok: false; error: BookingError };
 
 /** What the guest agreed to, stored with the booking so later edits to the listing don't change it. */
@@ -196,6 +196,8 @@ async function holdAndInsert(args: {
   roomId: string | null;
   promoId: string | null;
   now: Date;
+  /** Monthly rentals: identity details, kept apart from the booking and shown to staff only. */
+  identity?: { idNumber: string; nationality: string | null } | null;
   data: Omit<Prisma.BookingUncheckedCreateInput, "reference" | "listingId" | "guestId" | "checkIn" | "checkOut" | "roomId">;
 }): Promise<CreateBookingResult> {
   const { listingId, guestId, checkIn, checkOut, roomId, now } = args;
@@ -217,7 +219,7 @@ async function holdAndInsert(args: {
         });
         if (clash) throw new Unavailable();
         if (args.promoId && !(await claimPromoUse(tx, args.promoId))) throw new PromoGone();
-        await tx.booking.create({
+        const created = await tx.booking.create({
           data: {
             ...args.data,
             reference,
@@ -228,7 +230,9 @@ async function holdAndInsert(args: {
             checkOut: asDate(checkOut),
             events: { create: { fromStatus: null, toStatus: "PENDING_PAYMENT", actorId: guestId, reason: "booked by guest" } },
           },
+          select: { id: true },
         });
+        if (args.identity) await tx.bookingIdentity.create({ data: { bookingId: created.id, ...args.identity } });
         await notify(tx, guestId, "bookingHeld", { title: args.title, reference }, `/bookings/${reference}`);
       });
       return { ok: true, reference };
@@ -250,6 +254,8 @@ export type MonthlyRequest = {
   months: number;
   promoCode?: string | null;
   payment: { method: MoMoProvider; phone: string };
+  /** Only the details staff have said the business needs (Admin → Settings). */
+  identity?: { idNumber: string; nationality: string | null } | null;
 };
 
 /**
@@ -271,6 +277,13 @@ export async function createMonthlyBooking(request: MonthlyRequest, now: Date = 
   if (months < rate.minUnits || (rate.maxUnits !== null && months > rate.maxUnits)) return { ok: false, error: "stayLength" };
   const phone = parseMobileMoney(request.payment.method, request.payment.phone);
   if (!phone.ok) return { ok: false, error: "phone" };
+  // Ask for exactly the approved details: none, ID/passport number, or that plus nationality.
+  const idNumber = request.identity?.idNumber.trim() ?? "";
+  const nationality = request.identity?.nationality?.trim() ?? "";
+  const needsId = settings.monthlyIdentity !== "NONE";
+  const needsNationality = settings.monthlyIdentity === "ID_NATIONALITY";
+  if ((needsId && idNumber.length < 4) || (needsNationality && nationality.length < 2)) return { ok: false, error: "identity" };
+  const identity = needsId ? { idNumber, nationality: needsNationality ? nationality : null } : null;
 
   const monthly = discountedPrice(rate.price, listing.discountPercent);
   const upfront = Math.min(settings.monthlyUpfrontMonths, months);
@@ -294,6 +307,7 @@ export async function createMonthlyBooking(request: MonthlyRequest, now: Date = 
     roomId: null,
     promoId: promo?.id ?? null,
     now,
+    identity,
     data: {
       rentalMode: "MONTHLY",
       months,
@@ -460,6 +474,9 @@ export function staffBookings(take = 100) {
       hostPayout: true,
       holdExpiresAt: true,
       room: { select: { name: true } },
+      rentalMode: true,
+      months: true,
+      identity: { select: { idNumber: true, nationality: true } },
       guest: { select: { name: true, email: true } },
       listing: { select: { id: true, title: true } },
     },
