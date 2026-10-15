@@ -681,7 +681,7 @@
     "title": "Ubuyobozi",
     "nav": {
       "label": "Ibice by'ubuyobozi",
-      "overview": "Ahantu",
+      "overview": "Incamake",
       "moderation": "Igenzura",
       "support": "Ubufasha",
       "bookings": "Ibyabitswe",
@@ -689,7 +689,14 @@
       "audit": "Inyandiko z'ibikorwa",
       "settings": "Igenamiterere",
       "money": "Amafaranga",
-      "promotions": "Igabanywa"
+      "promotions": "Igabanywa",
+      "listings": "Ahantu",
+      "group": {
+        "operate": "Imikorere",
+        "money": "Amafaranga",
+        "people": "Abantu",
+        "system": "Sisitemu"
+      }
     },
     "count": {
       "listings": "Ahantu ho kugenzura",
@@ -787,7 +794,43 @@
     },
     "money": "Umushyitsi yishyura {total} · nyir'inzu {payout} · urubuga {commission}",
     "identityLine": "Indangamuntu/pasiporo {id} · ubwenegihugu {nationality}",
-    "monthlyRental": "Ubukode bw'amezi {months}"
+    "monthlyRental": "Ubukode bw'amezi {months}",
+    "console": "Ubuyobozi",
+    "viewSite": "Reba urubuga",
+    "openMenu": "Fungura menu",
+    "closeMenu": "Funga menu",
+    "waiting": "{count} bitegereje",
+    "all": "Byose",
+    "dashboard": {
+      "title": "Murakaza neza",
+      "subtitle": "{listings, plural, one {Ahantu # haragaragara} other {Ahantu # haragaragara}} kuri Space Rental.",
+      "thisMonth": "Uku kwezi",
+      "kpi": {
+        "bookings": "Ibyabitswe uku kwezi",
+        "paid": "Ibyishyuwe n'abashyitsi",
+        "platform": "Ibyinjiye ku rubuga",
+        "newUsers": "Abanyamuryango bashya"
+      },
+      "vsLastMonth": "ugereranyije n'ukwezi gushize",
+      "bookingsChart": "Ibyabitswe, iminsi 30 ishize",
+      "bookingsTotal": "{count, plural, one {# byabitswe} other {# byabitswe}} byose",
+      "bookingsCount": "{count, plural, one {# byabitswe} other {# byabitswe}}",
+      "day": "Umunsi",
+      "bookings": "Ibyabitswe",
+      "needsAttention": "Bikeneye kwitabwaho",
+      "allClear": "Nta kintu gitegereje.",
+      "attention": {
+        "listings": "Ahantu ho kugenzura",
+        "moderation": "Ibibazo n'ibitekerezo",
+        "tickets": "Ubusabe bw'ubufasha",
+        "payments": "Ubwishyu bwo kureba",
+        "rewards": "Ibihembo byo kwemeza"
+      },
+      "latestBookings": "Ibyabitswe vuba",
+      "seeAll": "Reba byose",
+      "activity": "Ibikorwa biheruka",
+      "newThisMonth": "Bishya uku kwezi"
+    }
   },
   "Questions": {
     "title": "Ibibazo n'ibisubizo",

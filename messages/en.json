@@ -681,7 +681,7 @@
     "title": "Admin",
     "nav": {
       "label": "Admin sections",
-      "overview": "Listings",
+      "overview": "Overview",
       "moderation": "Moderation",
       "support": "Support",
       "bookings": "Bookings",
@@ -689,7 +689,14 @@
       "audit": "Audit log",
       "settings": "Settings",
       "money": "Money",
-      "promotions": "Promotions"
+      "promotions": "Promotions",
+      "listings": "Listings",
+      "group": {
+        "operate": "Operations",
+        "money": "Money",
+        "people": "People",
+        "system": "System"
+      }
     },
     "count": {
       "listings": "Listings to review",
@@ -787,7 +794,43 @@
     },
     "money": "Guest pays {total} · owner {payout} · platform {commission}",
     "identityLine": "ID/passport {id} · nationality {nationality}",
-    "monthlyRental": "{months}-month rental"
+    "monthlyRental": "{months}-month rental",
+    "console": "Admin",
+    "viewSite": "View site",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "waiting": "{count} waiting",
+    "all": "All",
+    "dashboard": {
+      "title": "Good to see you",
+      "subtitle": "{listings, plural, one {# place is live} other {# places are live}} on Space Rental.",
+      "thisMonth": "This month",
+      "kpi": {
+        "bookings": "Bookings this month",
+        "paid": "Paid by guests",
+        "platform": "Platform earnings",
+        "newUsers": "New members"
+      },
+      "vsLastMonth": "vs last month",
+      "bookingsChart": "Bookings made, last 30 days",
+      "bookingsTotal": "{count, plural, one {# booking} other {# bookings}} in total",
+      "bookingsCount": "{count, plural, one {# booking} other {# bookings}}",
+      "day": "Day",
+      "bookings": "Bookings",
+      "needsAttention": "Needs attention",
+      "allClear": "All clear. Nothing is waiting.",
+      "attention": {
+        "listings": "Listings to review",
+        "moderation": "Questions and feedback",
+        "tickets": "Support requests",
+        "payments": "Payments to check",
+        "rewards": "Rewards to approve"
+      },
+      "latestBookings": "Latest bookings",
+      "seeAll": "See all",
+      "activity": "Recent activity",
+      "newThisMonth": "New this month"
+    }
   },
   "Questions": {
     "title": "Questions and answers",

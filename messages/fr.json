@@ -681,7 +681,7 @@
     "title": "Administration",
     "nav": {
       "label": "Sections d'administration",
-      "overview": "Annonces",
+      "overview": "Vue d'ensemble",
       "moderation": "Modération",
       "support": "Assistance",
       "bookings": "Réservations",
@@ -689,7 +689,14 @@
       "audit": "Journal d'audit",
       "settings": "Paramètres",
       "money": "Finances",
-      "promotions": "Promotions"
+      "promotions": "Promotions",
+      "listings": "Annonces",
+      "group": {
+        "operate": "Opérations",
+        "money": "Finances",
+        "people": "Personnes",
+        "system": "Système"
+      }
     },
     "count": {
       "listings": "Annonces à vérifier",
@@ -787,7 +794,43 @@
     },
     "money": "Le voyageur paie {total} · propriétaire {payout} · plateforme {commission}",
     "identityLine": "Identité/passeport {id} · nationalité {nationality}",
-    "monthlyRental": "Location de {months} mois"
+    "monthlyRental": "Location de {months} mois",
+    "console": "Administration",
+    "viewSite": "Voir le site",
+    "openMenu": "Ouvrir le menu",
+    "closeMenu": "Fermer le menu",
+    "waiting": "{count} en attente",
+    "all": "Toutes",
+    "dashboard": {
+      "title": "Bonjour",
+      "subtitle": "{listings, plural, one {# logement est en ligne} other {# logements sont en ligne}} sur Space Rental.",
+      "thisMonth": "Ce mois-ci",
+      "kpi": {
+        "bookings": "Réservations ce mois",
+        "paid": "Payé par les voyageurs",
+        "platform": "Revenus de la plateforme",
+        "newUsers": "Nouveaux membres"
+      },
+      "vsLastMonth": "vs le mois dernier",
+      "bookingsChart": "Réservations faites, 30 derniers jours",
+      "bookingsTotal": "{count, plural, one {# réservation} other {# réservations}} au total",
+      "bookingsCount": "{count, plural, one {# réservation} other {# réservations}}",
+      "day": "Jour",
+      "bookings": "Réservations",
+      "needsAttention": "À traiter",
+      "allClear": "Tout est à jour. Rien n'attend.",
+      "attention": {
+        "listings": "Annonces à vérifier",
+        "moderation": "Questions et avis",
+        "tickets": "Demandes d'aide",
+        "payments": "Paiements à vérifier",
+        "rewards": "Récompenses à approuver"
+      },
+      "latestBookings": "Dernières réservations",
+      "seeAll": "Tout voir",
+      "activity": "Activité récente",
+      "newThisMonth": "Nouveau ce mois-ci"
+    }
   },
   "Questions": {
     "title": "Questions et réponses",
