@@ -701,7 +701,9 @@
         "money": "Finances",
         "people": "Personnes",
         "system": "Système"
-      }
+      },
+      "account": "Votre compte",
+      "notifications": "Notifications"
     },
     "count": {
       "listings": "Annonces à vérifier",
@@ -925,7 +927,11 @@
     "moderationIntro": "Les questions et avis n'apparaissent sur les annonces qu'après publication.",
     "supportIntro": "Demandes des voyageurs et hôtes. Répondez ici ; ils le voient dans Aide et assistance.",
     "promotionsIntro": "Codes saisis à la réservation. Vous fixez la réduction, les limites et qui la paie.",
-    "reasonInternal": "Motif (gardé dans le journal d'audit)"
+    "reasonInternal": "Motif (gardé dans le journal d'audit)",
+    "accountIntro": "Vos informations et votre langue. Les comptes de l'équipe n'utilisent que l'administration.",
+    "languageHint": "Langue de l'administration.",
+    "notificationsIntro": "Ce qui vous attend : annonces à vérifier, nouvelles demandes, paiements à contrôler.",
+    "notificationsUnread": "Notifications, {count} non lues"
   },
   "Questions": {
     "title": "Questions et réponses",

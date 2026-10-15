@@ -46,11 +46,6 @@ export default async function AdminListingPage({ params }: Props) {
       <div className="flex flex-wrap items-center gap-3">
         <h2 className="text-[22px] leading-7 font-bold text-ink">{listing.title}</h2>
         <HostStatus status={listing.status} label={tHost(`status.${listing.status}`)} />
-        {listing.status === "PUBLISHED" && (
-          <Link href={`/listings/${listing.id}`} className="text-sm font-semibold text-primary hover:underline">
-            {tHost("viewLive")}
-          </Link>
-        )}
       </div>
 
       {listing.photos.length > 0 ? (

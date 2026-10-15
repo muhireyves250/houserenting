@@ -1,4 +1,4 @@
-import { Bell, ChevronRight, LayoutDashboard, Heart, House, KeyRound, LifeBuoy, MessageSquare, ShieldCheck, UserRound } from "lucide-react";
+import { Bell, ChevronRight, Heart, House, KeyRound, LifeBuoy, MessageSquare, UserRound } from "lucide-react";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Avatar } from "@/components/ui/Avatar";
@@ -16,7 +16,6 @@ import { InviteFriends } from "@/features/referrals/components/InviteFriends";
 import { ensureReferralCode, referralSummary } from "@/features/referrals/service";
 import { getSettings } from "@/features/settings/service";
 import { getEnv } from "@/lib/env";
-import { isAdmin } from "@/lib/roles";
 
 const TILES = [
   { key: "bookings", href: "/bookings", icon: House, tint: "bg-primary/[0.08] text-primary" },
@@ -42,25 +41,10 @@ export default async function ProfilePage() {
       <section className={`${card} flex flex-col items-center px-6 py-8 text-center`}>
         <Avatar name={profile.name} className="size-24 bg-orange-100 text-4xl text-orange-800" />
         <p className="mt-4 text-2xl leading-8 font-bold tracking-[-0.02em] text-ink">{profile.name.split(" ")[0]}</p>
-        <p className="text-sm text-muted">{isAdmin(user) ? t("roleAdmin") : user.isHost ? t("roleHost") : t("roleGuest")}</p>
+        <p className="text-sm text-muted">{user.isHost ? t("roleHost") : t("roleGuest")}</p>
       </section>
 
-      {/* Staff: the way into the admin dashboard, first thing on the page. */}
-      {isAdmin(user) && (
-        <Link
-          href="/admin"
-          className="mt-4 flex items-center gap-4 rounded-3xl bg-gradient-to-r from-primary to-[#0a6fe0] p-5 text-white shadow-[0_14px_32px_-14px_rgba(0,87,184,0.9)] transition-transform duration-300 active:scale-[0.98]"
-        >
-          <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-white/15">
-            <LayoutDashboard className="size-6" aria-hidden="true" />
-          </span>
-          <span className="flex-1">
-            <span className="block text-[16px] font-bold">{t("adminCard")}</span>
-            <span className="block text-[13px] text-white/80">{t("adminCardBody")}</span>
-          </span>
-          <ChevronRight className="size-5 text-white/80" aria-hidden="true" />
-        </Link>
-      )}
+
 
       {/* Two big tiles */}
       <nav aria-label={t("title")} className="mt-4 grid grid-cols-2 gap-4">
@@ -120,15 +104,7 @@ export default async function ProfilePage() {
             <ChevronRight className="size-5 text-ink/60" aria-hidden="true" />
           </Link>
         </li>
-        {isAdmin(user) && (
-          <li>
-            <Link href="/admin" className={row}>
-              <ShieldCheck className="size-6" strokeWidth={1.6} aria-hidden="true" />
-              <span className="flex-1">{t("admin")}</span>
-              <ChevronRight className="size-5 text-ink/60" aria-hidden="true" />
-            </Link>
-          </li>
-        )}
+
         <li className="flex items-center justify-between gap-4 py-3 md:hidden">
           <span className="text-[15px] text-ink">{tNav("language")}</span>
           <Suspense>

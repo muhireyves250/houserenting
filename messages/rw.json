@@ -701,7 +701,9 @@
         "money": "Amafaranga",
         "people": "Abantu",
         "system": "Sisitemu"
-      }
+      },
+      "account": "Konti yawe",
+      "notifications": "Imenyesha"
     },
     "count": {
       "listings": "Ahantu ho kugenzura",
@@ -925,7 +927,11 @@
     "moderationIntro": "Ibibazo n'ibitekerezo bigaragara ku hantu umaze kubyemeza.",
     "supportIntro": "Ubusabe bw'abashyitsi na ba nyir'inzu. Subiza hano; babibona mu Bufasha.",
     "promotionsIntro": "Kode abashyitsi bandika babika. Ni wowe ugena igabanywa, imipaka n'uryishyura.",
-    "reasonInternal": "Impamvu (ibikwa mu nyandiko z'ibikorwa)"
+    "reasonInternal": "Impamvu (ibikwa mu nyandiko z'ibikorwa)",
+    "accountIntro": "Amakuru yawe n'ururimi. Konti z'itsinda zikoresha ubuyobozi gusa.",
+    "languageHint": "Ururimi rw'ubuyobozi.",
+    "notificationsIntro": "Ibigutegereje: ahantu ho kugenzura, ubusabe bushya, ubwishyu bwo kureba.",
+    "notificationsUnread": "Imenyesha, {count} bitarasomwa"
   },
   "Questions": {
     "title": "Ibibazo n'ibisubizo",

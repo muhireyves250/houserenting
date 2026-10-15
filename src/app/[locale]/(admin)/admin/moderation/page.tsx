@@ -30,7 +30,7 @@ export default async function ModerationPage() {
           {questions.map((q) => (
             <li key={q.id} className={card}>
               <p className="text-[13px] text-muted">
-                <Link href={`/listings/${q.listing.id}`} className="text-primary hover:underline">
+                <Link href={`/admin/listings/${q.listing.id}`} className="text-primary hover:underline">
                   {q.listing.title}
                 </Link>{" "}
                 · {q.asker.name} · {formatKigaliDateTime(locale, q.createdAt)}
@@ -59,7 +59,7 @@ export default async function ModerationPage() {
           {reviews.map((r) => (
             <li key={r.id} className={card}>
               <p className="text-[13px] text-muted">
-                <Link href={`/listings/${r.listing.id}`} className="text-primary hover:underline">
+                <Link href={`/admin/listings/${r.listing.id}`} className="text-primary hover:underline">
                   {r.listing.title}
                 </Link>{" "}
                 · {r.author.name} · {formatKigaliDateTime(locale, r.createdAt)}

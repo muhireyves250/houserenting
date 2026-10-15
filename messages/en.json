@@ -701,7 +701,9 @@
         "money": "Money",
         "people": "People",
         "system": "System"
-      }
+      },
+      "account": "Your account",
+      "notifications": "Notifications"
     },
     "count": {
       "listings": "Listings to review",
@@ -925,7 +927,11 @@
     "moderationIntro": "Questions and guest feedback appear on listings only after you publish them.",
     "supportIntro": "Requests from guests and hosts. Reply here; they see it in Help and support.",
     "promotionsIntro": "Codes guests enter when booking. You decide the discount, limits and who pays for it.",
-    "reasonInternal": "Reason (kept in the audit log)"
+    "reasonInternal": "Reason (kept in the audit log)",
+    "accountIntro": "Your details and language. Staff accounts use the dashboard only.",
+    "languageHint": "The dashboard's language.",
+    "notificationsIntro": "What needs you: listings to review, new support requests, payments to check.",
+    "notificationsUnread": "Notifications, {count} unread"
   },
   "Questions": {
     "title": "Questions and answers",

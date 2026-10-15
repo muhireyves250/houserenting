@@ -2,9 +2,10 @@
 
 import {
   BadgePercent,
+  Bell,
+  UserRound,
   CalendarCheck,
   ClipboardList,
-  ExternalLink,
   Home,
   LayoutDashboard,
   LifeBuoy,
@@ -24,7 +25,7 @@ import { LogoMark } from "@/components/ui/Logo";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 
-type Key = "overview" | "listings" | "bookings" | "money" | "promotions" | "moderation" | "support" | "users" | "settings" | "audit";
+type Key = "overview" | "listings" | "bookings" | "money" | "promotions" | "moderation" | "support" | "users" | "settings" | "audit" | "account" | "notifications";
 
 const GROUPS: { label: "operate" | "money" | "people" | "system"; items: { key: Key; href: string; icon: LucideIcon }[] }[] = [
   {
@@ -54,18 +55,38 @@ const GROUPS: { label: "operate" | "money" | "people" | "system"; items: { key: 
   },
 ];
 
+/** Pages reached from the top bar (not listed in the sidebar), so the top bar can name them. */
+const EXTRA: { key: Key; href: string; icon: LucideIcon }[] = [
+  { key: "account", href: "/admin/account", icon: UserRound },
+  { key: "notifications", href: "/admin/notifications", icon: Bell },
+];
+
 const isOn = (pathname: string, href: string) => (href === "/admin" ? pathname === "/admin" : pathname === href || pathname.startsWith(`${href}/`));
 
 /**
  * Staff dashboard frame: a sidebar of sections (with how many items wait in each) beside the page, a top bar with
  * the page's name and a way back to the public site. Phones get the sidebar as a slide-in menu.
  */
-export function AdminShell({ user, counts, children }: { user: { name: string; email: string }; counts: Partial<Record<Key, number>>; children: ReactNode }) {
+export function AdminShell({
+  user,
+  counts,
+  unread,
+  languageSwitcher,
+  children,
+}: {
+  user: { name: string; email: string };
+  counts: Partial<Record<Key, number>>;
+  /** Unread notifications, for the bell. */
+  unread: number;
+  /** The language switcher (rendered on the server side of the layout). */
+  languageSwitcher: ReactNode;
+  children: ReactNode;
+}) {
   const t = useTranslations("Admin.nav");
   const tAdmin = useTranslations("Admin");
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const current = GROUPS.flatMap((g) => g.items).find((i) => isOn(pathname, i.href)) ?? GROUPS[0]!.items[0]!;
+  const current = [...GROUPS.flatMap((g) => g.items), ...EXTRA].find((i) => isOn(pathname, i.href)) ?? GROUPS[0]!.items[0]!;
 
   const sidebar = (
     // Any link tapped in the phone menu closes it.
@@ -113,20 +134,18 @@ export function AdminShell({ user, counts, children }: { user: { name: string; e
           </div>
         ))}
       </nav>
-      <div className="border-t border-line px-4 py-4">
-        <div className="flex items-center gap-3">
+      <div className="border-t border-line p-3">
+        <Link
+          href="/admin/account"
+          aria-current={isOn(pathname, "/admin/account") ? "page" : undefined}
+          className={cn("flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-canvas", isOn(pathname, "/admin/account") && "bg-canvas")}
+        >
           <Avatar name={user.name} className="size-9 text-sm" />
           <span className="min-w-0 flex-1">
             <span className="block truncate text-[13px] font-semibold text-ink">{user.name}</span>
             <span className="block truncate text-xs text-muted">{user.email}</span>
           </span>
-        </div>
-        <Link
-          href="/"
-          className="mt-3 flex items-center justify-center gap-2 rounded-xl border border-line px-3 py-2 text-[13px] font-semibold text-ink transition-colors hover:border-primary hover:text-primary"
-        >
-          <ExternalLink className="size-4" aria-hidden="true" />
-          {tAdmin("viewSite")}
+          <Settings className="size-4 text-ink/50" aria-hidden="true" />
         </Link>
       </div>
     </div>
@@ -170,11 +189,22 @@ export function AdminShell({ user, counts, children }: { user: { name: string; e
             <ClipboardList className="hidden size-5 text-primary md:block" aria-hidden="true" />
             <h1 className="truncate text-[17px] font-bold tracking-[-0.01em] text-ink">{t(current.key)}</h1>
           </div>
-          <Link href="/" className="hidden items-center gap-2 rounded-full px-3 py-2 text-[13px] font-semibold text-muted transition-colors hover:text-primary sm:flex">
-            <ExternalLink className="size-4" aria-hidden="true" />
-            {tAdmin("viewSite")}
+          <Link
+            href="/admin/notifications"
+            aria-label={unread > 0 ? tAdmin("notificationsUnread", { count: unread }) : t("notifications")}
+            className="relative flex size-10 items-center justify-center rounded-full text-ink transition-colors hover:bg-canvas hover:text-primary"
+          >
+            <Bell className="size-5" aria-hidden="true" />
+            {unread > 0 && (
+              <span className="absolute top-1 right-1 flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] leading-4 font-bold text-white ring-2 ring-surface">
+                {unread > 99 ? "99+" : unread}
+              </span>
+            )}
           </Link>
-          <Avatar name={user.name} className="size-9 text-sm" />
+          <div className="hidden sm:block">{languageSwitcher}</div>
+          <Link href="/admin/account" aria-label={t("account")} className="rounded-full focus-visible:outline-2 focus-visible:outline-primary">
+            <Avatar name={user.name} className="size-9 text-sm" />
+          </Link>
         </header>
         <main className="mx-auto max-w-6xl px-4 py-6 md:px-8 md:py-8">{children}</main>
       </div>

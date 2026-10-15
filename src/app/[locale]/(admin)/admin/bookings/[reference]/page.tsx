@@ -48,7 +48,7 @@ export default async function AdminBookingPage({ params }: Props) {
           <>
             {b.status === "CONFIRMED" && iso(b.checkIn) <= todayISO() && <CheckInOut reference={b.reference} to="CHECKED_IN" />}
             {b.status === "CHECKED_IN" && <CheckInOut reference={b.reference} to="COMPLETED" />}
-            <Link href={`/listings/${b.listing.id}`} className="rounded-full border border-line bg-surface px-4 py-2 text-[13px] font-semibold text-ink hover:border-primary">
+            <Link href={`/admin/listings/${b.listing.id}`} className="rounded-full border border-line bg-surface px-4 py-2 text-[13px] font-semibold text-ink hover:border-primary">
               {t("viewListing")}
             </Link>
           </>
