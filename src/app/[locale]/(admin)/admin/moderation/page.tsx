@@ -7,6 +7,7 @@ import { Stars } from "@/features/reviews/components/Stars";
 import { pendingReviews } from "@/features/reviews/service";
 import { Link } from "@/i18n/navigation";
 import { requireAdmin } from "@/lib/permissions";
+import { PageIntro } from "@/features/admin/components/ui";
 
 const card = "rounded-3xl bg-surface p-5 shadow-[0_10px_30px_-14px_rgba(16,24,40,0.3)] ring-1 ring-black/[0.04] max-md:ring-line";
 
@@ -21,6 +22,7 @@ export default async function ModerationPage() {
   ]);
   return (
     <div className="flex flex-col gap-8">
+      <PageIntro description={t("moderationIntro")} />
       <section>
         <h2 className="mb-3 text-lg font-bold text-ink">{t("questions")}</h2>
         {questions.length === 0 && <p className="py-6 text-center text-[15px] text-muted">{t("nothingHere")}</p>}

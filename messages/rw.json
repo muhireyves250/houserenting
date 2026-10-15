@@ -170,7 +170,8 @@
       "generic": "Hari ikitagenze neza. Ongera ugerageze.",
       "nameRequired": "Andika izina ryawe.",
       "nameTooLong": "Izina ni rirerire cyane (inyuguti 80 ntarengwa).",
-      "emailInvalid": "Andika imeyili yemewe."
+      "emailInvalid": "Andika imeyili yemewe.",
+      "suspended": "Iyi konti yarahagaritswe. Vugana n'ubufasha."
     },
     "modalTitle": "Murakaza neza kuri Space Rental",
     "welcomeBack": "Murakaza neza, {name}",
@@ -750,7 +751,9 @@
         "archive": "Byavanyweho"
       },
       "user": {
-        "role": "Uruhare rwahinduwe"
+        "role": "Uruhare rwahinduwe",
+        "suspend": "Konti yahagaritswe",
+        "reactivate": "Konti yongeye gufungurwa"
       },
       "question": {
         "answer": "Ikibazo cyasubijwe",
@@ -769,7 +772,8 @@
       "booking": {
         "checkIn": "Umushyitsi yageze",
         "checkOut": "Umushyitsi yavuyeyo",
-        "paid": "Kwishyura kwemejwe"
+        "paid": "Kwishyura kwemejwe",
+        "cancel": "Itsinda ryarekuye ibifashwe"
       },
       "settings": {
         "update": "Igenamiterere ryahinduwe"
@@ -794,6 +798,9 @@
       },
       "referral": {
         "claim": "Ubutumire bwanditswe"
+      },
+      "export": {
+        "download": "Raporo yakuweho"
       }
     },
     "money": "Umushyitsi yishyura {total} · nyir'inzu {payout} · urubuga {commission}",
@@ -834,7 +841,91 @@
       "seeAll": "Reba byose",
       "activity": "Ibikorwa biheruka",
       "newThisMonth": "Bishya uku kwezi"
-    }
+    },
+    "bookingsIntro": "Ibyabitswe byose: shakisha nimero, umushyitsi cyangwa ahantu, toranya uko bihagaze, fungura kimwe urebe byose.",
+    "exportCsv": "Kuramo CSV",
+    "searchBookings": "Nimero, umushyitsi cyangwa ahantu",
+    "col": {
+      "reference": "Nimero",
+      "place": "Ahantu",
+      "guest": "Umushyitsi",
+      "when": "Igihe",
+      "total": "Byose",
+      "status": "Uko bihagaze",
+      "name": "Izina",
+      "role": "Uruhare",
+      "activity": "Ibikorwa",
+      "joined": "Yiyandikishije",
+      "email": "Imeli",
+      "phone": "Telefoni",
+      "action": "Igikorwa",
+      "by": "Na",
+      "record": "Icyo bijyanye"
+    },
+    "ownerShort": "nyir'inzu {amount}",
+    "pageOf": "Urupapuro {page} kuri {pages}",
+    "viewListing": "Reba ahantu",
+    "stay": "Igihe",
+    "length": "Uburebure",
+    "bookedAt": "Byabitswe",
+    "holdUntil": "Bifashwe kugeza",
+    "moneySplit": "Amafaranga",
+    "guestPays": "Umushyitsi yishyura",
+    "payments": "Ubwishyu",
+    "noPayments": "Nta bwishyu buraza.",
+    "guest": "Umushyitsi",
+    "payer": "Yishyura na",
+    "identity": "Amakuru y'umwirondoro",
+    "idNumber": "Nimero y'indangamuntu cyangwa pasiporo",
+    "nationality": "Ubwenegihugu",
+    "identityNote": "Itsinda gusa. Akoreshwa mu masezerano; ntukayandukure ahandi.",
+    "releaseHold": "Rekura ibitishyuwe",
+    "releaseHoldHint": "Bihagarika ibi bitishyuwe kandi bikarekura iminsi. Umushyitsi aramenyeshwa. Ibyishyuwe bikurikiza amabwiriza yo gusubiza.",
+    "usersIntro": "{count, plural, one {Umuntu #} other {Abantu #}} bafite konti.",
+    "userFilter": {
+      "all": "Bose",
+      "staff": "Itsinda",
+      "hosts": "Ba nyir'inzu",
+      "suspended": "Bahagaritswe"
+    },
+    "guestRole": "Umushyitsi",
+    "activityLine": "{bookings} byabitswe · {listings} ahantu",
+    "userStatus": {
+      "ACTIVE": "Arakora",
+      "SUSPENDED": "Yahagaritswe"
+    },
+    "theirBookings": "Ibyabitswe",
+    "theirListings": "Ahantu",
+    "theirTickets": "Ubusabe bw'ubufasha",
+    "account": "Konti",
+    "emailVerified": "Imeli yemejwe",
+    "yes": "Yego",
+    "no": "Oya",
+    "language": "Ururimi",
+    "invitedBy": "Yatumiwe na",
+    "invited": "Inshuti yatumiye",
+    "staffAccess": "Uburenganzira bw'itsinda",
+    "isStaff": "Ashobora gufungura ubuyobozi.",
+    "notStaff": "Nta burenganzira bw'ubuyobozi.",
+    "suspend": "Hagarika konti",
+    "reactivate": "Ongera ufungure konti",
+    "suspendHint": "Bimusohora hose kandi ntiyongera kwinjira. Ibyo yabitse n'ahantu he biguma.",
+    "reactivateHint": "Bimwemerera kongera kwinjira.",
+    "listingBookings": "Ibyabitswe kuri aha hantu",
+    "auditIntro": "Impinduka zose z'itsinda, ba nyir'inzu na sisitemu, izivuye vuba mbere.",
+    "auditGroup": {
+      "all": "Byose",
+      "listings": "Ahantu",
+      "bookings": "Ibyabitswe",
+      "people": "Abantu",
+      "support": "Ubufasha",
+      "money": "Amafaranga",
+      "settings": "Igenamiterere"
+    },
+    "moderationIntro": "Ibibazo n'ibitekerezo bigaragara ku hantu umaze kubyemeza.",
+    "supportIntro": "Ubusabe bw'abashyitsi na ba nyir'inzu. Subiza hano; babibona mu Bufasha.",
+    "promotionsIntro": "Kode abashyitsi bandika babika. Ni wowe ugena igabanywa, imipaka n'uryishyura.",
+    "reasonInternal": "Impamvu (ibikwa mu nyandiko z'ibikorwa)"
   },
   "Questions": {
     "title": "Ibibazo n'ibisubizo",
@@ -1027,7 +1118,14 @@
       "SETTLEMENT": "Kwishyura nyir'inzu",
       "REFERRAL_REWARD": "Igihembo cy'ubutumire",
       "REFUND": "Gusubiza"
-    }
+    },
+    "intro": "Ubwishyu bw'abashyitsi, ibyo ba nyir'inzu bagomba n'ibyo bishyuwe, n'igitabo cyose. Raporo zifunguka muri spreadsheet iyo ari yo yose.",
+    "exportBookings": "Ibyabitswe CSV",
+    "exportPayments": "Ubwishyu CSV",
+    "exportLedger": "Igitabo CSV",
+    "paymentsTitle": "Ubwishyu",
+    "provider": "Utanga serivisi",
+    "transaction": "Igikorwa"
   },
   "Promotions": {
     "new": "Kode nshya y'igabanywa",

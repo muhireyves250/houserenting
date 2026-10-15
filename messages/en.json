@@ -170,7 +170,8 @@
       "generic": "Something went wrong. Please try again.",
       "nameRequired": "Enter your name.",
       "nameTooLong": "Name is too long (80 characters max).",
-      "emailInvalid": "Enter a valid email address."
+      "emailInvalid": "Enter a valid email address.",
+      "suspended": "This account is suspended. Contact support."
     },
     "modalTitle": "Welcome to Space Rental",
     "welcomeBack": "Welcome back, {name}",
@@ -750,7 +751,9 @@
         "archive": "Removed"
       },
       "user": {
-        "role": "Role changed"
+        "role": "Role changed",
+        "suspend": "Account suspended",
+        "reactivate": "Account reactivated"
       },
       "question": {
         "answer": "Question answered",
@@ -769,7 +772,8 @@
       "booking": {
         "checkIn": "Guest checked in",
         "checkOut": "Guest checked out",
-        "paid": "Payment verified"
+        "paid": "Payment verified",
+        "cancel": "Hold released by staff"
       },
       "settings": {
         "update": "Settings changed"
@@ -794,6 +798,9 @@
       },
       "referral": {
         "claim": "Invite credited"
+      },
+      "export": {
+        "download": "Report exported"
       }
     },
     "money": "Guest pays {total} · owner {payout} · platform {commission}",
@@ -834,7 +841,91 @@
       "seeAll": "See all",
       "activity": "Recent activity",
       "newThisMonth": "New this month"
-    }
+    },
+    "bookingsIntro": "Every booking: search by reference, guest or place, filter by status, open one for the full record.",
+    "exportCsv": "Export CSV",
+    "searchBookings": "Search reference, guest or place",
+    "col": {
+      "reference": "Reference",
+      "place": "Place",
+      "guest": "Guest",
+      "when": "When",
+      "total": "Total",
+      "status": "Status",
+      "name": "Name",
+      "role": "Role",
+      "activity": "Activity",
+      "joined": "Joined",
+      "email": "Email",
+      "phone": "Phone",
+      "action": "Action",
+      "by": "By",
+      "record": "Record"
+    },
+    "ownerShort": "owner {amount}",
+    "pageOf": "Page {page} of {pages}",
+    "viewListing": "View listing",
+    "stay": "Stay",
+    "length": "Length",
+    "bookedAt": "Booked",
+    "holdUntil": "Held until",
+    "moneySplit": "Money",
+    "guestPays": "Guest pays",
+    "payments": "Payments",
+    "noPayments": "No payment received yet.",
+    "guest": "Guest",
+    "payer": "Pays with",
+    "identity": "Identity details",
+    "idNumber": "ID or passport number",
+    "nationality": "Nationality",
+    "identityNote": "Staff only. Use for the rental agreement; don't copy elsewhere.",
+    "releaseHold": "Release unpaid hold",
+    "releaseHoldHint": "Cancels this unpaid booking and frees the dates. The guest is told. Paid bookings follow the refund policy.",
+    "usersIntro": "{count, plural, one {# person} other {# people}} with an account.",
+    "userFilter": {
+      "all": "Everyone",
+      "staff": "Staff",
+      "hosts": "Hosts",
+      "suspended": "Suspended"
+    },
+    "guestRole": "Guest",
+    "activityLine": "{bookings} bookings · {listings} listings",
+    "userStatus": {
+      "ACTIVE": "Active",
+      "SUSPENDED": "Suspended"
+    },
+    "theirBookings": "Bookings",
+    "theirListings": "Listings",
+    "theirTickets": "Support requests",
+    "account": "Account",
+    "emailVerified": "Email verified",
+    "yes": "Yes",
+    "no": "No",
+    "language": "Language",
+    "invitedBy": "Invited by",
+    "invited": "Friends invited",
+    "staffAccess": "Staff access",
+    "isStaff": "Can open the admin dashboard.",
+    "notStaff": "No admin access.",
+    "suspend": "Suspend account",
+    "reactivate": "Reactivate account",
+    "suspendHint": "Signs them out everywhere and stops them signing in. Their bookings and listings stay.",
+    "reactivateHint": "Lets them sign in again.",
+    "listingBookings": "Bookings for this place",
+    "auditIntro": "Every change staff, hosts and the system made, newest first.",
+    "auditGroup": {
+      "all": "Everything",
+      "listings": "Listings",
+      "bookings": "Bookings",
+      "people": "People",
+      "support": "Support",
+      "money": "Money",
+      "settings": "Settings"
+    },
+    "moderationIntro": "Questions and guest feedback appear on listings only after you publish them.",
+    "supportIntro": "Requests from guests and hosts. Reply here; they see it in Help and support.",
+    "promotionsIntro": "Codes guests enter when booking. You decide the discount, limits and who pays for it.",
+    "reasonInternal": "Reason (kept in the audit log)"
   },
   "Questions": {
     "title": "Questions and answers",
@@ -1027,7 +1118,14 @@
       "SETTLEMENT": "Payout to owner",
       "REFERRAL_REWARD": "Referral reward",
       "REFUND": "Refund"
-    }
+    },
+    "intro": "Guest payments, what owners are owed and paid, and the full ledger. Exports open in any spreadsheet.",
+    "exportBookings": "Bookings CSV",
+    "exportPayments": "Payments CSV",
+    "exportLedger": "Ledger CSV",
+    "paymentsTitle": "Payments",
+    "provider": "Provider",
+    "transaction": "Transaction"
   },
   "Promotions": {
     "new": "New promo code",

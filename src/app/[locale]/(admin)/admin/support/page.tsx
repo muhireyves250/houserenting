@@ -6,6 +6,7 @@ import { staffTickets, type TicketStatus } from "@/features/support/service";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { requireAdmin } from "@/lib/permissions";
+import { PageIntro } from "@/features/admin/components/ui";
 
 type Props = { searchParams: Promise<{ status?: string }> };
 const FILTERS: (TicketStatus | "active")[] = ["active", "RESOLVED", "CLOSED"];
@@ -17,6 +18,7 @@ export default async function AdminSupportPage({ searchParams }: Props) {
   const [t, tAdmin, locale, tickets] = await Promise.all([getTranslations("Support"), getTranslations("Admin"), getLocale(), staffTickets(status)]);
   return (
     <div className="flex flex-col gap-4">
+      <PageIntro description={tAdmin("supportIntro")} />
       <div className="flex gap-2">
         {FILTERS.map((f) => {
           const active = (status ?? "active") === f;

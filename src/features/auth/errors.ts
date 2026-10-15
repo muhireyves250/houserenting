@@ -10,6 +10,7 @@ export function authErrorKey(error?: { code?: string | null; status?: number | n
   if (code.startsWith("USER_ALREADY_EXISTS")) return "emailTaken";
   if (code === "INVALID_EMAIL_OR_PASSWORD" || code === "INVALID_PASSWORD" || code === "INVALID_EMAIL") return "invalidCredentials";
   if (code === "EMAIL_NOT_VERIFIED") return "notVerified";
+  if (code === "ACCOUNT_SUSPENDED") return "suspended";
   if (code === "PASSWORD_TOO_SHORT") return "passwordShort";
   if (code === "PASSWORD_TOO_LONG") return "passwordLong";
   if (code === "PASSWORD_TOO_COMMON") return "passwordCommon";

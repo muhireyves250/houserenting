@@ -9,6 +9,12 @@ import { HostStatus } from "@/features/hosting/components/HostStatus";
 import { Link } from "@/i18n/navigation";
 import { formatRWF } from "@/lib/format";
 import { requireAdmin } from "@/lib/permissions";
+import { RoomStatusSelect } from "@/features/admin/components/RoomStatusSelect";
+import { PageIntro, Panel, Table, td } from "@/features/admin/components/ui";
+import { listingBookings } from "@/features/admin/queries";
+import { StatusBadge } from "@/features/bookings/components/StatusBadge";
+import { formatStayDates } from "@/features/bookings/format";
+import { listingRooms } from "@/features/rooms/service";
 import { dynamicMessage } from "@/lib/dynamic-message";
 
 type Props = { params: Promise<{ id: string }> };
@@ -19,7 +25,7 @@ export default async function AdminListingPage({ params }: Props) {
   await requireAdmin(`/admin/listings/${id}`);
   const listing = await listingForReview(id);
   if (!listing) notFound();
-  const [t, tHost, tType, tFacility, tListings, locale, history] = await Promise.all([
+  const [t, tHost, tType, tFacility, tListings, locale, history, rooms, bookings, tBookings, tRooms] = await Promise.all([
     getTranslations("Admin"),
     getTranslations("Host"),
     getTranslations("ListingType"),
@@ -27,10 +33,16 @@ export default async function AdminListingPage({ params }: Props) {
     getTranslations("Listings"),
     getLocale(),
     recentAudit({ entityType: "listing", entityId: id, take: 30 }),
+    listingRooms(id),
+    listingBookings(id),
+    getTranslations("Bookings"),
+    getTranslations("Rooms"),
   ]);
+  const iso = (d: Date) => d.toISOString().slice(0, 10);
 
   return (
     <div className="flex flex-col gap-4">
+      <PageIntro back={{ href: "/admin/listings", label: t("nav.listings") }} />
       <div className="flex flex-wrap items-center gap-3">
         <h2 className="text-[22px] leading-7 font-bold text-ink">{listing.title}</h2>
         <HostStatus status={listing.status} label={tHost(`status.${listing.status}`)} />
@@ -81,7 +93,9 @@ export default async function AdminListingPage({ params }: Props) {
 
       <section className={card}>
         <h3 className="mb-2 text-[15px] font-semibold text-ink">{t("host")}</h3>
-        <p className="text-[15px] text-ink">{listing.host.name}</p>
+        <Link href={`/admin/users/${listing.host.id}`} className="text-[15px] font-semibold text-primary hover:underline">
+          {listing.host.name}
+        </Link>
         <p className="text-[13px] text-muted">
           {listing.host.email}
           {listing.host.phone && ` · ${listing.host.phone}`}
@@ -94,6 +108,47 @@ export default async function AdminListingPage({ params }: Props) {
           <ReviewListing listingId={listing.id} mode={listing.status === "PENDING_REVIEW" ? "review" : "live"} />
         </section>
       )}
+
+      {rooms.length > 0 && (
+        <Panel title={tRooms("title")} flush>
+          <ul className="divide-y divide-line">
+            {rooms.map((room) => (
+              <li key={room.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-3">
+                <span>
+                  <span className="block text-[14px] font-semibold text-ink">{room.name}</span>
+                  <span className="block text-xs text-muted">
+                    {room.rates.map((r) => `${formatRWF(r.price, locale)} ${tListings(`perUnit.${r.unit}`)}`).join(" · ")} · {tRooms("guests", { count: room.maxGuests })}
+                  </span>
+                </span>
+                <RoomStatusSelect roomId={room.id} status={room.status} name={room.name} />
+              </li>
+            ))}
+          </ul>
+        </Panel>
+      )}
+
+      <Panel title={t("listingBookings")} flush>
+        <Table
+          head={[t("col.reference"), t("col.guest"), t("col.when"), t("col.total"), t("col.status")]}
+          empty={bookings.length === 0 ? <p className="py-8 text-center text-[14px] text-muted">{t("nothingHere")}</p> : null}
+        >
+          {bookings.map((b) => (
+            <tr key={b.reference} className="hover:bg-canvas/70">
+              <td className={td}>
+                <Link href={`/admin/bookings/${b.reference}`} className="font-mono text-[13px] font-semibold text-primary hover:underline">
+                  {b.reference}
+                </Link>
+              </td>
+              <td className={td}>{b.guest.name}</td>
+              <td className={`${td} whitespace-nowrap`}>{formatStayDates(locale, iso(b.checkIn), iso(b.checkOut))}</td>
+              <td className={`${td} whitespace-nowrap tabular-nums`}>{formatRWF(b.total, locale)}</td>
+              <td className={td}>
+                <StatusBadge status={b.status} label={tBookings(`status.${b.status}`)} />
+              </td>
+            </tr>
+          ))}
+        </Table>
+      </Panel>
 
       <section className={card}>
         <h3 className="mb-3 text-[15px] font-semibold text-ink">{t("history")}</h3>

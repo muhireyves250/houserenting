@@ -39,3 +39,21 @@ export async function moveBookingAction(reference: string, to: "CHECKED_IN" | "C
   if (ok) revalidatePath("/[locale]/admin/bookings", "page");
   return { ok };
 }
+
+export async function staffCancelBookingAction(reference: string, reason: string): Promise<{ ok: boolean }> {
+  const admin = await staff();
+  if (!admin || typeof reference !== "string" || !isBookingReference(reference) || typeof reason !== "string" || reason.length > 300) return { ok: false };
+  const { staffCancelUnpaid } = await import("./queries");
+  const ok = await staffCancelUnpaid(admin.id, reference, reason);
+  if (ok) revalidatePath("/[locale]/admin", "layout");
+  return { ok };
+}
+
+export async function setUserStatusAction(userId: string, status: "ACTIVE" | "SUSPENDED", reason: string): Promise<{ ok: boolean }> {
+  const admin = await staff();
+  if (!admin || !id.safeParse(userId).success || (status !== "ACTIVE" && status !== "SUSPENDED") || typeof reason !== "string" || reason.length > 300) return { ok: false };
+  const { setUserStatus } = await import("./queries");
+  const ok = await setUserStatus(admin.id, userId, status, reason);
+  if (ok) revalidatePath("/[locale]/admin/users", "layout");
+  return { ok };
+}

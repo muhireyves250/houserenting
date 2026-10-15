@@ -97,6 +97,11 @@ export const auth = betterAuth({
       await claimReferral(userId, code).catch((err: unknown) => logger.error({ err }, "referral claim failed"));
     }),
     before: createAuthMiddleware(async (ctx) => {
+      // Suspended accounts can't sign in (their sessions were ended when they were suspended).
+      if (ctx.path === "/sign-in/email" && typeof ctx.body?.email === "string") {
+        const account = await db.user.findUnique({ where: { email: ctx.body.email.toLowerCase().trim() }, select: { status: true } });
+        if (account?.status === "SUSPENDED") throw new APIError("FORBIDDEN", { code: "ACCOUNT_SUSPENDED", message: "This account is suspended" });
+      }
       const candidate =
         ctx.path === "/sign-up/email" ? ctx.body?.password : ctx.path === "/reset-password" ? ctx.body?.newPassword : undefined;
       if (typeof candidate === "string" && isCommonPassword(candidate)) {

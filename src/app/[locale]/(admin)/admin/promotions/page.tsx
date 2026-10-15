@@ -3,14 +3,16 @@ import { PromoForm, PromoToggle } from "@/features/admin/components/PromoForm";
 import { listPromos } from "@/features/promotions/service";
 import { formatRWF } from "@/lib/format";
 import { requireAdmin } from "@/lib/permissions";
+import { PageIntro } from "@/features/admin/components/ui";
 import { cn } from "@/lib/cn";
 
 export default async function AdminPromotionsPage() {
   await requireAdmin("/admin/promotions");
-  const [t, locale, promos] = await Promise.all([getTranslations("Promotions"), getLocale(), listPromos()]);
+  const [t, tIntro, locale, promos] = await Promise.all([getTranslations("Promotions"), getTranslations("Admin"), getLocale(), listPromos()]);
   const date = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeZone: "Africa/Kigali" });
   return (
     <div className="flex flex-col gap-6">
+      <PageIntro description={tIntro("promotionsIntro")} />
       <PromoForm />
       <ul className="divide-y divide-line rounded-3xl bg-surface px-5 shadow-[0_10px_30px_-14px_rgba(16,24,40,0.3)] ring-1 ring-black/[0.04] max-md:ring-line">
         {promos.length === 0 && <li className="py-8 text-center text-[15px] text-muted">{t("none")}</li>}

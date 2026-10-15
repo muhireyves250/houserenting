@@ -170,7 +170,8 @@
       "generic": "Une erreur s'est produite. Veuillez réessayer.",
       "nameRequired": "Saisissez votre nom.",
       "nameTooLong": "Le nom est trop long (80 caractères maximum).",
-      "emailInvalid": "Saisissez une adresse e-mail valide."
+      "emailInvalid": "Saisissez une adresse e-mail valide.",
+      "suspended": "Ce compte est suspendu. Contactez l'assistance."
     },
     "modalTitle": "Bienvenue sur Space Rental",
     "welcomeBack": "Bon retour, {name}",
@@ -750,7 +751,9 @@
         "archive": "Supprimée"
       },
       "user": {
-        "role": "Rôle modifié"
+        "role": "Rôle modifié",
+        "suspend": "Compte suspendu",
+        "reactivate": "Compte réactivé"
       },
       "question": {
         "answer": "Réponse à une question",
@@ -769,7 +772,8 @@
       "booking": {
         "checkIn": "Arrivée enregistrée",
         "checkOut": "Départ enregistré",
-        "paid": "Paiement vérifié"
+        "paid": "Paiement vérifié",
+        "cancel": "Blocage libéré par l'équipe"
       },
       "settings": {
         "update": "Paramètres modifiés"
@@ -794,6 +798,9 @@
       },
       "referral": {
         "claim": "Parrainage enregistré"
+      },
+      "export": {
+        "download": "Rapport exporté"
       }
     },
     "money": "Le voyageur paie {total} · propriétaire {payout} · plateforme {commission}",
@@ -834,7 +841,91 @@
       "seeAll": "Tout voir",
       "activity": "Activité récente",
       "newThisMonth": "Nouveau ce mois-ci"
-    }
+    },
+    "bookingsIntro": "Toutes les réservations : recherchez par référence, voyageur ou logement, filtrez par statut, ouvrez-en une pour le dossier complet.",
+    "exportCsv": "Exporter en CSV",
+    "searchBookings": "Référence, voyageur ou logement",
+    "col": {
+      "reference": "Référence",
+      "place": "Logement",
+      "guest": "Voyageur",
+      "when": "Dates",
+      "total": "Total",
+      "status": "Statut",
+      "name": "Nom",
+      "role": "Rôle",
+      "activity": "Activité",
+      "joined": "Inscription",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "action": "Action",
+      "by": "Par",
+      "record": "Élément"
+    },
+    "ownerShort": "propriétaire {amount}",
+    "pageOf": "Page {page} sur {pages}",
+    "viewListing": "Voir l'annonce",
+    "stay": "Séjour",
+    "length": "Durée",
+    "bookedAt": "Réservé le",
+    "holdUntil": "Bloqué jusqu'au",
+    "moneySplit": "Montants",
+    "guestPays": "Le voyageur paie",
+    "payments": "Paiements",
+    "noPayments": "Aucun paiement reçu.",
+    "guest": "Voyageur",
+    "payer": "Paie avec",
+    "identity": "Identité",
+    "idNumber": "N° d'identité ou de passeport",
+    "nationality": "Nationalité",
+    "identityNote": "Réservé à l'équipe. Pour le contrat de location ; ne pas copier ailleurs.",
+    "releaseHold": "Libérer le blocage non payé",
+    "releaseHoldHint": "Annule cette réservation non payée et libère les dates. Le voyageur est prévenu. Les réservations payées suivent la politique de remboursement.",
+    "usersIntro": "{count, plural, one {# personne} other {# personnes}} avec un compte.",
+    "userFilter": {
+      "all": "Tout le monde",
+      "staff": "Équipe",
+      "hosts": "Hôtes",
+      "suspended": "Suspendus"
+    },
+    "guestRole": "Voyageur",
+    "activityLine": "{bookings} réservations · {listings} annonces",
+    "userStatus": {
+      "ACTIVE": "Actif",
+      "SUSPENDED": "Suspendu"
+    },
+    "theirBookings": "Réservations",
+    "theirListings": "Annonces",
+    "theirTickets": "Demandes d'aide",
+    "account": "Compte",
+    "emailVerified": "E-mail vérifié",
+    "yes": "Oui",
+    "no": "Non",
+    "language": "Langue",
+    "invitedBy": "Invité par",
+    "invited": "Amis invités",
+    "staffAccess": "Accès équipe",
+    "isStaff": "Peut ouvrir l'administration.",
+    "notStaff": "Pas d'accès administration.",
+    "suspend": "Suspendre le compte",
+    "reactivate": "Réactiver le compte",
+    "suspendHint": "Le déconnecte partout et l'empêche de se connecter. Ses réservations et annonces restent.",
+    "reactivateHint": "Lui permet de se reconnecter.",
+    "listingBookings": "Réservations de ce logement",
+    "auditIntro": "Toutes les modifications de l'équipe, des hôtes et du système, les plus récentes d'abord.",
+    "auditGroup": {
+      "all": "Tout",
+      "listings": "Annonces",
+      "bookings": "Réservations",
+      "people": "Personnes",
+      "support": "Assistance",
+      "money": "Finances",
+      "settings": "Paramètres"
+    },
+    "moderationIntro": "Les questions et avis n'apparaissent sur les annonces qu'après publication.",
+    "supportIntro": "Demandes des voyageurs et hôtes. Répondez ici ; ils le voient dans Aide et assistance.",
+    "promotionsIntro": "Codes saisis à la réservation. Vous fixez la réduction, les limites et qui la paie.",
+    "reasonInternal": "Motif (gardé dans le journal d'audit)"
   },
   "Questions": {
     "title": "Questions et réponses",
@@ -1027,7 +1118,14 @@
       "SETTLEMENT": "Versement au propriétaire",
       "REFERRAL_REWARD": "Récompense de parrainage",
       "REFUND": "Remboursement"
-    }
+    },
+    "intro": "Paiements des voyageurs, montants dus et versés aux propriétaires, et le grand livre complet. Les exports s'ouvrent dans tout tableur.",
+    "exportBookings": "Réservations CSV",
+    "exportPayments": "Paiements CSV",
+    "exportLedger": "Grand livre CSV",
+    "paymentsTitle": "Paiements",
+    "provider": "Prestataire",
+    "transaction": "Transaction"
   },
   "Promotions": {
     "new": "Nouveau code promo",
