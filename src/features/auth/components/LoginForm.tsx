@@ -12,13 +12,23 @@ import { loginSchema } from "@/features/auth/schemas";
 import { Link, useRouter } from "@/i18n/navigation";
 import { authClient } from "@/lib/auth-client";
 import { safeNextPath } from "@/lib/safe-redirect";
+import { landingAfterLogin } from "@/features/auth/landing";
 import { PasswordField } from "./PasswordField";
 
 /**
  * `onSuccess` replaces the default "go to next" navigation, and `onForgot` replaces the
  * "Forgot password?" link with an in-place action (both used by the auth modal).
  */
-export function LoginForm({ next, onSuccess, onForgot }: { next?: string; onSuccess?: () => void; onForgot?: () => void }) {
+export function LoginForm({
+  next,
+  onSuccess,
+  onForgot,
+}: {
+  next?: string;
+  /** Receives where to go: `next`, or the admin dashboard for staff without a particular destination. */
+  onSuccess?: (destination: string) => void;
+  onForgot?: () => void;
+}) {
   const t = useTranslations("Auth");
   const router = useRouter();
   const [error, setError] = useState<AuthErrorKey | null>(null);
@@ -52,8 +62,9 @@ export function LoginForm({ next, onSuccess, onForgot }: { next?: string; onSucc
     }
     const user = result.data?.user;
     if (user?.name && user.email) rememberAccount({ name: user.name, email: user.email });
-    if (onSuccess) return onSuccess();
-    router.push(safeNextPath(next));
+    const destination = landingAfterLogin(safeNextPath(next), (user as { role?: string } | undefined)?.role);
+    if (onSuccess) return onSuccess(destination);
+    router.push(destination);
   }
 
   return (

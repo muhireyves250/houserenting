@@ -93,7 +93,7 @@ export function AuthModal({
               onForgot={() => go("forgot")}
               // Full reload of the page underneath so the header and layout show the signed-in user.
               // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-              onSuccess={() => window.location.assign(`/${locale}${next === "/" ? "" : next}`)}
+              onSuccess={(destination) => window.location.assign(`/${locale}${destination === "/" ? "" : destination}`)}
             />
           ) : (
             <SignupForm />

@@ -1,3 +1,4 @@
+import { LayoutDashboard } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { Avatar } from "@/components/ui/Avatar";
@@ -9,7 +10,7 @@ import { HeaderAuthLinks } from "./HeaderAuthLinks";
 import { HeaderNav } from "./HeaderNav";
 import { LocaleSwitcher } from "./LocaleSwitcher";
 
-export async function SiteHeader({ user }: { user: { name: string } | null }) {
+export async function SiteHeader({ user }: { user: { name: string; isAdmin?: boolean } | null }) {
   const t = await getTranslations("Nav");
 
   return (
@@ -27,6 +28,15 @@ export async function SiteHeader({ user }: { user: { name: string } | null }) {
           <Suspense>
             <LocaleSwitcher />
           </Suspense>
+          {user?.isAdmin && (
+            <Link
+              href="/admin"
+              className="inline-flex h-11 items-center gap-2 rounded-full bg-primary px-4 text-[14px] font-semibold text-white shadow-[0_6px_16px_-8px_rgba(0,87,184,0.9)] transition-colors hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            >
+              <LayoutDashboard className="size-4" aria-hidden="true" />
+              {t("admin")}
+            </Link>
+          )}
           {user ? (
             <Link href="/profile" className="rounded-full focus-visible:outline-2 focus-visible:outline-primary">
               <Avatar name={user.name} />

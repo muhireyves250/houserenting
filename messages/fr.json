@@ -14,7 +14,8 @@
     "language": "Langue",
     "mainNav": "Navigation principale",
     "back": "Retour",
-    "chooseLanguage": "Choisissez une langue"
+    "chooseLanguage": "Choisissez une langue",
+    "admin": "Admin"
   },
   "Common": {
     "save": "Enregistrer",
@@ -209,7 +210,10 @@
     "yourListings": "Vos annonces",
     "hostYourPlace": "Proposer votre logement",
     "help": "Aide et assistance",
-    "admin": "Administration"
+    "admin": "Administration",
+    "roleAdmin": "Administrateur",
+    "adminCard": "Ouvrir le tableau de bord",
+    "adminCardBody": "Annonces, réservations, finances, assistance et paramètres"
   },
   "Empty": {
     "favoritesTitle": "Aucun favori pour l'instant",

@@ -14,7 +14,8 @@
     "language": "Language",
     "mainNav": "Main navigation",
     "back": "Back",
-    "chooseLanguage": "Choose a language"
+    "chooseLanguage": "Choose a language",
+    "admin": "Admin"
   },
   "Common": {
     "save": "Save",
@@ -209,7 +210,10 @@
     "yourListings": "Your listings",
     "hostYourPlace": "List your place",
     "help": "Help and support",
-    "admin": "Admin"
+    "admin": "Admin",
+    "roleAdmin": "Admin",
+    "adminCard": "Open admin dashboard",
+    "adminCardBody": "Listings, bookings, money, support and settings"
   },
   "Empty": {
     "favoritesTitle": "No favorites yet",

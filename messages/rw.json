@@ -14,7 +14,8 @@
     "language": "Ururimi",
     "mainNav": "Ibice by'ingenzi",
     "back": "Subira inyuma",
-    "chooseLanguage": "Hitamo ururimi"
+    "chooseLanguage": "Hitamo ururimi",
+    "admin": "Ubuyobozi"
   },
   "Common": {
     "save": "Bika",
@@ -209,7 +210,10 @@
     "yourListings": "Aho wakira abashyitsi",
     "hostYourPlace": "Shyiraho aho ukodesha",
     "help": "Ubufasha",
-    "admin": "Ubuyobozi"
+    "admin": "Ubuyobozi",
+    "roleAdmin": "Umuyobozi",
+    "adminCard": "Fungura ubuyobozi",
+    "adminCardBody": "Ahantu, ibyabitswe, amafaranga, ubufasha n'igenamiterere"
   },
   "Empty": {
     "favoritesTitle": "Nta byo ukunda biraboneka",
