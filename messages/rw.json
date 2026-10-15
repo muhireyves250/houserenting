@@ -252,13 +252,17 @@
       "HOUR": "/ isaha",
       "DAY": "/ umunsi",
       "NIGHT": "/ ijoro",
-      "MONTH": "/ ukwezi"
+      "MONTH": "/ ukwezi",
+      "WEEK": "/ icyumweru",
+      "YEAR": "/ umwaka"
     },
     "unitName": {
       "HOUR": "Ku isaha",
       "DAY": "Ku munsi",
       "NIGHT": "Ku ijoro",
-      "MONTH": "Ku kwezi"
+      "MONTH": "Ku kwezi",
+      "WEEK": "Ku cyumweru",
+      "YEAR": "Ku mwaka"
     },
     "new": "Gishya",
     "discount": "-{percent}%",
@@ -439,7 +443,34 @@
     "yourDetails": "Amakuru yawe",
     "idNumber": "Nimero y'indangamuntu cyangwa pasiporo",
     "nationality": "Ubwenegihugu",
-    "identityPrivacy": "Itsinda ryacu ryonyine ni ryo ribona aya makuru. Akoreshwa mu masezerano y'ubukode."
+    "identityPrivacy": "Itsinda ryacu ryonyine ni ryo ribona aya makuru. Akoreshwa mu masezerano y'ubukode.",
+    "by": {
+      "HOUR": "Ku isaha",
+      "DAY": "Ku munsi",
+      "NIGHT": "Ku ijoro",
+      "WEEK": "Ku cyumweru",
+      "MONTH": "Ku kwezi",
+      "YEAR": "Ku mwaka"
+    },
+    "unitTimes": {
+      "HOUR": "{price} × {count, plural, one {isaha #} other {amasaha #}}",
+      "DAY": "{price} × {count, plural, one {umunsi #} other {iminsi #}}",
+      "NIGHT": "{price} × {count, plural, one {ijoro #} other {amajoro #}}",
+      "WEEK": "{price} × {count, plural, one {icyumweru #} other {ibyumweru #}}",
+      "MONTH": "{price} × {count, plural, one {ukwezi #} other {amezi #}}",
+      "YEAR": "{price} × {count, plural, one {umwaka #} other {imyaka #}}"
+    },
+    "unitCount": {
+      "HOUR": "{count, plural, one {isaha #} other {amasaha #}}",
+      "DAY": "{count, plural, one {umunsi #} other {iminsi #}}",
+      "NIGHT": "{count, plural, one {ijoro #} other {amajoro #}}",
+      "WEEK": "{count, plural, one {icyumweru #} other {ibyumweru #}}",
+      "MONTH": "{count, plural, one {ukwezi #} other {amezi #}}",
+      "YEAR": "{count, plural, one {umwaka #} other {imyaka #}}"
+    },
+    "startDate": "Itariki",
+    "startTime": "Isaha yo gutangira",
+    "chooseTime": "Hitamo isaha"
   },
   "Facility": {
     "KITCHEN": "Igikoni",
@@ -537,7 +568,8 @@
     "rental": "Ubukode",
     "rentalTerms": "Amezi {months}, {upfront} yishyurwa ubika",
     "payTitle": "Ishyura kugira ngo byemezwe",
-    "messageHost": "Andikira nyir'inzu"
+    "messageHost": "Andikira nyir'inzu",
+    "time": "Isaha"
   },
   "Host": {
     "title": "Aho wakira abashyitsi",
@@ -584,13 +616,17 @@
         "HOUR": "Amasaha make",
         "DAY": "Iminsi mike",
         "NIGHT": "Amajoro make",
-        "MONTH": "Amezi make"
+        "MONTH": "Amezi make",
+        "WEEK": "Ibyumweru bike",
+        "YEAR": "Imyaka mike"
       },
       "max": {
         "HOUR": "Amasaha menshi",
         "DAY": "Iminsi myinshi",
         "NIGHT": "Amajoro menshi",
-        "MONTH": "Amezi menshi"
+        "MONTH": "Amezi menshi",
+        "WEEK": "Ibyumweru byinshi",
+        "YEAR": "Imyaka myinshi"
       },
       "checkIn": "Kwinjira guhera",
       "checkOut": "Gusohoka mbere ya",
@@ -602,7 +638,7 @@
       "terms": "Amabwiriza y'inzu (rimwe ku murongo)",
       "bookingModel": "Uko abashyitsi babika"
     },
-    "pricesHint": "Hitamo uko abashyitsi bakodesha: ku isaha, ku munsi, ku ijoro cyangwa ku kwezi.",
+    "pricesHint": "Hitamo uko abashyitsi babika: ku isaha, ku munsi, ku ijoro, ku cyumweru, ku kwezi cyangwa ku mwaka (lodge: ijoro cyangwa umunsi).",
     "errors": {
       "field": "Reba aha.",
       "maxBelowMin": "Umubare munini ugomba kuba nibura ungana n'umuto.",
@@ -610,7 +646,8 @@
       "pin": "Shyira akamenyetso ahantu mu Rwanda.",
       "noRates": "Shyiraho nibura igiciro kimwe.",
       "check": "Reba ahagaragajwe.",
-      "failed": "Kubika byanze. Ongera ugerageze."
+      "failed": "Kubika byanze. Ongera ugerageze.",
+      "lodgeUnits": "Lodge zibikwa ku ijoro cyangwa ku munsi gusa."
     },
     "save": "Bika",
     "saved": "Byabitswe",
@@ -866,7 +903,8 @@
     "save": "Bika icyumba",
     "wholePlace": "Ahantu hose",
     "choose": "Hitamo icyumba",
-    "perNight": "/ ijoro"
+    "perNight": "/ ijoro",
+    "howBooked": "Uko iki cyumba kibikwa"
   },
   "Settings": {
     "note": "Siga ahantu ubusa kugeza icyemezo gifashwe: nta mafaranga yakwa kandi nta kintu gisezeranywa ku hasigaye ubusa. Buri mpinduka yandikwa mu nyandiko z'ibikorwa, kandi ibyabitswe bigumana igenamiterere ryariho.",

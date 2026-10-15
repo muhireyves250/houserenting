@@ -252,13 +252,17 @@
       "HOUR": "/ hour",
       "DAY": "/ day",
       "NIGHT": "/ night",
-      "MONTH": "/ month"
+      "MONTH": "/ month",
+      "WEEK": "/ week",
+      "YEAR": "/ year"
     },
     "unitName": {
       "HOUR": "Hourly",
       "DAY": "Daily",
       "NIGHT": "Nightly",
-      "MONTH": "Monthly"
+      "MONTH": "Monthly",
+      "WEEK": "Weekly",
+      "YEAR": "Yearly"
     },
     "new": "New",
     "discount": "-{percent}%",
@@ -439,7 +443,34 @@
     "yourDetails": "Your details",
     "idNumber": "National ID or passport number",
     "nationality": "Nationality",
-    "identityPrivacy": "Only our staff can see these details. They're used for the rental agreement."
+    "identityPrivacy": "Only our staff can see these details. They're used for the rental agreement.",
+    "by": {
+      "HOUR": "By the hour",
+      "DAY": "By the day",
+      "NIGHT": "By the night",
+      "WEEK": "By the week",
+      "MONTH": "By the month",
+      "YEAR": "By the year"
+    },
+    "unitTimes": {
+      "HOUR": "{price} × {count, plural, one {# hour} other {# hours}}",
+      "DAY": "{price} × {count, plural, one {# day} other {# days}}",
+      "NIGHT": "{price} × {count, plural, one {# night} other {# nights}}",
+      "WEEK": "{price} × {count, plural, one {# week} other {# weeks}}",
+      "MONTH": "{price} × {count, plural, one {# month} other {# months}}",
+      "YEAR": "{price} × {count, plural, one {# year} other {# years}}"
+    },
+    "unitCount": {
+      "HOUR": "{count, plural, one {# hour} other {# hours}}",
+      "DAY": "{count, plural, one {# day} other {# days}}",
+      "NIGHT": "{count, plural, one {# night} other {# nights}}",
+      "WEEK": "{count, plural, one {# week} other {# weeks}}",
+      "MONTH": "{count, plural, one {# month} other {# months}}",
+      "YEAR": "{count, plural, one {# year} other {# years}}"
+    },
+    "startDate": "Date",
+    "startTime": "Start time",
+    "chooseTime": "Choose a time"
   },
   "Facility": {
     "KITCHEN": "Kitchen",
@@ -537,7 +568,8 @@
     "rental": "Rental",
     "rentalTerms": "{months} months, {upfront} paid when booking",
     "payTitle": "Pay to confirm",
-    "messageHost": "Message host"
+    "messageHost": "Message host",
+    "time": "Time"
   },
   "Host": {
     "title": "Your listings",
@@ -584,13 +616,17 @@
         "HOUR": "Minimum hours",
         "DAY": "Minimum days",
         "NIGHT": "Minimum nights",
-        "MONTH": "Minimum months"
+        "MONTH": "Minimum months",
+        "WEEK": "Minimum weeks",
+        "YEAR": "Minimum years"
       },
       "max": {
         "HOUR": "Maximum hours",
         "DAY": "Maximum days",
         "NIGHT": "Maximum nights",
-        "MONTH": "Maximum months"
+        "MONTH": "Maximum months",
+        "WEEK": "Maximum weeks",
+        "YEAR": "Maximum years"
       },
       "checkIn": "Check-in from",
       "checkOut": "Check-out until",
@@ -602,7 +638,7 @@
       "terms": "House rules (one per line)",
       "bookingModel": "How guests book"
     },
-    "pricesHint": "Choose how guests can rent: by the hour, day, night or month.",
+    "pricesHint": "Choose how guests can book: by the hour, day, night, week, month or year (lodges: night or day).",
     "errors": {
       "field": "Check this field.",
       "maxBelowMin": "The maximum must be at least the minimum.",
@@ -610,7 +646,8 @@
       "pin": "Put the pin on a spot in Rwanda.",
       "noRates": "Add at least one price.",
       "check": "Check the highlighted fields.",
-      "failed": "Couldn't save. Try again."
+      "failed": "Couldn't save. Try again.",
+      "lodgeUnits": "Lodges are booked by the night or by the day only."
     },
     "save": "Save",
     "saved": "Saved",
@@ -866,7 +903,8 @@
     "save": "Save room",
     "wholePlace": "The whole place",
     "choose": "Choose a room",
-    "perNight": "/ night"
+    "perNight": "/ night",
+    "howBooked": "How this room is booked"
   },
   "Settings": {
     "note": "Leave a field empty until the business decision is made: nothing is charged or promised for empty fields. Every change is recorded in the audit log, and bookings keep the settings they were made with.",

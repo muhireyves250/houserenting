@@ -5,10 +5,9 @@ import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { useId, useRef, useState, useTransition, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { bookMonthlyAction, bookStayAction, checkPromoAction } from "@/features/bookings/actions";
+import { bookRentalAction, checkPromoAction } from "@/features/bookings/actions";
+import { LONG_UNITS, periodFor, type BookingUnit } from "@/features/bookings/period";
 import { maskPhone, parseMobileMoney, type MoMoProvider } from "@/features/listings/mobile-money";
-import type { StayQuote } from "@/features/listings/quote";
-import type { DateRange } from "@/features/search/date-range";
 import { useRouter } from "@/i18n/navigation";
 import { useModal } from "@/lib/use-modal";
 import { cn } from "@/lib/cn";
@@ -26,6 +25,26 @@ const PROVIDERS: { id: MoMoProvider; badge: ReactNode }[] = [
   },
 ];
 
+/** What the client chose: how (unit), from when, for how long, and the price worked out from the host's rates. */
+export type ReservePlan = {
+  unit: BookingUnit;
+  start: string;
+  /** Hours only: "HH:MM". */
+  startTime: string | null;
+  quantity: number;
+  /** Units paid now (monthly rentals may pay fewer months upfront). */
+  paidQuantity: number;
+  unitPrice: number;
+  subtotal: number;
+  /** Before the host's discount, for "You save". */
+  originalSubtotal: number | null;
+  deposit: number;
+  /** Long stays: identity details staff ask for. */
+  identity: "NONE" | "ID" | "ID_NATIONALITY";
+  checkInTime: string | null;
+  checkOutTime: string | null;
+};
+
 /**
  * "Confirm and pay" window: 1. choose MTN Mobile Money or Airtel Money and the number, 2. review and book.
  * Booking holds the dates for a while (the server rechecks them); payment isn't connected yet, so nothing is charged.
@@ -36,13 +55,9 @@ export function ReserveDialog({
   room = null,
   guestFeeBps = null,
   cancellationPolicy = null,
-  monthly = null,
   place,
-  quote,
-  range,
+  plan,
   guests,
-  checkInTime,
-  checkOutTime,
   savings,
   onClose,
   onChangeDates,
@@ -53,16 +68,11 @@ export function ReserveDialog({
   room?: { id: string; name: string } | null;
   /** Platform fee on top of the (discounted) price, in basis points. */
   guestFeeBps?: number | null;
-  /** Monthly rental: length, months paid now, deposit due now. Null = a nightly stay. */
-  monthly?: { months: number; upfrontMonths: number; monthlyPrice: number; deposit: number; identity?: "NONE" | "ID" | "ID_NATIONALITY" } | null;
   /** Published cancellation terms; when null, the unpaid-hold rule is shown. */
   cancellationPolicy?: string | null;
   place: PlacePreviewData;
-  quote: StayQuote;
-  range: DateRange;
+  plan: ReservePlan;
   guests: number;
-  checkInTime: string | null;
-  checkOutTime: string | null;
   savings: number | null;
   onClose: () => void;
   onChangeDates: () => void;
@@ -83,24 +93,26 @@ export function ReserveDialog({
   const [bookError, setBookError] = useState<string | null>(null);
   const [idNumber, setIdNumber] = useState("");
   const [nationality, setNationality] = useState("");
-  const needsId = monthly?.identity === "ID" || monthly?.identity === "ID_NATIONALITY";
-  const needsNationality = monthly?.identity === "ID_NATIONALITY";
+  const { checkInTime, checkOutTime } = plan;
+  const long = LONG_UNITS.includes(plan.unit);
+  const needsId = plan.identity === "ID" || plan.identity === "ID_NATIONALITY";
+  const needsNationality = plan.identity === "ID_NATIONALITY";
   const identityMissing = (needsId && idNumber.trim().length < 4) || (needsNationality && nationality.trim().length < 2);
   const [promoInput, setPromoInput] = useState("");
   const [promo, setPromo] = useState<{ code: string; discount: number } | null>(null);
   const [promoError, setPromoError] = useState<string | null>(null);
   const [checkingPromo, startCheckingPromo] = useTransition();
 
-  // What is paid now: the stay (or the upfront months), less any promo, plus the service fee, plus a monthly deposit.
+  // What is paid now: the price (or the upfront months), less any promo, plus the service fee, plus a long-stay deposit.
   const discount = promo?.discount ?? 0;
-  const guestFee = guestFeeBps ? Math.round(((quote.total - discount) * guestFeeBps) / 10_000) : 0;
-  const deposit = monthly?.deposit ?? 0;
-  const dueNow = quote.total - discount + guestFee + deposit;
+  const guestFee = guestFeeBps ? Math.round(((plan.subtotal - discount) * guestFeeBps) / 10_000) : 0;
+  const deposit = plan.deposit;
+  const dueNow = plan.subtotal - discount + guestFee + deposit;
 
   function applyPromo() {
     setPromoError(null);
     startCheckingPromo(async () => {
-      const result = await checkPromoAction(promoInput, quote.total);
+      const result = await checkPromoAction(promoInput, plan.subtotal);
       if ("discount" in result) setPromo({ code: promoInput.trim().toUpperCase(), discount: result.discount });
       else {
         setPromo(null);
@@ -113,10 +125,16 @@ export function ReserveDialog({
 
   const providerName = (id: MoMoProvider) => (id === "mtn" ? t("mtnMomo") : t("airtelMoney"));
   const dateFmt = new Intl.DateTimeFormat(locale, { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+  const period = periodFor(plan.unit, plan.start, plan.quantity, plan.startTime);
+  const utc = (iso: string) => new Date(`${iso}T00:00:00Z`);
+  const timeFmt = new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Kigali" });
+  // Hours: "Nov 1, 2026 · 09:30–12:30"; otherwise the date range (one day for a single day).
   const dates =
-    range.checkIn && range.checkOut
-      ? dateFmt.formatRange(new Date(`${range.checkIn}T00:00:00Z`), new Date(`${range.checkOut}T00:00:00Z`))
-      : "";
+    plan.unit === "HOUR"
+      ? `${dateFmt.format(utc(plan.start))} · ${timeFmt.formatRange(period.startAt, period.endAt)}`
+      : plan.unit === "DAY" && plan.quantity === 1
+        ? dateFmt.format(utc(plan.start))
+        : dateFmt.formatRange(utc(period.checkIn), utc(plan.unit === "DAY" ? new Date(utc(period.checkOut).getTime() - 86_400_000).toISOString().slice(0, 10) : period.checkOut));
 
   function next() {
     const result = parseMobileMoney(provider, number);
@@ -130,21 +148,20 @@ export function ReserveDialog({
   }
 
   function book() {
-    if (!range.checkIn || !range.checkOut) return;
     setBookError(null);
     startBooking(async () => {
-      const payment = { method: provider, phone: number };
-      const promoCode = promo?.code ?? null;
-      const result = monthly
-        ? await bookMonthlyAction({
-            listingId,
-            start: range.checkIn,
-            months: monthly.months,
-            promoCode,
-            payment,
-            identity: needsId ? { idNumber, nationality: needsNationality ? nationality : null } : null,
-          })
-        : await bookStayAction({ listingId, checkIn: range.checkIn, checkOut: range.checkOut, guests, roomId: room?.id ?? null, promoCode, payment });
+      const result = await bookRentalAction({
+        listingId,
+        unit: plan.unit,
+        start: plan.start,
+        startTime: plan.startTime,
+        quantity: plan.quantity,
+        guests: long ? 1 : guests,
+        roomId: room?.id ?? null,
+        promoCode: promo?.code ?? null,
+        payment: { method: provider, phone: number },
+        identity: needsId ? { idNumber, nationality: needsNationality ? nationality : null } : null,
+      });
       if ("reference" in result) {
         router.push(`/bookings/${result.reference}`);
         return;
@@ -371,11 +388,9 @@ export function ReserveDialog({
                   <p className="mb-2 text-[15px] font-semibold text-ink">{t("priceDetails")}</p>
                   <div className="flex justify-between text-[15px] text-ink/80">
                     <span>
-                      {monthly
-                        ? t("monthsTimes", { price: formatRWF(monthly.monthlyPrice, locale), count: monthly.upfrontMonths })
-                        : t("nightsTimes", { price: formatRWF(quote.nightly, locale), count: quote.nights })}
+                      {t(`unitTimes.${plan.unit}`, { price: formatRWF(plan.unitPrice, locale), count: plan.paidQuantity })}
                     </span>
-                    <span>{formatRWF(quote.total, locale)}</span>
+                    <span>{formatRWF(plan.subtotal, locale)}</span>
                   </div>
                   {promo && (
                     <div className="mt-1 flex justify-between text-[15px] text-emerald-700">
@@ -397,10 +412,12 @@ export function ReserveDialog({
                   )}
                 </div>
                 <div className="flex justify-between border-t border-line pt-5 text-[15px] font-bold text-ink tabular-nums">
-                  <span>{monthly ? t("dueNow") : t("total")} (RWF)</span>
+                  <span>{long ? t("dueNow") : t("total")} (RWF)</span>
                   <span>{formatRWF(dueNow, locale)}</span>
                 </div>
-                {monthly && <p className="mt-2 text-[13px] text-muted">{t("monthlyNote", { months: monthly.months, upfront: monthly.upfrontMonths })}</p>}
+                {plan.unit === "MONTH" && plan.paidQuantity < plan.quantity && (
+                  <p className="mt-2 text-[13px] text-muted">{t("monthlyNote", { months: plan.quantity, upfront: plan.paidQuantity })}</p>
+                )}
                 {/* Promo code */}
                 <div className="mt-5 border-t border-line pt-5">
                   <div className="flex gap-2">

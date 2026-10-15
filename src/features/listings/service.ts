@@ -3,7 +3,8 @@ import type { Prisma } from "@/generated/prisma/client";
 import type { SearchQuery } from "@/features/search/params";
 import { db } from "@/lib/db";
 
-const SHORT_UNITS = ["HOUR", "DAY", "NIGHT"] as const;
+const SHORT_UNITS = ["HOUR", "DAY", "NIGHT", "WEEK"] as const;
+const LONG_UNITS = ["MONTH", "YEAR"] as const;
 const SEARCH_LIMIT = 24;
 
 export const CARD_SELECT = {
@@ -37,7 +38,7 @@ export function searchListings(query: SearchQuery, limit = SEARCH_LIMIT, now: Da
   const price = query.minPrice || query.maxPrice ? { gte: query.minPrice, lte: query.maxPrice } : undefined;
   const where: Prisma.ListingWhereInput = {
     status: "PUBLISHED",
-    rates: { some: { unit: query.mode === "long" ? "MONTH" : { in: [...SHORT_UNITS] }, price } },
+    rates: { some: { unit: { in: query.mode === "long" ? [...LONG_UNITS] : [...SHORT_UNITS] }, price } },
   };
   if (query.types?.length) where.type = { in: query.types };
   if (query.bbox) {

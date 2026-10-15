@@ -228,6 +228,8 @@ describe("bedroom, amenity and availability filters", () => {
           status,
           checkIn: new Date("2026-10-20T00:00:00Z"),
           checkOut: new Date("2026-10-23T00:00:00Z"),
+          startAt: new Date("2026-10-19T22:00:00Z"),
+          endAt: new Date("2026-10-22T22:00:00Z"),
           nights: 3,
           guests: 1,
           nightlyPrice: 45000,
@@ -252,7 +254,7 @@ describe("room-by-room availability", () => {
     await db.user.create({ data: { id: "guest", name: "Guest", email: "guest@example.com" } });
     const lodge = await listing({ bookingModel: "ROOM_BY_ROOM" });
     const [a, b] = await Promise.all(
-      ["A", "B"].map((name, position) => db.room.create({ data: { listingId: lodge.id, name, maxGuests: 2, nightlyPrice: 30000, position } })),
+      ["A", "B"].map((name, position) => db.room.create({ data: { listingId: lodge.id, name, maxGuests: 2, position, rates: { create: [{ unit: "NIGHT", price: 30000 }] } } })),
     );
     const now = new Date("2026-10-14T08:00:00Z");
     const book = (roomId: string, reference: string) =>
@@ -265,6 +267,8 @@ describe("room-by-room availability", () => {
           status: "CONFIRMED",
           checkIn: new Date("2026-10-20T00:00:00Z"),
           checkOut: new Date("2026-10-22T00:00:00Z"),
+          startAt: new Date("2026-10-19T22:00:00Z"),
+          endAt: new Date("2026-10-21T22:00:00Z"),
           nights: 2,
           guests: 1,
           nightlyPrice: 30000,

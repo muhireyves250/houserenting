@@ -13,7 +13,7 @@ import { audit } from "@/features/audit/service";
 import { checkPromo, claimPromoUse, type PromoCheck } from "@/features/promotions/service";
 import { maybeCreateReward } from "@/features/referrals/service";
 import { priceBreakdown } from "./money";
-import { monthlyQuote } from "./monthly";
+import { BOOKING_UNITS, LONG_UNITS, periodFor, unitsAllowedFor, withinHours, type BookingUnit } from "./period";
 import { BLOCKING_STATUSES, canTransition } from "./status";
 
 export type BookingRequest = {
@@ -88,96 +88,152 @@ function isUniqueReferenceError(error: unknown): boolean {
   return (error as { code?: string }).code === "P2002";
 }
 
+/** A booking by the hour, day, night, week, month or year, of the whole place or one room. */
+export type RentalRequest = {
+  guestId: string;
+  listingId: string;
+  unit: BookingUnit;
+  /** First day (and for hours, the start time "HH:MM"). */
+  start: ISODate;
+  startTime?: string | null;
+  /** How many hours/days/nights/weeks/months/years. */
+  quantity: number;
+  guests: number;
+  /** One room of the place; null or missing = the whole place. */
+  roomId?: string | null;
+  promoCode?: string | null;
+  payment: { method: MoMoProvider; phone: string };
+  /** Long stays: only the details staff have said the business needs (Admin → Settings). */
+  identity?: { idNumber: string; nationality: string | null } | null;
+};
+
+const MAX_QUANTITY: Record<BookingUnit, number> = { HOUR: 24, DAY: 365, NIGHT: 365, WEEK: 104, MONTH: 60, YEAR: 10 };
+const HHMM = /^([01]\d|2[0-3]):[0-5]\d$/;
+
 /**
- * Books a stay and holds its dates until payment, all checked on the server: the price comes from the listing's
- * rates, and the database itself refuses a stay that overlaps another active booking.
+ * Books a place (or one of its rooms) for the way the host offers it, and holds it until payment. Everything is
+ * checked on the server: the unit must be one the place (or room) offers (lodges: nights or days only), the price
+ * comes from the host's rates, and overlapping bookings are refused on exact times by the database.
  */
-export async function createBooking(request: BookingRequest, now: Date = new Date()): Promise<CreateBookingResult> {
-  const { guestId, listingId, checkIn, checkOut, guests } = request;
-  if (!isRealDate(checkIn) || !isRealDate(checkOut) || checkIn < todayISO(now)) return { ok: false, error: "invalid" };
-  const nights = nightsBetween({ checkIn, checkOut });
-  if (nights < 1 || !Number.isInteger(guests) || guests < 1) return { ok: false, error: "invalid" };
+export async function createRentalBooking(request: RentalRequest, now: Date = new Date()): Promise<CreateBookingResult> {
+  const { guestId, listingId, unit, start, quantity, guests } = request;
+  if (!BOOKING_UNITS.includes(unit) || !isRealDate(start) || start < todayISO(now)) return { ok: false, error: "invalid" };
+  if (!Number.isInteger(quantity) || quantity < 1 || quantity > MAX_QUANTITY[unit] || !Number.isInteger(guests) || guests < 1) return { ok: false, error: "invalid" };
+  const startTime = unit === "HOUR" ? (request.startTime ?? "") : null;
+  if (unit === "HOUR" && !HHMM.test(startTime ?? "")) return { ok: false, error: "invalid" };
 
   const listing = await db.listing.findFirst({
     where: { id: listingId, status: "PUBLISHED" },
-    select: {
-      title: true,
-      hostId: true,
-      maxGuests: true,
-      discountPercent: true,
-      termsOfRent: true,
-      bookingModel: true,
-      rates: { where: { unit: "NIGHT" } },
-    },
+    select: { title: true, type: true, hostId: true, maxGuests: true, discountPercent: true, termsOfRent: true, bookingModel: true, rates: true },
   });
   if (!listing) return { ok: false, error: "notFound" };
   if (listing.hostId === guestId) return { ok: false, error: "ownListing" };
-  const night = listing.rates[0] ?? null;
+  if (!unitsAllowedFor(listing.type).includes(unit)) return { ok: false, error: "notOffered" };
+  const rate = listing.rates.find((r) => r.unit === unit) ?? null;
   const roomId = request.roomId ?? null;
 
-  // What is being booked: the whole place (needs a nightly price) or one available room of it.
+  // What is being booked: the whole place at its rate for this unit, or one available room at the room's rate.
   let base: number;
   let room: { id: string; name: string } | null = null;
   if (roomId === null) {
-    if (listing.bookingModel === "ROOM_BY_ROOM" || !night) return { ok: false, error: "notFound" };
+    if (listing.bookingModel === "ROOM_BY_ROOM") return { ok: false, error: "notFound" };
+    if (!rate) return { ok: false, error: "notOffered" };
     if (guests > listing.maxGuests) return { ok: false, error: "invalid" };
-    base = night.price;
+    base = rate.price;
   } else {
     if (listing.bookingModel === "WHOLE_PROPERTY") return { ok: false, error: "notFound" };
-    const found = await db.room.findFirst({ where: { id: roomId, listingId, status: "AVAILABLE" } });
+    const found = await db.room.findFirst({ where: { id: roomId, listingId, status: "AVAILABLE" }, include: { rates: true } });
     if (!found) return { ok: false, error: "unavailable" };
+    const roomRate = found.rates.find((r) => r.unit === unit);
+    if (!roomRate) return { ok: false, error: "notOffered" };
     if (guests > found.maxGuests) return { ok: false, error: "invalid" };
-    base = found.nightlyPrice;
+    base = roomRate.price;
     room = { id: found.id, name: found.name };
   }
-  // Stay length follows the place's nightly rules (when set).
-  if (night && (nights < night.minUnits || (night.maxUnits !== null && nights > night.maxUnits))) return { ok: false, error: "stayLength" };
+  // Length and opening hours follow the place's rules for this unit (when set).
+  if (rate && (quantity < rate.minUnits || (rate.maxUnits !== null && quantity > rate.maxUnits))) return { ok: false, error: "stayLength" };
+  if (unit === "HOUR" && !withinHours(startTime!, quantity, rate?.dayStartTime ?? null, rate?.dayEndTime ?? null)) return { ok: false, error: "stayLength" };
 
   const phone = parseMobileMoney(request.payment.method, request.payment.phone);
   if (!phone.ok) return { ok: false, error: "phone" };
 
   const settings = await readSettings();
+  const long = LONG_UNITS.includes(unit);
+  // Long stays: identity details exactly as staff set them.
+  const idNumber = request.identity?.idNumber.trim() ?? "";
+  const nationality = request.identity?.nationality?.trim() ?? "";
+  const needsId = long && settings.monthlyIdentity !== "NONE";
+  const needsNationality = long && settings.monthlyIdentity === "ID_NATIONALITY";
+  if ((needsId && idNumber.length < 4) || (needsNationality && nationality.length < 2)) return { ok: false, error: "identity" };
+  const identity = needsId ? { idNumber, nationality: needsNationality ? nationality : null } : null;
+
+  const unitPrice = discountedPrice(base, listing.discountPercent);
+  // Monthly: all chosen months now unless staff set fewer upfront. Everything else is paid in full.
+  const paidUnits = unit === "MONTH" ? Math.min(settings.monthlyUpfrontMonths ?? quantity, quantity) : quantity;
+  // Deposit for long stays: a percent of one month's rent (a year's rent / 12).
+  const monthRent = unit === "MONTH" ? unitPrice : unit === "YEAR" ? Math.round(unitPrice / 12) : 0;
+  const deposit = long && settings.monthlyDepositPercent ? Math.round((monthRent * settings.monthlyDepositPercent) / 100) : 0;
   const fees = { commissionBps: settings.commissionBps, guestFeeBps: settings.guestFeeBps };
-  const nightlyPrice = discountedPrice(base, listing.discountPercent);
   let promo: Extract<PromoCheck, { ok: true }> | null = null;
   if (request.promoCode) {
-    const checked = await checkPromo(db, request.promoCode, nightlyPrice * nights, now);
+    const checked = await checkPromo(db, request.promoCode, unitPrice * paidUnits, now);
     if (!checked.ok) return { ok: false, error: "promo" };
     promo = checked;
   }
-  const money = priceBreakdown(nightlyPrice * nights, fees, promo ? { amount: promo.discount, fundedBy: promo.fundedBy } : null);
+  const money = priceBreakdown(unitPrice * paidUnits, fees, promo ? { amount: promo.discount, fundedBy: promo.fundedBy } : null);
+  const period = periodFor(unit, start, quantity, startTime);
+  const night = listing.rates.find((r) => r.unit === "NIGHT");
   const hasPolicy = Object.values(settings.cancellationPolicy).some(Boolean);
   const policySnapshot: PolicySnapshot = {
-    checkInTime: night?.checkInTime ?? null,
-    checkOutTime: night?.checkOutTime ?? null,
+    checkInTime: unit === "NIGHT" ? (night?.checkInTime ?? null) : null,
+    checkOutTime: unit === "NIGHT" ? (night?.checkOutTime ?? null) : null,
     houseRules: listing.termsOfRent,
     cancellationPolicy: hasPolicy ? settings.cancellationPolicy : null,
     room: room?.name ?? null,
     fees,
+    ...(long ? { monthly: { months: unit === "YEAR" ? quantity * 12 : quantity, upfrontMonths: unit === "MONTH" ? paidUnits : quantity * 12, depositPercent: settings.monthlyDepositPercent } } : {}),
   };
-  const holdExpiresAt = new Date(now.getTime() + holdMinutesFrom(settings) * 60_000);
 
   return holdAndInsert({
     listingId,
     title: listing.title,
     guestId,
-    checkIn,
-    checkOut,
+    checkIn: period.checkIn,
+    checkOut: period.checkOut,
+    startAt: period.startAt,
+    endAt: period.endAt,
     roomId: room?.id ?? null,
     promoId: promo?.id ?? null,
+    identity,
     now,
     data: {
-      nights,
+      unit,
+      quantity,
+      rentalMode: long ? "MONTHLY" : "STAY",
+      months: unit === "MONTH" ? quantity : unit === "YEAR" ? quantity * 12 : null,
+      upfrontMonths: unit === "MONTH" ? paidUnits : null,
+      nights: nightsBetween({ checkIn: period.checkIn, checkOut: period.checkOut }),
       guests,
-      nightlyPrice,
+      nightlyPrice: unitPrice,
       ...money,
+      deposit,
+      total: money.total + deposit,
       promoCodeId: promo?.id ?? null,
       paymentMethod: request.payment.method,
       payerPhone: maskPhone(phone.number),
       policySnapshot,
-      holdExpiresAt,
+      holdExpiresAt: new Date(now.getTime() + holdMinutesFrom(settings) * 60_000),
     },
   });
+}
+
+/** Nightly stay from check-in to checkout (the calendar on the listing page). */
+export async function createBooking(request: BookingRequest, now: Date = new Date()): Promise<CreateBookingResult> {
+  const { checkIn, checkOut, ...rest } = request;
+  if (!isRealDate(checkIn) || !isRealDate(checkOut)) return { ok: false, error: "invalid" };
+  const nights = nightsBetween({ checkIn, checkOut });
+  if (nights < 1) return { ok: false, error: "invalid" };
+  return createRentalBooking({ ...rest, unit: "NIGHT", start: checkIn, quantity: nights }, now);
 }
 
 class PromoGone extends Error {}
@@ -193,14 +249,16 @@ async function holdAndInsert(args: {
   guestId: string;
   checkIn: ISODate;
   checkOut: ISODate;
+  startAt: Date;
+  endAt: Date;
   roomId: string | null;
   promoId: string | null;
   now: Date;
   /** Monthly rentals: identity details, kept apart from the booking and shown to staff only. */
   identity?: { idNumber: string; nationality: string | null } | null;
-  data: Omit<Prisma.BookingUncheckedCreateInput, "reference" | "listingId" | "guestId" | "checkIn" | "checkOut" | "roomId">;
+  data: Omit<Prisma.BookingUncheckedCreateInput, "reference" | "listingId" | "guestId" | "checkIn" | "checkOut" | "roomId" | "startAt" | "endAt">;
 }): Promise<CreateBookingResult> {
-  const { listingId, guestId, checkIn, checkOut, roomId, now } = args;
+  const { listingId, guestId, checkIn, checkOut, startAt, endAt, roomId, now } = args;
   for (let attempt = 0; attempt < 3; attempt++) {
     const reference = newBookingReference();
     try {
@@ -211,8 +269,8 @@ async function holdAndInsert(args: {
           where: {
             listingId,
             status: { in: [...BLOCKING_STATUSES] },
-            checkIn: { lt: asDate(checkOut) },
-            checkOut: { gt: asDate(checkIn) },
+            startAt: { lt: endAt },
+            endAt: { gt: startAt },
             ...(roomId ? { OR: [{ roomId }, { roomId: null }] } : {}),
           },
           select: { id: true },
@@ -228,6 +286,8 @@ async function holdAndInsert(args: {
             roomId,
             checkIn: asDate(checkIn),
             checkOut: asDate(checkOut),
+            startAt,
+            endAt,
             events: { create: { fromStatus: null, toStatus: "PENDING_PAYMENT", actorId: guestId, reason: "booked by guest" } },
           },
           select: { id: true },
@@ -254,86 +314,13 @@ export type MonthlyRequest = {
   months: number;
   promoCode?: string | null;
   payment: { method: MoMoProvider; phone: string };
-  /** Only the details staff have said the business needs (Admin → Settings). */
   identity?: { idNumber: string; nationality: string | null } | null;
 };
 
-/**
- * Books a monthly rental of the whole place (not lodges, not single rooms: those are paid by the night). The client
- * chooses the months; identity details are asked only if staff have set which ones the business needs.
- */
-export async function createMonthlyBooking(request: MonthlyRequest, now: Date = new Date()): Promise<CreateBookingResult> {
-  const { guestId, listingId, start, months } = request;
-  if (!isRealDate(start) || start < todayISO(now) || !Number.isInteger(months) || months < 1 || months > 60) return { ok: false, error: "invalid" };
-  const settings = await readSettings();
-  const listing = await db.listing.findFirst({
-    where: { id: listingId, status: "PUBLISHED" },
-    select: { title: true, type: true, hostId: true, discountPercent: true, termsOfRent: true, maxGuests: true, rates: { where: { unit: "MONTH" } } },
-  });
-  const rate = listing?.rates[0];
-  if (!listing || !rate) return { ok: false, error: "notFound" };
-  // Lodges are booked and paid by the night.
-  if (listing.type === "LODGE") return { ok: false, error: "notOffered" };
-  if (listing.hostId === guestId) return { ok: false, error: "ownListing" };
-  if (months < rate.minUnits || (rate.maxUnits !== null && months > rate.maxUnits)) return { ok: false, error: "stayLength" };
-  const phone = parseMobileMoney(request.payment.method, request.payment.phone);
-  if (!phone.ok) return { ok: false, error: "phone" };
-  // Ask for exactly the approved details: none, ID/passport number, or that plus nationality.
-  const idNumber = request.identity?.idNumber.trim() ?? "";
-  const nationality = request.identity?.nationality?.trim() ?? "";
-  const needsId = settings.monthlyIdentity !== "NONE";
-  const needsNationality = settings.monthlyIdentity === "ID_NATIONALITY";
-  if ((needsId && idNumber.length < 4) || (needsNationality && nationality.length < 2)) return { ok: false, error: "identity" };
-  const identity = needsId ? { idNumber, nationality: needsNationality ? nationality : null } : null;
-
-  const monthly = discountedPrice(rate.price, listing.discountPercent);
-  // The client chooses the months; they pay all of them now unless staff set fewer months upfront.
-  const upfront = Math.min(settings.monthlyUpfrontMonths ?? months, months);
-  const quote = monthlyQuote(start, months, monthly, settings.monthlyDepositPercent);
-  const fees = { commissionBps: settings.commissionBps, guestFeeBps: settings.guestFeeBps };
-  let promo: Extract<PromoCheck, { ok: true }> | null = null;
-  if (request.promoCode) {
-    const checked = await checkPromo(db, request.promoCode, monthly * upfront, now);
-    if (!checked.ok) return { ok: false, error: "promo" };
-    promo = checked;
-  }
-  const money = priceBreakdown(monthly * upfront, fees, promo ? { amount: promo.discount, fundedBy: promo.fundedBy } : null);
-  const hasPolicy = Object.values(settings.cancellationPolicy).some(Boolean);
-
-  return holdAndInsert({
-    listingId,
-    title: listing.title,
-    guestId,
-    checkIn: start,
-    checkOut: quote.moveOut,
-    roomId: null,
-    promoId: promo?.id ?? null,
-    now,
-    identity,
-    data: {
-      rentalMode: "MONTHLY",
-      months,
-      upfrontMonths: upfront,
-      nights: nightsBetween({ checkIn: start, checkOut: quote.moveOut }),
-      guests: 1,
-      nightlyPrice: monthly,
-      ...money,
-      deposit: quote.deposit,
-      total: money.total + quote.deposit,
-      promoCodeId: promo?.id ?? null,
-      paymentMethod: request.payment.method,
-      payerPhone: maskPhone(phone.number),
-      policySnapshot: {
-        checkInTime: null,
-        checkOutTime: null,
-        houseRules: listing.termsOfRent,
-        cancellationPolicy: hasPolicy ? settings.cancellationPolicy : null,
-        fees,
-        monthly: { months, upfrontMonths: upfront, depositPercent: settings.monthlyDepositPercent },
-      } satisfies PolicySnapshot,
-      holdExpiresAt: new Date(now.getTime() + holdMinutesFrom(settings) * 60_000),
-    },
-  });
+/** Monthly rental of the whole place (the client chooses the months). */
+export function createMonthlyBooking(request: MonthlyRequest, now: Date = new Date()): Promise<CreateBookingResult> {
+  const { start, months, ...rest } = request;
+  return createRentalBooking({ ...rest, unit: "MONTH", start, quantity: months, guests: 1 }, now);
 }
 
 /** Nights taken from today on (paid stays and live holds); `roomId` null = a whole-place stay. Dates only, no guest data. */
@@ -358,6 +345,10 @@ const GUEST_SELECT = {
   nights: true,
   guests: true,
   nightlyPrice: true,
+  unit: true,
+  quantity: true,
+  startAt: true,
+  endAt: true,
   subtotal: true,
   guestFee: true,
   discount: true,

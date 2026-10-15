@@ -1,15 +1,21 @@
 import { expect, test } from "@playwright/test";
 import { skipOnboarding } from "./support/flows";
 
-test("search Kigali short-term, open a listing and see its prices", async ({ page }) => {
+test("search Kigali short-term, open a listing and see its prices", async ({ page }, testInfo) => {
   await skipOnboarding(page);
-  await page.goto("/en");
-  await page.getByRole("combobox", { name: "Where" }).first().fill("Kimihurura");
-  await page.keyboard.press("Escape");
-  await page.getByRole("button", { name: "Search", exact: true }).click();
+  if (testInfo.project.name === "desktop") {
+    await page.goto("/en");
+    await page.getByRole("combobox", { name: "Where" }).first().fill("Kimihurura");
+    await page.keyboard.press("Escape");
+    await page.getByRole("button", { name: "Search", exact: true }).click();
+  } else {
+    // Phones search from a full-screen sheet (covered by unit tests); start from the results.
+    await page.goto("/en/search?mode=short&location=Kimihurura");
+  }
 
   await expect(page).toHaveURL(/\/en\/search\?mode=short&location=Kimihurura/);
-  await page.getByRole("link", { name: /Bright 2-bedroom flat in Kimihurura/ }).click();
+  // The card's own link (its "Save …" button also names the place).
+  await page.getByRole("link", { name: /^Bright 2-bedroom flat in Kimihurura/ }).click();
 
   await expect(page.getByRole("heading", { level: 1, name: "Bright 2-bedroom flat in Kimihurura" })).toBeVisible();
   await expect(page.getByText("RWF 55,250").first()).toBeVisible();
@@ -17,16 +23,20 @@ test("search Kigali short-term, open a listing and see its prices", async ({ pag
   await expect(page.getByRole("link", { name: "Reserve" }).filter({ visible: true }).first()).toHaveAttribute("href", /\/en\/login\?next=/);
 });
 
-test("long-term search only shows monthly listings with the viewing action", async ({ page }) => {
+test("long-term search shows monthly listings, booked by choosing a move-in date and months", async ({ page }) => {
   await skipOnboarding(page);
   await page.goto("/en/search?mode=long&location=Nyarutarama");
-  await page.getByRole("link", { name: /Family villa with garden in Nyarutarama/ }).click();
+  await page.getByRole("link", { name: /^Family villa with garden in Nyarutarama/ }).click();
   await expect(page.getByText("/ month").first()).toBeVisible();
-  await expect(page.getByRole("button", { name: "Apply for viewing" }).filter({ visible: true })).toBeVisible();
-  await expect(page.getByText("Reserve", { exact: true })).toHaveCount(0);
+  await expect(page.getByLabel("Move-in date").filter({ visible: true })).toBeVisible();
+  await expect(page.getByLabel("Length").filter({ visible: true })).toBeVisible();
+  // Signed out: Reserve asks to log in first.
+  await expect(page.getByRole("link", { name: "Reserve" }).filter({ visible: true }).first()).toHaveAttribute("href", /\/en\/login\?next=/);
 });
 
 test("unknown listings return 404", async ({ page }) => {
+  // Opened links start on the welcome page; skip it to reach the page itself.
+  await skipOnboarding(page);
   const res = await page.goto("/en/listings/does-not-exist");
   expect(res?.status()).toBe(404);
 });

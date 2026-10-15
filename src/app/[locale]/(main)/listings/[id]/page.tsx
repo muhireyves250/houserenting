@@ -56,7 +56,7 @@ import { getCurrentUser } from "@/lib/session";
 
 type Props = { params: Promise<{ id: string }> };
 
-const UNIT_ORDER = ["HOUR", "DAY", "NIGHT", "MONTH"] as const;
+const UNIT_ORDER = ["HOUR", "DAY", "NIGHT", "WEEK", "MONTH", "YEAR"] as const;
 
 const FACILITY_ICONS: Record<string, LucideIcon> = {
   KITCHEN: CookingPot,
@@ -118,12 +118,12 @@ export default async function ListingPage({ params }: Props) {
       ? []
       : allRooms
           .filter((r) => r.status === "AVAILABLE")
-          .map(({ id, name, description, maxGuests, nightlyPrice, facilities }) => ({
+          .map(({ id, name, description, maxGuests, rates: roomRates, facilities }) => ({
             id,
             name,
             description,
             maxGuests,
-            nightlyPrice: discountedPrice(nightlyPrice, listing.discountPercent),
+            rates: roomRates.map((r) => ({ unit: r.unit, price: r.price })),
             facilities,
           }));
   const monthYear = new Intl.DateTimeFormat(locale, { month: "long", year: "numeric", timeZone: "Africa/Kigali" });
@@ -201,13 +201,12 @@ export default async function ListingPage({ params }: Props) {
       bookingModel={listing.bookingModel}
       guestFeeBps={settings.guestFeeBps}
       cancellationPolicy={policyText(settings.cancellationPolicy, locale)}
-      monthlyConfig={
+      longStay={
         listing.type === "LODGE"
           ? null
           : { upfrontMonths: settings.monthlyUpfrontMonths, depositPercent: settings.monthlyDepositPercent, identity: settings.monthlyIdentity }
       }
-      monthlyOnly={!rates.some((r) => r.unit !== "MONTH")}
-      minMonths={rates.find((r) => r.unit === "MONTH")?.minUnits ?? 1}
+      defaultUnit={rates.some((r) => r.unit === "NIGHT") ? "NIGHT" : (rates[0]?.unit ?? "NIGHT")}
     >
       <TrackView
         listing={{
@@ -339,8 +338,8 @@ export default async function ListingPage({ params }: Props) {
               </Section>
             )}
 
-            <RoomPicker wholePrice={night ? discountedPrice(night.price, listing.discountPercent) : null} />
-            {(night || rooms.length > 0) && <StayCalendar city={listing.city} />}
+            <RoomPicker wholeRates={rates.map((r) => ({ unit: r.unit, price: discountedPrice(r.price, listing.discountPercent) }))} />
+            <StayCalendar city={listing.city} rates={bookingRates} />
           </div>
 
           <div className="hidden md:block">

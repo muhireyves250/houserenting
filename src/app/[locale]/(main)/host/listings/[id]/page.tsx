@@ -7,7 +7,7 @@ import { ListingActions } from "@/features/hosting/components/ListingActions";
 import { ListingForm } from "@/features/hosting/components/ListingForm";
 import { ListingPhotosEditor } from "@/features/hosting/components/ListingPhotosEditor";
 import { getHostListing } from "@/features/hosting/service";
-import type { ListingInput } from "@/features/hosting/validation";
+import { rateUnitsFor, type ListingInput } from "@/features/hosting/validation";
 import { Link } from "@/i18n/navigation";
 import { uploadsEnabled } from "@/lib/cloudinary";
 import { requireUser } from "@/lib/session";
@@ -87,7 +87,8 @@ export default async function EditListingPage({ params }: Props) {
         {(listing.bookingModel !== "WHOLE_PROPERTY" || rooms.length > 0) && (
           <RoomsEditor
             listingId={listing.id}
-            rooms={rooms.map(({ id, name, description, maxGuests, nightlyPrice, facilities, status }) => ({ id, name, description, maxGuests, nightlyPrice, facilities, status }))}
+            rooms={rooms.map(({ id, name, description, maxGuests, rates, facilities, status }) => ({ id, name, description, maxGuests, rates, facilities, status }))}
+            units={rateUnitsFor(listing.type)}
           />
         )}
         <ListingActions listingId={listing.id} canSubmit={canSubmit} />

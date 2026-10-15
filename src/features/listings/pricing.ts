@@ -1,9 +1,10 @@
 import type { SearchMode } from "@/features/search/params";
 
-export type Unit = "HOUR" | "DAY" | "NIGHT" | "MONTH";
+export type Unit = "HOUR" | "DAY" | "NIGHT" | "WEEK" | "MONTH" | "YEAR";
 export type Rate = { unit: Unit; price: number };
 
-const SHORT_PREFERENCE: Unit[] = ["NIGHT", "DAY", "HOUR"];
+const SHORT_PREFERENCE: Unit[] = ["NIGHT", "DAY", "HOUR", "WEEK"];
+const LONG_PREFERENCE: Unit[] = ["MONTH", "YEAR"];
 /** Nights priced on cards and map pins ("RWF 100,000 for 2 nights"), as on the big travel sites. */
 export const SAMPLE_NIGHTS = 2;
 
@@ -11,7 +12,7 @@ const NEW_FOR_MS = 14 * 24 * 60 * 60 * 1000;
 
 /** The rate shown on cards: nightly → daily → hourly for short stays, monthly for long stays. */
 export function headlineRate<R extends Rate>(rates: R[], mode: SearchMode): R | undefined {
-  const order = mode === "long" ? (["MONTH"] as Unit[]) : SHORT_PREFERENCE;
+  const order = mode === "long" ? LONG_PREFERENCE : SHORT_PREFERENCE;
   for (const unit of order) {
     const rate = rates.find((r) => r.unit === unit);
     if (rate) return rate;
@@ -31,6 +32,6 @@ export function isNewListing(publishedAt: Date | null, now: Date = new Date()): 
 export function rentalModes(rates: Rate[]): { short: boolean; long: boolean } {
   return {
     short: rates.some((r) => SHORT_PREFERENCE.includes(r.unit)),
-    long: rates.some((r) => r.unit === "MONTH"),
+    long: rates.some((r) => LONG_PREFERENCE.includes(r.unit)),
   };
 }

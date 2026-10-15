@@ -8,7 +8,7 @@ import { PLACE_TYPES } from "@/features/search/params";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { saveListingAction } from "../actions";
-import { FACILITIES, RATE_UNITS, type ListingInput } from "../validation";
+import { FACILITIES, RATE_UNITS, rateUnitsFor, type ListingInput } from "../validation";
 import { AreaField, Card, Chip, Field, SelectField } from "./fields";
 
 const MapPicker = dynamic(() => import("./MapPicker").then((m) => m.MapPicker), {
@@ -50,7 +50,9 @@ const NEW_RATE: Record<Unit, Rate> = {
   HOUR: { unit: "HOUR", price: 0, minUnits: 1, maxUnits: null, dayStartTime: "08:00", dayEndTime: "20:00" },
   DAY: { unit: "DAY", price: 0, minUnits: 1, maxUnits: null, dayStartTime: "08:00", dayEndTime: "20:00" },
   NIGHT: { unit: "NIGHT", price: 0, minUnits: 1, maxUnits: null, checkInTime: "14:00", checkOutTime: "11:00" },
-  MONTH: { unit: "MONTH", price: 0, minUnits: 6, maxUnits: null },
+  WEEK: { unit: "WEEK", price: 0, minUnits: 1, maxUnits: null },
+  MONTH: { unit: "MONTH", price: 0, minUnits: 1, maxUnits: null },
+  YEAR: { unit: "YEAR", price: 0, minUnits: 1, maxUnits: null },
 };
 
 const num = (value: string) => (value === "" ? 0 : Number(value));
@@ -76,7 +78,13 @@ export function ListingForm({ listingId, initial, live }: { listingId: string | 
   const err = (key: string) => {
     const code = errors[key];
     if (!code) return undefined;
-    return code === "maxBelowMin" ? t("errors.maxBelowMin") : code === "duplicateUnit" ? t("errors.duplicateUnit") : t("errors.field");
+    return code === "maxBelowMin"
+      ? t("errors.maxBelowMin")
+      : code === "duplicateUnit"
+        ? t("errors.duplicateUnit")
+        : code === "lodgeUnits"
+          ? t("errors.lodgeUnits")
+          : t("errors.field");
   };
   const rateIndex = (unit: Unit) => form.rates.findIndex((r) => r.unit === unit);
   const setRate = (unit: Unit, patch: Partial<Rate>) =>
@@ -115,7 +123,16 @@ export function ListingForm({ listingId, initial, live }: { listingId: string | 
       <Card title={t("sections.basics")}>
         <div className="grid gap-3">
           <Field label={t("fields.title")} value={form.title} maxLength={100} onChange={(e) => set("title", e.target.value)} error={err("title")} />
-          <SelectField label={t("fields.type")} value={form.type} onChange={(e) => set("type", e.target.value as ListingInput["type"])}>
+          <SelectField
+            label={t("fields.type")}
+            value={form.type}
+            onChange={(e) => {
+              const type = e.target.value as ListingInput["type"];
+              // A lodge keeps only nightly and daily prices.
+              setForm((f) => ({ ...f, type, rates: f.rates.filter((r) => rateUnitsFor(type).includes(r.unit)) }));
+              setStatus("idle");
+            }}
+          >
             {PLACE_TYPES.map((type) => (
               <option key={type} value={type}>
                 {tType(type)}
@@ -219,7 +236,7 @@ export function ListingForm({ listingId, initial, live }: { listingId: string | 
           {t("pricesHint")} {form.bookingModel !== "WHOLE_PROPERTY" && t("pricesRoomsHint")}
         </p>
         <div className="mb-4 flex flex-wrap gap-2">
-          {RATE_UNITS.map((unit) => (
+          {rateUnitsFor(form.type).map((unit) => (
             <Chip key={unit} on={rateIndex(unit) >= 0} onToggle={() => toggleRate(unit)}>
               {tListings(`unitName.${unit}`)}
             </Chip>

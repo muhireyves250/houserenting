@@ -126,6 +126,11 @@ export default async function BookingPage({ params }: Props) {
       <section className={cn(card, "mt-4")}>
         <h2 className="mb-2 text-lg font-bold text-ink">{t("yourStay")}</h2>
         <dl className="divide-y divide-line">
+          {booking.unit === "HOUR" && (
+            <Row label={t("time")}>
+              {new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Kigali" }).formatRange(booking.startAt, booking.endAt)}
+            </Row>
+          )}
           <Row label={tListings("checkInLabel")}>
             {formatDay(locale, booking.checkIn)}
             {policy.checkInTime && <span className="block text-[13px] font-normal text-muted">{tListings("checkIn", { time: policy.checkInTime })}</span>}
@@ -154,11 +159,10 @@ export default async function BookingPage({ params }: Props) {
             <Row label={t("rental")}>{t("rentalTerms", { months: booking.months, upfront: booking.upfrontMonths ?? booking.months })}</Row>
           )}
           <Row
-            label={
-              booking.rentalMode === "MONTHLY"
-                ? tListings("monthsTimes", { price: formatRWF(booking.nightlyPrice, locale), count: booking.upfrontMonths ?? 1 })
-                : tListings("nightsTimes", { price: formatRWF(booking.nightlyPrice, locale), count: booking.nights })
-            }
+            label={tListings(`unitTimes.${booking.unit}`, {
+              price: formatRWF(booking.nightlyPrice, locale),
+              count: booking.unit === "MONTH" ? (booking.upfrontMonths ?? booking.quantity) : booking.quantity,
+            })}
           >
             {formatRWF(booking.subtotal || booking.total, locale)}
           </Row>

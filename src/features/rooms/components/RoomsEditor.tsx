@@ -14,7 +14,8 @@ import { ROOM_STATUSES, type RoomInput, type RoomStatus } from "../validation";
 
 type Room = RoomInput & { id: string; status: RoomStatus };
 
-const EMPTY: RoomInput = { name: "", description: "", maxGuests: 2, nightlyPrice: 0, facilities: [] };
+type Unit = RoomInput["rates"][number]["unit"];
+const emptyRoom = (units: readonly Unit[]): RoomInput => ({ name: "", description: "", maxGuests: 2, rates: [{ unit: units[0] ?? "NIGHT", price: 0 }], facilities: [] });
 
 const STATUS_TONE: Record<RoomStatus, string> = {
   AVAILABLE: "text-emerald-700",
@@ -24,8 +25,9 @@ const STATUS_TONE: Record<RoomStatus, string> = {
 };
 
 /** Rooms of a place that rents by the room: each with its own price, guests, amenities and status. */
-export function RoomsEditor({ listingId, rooms }: { listingId: string; rooms: Room[] }) {
+export function RoomsEditor({ listingId, rooms, units }: { listingId: string; rooms: Room[]; units: readonly Unit[] }) {
   const t = useTranslations("Rooms");
+  const tListings = useTranslations("Listings");
   const locale = useLocale();
   const router = useRouter();
   const [editing, setEditing] = useState<string | "new" | null>(rooms.length === 0 ? "new" : null);
@@ -49,14 +51,14 @@ export function RoomsEditor({ listingId, rooms }: { listingId: string; rooms: Ro
         {rooms.map((room) =>
           editing === room.id ? (
             <li key={room.id}>
-              <RoomForm initial={room} pending={pending} onCancel={() => setEditing(null)} onSave={(input) => run(() => saveRoomAction(listingId, room.id, input), () => setEditing(null))} />
+              <RoomForm initial={room} units={units} pending={pending} onCancel={() => setEditing(null)} onSave={(input) => run(() => saveRoomAction(listingId, room.id, input), () => setEditing(null))} />
             </li>
           ) : (
             <li key={room.id} className="flex flex-col gap-3 rounded-2xl border border-line p-4 sm:flex-row sm:items-center">
               <div className="min-w-0 flex-1">
                 <p className="text-[15px] font-semibold text-ink">{room.name}</p>
                 <p className="text-[13px] text-muted">
-                  {formatRWF(room.nightlyPrice, locale)} · {t("guests", { count: room.maxGuests })}
+                  {room.rates.map((r) => `${formatRWF(r.price, locale)} ${tListings(`perUnit.${r.unit}`)}`).join(" · ")} · {t("guests", { count: room.maxGuests })}
                 </p>
               </div>
               <label className="flex items-center gap-2 text-[13px] text-muted">
@@ -99,7 +101,7 @@ export function RoomsEditor({ listingId, rooms }: { listingId: string; rooms: Ro
       )}
       <div className="mt-4">
         {editing === "new" ? (
-          <RoomForm initial={EMPTY} pending={pending} onCancel={rooms.length > 0 ? () => setEditing(null) : undefined} onSave={(input) => run(() => saveRoomAction(listingId, null, input), () => setEditing(null))} />
+          <RoomForm initial={emptyRoom(units)} units={units} pending={pending} onCancel={rooms.length > 0 ? () => setEditing(null) : undefined} onSave={(input) => run(() => saveRoomAction(listingId, null, input), () => setEditing(null))} />
         ) : (
           <Button variant="outline" onClick={() => setEditing("new")}>
             <Plus className="size-4" aria-hidden="true" />
@@ -111,18 +113,56 @@ export function RoomsEditor({ listingId, rooms }: { listingId: string; rooms: Ro
   );
 }
 
-function RoomForm({ initial, pending, onSave, onCancel }: { initial: RoomInput; pending: boolean; onSave: (input: RoomInput) => void; onCancel?: () => void }) {
+function RoomForm({
+  initial,
+  units,
+  pending,
+  onSave,
+  onCancel,
+}: {
+  initial: RoomInput;
+  units: readonly Unit[];
+  pending: boolean;
+  onSave: (input: RoomInput) => void;
+  onCancel?: () => void;
+}) {
   const t = useTranslations("Rooms");
+  const tListings = useTranslations("Listings");
   const tFacility = useTranslations("Facility");
   const [room, setRoom] = useState<RoomInput>(initial);
   const set = <K extends keyof RoomInput>(key: K, value: RoomInput[K]) => setRoom((r) => ({ ...r, [key]: value }));
-  const valid = room.name.trim().length >= 2 && room.nightlyPrice >= 100 && room.maxGuests >= 1;
+  const rates = room.rates ?? [];
+  const valid = room.name.trim().length >= 2 && rates.length > 0 && rates.every((r) => r.price >= 100) && room.maxGuests >= 1;
+  const priceOf = (unit: Unit) => rates.find((r) => r.unit === unit);
+  const toggleUnit = (unit: Unit) =>
+    set("rates", priceOf(unit) ? rates.filter((r) => r.unit !== unit) : [...rates, { unit, price: 0 }]);
+  const setPrice = (unit: Unit, price: number) => set("rates", rates.map((r) => (r.unit === unit ? { ...r, price } : r)));
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-primary/40 bg-primary/[0.02] p-4">
       <Field label={t("name")} value={room.name} maxLength={60} onChange={(e) => set("name", e.target.value)} />
+      <Field label={t("maxGuests")} type="number" min={1} value={room.maxGuests || ""} onChange={(e) => set("maxGuests", Number(e.target.value) || 0)} />
+      {/* How this room is booked, each with its own price. */}
+      <p className="text-xs font-semibold text-muted">{t("howBooked")}</p>
+      <div className="flex flex-wrap gap-2">
+        {units.map((unit) => (
+          <Chip key={unit} on={Boolean(priceOf(unit))} onToggle={() => toggleUnit(unit)}>
+            {tListings(`unitName.${unit}`)}
+          </Chip>
+        ))}
+      </div>
       <div className="grid grid-cols-2 gap-3">
-        <Field label={t("price")} type="number" min={0} value={room.nightlyPrice || ""} onChange={(e) => set("nightlyPrice", Number(e.target.value) || 0)} />
-        <Field label={t("maxGuests")} type="number" min={1} value={room.maxGuests || ""} onChange={(e) => set("maxGuests", Number(e.target.value) || 0)} />
+        {units
+          .filter((unit) => priceOf(unit))
+          .map((unit) => (
+            <Field
+              key={unit}
+              label={`${t("price")} ${tListings(`perUnit.${unit}`)}`}
+              type="number"
+              min={0}
+              value={priceOf(unit)?.price || ""}
+              onChange={(e) => setPrice(unit, Number(e.target.value) || 0)}
+            />
+          ))}
       </div>
       <AreaField label={t("description")} rows={2} maxLength={500} value={room.description ?? ""} onChange={(e) => set("description", e.target.value)} />
       <div className="flex flex-wrap gap-2">

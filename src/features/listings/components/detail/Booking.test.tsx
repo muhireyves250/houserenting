@@ -7,9 +7,10 @@ import { BookingCard, RoomPicker, StayCalendar, StayProvider } from "./Booking";
 
 const animateScrollTo = vi.hoisted(() => vi.fn(() => Promise.resolve()));
 vi.mock("@/lib/animate-scroll", () => ({ animateScrollTo }));
-const bookStayAction = vi.hoisted(() => vi.fn());
+const bookRentalAction = vi.hoisted(() => vi.fn());
+const bookStayAction = bookRentalAction;
 const checkPromoAction = vi.hoisted(() => vi.fn());
-vi.mock("@/features/bookings/actions", () => ({ bookStayAction, checkPromoAction, bookMonthlyAction: vi.fn() }));
+vi.mock("@/features/bookings/actions", () => ({ bookRentalAction, checkPromoAction }));
 const push = vi.hoisted(() => vi.fn());
 vi.mock("@/i18n/navigation", () => ({
   usePathname: () => "/listings/abc",
@@ -61,9 +62,11 @@ describe("Booking card", () => {
     expect(card).toHaveTextContent("Total");
   });
 
-  it("lists the other ways to rent", () => {
+  it("offers each way the host rents the place, with its price", async () => {
     setup({ discountPercent: null });
-    expect(screen.getByRole("complementary")).toHaveTextContent("RWF 9,000 / hour");
+    expect(screen.getByRole("radio", { name: "By the night" })).toBeChecked();
+    await userEvent.click(screen.getByRole("radio", { name: "By the hour" }));
+    expect(screen.getByRole("complementary")).toHaveTextContent("RWF 9,000/ hour");
     expect(screen.queryByText("This host is offering a discount")).not.toBeInTheDocument();
   });
 
@@ -109,14 +112,17 @@ describe("Confirm and pay", () => {
     expect(dialog).toHaveTextContent("Free to cancel while the booking is unpaid.");
     expect(dialog).toHaveTextContent("We hold your dates for 30 minutes. Mobile money payment isn't connected yet, so you won't be charged.");
     await userEvent.click(within(dialog).getByRole("button", { name: "Book and hold these dates" }));
-    expect(bookStayAction).toHaveBeenCalledWith({
+    expect(bookRentalAction).toHaveBeenCalledWith({
       listingId: "abc",
-      checkIn: "2026-10-14",
-      checkOut: "2026-10-16",
+      unit: "NIGHT",
+      start: "2026-10-14",
+      startTime: null,
+      quantity: 2,
       guests: 1,
       roomId: null,
       promoCode: null,
       payment: { method: "mtn", phone: "078 812 3456" },
+      identity: null,
     });
     expect(push).toHaveBeenCalledWith("/bookings/SR-7K2M9Q");
   });
@@ -157,14 +163,14 @@ describe("Booked nights", () => {
 
 describe("Rooms and fees", () => {
   const rooms = [
-    { id: "r1", name: "Garden room", description: "", maxGuests: 2, nightlyPrice: 20000, facilities: [] },
-    { id: "r2", name: "Lake room", description: "", maxGuests: 3, nightlyPrice: 30000, facilities: [] },
+    { id: "r1", name: "Garden room", description: "", maxGuests: 2, facilities: [], rates: [{ unit: "NIGHT" as const, price: 20000 }] },
+    { id: "r2", name: "Lake room", description: "", maxGuests: 3, facilities: [], rates: [{ unit: "NIGHT" as const, price: 30000 }] },
   ];
 
   it("asks for a room first, then prices that room and adds the service fee", async () => {
     renderWithIntl(
       <StayProvider listingId="abc" rooms={rooms} bookingModel="ROOM_BY_ROOM" guestFeeBps={500} booked={[{ checkIn: "2026-10-20", checkOut: "2026-10-23", roomId: "r1" }]}>
-        <RoomPicker wholePrice={null} />
+        <RoomPicker wholeRates={[]} />
         <StayCalendar city="Kigali" today="2026-10-13" />
         <BookingCard rates={rates} discountPercent={null} maxGuests={6} place={place} signedIn />
       </StayProvider>,
@@ -200,5 +206,31 @@ describe("Promo codes in the Reserve window", () => {
     await userEvent.click(within(dialog).getByRole("button", { name: "Next" }));
     await userEvent.click(within(dialog).getByRole("button", { name: "Book and hold these dates" }));
     expect(bookStayAction).toHaveBeenLastCalledWith(expect.objectContaining({ promoCode: "WELCOME" }));
+  });
+});
+
+describe("Booking by the hour", () => {
+  it("asks for a date, a start time and hours, and prices the hours", async () => {
+    bookRentalAction.mockResolvedValueOnce({ reference: "SR-HHHHHH" });
+    renderWithIntl(
+      <StayProvider listingId="abc" defaultUnit="NIGHT">
+        <StayCalendar city="Kigali" rates={rates} today="2026-10-13" />
+        <BookingCard rates={rates} discountPercent={null} maxGuests={2} place={place} signedIn />
+      </StayProvider>,
+    );
+    await userEvent.click(screen.getByRole("radio", { name: "By the hour" }));
+    // The night calendar goes away; the card asks for a date, a time and hours.
+    expect(screen.queryByRole("button", { name: /October 14, 2026/ })).not.toBeInTheDocument();
+    await userEvent.type(screen.getByLabelText("Date"), "2026-10-20");
+    await userEvent.selectOptions(screen.getByLabelText("Start time"), "09:00");
+    await userEvent.selectOptions(screen.getByLabelText("Length"), "3");
+    expect(screen.getByText("RWF 9,000 × 3 hours")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Reserve" }));
+    const dialog = screen.getByRole("dialog");
+    expect(dialog).toHaveTextContent("Oct 20, 2026 · 9:00");
+    await userEvent.type(within(dialog).getByLabelText("Mobile money number"), "0788123456");
+    await userEvent.click(within(dialog).getByRole("button", { name: "Next" }));
+    await userEvent.click(within(dialog).getByRole("button", { name: "Book and hold these dates" }));
+    expect(bookRentalAction).toHaveBeenLastCalledWith(expect.objectContaining({ unit: "HOUR", start: "2026-10-20", startTime: "09:00", quantity: 3 }));
   });
 });

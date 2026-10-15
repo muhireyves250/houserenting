@@ -134,7 +134,9 @@ enum RateUnit {
   HOUR
   DAY
   NIGHT
+  WEEK
   MONTH
+  YEAR
 }
 
 enum Facility {
@@ -269,6 +271,12 @@ model Booking {
   status         BookingStatus  @default(PENDING_PAYMENT)
   checkIn        DateTime       @db.Date
   checkOut       DateTime       @db.Date
+  /// How it was booked (hours, days, nights, weeks, months, years) and how many.
+  unit           RateUnit       @default(NIGHT)
+  quantity       Int            @default(1)
+  /// Exact time the place is taken from and until (end not included); double booking is checked on these.
+  startAt        DateTime
+  endAt          DateTime
   nights         Int
   guests         Int
   /// Prices in whole RWF, worked out on the server when booked.
@@ -475,9 +483,9 @@ model Room {
   name         String
   description  String     @default("")
   maxGuests    Int
-  nightlyPrice Int
   facilities   Facility[]
   status       RoomStatus @default(AVAILABLE)
+  rates        RoomRate[]
   position     Int        @default(0)
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
@@ -709,4 +717,16 @@ model Message {
 
   @@index([conversationId, createdAt])
   @@map("message")
+}
+
+/// A room's own price for one way of booking it (by the hour, night, week…).
+model RoomRate {
+  id     String   @id @default(cuid())
+  roomId String
+  room   Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  unit   RateUnit
+  price  Int
+
+  @@unique([roomId, unit])
+  @@map("roomRate")
 }

@@ -252,13 +252,17 @@
       "HOUR": "/ heure",
       "DAY": "/ jour",
       "NIGHT": "/ nuit",
-      "MONTH": "/ mois"
+      "MONTH": "/ mois",
+      "WEEK": "/ semaine",
+      "YEAR": "/ an"
     },
     "unitName": {
       "HOUR": "À l'heure",
       "DAY": "À la journée",
       "NIGHT": "À la nuit",
-      "MONTH": "Au mois"
+      "MONTH": "Au mois",
+      "WEEK": "À la semaine",
+      "YEAR": "À l'année"
     },
     "new": "Nouveau",
     "discount": "-{percent}%",
@@ -439,7 +443,34 @@
     "yourDetails": "Vos informations",
     "idNumber": "Numéro de carte d'identité ou de passeport",
     "nationality": "Nationalité",
-    "identityPrivacy": "Seule notre équipe voit ces informations. Elles servent au contrat de location."
+    "identityPrivacy": "Seule notre équipe voit ces informations. Elles servent au contrat de location.",
+    "by": {
+      "HOUR": "À l'heure",
+      "DAY": "À la journée",
+      "NIGHT": "À la nuit",
+      "WEEK": "À la semaine",
+      "MONTH": "Au mois",
+      "YEAR": "À l'année"
+    },
+    "unitTimes": {
+      "HOUR": "{price} × {count, plural, one {# heure} other {# heures}}",
+      "DAY": "{price} × {count, plural, one {# jour} other {# jours}}",
+      "NIGHT": "{price} × {count, plural, one {# nuit} other {# nuits}}",
+      "WEEK": "{price} × {count, plural, one {# semaine} other {# semaines}}",
+      "MONTH": "{price} × {count, plural, one {# mois} other {# mois}}",
+      "YEAR": "{price} × {count, plural, one {# an} other {# ans}}"
+    },
+    "unitCount": {
+      "HOUR": "{count, plural, one {# heure} other {# heures}}",
+      "DAY": "{count, plural, one {# jour} other {# jours}}",
+      "NIGHT": "{count, plural, one {# nuit} other {# nuits}}",
+      "WEEK": "{count, plural, one {# semaine} other {# semaines}}",
+      "MONTH": "{count, plural, one {# mois} other {# mois}}",
+      "YEAR": "{count, plural, one {# an} other {# ans}}"
+    },
+    "startDate": "Date",
+    "startTime": "Heure de début",
+    "chooseTime": "Choisir une heure"
   },
   "Facility": {
     "KITCHEN": "Cuisine",
@@ -537,7 +568,8 @@
     "rental": "Location",
     "rentalTerms": "{months} mois, {upfront} payé(s) à la réservation",
     "payTitle": "Payer pour confirmer",
-    "messageHost": "Écrire à l'hôte"
+    "messageHost": "Écrire à l'hôte",
+    "time": "Heure"
   },
   "Host": {
     "title": "Vos annonces",
@@ -584,13 +616,17 @@
         "HOUR": "Heures minimum",
         "DAY": "Jours minimum",
         "NIGHT": "Nuits minimum",
-        "MONTH": "Mois minimum"
+        "MONTH": "Mois minimum",
+        "WEEK": "Semaines minimum",
+        "YEAR": "Années minimum"
       },
       "max": {
         "HOUR": "Heures maximum",
         "DAY": "Jours maximum",
         "NIGHT": "Nuits maximum",
-        "MONTH": "Mois maximum"
+        "MONTH": "Mois maximum",
+        "WEEK": "Semaines maximum",
+        "YEAR": "Années maximum"
       },
       "checkIn": "Arrivée à partir de",
       "checkOut": "Départ avant",
@@ -602,7 +638,7 @@
       "terms": "Règlement intérieur (un par ligne)",
       "bookingModel": "Mode de réservation"
     },
-    "pricesHint": "Choisissez comment louer : à l'heure, à la journée, à la nuit ou au mois.",
+    "pricesHint": "Choisissez comment réserver : à l'heure, à la journée, à la nuit, à la semaine, au mois ou à l'année (lodges : nuit ou journée).",
     "errors": {
       "field": "Vérifiez ce champ.",
       "maxBelowMin": "Le maximum doit être au moins égal au minimum.",
@@ -610,7 +646,8 @@
       "pin": "Placez le repère au Rwanda.",
       "noRates": "Ajoutez au moins un prix.",
       "check": "Vérifiez les champs signalés.",
-      "failed": "Enregistrement impossible. Réessayez."
+      "failed": "Enregistrement impossible. Réessayez.",
+      "lodgeUnits": "Les lodges se réservent uniquement à la nuit ou à la journée."
     },
     "save": "Enregistrer",
     "saved": "Enregistré",
@@ -866,7 +903,8 @@
     "save": "Enregistrer la chambre",
     "wholePlace": "Le logement entier",
     "choose": "Choisir une chambre",
-    "perNight": "/ nuit"
+    "perNight": "/ nuit",
+    "howBooked": "Comment cette chambre se réserve"
   },
   "Settings": {
     "note": "Laissez un champ vide tant que la décision n'est pas prise : rien n'est facturé ni promis pour un champ vide. Chaque modification est inscrite au journal d'audit, et les réservations gardent les paramètres en vigueur à leur création.",

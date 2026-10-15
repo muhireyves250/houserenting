@@ -81,7 +81,7 @@ test("signed-out: a members-only menu link opens the login modal, then lands on 
   test.skip(testInfo.project.name !== "desktop", "header menu is desktop-only; phones use the bottom tabs");
   await skipOnboarding(page);
   await page.goto("/en/search");
-  await page.getByRole("link", { name: "Chats" }).click();
+  await page.getByRole("navigation", { name: "Main navigation" }).getByRole("link", { name: "Chats" }).click();
   const dialog = page.getByRole("dialog", { name: "Rent your perfect fit" });
   await expect(dialog).toBeVisible();
   await expect(page).toHaveURL(/\/en\/login\?next=%2Fchats/);

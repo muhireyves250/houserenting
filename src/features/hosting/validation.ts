@@ -18,7 +18,12 @@ export const FACILITIES = [
   "POOL",
 ] as const;
 
-export const RATE_UNITS = ["HOUR", "DAY", "NIGHT", "MONTH"] as const;
+export const RATE_UNITS = ["HOUR", "DAY", "NIGHT", "WEEK", "MONTH", "YEAR"] as const;
+/** Lodges are booked by the night or by the day only. */
+export const LODGE_RATE_UNITS = ["NIGHT", "DAY"] as const;
+export function rateUnitsFor(type: string): readonly (typeof RATE_UNITS)[number][] {
+  return type === "LODGE" ? LODGE_RATE_UNITS : RATE_UNITS;
+}
 
 // Rwanda, with a little margin.
 const LAT = { min: -2.95, max: -1.0 };
@@ -76,7 +81,8 @@ export const listingInput = z
     discountPercent: z.number().int().min(0).max(90).nullable(),
     rates: z.array(rate).min(1).max(RATE_UNITS.length),
   })
-  .refine((l) => new Set(l.rates.map((r) => r.unit)).size === l.rates.length, { path: ["rates"], message: "duplicateUnit" });
+  .refine((l) => new Set(l.rates.map((r) => r.unit)).size === l.rates.length, { path: ["rates"], message: "duplicateUnit" })
+  .refine((l) => l.rates.every((r) => rateUnitsFor(l.type).includes(r.unit)), { path: ["rates"], message: "lodgeUnits" });
 
 export type ListingInput = z.input<typeof listingInput>;
 export type ValidListing = z.output<typeof listingInput>;

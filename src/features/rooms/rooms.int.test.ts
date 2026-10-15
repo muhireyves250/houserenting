@@ -47,8 +47,8 @@ beforeEach(async () => {
       rates: { create: [{ unit: "NIGHT", price: 200000, minUnits: 1 }] },
     },
   });
-  const a = await saveRoom(host, "lodge", null, { ...room, name: "Room A", nightlyPrice: 40000 });
-  const b = await saveRoom(host, "lodge", null, { ...room, name: "Room B", nightlyPrice: 50000 });
+  const a = await saveRoom(host, "lodge", null, { ...room, name: "Room A", rates: [{ unit: "NIGHT", price: 40000 }] });
+  const b = await saveRoom(host, "lodge", null, { ...room, name: "Room B", rates: [{ unit: "NIGHT", price: 50000 }] });
   roomA = a.ok ? a.id : "";
   roomB = b.ok ? b.id : "";
   await db.listing.update({ where: { id: "lodge" }, data: { status: "PUBLISHED" } });
@@ -101,7 +101,7 @@ describe("room-by-room and whole-place bookings", () => {
   });
 
   it("sends a live place back to review when its rooms change, and keeps booked rooms in history", async () => {
-    await saveRoom(host, "lodge", roomA, { ...room, name: "Room A (garden)", nightlyPrice: 45000 });
+    await saveRoom(host, "lodge", roomA, { ...room, name: "Room A (garden)", rates: [{ unit: "NIGHT", price: 45000 }] });
     expect((await db.listing.findUnique({ where: { id: "lodge" } }))?.status).toBe("PENDING_REVIEW");
     await db.listing.update({ where: { id: "lodge" }, data: { status: "PUBLISHED" } });
     await createBooking(stay({ roomId: roomA }), NOW);

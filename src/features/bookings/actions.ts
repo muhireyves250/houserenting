@@ -7,7 +7,8 @@ import { getCurrentUser } from "@/lib/session";
 import { isBookingReference } from "./reference";
 import { checkPromo } from "@/features/promotions/service";
 import { db } from "@/lib/db";
-import { cancelPendingBooking, createBooking, createMonthlyBooking, type BookingError } from "./service";
+import { BOOKING_UNITS } from "./period";
+import { cancelPendingBooking, createBooking, createMonthlyBooking, createRentalBooking, type BookingError } from "./service";
 
 const input = z.object({
   listingId: z.string().min(1).max(64),
@@ -83,4 +84,35 @@ export async function checkPromoAction(code: string, subtotal: number): Promise<
   if (typeof code !== "string" || code.length > 40 || !Number.isInteger(subtotal) || subtotal < 0 || subtotal > 1_000_000_000) return { error: "unknown" };
   const result = await checkPromo(db, code, subtotal);
   return result.ok ? { discount: result.discount } : { error: result.error };
+}
+
+const rentalInput = z.object({
+  listingId: z.string().min(1).max(64),
+  unit: z.enum(BOOKING_UNITS),
+  start: z.string().max(10),
+  startTime: z.string().max(5).nullable().optional(),
+  quantity: z.number().int().min(1).max(365),
+  guests: z.number().int().min(1).max(50),
+  roomId: z.string().min(1).max(64).nullable().optional(),
+  promoCode: z.string().max(40).nullable().optional(),
+  payment: z.object({ method: z.enum(["mtn", "airtel"]), phone: z.string().max(20) }),
+  identity: z.object({ idNumber: z.string().trim().max(40), nationality: z.string().trim().max(60).nullable() }).nullable().optional(),
+});
+
+/** Books by the hour, day, night, week, month or year (whatever the place or room offers). */
+export async function bookRentalAction(raw: unknown): Promise<BookStayResult> {
+  const user = await getCurrentUser();
+  if (!user) return { error: "auth" };
+  const parsed = rentalInput.safeParse(raw);
+  if (!parsed.success) return { error: "invalid" };
+  try {
+    const result = await createRentalBooking({ guestId: user.id, ...parsed.data });
+    if (!result.ok) return { error: result.error };
+    revalidatePath("/[locale]/bookings", "page");
+    revalidatePath(`/[locale]/listings/${parsed.data.listingId}`, "page");
+    return { reference: result.reference };
+  } catch (err) {
+    logger.error({ err, listingId: parsed.data.listingId }, "booking failed");
+    return { error: "failed" };
+  }
 }

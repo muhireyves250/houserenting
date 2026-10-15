@@ -28,3 +28,12 @@ describe("listingInput", () => {
     expect(Object.keys(errors).sort()).toEqual(["lat", "maxGuests", "rates.0.checkInTime", "rates.0.maxUnits"]);
   });
 });
+
+describe("ways of booking by type of place", () => {
+  it("lets houses offer weeks and years, but lodges only nights or days", () => {
+    expect(listingInput.safeParse({ ...validListing, rates: [{ unit: "WEEK", price: 200000 }, { unit: "YEAR", price: 6000000 }] }).success).toBe(true);
+    const lodge = { ...validListing, type: "LODGE" as const };
+    expect(listingInput.safeParse({ ...lodge, rates: [{ unit: "NIGHT", price: 40000 }, { unit: "DAY", price: 30000 }] }).success).toBe(true);
+    expect(fieldErrors(listingInput.safeParse({ ...lodge, rates: [{ unit: "MONTH", price: 400000 }] }).error!)).toEqual({ rates: "lodgeUnits" });
+  });
+});

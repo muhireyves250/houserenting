@@ -19,12 +19,13 @@ const pillLink =
 
 export default async function BookingsPage() {
   const user = await requireUser("/bookings");
-  const [t, tNav, tEmpty, tFooter, tType, locale] = await Promise.all([
+  const [t, tNav, tEmpty, tFooter, tType, tListings, locale] = await Promise.all([
     getTranslations("Bookings"),
     getTranslations("Nav"),
     getTranslations("Empty"),
     getTranslations("Footer"),
     getTranslations("ListingType"),
+    getTranslations("Listings"),
     getLocale(),
   ]);
   const now = new Date();
@@ -39,7 +40,10 @@ export default async function BookingsPage() {
     place: `${tType(b.listing.type)} · ${b.listing.district}, ${b.listing.city}`,
     photo: b.listing.photos[0]?.url ?? null,
     dates: formatStayDates(locale, b.checkIn, b.checkOut),
-    meta: t("nightsGuests", { nights: b.nights, guests: b.guests }),
+    meta:
+      b.unit === "NIGHT"
+        ? t("nightsGuests", { nights: b.nights, guests: b.guests })
+        : tListings(`unitCount.${b.unit}`, { count: b.quantity }),
     note: b.status === "PENDING_PAYMENT" && b.holdExpiresAt ? t("heldUntil", { time: formatKigaliTime(locale, b.holdExpiresAt) }) : null,
   });
 

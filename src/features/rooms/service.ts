@@ -19,7 +19,11 @@ async function managed(tx: Prisma.TransactionClient, actor: Actor, listingId: st
 }
 
 export function listingRooms(listingId: string) {
-  return db.room.findMany({ where: { listingId }, orderBy: [{ position: "asc" }, { createdAt: "asc" }] });
+  return db.room.findMany({
+    where: { listingId },
+    orderBy: [{ position: "asc" }, { createdAt: "asc" }],
+    include: { rates: { select: { unit: true, price: true } } },
+  });
 }
 
 export type SaveRoomResult = { ok: true; id: string } | { ok: false; errors?: Record<string, string> };
@@ -38,13 +42,16 @@ export async function saveRoom(actor: Actor, listingId: string, roomId: string |
   return db.$transaction(async (tx) => {
     const listing = await managed(tx, actor, listingId);
     if (!listing) return { ok: false };
+    const { rates, ...fields } = parsed.data;
     let id = roomId;
     if (roomId === null) {
       const count = await tx.room.count({ where: { listingId } });
-      id = (await tx.room.create({ data: { ...parsed.data, listingId, position: count } })).id;
+      id = (await tx.room.create({ data: { ...fields, listingId, position: count, rates: { create: rates } } })).id;
     } else {
-      const { count } = await tx.room.updateMany({ where: { id: roomId, listingId }, data: parsed.data });
+      const { count } = await tx.room.updateMany({ where: { id: roomId, listingId }, data: fields });
       if (count !== 1) return { ok: false };
+      await tx.roomRate.deleteMany({ where: { roomId } });
+      await tx.roomRate.createMany({ data: rates.map((r) => ({ ...r, roomId })) });
     }
     await audit(tx, { actorId: actor.id, action: roomId ? "room.update" : "room.create", entityType: "listing", entityId: listingId, data: { room: parsed.data.name } });
     if (listing.status === "PUBLISHED") {
