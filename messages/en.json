@@ -536,7 +536,8 @@
     "serviceFee": "Service fee",
     "rental": "Rental",
     "rentalTerms": "{months} months, {upfront} paid when booking",
-    "payTitle": "Pay to confirm"
+    "payTitle": "Pay to confirm",
+    "messageHost": "Message host"
   },
   "Host": {
     "title": "Your listings",
@@ -838,7 +839,8 @@
       "paymentProblem": "A payment needs attention ({reference}).",
       "rewardApproved": "Your referral reward of {amount} RWF was approved.",
       "rewardToCheck": "A referral reward is waiting for approval.",
-      "payoutRecorded": "A payout of {amount} RWF was sent to you ({reference})."
+      "payoutRecorded": "A payout of {amount} RWF was sent to you ({reference}).",
+      "newMessage": "New message from {name} about {title}."
     }
   },
   "Rooms": {
@@ -886,8 +888,8 @@
     "save": "Save settings",
     "invalid": "Check this value.",
     "monthly": "Monthly rentals",
-    "upfrontMonths": "Months paid when booking",
-    "monthlyHint": "Leave empty to keep monthly rentals off. Guests pay these months (plus any deposit) to book; the rest is arranged with the owner.",
+    "upfrontMonths": "Months paid when booking (empty = all months chosen)",
+    "monthlyHint": "Guests choose how many months to rent. Leave empty and they pay for all of them when booking; set a number to take only those months upfront. Lodges and single rooms are always paid by the night.",
     "referrals": "Referrals",
     "referralEnabled": "Show invite links to members",
     "referralReward": "Reward per friend (RWF)",
@@ -991,5 +993,22 @@
       "phone": "Check your mobile money number.",
       "providerDown": "The payment service didn't answer. Try again in a moment."
     }
+  },
+  "Chats": {
+    "startError": {
+      "notFound": "This place can't be messaged right now.",
+      "ownListing": "This is your own place.",
+      "auth": "Log in to message the host."
+    },
+    "sendFailed": "Couldn't send. Try again.",
+    "placeholder": "Write a message",
+    "send": "Send",
+    "aboutYourPlace": "About your place: {title}",
+    "you": "You",
+    "noMessages": "No messages yet",
+    "unread": "Unread",
+    "host": "Host",
+    "guest": "Guest",
+    "startHint": "Say hello to {name} and ask anything about the place."
   }
 }

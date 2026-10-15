@@ -536,7 +536,8 @@
     "serviceFee": "Frais de service",
     "rental": "Location",
     "rentalTerms": "{months} mois, {upfront} payé(s) à la réservation",
-    "payTitle": "Payer pour confirmer"
+    "payTitle": "Payer pour confirmer",
+    "messageHost": "Écrire à l'hôte"
   },
   "Host": {
     "title": "Vos annonces",
@@ -838,7 +839,8 @@
       "paymentProblem": "Un paiement est à vérifier ({reference}).",
       "rewardApproved": "Votre récompense de parrainage de {amount} RWF a été approuvée.",
       "rewardToCheck": "Une récompense de parrainage attend une approbation.",
-      "payoutRecorded": "Un versement de {amount} RWF vous a été envoyé ({reference})."
+      "payoutRecorded": "Un versement de {amount} RWF vous a été envoyé ({reference}).",
+      "newMessage": "Nouveau message de {name} à propos de {title}."
     }
   },
   "Rooms": {
@@ -886,8 +888,8 @@
     "save": "Enregistrer",
     "invalid": "Vérifiez cette valeur.",
     "monthly": "Locations au mois",
-    "upfrontMonths": "Mois payés à la réservation",
-    "monthlyHint": "Laissez vide pour désactiver les locations au mois. Le voyageur paie ces mois (et la caution éventuelle) pour réserver ; le reste se règle avec le propriétaire.",
+    "upfrontMonths": "Mois payés à la réservation (vide = tous les mois choisis)",
+    "monthlyHint": "Le voyageur choisit le nombre de mois. Laissez vide : il paie tous les mois à la réservation ; indiquez un nombre pour ne prendre que ces mois d'avance. Les lodges et les chambres se paient toujours à la nuit.",
     "referrals": "Parrainage",
     "referralEnabled": "Afficher les liens d'invitation aux membres",
     "referralReward": "Récompense par ami (RWF)",
@@ -991,5 +993,22 @@
       "phone": "Vérifiez votre numéro mobile money.",
       "providerDown": "Le service de paiement n'a pas répondu. Réessayez dans un instant."
     }
+  },
+  "Chats": {
+    "startError": {
+      "notFound": "Impossible d'écrire pour ce logement pour le moment.",
+      "ownListing": "C'est votre propre logement.",
+      "auth": "Connectez-vous pour écrire à l'hôte."
+    },
+    "sendFailed": "Envoi impossible. Réessayez.",
+    "placeholder": "Écrire un message",
+    "send": "Envoyer",
+    "aboutYourPlace": "Votre logement : {title}",
+    "you": "Vous",
+    "noMessages": "Pas encore de messages",
+    "unread": "Non lu",
+    "host": "Hôte",
+    "guest": "Voyageur",
+    "startHint": "Dites bonjour à {name} et posez vos questions sur le logement."
   }
 }

@@ -536,7 +536,8 @@
     "serviceFee": "Amafaranga ya serivisi",
     "rental": "Ubukode",
     "rentalTerms": "Amezi {months}, {upfront} yishyurwa ubika",
-    "payTitle": "Ishyura kugira ngo byemezwe"
+    "payTitle": "Ishyura kugira ngo byemezwe",
+    "messageHost": "Andikira nyir'inzu"
   },
   "Host": {
     "title": "Aho wakira abashyitsi",
@@ -838,7 +839,8 @@
       "paymentProblem": "Ubwishyu bukeneye kurebwa ({reference}).",
       "rewardApproved": "Igihembo cyawe cya {amount} RWF cyemejwe.",
       "rewardToCheck": "Igihembo cy'ubutumire gitegereje kwemezwa.",
-      "payoutRecorded": "Wohererejwe {amount} RWF ({reference})."
+      "payoutRecorded": "Wohererejwe {amount} RWF ({reference}).",
+      "newMessage": "Ubutumwa bushya bwa {name} kuri {title}."
     }
   },
   "Rooms": {
@@ -886,8 +888,8 @@
     "save": "Bika",
     "invalid": "Reba iyi mibare.",
     "monthly": "Ubukode bw'ukwezi",
-    "upfrontMonths": "Amezi yishyurwa ubika",
-    "monthlyHint": "Siga ubusa kugira ngo ubukode bw'ukwezi bufunge. Umushyitsi yishyura aya mezi (n'ingwate niba ihari) kugira ngo abike; ibisigaye bivugwaho na nyir'inzu.",
+    "upfrontMonths": "Amezi yishyurwa ubika (ubusa = amezi yose yahiswemo)",
+    "monthlyHint": "Umushyitsi ahitamo amezi ashaka gukodesha. Usize ubusa, yishyura amezi yose abika; shyiraho umubare kugira ngo yishyure ayo mezi gusa mbere. Lodge n'ibyumba byishyurwa ku ijoro buri gihe.",
     "referrals": "Ubutumire",
     "referralEnabled": "Erekana amahuza y'ubutumire",
     "referralReward": "Igihembo kuri buri nshuti (RWF)",
@@ -991,5 +993,22 @@
       "phone": "Reba nimero yawe ya mobile money.",
       "providerDown": "Serivisi yo kwishyura ntiyasubije. Ongera ugerageze."
     }
+  },
+  "Chats": {
+    "startError": {
+      "notFound": "Ntushobora kwandikira aha hantu ubu.",
+      "ownListing": "Aha ni ahawe.",
+      "auth": "Injira kugira ngo wandikire nyir'inzu."
+    },
+    "sendFailed": "Kohereza byanze. Ongera ugerageze.",
+    "placeholder": "Andika ubutumwa",
+    "send": "Ohereza",
+    "aboutYourPlace": "Ahawe: {title}",
+    "you": "Wowe",
+    "noMessages": "Nta butumwa buraza",
+    "unread": "Bitarasomwa",
+    "host": "Nyir'inzu",
+    "guest": "Umushyitsi",
+    "startHint": "Suhuza {name} ubaze icyo ushaka ku hantu."
   }
 }

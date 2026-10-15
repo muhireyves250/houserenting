@@ -49,7 +49,7 @@ import { publishedReviews } from "@/features/reviews/service";
 import { CollapsibleText } from "@/features/listings/components/detail/CollapsibleText";
 import { CompactListingCard } from "@/features/home/components/CompactListingCard";
 import { HomeRow } from "@/features/home/components/HomeRow";
-import { navHref } from "@/components/shell/nav-items";
+import { MessageHostButton } from "@/features/chats/components/MessageHostButton";
 import { Link } from "@/i18n/navigation";
 import { formatRWF } from "@/lib/format";
 import { getCurrentUser } from "@/lib/session";
@@ -201,7 +201,11 @@ export default async function ListingPage({ params }: Props) {
       bookingModel={listing.bookingModel}
       guestFeeBps={settings.guestFeeBps}
       cancellationPolicy={policyText(settings.cancellationPolicy, locale)}
-      monthlyConfig={settings.monthlyUpfrontMonths ? { upfrontMonths: settings.monthlyUpfrontMonths, depositPercent: settings.monthlyDepositPercent, identity: settings.monthlyIdentity } : null}
+      monthlyConfig={
+        listing.type === "LODGE"
+          ? null
+          : { upfrontMonths: settings.monthlyUpfrontMonths, depositPercent: settings.monthlyDepositPercent, identity: settings.monthlyIdentity }
+      }
       monthlyOnly={!rates.some((r) => r.unit !== "MONTH")}
       minMonths={rates.find((r) => r.unit === "MONTH")?.minUnits ?? 1}
     >
@@ -391,12 +395,13 @@ export default async function ListingPage({ params }: Props) {
               <p className="mt-2 font-display text-[26px] font-bold tracking-[-0.02em] text-ink">{listing.host.name}</p>
               <p className="text-sm text-muted">{t("hostingSince", { year: listing.host.createdAt.getFullYear() })}</p>
             </div>
-            <Link
-              href={navHref("/chats", user !== null)}
-              className="inline-flex w-fit items-center rounded-xl border border-ink/80 max-md:border-primary bg-surface px-6 py-3 text-[15px] font-semibold text-ink transition-[background-color,transform] duration-300 hover:bg-canvas active:scale-95"
+            <MessageHostButton
+              listingId={listing.id}
+              signedIn={user !== null}
+              className="inline-flex w-fit items-center rounded-xl border border-ink/80 max-md:border-primary bg-surface px-6 py-3 text-[15px] font-semibold text-ink transition-[background-color,transform] duration-300 hover:bg-canvas active:scale-95 disabled:opacity-60"
             >
               {t("messageHost")}
-            </Link>
+            </MessageHostButton>
           </div>
         </Section>
 

@@ -26,7 +26,8 @@ export type NotificationKind =
   | "paymentProblem"
   | "rewardApproved"
   | "rewardToCheck"
-  | "payoutRecorded";
+  | "payoutRecorded"
+  | "newMessage";
 
 export async function notify(
   client: Client,

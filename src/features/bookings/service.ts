@@ -259,20 +259,21 @@ export type MonthlyRequest = {
 };
 
 /**
- * Books a monthly rental of the whole place. Offered only once staff set how many months are paid when booking;
- * no identity details are collected until the business approves which ones are needed.
+ * Books a monthly rental of the whole place (not lodges, not single rooms: those are paid by the night). The client
+ * chooses the months; identity details are asked only if staff have set which ones the business needs.
  */
 export async function createMonthlyBooking(request: MonthlyRequest, now: Date = new Date()): Promise<CreateBookingResult> {
   const { guestId, listingId, start, months } = request;
   if (!isRealDate(start) || start < todayISO(now) || !Number.isInteger(months) || months < 1 || months > 60) return { ok: false, error: "invalid" };
   const settings = await readSettings();
-  if (!settings.monthlyUpfrontMonths) return { ok: false, error: "notOffered" };
   const listing = await db.listing.findFirst({
     where: { id: listingId, status: "PUBLISHED" },
-    select: { title: true, hostId: true, discountPercent: true, termsOfRent: true, maxGuests: true, rates: { where: { unit: "MONTH" } } },
+    select: { title: true, type: true, hostId: true, discountPercent: true, termsOfRent: true, maxGuests: true, rates: { where: { unit: "MONTH" } } },
   });
   const rate = listing?.rates[0];
   if (!listing || !rate) return { ok: false, error: "notFound" };
+  // Lodges are booked and paid by the night.
+  if (listing.type === "LODGE") return { ok: false, error: "notOffered" };
   if (listing.hostId === guestId) return { ok: false, error: "ownListing" };
   if (months < rate.minUnits || (rate.maxUnits !== null && months > rate.maxUnits)) return { ok: false, error: "stayLength" };
   const phone = parseMobileMoney(request.payment.method, request.payment.phone);
@@ -286,7 +287,8 @@ export async function createMonthlyBooking(request: MonthlyRequest, now: Date = 
   const identity = needsId ? { idNumber, nationality: needsNationality ? nationality : null } : null;
 
   const monthly = discountedPrice(rate.price, listing.discountPercent);
-  const upfront = Math.min(settings.monthlyUpfrontMonths, months);
+  // The client chooses the months; they pay all of them now unless staff set fewer months upfront.
+  const upfront = Math.min(settings.monthlyUpfrontMonths ?? months, months);
   const quote = monthlyQuote(start, months, monthly, settings.monthlyDepositPercent);
   const fees = { commissionBps: settings.commissionBps, guestFeeBps: settings.guestFeeBps };
   let promo: Extract<PromoCheck, { ok: true }> | null = null;

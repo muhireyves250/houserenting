@@ -1,4 +1,4 @@
-import { ChevronLeft, House, LifeBuoy, Navigation } from "lucide-react";
+import { ChevronLeft, House, LifeBuoy, MessageSquare, Navigation } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -20,6 +20,7 @@ import { ReviewForm } from "@/features/reviews/components/ReviewForm";
 import { canReview } from "@/features/reviews/service";
 import { policyText } from "@/features/settings/service";
 import { PayNow } from "@/features/payments/components/PayNow";
+import { MessageHostButton } from "@/features/chats/components/MessageHostButton";
 import { getPaymentProvider } from "@/features/payments/providers";
 
 type Props = { params: Promise<{ reference: string }> };
@@ -94,6 +95,10 @@ export default async function BookingPage({ params }: Props) {
                 {t("directions")}
               </a>
             )}
+            <MessageHostButton listingId={listing.id} signedIn className={pillLink}>
+              <MessageSquare className="size-4" aria-hidden="true" />
+              {t("messageHost")}
+            </MessageHostButton>
             <Link href={{ pathname: "/support", query: { booking: booking.reference } }} className={pillLink}>
               <LifeBuoy className="size-4" aria-hidden="true" />
               {t("getHelp")}

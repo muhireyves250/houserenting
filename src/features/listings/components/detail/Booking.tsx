@@ -51,7 +51,7 @@ type Stay = {
   /** Published cancellation terms in the reader's language. */
   cancellationPolicy: string | null;
   /** Monthly rentals, when staff have set the months paid upfront (null = not offered). */
-  monthlyConfig: { upfrontMonths: number; depositPercent: number | null; identity?: "NONE" | "ID" | "ID_NATIONALITY" } | null;
+  monthlyConfig: { upfrontMonths: number | null; depositPercent: number | null; identity?: "NONE" | "ID" | "ID_NATIONALITY" } | null;
   mode: "stay" | "monthly";
   setMode: (mode: "stay" | "monthly") => void;
   plan: { start: string; months: number };
@@ -90,7 +90,7 @@ export function StayProvider({
   bookingModel?: BookingModel;
   guestFeeBps?: number | null;
   cancellationPolicy?: string | null;
-  monthlyConfig?: { upfrontMonths: number; depositPercent: number | null; identity?: "NONE" | "ID" | "ID_NATIONALITY" } | null;
+  monthlyConfig?: { upfrontMonths: number | null; depositPercent: number | null; identity?: "NONE" | "ID" | "ID_NATIONALITY" } | null;
   /** The place rents by the month only. */
   monthlyOnly?: boolean;
   minMonths?: number;
@@ -260,7 +260,9 @@ function ReserveButton({
 }) {
   const t = useTranslations("Listings");
   const pathname = usePathname();
-  const { range, guests, listingId, holdMinutes, choice, guestFeeBps, cancellationPolicy, monthlyConfig, mode, plan } = useStay();
+  const { range, guests, listingId, holdMinutes, choice, guestFeeBps, cancellationPolicy, monthlyConfig, mode: chosenMode, plan } = useStay();
+  // A single room is always booked by the night.
+  const mode = choice === "whole" ? chosenMode : "stay";
   const { rates: choiceRates, room } = useChoiceRates(rates);
   const [open, setOpen] = useState(false);
   const quote = stayQuote(choiceRates, discountPercent, range);
@@ -271,7 +273,8 @@ function ReserveButton({
   // Monthly rental (offered once staff set the months paid upfront).
   if (mode === "monthly" && month && monthlyConfig) {
     const monthlyPrice = discountedPrice(month.price, discountPercent);
-    const upfrontMonths = Math.min(monthlyConfig.upfrontMonths, plan.months);
+    // All chosen months are paid now, unless staff set fewer months upfront.
+    const upfrontMonths = Math.min(monthlyConfig.upfrontMonths ?? plan.months, plan.months);
     const moveOut = plan.start ? addMonthsISO(plan.start, plan.months) : "";
     if (!signedIn) {
       return (
@@ -374,9 +377,11 @@ export function BookingCard({
   const t = useTranslations("Listings");
   const locale = useLocale();
   const guestsId = useId();
-  const { range, guests, setGuests, guestFeeBps, monthlyConfig, mode, setMode, plan, setPlan } = useStay();
+  const { range, guests, setGuests, guestFeeBps, monthlyConfig, mode: chosenMode, setMode, plan, setPlan, choice } = useStay();
   const monthRate = rates.find((r) => r.unit === "MONTH");
-  const canRentMonthly = Boolean(monthRate && monthlyConfig);
+  // Monthly rent is for the whole house; lodges (no monthly config) and single rooms are paid by the night.
+  const canRentMonthly = Boolean(monthRate && monthlyConfig && choice === "whole");
+  const mode = canRentMonthly ? chosenMode : "stay";
   const hasNightly = rates.some((r) => r.unit === "NIGHT");
   const { rates: choiceRates, room } = useChoiceRates(rates);
   const quote = stayQuote(choiceRates, discountPercent, range);

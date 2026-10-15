@@ -133,7 +133,14 @@ describe("monthly rentals", () => {
   const monthly = (over: Record<string, unknown> = {}) =>
     createMonthlyBooking({ guestId: "g1", listingId: "flat", start: "2026-12-01", months: 6, payment: pay, ...over }, NOW);
 
-  it("are offered only once staff set the months paid upfront", async () => {
+  it("let the client choose the months and pay for all of them when staff set no upfront limit", async () => {
+    const r = await monthly({ months: 4 });
+    expect(r.ok).toBe(true);
+    expect(await db.booking.findFirstOrThrow({ where: { rentalMode: "MONTHLY" } })).toMatchObject({ months: 4, upfrontMonths: 4, subtotal: 2400000 });
+  });
+
+  it("are not offered for lodges (paid by the night)", async () => {
+    await db.listing.update({ where: { id: "flat" }, data: { type: "LODGE" } });
     expect(await monthly()).toEqual({ ok: false, error: "notOffered" });
   });
 
