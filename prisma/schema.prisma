@@ -42,6 +42,15 @@ model User {
   notifications Notification[]
   tickets       SupportTicket[]
   ticketMessages SupportMessage[]
+  /// Code this person shares to invite friends (made when first needed).
+  referralCode  String?        @unique
+  /// Who invited this person (set once, never to themselves).
+  referredById  String?
+  referredBy    User?          @relation("referrals", fields: [referredById], references: [id], onDelete: SetNull)
+  referrals     User[]         @relation("referrals")
+  rewardsEarned ReferralReward[] @relation("rewardReferrer")
+  rewardFrom    ReferralReward?  @relation("rewardReferee")
+  settlements   Settlement[]
 
   @@map("user")
 }
@@ -280,6 +289,20 @@ model Booking {
   updatedAt      DateTime       @updatedAt
   events         BookingEvent[]
   review         Review?
+  /// Nightly stay or monthly rental.
+  rentalMode     RentalMode     @default(STAY)
+  /// Monthly rentals: number of months, and months paid when booking.
+  months         Int?
+  upfrontMonths  Int?
+  /// Monthly rentals: deposit due with the first payment.
+  deposit        Int            @default(0)
+  /// Promo code used and the discount it gave (and who funds it).
+  promoCodeId    String?
+  promoCode      PromoCode?     @relation(fields: [promoCodeId], references: [id], onDelete: SetNull)
+  discount       Int            @default(0)
+  payments       Payment[]
+  ledger         LedgerEntry[]
+  referralReward ReferralReward?
 
   @@index([guestId, checkIn])
   @@index([listingId, checkIn])
@@ -472,8 +495,160 @@ model PlatformConfig {
   monthlyDepositPercent Int?
   /// Cancellation terms shown before booking, per language: { en, fr, rw }.
   cancellationPolicy    Json?
+  /// Monthly rentals: months paid when booking (null = monthly booking not offered yet).
+  monthlyUpfrontMonths  Int?
+  /// Referrals: on/off, and the reward (RWF) for the inviter after the friend's first finished stay (null = no reward).
+  referralEnabled       Boolean  @default(false)
+  referralRewardAmount  Int?
   updatedAt             DateTime @updatedAt
   updatedById           String?
 
   @@map("platformConfig")
+}
+
+enum RentalMode {
+  STAY
+  MONTHLY
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+/// A payment attempt for a booking, as reported by the payment provider.
+model Payment {
+  id                String        @id @default(cuid())
+  bookingId         String
+  booking           Booking       @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  provider          String
+  /// The provider's transaction id: one payment per transaction, so a repeated callback can't pay twice.
+  providerReference String?       @unique
+  amount            Int
+  currency          String        @default("RWF")
+  status            PaymentStatus @default(PENDING)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@index([bookingId])
+  @@map("payment")
+}
+
+/// Every provider callback received, keyed by the provider's event id: a repeat is recognised and ignored.
+model PaymentEvent {
+  id          String   @id
+  provider    String
+  type        String
+  payload     Json
+  outcome     String
+  receivedAt  DateTime @default(now())
+
+  @@map("paymentEvent")
+}
+
+enum LedgerKind {
+  GUEST_PAYMENT
+  GUEST_FEE
+  COMMISSION
+  HOST_PAYABLE
+  DEPOSIT_HELD
+  PROMO_DISCOUNT
+  SETTLEMENT
+  REFERRAL_REWARD
+  REFUND
+}
+
+/// Money movements, never edited: the guest's payment, the platform's share, what owners are owed and paid.
+model LedgerEntry {
+  id           String      @id @default(cuid())
+  kind         LedgerKind
+  /// Positive amounts in RWF; the kind says which way the money goes.
+  amount       Int
+  currency     String      @default("RWF")
+  bookingId    String?
+  booking      Booking?    @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  hostId       String?
+  settlementId String?
+  settlement   Settlement? @relation(fields: [settlementId], references: [id], onDelete: Restrict)
+  note         String?
+  createdAt    DateTime    @default(now())
+
+  @@index([hostId, kind])
+  @@index([bookingId])
+  @@map("ledgerEntry")
+}
+
+enum SettlementStatus {
+  PENDING
+  PAID
+}
+
+/// A payout to a property owner, recorded by staff.
+model Settlement {
+  id                String           @id @default(cuid())
+  reference         String           @unique
+  hostId            String
+  host              User             @relation(fields: [hostId], references: [id], onDelete: Restrict)
+  amount            Int
+  currency          String           @default("RWF")
+  status            SettlementStatus @default(PAID)
+  method            String?
+  externalReference String?
+  createdById       String
+  createdAt         DateTime         @default(now())
+  entries           LedgerEntry[]
+
+  @@index([hostId, createdAt])
+  @@map("settlement")
+}
+
+enum PromoFunding {
+  PLATFORM
+  HOST
+}
+
+model PromoCode {
+  id          String       @id @default(cuid())
+  code        String       @unique
+  description String       @default("")
+  percentOff  Int?
+  amountOff   Int?
+  minSubtotal Int?
+  startsAt    DateTime?
+  endsAt      DateTime?
+  maxUses     Int?
+  usedCount   Int          @default(0)
+  /// Who pays for the discount: the platform (owner still gets the full price) or the owner.
+  fundedBy    PromoFunding @default(PLATFORM)
+  active      Boolean      @default(true)
+  createdById String
+  createdAt   DateTime     @default(now())
+  bookings    Booking[]
+
+  @@map("promoCode")
+}
+
+enum RewardStatus {
+  PENDING
+  APPROVED
+  VOID
+}
+
+/// A referral reward waiting for staff approval; one per invited person, only after their first finished stay.
+model ReferralReward {
+  id         String       @id @default(cuid())
+  referrerId String
+  referrer   User         @relation("rewardReferrer", fields: [referrerId], references: [id], onDelete: Cascade)
+  refereeId  String       @unique
+  referee    User         @relation("rewardReferee", fields: [refereeId], references: [id], onDelete: Cascade)
+  bookingId  String       @unique
+  booking    Booking      @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  amount     Int
+  status     RewardStatus @default(PENDING)
+  createdAt  DateTime     @default(now())
+  decidedAt  DateTime?
+
+  @@map("referralReward")
 }

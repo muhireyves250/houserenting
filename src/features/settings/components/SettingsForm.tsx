@@ -46,6 +46,38 @@ export function SettingsForm({ initial, envHoldMinutes }: { initial: SettingsInp
         </div>
         <p className="mt-3 text-[13px] text-muted">{t("moneyHint")}</p>
       </Card>
+      <Card title={t("monthly")}>
+        <Field
+          label={t("upfrontMonths")}
+          type="number"
+          min={1}
+          max={24}
+          value={show(form.monthlyUpfrontMonths ?? null)}
+          onChange={(e) => set("monthlyUpfrontMonths", num(e.target.value))}
+          error={err("monthlyUpfrontMonths")}
+        />
+        <p className="mt-3 text-[13px] text-muted">{t("monthlyHint")}</p>
+      </Card>
+      <Card title={t("referrals")}>
+        <label className="mb-3 flex cursor-pointer items-center gap-3 text-[15px] text-ink">
+          <input
+            type="checkbox"
+            checked={Boolean(form.referralEnabled)}
+            onChange={(e) => set("referralEnabled", e.target.checked)}
+            className="size-5 cursor-pointer accent-[var(--color-primary)]"
+          />
+          {t("referralEnabled")}
+        </label>
+        <Field
+          label={t("referralReward")}
+          type="number"
+          min={1}
+          value={show(form.referralRewardAmount ?? null)}
+          onChange={(e) => set("referralRewardAmount", num(e.target.value))}
+          error={err("referralRewardAmount")}
+        />
+        <p className="mt-3 text-[13px] text-muted">{t("referralHint")}</p>
+      </Card>
       <Card title={t("cancellation")}>
         <p className="-mt-2 mb-3 text-[13px] text-muted">{t("cancellationHint")}</p>
         <div className="grid gap-3">

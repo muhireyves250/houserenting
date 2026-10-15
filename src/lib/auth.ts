@@ -13,6 +13,8 @@ import { vercelOrigins } from "@/lib/vercel-origins";
 import { getEnv } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { getMailer, type MailMessage } from "@/lib/mailer";
+import { REFERRAL_COOKIE } from "@/features/referrals/cookie";
+import { claimReferral } from "@/features/referrals/service";
 
 const env = getEnv();
 
@@ -86,6 +88,14 @@ export const auth = betterAuth({
     },
   },
   hooks: {
+    // A new account opened from an invite link is credited to the inviter (rules in claimReferral).
+    after: createAuthMiddleware(async (ctx) => {
+      if (ctx.path !== "/sign-up/email") return;
+      const userId = ctx.context.newSession?.user.id;
+      const code = ctx.getCookie(REFERRAL_COOKIE);
+      if (!userId || !code) return;
+      await claimReferral(userId, code).catch((err: unknown) => logger.error({ err }, "referral claim failed"));
+    }),
     before: createAuthMiddleware(async (ctx) => {
       const candidate =
         ctx.path === "/sign-up/email" ? ctx.body?.password : ctx.path === "/reset-password" ? ctx.body?.newPassword : undefined;

@@ -56,7 +56,7 @@ export default async function BookingPage({ params }: Props) {
   ]);
   const { listing, policySnapshot: policy } = booking;
   const holding = isHoldActive(booking, now);
-  const paid = ["CONFIRMED", "CHECKED_IN", "COMPLETED"].includes(booking.status);
+  const paid = booking.payments.length > 0 || ["CONFIRMED", "CHECKED_IN", "COMPLETED"].includes(booking.status);
   const live = holding || booking.status === "CONFIRMED" || booking.status === "CHECKED_IN";
   const methodName = booking.paymentMethod === "mtn" ? tListings("mtnMomo") : booking.paymentMethod === "airtel" ? tListings("airtelMoney") : null;
 
@@ -134,9 +134,22 @@ export default async function BookingPage({ params }: Props) {
           </Row>
           <Row label={tListings("dates")}>{formatStayDates(locale, booking.checkIn, booking.checkOut)}</Row>
           {booking.room && <Row label={t("room")}>{booking.room.name}</Row>}
-          <Row label={tListings("nightsTimes", { price: formatRWF(booking.nightlyPrice, locale), count: booking.nights })}>
+          {booking.rentalMode === "MONTHLY" && booking.months && (
+            <Row label={t("rental")}>{t("rentalTerms", { months: booking.months, upfront: booking.upfrontMonths ?? booking.months })}</Row>
+          )}
+          <Row
+            label={
+              booking.rentalMode === "MONTHLY"
+                ? tListings("monthsTimes", { price: formatRWF(booking.nightlyPrice, locale), count: booking.upfrontMonths ?? 1 })
+                : tListings("nightsTimes", { price: formatRWF(booking.nightlyPrice, locale), count: booking.nights })
+            }
+          >
             {formatRWF(booking.subtotal || booking.total, locale)}
           </Row>
+          {booking.discount > 0 && (
+            <Row label={tListings("promoLine", { code: booking.promoCode?.code ?? "" })}>−{formatRWF(booking.discount, locale)}</Row>
+          )}
+          {booking.deposit > 0 && <Row label={tListings("depositDue")}>{formatRWF(booking.deposit, locale)}</Row>}
           {booking.guestFee > 0 && <Row label={t("serviceFee")}>{formatRWF(booking.guestFee, locale)}</Row>}
           <Row label={`${t("amount")} (${booking.currency})`}>
             <span className="font-bold">{formatRWF(booking.total, locale)}</span>
@@ -148,7 +161,9 @@ export default async function BookingPage({ params }: Props) {
             </Row>
           )}
           <Row label={t("paymentStatus")}>{paid ? t("paid") : t("unpaid")}</Row>
-          <Row label={t("transactionRef")}>{t("notYet")}</Row>
+          <Row label={t("transactionRef")}>
+            {booking.payments[0] ? <span className="font-mono">{booking.payments[0].providerReference}</span> : t("notYet")}
+          </Row>
         </dl>
         <p className="mt-3 text-[13px] text-muted">{t("bookedOn", { date: formatKigaliDateTime(locale, booking.createdAt) })}</p>
       </section>

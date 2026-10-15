@@ -8,7 +8,8 @@ import { BookingCard, RoomPicker, StayCalendar, StayProvider } from "./Booking";
 const animateScrollTo = vi.hoisted(() => vi.fn(() => Promise.resolve()));
 vi.mock("@/lib/animate-scroll", () => ({ animateScrollTo }));
 const bookStayAction = vi.hoisted(() => vi.fn());
-vi.mock("@/features/bookings/actions", () => ({ bookStayAction }));
+const checkPromoAction = vi.hoisted(() => vi.fn());
+vi.mock("@/features/bookings/actions", () => ({ bookStayAction, checkPromoAction, bookMonthlyAction: vi.fn() }));
 const push = vi.hoisted(() => vi.fn());
 vi.mock("@/i18n/navigation", () => ({
   usePathname: () => "/listings/abc",
@@ -114,6 +115,7 @@ describe("Confirm and pay", () => {
       checkOut: "2026-10-16",
       guests: 1,
       roomId: null,
+      promoCode: null,
       payment: { method: "mtn", phone: "078 812 3456" },
     });
     expect(push).toHaveBeenCalledWith("/bookings/SR-7K2M9Q");
@@ -178,5 +180,25 @@ describe("Rooms and fees", () => {
     expect(screen.getByText("Service fee").nextSibling).toHaveTextContent("RWF 3,000");
     expect(screen.getByText("Total").nextSibling).toHaveTextContent("RWF 63,000");
     expect(screen.getByText("Room:").parentElement).toHaveTextContent("Room: Lake room");
+  });
+});
+
+describe("Promo codes in the Reserve window", () => {
+  it("shows the discount and books with the code", async () => {
+    checkPromoAction.mockResolvedValueOnce({ discount: 4500 });
+    bookStayAction.mockResolvedValueOnce({ reference: "SR-7K2M9Q" });
+    setup();
+    await pickDates();
+    await userEvent.click(screen.getByRole("button", { name: "Reserve" }));
+    const dialog = screen.getByRole("dialog");
+    await userEvent.type(within(dialog).getByLabelText("Promo code"), "welcome");
+    await userEvent.click(within(dialog).getByRole("button", { name: "Apply" }));
+    expect(await within(dialog).findByText("Promo WELCOME")).toBeInTheDocument();
+    // 2 nights × 22,500 = 45,000, less 4,500.
+    expect(within(dialog).getByText("Total (RWF)").nextSibling).toHaveTextContent("RWF 40,500");
+    await userEvent.type(within(dialog).getByLabelText("Mobile money number"), "0788123456");
+    await userEvent.click(within(dialog).getByRole("button", { name: "Next" }));
+    await userEvent.click(within(dialog).getByRole("button", { name: "Book and hold these dates" }));
+    expect(bookStayAction).toHaveBeenLastCalledWith(expect.objectContaining({ promoCode: "WELCOME" }));
   });
 });

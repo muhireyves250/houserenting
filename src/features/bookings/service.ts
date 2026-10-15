@@ -10,7 +10,10 @@ import { logger } from "@/lib/logger";
 import { notify } from "@/features/notifications/service";
 import { newBookingReference } from "./reference";
 import { audit } from "@/features/audit/service";
+import { checkPromo, claimPromoUse, type PromoCheck } from "@/features/promotions/service";
+import { maybeCreateReward } from "@/features/referrals/service";
 import { priceBreakdown } from "./money";
+import { monthlyQuote } from "./monthly";
 import { BLOCKING_STATUSES, canTransition } from "./status";
 
 export type BookingRequest = {
@@ -21,10 +24,11 @@ export type BookingRequest = {
   guests: number;
   /** One room of the place; null or missing = the whole place. */
   roomId?: string | null;
+  promoCode?: string | null;
   payment: { method: MoMoProvider; phone: string };
 };
 
-export type BookingError = "invalid" | "notFound" | "ownListing" | "stayLength" | "phone" | "unavailable";
+export type BookingError = "invalid" | "notFound" | "ownListing" | "stayLength" | "phone" | "unavailable" | "promo" | "notOffered";
 export type CreateBookingResult = { ok: true; reference: string } | { ok: false; error: BookingError };
 
 /** What the guest agreed to, stored with the booking so later edits to the listing don't change it. */
@@ -38,6 +42,8 @@ export type PolicySnapshot = {
   room?: string | null;
   /** Fee settings used for this booking's price split. */
   fees?: { commissionBps: number | null; guestFeeBps: number | null };
+  /** Monthly rentals: length, months paid when booking, deposit setting. */
+  monthly?: { months: number; upfrontMonths: number; depositPercent: number | null };
 };
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -133,7 +139,13 @@ export async function createBooking(request: BookingRequest, now: Date = new Dat
   const settings = await readSettings();
   const fees = { commissionBps: settings.commissionBps, guestFeeBps: settings.guestFeeBps };
   const nightlyPrice = discountedPrice(base, listing.discountPercent);
-  const money = priceBreakdown(nightlyPrice * nights, fees);
+  let promo: Extract<PromoCheck, { ok: true }> | null = null;
+  if (request.promoCode) {
+    const checked = await checkPromo(db, request.promoCode, nightlyPrice * nights, now);
+    if (!checked.ok) return { ok: false, error: "promo" };
+    promo = checked;
+  }
+  const money = priceBreakdown(nightlyPrice * nights, fees, promo ? { amount: promo.discount, fundedBy: promo.fundedBy } : null);
   const hasPolicy = Object.values(settings.cancellationPolicy).some(Boolean);
   const policySnapshot: PolicySnapshot = {
     checkInTime: night?.checkInTime ?? null,
@@ -145,11 +157,52 @@ export async function createBooking(request: BookingRequest, now: Date = new Dat
   };
   const holdExpiresAt = new Date(now.getTime() + holdMinutesFrom(settings) * 60_000);
 
+  return holdAndInsert({
+    listingId,
+    title: listing.title,
+    guestId,
+    checkIn,
+    checkOut,
+    roomId: room?.id ?? null,
+    promoId: promo?.id ?? null,
+    now,
+    data: {
+      nights,
+      guests,
+      nightlyPrice,
+      ...money,
+      promoCodeId: promo?.id ?? null,
+      paymentMethod: request.payment.method,
+      payerPhone: maskPhone(phone.number),
+      policySnapshot,
+      holdExpiresAt,
+    },
+  });
+}
+
+class PromoGone extends Error {}
+
+/**
+ * Inserts a booking that holds its dates, safely: one booking at a time per place (advisory lock), lapsed holds
+ * released first, then a clash check (the whole place clashes with anything; a room with itself and whole-place stays),
+ * with the database constraint as a final guard. A promo use is counted in the same transaction.
+ */
+async function holdAndInsert(args: {
+  listingId: string;
+  title: string;
+  guestId: string;
+  checkIn: ISODate;
+  checkOut: ISODate;
+  roomId: string | null;
+  promoId: string | null;
+  now: Date;
+  data: Omit<Prisma.BookingUncheckedCreateInput, "reference" | "listingId" | "guestId" | "checkIn" | "checkOut" | "roomId">;
+}): Promise<CreateBookingResult> {
+  const { listingId, guestId, checkIn, checkOut, roomId, now } = args;
   for (let attempt = 0; attempt < 3; attempt++) {
     const reference = newBookingReference();
     try {
       await db.$transaction(async (tx) => {
-        // One booking at a time per place, so a whole-place stay and a room stay can't slip past each other.
         await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${listingId}))`;
         await expireHolds(tx, { listingId }, now);
         const clash = await tx.booking.findFirst({
@@ -158,42 +211,113 @@ export async function createBooking(request: BookingRequest, now: Date = new Dat
             status: { in: [...BLOCKING_STATUSES] },
             checkIn: { lt: asDate(checkOut) },
             checkOut: { gt: asDate(checkIn) },
-            // The whole place clashes with anything; a room clashes with itself and with whole-place stays.
-            ...(room ? { OR: [{ roomId: room.id }, { roomId: null }] } : {}),
+            ...(roomId ? { OR: [{ roomId }, { roomId: null }] } : {}),
           },
           select: { id: true },
         });
         if (clash) throw new Unavailable();
+        if (args.promoId && !(await claimPromoUse(tx, args.promoId))) throw new PromoGone();
         await tx.booking.create({
           data: {
+            ...args.data,
             reference,
             listingId,
             guestId,
+            roomId,
             checkIn: asDate(checkIn),
             checkOut: asDate(checkOut),
-            nights,
-            guests,
-            roomId: room?.id ?? null,
-            nightlyPrice,
-            ...money,
-            paymentMethod: request.payment.method,
-            payerPhone: maskPhone(phone.number),
-            policySnapshot,
-            holdExpiresAt,
             events: { create: { fromStatus: null, toStatus: "PENDING_PAYMENT", actorId: guestId, reason: "booked by guest" } },
           },
         });
-        await notify(tx, guestId, "bookingHeld", { title: listing.title, reference }, `/bookings/${reference}`);
+        await notify(tx, guestId, "bookingHeld", { title: args.title, reference }, `/bookings/${reference}`);
       });
       return { ok: true, reference };
     } catch (error) {
       if (error instanceof Unavailable || isOverlapError(error)) return { ok: false, error: "unavailable" };
+      if (error instanceof PromoGone) return { ok: false, error: "promo" };
       if (isUniqueReferenceError(error)) continue;
       throw error;
     }
   }
   logger.error({ listingId }, "could not find a free booking reference");
   throw new Error("Could not create a booking reference");
+}
+
+export type MonthlyRequest = {
+  guestId: string;
+  listingId: string;
+  start: ISODate;
+  months: number;
+  promoCode?: string | null;
+  payment: { method: MoMoProvider; phone: string };
+};
+
+/**
+ * Books a monthly rental of the whole place. Offered only once staff set how many months are paid when booking;
+ * no identity details are collected until the business approves which ones are needed.
+ */
+export async function createMonthlyBooking(request: MonthlyRequest, now: Date = new Date()): Promise<CreateBookingResult> {
+  const { guestId, listingId, start, months } = request;
+  if (!isRealDate(start) || start < todayISO(now) || !Number.isInteger(months) || months < 1 || months > 60) return { ok: false, error: "invalid" };
+  const settings = await readSettings();
+  if (!settings.monthlyUpfrontMonths) return { ok: false, error: "notOffered" };
+  const listing = await db.listing.findFirst({
+    where: { id: listingId, status: "PUBLISHED" },
+    select: { title: true, hostId: true, discountPercent: true, termsOfRent: true, maxGuests: true, rates: { where: { unit: "MONTH" } } },
+  });
+  const rate = listing?.rates[0];
+  if (!listing || !rate) return { ok: false, error: "notFound" };
+  if (listing.hostId === guestId) return { ok: false, error: "ownListing" };
+  if (months < rate.minUnits || (rate.maxUnits !== null && months > rate.maxUnits)) return { ok: false, error: "stayLength" };
+  const phone = parseMobileMoney(request.payment.method, request.payment.phone);
+  if (!phone.ok) return { ok: false, error: "phone" };
+
+  const monthly = discountedPrice(rate.price, listing.discountPercent);
+  const upfront = Math.min(settings.monthlyUpfrontMonths, months);
+  const quote = monthlyQuote(start, months, monthly, settings.monthlyDepositPercent);
+  const fees = { commissionBps: settings.commissionBps, guestFeeBps: settings.guestFeeBps };
+  let promo: Extract<PromoCheck, { ok: true }> | null = null;
+  if (request.promoCode) {
+    const checked = await checkPromo(db, request.promoCode, monthly * upfront, now);
+    if (!checked.ok) return { ok: false, error: "promo" };
+    promo = checked;
+  }
+  const money = priceBreakdown(monthly * upfront, fees, promo ? { amount: promo.discount, fundedBy: promo.fundedBy } : null);
+  const hasPolicy = Object.values(settings.cancellationPolicy).some(Boolean);
+
+  return holdAndInsert({
+    listingId,
+    title: listing.title,
+    guestId,
+    checkIn: start,
+    checkOut: quote.moveOut,
+    roomId: null,
+    promoId: promo?.id ?? null,
+    now,
+    data: {
+      rentalMode: "MONTHLY",
+      months,
+      upfrontMonths: upfront,
+      nights: nightsBetween({ checkIn: start, checkOut: quote.moveOut }),
+      guests: 1,
+      nightlyPrice: monthly,
+      ...money,
+      deposit: quote.deposit,
+      total: money.total + quote.deposit,
+      promoCodeId: promo?.id ?? null,
+      paymentMethod: request.payment.method,
+      payerPhone: maskPhone(phone.number),
+      policySnapshot: {
+        checkInTime: null,
+        checkOutTime: null,
+        houseRules: listing.termsOfRent,
+        cancellationPolicy: hasPolicy ? settings.cancellationPolicy : null,
+        fees,
+        monthly: { months, upfrontMonths: upfront, depositPercent: settings.monthlyDepositPercent },
+      } satisfies PolicySnapshot,
+      holdExpiresAt: new Date(now.getTime() + holdMinutesFrom(settings) * 60_000),
+    },
+  });
 }
 
 /** Nights taken from today on (paid stays and live holds); `roomId` null = a whole-place stay. Dates only, no guest data. */
@@ -220,9 +344,16 @@ const GUEST_SELECT = {
   nightlyPrice: true,
   subtotal: true,
   guestFee: true,
+  discount: true,
+  deposit: true,
+  rentalMode: true,
+  months: true,
+  upfrontMonths: true,
   total: true,
   currency: true,
   room: { select: { name: true } },
+  promoCode: { select: { code: true } },
+  payments: { where: { status: "SUCCEEDED" }, select: { provider: true, providerReference: true, createdAt: true }, take: 1 },
   paymentMethod: true,
   payerPhone: true,
   holdExpiresAt: true,
@@ -309,6 +440,7 @@ export async function staffMoveBooking(
       data: { bookingId: booking.id, fromStatus: booking.status, toStatus: to, actorId: staffId, reason: to === "CHECKED_IN" ? "checked in" : "checked out" },
     });
     await audit(tx, { actorId: staffId, action: to === "CHECKED_IN" ? "booking.checkIn" : "booking.checkOut", entityType: "booking", entityId: reference });
+    if (to === "COMPLETED") await maybeCreateReward(tx, booking.id);
     return true;
   });
 }
@@ -332,4 +464,11 @@ export function staffBookings(take = 100) {
       listing: { select: { id: true, title: true } },
     },
   });
+}
+
+/** Background job: releases every unpaid hold past its time (they are also released whenever a place is booked). */
+export async function expireAllHolds(now: Date = new Date()): Promise<number> {
+  const before = await db.booking.count({ where: { status: "PENDING_PAYMENT", holdExpiresAt: { lte: now } } });
+  if (before > 0) await db.$transaction((tx) => expireHolds(tx, {}, now));
+  return before;
 }

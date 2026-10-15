@@ -11,6 +11,9 @@ export type CancellationPolicy = { en: string | null; fr: string | null; rw: str
 export type PlatformSettings = FeeConfig & {
   holdMinutes: number | null;
   monthlyDepositPercent: number | null;
+  monthlyUpfrontMonths: number | null;
+  referralEnabled: boolean;
+  referralRewardAmount: number | null;
   cancellationPolicy: CancellationPolicy;
   updatedAt: Date | null;
 };
@@ -24,6 +27,9 @@ async function load(): Promise<PlatformSettings> {
     guestFeeBps: row?.guestFeeBps ?? null,
     holdMinutes: row?.holdMinutes ?? null,
     monthlyDepositPercent: row?.monthlyDepositPercent ?? null,
+    monthlyUpfrontMonths: row?.monthlyUpfrontMonths ?? null,
+    referralEnabled: row?.referralEnabled ?? false,
+    referralRewardAmount: row?.referralRewardAmount ?? null,
     cancellationPolicy: { ...EMPTY_POLICY, ...((row?.cancellationPolicy as Partial<CancellationPolicy> | null) ?? {}) },
     updatedAt: row?.updatedAt ?? null,
   };
@@ -60,6 +66,9 @@ export async function updateSettings(adminId: string, raw: SettingsInput): Promi
     guestFeeBps: toBps(v.guestFeePercent),
     holdMinutes: v.holdMinutes,
     monthlyDepositPercent: v.monthlyDepositPercent,
+    monthlyUpfrontMonths: v.monthlyUpfrontMonths,
+    referralEnabled: v.referralEnabled,
+    referralRewardAmount: v.referralRewardAmount,
     cancellationPolicy: v.cancellationPolicy,
   };
   await db.$transaction(async (tx) => {
@@ -70,6 +79,9 @@ export async function updateSettings(adminId: string, raw: SettingsInput): Promi
       guestFeeBps: before?.guestFeeBps ?? null,
       holdMinutes: before?.holdMinutes ?? null,
       monthlyDepositPercent: before?.monthlyDepositPercent ?? null,
+      monthlyUpfrontMonths: before?.monthlyUpfrontMonths ?? null,
+      referralEnabled: before?.referralEnabled ?? false,
+      referralRewardAmount: before?.referralRewardAmount ?? null,
       cancellationPolicy: (before?.cancellationPolicy as CancellationPolicy | null) ?? null,
     };
     await audit(tx, { actorId: adminId, action: "settings.update", entityType: "settings", entityId: "platform", data: { from, to: next } });

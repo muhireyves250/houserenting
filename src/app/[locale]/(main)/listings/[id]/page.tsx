@@ -181,9 +181,11 @@ export default async function ListingPage({ params }: Props) {
     ),
   ];
 
-  const bookingRates = rates.map(({ unit, price, checkInTime, checkOutTime, dayStartTime, dayEndTime }) => ({
+  const bookingRates = rates.map(({ unit, price, minUnits, maxUnits, checkInTime, checkOutTime, dayStartTime, dayEndTime }) => ({
     unit,
     price,
+    minUnits,
+    maxUnits,
     checkInTime,
     checkOutTime,
     dayStartTime,
@@ -199,6 +201,9 @@ export default async function ListingPage({ params }: Props) {
       bookingModel={listing.bookingModel}
       guestFeeBps={settings.guestFeeBps}
       cancellationPolicy={policyText(settings.cancellationPolicy, locale)}
+      monthlyConfig={settings.monthlyUpfrontMonths ? { upfrontMonths: settings.monthlyUpfrontMonths, depositPercent: settings.monthlyDepositPercent } : null}
+      monthlyOnly={!rates.some((r) => r.unit !== "MONTH")}
+      minMonths={rates.find((r) => r.unit === "MONTH")?.minUnits ?? 1}
     >
       <TrackView
         listing={{

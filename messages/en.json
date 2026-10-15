@@ -405,14 +405,36 @@
       "phone": "Check your mobile money number.",
       "unavailable": "Someone just booked some of these nights. Choose other dates.",
       "auth": "Log in again to book.",
-      "failed": "Couldn't book. Try again."
+      "failed": "Couldn't book. Try again.",
+      "promo": "That promo code can't be used.",
+      "notOffered": "Monthly rentals can't be booked online yet."
     },
     "qrCode": "QR code",
     "qrCodeFor": "QR code for {title}",
     "downloadQr": "Download QR code",
     "chooseRoom": "Choose a room",
     "roomLabel": "Room:",
-    "serviceFee": "Service fee"
+    "serviceFee": "Service fee",
+    "monthsTimes": "{price} × {count, plural, one {# month} other {# months}}",
+    "promoLine": "Promo {code}",
+    "depositDue": "Deposit",
+    "dueNow": "Due now",
+    "monthlyNote": "A {months}-month rental: {upfront, plural, one {the first month is} other {the first # months are}} paid now.",
+    "promoCode": "Promo code",
+    "applyPromo": "Apply",
+    "promoError": {
+      "unknown": "That code isn't valid.",
+      "expired": "That code has expired or hasn't started.",
+      "usedUp": "That code has been fully used.",
+      "minimum": "This stay doesn't reach the code's minimum spend."
+    },
+    "rentMonthly": "Rent monthly",
+    "howToRent": "How to rent",
+    "byNight": "By the night",
+    "byMonth": "By the month",
+    "moveIn": "Move-in date",
+    "rentalLength": "Length",
+    "monthsCount": "{count, plural, one {# month} other {# months}}"
   },
   "Facility": {
     "KITCHEN": "Kitchen",
@@ -506,7 +528,9 @@
     "keep": "Keep booking",
     "cancelFailed": "Couldn't cancel. Try again.",
     "room": "Room",
-    "serviceFee": "Service fee"
+    "serviceFee": "Service fee",
+    "rental": "Rental",
+    "rentalTerms": "{months} months, {upfront} paid when booking"
   },
   "Host": {
     "title": "Your listings",
@@ -601,7 +625,13 @@
       "ROOM_BY_ROOM": "Room by room",
       "BOTH": "Whole place or single rooms"
     },
-    "pricesRoomsHint": "For room-by-room places, each room has its own price (add rooms below after saving); the nightly price here is for the whole place and sets the minimum and maximum nights."
+    "pricesRoomsHint": "For room-by-room places, each room has its own price (add rooms below after saving); the nightly price here is for the whole place and sets the minimum and maximum nights.",
+    "earnings": "Earnings",
+    "earningsLabel": {
+      "due": "Ready to pay out",
+      "upcoming": "From upcoming stays",
+      "paidOut": "Paid out"
+    }
   },
   "Admin": {
     "title": "Admin",
@@ -613,7 +643,9 @@
       "bookings": "Bookings",
       "users": "Users",
       "audit": "Audit log",
-      "settings": "Settings"
+      "settings": "Settings",
+      "money": "Money",
+      "promotions": "Promotions"
     },
     "count": {
       "listings": "Listings to review",
@@ -681,7 +713,8 @@
       },
       "booking": {
         "checkIn": "Guest checked in",
-        "checkOut": "Guest checked out"
+        "checkOut": "Guest checked out",
+        "paid": "Payment verified"
       },
       "settings": {
         "update": "Settings changed"
@@ -691,6 +724,21 @@
         "update": "Room edited",
         "status": "Room status changed",
         "delete": "Room deleted"
+      },
+      "settlement": {
+        "record": "Payout recorded"
+      },
+      "promo": {
+        "create": "Promo created",
+        "enable": "Promo turned on",
+        "disable": "Promo turned off"
+      },
+      "reward": {
+        "approve": "Reward approved",
+        "void": "Reward voided"
+      },
+      "referral": {
+        "claim": "Invite credited"
       }
     },
     "money": "Guest pays {total} · owner {payout} · platform {commission}"
@@ -775,7 +823,14 @@
       "reviewPublished": "Your feedback about {title} is published. Thank you!",
       "ticketOpened": "New support request: {subject} ({reference}).",
       "ticketReply": "New reply on “{subject}”.",
-      "ticketStatus": "“{subject}” is now: {statusLabel}."
+      "ticketStatus": "“{subject}” is now: {statusLabel}.",
+      "bookingConfirmed": "Payment received: your booking {reference} at {title} is confirmed.",
+      "newBooking": "New confirmed booking at {title} ({reference}).",
+      "paymentFailed": "The payment for {reference} didn't go through. You can try again while your dates are held.",
+      "paymentProblem": "A payment needs attention ({reference}).",
+      "rewardApproved": "Your referral reward of {amount} RWF was approved.",
+      "rewardToCheck": "A referral reward is waiting for approval.",
+      "payoutRecorded": "A payout of {amount} RWF was sent to you ({reference})."
     }
   },
   "Rooms": {
@@ -821,6 +876,91 @@
     "saved": "Saved",
     "failed": "Couldn't save. Try again.",
     "save": "Save settings",
-    "invalid": "Check this value."
+    "invalid": "Check this value.",
+    "monthly": "Monthly rentals",
+    "upfrontMonths": "Months paid when booking",
+    "monthlyHint": "Leave empty to keep monthly rentals off. Guests pay these months (plus any deposit) to book; the rest is arranged with the owner.",
+    "referrals": "Referrals",
+    "referralEnabled": "Show invite links to members",
+    "referralReward": "Reward per friend (RWF)",
+    "referralHint": "A reward is created only after the invited friend's first finished stay, and staff approve each one. Leave empty for no reward."
+  },
+  "Money": {
+    "notConnected": "Payments aren't connected yet: set PAYMENT_WEBHOOK_SECRET and connect a provider. Until then nothing here changes on its own.",
+    "owners": "What owners are owed",
+    "ownersHint": "Owners can be paid for stays that have finished. Money for upcoming stays waits until the stay ends.",
+    "nothing": "Nothing here yet.",
+    "balanceLine": "Due {due} · upcoming {upcoming} · paid {paid}",
+    "depositsHeld": "deposits held {amount}",
+    "recordPayout": "Record payout",
+    "amount": "Amount (due {due})",
+    "method": "Paid by (e.g. MTN MoMo, bank)",
+    "externalRef": "Transfer reference",
+    "cancel": "Cancel",
+    "save": "Save payout",
+    "error": {
+      "invalid": "Check the amount and how it was paid.",
+      "tooMuch": "That's more than is due for finished stays.",
+      "auth": "Log in again."
+    },
+    "rewards": "Referral rewards to approve",
+    "rewardLine": "{referrer} invited {friend}: {amount}",
+    "approve": "Approve",
+    "void": "Void",
+    "problems": "Payments needing attention",
+    "outcome": {
+      "amountMismatch": "Amount doesn't match the booking",
+      "datesTaken": "Paid after the hold ended, and the dates were taken: refund needed",
+      "notPending": "Paid for a booking that was no longer waiting: check and refund",
+      "unknownBooking": "Payment for an unknown booking"
+    },
+    "ledger": "Ledger",
+    "kind": {
+      "GUEST_PAYMENT": "Guest payment",
+      "GUEST_FEE": "Service fee",
+      "COMMISSION": "Commission",
+      "HOST_PAYABLE": "Owed to owner",
+      "DEPOSIT_HELD": "Deposit held",
+      "PROMO_DISCOUNT": "Promo discount",
+      "SETTLEMENT": "Payout to owner",
+      "REFERRAL_REWARD": "Referral reward",
+      "REFUND": "Refund"
+    }
+  },
+  "Promotions": {
+    "new": "New promo code",
+    "code": "Code",
+    "fundedBy": "Who pays for the discount",
+    "funding": {
+      "PLATFORM": "The platform (owner gets the full price)",
+      "HOST": "The owner"
+    },
+    "percentOff": "Percent off",
+    "amountOff": "Amount off (RWF)",
+    "minSubtotal": "Minimum spend (RWF)",
+    "maxUses": "Maximum uses",
+    "startsAt": "Starts",
+    "endsAt": "Ends",
+    "description": "Note (staff only)",
+    "create": "Create code",
+    "error": {
+      "taken": "That code already exists.",
+      "needsDiscount": "Set a percent or an amount off.",
+      "field": "Check this value."
+    },
+    "none": "No promo codes yet.",
+    "uses": "{used} of {max} used",
+    "until": "until {date}",
+    "disable": "Turn off",
+    "enable": "Turn on"
+  },
+  "Referrals": {
+    "title": "Invite friends",
+    "body": "Share your link. When friends sign up with it, they're linked to you.",
+    "bodyReward": "Share your link. After a friend's first finished stay, you can earn {amount}.",
+    "copy": "Copy link",
+    "code": "Your code {code}",
+    "invited": "{count, plural, =0 {no friends joined yet} one {# friend joined} other {# friends joined}}",
+    "earned": "earned {amount}"
   }
 }

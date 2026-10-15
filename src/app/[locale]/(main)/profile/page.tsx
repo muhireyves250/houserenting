@@ -12,6 +12,10 @@ import { Suspense } from "react";
 import { toAppLocale } from "@/i18n/routing";
 import { requireUser } from "@/lib/session";
 import { unreadCount } from "@/features/notifications/service";
+import { InviteFriends } from "@/features/referrals/components/InviteFriends";
+import { ensureReferralCode, referralSummary } from "@/features/referrals/service";
+import { getSettings } from "@/features/settings/service";
+import { getEnv } from "@/lib/env";
 import { isAdmin } from "@/lib/roles";
 
 const TILES = [
@@ -23,7 +27,10 @@ export default async function ProfilePage() {
   const user = await requireUser("/profile");
   const profile = await getProfile(user.id);
   if (!profile) notFound();
-  const [t, tNav, unread] = await Promise.all([getTranslations("Profile"), getTranslations("Nav"), unreadCount(user.id)]);
+  const [t, tNav, unread, settings] = await Promise.all([getTranslations("Profile"), getTranslations("Nav"), unreadCount(user.id), getSettings()]);
+  const referral = settings.referralEnabled
+    ? { code: await ensureReferralCode(user.id), summary: await referralSummary(user.id), reward: settings.referralRewardAmount }
+    : null;
   const card = "rounded-3xl bg-surface shadow-[0_10px_30px_-14px_rgba(16,24,40,0.3)] ring-1 ring-black/[0.04] max-md:ring-line";
   const row = "flex w-full items-center gap-4 py-4 text-[15px] text-ink transition-colors active:bg-ink/5";
 
@@ -112,6 +119,16 @@ export default async function ProfilePage() {
           </Suspense>
         </li>
       </ul>
+
+      {referral && (
+        <InviteFriends
+          link={`${getEnv().BETTER_AUTH_URL}/?ref=${referral.code}`}
+          code={referral.code}
+          invited={referral.summary.invited}
+          earned={referral.summary.approved}
+          reward={referral.reward}
+        />
+      )}
 
       {/* Personal information */}
       <section id="personal" className={`${card} mt-6 scroll-mt-6 p-6`}>

@@ -405,14 +405,36 @@
       "phone": "Reba nimero yawe ya mobile money.",
       "unavailable": "Hari umaze kubika amwe muri aya majoro. Hitamo indi minsi.",
       "auth": "Ongera winjire kugira ngo ubike.",
-      "failed": "Kubika byanze. Ongera ugerageze."
+      "failed": "Kubika byanze. Ongera ugerageze.",
+      "promo": "Iyo kode ntishobora gukoreshwa.",
+      "notOffered": "Ubukode bw'ukwezi ntiburabikwa kuri internet."
     },
     "qrCode": "Kode ya QR",
     "qrCodeFor": "Kode ya QR ya {title}",
     "downloadQr": "Kuramo kode ya QR",
     "chooseRoom": "Hitamo icyumba",
     "roomLabel": "Icyumba:",
-    "serviceFee": "Amafaranga ya serivisi"
+    "serviceFee": "Amafaranga ya serivisi",
+    "monthsTimes": "{price} × {count, plural, one {ukwezi #} other {amezi #}}",
+    "promoLine": "Kode {code}",
+    "depositDue": "Ingwate",
+    "dueNow": "Kwishyura ubu",
+    "monthlyNote": "Ubukode bw'amezi {months}: {upfront, plural, one {ukwezi kwa mbere kwishyurwa} other {amezi # ya mbere yishyurwa}} ubu.",
+    "promoCode": "Kode y'igabanywa",
+    "applyPromo": "Koresha",
+    "promoError": {
+      "unknown": "Iyo kode ntabwo ari yo.",
+      "expired": "Iyo kode yarangiye cyangwa ntiratangira.",
+      "usedUp": "Iyo kode yakoreshejwe yose.",
+      "minimum": "Iki giciro ntikigera ku cyo kode isaba."
+    },
+    "rentMonthly": "Kodesha ku kwezi",
+    "howToRent": "Uko ukodesha",
+    "byNight": "Ku ijoro",
+    "byMonth": "Ku kwezi",
+    "moveIn": "Itariki yo kwinjira",
+    "rentalLength": "Igihe",
+    "monthsCount": "{count, plural, one {ukwezi #} other {amezi #}}"
   },
   "Facility": {
     "KITCHEN": "Igikoni",
@@ -506,7 +528,9 @@
     "keep": "Bigumeho",
     "cancelFailed": "Guhagarika byanze. Ongera ugerageze.",
     "room": "Icyumba",
-    "serviceFee": "Amafaranga ya serivisi"
+    "serviceFee": "Amafaranga ya serivisi",
+    "rental": "Ubukode",
+    "rentalTerms": "Amezi {months}, {upfront} yishyurwa ubika"
   },
   "Host": {
     "title": "Aho wakira abashyitsi",
@@ -601,7 +625,13 @@
       "ROOM_BY_ROOM": "Icyumba ku cyumba",
       "BOTH": "Ahantu hose cyangwa icyumba"
     },
-    "pricesRoomsHint": "Ku hantu hakodeshwa icyumba ku cyumba, buri cyumba gifite igiciro cyacyo (ongeraho ibyumba hepfo umaze kubika); igiciro cy'ijoro hano ni icy'ahantu hose kandi kigena amajoro make n'amenshi."
+    "pricesRoomsHint": "Ku hantu hakodeshwa icyumba ku cyumba, buri cyumba gifite igiciro cyacyo (ongeraho ibyumba hepfo umaze kubika); igiciro cy'ijoro hano ni icy'ahantu hose kandi kigena amajoro make n'amenshi.",
+    "earnings": "Ibyo winjiza",
+    "earningsLabel": {
+      "due": "Byiteguye kwishyurwa",
+      "upcoming": "Ibiri imbere",
+      "paidOut": "Byishyuwe"
+    }
   },
   "Admin": {
     "title": "Ubuyobozi",
@@ -613,7 +643,9 @@
       "bookings": "Ibyabitswe",
       "users": "Abakoresha",
       "audit": "Inyandiko z'ibikorwa",
-      "settings": "Igenamiterere"
+      "settings": "Igenamiterere",
+      "money": "Amafaranga",
+      "promotions": "Igabanywa"
     },
     "count": {
       "listings": "Ahantu ho kugenzura",
@@ -681,7 +713,8 @@
       },
       "booking": {
         "checkIn": "Umushyitsi yageze",
-        "checkOut": "Umushyitsi yavuyeyo"
+        "checkOut": "Umushyitsi yavuyeyo",
+        "paid": "Kwishyura kwemejwe"
       },
       "settings": {
         "update": "Igenamiterere ryahinduwe"
@@ -691,6 +724,21 @@
         "update": "Icyumba cyahinduwe",
         "status": "Uko icyumba gihagaze byahindutse",
         "delete": "Icyumba cyasibwe"
+      },
+      "settlement": {
+        "record": "Kwishyura byanditswe"
+      },
+      "promo": {
+        "create": "Kode yashyizweho",
+        "enable": "Kode yafunguwe",
+        "disable": "Kode yafunzwe"
+      },
+      "reward": {
+        "approve": "Igihembo cyemejwe",
+        "void": "Igihembo cyakuweho"
+      },
+      "referral": {
+        "claim": "Ubutumire bwanditswe"
       }
     },
     "money": "Umushyitsi yishyura {total} · nyir'inzu {payout} · urubuga {commission}"
@@ -775,7 +823,14 @@
       "reviewPublished": "Igitekerezo cyawe kuri {title} cyashyizweho. Murakoze!",
       "ticketOpened": "Ubusabe bushya: {subject} ({reference}).",
       "ticketReply": "Igisubizo gishya kuri “{subject}”.",
-      "ticketStatus": "“{subject}” ubu: {statusLabel}."
+      "ticketStatus": "“{subject}” ubu: {statusLabel}.",
+      "bookingConfirmed": "Ubwishyu bwakiriwe: {reference} kuri {title} byemejwe.",
+      "newBooking": "Ibyabitswe bishya byemejwe kuri {title} ({reference}).",
+      "paymentFailed": "Kwishyura {reference} ntibyakunze. Ushobora kongera kugerageza igihe iminsi ikifashwe.",
+      "paymentProblem": "Ubwishyu bukeneye kurebwa ({reference}).",
+      "rewardApproved": "Igihembo cyawe cya {amount} RWF cyemejwe.",
+      "rewardToCheck": "Igihembo cy'ubutumire gitegereje kwemezwa.",
+      "payoutRecorded": "Wohererejwe {amount} RWF ({reference})."
     }
   },
   "Rooms": {
@@ -821,6 +876,91 @@
     "saved": "Byabitswe",
     "failed": "Kubika byanze. Ongera ugerageze.",
     "save": "Bika",
-    "invalid": "Reba iyi mibare."
+    "invalid": "Reba iyi mibare.",
+    "monthly": "Ubukode bw'ukwezi",
+    "upfrontMonths": "Amezi yishyurwa ubika",
+    "monthlyHint": "Siga ubusa kugira ngo ubukode bw'ukwezi bufunge. Umushyitsi yishyura aya mezi (n'ingwate niba ihari) kugira ngo abike; ibisigaye bivugwaho na nyir'inzu.",
+    "referrals": "Ubutumire",
+    "referralEnabled": "Erekana amahuza y'ubutumire",
+    "referralReward": "Igihembo kuri buri nshuti (RWF)",
+    "referralHint": "Igihembo gishyirwaho nyuma y'uko inshuti yatumiwe irangiza bwa mbere, kandi itsinda ryemeza buri kimwe. Siga ubusa niba nta gihembo."
+  },
+  "Money": {
+    "notConnected": "Kwishyura ntikurahuzwa: shyiraho PAYMENT_WEBHOOK_SECRET kandi uhuze utanga serivisi. Kugeza icyo gihe, nta kintu gihinduka hano ubwacyo.",
+    "owners": "Ibyo ba nyir'inzu bagomba kwishyurwa",
+    "ownersHint": "Ba nyir'inzu bishyurwa ku hantu abashyitsi bamaze kuva. Amafaranga y'ibiri imbere ategereza ko birangira.",
+    "nothing": "Nta kintu kirimo.",
+    "balanceLine": "Bigomba {due} · biri imbere {upcoming} · byishyuwe {paid}",
+    "depositsHeld": "ingwate zifashwe {amount}",
+    "recordPayout": "Andika kwishyura",
+    "amount": "Amafaranga (bigomba {due})",
+    "method": "Byishyuwe na (urugero MTN MoMo, banki)",
+    "externalRef": "Nimero yo kohereza",
+    "cancel": "Reka",
+    "save": "Bika",
+    "error": {
+      "invalid": "Reba amafaranga n'uburyo yishyuwe.",
+      "tooMuch": "Birenze ibigomba kwishyurwa.",
+      "auth": "Ongera winjire."
+    },
+    "rewards": "Ibihembo byo kwemeza",
+    "rewardLine": "{referrer} yatumiye {friend}: {amount}",
+    "approve": "Emeza",
+    "void": "Kuraho",
+    "problems": "Ubwishyu bukeneye kurebwa",
+    "outcome": {
+      "amountMismatch": "Amafaranga ntahura n'ibyabitswe",
+      "datesTaken": "Yishyuwe nyuma y'igihe, iminsi yafashwe: agomba gusubizwa",
+      "notPending": "Yishyuwe ku byari bitagitegereje: reba kandi usubize",
+      "unknownBooking": "Ubwishyu bw'ibitazwi"
+    },
+    "ledger": "Igitabo cy'amafaranga",
+    "kind": {
+      "GUEST_PAYMENT": "Ubwishyu bw'umushyitsi",
+      "GUEST_FEE": "Amafaranga ya serivisi",
+      "COMMISSION": "Komisiyo",
+      "HOST_PAYABLE": "Bigomba nyir'inzu",
+      "DEPOSIT_HELD": "Ingwate ifashwe",
+      "PROMO_DISCOUNT": "Igabanywa",
+      "SETTLEMENT": "Kwishyura nyir'inzu",
+      "REFERRAL_REWARD": "Igihembo cy'ubutumire",
+      "REFUND": "Gusubiza"
+    }
+  },
+  "Promotions": {
+    "new": "Kode nshya y'igabanywa",
+    "code": "Kode",
+    "fundedBy": "Uwishyura igabanywa",
+    "funding": {
+      "PLATFORM": "Urubuga (nyir'inzu ahabwa igiciro cyose)",
+      "HOST": "Nyir'inzu"
+    },
+    "percentOff": "Ijanisha ry'igabanywa",
+    "amountOff": "Amafaranga y'igabanywa (RWF)",
+    "minSubtotal": "Ayo ugomba kurenza (RWF)",
+    "maxUses": "Inshuro nyinshi",
+    "startsAt": "Itangira",
+    "endsAt": "Irangira",
+    "description": "Icyitonderwa (itsinda gusa)",
+    "create": "Shyiraho kode",
+    "error": {
+      "taken": "Iyo kode isanzwe ihari.",
+      "needsDiscount": "Shyiraho ijanisha cyangwa amafaranga.",
+      "field": "Reba iyi mibare."
+    },
+    "none": "Nta kode irashyirwaho.",
+    "uses": "{used} kuri {max}",
+    "until": "kugeza {date}",
+    "disable": "Funga",
+    "enable": "Fungura"
+  },
+  "Referrals": {
+    "title": "Tumira inshuti",
+    "body": "Sangiza ihuza ryawe. Inshuti ziyandikishije naryo zihuzwa nawe.",
+    "bodyReward": "Sangiza ihuza ryawe. Nyuma y'uko inshuti irangiza bwa mbere, ushobora kubona {amount}.",
+    "copy": "Koporora ihuza",
+    "code": "Kode yawe {code}",
+    "invited": "{count, plural, =0 {nta nshuti irinjira} one {inshuti # yinjiye} other {inshuti # zinjiye}}",
+    "earned": "wabonye {amount}"
   }
 }

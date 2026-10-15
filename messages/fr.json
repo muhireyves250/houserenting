@@ -405,14 +405,36 @@
       "phone": "Vérifiez votre numéro mobile money.",
       "unavailable": "Quelqu'un vient de réserver certaines de ces nuits. Choisissez d'autres dates.",
       "auth": "Reconnectez-vous pour réserver.",
-      "failed": "Réservation impossible. Réessayez."
+      "failed": "Réservation impossible. Réessayez.",
+      "promo": "Ce code promo ne peut pas être utilisé.",
+      "notOffered": "Les locations au mois ne se réservent pas encore en ligne."
     },
     "qrCode": "Code QR",
     "qrCodeFor": "Code QR pour {title}",
     "downloadQr": "Télécharger le code QR",
     "chooseRoom": "Choisir une chambre",
     "roomLabel": "Chambre :",
-    "serviceFee": "Frais de service"
+    "serviceFee": "Frais de service",
+    "monthsTimes": "{price} × {count, plural, one {# mois} other {# mois}}",
+    "promoLine": "Code {code}",
+    "depositDue": "Caution",
+    "dueNow": "À payer maintenant",
+    "monthlyNote": "Location de {months} mois : {upfront, plural, one {le premier mois est payé} other {les # premiers mois sont payés}} maintenant.",
+    "promoCode": "Code promo",
+    "applyPromo": "Appliquer",
+    "promoError": {
+      "unknown": "Ce code n'est pas valable.",
+      "expired": "Ce code a expiré ou n'a pas encore commencé.",
+      "usedUp": "Ce code a été entièrement utilisé.",
+      "minimum": "Ce séjour n'atteint pas le montant minimum du code."
+    },
+    "rentMonthly": "Louer au mois",
+    "howToRent": "Mode de location",
+    "byNight": "À la nuit",
+    "byMonth": "Au mois",
+    "moveIn": "Date d'entrée",
+    "rentalLength": "Durée",
+    "monthsCount": "{count, plural, one {# mois} other {# mois}}"
   },
   "Facility": {
     "KITCHEN": "Cuisine",
@@ -506,7 +528,9 @@
     "keep": "Garder la réservation",
     "cancelFailed": "Annulation impossible. Réessayez.",
     "room": "Chambre",
-    "serviceFee": "Frais de service"
+    "serviceFee": "Frais de service",
+    "rental": "Location",
+    "rentalTerms": "{months} mois, {upfront} payé(s) à la réservation"
   },
   "Host": {
     "title": "Vos annonces",
@@ -601,7 +625,13 @@
       "ROOM_BY_ROOM": "Chambre par chambre",
       "BOTH": "Logement entier ou chambres"
     },
-    "pricesRoomsHint": "Pour une location par chambre, chaque chambre a son prix (ajoutez les chambres ci-dessous après l'enregistrement) ; le prix à la nuit ici concerne le logement entier et fixe les nuits minimum et maximum."
+    "pricesRoomsHint": "Pour une location par chambre, chaque chambre a son prix (ajoutez les chambres ci-dessous après l'enregistrement) ; le prix à la nuit ici concerne le logement entier et fixe les nuits minimum et maximum.",
+    "earnings": "Revenus",
+    "earningsLabel": {
+      "due": "Prêt à être versé",
+      "upcoming": "Séjours à venir",
+      "paidOut": "Déjà versé"
+    }
   },
   "Admin": {
     "title": "Administration",
@@ -613,7 +643,9 @@
       "bookings": "Réservations",
       "users": "Utilisateurs",
       "audit": "Journal d'audit",
-      "settings": "Paramètres"
+      "settings": "Paramètres",
+      "money": "Finances",
+      "promotions": "Promotions"
     },
     "count": {
       "listings": "Annonces à vérifier",
@@ -681,7 +713,8 @@
       },
       "booking": {
         "checkIn": "Arrivée enregistrée",
-        "checkOut": "Départ enregistré"
+        "checkOut": "Départ enregistré",
+        "paid": "Paiement vérifié"
       },
       "settings": {
         "update": "Paramètres modifiés"
@@ -691,6 +724,21 @@
         "update": "Chambre modifiée",
         "status": "Statut de chambre modifié",
         "delete": "Chambre supprimée"
+      },
+      "settlement": {
+        "record": "Versement enregistré"
+      },
+      "promo": {
+        "create": "Code promo créé",
+        "enable": "Code promo activé",
+        "disable": "Code promo désactivé"
+      },
+      "reward": {
+        "approve": "Récompense approuvée",
+        "void": "Récompense annulée"
+      },
+      "referral": {
+        "claim": "Parrainage enregistré"
       }
     },
     "money": "Le voyageur paie {total} · propriétaire {payout} · plateforme {commission}"
@@ -775,7 +823,14 @@
       "reviewPublished": "Votre avis sur {title} est publié. Merci !",
       "ticketOpened": "Nouvelle demande d'aide : {subject} ({reference}).",
       "ticketReply": "Nouvelle réponse à « {subject} ».",
-      "ticketStatus": "« {subject} » est maintenant : {statusLabel}."
+      "ticketStatus": "« {subject} » est maintenant : {statusLabel}.",
+      "bookingConfirmed": "Paiement reçu : votre réservation {reference} à {title} est confirmée.",
+      "newBooking": "Nouvelle réservation confirmée à {title} ({reference}).",
+      "paymentFailed": "Le paiement de {reference} n'a pas abouti. Vous pouvez réessayer tant que vos dates sont bloquées.",
+      "paymentProblem": "Un paiement est à vérifier ({reference}).",
+      "rewardApproved": "Votre récompense de parrainage de {amount} RWF a été approuvée.",
+      "rewardToCheck": "Une récompense de parrainage attend une approbation.",
+      "payoutRecorded": "Un versement de {amount} RWF vous a été envoyé ({reference})."
     }
   },
   "Rooms": {
@@ -821,6 +876,91 @@
     "saved": "Enregistré",
     "failed": "Enregistrement impossible. Réessayez.",
     "save": "Enregistrer",
-    "invalid": "Vérifiez cette valeur."
+    "invalid": "Vérifiez cette valeur.",
+    "monthly": "Locations au mois",
+    "upfrontMonths": "Mois payés à la réservation",
+    "monthlyHint": "Laissez vide pour désactiver les locations au mois. Le voyageur paie ces mois (et la caution éventuelle) pour réserver ; le reste se règle avec le propriétaire.",
+    "referrals": "Parrainage",
+    "referralEnabled": "Afficher les liens d'invitation aux membres",
+    "referralReward": "Récompense par ami (RWF)",
+    "referralHint": "Une récompense n'est créée qu'après le premier séjour terminé de l'ami invité, et l'équipe approuve chacune. Laissez vide pour aucune récompense."
+  },
+  "Money": {
+    "notConnected": "Les paiements ne sont pas encore connectés : définissez PAYMENT_WEBHOOK_SECRET et connectez un prestataire. D'ici là, rien ne change ici automatiquement.",
+    "owners": "Montants dus aux propriétaires",
+    "ownersHint": "Les propriétaires sont payés pour les séjours terminés. L'argent des séjours à venir attend la fin du séjour.",
+    "nothing": "Rien pour l'instant.",
+    "balanceLine": "Dû {due} · à venir {upcoming} · versé {paid}",
+    "depositsHeld": "cautions détenues {amount}",
+    "recordPayout": "Enregistrer un versement",
+    "amount": "Montant (dû {due})",
+    "method": "Payé par (ex. MTN MoMo, banque)",
+    "externalRef": "Référence du virement",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "error": {
+      "invalid": "Vérifiez le montant et le moyen de paiement.",
+      "tooMuch": "C'est plus que le montant dû pour les séjours terminés.",
+      "auth": "Reconnectez-vous."
+    },
+    "rewards": "Récompenses de parrainage à approuver",
+    "rewardLine": "{referrer} a invité {friend} : {amount}",
+    "approve": "Approuver",
+    "void": "Annuler",
+    "problems": "Paiements à vérifier",
+    "outcome": {
+      "amountMismatch": "Le montant ne correspond pas à la réservation",
+      "datesTaken": "Payé après la fin du blocage, dates déjà prises : remboursement nécessaire",
+      "notPending": "Payé pour une réservation qui n'attendait plus : vérifier et rembourser",
+      "unknownBooking": "Paiement pour une réservation inconnue"
+    },
+    "ledger": "Grand livre",
+    "kind": {
+      "GUEST_PAYMENT": "Paiement du voyageur",
+      "GUEST_FEE": "Frais de service",
+      "COMMISSION": "Commission",
+      "HOST_PAYABLE": "Dû au propriétaire",
+      "DEPOSIT_HELD": "Caution détenue",
+      "PROMO_DISCOUNT": "Réduction promo",
+      "SETTLEMENT": "Versement au propriétaire",
+      "REFERRAL_REWARD": "Récompense de parrainage",
+      "REFUND": "Remboursement"
+    }
+  },
+  "Promotions": {
+    "new": "Nouveau code promo",
+    "code": "Code",
+    "fundedBy": "Qui paie la réduction",
+    "funding": {
+      "PLATFORM": "La plateforme (le propriétaire reçoit le prix complet)",
+      "HOST": "Le propriétaire"
+    },
+    "percentOff": "Pourcentage de réduction",
+    "amountOff": "Montant de réduction (RWF)",
+    "minSubtotal": "Montant minimum (RWF)",
+    "maxUses": "Utilisations maximum",
+    "startsAt": "Début",
+    "endsAt": "Fin",
+    "description": "Note (équipe seulement)",
+    "create": "Créer le code",
+    "error": {
+      "taken": "Ce code existe déjà.",
+      "needsDiscount": "Indiquez un pourcentage ou un montant.",
+      "field": "Vérifiez cette valeur."
+    },
+    "none": "Aucun code promo.",
+    "uses": "{used} sur {max} utilisés",
+    "until": "jusqu'au {date}",
+    "disable": "Désactiver",
+    "enable": "Activer"
+  },
+  "Referrals": {
+    "title": "Inviter des amis",
+    "body": "Partagez votre lien. Les amis qui s'inscrivent avec lui vous sont rattachés.",
+    "bodyReward": "Partagez votre lien. Après le premier séjour terminé d'un ami, vous pouvez gagner {amount}.",
+    "copy": "Copier le lien",
+    "code": "Votre code {code}",
+    "invited": "{count, plural, =0 {aucun ami inscrit} one {# ami inscrit} other {# amis inscrits}}",
+    "earned": "gagné {amount}"
   }
 }

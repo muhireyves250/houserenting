@@ -4,7 +4,9 @@ import { Tag } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { createContext, useContext, useId, useState, type ReactNode } from "react";
 import { discountedPrice, headlineRate, type Unit } from "@/features/listings/pricing";
-import { stayQuote } from "@/features/listings/quote";
+import { nightsBetween, stayQuote } from "@/features/listings/quote";
+import { addMonthsISO } from "@/features/bookings/monthly";
+import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
 import { DatePanel } from "@/features/search/components/DatePanel";
 import { isDayBlocked, todayISO, type BookedRange, type DateRange } from "@/features/search/date-range";
 import { Link, usePathname } from "@/i18n/navigation";
@@ -17,6 +19,8 @@ import { ReserveDialog } from "./Reserve";
 export type BookingRate = {
   unit: Unit;
   price: number;
+  minUnits?: number;
+  maxUnits?: number | null;
   checkInTime: string | null;
   checkOutTime: string | null;
   dayStartTime: string | null;
@@ -46,6 +50,12 @@ type Stay = {
   guestFeeBps: number | null;
   /** Published cancellation terms in the reader's language. */
   cancellationPolicy: string | null;
+  /** Monthly rentals, when staff have set the months paid upfront (null = not offered). */
+  monthlyConfig: { upfrontMonths: number; depositPercent: number | null } | null;
+  mode: "stay" | "monthly";
+  setMode: (mode: "stay" | "monthly") => void;
+  plan: { start: string; months: number };
+  setPlan: (plan: { start: string; months: number }) => void;
 };
 
 const StayContext = createContext<Stay | null>(null);
@@ -68,6 +78,9 @@ export function StayProvider({
   bookingModel = "WHOLE_PROPERTY",
   guestFeeBps = null,
   cancellationPolicy = null,
+  monthlyConfig = null,
+  monthlyOnly = false,
+  minMonths = 1,
 }: {
   children: ReactNode;
   listingId?: string;
@@ -77,7 +90,13 @@ export function StayProvider({
   bookingModel?: BookingModel;
   guestFeeBps?: number | null;
   cancellationPolicy?: string | null;
+  monthlyConfig?: { upfrontMonths: number; depositPercent: number | null } | null;
+  /** The place rents by the month only. */
+  monthlyOnly?: boolean;
+  minMonths?: number;
 }) {
+  const [mode, setMode] = useState<"stay" | "monthly">(monthlyOnly ? "monthly" : "stay");
+  const [plan, setPlan] = useState({ start: "", months: minMonths });
   const [range, setRange] = useState<DateRange>({});
   const [guests, setGuests] = useState(1);
   const [choice, setChoice] = useState<StayChoice>(bookingModel === "ROOM_BY_ROOM" ? null : "whole");
@@ -98,6 +117,11 @@ export function StayProvider({
         setChoice,
         guestFeeBps,
         cancellationPolicy,
+        monthlyConfig,
+        mode,
+        setMode,
+        plan,
+        setPlan,
       }}
     >
       {children}
@@ -236,12 +260,57 @@ function ReserveButton({
 }) {
   const t = useTranslations("Listings");
   const pathname = usePathname();
-  const { range, guests, listingId, holdMinutes, choice, guestFeeBps, cancellationPolicy } = useStay();
+  const { range, guests, listingId, holdMinutes, choice, guestFeeBps, cancellationPolicy, monthlyConfig, mode, plan } = useStay();
   const { rates: choiceRates, room } = useChoiceRates(rates);
   const [open, setOpen] = useState(false);
   const quote = stayQuote(choiceRates, discountPercent, range);
   const night = rates.find((r) => r.unit === "NIGHT");
+  const month = rates.find((r) => r.unit === "MONTH");
   const longOnly = !rates.some((r) => r.unit !== "MONTH");
+
+  // Monthly rental (offered once staff set the months paid upfront).
+  if (mode === "monthly" && month && monthlyConfig) {
+    const monthlyPrice = discountedPrice(month.price, discountPercent);
+    const upfrontMonths = Math.min(monthlyConfig.upfrontMonths, plan.months);
+    const moveOut = plan.start ? addMonthsISO(plan.start, plan.months) : "";
+    if (!signedIn) {
+      return (
+        <Link href={{ pathname: "/login", query: { next: pathname } }} className={cn(className, "block text-center")}>
+          {t("rentMonthly")}
+        </Link>
+      );
+    }
+    return (
+      <>
+        <button type="button" disabled={!plan.start} onClick={() => setOpen(true)} className={className}>
+          {t("rentMonthly")}
+        </button>
+        {open && plan.start && (
+          <ReserveDialog
+            listingId={listingId}
+            holdMinutes={holdMinutes}
+            guestFeeBps={guestFeeBps}
+            cancellationPolicy={cancellationPolicy}
+            monthly={{
+              months: plan.months,
+              upfrontMonths,
+              monthlyPrice,
+              deposit: monthlyConfig.depositPercent ? Math.round((monthlyPrice * monthlyConfig.depositPercent) / 100) : 0,
+            }}
+            place={place}
+            quote={{ nights: nightsBetween({ checkIn: plan.start, checkOut: moveOut }), nightly: monthlyPrice, total: monthlyPrice * upfrontMonths, originalTotal: null }}
+            range={{ checkIn: plan.start, checkOut: moveOut }}
+            guests={1}
+            checkInTime={null}
+            checkOutTime={null}
+            savings={null}
+            onClose={() => setOpen(false)}
+            onChangeDates={() => setOpen(false)}
+          />
+        )}
+      </>
+    );
+  }
 
   if (longOnly || !night) {
     return (
@@ -267,7 +336,7 @@ function ReserveButton({
           listingId={listingId}
           holdMinutes={holdMinutes}
           room={room ? { id: room.id, name: room.name } : null}
-          guestFee={feeOf(quote.total, guestFeeBps)}
+          guestFeeBps={guestFeeBps}
           cancellationPolicy={cancellationPolicy}
           place={place}
           quote={quote}
@@ -304,7 +373,10 @@ export function BookingCard({
   const t = useTranslations("Listings");
   const locale = useLocale();
   const guestsId = useId();
-  const { range, guests, setGuests, guestFeeBps } = useStay();
+  const { range, guests, setGuests, guestFeeBps, monthlyConfig, mode, setMode, plan, setPlan } = useStay();
+  const monthRate = rates.find((r) => r.unit === "MONTH");
+  const canRentMonthly = Boolean(monthRate && monthlyConfig);
+  const hasNightly = rates.some((r) => r.unit === "NIGHT");
   const { rates: choiceRates, room } = useChoiceRates(rates);
   const quote = stayQuote(choiceRates, discountPercent, range);
   const guestFee = quote ? feeOf(quote.total, guestFeeBps) : 0;
@@ -350,8 +422,32 @@ export function BookingCard({
           </p>
         )}
 
+        {/* Nights or months, when the place offers both */}
+        {canRentMonthly && hasNightly && (
+          <SegmentedTabs
+            label={t("howToRent")}
+            value={mode}
+            onChange={setMode}
+            options={[
+              { value: "stay", label: t("byNight") },
+              { value: "monthly", label: t("byMonth") },
+            ]}
+            className="mt-4 ring-1 ring-line"
+          />
+        )}
+
+        {mode === "monthly" && canRentMonthly && monthRate && (
+          <MonthlyFields
+            start={plan.start}
+            months={plan.months}
+            minMonths={monthRate.minUnits ?? 1}
+            maxMonths={monthRate.maxUnits ?? 24}
+            onChange={setPlan}
+          />
+        )}
+
         {/* Dates and guests */}
-        {!longOnly && (
+        {!longOnly && mode === "stay" && (
           <div className="mt-5 overflow-hidden rounded-xl border border-line-strong">
             <div className="grid grid-cols-2 divide-x divide-line-strong">
               {(
@@ -481,6 +577,44 @@ export function MobileBookingBar({
         signedIn={signedIn}
         className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white disabled:opacity-60"
       />
+    </div>
+  );
+}
+
+/** Move-in date and length for a monthly rental. */
+function MonthlyFields({
+  start,
+  months,
+  minMonths,
+  maxMonths,
+  onChange,
+}: {
+  start: string;
+  months: number;
+  minMonths: number;
+  maxMonths: number;
+  onChange: (plan: { start: string; months: number }) => void;
+}) {
+  const t = useTranslations("Listings");
+  const startId = useId();
+  const monthsId = useId();
+  const count = Math.max(1, maxMonths - minMonths + 1);
+  return (
+    <div className="mt-5 overflow-hidden rounded-xl border border-line-strong">
+      <label htmlFor={startId} className="flex flex-col gap-0.5 px-3.5 py-2.5 transition-colors hover:bg-canvas">
+        <span className="text-xs font-semibold text-ink">{t("moveIn")}</span>
+        <input id={startId} type="date" min={todayISO()} value={start} onChange={(e) => onChange({ start: e.target.value, months })} className="bg-transparent text-sm text-ink outline-none" />
+      </label>
+      <label htmlFor={monthsId} className="flex flex-col gap-0.5 border-t border-line-strong px-3.5 py-2.5 transition-colors hover:bg-canvas">
+        <span className="text-xs font-semibold text-ink">{t("rentalLength")}</span>
+        <select id={monthsId} value={months} onChange={(e) => onChange({ start, months: Number(e.target.value) })} className="-ml-1 cursor-pointer bg-transparent text-sm text-ink outline-none">
+          {Array.from({ length: count }, (_, i) => minMonths + i).map((n) => (
+            <option key={n} value={n}>
+              {t("monthsCount", { count: n })}
+            </option>
+          ))}
+        </select>
+      </label>
     </div>
   );
 }

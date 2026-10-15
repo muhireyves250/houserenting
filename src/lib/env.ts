@@ -32,6 +32,10 @@ const schema = z
     CLOUDINARY_CLOUD_NAME: z.string().min(1).optional(),
     CLOUDINARY_API_KEY: z.string().min(1).optional(),
     CLOUDINARY_API_SECRET: z.string().min(1).optional(),
+    // Shared secret for signed payment provider callbacks (unset = payments not connected).
+    PAYMENT_WEBHOOK_SECRET: z.string().min(16).optional(),
+    // Lets the scheduler run background jobs (Vercel Cron sends it as a Bearer token).
+    CRON_SECRET: z.string().min(16).optional(),
     LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
     SENTRY_DSN: z.string().optional(),
   })

@@ -8,6 +8,9 @@ import { hostListings } from "@/features/hosting/service";
 import { Link } from "@/i18n/navigation";
 import { requireUser } from "@/lib/session";
 import { AnswerQuestion } from "@/features/questions/components/AnswerQuestion";
+import { hostEarnings } from "@/features/ledger/service";
+import { formatRWF } from "@/lib/format";
+import { getLocale } from "next-intl/server";
 import { hostQuestions } from "@/features/questions/service";
 
 const newButton =
@@ -15,12 +18,15 @@ const newButton =
 
 export default async function HostPage() {
   const user = await requireUser("/host");
-  const [t, tType, listings, questions] = await Promise.all([
+  const [t, tType, listings, questions, earnings, locale] = await Promise.all([
     getTranslations("Host"),
     getTranslations("ListingType"),
     hostListings(user.id),
     hostQuestions(user.id),
+    hostEarnings(user.id),
+    getLocale(),
   ]);
+  const hasMoney = earnings.earned + earnings.upcoming + earnings.paidOut > 0;
 
   return (
     <PageContainer className="max-w-3xl py-6 md:py-10">
@@ -72,6 +78,36 @@ export default async function HostPage() {
             </li>
           ))}
         </ul>
+      )}
+
+      {hasMoney && (
+        <section className="mt-10">
+          <h2 className="mb-3 text-lg font-bold text-ink">{t("earnings")}</h2>
+          <ul className="grid grid-cols-3 gap-3">
+            {(
+              [
+                ["due", earnings.due],
+                ["upcoming", earnings.upcoming],
+                ["paidOut", earnings.paidOut],
+              ] as const
+            ).map(([key, value]) => (
+              <li key={key} className="rounded-3xl bg-surface p-4 shadow-[0_10px_30px_-14px_rgba(16,24,40,0.3)] ring-1 ring-black/[0.04] max-md:ring-line">
+                <p className="text-lg font-bold text-ink tabular-nums">{formatRWF(value, locale)}</p>
+                <p className="text-[13px] text-muted">{t(`earningsLabel.${key}`)}</p>
+              </li>
+            ))}
+          </ul>
+          {earnings.payouts.length > 0 && (
+            <ul className="mt-3 flex flex-col gap-1 text-[13px] text-ink/80 tabular-nums">
+              {earnings.payouts.map((p) => (
+                <li key={p.reference}>
+                  {p.reference} · {formatRWF(p.amount, locale)}
+                  {p.method && ` · ${p.method}`}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
       )}
 
       {questions.length > 0 && (

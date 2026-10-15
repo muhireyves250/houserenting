@@ -9,6 +9,8 @@ const ITEMS = [
   { key: "moderation", href: "/admin/moderation" },
   { key: "support", href: "/admin/support" },
   { key: "bookings", href: "/admin/bookings" },
+  { key: "money", href: "/admin/money" },
+  { key: "promotions", href: "/admin/promotions" },
   { key: "settings", href: "/admin/settings" },
   { key: "users", href: "/admin/users" },
   { key: "audit", href: "/admin/audit" },

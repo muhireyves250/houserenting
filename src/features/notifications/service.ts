@@ -19,7 +19,14 @@ export type NotificationKind =
   | "reviewPublished"
   | "ticketOpened"
   | "ticketReply"
-  | "ticketStatus";
+  | "ticketStatus"
+  | "bookingConfirmed"
+  | "newBooking"
+  | "paymentFailed"
+  | "paymentProblem"
+  | "rewardApproved"
+  | "rewardToCheck"
+  | "payoutRecorded";
 
 export async function notify(
   client: Client,

@@ -15,6 +15,9 @@ export default async function AdminSettingsPage() {
         guestFeePercent: fromBps(settings.guestFeeBps),
         holdMinutes: settings.holdMinutes,
         monthlyDepositPercent: settings.monthlyDepositPercent,
+        monthlyUpfrontMonths: settings.monthlyUpfrontMonths,
+        referralEnabled: settings.referralEnabled,
+        referralRewardAmount: settings.referralRewardAmount,
         cancellationPolicy: settings.cancellationPolicy,
       }}
     />

@@ -9,6 +9,9 @@ export const settingsInput = z.object({
   guestFeePercent: optional(z.number().min(0).max(50)),
   holdMinutes: optional(z.number().int().min(5).max(1440)),
   monthlyDepositPercent: optional(z.number().int().min(0).max(1200)),
+  monthlyUpfrontMonths: optional(z.number().int().min(1).max(24)).optional().default(null),
+  referralEnabled: z.boolean().optional().default(false),
+  referralRewardAmount: optional(z.number().int().min(1).max(10_000_000)).optional().default(null),
   cancellationPolicy: z.object({ en: policyText, fr: policyText, rw: policyText }),
 });
 

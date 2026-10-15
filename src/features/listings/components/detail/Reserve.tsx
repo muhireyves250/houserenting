@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { useId, useRef, useState, useTransition, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { bookStayAction } from "@/features/bookings/actions";
+import { bookMonthlyAction, bookStayAction, checkPromoAction } from "@/features/bookings/actions";
 import { maskPhone, parseMobileMoney, type MoMoProvider } from "@/features/listings/mobile-money";
 import type { StayQuote } from "@/features/listings/quote";
 import type { DateRange } from "@/features/search/date-range";
@@ -34,8 +34,9 @@ export function ReserveDialog({
   listingId,
   holdMinutes,
   room = null,
-  guestFee = 0,
+  guestFeeBps = null,
   cancellationPolicy = null,
+  monthly = null,
   place,
   quote,
   range,
@@ -50,8 +51,10 @@ export function ReserveDialog({
   holdMinutes: number;
   /** The room being booked; null = the whole place. */
   room?: { id: string; name: string } | null;
-  /** Platform fee on top of the stay price. */
-  guestFee?: number;
+  /** Platform fee on top of the (discounted) price, in basis points. */
+  guestFeeBps?: number | null;
+  /** Monthly rental: length, months paid now, deposit due now. Null = a nightly stay. */
+  monthly?: { months: number; upfrontMonths: number; monthlyPrice: number; deposit: number } | null;
   /** Published cancellation terms; when null, the unpaid-hold rule is shown. */
   cancellationPolicy?: string | null;
   place: PlacePreviewData;
@@ -78,6 +81,28 @@ export function ReserveDialog({
   const [error, setError] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState<string | null>(null);
   const [bookError, setBookError] = useState<string | null>(null);
+  const [promoInput, setPromoInput] = useState("");
+  const [promo, setPromo] = useState<{ code: string; discount: number } | null>(null);
+  const [promoError, setPromoError] = useState<string | null>(null);
+  const [checkingPromo, startCheckingPromo] = useTransition();
+
+  // What is paid now: the stay (or the upfront months), less any promo, plus the service fee, plus a monthly deposit.
+  const discount = promo?.discount ?? 0;
+  const guestFee = guestFeeBps ? Math.round(((quote.total - discount) * guestFeeBps) / 10_000) : 0;
+  const deposit = monthly?.deposit ?? 0;
+  const dueNow = quote.total - discount + guestFee + deposit;
+
+  function applyPromo() {
+    setPromoError(null);
+    startCheckingPromo(async () => {
+      const result = await checkPromoAction(promoInput, quote.total);
+      if ("discount" in result) setPromo({ code: promoInput.trim().toUpperCase(), discount: result.discount });
+      else {
+        setPromo(null);
+        setPromoError(t(`promoError.${result.error === "auth" ? "unknown" : result.error}` as "promoError.unknown"));
+      }
+    });
+  }
   const [booking, startBooking] = useTransition();
   const router = useRouter();
 
@@ -103,14 +128,11 @@ export function ReserveDialog({
     if (!range.checkIn || !range.checkOut) return;
     setBookError(null);
     startBooking(async () => {
-      const result = await bookStayAction({
-        listingId,
-        checkIn: range.checkIn,
-        checkOut: range.checkOut,
-        guests,
-        roomId: room?.id ?? null,
-        payment: { method: provider, phone: number },
-      });
+      const payment = { method: provider, phone: number };
+      const promoCode = promo?.code ?? null;
+      const result = monthly
+        ? await bookMonthlyAction({ listingId, start: range.checkIn, months: monthly.months, promoCode, payment })
+        : await bookStayAction({ listingId, checkIn: range.checkIn, checkOut: range.checkOut, guests, roomId: room?.id ?? null, promoCode, payment });
       if ("reference" in result) {
         router.push(`/bookings/${result.reference}`);
         return;
@@ -320,9 +342,25 @@ export function ReserveDialog({
                 <div className="border-t border-line py-5 tabular-nums">
                   <p className="mb-2 text-[15px] font-semibold text-ink">{t("priceDetails")}</p>
                   <div className="flex justify-between text-[15px] text-ink/80">
-                    <span>{t("nightsTimes", { price: formatRWF(quote.nightly, locale), count: quote.nights })}</span>
+                    <span>
+                      {monthly
+                        ? t("monthsTimes", { price: formatRWF(monthly.monthlyPrice, locale), count: monthly.upfrontMonths })
+                        : t("nightsTimes", { price: formatRWF(quote.nightly, locale), count: quote.nights })}
+                    </span>
                     <span>{formatRWF(quote.total, locale)}</span>
                   </div>
+                  {promo && (
+                    <div className="mt-1 flex justify-between text-[15px] text-emerald-700">
+                      <span>{t("promoLine", { code: promo.code })}</span>
+                      <span>−{formatRWF(promo.discount, locale)}</span>
+                    </div>
+                  )}
+                  {deposit > 0 && (
+                    <div className="mt-1 flex justify-between text-[15px] text-ink/80">
+                      <span>{t("depositDue")}</span>
+                      <span>{formatRWF(deposit, locale)}</span>
+                    </div>
+                  )}
                   {guestFee > 0 && (
                     <div className="mt-1 flex justify-between text-[15px] text-ink/80">
                       <span>{t("serviceFee")}</span>
@@ -331,8 +369,32 @@ export function ReserveDialog({
                   )}
                 </div>
                 <div className="flex justify-between border-t border-line pt-5 text-[15px] font-bold text-ink tabular-nums">
-                  <span>{t("total")} (RWF)</span>
-                  <span>{formatRWF(quote.total + guestFee, locale)}</span>
+                  <span>{monthly ? t("dueNow") : t("total")} (RWF)</span>
+                  <span>{formatRWF(dueNow, locale)}</span>
+                </div>
+                {monthly && <p className="mt-2 text-[13px] text-muted">{t("monthlyNote", { months: monthly.months, upfront: monthly.upfrontMonths })}</p>}
+                {/* Promo code */}
+                <div className="mt-5 border-t border-line pt-5">
+                  <div className="flex gap-2">
+                    <label className="flex flex-1 flex-col gap-0.5 rounded-xl border border-line-strong px-3 py-2 focus-within:border-ink max-md:focus-within:border-primary">
+                      <span className="text-xs font-semibold text-muted">{t("promoCode")}</span>
+                      <input
+                        value={promoInput}
+                        onChange={(e) => setPromoInput(e.target.value)}
+                        maxLength={40}
+                        autoCapitalize="characters"
+                        className="w-full bg-transparent text-[15px] text-ink uppercase outline-none"
+                      />
+                    </label>
+                    <button type="button" onClick={applyPromo} disabled={!promoInput.trim() || checkingPromo} className={changeButton + " self-center disabled:opacity-50"}>
+                      {t("applyPromo")}
+                    </button>
+                  </div>
+                  {promoError && (
+                    <p role="alert" className="mt-1 text-[13px] font-medium text-danger">
+                      {promoError}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
