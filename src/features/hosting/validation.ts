@@ -57,6 +57,7 @@ export const listingInput = z
     title: text(5, 100),
     description: text(20, 5000),
     type: z.enum(PLACE_TYPES),
+    bookingModel: z.enum(["WHOLE_PROPERTY", "ROOM_BY_ROOM", "BOTH"]).default("WHOLE_PROPERTY"),
     addressLine: text(2, 120),
     district: text(2, 60),
     city: text(2, 60),

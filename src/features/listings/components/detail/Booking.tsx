@@ -23,20 +23,34 @@ export type BookingRate = {
   dayEndTime: string | null;
 };
 
+export type PublicRoom = { id: string; name: string; description: string; maxGuests: number; nightlyPrice: number; facilities: string[] };
+export type BookingModel = "WHOLE_PROPERTY" | "ROOM_BY_ROOM" | "BOTH";
+/** "whole" = the whole place; a room id; null = a room still has to be chosen. */
+export type StayChoice = "whole" | string | null;
+
 type Stay = {
   range: DateRange;
   setRange: (range: DateRange) => void;
   guests: number;
   setGuests: (n: number) => void;
-  /** Nights other guests already hold. */
-  booked: BookedRange[];
+  /** Nights taken, for the whole place and for each room (roomId null = whole-place stays). */
+  booked: (BookedRange & { roomId: string | null })[];
   listingId: string;
   /** Minutes an unpaid booking holds its dates. */
   holdMinutes: number;
+  rooms: PublicRoom[];
+  bookingModel: BookingModel;
+  choice: StayChoice;
+  setChoice: (choice: StayChoice) => void;
+  /** Platform fee on top of the stay price, in basis points (null = none). */
+  guestFeeBps: number | null;
+  /** Published cancellation terms in the reader's language. */
+  cancellationPolicy: string | null;
 };
 
 const StayContext = createContext<Stay | null>(null);
 const CALENDAR_ID = "stay-calendar";
+const ROOMS_ID = "rooms";
 
 function useStay(): Stay {
   const stay = useContext(StayContext);
@@ -50,16 +64,115 @@ export function StayProvider({
   listingId = "",
   booked = [],
   holdMinutes = 30,
+  rooms = [],
+  bookingModel = "WHOLE_PROPERTY",
+  guestFeeBps = null,
+  cancellationPolicy = null,
 }: {
   children: ReactNode;
   listingId?: string;
-  booked?: BookedRange[];
+  booked?: (BookedRange & { roomId?: string | null })[];
   holdMinutes?: number;
+  rooms?: PublicRoom[];
+  bookingModel?: BookingModel;
+  guestFeeBps?: number | null;
+  cancellationPolicy?: string | null;
 }) {
   const [range, setRange] = useState<DateRange>({});
   const [guests, setGuests] = useState(1);
+  const [choice, setChoice] = useState<StayChoice>(bookingModel === "ROOM_BY_ROOM" ? null : "whole");
+  const normalized = booked.map((b) => ({ ...b, roomId: b.roomId ?? null }));
   return (
-    <StayContext.Provider value={{ range, setRange, guests, setGuests, booked, listingId, holdMinutes }}>{children}</StayContext.Provider>
+    <StayContext.Provider
+      value={{
+        range,
+        setRange,
+        guests,
+        setGuests,
+        booked: normalized,
+        listingId,
+        holdMinutes,
+        rooms,
+        bookingModel,
+        choice,
+        setChoice,
+        guestFeeBps,
+        cancellationPolicy,
+      }}
+    >
+      {children}
+    </StayContext.Provider>
+  );
+}
+
+/** What the current choice can't overlap: everything for the whole place; that room and whole-place stays for a room. */
+function takenFor(booked: Stay["booked"], choice: StayChoice): BookedRange[] {
+  if (choice === "whole") return booked;
+  return booked.filter((b) => b.roomId === null || b.roomId === choice);
+}
+
+/** Rates for the current choice: a room has its own nightly price. */
+function useChoiceRates(rates: BookingRate[]): { rates: BookingRate[]; room: PublicRoom | null } {
+  const { choice, rooms } = useStay();
+  const room = rooms.find((r) => r.id === choice) ?? null;
+  if (!room) return { rates, room: null };
+  const night = rates.find((r) => r.unit === "NIGHT");
+  return {
+    rates: [{ unit: "NIGHT", price: room.nightlyPrice, checkInTime: night?.checkInTime ?? null, checkOutTime: night?.checkOutTime ?? null, dayStartTime: null, dayEndTime: null }],
+    room,
+  };
+}
+
+const feeOf = (amount: number, bps: number | null) => (bps ? Math.round((amount * bps) / 10_000) : 0);
+
+/** "Choose a room" (places that rent by the room): the whole place (if offered) and each available room. */
+export function RoomPicker({ wholePrice }: { wholePrice: number | null }) {
+  const t = useTranslations("Rooms");
+  const tFacility = useTranslations("Facility");
+  const locale = useLocale();
+  const { rooms, bookingModel, choice, setChoice, setRange, guests, setGuests } = useStay();
+  if (bookingModel === "WHOLE_PROPERTY" || rooms.length === 0) return null;
+  const options = [
+    ...(bookingModel === "BOTH" && wholePrice ? [{ id: "whole", name: t("wholePlace"), description: "", maxGuests: 0, nightlyPrice: wholePrice, facilities: [] as string[] }] : []),
+    ...rooms,
+  ];
+  return (
+    <section id={ROOMS_ID} className="scroll-mt-28 border-t border-line py-10">
+      <h2 className="mb-6 font-display text-[22px] leading-7 font-bold tracking-[-0.02em] text-ink">{t("choose")}</h2>
+      <div role="radiogroup" aria-label={t("choose")} className="grid gap-3 sm:grid-cols-2">
+        {options.map((option) => {
+          const selected = choice === option.id;
+          return (
+            <button
+              key={option.id}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              onClick={() => {
+                setChoice(option.id);
+                // Dates chosen for another room may not suit this one.
+                setRange({});
+                if (option.maxGuests && guests > option.maxGuests) setGuests(option.maxGuests);
+              }}
+              className={cn(
+                "flex flex-col gap-1 rounded-2xl border bg-surface p-4 text-left transition-[border-color,box-shadow] duration-300",
+                selected ? "border-primary shadow-[0_8px_24px_-12px_rgba(0,87,184,0.6)] ring-1 ring-primary" : "border-line hover:border-primary/60",
+              )}
+            >
+              <span className="text-[15px] font-semibold text-ink">{option.name}</span>
+              <span className="text-[13px] text-ink/80">
+                <b className="font-semibold text-ink">{formatRWF(option.nightlyPrice, locale)}</b> {t("perNight")}
+                {option.maxGuests > 0 && ` · ${t("guests", { count: option.maxGuests })}`}
+              </span>
+              {option.description && <span className="text-[13px] text-muted">{option.description}</span>}
+              {option.facilities.length > 0 && (
+                <span className="text-xs text-muted">{option.facilities.map((f) => tFacility(f as "WIFI")).join(" · ")}</span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
@@ -67,7 +180,8 @@ export function StayProvider({
 export function StayCalendar({ city, today = todayISO() }: { city: string; today?: string }) {
   const t = useTranslations("Listings");
   const locale = useLocale();
-  const { range, setRange, booked } = useStay();
+  const { range, setRange, booked: allBooked, choice } = useStay();
+  const booked = takenFor(allBooked, choice);
   const quoteNights = stayQuote([{ unit: "NIGHT", price: 1 }], null, range)?.nights ?? 0;
   const short = new Intl.DateTimeFormat(locale, { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
   const utc = (iso: string) => new Date(`${iso}T00:00:00Z`);
@@ -91,6 +205,11 @@ export function StayCalendar({ city, today = todayISO() }: { city: string; today
       />
     </section>
   );
+}
+
+function scrollToRooms() {
+  const el = document.getElementById(ROOMS_ID);
+  if (el) void animateScrollTo(el.getBoundingClientRect().top + window.scrollY - 112);
 }
 
 function scrollToCalendar() {
@@ -117,9 +236,10 @@ function ReserveButton({
 }) {
   const t = useTranslations("Listings");
   const pathname = usePathname();
-  const { range, guests, listingId, holdMinutes } = useStay();
+  const { range, guests, listingId, holdMinutes, choice, guestFeeBps, cancellationPolicy } = useStay();
+  const { rates: choiceRates, room } = useChoiceRates(rates);
   const [open, setOpen] = useState(false);
-  const quote = stayQuote(rates, discountPercent, range);
+  const quote = stayQuote(choiceRates, discountPercent, range);
   const night = rates.find((r) => r.unit === "NIGHT");
   const longOnly = !rates.some((r) => r.unit !== "MONTH");
 
@@ -139,13 +259,16 @@ function ReserveButton({
   }
   return (
     <>
-      <button type="button" onClick={() => (quote ? setOpen(true) : scrollToCalendar())} className={className}>
-        {t("reserve")}
+      <button type="button" onClick={() => (choice === null ? scrollToRooms() : quote ? setOpen(true) : scrollToCalendar())} className={className}>
+        {choice === null ? t("chooseRoom") : t("reserve")}
       </button>
       {open && quote && (
         <ReserveDialog
           listingId={listingId}
           holdMinutes={holdMinutes}
+          room={room ? { id: room.id, name: room.name } : null}
+          guestFee={feeOf(quote.total, guestFeeBps)}
+          cancellationPolicy={cancellationPolicy}
           place={place}
           quote={quote}
           range={range}
@@ -181,8 +304,11 @@ export function BookingCard({
   const t = useTranslations("Listings");
   const locale = useLocale();
   const guestsId = useId();
-  const { range, guests, setGuests } = useStay();
-  const quote = stayQuote(rates, discountPercent, range);
+  const { range, guests, setGuests, guestFeeBps } = useStay();
+  const { rates: choiceRates, room } = useChoiceRates(rates);
+  const quote = stayQuote(choiceRates, discountPercent, range);
+  const guestFee = quote ? feeOf(quote.total, guestFeeBps) : 0;
+  const guestLimit = room?.maxGuests ?? maxGuests;
   const longOnly = !rates.some((r) => r.unit !== "MONTH");
   const headline = headlineRate(rates, longOnly ? "long" : "short") ?? rates[0];
   const others = rates.filter((r) => r !== headline);
@@ -218,6 +344,12 @@ export function BookingCard({
           )}
         </p>
 
+        {room && (
+          <p className="mt-3 text-sm text-ink">
+            <span className="text-muted">{t("roomLabel")}</span> <b className="font-semibold">{room.name}</b>
+          </p>
+        )}
+
         {/* Dates and guests */}
         {!longOnly && (
           <div className="mt-5 overflow-hidden rounded-xl border border-line-strong">
@@ -247,7 +379,7 @@ export function BookingCard({
                 onChange={(event) => setGuests(Number(event.target.value))}
                 className="-ml-1 cursor-pointer bg-transparent text-sm text-ink outline-none"
               >
-                {Array.from({ length: maxGuests }, (_, i) => i + 1).map((n) => (
+                {Array.from({ length: guestLimit }, (_, i) => i + 1).map((n) => (
                   <option key={n} value={n}>
                     {t("statGuests", { count: n })}
                   </option>
@@ -275,9 +407,15 @@ export function BookingCard({
               <dt className="underline decoration-line-strong underline-offset-4">{t("nightsTimes", { price: formatRWF(quote.nightly, locale), count: quote.nights })}</dt>
               <dd>{formatRWF(quote.total, locale)}</dd>
             </div>
+            {guestFee > 0 && (
+              <div className="flex justify-between text-ink/80">
+                <dt>{t("serviceFee")}</dt>
+                <dd>{formatRWF(guestFee, locale)}</dd>
+              </div>
+            )}
             <div className="flex justify-between border-t border-line pt-3 font-bold text-ink">
               <dt>{t("total")}</dt>
-              <dd>{formatRWF(quote.total, locale)}</dd>
+              <dd>{formatRWF(quote.total + guestFee, locale)}</dd>
             </div>
           </dl>
         )}
@@ -320,9 +458,10 @@ export function MobileBookingBar({
   const t = useTranslations("Listings");
   const locale = useLocale();
   const { range } = useStay();
-  const quote = stayQuote(rates, discountPercent, range);
+  const { rates: choiceRates } = useChoiceRates(rates);
+  const quote = stayQuote(choiceRates, discountPercent, range);
   const longOnly = !rates.some((r) => r.unit !== "MONTH");
-  const headline = headlineRate(rates, longOnly ? "long" : "short") ?? rates[0];
+  const headline = headlineRate(choiceRates, longOnly ? "long" : "short") ?? choiceRates[0];
   const bold = (chunks: ReactNode) => <b className="text-ink">{chunks}</b>;
   return (
     <div className="fixed inset-x-0 bottom-[calc(82px+env(safe-area-inset-bottom))] z-30 mx-3 flex items-center justify-between gap-4 rounded-2xl border border-line bg-surface px-4 py-3 shadow-[0_10px_30px_-12px_rgba(16,24,40,0.35)] md:hidden">

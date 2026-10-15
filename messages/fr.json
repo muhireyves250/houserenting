@@ -409,7 +409,10 @@
     },
     "qrCode": "Code QR",
     "qrCodeFor": "Code QR pour {title}",
-    "downloadQr": "Télécharger le code QR"
+    "downloadQr": "Télécharger le code QR",
+    "chooseRoom": "Choisir une chambre",
+    "roomLabel": "Chambre :",
+    "serviceFee": "Frais de service"
   },
   "Facility": {
     "KITCHEN": "Cuisine",
@@ -501,7 +504,9 @@
     "cancelTitle": "Annuler cette réservation ?",
     "cancelBody": "Les dates seront libérées pour d'autres voyageurs.",
     "keep": "Garder la réservation",
-    "cancelFailed": "Annulation impossible. Réessayez."
+    "cancelFailed": "Annulation impossible. Réessayez.",
+    "room": "Chambre",
+    "serviceFee": "Frais de service"
   },
   "Host": {
     "title": "Vos annonces",
@@ -563,7 +568,8 @@
       "discount": "Réduction (%)",
       "deposit": "Caution (mois)",
       "characteristics": "Points forts (un par ligne)",
-      "terms": "Règlement intérieur (un par ligne)"
+      "terms": "Règlement intérieur (un par ligne)",
+      "bookingModel": "Mode de réservation"
     },
     "pricesHint": "Choisissez comment louer : à l'heure, à la journée, à la nuit ou au mois.",
     "errors": {
@@ -589,7 +595,13 @@
     "archiveTitle": "Retirer cette annonce ?",
     "archiveBody": "Les voyageurs ne la verront plus. Les réservations passées restent dans votre historique.",
     "cancel": "Annuler",
-    "questionsTitle": "Questions des voyageurs"
+    "questionsTitle": "Questions des voyageurs",
+    "bookingModel": {
+      "WHOLE_PROPERTY": "Le logement entier",
+      "ROOM_BY_ROOM": "Chambre par chambre",
+      "BOTH": "Logement entier ou chambres"
+    },
+    "pricesRoomsHint": "Pour une location par chambre, chaque chambre a son prix (ajoutez les chambres ci-dessous après l'enregistrement) ; le prix à la nuit ici concerne le logement entier et fixe les nuits minimum et maximum."
   },
   "Admin": {
     "title": "Administration",
@@ -600,7 +612,8 @@
       "support": "Assistance",
       "bookings": "Réservations",
       "users": "Utilisateurs",
-      "audit": "Journal d'audit"
+      "audit": "Journal d'audit",
+      "settings": "Paramètres"
     },
     "count": {
       "listings": "Annonces à vérifier",
@@ -669,8 +682,18 @@
       "booking": {
         "checkIn": "Arrivée enregistrée",
         "checkOut": "Départ enregistré"
+      },
+      "settings": {
+        "update": "Paramètres modifiés"
+      },
+      "room": {
+        "create": "Chambre ajoutée",
+        "update": "Chambre modifiée",
+        "status": "Statut de chambre modifié",
+        "delete": "Chambre supprimée"
       }
-    }
+    },
+    "money": "Le voyageur paie {total} · propriétaire {payout} · plateforme {commission}"
   },
   "Questions": {
     "title": "Questions et réponses",
@@ -754,5 +777,50 @@
       "ticketReply": "Nouvelle réponse à « {subject} ».",
       "ticketStatus": "« {subject} » est maintenant : {statusLabel}."
     }
+  },
+  "Rooms": {
+    "title": "Chambres",
+    "intro": "Chaque chambre a son prix, son nombre de voyageurs et ses équipements. Une chambre en nettoyage ou en réparation ne peut pas être réservée.",
+    "guests": "{count, plural, one {# voyageur} other {# voyageurs}}",
+    "status": "Statut",
+    "statuses": {
+      "AVAILABLE": "Disponible",
+      "MAINTENANCE": "En réparation",
+      "UNAVAILABLE": "Non proposée",
+      "CLEANING": "En nettoyage"
+    },
+    "edit": "Modifier {name}",
+    "remove": "Retirer {name}",
+    "failed": "Échec. Réessayez.",
+    "add": "Ajouter une chambre",
+    "name": "Nom de la chambre",
+    "price": "Prix par nuit (RWF)",
+    "maxGuests": "Voyageurs maximum",
+    "description": "Description",
+    "cancel": "Annuler",
+    "save": "Enregistrer la chambre",
+    "wholePlace": "Le logement entier",
+    "choose": "Choisir une chambre",
+    "perNight": "/ nuit"
+  },
+  "Settings": {
+    "note": "Laissez un champ vide tant que la décision n'est pas prise : rien n'est facturé ni promis pour un champ vide. Chaque modification est inscrite au journal d'audit, et les réservations gardent les paramètres en vigueur à leur création.",
+    "money": "Frais et blocages",
+    "commission": "Commission de la plateforme (% du prix du séjour)",
+    "guestFee": "Frais de service voyageur (% ajouté)",
+    "deposit": "Caution location mensuelle (% d'un mois)",
+    "hold": "Blocage avant paiement (minutes, par défaut {minutes})",
+    "moneyHint": "Le voyageur paie le prix du séjour plus les frais de service. Le propriétaire reçoit le prix du séjour moins la commission.",
+    "cancellation": "Conditions d'annulation",
+    "cancellationHint": "Affichées aux voyageurs avant la réservation et enregistrées avec chaque réservation. Rédigez-les dans chaque langue.",
+    "lang": {
+      "en": "Anglais",
+      "fr": "Français",
+      "rw": "Kinyarwanda"
+    },
+    "saved": "Enregistré",
+    "failed": "Enregistrement impossible. Réessayez.",
+    "save": "Enregistrer",
+    "invalid": "Vérifiez cette valeur."
   }
 }

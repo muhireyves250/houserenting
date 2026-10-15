@@ -179,6 +179,9 @@ model Listing {
   bookings        Booking[]
   questions       ListingQuestion[]
   reviews         Review[]
+  /// Whole place, single rooms, or either.
+  bookingModel    BookingModel  @default(WHOLE_PROPERTY)
+  roomUnits       Room[]
 
   @@index([status, city])
   @@index([hostId])
@@ -247,6 +250,9 @@ model Booking {
   listing        Listing        @relation(fields: [listingId], references: [id], onDelete: Restrict)
   guestId        String
   guest          User           @relation(fields: [guestId], references: [id], onDelete: Restrict)
+  /// Set when one room is booked; null = the whole place.
+  roomId         String?
+  room           Room?          @relation(fields: [roomId], references: [id], onDelete: Restrict)
   status         BookingStatus  @default(PENDING_PAYMENT)
   checkIn        DateTime       @db.Date
   checkOut       DateTime       @db.Date
@@ -254,7 +260,15 @@ model Booking {
   guests         Int
   /// Prices in whole RWF, worked out on the server when booked.
   nightlyPrice   Int
+  /// nights × nightly price
+  subtotal       Int            @default(0)
+  /// Platform fee paid by the guest (from settings at booking time).
+  guestFee       Int            @default(0)
+  /// What the guest pays: subtotal + guestFee.
   total          Int
+  /// Platform commission taken from the subtotal, and what the property owner is owed.
+  commission     Int            @default(0)
+  hostPayout     Int            @default(0)
   currency       String         @default("RWF")
   paymentMethod  String?
   /// Masked payer number ("078 ••• 4567"); the full number is not stored.
@@ -410,4 +424,56 @@ model SupportMessage {
 
   @@index([ticketId, createdAt])
   @@map("supportMessage")
+}
+
+enum BookingModel {
+  WHOLE_PROPERTY
+  ROOM_BY_ROOM
+  BOTH
+}
+
+/// AVAILABLE rooms can be booked; the others are blocked (repairs, not offered, being cleaned after a checkout).
+enum RoomStatus {
+  AVAILABLE
+  MAINTENANCE
+  UNAVAILABLE
+  CLEANING
+}
+
+model Room {
+  id           String     @id @default(cuid())
+  listingId    String
+  listing      Listing    @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  name         String
+  description  String     @default("")
+  maxGuests    Int
+  nightlyPrice Int
+  facilities   Facility[]
+  status       RoomStatus @default(AVAILABLE)
+  position     Int        @default(0)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  bookings     Booking[]
+
+  @@index([listingId, position])
+  @@map("room")
+}
+
+/// Business settings staff control (one row). Empty values mean "not set": nothing is charged or promised for them.
+model PlatformConfig {
+  id                    Int      @id @default(1)
+  /// Basis points (100 = 1%) of the stay price kept by the platform.
+  commissionBps         Int?
+  /// Basis points added on top of the stay price for the guest.
+  guestFeeBps           Int?
+  /// Minutes an unpaid booking holds its dates (falls back to BOOKING_HOLD_MINUTES).
+  holdMinutes           Int?
+  /// Deposit for monthly rentals, percent of one month.
+  monthlyDepositPercent Int?
+  /// Cancellation terms shown before booking, per language: { en, fr, rw }.
+  cancellationPolicy    Json?
+  updatedAt             DateTime @updatedAt
+  updatedById           String?
+
+  @@map("platformConfig")
 }

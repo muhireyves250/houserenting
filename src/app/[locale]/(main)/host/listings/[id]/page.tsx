@@ -11,6 +11,8 @@ import type { ListingInput } from "@/features/hosting/validation";
 import { Link } from "@/i18n/navigation";
 import { uploadsEnabled } from "@/lib/cloudinary";
 import { requireUser } from "@/lib/session";
+import { RoomsEditor } from "@/features/rooms/components/RoomsEditor";
+import { listingRooms } from "@/features/rooms/service";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -19,12 +21,13 @@ export default async function EditListingPage({ params }: Props) {
   const user = await requireUser(`/host/listings/${id}`);
   const listing = await getHostListing(user.id, id);
   if (!listing || listing.status === "ARCHIVED") notFound();
-  const t = await getTranslations("Host");
+  const [t, rooms] = await Promise.all([getTranslations("Host"), listingRooms(listing.id)]);
 
   const initial: ListingInput = {
     title: listing.title,
     description: listing.description,
     type: listing.type,
+    bookingModel: listing.bookingModel,
     addressLine: listing.addressLine,
     district: listing.district,
     city: listing.city,
@@ -81,6 +84,12 @@ export default async function EditListingPage({ params }: Props) {
       <div className="flex flex-col gap-4">
         <ListingPhotosEditor listingId={listing.id} photos={listing.photos.map((p) => ({ id: p.id, url: p.url }))} enabled={uploadsEnabled()} />
         <ListingForm listingId={listing.id} initial={initial} live={listing.status === "PUBLISHED"} />
+        {(listing.bookingModel !== "WHOLE_PROPERTY" || rooms.length > 0) && (
+          <RoomsEditor
+            listingId={listing.id}
+            rooms={rooms.map(({ id, name, description, maxGuests, nightlyPrice, facilities, status }) => ({ id, name, description, maxGuests, nightlyPrice, facilities, status }))}
+          />
+        )}
         <ListingActions listingId={listing.id} canSubmit={canSubmit} />
       </div>
     </PageContainer>

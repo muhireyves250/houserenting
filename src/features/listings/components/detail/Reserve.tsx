@@ -33,6 +33,9 @@ const PROVIDERS: { id: MoMoProvider; badge: ReactNode }[] = [
 export function ReserveDialog({
   listingId,
   holdMinutes,
+  room = null,
+  guestFee = 0,
+  cancellationPolicy = null,
   place,
   quote,
   range,
@@ -45,6 +48,12 @@ export function ReserveDialog({
 }: {
   listingId: string;
   holdMinutes: number;
+  /** The room being booked; null = the whole place. */
+  room?: { id: string; name: string } | null;
+  /** Platform fee on top of the stay price. */
+  guestFee?: number;
+  /** Published cancellation terms; when null, the unpaid-hold rule is shown. */
+  cancellationPolicy?: string | null;
   place: PlacePreviewData;
   quote: StayQuote;
   range: DateRange;
@@ -99,6 +108,7 @@ export function ReserveDialog({
         checkIn: range.checkIn,
         checkOut: range.checkOut,
         guests,
+        roomId: room?.id ?? null,
         payment: { method: provider, phone: number },
       });
       if ("reference" in result) {
@@ -243,7 +253,7 @@ export function ReserveDialog({
                     </div>
                     <div>
                       <p className="mb-1.5 text-[15px] font-semibold text-ink">{t("cancellation")}</p>
-                      <p className="text-[15px] text-ink/80">{t("cancelWhileUnpaid")}</p>
+                      <p className="text-[15px] whitespace-pre-line text-ink/80">{cancellationPolicy ?? t("cancelWhileUnpaid")}</p>
                     </div>
                     <p className="border-t border-line pt-5 text-[13px] leading-5 text-muted">{t("agree")}</p>
                     <button
@@ -282,6 +292,7 @@ export function ReserveDialog({
                   <div className="min-w-0">
                     <p className="text-[17px] leading-6 font-bold text-ink">{place.title}</p>
                     <p className="mt-1 text-[13px] text-ink/80">{place.subtitle}</p>
+                    {room && <p className="mt-1 text-[13px] font-semibold text-ink">{room.name}</p>}
                   </div>
                 </div>
 
@@ -312,10 +323,16 @@ export function ReserveDialog({
                     <span>{t("nightsTimes", { price: formatRWF(quote.nightly, locale), count: quote.nights })}</span>
                     <span>{formatRWF(quote.total, locale)}</span>
                   </div>
+                  {guestFee > 0 && (
+                    <div className="mt-1 flex justify-between text-[15px] text-ink/80">
+                      <span>{t("serviceFee")}</span>
+                      <span>{formatRWF(guestFee, locale)}</span>
+                    </div>
+                  )}
                 </div>
                 <div className="flex justify-between border-t border-line pt-5 text-[15px] font-bold text-ink tabular-nums">
                   <span>{t("total")} (RWF)</span>
-                  <span>{formatRWF(quote.total, locale)}</span>
+                  <span>{formatRWF(quote.total + guestFee, locale)}</span>
                 </div>
               </div>
             </div>

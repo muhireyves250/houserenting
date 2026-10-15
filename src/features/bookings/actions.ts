@@ -12,6 +12,7 @@ const input = z.object({
   checkIn: z.string().max(10),
   checkOut: z.string().max(10),
   guests: z.number().int().min(1).max(50),
+  roomId: z.string().min(1).max(64).nullable().optional(),
   payment: z.object({ method: z.enum(["mtn", "airtel"]), phone: z.string().max(20) }),
 });
 

@@ -26,6 +26,7 @@ export const EMPTY_LISTING: ListingInput = {
   title: "",
   description: "",
   type: "APARTMENT",
+  bookingModel: "WHOLE_PROPERTY",
   addressLine: "",
   district: "",
   city: "Kigali",
@@ -121,6 +122,17 @@ export function ListingForm({ listingId, initial, live }: { listingId: string | 
               </option>
             ))}
           </SelectField>
+          <SelectField
+            label={t("fields.bookingModel")}
+            value={form.bookingModel}
+            onChange={(e) => set("bookingModel", e.target.value as NonNullable<ListingInput["bookingModel"]>)}
+          >
+            {(["WHOLE_PROPERTY", "ROOM_BY_ROOM", "BOTH"] as const).map((model) => (
+              <option key={model} value={model}>
+                {t(`bookingModel.${model}`)}
+              </option>
+            ))}
+          </SelectField>
           <AreaField
             label={t("fields.description")}
             value={form.description}
@@ -203,7 +215,9 @@ export function ListingForm({ listingId, initial, live }: { listingId: string | 
       </Card>
 
       <Card title={t("sections.prices")}>
-        <p className="-mt-2 mb-4 text-[13px] text-muted">{t("pricesHint")}</p>
+        <p className="-mt-2 mb-4 text-[13px] text-muted">
+          {t("pricesHint")} {form.bookingModel !== "WHOLE_PROPERTY" && t("pricesRoomsHint")}
+        </p>
         <div className="mb-4 flex flex-wrap gap-2">
           {RATE_UNITS.map((unit) => (
             <Chip key={unit} on={rateIndex(unit) >= 0} onToggle={() => toggleRate(unit)}>

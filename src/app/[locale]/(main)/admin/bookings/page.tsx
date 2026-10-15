@@ -28,7 +28,11 @@ export default async function AdminBookingsPage() {
               {b.listing.title}
             </Link>
             <span className="block text-[13px] text-muted">
-              {b.guest.name} · {formatStayDates(locale, asISO(b.checkIn), asISO(b.checkOut))} · {formatRWF(b.total, locale)}
+              {b.guest.name} · {formatStayDates(locale, asISO(b.checkIn), asISO(b.checkOut))}
+              {b.room && ` · ${b.room.name}`}
+            </span>
+            <span className="block text-[13px] text-muted tabular-nums">
+              {t("money", { total: formatRWF(b.total, locale), payout: formatRWF(b.hostPayout, locale), commission: formatRWF(b.commission, locale) })}
             </span>
           </span>
           {b.status === "CONFIRMED" && asISO(b.checkIn) <= today && <CheckInOut reference={b.reference} to="CHECKED_IN" />}

@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { renderWithIntl } from "@/test/render";
-import { BookingCard, StayCalendar, StayProvider } from "./Booking";
+import { BookingCard, RoomPicker, StayCalendar, StayProvider } from "./Booking";
 
 const animateScrollTo = vi.hoisted(() => vi.fn(() => Promise.resolve()));
 vi.mock("@/lib/animate-scroll", () => ({ animateScrollTo }));
@@ -113,6 +113,7 @@ describe("Confirm and pay", () => {
       checkIn: "2026-10-14",
       checkOut: "2026-10-16",
       guests: 1,
+      roomId: null,
       payment: { method: "mtn", phone: "078 812 3456" },
     });
     expect(push).toHaveBeenCalledWith("/bookings/SR-7K2M9Q");
@@ -149,5 +150,33 @@ describe("Booked nights", () => {
     await userEvent.click(screen.getByRole("button", { name: /October 18, 2026/ }));
     expect(screen.getByRole("button", { name: /October 20, 2026/ })).toBeEnabled();
     expect(screen.getByRole("button", { name: /October 21, 2026/ })).toBeDisabled();
+  });
+});
+
+describe("Rooms and fees", () => {
+  const rooms = [
+    { id: "r1", name: "Garden room", description: "", maxGuests: 2, nightlyPrice: 20000, facilities: [] },
+    { id: "r2", name: "Lake room", description: "", maxGuests: 3, nightlyPrice: 30000, facilities: [] },
+  ];
+
+  it("asks for a room first, then prices that room and adds the service fee", async () => {
+    renderWithIntl(
+      <StayProvider listingId="abc" rooms={rooms} bookingModel="ROOM_BY_ROOM" guestFeeBps={500} booked={[{ checkIn: "2026-10-20", checkOut: "2026-10-23", roomId: "r1" }]}>
+        <RoomPicker wholePrice={null} />
+        <StayCalendar city="Kigali" today="2026-10-13" />
+        <BookingCard rates={rates} discountPercent={null} maxGuests={6} place={place} signedIn />
+      </StayProvider>,
+    );
+    expect(screen.getByRole("button", { name: "Choose a room" })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("radio", { name: /Garden room/ }));
+    // The garden room is taken on the 20th–22nd; the lake room isn't.
+    expect(screen.getByRole("button", { name: /October 21, 2026/ })).toBeDisabled();
+    await userEvent.click(screen.getByRole("radio", { name: /Lake room/ }));
+    expect(screen.getByRole("button", { name: /October 21, 2026/ })).toBeEnabled();
+    await pickDates();
+    // 2 nights × 30,000 = 60,000, plus a 5% service fee = 63,000.
+    expect(screen.getByText("Service fee").nextSibling).toHaveTextContent("RWF 3,000");
+    expect(screen.getByText("Total").nextSibling).toHaveTextContent("RWF 63,000");
+    expect(screen.getByText("Room:").parentElement).toHaveTextContent("Room: Lake room");
   });
 });

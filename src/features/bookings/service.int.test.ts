@@ -124,7 +124,7 @@ describe("reading bookings", () => {
 
   it("gives the calendar the nights still taken", async () => {
     await createBooking(stay(), NOW);
-    expect(await bookedRanges("a", NOW)).toEqual([{ checkIn: "2026-10-20", checkOut: "2026-10-23" }]);
+    expect(await bookedRanges("a", NOW)).toEqual([{ checkIn: "2026-10-20", checkOut: "2026-10-23", roomId: null }]);
     expect(await bookedRanges("a", new Date(NOW.getTime() + 24 * 60 * 60 * 1000))).toEqual([]);
   });
 });

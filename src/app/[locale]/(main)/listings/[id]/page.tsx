@@ -28,18 +28,20 @@ import { Avatar } from "@/components/ui/Avatar";
 import { PageContainer } from "@/components/ui/PageContainer";
 import { savedListingIds } from "@/features/favorites/service";
 import { isGuestFavorite } from "@/features/home/sections";
-import { BookingCard, MobileBookingBar, StayCalendar, StayProvider } from "@/features/listings/components/detail/Booking";
+import { BookingCard, MobileBookingBar, RoomPicker, StayCalendar, StayProvider } from "@/features/listings/components/detail/Booking";
+import { listingRooms } from "@/features/rooms/service";
+import { getSettings, holdMinutesFrom, policyText } from "@/features/settings/service";
 import { TrackView } from "@/features/listings/components/RecentlyViewed";
 import { ListingPhotos } from "@/features/listings/components/detail/ListingPhotos";
 import { LocationMapLazy } from "@/features/listings/components/detail/LocationMapLazy";
 import { SaveButton } from "@/features/listings/components/detail/SaveButton";
 import { ShareButton } from "@/features/listings/components/detail/ShareButton";
 import { discountedPrice } from "@/features/listings/pricing";
-import { getPublishedListing, nearbyListings } from "@/features/listings/service";
+import { getPublishedListingByParam, nearbyListings } from "@/features/listings/service";
 import { bookedRanges } from "@/features/bookings/service";
 import { getEnv } from "@/lib/env";
 import QRCode from "qrcode";
-import { listingIdFromParam, listingPath } from "@/features/listings/links";
+import { listingIdCandidates, listingPath } from "@/features/listings/links";
 import { AskQuestion } from "@/features/questions/components/AskQuestion";
 import { publishedQuestions } from "@/features/questions/service";
 import { Stars } from "@/features/reviews/components/Stars";
@@ -74,7 +76,7 @@ const FACILITY_ICONS: Record<string, LucideIcon> = {
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const listing = await getPublishedListing(listingIdFromParam((await params).id));
+  const listing = await getPublishedListingByParam(listingIdCandidates((await params).id));
   return listing
     ? { title: listing.title, description: listing.description.slice(0, 160), alternates: { canonical: listingPath(listing.id, listing.title) } }
     : {};
@@ -90,7 +92,7 @@ function Section({ title, children, id }: { title?: string; children: ReactNode;
 }
 
 export default async function ListingPage({ params }: Props) {
-  const listing = await getPublishedListing(listingIdFromParam((await params).id));
+  const listing = await getPublishedListingByParam(listingIdCandidates((await params).id));
   if (!listing) notFound();
 
   const [t, tFacility, tType, user, locale] = await Promise.all([
@@ -100,14 +102,30 @@ export default async function ListingPage({ params }: Props) {
     getCurrentUser(),
     getLocale(),
   ]);
-  const [nearby, booked, questions, reviews, tQuestions, tReviews] = await Promise.all([
+  const [nearby, booked, questions, reviews, tQuestions, tReviews, allRooms, settings] = await Promise.all([
     nearbyListings(listing),
     bookedRanges(listing.id),
     publishedQuestions(listing.id),
     publishedReviews(listing.id),
     getTranslations("Questions"),
     getTranslations("Reviews"),
+    listingRooms(listing.id),
+    getSettings(),
   ]);
+  // Only rooms guests can book now; places that rent whole don't show rooms.
+  const rooms =
+    listing.bookingModel === "WHOLE_PROPERTY"
+      ? []
+      : allRooms
+          .filter((r) => r.status === "AVAILABLE")
+          .map(({ id, name, description, maxGuests, nightlyPrice, facilities }) => ({
+            id,
+            name,
+            description,
+            maxGuests,
+            nightlyPrice: discountedPrice(nightlyPrice, listing.discountPercent),
+            facilities,
+          }));
   const monthYear = new Intl.DateTimeFormat(locale, { month: "long", year: "numeric", timeZone: "Africa/Kigali" });
   const savedIds = user ? await savedListingIds(user.id, [listing.id, ...nearby.map((l) => l.id)]) : new Set<string>();
   const saved = savedIds.has(listing.id);
@@ -173,7 +191,15 @@ export default async function ListingPage({ params }: Props) {
   }));
 
   return (
-    <StayProvider listingId={listing.id} booked={booked} holdMinutes={getEnv().BOOKING_HOLD_MINUTES}>
+    <StayProvider
+      listingId={listing.id}
+      booked={booked}
+      holdMinutes={holdMinutesFrom(settings)}
+      rooms={rooms}
+      bookingModel={listing.bookingModel}
+      guestFeeBps={settings.guestFeeBps}
+      cancellationPolicy={policyText(settings.cancellationPolicy, locale)}
+    >
       <TrackView
         listing={{
           id: listing.id,
@@ -304,7 +330,8 @@ export default async function ListingPage({ params }: Props) {
               </Section>
             )}
 
-            {night && <StayCalendar city={listing.city} />}
+            <RoomPicker wholePrice={night ? discountedPrice(night.price, listing.discountPercent) : null} />
+            {(night || rooms.length > 0) && <StayCalendar city={listing.city} />}
           </div>
 
           <div className="hidden md:block">

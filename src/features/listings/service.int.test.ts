@@ -246,3 +246,49 @@ describe("bedroom, amenity and availability filters", () => {
     expect(await searchListings({ mode: "short" }, 50, now)).toHaveLength(3);
   });
 });
+
+describe("room-by-room availability", () => {
+  it("keeps a room-by-room place in date results while one of its rooms is free", async () => {
+    await db.user.create({ data: { id: "guest", name: "Guest", email: "guest@example.com" } });
+    const lodge = await listing({ bookingModel: "ROOM_BY_ROOM" });
+    const [a, b] = await Promise.all(
+      ["A", "B"].map((name, position) => db.room.create({ data: { listingId: lodge.id, name, maxGuests: 2, nightlyPrice: 30000, position } })),
+    );
+    const now = new Date("2026-10-14T08:00:00Z");
+    const book = (roomId: string, reference: string) =>
+      db.booking.create({
+        data: {
+          reference,
+          listingId: lodge.id,
+          roomId,
+          guestId: "guest",
+          status: "CONFIRMED",
+          checkIn: new Date("2026-10-20T00:00:00Z"),
+          checkOut: new Date("2026-10-22T00:00:00Z"),
+          nights: 2,
+          guests: 1,
+          nightlyPrice: 30000,
+          total: 60000,
+          policySnapshot: {},
+        },
+      });
+    const query = { mode: "short" as const, checkIn: "2026-10-20", checkOut: "2026-10-21", location: "kigali" };
+    await book(a!.id, "SR-AAAAAA");
+    expect((await searchListings(query, 50, now)).map((r) => r.id)).toEqual([lodge.id]);
+    await book(b!.id, "SR-BBBBBB");
+    expect(await searchListings(query, 50, now)).toEqual([]);
+  });
+});
+
+describe("getPublishedListingByParam", () => {
+  it("finds a listing from its permanent link, even when the ID has dashes", async () => {
+    const dashed = await listing({ id: "seed-lake-house" } as Prisma.ListingUncheckedCreateInput);
+    const plain = await listing();
+    const { getPublishedListingByParam } = await import("./service");
+    const { listingIdCandidates } = await import("./links");
+    expect((await getPublishedListingByParam(listingIdCandidates("seed-lake-house")))?.id).toBe(dashed.id);
+    expect((await getPublishedListingByParam(listingIdCandidates("seed-lake-house-flat-9")))?.id).toBe(dashed.id);
+    expect((await getPublishedListingByParam(listingIdCandidates(`${plain.id}-some-old-title`)))?.id).toBe(plain.id);
+    expect(await getPublishedListingByParam(listingIdCandidates("nope-nothing"))).toBeNull();
+  });
+});

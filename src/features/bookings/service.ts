@@ -5,11 +5,12 @@ import { discountedPrice } from "@/features/listings/pricing";
 import { nightsBetween } from "@/features/listings/quote";
 import { todayISO, type BookedRange, type ISODate } from "@/features/search/date-range";
 import { db } from "@/lib/db";
-import { getEnv } from "@/lib/env";
+import { holdMinutesFrom, readSettings, type CancellationPolicy } from "@/features/settings/service";
 import { logger } from "@/lib/logger";
 import { notify } from "@/features/notifications/service";
 import { newBookingReference } from "./reference";
 import { audit } from "@/features/audit/service";
+import { priceBreakdown } from "./money";
 import { BLOCKING_STATUSES, canTransition } from "./status";
 
 export type BookingRequest = {
@@ -18,6 +19,8 @@ export type BookingRequest = {
   checkIn: ISODate;
   checkOut: ISODate;
   guests: number;
+  /** One room of the place; null or missing = the whole place. */
+  roomId?: string | null;
   payment: { method: MoMoProvider; phone: string };
 };
 
@@ -29,8 +32,12 @@ export type PolicySnapshot = {
   checkInTime: string | null;
   checkOutTime: string | null;
   houseRules: string[];
-  /** Cancellation terms; null until the platform owner publishes them. */
-  cancellationPolicy: string | null;
+  /** Cancellation terms in force when booked, per language; null until the platform publishes them. */
+  cancellationPolicy: CancellationPolicy | null;
+  /** The room booked, if not the whole place. */
+  room?: string | null;
+  /** Fee settings used for this booking's price split. */
+  fees?: { commissionBps: number | null; guestFeeBps: number | null };
 };
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -69,6 +76,8 @@ function isOverlapError(error: unknown): boolean {
   return false;
 }
 
+class Unavailable extends Error {}
+
 function isUniqueReferenceError(error: unknown): boolean {
   return (error as { code?: string }).code === "P2002";
 }
@@ -85,31 +94,76 @@ export async function createBooking(request: BookingRequest, now: Date = new Dat
 
   const listing = await db.listing.findFirst({
     where: { id: listingId, status: "PUBLISHED" },
-    select: { title: true, hostId: true, maxGuests: true, discountPercent: true, termsOfRent: true, rates: { where: { unit: "NIGHT" } } },
+    select: {
+      title: true,
+      hostId: true,
+      maxGuests: true,
+      discountPercent: true,
+      termsOfRent: true,
+      bookingModel: true,
+      rates: { where: { unit: "NIGHT" } },
+    },
   });
-  const night = listing?.rates[0];
-  if (!listing || !night) return { ok: false, error: "notFound" };
+  if (!listing) return { ok: false, error: "notFound" };
   if (listing.hostId === guestId) return { ok: false, error: "ownListing" };
-  if (guests > listing.maxGuests) return { ok: false, error: "invalid" };
-  if (nights < night.minUnits || (night.maxUnits !== null && nights > night.maxUnits)) return { ok: false, error: "stayLength" };
+  const night = listing.rates[0] ?? null;
+  const roomId = request.roomId ?? null;
+
+  // What is being booked: the whole place (needs a nightly price) or one available room of it.
+  let base: number;
+  let room: { id: string; name: string } | null = null;
+  if (roomId === null) {
+    if (listing.bookingModel === "ROOM_BY_ROOM" || !night) return { ok: false, error: "notFound" };
+    if (guests > listing.maxGuests) return { ok: false, error: "invalid" };
+    base = night.price;
+  } else {
+    if (listing.bookingModel === "WHOLE_PROPERTY") return { ok: false, error: "notFound" };
+    const found = await db.room.findFirst({ where: { id: roomId, listingId, status: "AVAILABLE" } });
+    if (!found) return { ok: false, error: "unavailable" };
+    if (guests > found.maxGuests) return { ok: false, error: "invalid" };
+    base = found.nightlyPrice;
+    room = { id: found.id, name: found.name };
+  }
+  // Stay length follows the place's nightly rules (when set).
+  if (night && (nights < night.minUnits || (night.maxUnits !== null && nights > night.maxUnits))) return { ok: false, error: "stayLength" };
 
   const phone = parseMobileMoney(request.payment.method, request.payment.phone);
   if (!phone.ok) return { ok: false, error: "phone" };
 
-  const nightlyPrice = discountedPrice(night.price, listing.discountPercent);
+  const settings = await readSettings();
+  const fees = { commissionBps: settings.commissionBps, guestFeeBps: settings.guestFeeBps };
+  const nightlyPrice = discountedPrice(base, listing.discountPercent);
+  const money = priceBreakdown(nightlyPrice * nights, fees);
+  const hasPolicy = Object.values(settings.cancellationPolicy).some(Boolean);
   const policySnapshot: PolicySnapshot = {
-    checkInTime: night.checkInTime,
-    checkOutTime: night.checkOutTime,
+    checkInTime: night?.checkInTime ?? null,
+    checkOutTime: night?.checkOutTime ?? null,
     houseRules: listing.termsOfRent,
-    cancellationPolicy: null,
+    cancellationPolicy: hasPolicy ? settings.cancellationPolicy : null,
+    room: room?.name ?? null,
+    fees,
   };
-  const holdExpiresAt = new Date(now.getTime() + getEnv().BOOKING_HOLD_MINUTES * 60_000);
+  const holdExpiresAt = new Date(now.getTime() + holdMinutesFrom(settings) * 60_000);
 
   for (let attempt = 0; attempt < 3; attempt++) {
     const reference = newBookingReference();
     try {
       await db.$transaction(async (tx) => {
+        // One booking at a time per place, so a whole-place stay and a room stay can't slip past each other.
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${listingId}))`;
         await expireHolds(tx, { listingId }, now);
+        const clash = await tx.booking.findFirst({
+          where: {
+            listingId,
+            status: { in: [...BLOCKING_STATUSES] },
+            checkIn: { lt: asDate(checkOut) },
+            checkOut: { gt: asDate(checkIn) },
+            // The whole place clashes with anything; a room clashes with itself and with whole-place stays.
+            ...(room ? { OR: [{ roomId: room.id }, { roomId: null }] } : {}),
+          },
+          select: { id: true },
+        });
+        if (clash) throw new Unavailable();
         await tx.booking.create({
           data: {
             reference,
@@ -119,8 +173,9 @@ export async function createBooking(request: BookingRequest, now: Date = new Dat
             checkOut: asDate(checkOut),
             nights,
             guests,
+            roomId: room?.id ?? null,
             nightlyPrice,
-            total: nightlyPrice * nights,
+            ...money,
             paymentMethod: request.payment.method,
             payerPhone: maskPhone(phone.number),
             policySnapshot,
@@ -132,7 +187,7 @@ export async function createBooking(request: BookingRequest, now: Date = new Dat
       });
       return { ok: true, reference };
     } catch (error) {
-      if (isOverlapError(error)) return { ok: false, error: "unavailable" };
+      if (error instanceof Unavailable || isOverlapError(error)) return { ok: false, error: "unavailable" };
       if (isUniqueReferenceError(error)) continue;
       throw error;
     }
@@ -141,18 +196,18 @@ export async function createBooking(request: BookingRequest, now: Date = new Dat
   throw new Error("Could not create a booking reference");
 }
 
-/** Nights a listing can't offer from today on (paid stays and live holds). */
-export async function bookedRanges(listingId: string, now: Date = new Date()): Promise<BookedRange[]> {
+/** Nights taken from today on (paid stays and live holds); `roomId` null = a whole-place stay. Dates only, no guest data. */
+export async function bookedRanges(listingId: string, now: Date = new Date()): Promise<(BookedRange & { roomId: string | null })[]> {
   const rows = await db.booking.findMany({
     where: {
       listingId,
       checkOut: { gt: asDate(todayISO(now)) },
       OR: [{ status: { in: ["CONFIRMED", "CHECKED_IN"] } }, { status: "PENDING_PAYMENT", holdExpiresAt: { gt: now } }],
     },
-    select: { checkIn: true, checkOut: true },
+    select: { checkIn: true, checkOut: true, roomId: true },
     orderBy: { checkIn: "asc" },
   });
-  return rows.map((r) => ({ checkIn: asISO(r.checkIn), checkOut: asISO(r.checkOut) }));
+  return rows.map((r) => ({ checkIn: asISO(r.checkIn), checkOut: asISO(r.checkOut), roomId: r.roomId }));
 }
 
 const GUEST_SELECT = {
@@ -163,8 +218,11 @@ const GUEST_SELECT = {
   nights: true,
   guests: true,
   nightlyPrice: true,
+  subtotal: true,
+  guestFee: true,
   total: true,
   currency: true,
+  room: { select: { name: true } },
   paymentMethod: true,
   payerPhone: true,
   holdExpiresAt: true,
@@ -266,7 +324,10 @@ export function staffBookings(take = 100) {
       checkIn: true,
       checkOut: true,
       total: true,
+      commission: true,
+      hostPayout: true,
       holdExpiresAt: true,
+      room: { select: { name: true } },
       guest: { select: { name: true, email: true } },
       listing: { select: { id: true, title: true } },
     },

@@ -19,7 +19,13 @@ export function listingPath(id: string, title: string): string {
   return slug ? `/listings/${id}-${slug}` : `/listings/${id}`;
 }
 
-/** The listing ID from "/listings/<id>" or "/listings/<id>-<words>" (IDs contain no dashes). */
-export function listingIdFromParam(param: string): string {
-  return decodeURIComponent(param).split("-")[0] ?? "";
+/**
+ * IDs the link could stand for, longest first: "/listings/<id>" or "/listings/<id>-<words>". Some IDs contain dashes
+ * themselves (e.g. "seed-karongi-cottage"), so every dash is a possible end of the ID; the caller keeps the longest
+ * that exists.
+ */
+export function listingIdCandidates(param: string): string[] {
+  const value = decodeURIComponent(param);
+  const parts = value.split("-");
+  return parts.map((_, i) => parts.slice(0, parts.length - i).join("-")).filter(Boolean);
 }

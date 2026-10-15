@@ -409,7 +409,10 @@
     },
     "qrCode": "QR code",
     "qrCodeFor": "QR code for {title}",
-    "downloadQr": "Download QR code"
+    "downloadQr": "Download QR code",
+    "chooseRoom": "Choose a room",
+    "roomLabel": "Room:",
+    "serviceFee": "Service fee"
   },
   "Facility": {
     "KITCHEN": "Kitchen",
@@ -501,7 +504,9 @@
     "cancelTitle": "Cancel this booking?",
     "cancelBody": "The dates will be released for other guests.",
     "keep": "Keep booking",
-    "cancelFailed": "Couldn't cancel. Try again."
+    "cancelFailed": "Couldn't cancel. Try again.",
+    "room": "Room",
+    "serviceFee": "Service fee"
   },
   "Host": {
     "title": "Your listings",
@@ -563,7 +568,8 @@
       "discount": "Discount (%)",
       "deposit": "Deposit (months)",
       "characteristics": "Highlights (one per line)",
-      "terms": "House rules (one per line)"
+      "terms": "House rules (one per line)",
+      "bookingModel": "How guests book"
     },
     "pricesHint": "Choose how guests can rent: by the hour, day, night or month.",
     "errors": {
@@ -589,7 +595,13 @@
     "archiveTitle": "Remove this listing?",
     "archiveBody": "Guests won't see it any more. Past bookings stay in your history.",
     "cancel": "Cancel",
-    "questionsTitle": "Questions from guests"
+    "questionsTitle": "Questions from guests",
+    "bookingModel": {
+      "WHOLE_PROPERTY": "The whole place",
+      "ROOM_BY_ROOM": "Room by room",
+      "BOTH": "Whole place or single rooms"
+    },
+    "pricesRoomsHint": "For room-by-room places, each room has its own price (add rooms below after saving); the nightly price here is for the whole place and sets the minimum and maximum nights."
   },
   "Admin": {
     "title": "Admin",
@@ -600,7 +612,8 @@
       "support": "Support",
       "bookings": "Bookings",
       "users": "Users",
-      "audit": "Audit log"
+      "audit": "Audit log",
+      "settings": "Settings"
     },
     "count": {
       "listings": "Listings to review",
@@ -669,8 +682,18 @@
       "booking": {
         "checkIn": "Guest checked in",
         "checkOut": "Guest checked out"
+      },
+      "settings": {
+        "update": "Settings changed"
+      },
+      "room": {
+        "create": "Room added",
+        "update": "Room edited",
+        "status": "Room status changed",
+        "delete": "Room deleted"
       }
-    }
+    },
+    "money": "Guest pays {total} · owner {payout} · platform {commission}"
   },
   "Questions": {
     "title": "Questions and answers",
@@ -754,5 +777,50 @@
       "ticketReply": "New reply on “{subject}”.",
       "ticketStatus": "“{subject}” is now: {statusLabel}."
     }
+  },
+  "Rooms": {
+    "title": "Rooms",
+    "intro": "Each room has its own price, guests and amenities. Rooms being cleaned or repaired can't be booked.",
+    "guests": "{count, plural, one {# guest} other {# guests}}",
+    "status": "Status",
+    "statuses": {
+      "AVAILABLE": "Available",
+      "MAINTENANCE": "Under repair",
+      "UNAVAILABLE": "Not offered",
+      "CLEANING": "Being cleaned"
+    },
+    "edit": "Edit {name}",
+    "remove": "Remove {name}",
+    "failed": "That didn't work. Try again.",
+    "add": "Add a room",
+    "name": "Room name",
+    "price": "Price per night (RWF)",
+    "maxGuests": "Maximum guests",
+    "description": "Description",
+    "cancel": "Cancel",
+    "save": "Save room",
+    "wholePlace": "The whole place",
+    "choose": "Choose a room",
+    "perNight": "/ night"
+  },
+  "Settings": {
+    "note": "Leave a field empty until the business decision is made: nothing is charged or promised for empty fields. Every change is recorded in the audit log, and bookings keep the settings they were made with.",
+    "money": "Fees and holds",
+    "commission": "Platform commission (% of the stay price)",
+    "guestFee": "Guest service fee (% added on top)",
+    "deposit": "Monthly rental deposit (% of one month)",
+    "hold": "Payment hold (minutes, default {minutes})",
+    "moneyHint": "The guest pays the stay price plus the service fee. The owner is owed the stay price minus the commission.",
+    "cancellation": "Cancellation policy",
+    "cancellationHint": "Shown to guests before they book and saved with each booking. Write it in each language.",
+    "lang": {
+      "en": "English",
+      "fr": "French",
+      "rw": "Kinyarwanda"
+    },
+    "saved": "Saved",
+    "failed": "Couldn't save. Try again.",
+    "save": "Save settings",
+    "invalid": "Check this value."
   }
 }

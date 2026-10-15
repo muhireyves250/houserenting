@@ -18,6 +18,7 @@ import { formatRWF } from "@/lib/format";
 import { requireUser } from "@/lib/session";
 import { ReviewForm } from "@/features/reviews/components/ReviewForm";
 import { canReview } from "@/features/reviews/service";
+import { policyText } from "@/features/settings/service";
 
 type Props = { params: Promise<{ reference: string }> };
 
@@ -132,9 +133,11 @@ export default async function BookingPage({ params }: Props) {
             <span className="font-mono tracking-wider">{booking.reference}</span>
           </Row>
           <Row label={tListings("dates")}>{formatStayDates(locale, booking.checkIn, booking.checkOut)}</Row>
+          {booking.room && <Row label={t("room")}>{booking.room.name}</Row>}
           <Row label={tListings("nightsTimes", { price: formatRWF(booking.nightlyPrice, locale), count: booking.nights })}>
-            {formatRWF(booking.total, locale)}
+            {formatRWF(booking.subtotal || booking.total, locale)}
           </Row>
+          {booking.guestFee > 0 && <Row label={t("serviceFee")}>{formatRWF(booking.guestFee, locale)}</Row>}
           <Row label={`${t("amount")} (${booking.currency})`}>
             <span className="font-bold">{formatRWF(booking.total, locale)}</span>
           </Row>
@@ -162,7 +165,9 @@ export default async function BookingPage({ params }: Props) {
           ))}
         </ul>
         <h3 className="mb-1.5 text-[15px] font-semibold text-ink">{tListings("cancellation")}</h3>
-        <p className="text-[15px] text-ink/80">{policy.cancellationPolicy ?? `${tListings("cancelWhileUnpaid")} ${t("cancelPaid")}`}</p>
+        <p className="text-[15px] whitespace-pre-line text-ink/80">
+          {policyText(policy.cancellationPolicy, locale) ?? `${tListings("cancelWhileUnpaid")} ${t("cancelPaid")}`}
+        </p>
       </section>
 
       {/* Status history */}

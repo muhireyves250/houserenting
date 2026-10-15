@@ -409,7 +409,10 @@
     },
     "qrCode": "Kode ya QR",
     "qrCodeFor": "Kode ya QR ya {title}",
-    "downloadQr": "Kuramo kode ya QR"
+    "downloadQr": "Kuramo kode ya QR",
+    "chooseRoom": "Hitamo icyumba",
+    "roomLabel": "Icyumba:",
+    "serviceFee": "Amafaranga ya serivisi"
   },
   "Facility": {
     "KITCHEN": "Igikoni",
@@ -501,7 +504,9 @@
     "cancelTitle": "Uhagarike ibi wabitse?",
     "cancelBody": "Iminsi izarekurirwa abandi bashyitsi.",
     "keep": "Bigumeho",
-    "cancelFailed": "Guhagarika byanze. Ongera ugerageze."
+    "cancelFailed": "Guhagarika byanze. Ongera ugerageze.",
+    "room": "Icyumba",
+    "serviceFee": "Amafaranga ya serivisi"
   },
   "Host": {
     "title": "Aho wakira abashyitsi",
@@ -563,7 +568,8 @@
       "discount": "Igabanywa (%)",
       "deposit": "Ingwate (amezi)",
       "characteristics": "Ibyiza (kimwe ku murongo)",
-      "terms": "Amabwiriza y'inzu (rimwe ku murongo)"
+      "terms": "Amabwiriza y'inzu (rimwe ku murongo)",
+      "bookingModel": "Uko abashyitsi babika"
     },
     "pricesHint": "Hitamo uko abashyitsi bakodesha: ku isaha, ku munsi, ku ijoro cyangwa ku kwezi.",
     "errors": {
@@ -589,7 +595,13 @@
     "archiveTitle": "Uhakureho?",
     "archiveBody": "Abashyitsi ntibazongera kuhabona. Ibyabitswe mbere bigumaho.",
     "cancel": "Reka",
-    "questionsTitle": "Ibibazo by'abashyitsi"
+    "questionsTitle": "Ibibazo by'abashyitsi",
+    "bookingModel": {
+      "WHOLE_PROPERTY": "Ahantu hose",
+      "ROOM_BY_ROOM": "Icyumba ku cyumba",
+      "BOTH": "Ahantu hose cyangwa icyumba"
+    },
+    "pricesRoomsHint": "Ku hantu hakodeshwa icyumba ku cyumba, buri cyumba gifite igiciro cyacyo (ongeraho ibyumba hepfo umaze kubika); igiciro cy'ijoro hano ni icy'ahantu hose kandi kigena amajoro make n'amenshi."
   },
   "Admin": {
     "title": "Ubuyobozi",
@@ -600,7 +612,8 @@
       "support": "Ubufasha",
       "bookings": "Ibyabitswe",
       "users": "Abakoresha",
-      "audit": "Inyandiko z'ibikorwa"
+      "audit": "Inyandiko z'ibikorwa",
+      "settings": "Igenamiterere"
     },
     "count": {
       "listings": "Ahantu ho kugenzura",
@@ -669,8 +682,18 @@
       "booking": {
         "checkIn": "Umushyitsi yageze",
         "checkOut": "Umushyitsi yavuyeyo"
+      },
+      "settings": {
+        "update": "Igenamiterere ryahinduwe"
+      },
+      "room": {
+        "create": "Icyumba cyongewe",
+        "update": "Icyumba cyahinduwe",
+        "status": "Uko icyumba gihagaze byahindutse",
+        "delete": "Icyumba cyasibwe"
       }
-    }
+    },
+    "money": "Umushyitsi yishyura {total} · nyir'inzu {payout} · urubuga {commission}"
   },
   "Questions": {
     "title": "Ibibazo n'ibisubizo",
@@ -754,5 +777,50 @@
       "ticketReply": "Igisubizo gishya kuri “{subject}”.",
       "ticketStatus": "“{subject}” ubu: {statusLabel}."
     }
+  },
+  "Rooms": {
+    "title": "Ibyumba",
+    "intro": "Buri cyumba gifite igiciro cyacyo, abashyitsi n'ibikoresho. Icyumba kiri gusukurwa cyangwa gusanwa ntikibikwa.",
+    "guests": "{count, plural, one {umushyitsi #} other {abashyitsi #}}",
+    "status": "Uko gihagaze",
+    "statuses": {
+      "AVAILABLE": "Kirahari",
+      "MAINTENANCE": "Kiri gusanwa",
+      "UNAVAILABLE": "Ntikitangwa",
+      "CLEANING": "Kiri gusukurwa"
+    },
+    "edit": "Hindura {name}",
+    "remove": "Kuraho {name}",
+    "failed": "Byanze. Ongera ugerageze.",
+    "add": "Ongeraho icyumba",
+    "name": "Izina ry'icyumba",
+    "price": "Igiciro ku ijoro (RWF)",
+    "maxGuests": "Abashyitsi benshi",
+    "description": "Ibisobanuro",
+    "cancel": "Reka",
+    "save": "Bika icyumba",
+    "wholePlace": "Ahantu hose",
+    "choose": "Hitamo icyumba",
+    "perNight": "/ ijoro"
+  },
+  "Settings": {
+    "note": "Siga ahantu ubusa kugeza icyemezo gifashwe: nta mafaranga yakwa kandi nta kintu gisezeranywa ku hasigaye ubusa. Buri mpinduka yandikwa mu nyandiko z'ibikorwa, kandi ibyabitswe bigumana igenamiterere ryariho.",
+    "money": "Amafaranga n'igihe cyo gufata",
+    "commission": "Komisiyo y'urubuga (% y'igiciro)",
+    "guestFee": "Amafaranga ya serivisi y'umushyitsi (% yongerwaho)",
+    "deposit": "Ingwate y'ubukode bw'ukwezi (% by'ukwezi kumwe)",
+    "hold": "Gufata mbere yo kwishyura (iminota, isanzwe {minutes})",
+    "moneyHint": "Umushyitsi yishyura igiciro n'amafaranga ya serivisi. Nyir'inzu ahabwa igiciro gikuweho komisiyo.",
+    "cancellation": "Amabwiriza yo guhagarika",
+    "cancellationHint": "Agaragazwa abashyitsi mbere yo kubika kandi akabikwa na buri gikorwa. Yandike muri buri rurimi.",
+    "lang": {
+      "en": "Icyongereza",
+      "fr": "Igifaransa",
+      "rw": "Ikinyarwanda"
+    },
+    "saved": "Byabitswe",
+    "failed": "Kubika byanze. Ongera ugerageze.",
+    "save": "Bika",
+    "invalid": "Reba iyi mibare."
   }
 }

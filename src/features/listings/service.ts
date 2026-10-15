@@ -60,14 +60,22 @@ export function searchListings(query: SearchQuery, limit = SEARCH_LIMIT, now: Da
     const checkIn = new Date(`${query.checkIn}T00:00:00Z`);
     const checkOut = new Date(`${query.checkOut}T00:00:00Z`);
     const nights = Math.round((checkOut.getTime() - checkIn.getTime()) / 86_400_000);
-    where.bookings = {
-      none: {
-        checkIn: { lt: checkOut },
-        checkOut: { gt: checkIn },
-        OR: [{ status: { in: ["CONFIRMED", "CHECKED_IN"] } }, { status: "PENDING_PAYMENT", holdExpiresAt: { gt: now } }],
-      },
+    const overlap: Prisma.BookingWhereInput = {
+      checkIn: { lt: checkOut },
+      checkOut: { gt: checkIn },
+      OR: [{ status: { in: ["CONFIRMED", "CHECKED_IN"] } }, { status: "PENDING_PAYMENT", holdExpiresAt: { gt: now } }],
     };
+    // Free if the whole place is (whole-place bookings), or if some available room is (room-by-room places).
+    const free: Prisma.ListingWhereInput[] = [
+      { bookingModel: { in: ["WHOLE_PROPERTY", "BOTH"] }, bookings: { none: overlap } },
+      {
+        bookingModel: { in: ["ROOM_BY_ROOM", "BOTH"] },
+        bookings: { none: { ...overlap, roomId: null } },
+        roomUnits: { some: { status: "AVAILABLE", bookings: { none: overlap } } },
+      },
+    ];
     where.AND = [
+      { OR: free },
       { rates: { some: { unit: "NIGHT", minUnits: { lte: nights }, OR: [{ maxUnits: null }, { maxUnits: { gte: nights } }] } } },
     ];
   }
@@ -123,6 +131,14 @@ export function getPublishedListing(id: string) {
       host: { select: { name: true, createdAt: true } },
     },
   });
+}
+
+/** The published listing a "/listings/<id>[-words]" link points to: the longest candidate ID that exists wins. */
+export async function getPublishedListingByParam(candidates: string[]) {
+  if (candidates.length === 0) return null;
+  const found = await db.listing.findMany({ where: { id: { in: candidates.slice(0, 20) }, status: "PUBLISHED" }, select: { id: true } });
+  const id = candidates.find((c) => found.some((f) => f.id === c));
+  return id ? getPublishedListing(id) : null;
 }
 
 export type ListingDetail = NonNullable<Awaited<ReturnType<typeof getPublishedListing>>>;
