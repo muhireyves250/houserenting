@@ -1897,7 +1897,13 @@
     "pastOrdersCustomer": "Ibyatumijwe kera",
     "prepMinutes": "Iminota isanzwe yo gutegura",
     "minOrder": "Ibyo bemera nibura (RWF)",
-    "addDishPhoto": "Ongeraho ifoto y'ibiryo"
+    "addDishPhoto": "Ongeraho ifoto y'ibiryo",
+    "todayAt": "Uyu munsi {time}",
+    "yesterdayAt": "Ejo hashize {time}",
+    "trackOrder": "Kurikirana",
+    "orderNearStay": "Tumiza hafi y'aho ucumbitse",
+    "orderFrom": "Tumiza kuri",
+    "orderAgainShort": "Ongera"
   },
   "Promoters": {
     "title": "Kwamamaza no kwinjiza",

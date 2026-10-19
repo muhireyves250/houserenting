@@ -1897,7 +1897,13 @@
     "pastOrdersCustomer": "Commandes passées",
     "prepMinutes": "Temps de préparation habituel (minutes)",
     "minOrder": "Commande minimum (RWF)",
-    "addDishPhoto": "Ajouter une photo du plat"
+    "addDishPhoto": "Ajouter une photo du plat",
+    "todayAt": "Aujourd'hui {time}",
+    "yesterdayAt": "Hier {time}",
+    "trackOrder": "Suivre",
+    "orderNearStay": "Commander près de votre logement",
+    "orderFrom": "Commander chez",
+    "orderAgainShort": "Recommander"
   },
   "Promoters": {
     "title": "Promouvoir et gagner",

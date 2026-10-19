@@ -1897,7 +1897,13 @@
     "pastOrdersCustomer": "Past orders",
     "prepMinutes": "Usual time to prepare (minutes)",
     "minOrder": "Minimum order (RWF)",
-    "addDishPhoto": "Add a dish photo"
+    "addDishPhoto": "Add a dish photo",
+    "todayAt": "Today {time}",
+    "yesterdayAt": "Yesterday {time}",
+    "trackOrder": "Track",
+    "orderNearStay": "Order near your stay",
+    "orderFrom": "Order from",
+    "orderAgainShort": "Again"
   },
   "Promoters": {
     "title": "Promote and earn",

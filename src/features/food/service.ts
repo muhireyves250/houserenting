@@ -307,7 +307,7 @@ export function myOrders(customerId: string) {
     where: { customerId },
     orderBy: { createdAt: "desc" },
     take: 50,
-    include: { items: true, restaurant: { select: { id: true, name: true, phone: true, photoUrl: true } }, events: { orderBy: { createdAt: "asc" } } },
+    include: { items: true, restaurant: { select: { id: true, name: true, phone: true, photoUrl: true, prepMinutes: true } }, events: { orderBy: { createdAt: "asc" } } },
   });
 }
 
