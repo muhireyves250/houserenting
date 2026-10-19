@@ -2,6 +2,7 @@ import { ChevronLeft } from "lucide-react";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { PageContainer } from "@/components/ui/PageContainer";
+import { AutoRefresh } from "@/features/food/components/AutoRefresh";
 import { MenuEditor } from "@/features/food/components/MenuEditor";
 import { OrdersBoard, type BoardOrder } from "@/features/food/components/OrdersBoard";
 import { PauseToggle } from "@/features/food/components/RestaurantControls";
@@ -62,6 +63,8 @@ export default async function HostRestaurantPage({ params }: Props) {
       </div>
       {r.status === "DRAFT" && <p className="mb-4 rounded-2xl bg-amber-50 px-5 py-3 text-sm text-amber-900">{t("draftNote")}</p>}
       {r.status === "HIDDEN" && r.statusReason && <p className="mb-4 rounded-2xl bg-red-50 px-5 py-3 text-sm text-red-900">{t("hiddenNote", { reason: r.statusReason })}</p>}
+      {/* New orders show up without reloading. */}
+      <AutoRefresh seconds={20} />
       <div className="flex flex-col gap-4">
         <Card title={t("ordersOpen", { count: open.length })}>
           <OrdersBoard orders={open} />
@@ -96,6 +99,8 @@ export default async function HostRestaurantPage({ params }: Props) {
               delivery: r.delivery,
               deliveryFee: r.deliveryFee,
               deliveryKm: r.deliveryKm,
+              prepMinutes: r.prepMinutes,
+              minOrder: r.minOrder,
               listingId: r.listingId,
             }}
           />

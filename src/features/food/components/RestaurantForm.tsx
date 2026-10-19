@@ -32,6 +32,8 @@ export const EMPTY_RESTAURANT: RestaurantInput = {
   delivery: false,
   deliveryFee: 0,
   deliveryKm: 5,
+  prepMinutes: 30,
+  minOrder: 0,
   listingId: null,
 };
 
@@ -159,6 +161,10 @@ export function RestaurantForm({
             {t("delivery")}
           </label>
           {err("pickup") && <p className="text-[13px] font-medium text-danger">{err("pickup")}</p>}
+          <div className="grid grid-cols-2 gap-3">
+            <Field label={t("prepMinutes")} type="number" min={5} max={240} value={form.prepMinutes ?? 30} onChange={(e) => set("prepMinutes", Number(e.target.value) || 30)} error={err("prepMinutes")} />
+            <Field label={t("minOrder")} type="number" min={0} value={form.minOrder ?? 0} onChange={(e) => set("minOrder", Number(e.target.value) || 0)} error={err("minOrder")} />
+          </div>
           {form.delivery && (
             <div className="grid grid-cols-2 gap-3">
               <Field label={t("deliveryFee")} type="number" min={0} value={form.deliveryFee} onChange={(e) => set("deliveryFee", Number(e.target.value) || 0)} error={err("deliveryFee")} />

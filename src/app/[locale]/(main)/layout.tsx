@@ -20,7 +20,7 @@ export default async function MainLayout({ children, modal }: { children: ReactN
       <MobileTopBar />
       <main className="min-h-dvh pb-24 md:pb-12">{children}</main>
       <SiteFooter signedIn={Boolean(user)} />
-      <BottomTabBar signedIn={Boolean(user)} orders={orders} />
+      <BottomTabBar signedIn={Boolean(user)} />
       {modal}
     </>
   );

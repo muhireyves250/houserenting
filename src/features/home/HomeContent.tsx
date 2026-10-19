@@ -91,6 +91,24 @@ export async function HomeContent({ type = null }: { type?: PlaceType | null }) 
           </PageContainer>
         }
       >
+      {food && (
+        // Always on the home page (any category): food from nearby restaurants.
+        <PageContainer className="pt-4 md:pt-10">
+            <Link
+              href="/restaurants"
+              className="flex items-center justify-between gap-4 rounded-3xl bg-primary px-5 py-4 text-white shadow-[0_10px_30px_-14px_rgba(0,87,184,0.6)] transition-transform active:scale-[0.99] md:px-7 md:py-5"
+            >
+              <span className="flex items-center gap-3">
+                <UtensilsCrossed className="size-6 shrink-0" aria-hidden="true" />
+                <span>
+                  <span className="block text-[16px] font-bold md:text-[18px]">{tFood("homeBanner")}</span>
+                  <span className="block text-[13px] text-white/85 md:text-[14px]">{tFood("homeBannerSub")}</span>
+                </span>
+              </span>
+              <ChevronRight className="size-5 shrink-0" aria-hidden="true" />
+            </Link>
+        </PageContainer>
+      )}
       {type && sections.length === 0 && (
         <PageContainer className="motion-safe:animate-pop-in">
           <EmptyState
@@ -108,21 +126,6 @@ export async function HomeContent({ type = null }: { type?: PlaceType | null }) 
       {sections.length > 0 && (
         // Keyed by category: switching chips fades the new rows in.
         <PageContainer key={type ?? "all"} className="flex flex-col gap-9 pt-4 pb-8 motion-safe:animate-pop-in md:gap-12 md:py-14">
-          {food && !type && (
-            <Link
-              href="/restaurants"
-              className="flex items-center justify-between gap-4 rounded-3xl bg-primary px-5 py-4 text-white shadow-[0_10px_30px_-14px_rgba(0,87,184,0.6)] transition-transform active:scale-[0.99] md:px-7 md:py-5"
-            >
-              <span className="flex items-center gap-3">
-                <UtensilsCrossed className="size-6 shrink-0" aria-hidden="true" />
-                <span>
-                  <span className="block text-[16px] font-bold md:text-[18px]">{tFood("homeBanner")}</span>
-                  <span className="block text-[13px] text-white/85 md:text-[14px]">{tFood("homeBannerSub")}</span>
-                </span>
-              </span>
-              <ChevronRight className="size-5 shrink-0" aria-hidden="true" />
-            </Link>
-          )}
           {picks.length > 0 && (
             <HomeRow title={tListings("rowHighlighted")} subtitle={tListings("rowHighlightedSub")}>
               {picks.map((listing) => (

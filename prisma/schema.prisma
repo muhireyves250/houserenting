@@ -611,7 +611,7 @@ model PlatformConfig {
   /// Commission per place category, in basis points: { "APARTMENT": 1200, ... }; missing = the default commission.
   commissionByType      Json?
   /// ADD_ON: the guest fee is added to the price; INCLUDED: guests pay the listed price and the platform's share comes from it.
-  feeModel              FeeModel @default(ADD_ON)
+  feeModel              FeeModel            @default(ADD_ON)
   /// Tax rates for report estimates (basis points), until the tax treatment is confirmed.
   /// How guests pay while there's no payment provider (e.g. "MTN MoMo 078… — VIIPA Ltd"), shown on unpaid bookings.
   paymentInstructions   String?
@@ -1008,6 +1008,9 @@ model Restaurant {
   deliveryKm   Int                @default(5)
   /// Not taking orders right now (closed, too busy) without being hidden.
   paused       Boolean            @default(false)
+  /// Usual minutes until an order is ready, and the smallest order taken (RWF, before delivery).
+  prepMinutes  Int                @default(30)
+  minOrder     Int                @default(0)
   status       RestaurantStatus   @default(DRAFT)
   statusReason String?
   createdAt    DateTime           @default(now())
@@ -1030,6 +1033,7 @@ model MenuItem {
   description  String     @default("")
   /// RWF
   price        Int
+  photoUrl     String?
   available    Boolean    @default(true)
   position     Int        @default(0)
   createdAt    DateTime   @default(now())

@@ -1,5 +1,5 @@
 /** Demo restaurants (development, tests and the demo site). Prices in RWF. */
-export type SeedDish = { section: string; name: string; description?: string; price: number };
+export type SeedDish = { section: string; name: string; description?: string; price: number; photo?: string };
 export type SeedRestaurant = {
   id: string;
   name: string;
@@ -45,9 +45,9 @@ export const SEED_RESTAURANTS: SeedRestaurant[] = [
       { section: "Breakfast", name: "Rwandan breakfast", description: "Eggs, chapati, fried plantain, fruit and tea", price: 6000 },
       { section: "Breakfast", name: "Rolex", description: "Chapati rolled with a vegetable omelette", price: 2500 },
       { section: "Breakfast", name: "Pancakes with honey", price: 4500 },
-      { section: "Lunch", name: "Beef brochettes", description: "Two skewers with fries or plantain", price: 5000 },
+      { section: "Lunch", name: "Beef brochettes", description: "Two skewers with fries or plantain", price: 5000 , photo: "photo-1555939594-58d7cb561ad1" },
       { section: "Lunch", name: "Chicken wrap", description: "Grilled chicken, avocado, salad", price: 5500 },
-      { section: "Drinks", name: "Rwandan coffee", description: "Single origin, Huye mountain", price: 2000 },
+      { section: "Drinks", name: "Rwandan coffee", description: "Single origin, Huye mountain", price: 2000 , photo: "photo-1554118811-1e0d58224f24" },
       { section: "Drinks", name: "Passion fruit juice", price: 2000 },
       { section: "Drinks", name: "African tea", description: "Spiced milk tea", price: 1500 },
     ],
@@ -70,8 +70,8 @@ export const SEED_RESTAURANTS: SeedRestaurant[] = [
     deliveryFee: 1500,
     deliveryKm: 8,
     menu: [
-      { section: "Grill", name: "Goat brochettes", description: "Three skewers with chips", price: 6000 },
-      { section: "Grill", name: "Whole grilled tilapia", description: "With plantain and kachumbari", price: 12000 },
+      { section: "Grill", name: "Goat brochettes", description: "Three skewers with chips", price: 6000 , photo: "photo-1555939594-58d7cb561ad1" },
+      { section: "Grill", name: "Whole grilled tilapia", description: "With plantain and kachumbari", price: 12000 , photo: "photo-1504674900247-0877df9cc836" },
       { section: "Grill", name: "Half chicken", description: "Grilled with peri-peri", price: 9000 },
       { section: "Sides", name: "Fried plantain (ibitoki)", price: 2000 },
       { section: "Sides", name: "Chips", price: 2000 },
@@ -98,7 +98,7 @@ export const SEED_RESTAURANTS: SeedRestaurant[] = [
     deliveryFee: 1000,
     deliveryKm: 6,
     menu: [
-      { section: "Plates", name: "Rwandan buffet plate", description: "Isombe, beans, rice, matoke and a piece of beef", price: 4000 },
+      { section: "Plates", name: "Rwandan buffet plate", description: "Isombe, beans, rice, matoke and a piece of beef", price: 4000 , photo: "photo-1512058564366-18510be2db19" },
       { section: "Plates", name: "Isombe with ugali", description: "Cassava leaves cooked with peanut", price: 3000 },
       { section: "Plates", name: "Beans and rice", price: 2500 },
       { section: "Plates", name: "Sambaza", description: "Fried lake Kivu sardines with ugali", price: 4500 },
@@ -127,7 +127,7 @@ export const SEED_RESTAURANTS: SeedRestaurant[] = [
       { section: "Breakfast", name: "Trekkers' breakfast", description: "Eggs, sausages, toast, fruit, coffee", price: 8000 },
       { section: "Packed lunch", name: "Trek lunch box", description: "Sandwich, fruit, juice and snacks", price: 7000 },
       { section: "Dinner", name: "Irish potato stew", description: "Musanze potatoes with beef", price: 6500 },
-      { section: "Dinner", name: "Vegetable curry with rice", price: 6000 },
+      { section: "Dinner", name: "Vegetable curry with rice", price: 6000 , photo: "photo-1512058564366-18510be2db19" },
       { section: "Drinks", name: "Hot chocolate", price: 2500 },
       { section: "Drinks", name: "Ginger tea", price: 1500 },
     ],
@@ -150,7 +150,7 @@ export const SEED_RESTAURANTS: SeedRestaurant[] = [
     deliveryFee: 1000,
     deliveryKm: 5,
     menu: [
-      { section: "Fish", name: "Grilled tilapia", description: "Whole fish with chips or plantain", price: 11000 },
+      { section: "Fish", name: "Grilled tilapia", description: "Whole fish with chips or plantain", price: 11000 , photo: "photo-1504674900247-0877df9cc836" },
       { section: "Fish", name: "Sambaza basket", description: "Crispy Kivu sardines with lemon", price: 5000 },
       { section: "Fish", name: "Fish brochettes", description: "Two skewers", price: 6000 },
       { section: "Sides", name: "Plantain", price: 2000 },
@@ -180,7 +180,7 @@ export const SEED_RESTAURANTS: SeedRestaurant[] = [
       { section: "Meals", name: "Chicken and chips", price: 4500 },
       { section: "Meals", name: "Beef pilau", description: "Spiced rice with beef", price: 3500 },
       { section: "Meals", name: "Veggie samosas (3)", price: 1500 },
-      { section: "Meals", name: "Margherita pizza", price: 7000 },
+      { section: "Meals", name: "Margherita pizza", price: 7000 , photo: "photo-1565299624946-b28f40a0ae38" },
       { section: "Drinks", name: "Huye coffee", price: 1500 },
       { section: "Drinks", name: "Milkshake", price: 3000 },
     ],

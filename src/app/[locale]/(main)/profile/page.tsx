@@ -1,4 +1,4 @@
-import { Bell, ChevronRight, Heart, House, KeyRound, LifeBuoy, MessageSquare, QrCode, UserRound } from "lucide-react";
+import { Bell, ChevronRight, Heart, House, KeyRound, LifeBuoy, MessageSquare, QrCode, ShoppingBag, UserRound } from "lucide-react";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ProfilePhoto } from "@/features/users/components/ProfilePhoto";
@@ -89,6 +89,13 @@ export default async function ProfilePage() {
           <Link href="/host" className={row}>
             <KeyRound className="size-6" strokeWidth={1.6} aria-hidden="true" />
             <span className="flex-1">{user.isHost ? t("yourListings") : t("hostYourPlace")}</span>
+            <ChevronRight className="size-5 text-ink/60" aria-hidden="true" />
+          </Link>
+        </li>
+        <li>
+          <Link href="/orders" className={row}>
+            <ShoppingBag className="size-6" strokeWidth={1.6} aria-hidden="true" />
+            <span className="flex-1">{tNav("orders")}</span>
             <ChevronRight className="size-5 text-ink/60" aria-hidden="true" />
           </Link>
         </li>

@@ -6,10 +6,12 @@ import { useState, useTransition } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { formatRWF } from "@/lib/format";
+import { restaurantPhotoTicketAction } from "@/features/users/photo-actions";
+import { uploadImage } from "@/lib/cloudinary-upload";
 import { deleteMenuItemAction, saveMenuItemAction } from "../actions";
 
-type Item = { id: string; section: string; name: string; description: string; price: number; available: boolean };
-const EMPTY = { section: "", name: "", description: "", price: 0, available: true };
+type Item = { id: string; section: string; name: string; description: string; price: number; available: boolean; photoUrl: string | null };
+const EMPTY = { section: "", name: "", description: "", price: 0, available: true, photoUrl: null as string | null };
 const input = "w-full rounded-xl border border-line-strong bg-surface px-3 py-2 text-[14px] text-ink outline-none focus:border-primary";
 
 /** Add, edit, switch off or remove dishes; sections group them on the menu. */
@@ -22,6 +24,21 @@ export function MenuEditor({ restaurantId, items }: { restaurantId: string; item
   const [error, setError] = useState(false);
   const [pending, start] = useTransition();
   const sections = [...new Set(items.map((i) => i.section).filter(Boolean))];
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  /** Dish photos go to Cloudinary; only the link is saved with the dish. */
+  async function uploadPhoto(file: File | undefined, input: HTMLInputElement) {
+    input.value = "";
+    if (!file) return;
+    setPhotoError(null);
+    const ticket = await restaurantPhotoTicketAction(restaurantId).catch(() => null);
+    if (!ticket) return setPhotoError(t("photoUnavailable"));
+    setPhotoBusy(true);
+    const uploaded = await uploadImage(ticket, file);
+    setPhotoBusy(false);
+    if (uploaded) setForm((f) => ({ ...f, photoUrl: uploaded.url }));
+    else setPhotoError(t("photoFailed"));
+  }
 
   const save = () =>
     start(async () => {
@@ -53,7 +70,7 @@ export function MenuEditor({ restaurantId, items }: { restaurantId: string; item
                 aria-label={t("editItem", { name: item.name })}
                 onClick={() => {
                   setEditing(item.id);
-                  setForm({ section: item.section, name: item.name, description: item.description, price: item.price, available: item.available });
+                  setForm({ section: item.section, name: item.name, description: item.description, price: item.price, available: item.available, photoUrl: item.photoUrl });
                 }}
                 className="flex size-8 items-center justify-center rounded-full text-ink hover:bg-canvas"
               >
@@ -100,6 +117,24 @@ export function MenuEditor({ restaurantId, items }: { restaurantId: string; item
           {t("dishDescription")}
           <input className={input} maxLength={300} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
         </label>
+        <div className="flex items-center gap-3 sm:col-span-2">
+          <span className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-primary-soft">
+            {form.photoUrl && (
+              // eslint-disable-next-line @next/next/no-img-element -- preview of the dish photo
+              <img src={form.photoUrl} alt="" className="absolute inset-0 size-full object-cover" />
+            )}
+          </span>
+          <label className="cursor-pointer rounded-full border border-line bg-surface px-4 py-2 text-[13px] font-semibold text-ink hover:border-primary">
+            {photoBusy ? t("photoUploading") : form.photoUrl ? t("changePhoto") : t("addDishPhoto")}
+            <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={photoBusy} onChange={(e) => void uploadPhoto(e.target.files?.[0], e.target)} />
+          </label>
+          {form.photoUrl && (
+            <button type="button" onClick={() => setForm({ ...form, photoUrl: null })} className="text-xs font-semibold text-muted hover:text-danger">
+              {t("removePhoto")}
+            </button>
+          )}
+          {photoError && <span className="text-xs font-medium text-danger">{photoError}</span>}
+        </div>
         <label className="flex cursor-pointer items-center gap-2 text-[14px] text-ink sm:col-span-2">
           <input type="checkbox" checked={form.available} onChange={(e) => setForm({ ...form, available: e.target.checked })} className="size-4.5 accent-[var(--color-primary)]" />
           {t("availableNow")}

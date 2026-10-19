@@ -13,7 +13,7 @@ const SLIDE = "duration-500 ease-[cubic-bezier(0.25,0.8,0.25,1)] motion-reduce:t
  * Phones: a floating white glass bar in the brand colours (blue edge and icons). Tabs are icons; the current one is a blue pill with its name,
  * and that pill slides and stretches to the tapped tab. Members-only tabs open the login modal when signed out.
  */
-export function BottomTabBar({ signedIn = true, orders = false }: { signedIn?: boolean; orders?: boolean }) {
+export function BottomTabBar({ signedIn = true }: { signedIn?: boolean }) {
   const t = useTranslations("Nav");
   const pathname = usePathname();
   const listRef = useRef<HTMLUListElement>(null);
@@ -67,7 +67,8 @@ export function BottomTabBar({ signedIn = true, orders = false }: { signedIn?: b
             SLIDE,
           )}
         />
-        {navItems(orders).map(({ key, href, icon: Icon }) => {
+        {/* Phones keep five tabs; orders are reached from Profile and the restaurant pages. */}
+        {navItems(false).map(({ key, href, icon: Icon }) => {
           const active = isActive(pathname, href);
           // White while the pill is under it: the hovered tab, or the current tab when nothing is hovered.
           const onPill = hovered ? hovered === key : active;

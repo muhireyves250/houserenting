@@ -17,6 +17,9 @@ export const restaurantInput = z.object({
   delivery: z.boolean(),
   deliveryFee: z.number().int().min(0).max(100_000),
   deliveryKm: z.number().int().min(1).max(50),
+  /** Usual minutes until an order is ready; smallest order taken (RWF, before delivery). */
+  prepMinutes: z.number().int().min(5).max(240).default(30),
+  minOrder: z.number().int().min(0).max(1_000_000).default(0),
   /** The place it belongs to (its guests can order to their room). */
   listingId: z.string().max(64).nullable().default(null),
 }).refine((r) => r.pickup || r.delivery, { path: ["pickup"], message: "needsOne" });
@@ -28,6 +31,7 @@ export const menuItemInput = z.object({
   name: text(80).min(2),
   description: text(300).default(""),
   price: z.number().int().min(1).max(10_000_000),
+  photoUrl: z.url().max(500).nullable().default(null),
   available: z.boolean().default(true),
 });
 

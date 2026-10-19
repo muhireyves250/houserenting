@@ -42,9 +42,25 @@ beforeEach(async () => {
       { id: "admin", name: "Admin", email: "admin@example.com", role: "ADMIN" },
     ],
   });
+  // Only property owners (and staff) add restaurants.
+  await db.listing.create({
+    data: { id: "place", hostId: "owner", title: "Lake house", description: "Nice", type: "PRIVATE_HOUSE", status: "PUBLISHED", addressLine: "KG 1", district: "Rubavu", city: "Gisenyi", lat: -1.7, lng: 29.26, sizeM2: 90, rooms: 3, bedrooms: 2, bathrooms: 1, maxGuests: 4 },
+  });
 });
 
 describe("restaurants and orders", () => {
+  it("clients who only book can't add a restaurant; property owners can", async () => {
+    expect(await saveRestaurant({ id: "guest" }, null, base)).toEqual({ ok: false, error: "notAllowed" });
+    expect((await saveRestaurant({ id: "owner" }, null, base)).ok).toBe(true);
+  });
+
+  it("refuses orders below the restaurant's minimum", async () => {
+    const id = await liveRestaurant();
+    await db.restaurant.update({ where: { id }, data: { minOrder: 10_000 } });
+    const dish = await db.menuItem.findFirstOrThrow();
+    expect(await placeOrder("guest", { restaurantId: id, lines: [{ menuItemId: dish.id, quantity: 1 }], fulfilment: "PICKUP", address: null, bookingReference: null, phone: "0788123456", note: null })).toEqual({ ok: false, error: "minOrder" });
+  });
+
   it("only staff publish; hiding needs a reason; ORDERS appears once one is live", async () => {
     const saved = await saveRestaurant({ id: "owner" }, null, base);
     if (!saved.ok) throw new Error("save failed");

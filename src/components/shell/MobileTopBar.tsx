@@ -102,7 +102,7 @@ function Categories() {
 }
 
 // Pages with their own full-bleed top (listing photos) get no header.
-const NO_HEADER_PREFIXES = ["/listings/"];
+const NO_HEADER_PREFIXES = ["/listings/", "/restaurants/"];
 
 /** Logo (icon only), the search pill, and the language (flag) button, on one row. */
 function HeaderRow() {

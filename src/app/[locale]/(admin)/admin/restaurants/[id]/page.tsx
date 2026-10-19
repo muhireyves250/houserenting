@@ -69,6 +69,8 @@ export default async function AdminRestaurantPage({ params }: Props) {
               delivery: r.delivery,
               deliveryFee: r.deliveryFee,
               deliveryKm: r.deliveryKm,
+              prepMinutes: r.prepMinutes,
+              minOrder: r.minOrder,
               listingId: r.listingId,
             }}
           />

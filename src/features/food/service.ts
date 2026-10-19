@@ -156,6 +156,8 @@ const PUBLIC_SELECT = {
   delivery: true,
   deliveryFee: true,
   deliveryKm: true,
+  prepMinutes: true,
+  minOrder: true,
   paused: true,
   listingId: true,
   phone: true,
@@ -171,7 +173,7 @@ export async function restaurantsNear(point: { lat: number; lng: number } | null
 export function publicRestaurant(id: string) {
   return db.restaurant.findFirst({
     where: { id, status: "PUBLISHED" },
-    select: { ...PUBLIC_SELECT, menu: { where: { available: true }, orderBy: [{ position: "asc" }], select: { id: true, section: true, name: true, description: true, price: true } } },
+    select: { ...PUBLIC_SELECT, menu: { where: { available: true }, orderBy: [{ position: "asc" }], select: { id: true, section: true, name: true, description: true, price: true, photoUrl: true } } },
   });
 }
 
@@ -190,7 +192,7 @@ async function currentStay(customerId: string, reference: string | null, now: Da
   });
 }
 
-export type PlaceOrderResult = { ok: true; reference: string } | { ok: false; error: "invalid" | "closed" | "notOffered" | "tooFar" | "noStay" | "cart" };
+export type PlaceOrderResult = { ok: true; reference: string } | { ok: false; error: "invalid" | "closed" | "notOffered" | "tooFar" | "noStay" | "cart" | "minOrder" };
 
 export async function placeOrder(customerId: string, raw: OrderInput, now: Date = new Date()): Promise<PlaceOrderResult> {
   const parsed = orderInput.safeParse(raw);
@@ -198,12 +200,13 @@ export async function placeOrder(customerId: string, raw: OrderInput, now: Date 
   const input = parsed.data;
   const r = await db.restaurant.findFirst({
     where: { id: input.restaurantId, status: "PUBLISHED" },
-    select: { id: true, name: true, ownerId: true, paused: true, pickup: true, delivery: true, deliveryFee: true, deliveryKm: true, lat: true, lng: true, listingId: true, menu: { select: { id: true, name: true, price: true, available: true } }, team: { where: { role: { in: ["MANAGER", "STAFF"] } }, select: { userId: true } } },
+    select: { id: true, name: true, ownerId: true, paused: true, pickup: true, delivery: true, deliveryFee: true, deliveryKm: true, minOrder: true, lat: true, lng: true, listingId: true, menu: { select: { id: true, name: true, price: true, available: true } }, team: { where: { role: { in: ["MANAGER", "STAFF"] } }, select: { userId: true } } },
   });
   if (!r) return { ok: false, error: "invalid" };
   if (r.paused) return { ok: false, error: "closed" };
   const cart = priceCart(input.lines, r.menu);
   if (!cart) return { ok: false, error: "cart" };
+  if (cart.subtotal < r.minOrder) return { ok: false, error: "minOrder" };
 
   let address: string | null = null;
   let bookingId: string | null = null;
@@ -287,12 +290,24 @@ export async function moveOrder(actor: Actor, reference: string, to: OrderStatus
   });
 }
 
+/** One of the customer's orders with its steps, for the tracking page. */
+export function myOrder(customerId: string, reference: string) {
+  return db.foodOrder.findFirst({
+    where: { customerId, reference },
+    include: {
+      items: true,
+      events: { orderBy: { createdAt: "asc" } },
+      restaurant: { select: { id: true, name: true, phone: true, addressLine: true, district: true, city: true, lat: true, lng: true, prepMinutes: true, photoUrl: true } },
+    },
+  });
+}
+
 export function myOrders(customerId: string) {
   return db.foodOrder.findMany({
     where: { customerId },
     orderBy: { createdAt: "desc" },
     take: 50,
-    include: { items: true, restaurant: { select: { name: true, phone: true } }, events: { orderBy: { createdAt: "asc" } } },
+    include: { items: true, restaurant: { select: { id: true, name: true, phone: true, photoUrl: true } }, events: { orderBy: { createdAt: "asc" } } },
   });
 }
 
