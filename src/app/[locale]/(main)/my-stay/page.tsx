@@ -1,6 +1,5 @@
 import {
   BedDouble,
-  CalendarCheck,
   CalendarClock,
   ChevronRight,
   CircleAlert,
@@ -44,22 +43,22 @@ export async function generateMetadata() {
 
 const card = "rounded-3xl bg-surface shadow-[0_10px_30px_-14px_rgba(16,24,40,0.3)] ring-1 ring-black/[0.04] max-md:ring-line";
 
-function Section({ title, icon: Icon, badge, children }: { title: string; icon: LucideIcon; badge?: ReactNode; children: ReactNode }) {
+/** A section as one tappable row; its content opens below. */
+function Fold({ title, icon: Icon, badge, open = false, children }: { title: string; icon: LucideIcon; badge?: ReactNode; open?: boolean; children: ReactNode }) {
   return (
-    <section className={cn(card, "p-5 md:p-6")}>
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <h2 className="inline-flex items-center gap-2 text-[17px] font-bold text-ink">
-          <Icon className="size-5 text-primary" aria-hidden="true" />
-          {title}
-        </h2>
+    <details open={open} className="group">
+      <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-3.5 [&::-webkit-details-marker]:hidden">
+        <Icon className="size-5 shrink-0 text-primary" aria-hidden="true" />
+        <span className="flex-1 text-[15px] font-semibold text-ink">{title}</span>
         {badge}
-      </div>
-      {children}
-    </section>
+        <ChevronRight className="size-4 shrink-0 text-ink/50 transition-transform group-open:rotate-90" aria-hidden="true" />
+      </summary>
+      <div className="px-4 pb-4">{children}</div>
+    </details>
   );
 }
 
-const action = "flex flex-col items-center justify-center gap-1.5 rounded-2xl bg-surface px-1 py-3 text-center text-[12px] font-semibold text-ink ring-1 ring-line transition-colors hover:ring-primary active:scale-[0.97]";
+const action = "flex flex-col items-center justify-center gap-1 rounded-2xl bg-surface px-1 py-2.5 text-center text-[12px] font-semibold text-ink ring-1 ring-line transition-colors hover:ring-primary active:scale-[0.97]";
 
 /**
  * MY STAY: what the guest needs right now. A status line for today (pay, days to go, check-in, night N, check-out),
@@ -132,36 +131,31 @@ export default async function MyStayPage() {
   const StatusIcon = status.icon;
 
   return (
-    <PageContainer className="max-w-2xl pt-5 pb-10 md:py-10">
-      <h1 className="mb-4 text-[26px] leading-8 font-bold tracking-[-0.03em] text-ink md:text-[32px] md:leading-10">{t("title")}</h1>
+    <PageContainer className="max-w-2xl pt-4 pb-8 md:py-10">
+      <h1 className="mb-3 text-[24px] leading-8 font-bold tracking-[-0.03em] text-ink md:text-[32px] md:leading-10">{t("title")}</h1>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3">
         {/* The place and today's status */}
         <section className={cn(card, "overflow-hidden")}>
-          <div className="relative aspect-[16/9] bg-canvas md:aspect-[16/7]">
+          <div className="relative h-32 bg-canvas md:h-44">
             {listing.photos[0] && <Image src={listing.photos[0].url} alt="" fill sizes="(min-width: 768px) 672px, 100vw" className="object-cover" priority />}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-            <div className="absolute inset-x-0 bottom-0 p-4 text-white md:p-5">
-              <p className="text-[12px] font-semibold tracking-wide text-white/85 uppercase">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 px-4 pb-3 text-white">
+              <h2 className="truncate text-[18px] leading-6 font-bold md:text-[22px] md:leading-7">{listing.title}</h2>
+              <p className="truncate text-[12px] text-white/85">
+                {current.room ? `${current.room.name} · ` : ""}
                 {listing.district}, {listing.city}
               </p>
-              <h2 className="text-[20px] leading-6 font-bold md:text-[24px] md:leading-8">{listing.title}</h2>
-              {current.room && (
-                <p className="mt-0.5 inline-flex items-center gap-1.5 text-[13px] text-white/90">
-                  <BedDouble className="size-4" aria-hidden="true" />
-                  {current.room.name}
-                </p>
-              )}
             </div>
           </div>
-          <div className="p-4 md:p-5">
-            <div className={cn("flex items-start gap-3 rounded-2xl p-4 ring-1", status.tone)}>
-              <StatusIcon className="mt-0.5 size-6 shrink-0" aria-hidden="true" />
+          <div className="p-3 md:p-4">
+            <div className={cn("flex items-start gap-3 rounded-2xl px-3.5 py-3 ring-1", status.tone)}>
+              <StatusIcon className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
               <div className="min-w-0 flex-1">
-                <p className="text-[16px] leading-6 font-bold">{status.title}</p>
-                {status.sub && <p className="text-[14px] opacity-80">{status.sub}</p>}
+                <p className="text-[15px] leading-5 font-bold">{status.title}</p>
+                {status.sub && <p className="text-[13px] opacity-80">{status.sub}</p>}
                 {moment.kind === "during" && (
-                  <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-primary/15" aria-hidden="true">
+                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-primary/15" aria-hidden="true">
                     <div className="h-full rounded-full bg-primary" style={{ width: `${Math.round((moment.day / moment.total) * 100)}%` }} />
                   </div>
                 )}
@@ -170,11 +164,53 @@ export default async function MyStayPage() {
             {moment.kind === "unpaid" && (
               <Link
                 href={`/bookings/${current.reference}`}
-                className="mt-3 flex items-center justify-center rounded-full bg-primary px-5 py-3 text-[15px] font-semibold text-white hover:bg-primary-hover"
+                className="mt-2.5 flex items-center justify-center rounded-full bg-primary px-5 py-2.5 text-[15px] font-semibold text-white hover:bg-primary-hover"
               >
                 {t("payNow")}
               </Link>
             )}
+
+            {/* The booking at a glance */}
+            <dl className="mt-3 grid grid-cols-2 gap-2 text-[13px]">
+              <div className="rounded-xl bg-canvas px-3 py-2">
+                <dt className="text-muted">{t("checkInLabel")}</dt>
+                <dd className="font-semibold text-ink">
+                  {day(current.checkIn)}
+                  {inTime && <span className="font-normal text-muted"> · {inTime}</span>}
+                </dd>
+              </div>
+              <div className="rounded-xl bg-canvas px-3 py-2">
+                <dt className="text-muted">{t("checkOutLabel")}</dt>
+                <dd className="font-semibold text-ink">
+                  {day(current.checkOut)}
+                  {outTime && <span className="font-normal text-muted"> · {outTime}</span>}
+                </dd>
+              </div>
+              <div className="rounded-xl bg-canvas px-3 py-2">
+                <dt className="text-muted">{t("guests")}</dt>
+                <dd className="font-semibold text-ink">{current.guests}</dd>
+              </div>
+              <div className="rounded-xl bg-canvas px-3 py-2">
+                <dt className="text-muted">{t("total")}</dt>
+                <dd className="flex flex-wrap items-center gap-1.5 font-semibold text-ink tabular-nums">
+                  {formatRWF(current.total, locale)}
+                  <span className={cn("rounded-full px-1.5 py-px text-[10px] font-bold", paid ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800")}>{paid ? t("paid") : t("unpaid")}</span>
+                </dd>
+              </div>
+            </dl>
+            {current.refundStatus !== "NONE" && (
+              <p className="mt-2 rounded-xl bg-primary-soft px-3 py-2 text-[13px] text-ink">{t(`refund.${current.refundStatus}`, { amount: formatRWF(current.refundAmount ?? 0, locale) })}</p>
+            )}
+            <div className="mt-2 flex items-center justify-between gap-3 text-[13px]">
+              <a href={directionsUrl(listing.lat, listing.lng)} target="_blank" rel="noopener" className="inline-flex min-w-0 items-center gap-1 text-ink hover:text-primary">
+                <MapPin className="size-4 shrink-0 text-primary" aria-hidden="true" />
+                <span className="truncate">{listing.addressLine}</span>
+              </a>
+              <Link href={`/bookings/${current.reference}`} className="inline-flex shrink-0 items-center gap-0.5 font-semibold text-primary">
+                <span className="font-mono">{current.reference}</span>
+                <ChevronRight className="size-4" aria-hidden="true" />
+              </Link>
+            </div>
           </div>
         </section>
 
@@ -212,140 +248,98 @@ export default async function MyStayPage() {
           )}
         </nav>
 
-        {/* The booking at a glance */}
-        <Section title={t("yourBooking")} icon={CalendarCheck}>
-          <dl className="divide-y divide-line text-[14px]">
-            <div className="flex items-start justify-between gap-4 py-2.5">
-              <dt className="text-muted">{t("checkInLabel")}</dt>
-              <dd className="text-right font-semibold text-ink">
-                {day(current.checkIn)}
-                {inTime && <span className="block text-[13px] font-normal text-muted">{t("moment.fromTime", { time: inTime })}</span>}
-              </dd>
-            </div>
-            <div className="flex items-start justify-between gap-4 py-2.5">
-              <dt className="text-muted">{t("checkOutLabel")}</dt>
-              <dd className="text-right font-semibold text-ink">
-                {day(current.checkOut)}
-                {outTime && <span className="block text-[13px] font-normal text-muted">{t("moment.byTime", { time: outTime })}</span>}
-              </dd>
-            </div>
-            <div className="flex justify-between gap-4 py-2.5">
-              <dt className="text-muted">{t("guests")}</dt>
-              <dd className="font-semibold text-ink">{current.guests}</dd>
-            </div>
-            <div className="flex justify-between gap-4 py-2.5">
-              <dt className="text-muted">{t("reference")}</dt>
-              <dd className="font-mono font-semibold text-ink">{current.reference}</dd>
-            </div>
-            <div className="flex items-center justify-between gap-4 py-2.5">
-              <dt className="text-muted">{t("total")}</dt>
-              <dd className="flex items-center gap-2 font-semibold text-ink tabular-nums">
-                {formatRWF(current.total, locale)}
-                <span className={cn("rounded-full px-2 py-0.5 text-[11px] font-bold", paid ? "bg-emerald-50 text-emerald-800" : "bg-amber-50 text-amber-800")}>{paid ? t("paid") : t("unpaid")}</span>
-              </dd>
-            </div>
-            <div className="flex items-start justify-between gap-4 py-2.5">
-              <dt className="text-muted">{t("address")}</dt>
-              <dd className="text-right text-ink">
-                <a href={directionsUrl(listing.lat, listing.lng)} target="_blank" rel="noopener" className="inline-flex items-start gap-1 hover:text-primary">
-                  <MapPin className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
-                  {listing.addressLine}, {listing.district}
-                </a>
-              </dd>
-            </div>
-          </dl>
-          {current.refundStatus !== "NONE" && (
-            <p className="mt-3 rounded-xl bg-primary-soft px-4 py-3 text-[14px] text-ink">{t(`refund.${current.refundStatus}`, { amount: formatRWF(current.refundAmount ?? 0, locale) })}</p>
+        {/* Everything else: one line each, opened with a tap. */}
+        <div className={cn(card, "divide-y divide-line")}>
+          {listing.guestIdPolicy !== "NONE" && (
+            <Fold
+              title={t("idTitle")}
+              icon={KeyRound}
+              open={listing.guestIdPolicy === "UPLOAD_ONLINE" && !current.guestDocument}
+              badge={
+                listing.guestIdPolicy === "UPLOAD_ONLINE" ? (
+                  <span className={cn("rounded-full px-2 py-0.5 text-[11px] font-bold", current.guestDocument ? "bg-emerald-50 text-emerald-800" : "bg-amber-50 text-amber-800")}>
+                    {current.guestDocument ? t("idDone") : t("idNeeded")}
+                  </span>
+                ) : null
+              }
+            >
+              {listing.guestIdPolicy === "UPLOAD_ONLINE" ? (
+                <GuestIdUpload reference={current.reference} uploaded={current.guestDocument?.filename ?? null} />
+              ) : (
+                <p className="text-[14px] text-muted">{t("idAtCheckIn")}</p>
+              )}
+            </Fold>
           )}
-          <Link href={`/bookings/${current.reference}`} className="mt-3 inline-flex items-center gap-1 text-[14px] font-semibold text-primary hover:underline">
-            {t("bookingDetails")}
-            <ChevronRight className="size-4" aria-hidden="true" />
-          </Link>
-        </Section>
 
-        {listing.guestIdPolicy !== "NONE" && (
-          <Section
-            title={t("idTitle")}
-            icon={KeyRound}
-            badge={
-              listing.guestIdPolicy === "UPLOAD_ONLINE" && (
-                <span className={cn("rounded-full px-2.5 py-0.5 text-[12px] font-bold", current.guestDocument ? "bg-emerald-50 text-emerald-800" : "bg-amber-50 text-amber-800")}>
-                  {current.guestDocument ? t("idDone") : t("idNeeded")}
-                </span>
-              )
-            }
+          {(policy.houseRules.length > 0 || cancellation) && (
+            <Fold title={t("rulesTitle")} icon={ScrollText}>
+              {policy.houseRules.length > 0 && (
+                <ul className="flex flex-col gap-1.5 text-[14px] text-ink">
+                  {policy.houseRules.map((rule) => (
+                    <li key={rule} className="flex gap-2">
+                      <span aria-hidden="true" className="mt-2 size-1.5 shrink-0 rounded-full bg-primary" />
+                      {rule}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {cancellation && (
+                <p className="mt-3 text-[14px] whitespace-pre-line text-muted">
+                  <b className="font-semibold text-ink">{t("cancellationTerms")}: </b>
+                  {cancellation}
+                </p>
+              )}
+            </Fold>
+          )}
+
+          <Fold
+            title={t("changeTitle")}
+            icon={Clock}
+            open={current.requests.some((r) => r.status === "PENDING")}
+            badge={current.requests.some((r) => r.status === "PENDING") ? <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-bold text-amber-800">{t("requestStatus.PENDING")}</span> : null}
           >
-            {listing.guestIdPolicy === "UPLOAD_ONLINE" ? (
-              <GuestIdUpload reference={current.reference} uploaded={current.guestDocument?.filename ?? null} />
-            ) : (
-              <p className="text-[14px] text-muted">{t("idAtCheckIn")}</p>
-            )}
-          </Section>
-        )}
+            <StayRequests
+              reference={current.reference}
+              checkIn={current.checkIn}
+              checkOut={current.checkOut}
+              today={today}
+              paid={paid}
+              canCancel={current.status === "CONFIRMED" && current.checkIn > today}
+              requests={current.requests}
+            />
+          </Fold>
 
-        {(policy.houseRules.length > 0 || cancellation) && (
-          <Section title={t("rulesTitle")} icon={ScrollText}>
-            {policy.houseRules.length > 0 && (
-              <ul className="flex flex-col gap-1.5 text-[14px] text-ink">
-                {policy.houseRules.map((rule) => (
-                  <li key={rule} className="flex gap-2">
-                    <span aria-hidden="true" className="mt-2 size-1.5 shrink-0 rounded-full bg-primary" />
-                    {rule}
+          {underWay && (
+            <Fold title={t("feedbackTitle")} icon={BedDouble}>
+              <StayFeedback reference={current.reference} initial={current.feedback} />
+            </Fold>
+          )}
+
+          <Fold title={t("issueTitle")} icon={CircleAlert}>
+            <p className="mb-3 text-[14px] text-muted">{t("issueIntro")}</p>
+            <ReportIssue reference={current.reference} />
+          </Fold>
+
+          {others.length > 0 && (
+            <Fold title={t("nextStays")} icon={CalendarClock} badge={<span className="text-[12px] font-semibold text-muted">{others.length}</span>}>
+              <ul className="flex flex-col divide-y divide-line">
+                {others.map((s) => (
+                  <li key={s.reference}>
+                    <Link href={`/bookings/${s.reference}`} className="flex items-center justify-between gap-3 py-2.5">
+                      <span className="min-w-0">
+                        <span className="block truncate text-[14px] font-semibold text-ink">{s.listing.title}</span>
+                        <span className="block text-[12px] text-muted">
+                          {day(s.checkIn)} – {day(s.checkOut)}
+                        </span>
+                      </span>
+                      <ChevronRight className="size-4 shrink-0 text-ink/50" aria-hidden="true" />
+                    </Link>
                   </li>
                 ))}
               </ul>
-            )}
-            {cancellation && (
-              <details className="mt-3 text-[14px]">
-                <summary className="cursor-pointer font-semibold text-ink">{t("cancellationTerms")}</summary>
-                <p className="mt-2 whitespace-pre-line text-muted">{cancellation}</p>
-              </details>
-            )}
-          </Section>
-        )}
-
-        <Section title={t("changeTitle")} icon={Clock}>
-          <StayRequests
-            reference={current.reference}
-            checkIn={current.checkIn}
-            checkOut={current.checkOut}
-            today={today}
-            paid={paid}
-            canCancel={current.status === "CONFIRMED" && current.checkIn > today}
-            requests={current.requests}
-          />
-        </Section>
-
-        {underWay && (
-          <Section title={t("feedbackTitle")} icon={BedDouble}>
-            <StayFeedback reference={current.reference} initial={current.feedback} />
-          </Section>
-        )}
-
-        <Section title={t("issueTitle")} icon={CircleAlert}>
-          <p className="-mt-1 mb-3 text-[14px] text-muted">{t("issueIntro")}</p>
-          <ReportIssue reference={current.reference} />
-        </Section>
-
-        {others.length > 0 && (
-          <Section title={t("nextStays")} icon={CalendarClock}>
-            <ul className="flex flex-col divide-y divide-line">
-              {others.map((s) => (
-                <li key={s.reference}>
-                  <Link href={`/bookings/${s.reference}`} className="flex items-center justify-between gap-3 py-3">
-                    <span className="min-w-0">
-                      <span className="block truncate text-[15px] font-semibold text-ink">{s.listing.title}</span>
-                      <span className="block text-[13px] text-muted">
-                        {day(s.checkIn)} – {day(s.checkOut)}
-                      </span>
-                    </span>
-                    <ChevronRight className="size-4 shrink-0 text-ink/50" aria-hidden="true" />
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </Section>
-        )}
+            </Fold>
+          )}
+        </div>
       </div>
     </PageContainer>
   );
