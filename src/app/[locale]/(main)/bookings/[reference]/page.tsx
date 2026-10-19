@@ -18,7 +18,9 @@ import { formatRWF } from "@/lib/format";
 import { requireUser } from "@/lib/session";
 import { ReviewForm } from "@/features/reviews/components/ReviewForm";
 import { canReview } from "@/features/reviews/service";
-import { policyText } from "@/features/settings/service";
+import { getSettings, policyText } from "@/features/settings/service";
+import { PaymentClaim } from "@/features/payments/components/ManualPayment";
+import { db } from "@/lib/db";
 import { PayNow } from "@/features/payments/components/PayNow";
 import { MessageHostButton } from "@/features/chats/components/MessageHostButton";
 import { getPaymentProvider } from "@/features/payments/providers";
@@ -59,6 +61,11 @@ export default async function BookingPage({ params }: Props) {
   ]);
   const { listing, policySnapshot: policy } = booking;
   const holding = isHoldActive(booking, now);
+  const [settings, claim] = await Promise.all([
+    getSettings(),
+    db.payment.findFirst({ where: { booking: { reference: booking.reference }, status: "PENDING", provider: "manual" }, select: { providerReference: true } }),
+  ]);
+  const manual = { instructions: settings.paymentInstructions, claimed: claim?.providerReference ?? null };
   const paid = booking.payments.length > 0 || ["CONFIRMED", "CHECKED_IN", "COMPLETED"].includes(booking.status);
   const live = holding || booking.status === "CONFIRMED" || booking.status === "CHECKED_IN";
   const methodName = booking.paymentMethod === "mtn" ? tListings("mtnMomo") : booking.paymentMethod === "airtel" ? tListings("airtelMoney") : null;
@@ -113,12 +120,17 @@ export default async function BookingPage({ params }: Props) {
             <h2 className="text-lg font-bold text-ink">{t("payTitle")}</h2>
             <p className="text-[13px] font-semibold text-amber-800">{t("heldUntil", { time: formatKigaliTime(locale, booking.holdExpiresAt) })}</p>
           </div>
-          <PayNow
-            reference={booking.reference}
-            amount={booking.total}
-            method={booking.paymentMethod === "airtel" ? "airtel" : booking.paymentMethod === "mtn" ? "mtn" : null}
-            connected={getPaymentProvider() !== null}
-          />
+          {getPaymentProvider() !== null ? (
+            <PayNow
+              reference={booking.reference}
+              amount={booking.total}
+              method={booking.paymentMethod === "airtel" ? "airtel" : booking.paymentMethod === "mtn" ? "mtn" : null}
+              connected
+            />
+          ) : (
+            // No provider yet: the guest pays as staff explain, then the owner or staff confirm it by hand.
+            <PaymentClaim reference={booking.reference} amount={booking.total} instructions={manual.instructions} claimed={manual.claimed} />
+          )}
         </section>
       )}
 

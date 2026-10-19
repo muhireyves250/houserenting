@@ -851,13 +851,15 @@
       "booking": {
         "checkIn": "Guest checked in",
         "checkOut": "Guest checked out",
-        "paid": "Payment verified",
+        "paid": "Payment confirmed",
         "cancel": "Hold released by staff",
         "refunded": "Refund sent",
         "refundDeclined": "Refund declined",
         "noShow": "Marked as no-show",
         "guestId": "Guest ID uploaded",
-        "guestIdView": "Guest ID opened"
+        "guestIdView": "Guest ID opened",
+        "paymentClaim": "Guest says paid",
+        "paymentRejected": "Payment not received"
       },
       "settings": {
         "update": "Settings changed"
@@ -1169,7 +1171,9 @@
       "orderPlaced": "New order {reference} at {title} ({total} RWF).",
       "orderStatus": "Your order {reference} from {title}: {statusLabel}.",
       "promoterApplied": "Someone applied to be a promoter.",
-      "promoterStatus": "Your promoter account is now: {statusLabel}. {reason}"
+      "promoterStatus": "Your promoter account is now: {statusLabel}. {reason}",
+      "paymentClaim": "A guest says they paid for {reference} at {title}. Please confirm it.",
+      "paymentNotReceived": "Your payment for {reference} at {title} wasn't found: {reason}"
     }
   },
   "Rooms": {
@@ -1249,7 +1253,11 @@
     "taxTitle": "Tax rates (for report estimates)",
     "vat": "VAT (%)",
     "cit": "CIT (%)",
-    "taxHint": "Only used to estimate taxes in Reports. Confirm the tax treatment before relying on it."
+    "taxHint": "Only used to estimate taxes in Reports. Confirm the tax treatment before relying on it.",
+    "paymentTitle": "Payment instructions",
+    "paymentInstructions": "How guests pay",
+    "paymentInstructionsHint": "e.g. MTN MoMo 078 000 0000 (VIIPA Ltd)",
+    "paymentHint": "Shown on unpaid bookings while no payment provider is connected. The owner or staff confirm each payment."
   },
   "Money": {
     "notConnected": "Payments aren't connected yet: set PAYMENT_WEBHOOK_SECRET and connect a provider. Until then nothing here changes on its own.",
@@ -1813,7 +1821,13 @@
     "seeMenu": "See the menu",
     "homeBanner": "Order food near you",
     "homeBannerSub": "Restaurants deliver to your door or your room.",
-    "ownersOnly": "Restaurants are added by property owners and the VIIPA team. You can order from any restaurant on the site."
+    "ownersOnly": "Restaurants are added by property owners and the VIIPA team. You can order from any restaurant on the site.",
+    "addPhoto": "Add a photo",
+    "changePhoto": "Change photo",
+    "removePhoto": "Remove photo",
+    "photoUploading": "Uploading…",
+    "photoUnavailable": "Photo uploads aren't set up yet.",
+    "photoFailed": "Upload failed. Try again."
   },
   "Promoters": {
     "title": "Promote and earn",
@@ -1924,5 +1938,43 @@
     "ordersTitle": "Restaurant orders (delivered)",
     "restaurant": "Restaurant",
     "delivery": "Delivery fees"
+  },
+  "ManualPay": {
+    "howToPay": "How to pay {amount}",
+    "noInstructions": "Our team will tell you how to pay. Use Get help if you're unsure.",
+    "useReference": "Put {reference} in the payment message if you can.",
+    "transactionId": "Transaction ID",
+    "transactionHint": "From your mobile money confirmation SMS",
+    "ivePaid": "I've paid",
+    "waiting": "Thanks! Payment {reference} is being checked by the owner or our team. Your dates stay held meanwhile.",
+    "claimError": {
+      "notPayable": "This booking can't be paid any more.",
+      "transaction": "Check the transaction ID.",
+      "used": "This transaction ID was already used.",
+      "waiting": "Your payment is already being checked.",
+      "auth": "Log in again."
+    },
+    "confirmTitle": "Payment",
+    "guestSaysPaid": "The guest says they paid. Transaction: {tx}",
+    "notPaidYet": "Not paid yet: {amount}",
+    "amountReceived": "Amount received (RWF)",
+    "checkFirst": "Confirm only after you see the money in your mobile money or bank account.",
+    "confirm": "Confirm payment",
+    "notReceived": "Not received",
+    "rejectReason": "Why (the guest sees this)",
+    "notReceivedConfirm": "Tell the guest",
+    "confirmError": {
+      "notAllowed": "Only the owner or VIIPA staff can confirm payments.",
+      "notFound": "Booking not found.",
+      "transaction": "Check the transaction ID.",
+      "amount": "The amount must be the booking's total.",
+      "duplicate": "This payment was already recorded.",
+      "unknownBooking": "Booking not found.",
+      "amountMismatch": "The amount doesn't match; our team was told.",
+      "notPending": "This booking isn't waiting for payment.",
+      "datesTaken": "The dates were taken after the hold ended; our team was told to refund.",
+      "failedRecorded": "Recorded as failed.",
+      "auth": "Log in again."
+    }
   }
 }

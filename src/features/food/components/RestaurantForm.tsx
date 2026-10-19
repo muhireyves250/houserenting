@@ -1,11 +1,14 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { ImagePlus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/Button";
 import { AreaField, Card, Field, SelectField } from "@/features/hosting/components/fields";
 import { useRouter } from "@/i18n/navigation";
+import { restaurantPhotoTicketAction } from "@/features/users/photo-actions";
+import { uploadImage } from "@/lib/cloudinary-upload";
 import { saveRestaurantAction } from "../actions";
 import type { RestaurantInput } from "../validation";
 
@@ -59,6 +62,21 @@ export function RestaurantForm({
     setForm((f) => ({ ...f, [k]: v }));
     setSaved(false);
   };
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  /** The photo goes to Cloudinary; only its link is saved with the restaurant. */
+  async function uploadPhoto(file: File | undefined, input: HTMLInputElement) {
+    input.value = "";
+    if (!file) return;
+    setPhotoError(null);
+    const ticket = await restaurantPhotoTicketAction(restaurantId).catch(() => null);
+    if (!ticket) return setPhotoError(t("photoUnavailable"));
+    setPhotoBusy(true);
+    const uploaded = await uploadImage(ticket, file);
+    setPhotoBusy(false);
+    if (uploaded) set("photoUrl", uploaded.url);
+    else setPhotoError(t("photoFailed"));
+  }
   const err = (k: string) => (errors[k] ? (errors[k] === "noAccount" ? t("ownerMissing") : errors[k] === "needsOne" ? t("needsOne") : t("checkField")) : undefined);
 
   const save = () =>
@@ -84,7 +102,28 @@ export function RestaurantForm({
             <Field label={t("phone")} inputMode="tel" value={form.phone ?? ""} maxLength={20} onChange={(e) => set("phone", e.target.value || null)} />
             <Field label={t("hours")} placeholder={t("hoursHint")} value={form.openingHours ?? ""} maxLength={120} onChange={(e) => set("openingHours", e.target.value)} />
           </div>
-          <Field label={t("photoUrl")} type="url" value={form.photoUrl ?? ""} onChange={(e) => set("photoUrl", e.target.value || null)} error={err("photoUrl")} />
+          <div className="flex items-center gap-3">
+            <span className="relative flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-primary-soft text-primary">
+              {form.photoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element -- preview of the just-uploaded photo
+                <img src={form.photoUrl} alt="" className="absolute inset-0 size-full object-cover" />
+              ) : (
+                <ImagePlus className="size-7" aria-hidden="true" />
+              )}
+            </span>
+            <span className="flex flex-col items-start gap-1">
+              <label className="cursor-pointer rounded-full border border-line bg-surface px-4 py-2 text-[13px] font-semibold text-ink hover:border-primary">
+                {photoBusy ? t("photoUploading") : form.photoUrl ? t("changePhoto") : t("addPhoto")}
+                <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={photoBusy} onChange={(e) => void uploadPhoto(e.target.files?.[0], e.target)} />
+              </label>
+              {form.photoUrl && (
+                <button type="button" onClick={() => set("photoUrl", null)} className="text-xs font-semibold text-muted hover:text-danger">
+                  {t("removePhoto")}
+                </button>
+              )}
+              {photoError && <span className="text-xs font-medium text-danger">{photoError}</span>}
+            </span>
+          </div>
           {places.length > 0 && (
             <SelectField label={t("atPlace")} value={form.listingId ?? ""} onChange={(e) => set("listingId", e.target.value || null)}>
               <option value="">{t("standalone")}</option>

@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { useRouter } from "@/i18n/navigation";
+import { uploadImage } from "@/lib/cloudinary-upload";
+import { profilePhotoTicketAction, saveProfilePhotoUrlAction } from "../photo-actions";
 
 /** The profile picture with a camera button to add or change it, and a way to remove it. */
 export function ProfilePhoto({ name, image }: { name: string; image: string | null }) {
@@ -26,6 +28,25 @@ export function ProfilePhoto({ name, image }: { name: string; image: string | nu
     router.refresh();
   }
 
+  /** Cloudinary when it's set up (only the link is saved); otherwise the photo is kept in our database. */
+  async function upload(file: File) {
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type)) return setError(t("photoBadType"));
+    if (file.size > 8 * 1024 * 1024) return setError(t("photoTooLarge"));
+    const ticket = await profilePhotoTicketAction().catch(() => null);
+    if (!ticket) {
+      const body = new FormData();
+      body.append("file", file);
+      return send({ method: "POST", body });
+    }
+    setBusy(true);
+    setError(null);
+    const uploaded = await uploadImage(ticket, file);
+    const saved = uploaded ? await saveProfilePhotoUrlAction(uploaded.url) : { ok: false };
+    setBusy(false);
+    if (!saved.ok) return setError(t("photoFailed"));
+    router.refresh();
+  }
+
   return (
     <div className="flex flex-col items-center gap-2">
       <div className="relative">
@@ -44,10 +65,7 @@ export function ProfilePhoto({ name, image }: { name: string; image: string | nu
             onChange={(e) => {
               const file = e.target.files?.[0];
               e.target.value = "";
-              if (!file) return;
-              const body = new FormData();
-              body.append("file", file);
-              void send({ method: "POST", body });
+              if (file) void upload(file);
             }}
           />
         </label>

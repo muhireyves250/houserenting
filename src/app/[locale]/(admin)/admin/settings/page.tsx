@@ -27,6 +27,7 @@ export default async function AdminSettingsPage() {
         feeModel: settings.feeModel,
         vatPercent: fromBps(settings.vatBps),
         citPercent: fromBps(settings.citBps),
+        paymentInstructions: settings.paymentInstructions,
         cancellationPolicy: settings.cancellationPolicy,
       }}
     />

@@ -8,6 +8,7 @@ import { can } from "@/features/places/access";
 import { portalBookings } from "@/features/places/portal";
 import { todayISO } from "@/features/search/date-range";
 import { FrontDesk } from "@/features/stay/components/FrontDesk";
+import { ConfirmPayment } from "@/features/payments/components/ManualPayment";
 import { DecideRequest } from "@/features/stay/components/StaffStayPanels";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
@@ -69,6 +70,11 @@ export default async function HostBookingsPage() {
                   </a>
                 )}
               </div>
+              {b.status === "PENDING_PAYMENT" && can(b.role, "money") && (
+                <div className="mt-3">
+                  <ConfirmPayment reference={b.reference} total={b.total} claimed={b.payments[0]?.providerReference ?? null} />
+                </div>
+              )}
               {b.requests.length > 0 && can(b.role, "requests") && (
                 <div className="mt-3 flex flex-col gap-2 rounded-2xl bg-amber-50/70 p-3">
                   {b.requests.map((r) => (

@@ -35,11 +35,11 @@ export type CallbackOutcome =
  * Applies one verified provider callback exactly once. The event id is stored first: a retried callback finds it and
  * changes nothing, so a payment can't confirm a booking or issue a receipt twice.
  */
-export async function handlePaymentCallback(event: CallbackBody): Promise<CallbackOutcome> {
+export async function handlePaymentCallback(event: CallbackBody, actorId: string | null = null): Promise<CallbackOutcome> {
   try {
     return await db.$transaction(async (tx) => {
       await tx.paymentEvent.create({ data: { id: event.eventId, provider: event.provider, type: event.type, payload: event, outcome: "processing" } });
-      const outcome = await apply(tx, event);
+      const outcome = await apply(tx, event, actorId);
       await tx.paymentEvent.update({ where: { id: event.eventId }, data: { outcome } });
       return outcome;
     });
@@ -49,7 +49,8 @@ export async function handlePaymentCallback(event: CallbackBody): Promise<Callba
   }
 }
 
-async function apply(tx: Prisma.TransactionClient, event: CallbackBody): Promise<CallbackOutcome> {
+/** `actorId`: the staff member or owner who confirmed a payment by hand (null for provider callbacks). */
+async function apply(tx: Prisma.TransactionClient, event: CallbackBody, actorId: string | null): Promise<CallbackOutcome> {
   const booking = await tx.booking.findUnique({
     where: { reference: event.bookingReference },
     select: {
@@ -80,6 +81,9 @@ async function apply(tx: Prisma.TransactionClient, event: CallbackBody): Promise
     if (booking.status === "PENDING_PAYMENT") await notify(tx, booking.guestId, "paymentFailed", { title: booking.listing.title, reference: booking.reference }, `/bookings/${booking.reference}`);
     return "failedRecorded";
   }
+
+  // A guest's "I've paid" note with this transaction id becomes the confirmed (or flagged) payment below.
+  await tx.payment.deleteMany({ where: { bookingId: booking.id, providerReference: event.providerReference, status: "PENDING" } });
 
   // The provider must have collected exactly what the guest was asked to pay.
   if (event.amount !== booking.total || event.currency !== booking.currency) {
@@ -119,7 +123,13 @@ async function apply(tx: Prisma.TransactionClient, event: CallbackBody): Promise
 
   await tx.booking.update({ where: { id: booking.id }, data: { status: "CONFIRMED", holdExpiresAt: null } });
   await tx.bookingEvent.create({
-    data: { bookingId: booking.id, fromStatus: booking.status, toStatus: "CONFIRMED", reason: `payment ${event.providerReference} verified (${event.provider})` },
+    data: {
+      bookingId: booking.id,
+      fromStatus: booking.status,
+      toStatus: "CONFIRMED",
+      actorId,
+      reason: actorId ? `payment ${event.providerReference} confirmed by hand` : `payment ${event.providerReference} verified (${event.provider})`,
+    },
   });
 
   // Ledger: what the guest paid and where it goes. Never all platform revenue.
@@ -133,7 +143,7 @@ async function apply(tx: Prisma.TransactionClient, event: CallbackBody): Promise
     { kind: "PROMO_DISCOUNT", amount: booking.discount, bookingId: booking.id },
   ];
   await tx.ledgerEntry.createMany({ data: entries.filter((e) => e.amount > 0) });
-  await audit(tx, { actorId: null, action: "booking.paid", entityType: "booking", entityId: booking.reference, data: { amount: event.amount, provider: event.provider, providerReference: event.providerReference } });
+  await audit(tx, { actorId, action: "booking.paid", entityType: "booking", entityId: booking.reference, data: { amount: event.amount, provider: event.provider, providerReference: event.providerReference } });
   await notify(tx, booking.guestId, "bookingConfirmed", { title: booking.listing.title, reference: booking.reference }, `/bookings/${booking.reference}`);
   await notify(tx, host, "newBooking", { title: booking.listing.title, reference: booking.reference }, "/host");
   return "confirmed";

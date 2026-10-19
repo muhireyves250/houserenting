@@ -28,6 +28,8 @@ export const settingsInput = z.object({
   /** Tax rates used for report estimates only. */
   vatPercent: optional(z.number().min(0).max(50)).optional().default(null),
   citPercent: optional(z.number().min(0).max(50)).optional().default(null),
+  /** How guests pay until a payment provider is connected (shown on unpaid bookings). */
+  paymentInstructions: z.string().trim().max(500).transform((v) => v || null).nullable().optional().default(null),
   cancellationPolicy: z.object({ en: policyText, fr: policyText, rw: policyText }),
 });
 

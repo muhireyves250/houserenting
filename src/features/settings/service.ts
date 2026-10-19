@@ -24,6 +24,7 @@ export type PlatformSettings = FeeConfig & {
   feeModel: "ADD_ON" | "INCLUDED";
   vatBps: number | null;
   citBps: number | null;
+  paymentInstructions: string | null;
   cancellationPolicy: CancellationPolicy;
   updatedAt: Date | null;
 };
@@ -49,6 +50,7 @@ async function load(): Promise<PlatformSettings> {
     feeModel: row?.feeModel ?? "ADD_ON",
     vatBps: row?.vatBps ?? null,
     citBps: row?.citBps ?? null,
+    paymentInstructions: row?.paymentInstructions ?? null,
     cancellationPolicy: { ...EMPTY_POLICY, ...((row?.cancellationPolicy as Partial<CancellationPolicy> | null) ?? {}) },
     updatedAt: row?.updatedAt ?? null,
   };
@@ -103,6 +105,7 @@ export async function updateSettings(adminId: string, raw: SettingsInput): Promi
     feeModel: v.feeModel,
     vatBps: toBps(v.vatPercent),
     citBps: toBps(v.citPercent),
+    paymentInstructions: v.paymentInstructions,
     cancellationPolicy: v.cancellationPolicy,
   };
   await db.$transaction(async (tx) => {
@@ -125,6 +128,7 @@ export async function updateSettings(adminId: string, raw: SettingsInput): Promi
       feeModel: before?.feeModel ?? "ADD_ON",
       vatBps: before?.vatBps ?? null,
       citBps: before?.citBps ?? null,
+      paymentInstructions: before?.paymentInstructions ?? null,
       cancellationPolicy: (before?.cancellationPolicy as CancellationPolicy | null) ?? null,
     };
     await audit(tx, { actorId: adminId, action: "settings.update", entityType: "settings", entityId: "platform", data: { from, to: { ...next, commissionByType: byType(v.commissionByTypePercent) } } as Prisma.InputJsonObject });

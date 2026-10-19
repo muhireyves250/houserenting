@@ -15,6 +15,7 @@ import { formatRWF } from "@/lib/format";
 import { requireAdmin } from "@/lib/permissions";
 import { DecideRequest, NoShowButton, SettleRefund } from "@/features/stay/components/StaffStayPanels";
 import { priceChangeFor } from "@/features/stay/rules";
+import { ConfirmPayment } from "@/features/payments/components/ManualPayment";
 
 type Props = { params: Promise<{ reference: string }> };
 const iso = (d: Date) => d.toISOString().slice(0, 10);
@@ -25,12 +26,13 @@ export default async function AdminBookingPage({ params }: Props) {
   if (!isBookingReference(reference)) notFound();
   const b = await bookingForStaff(reference);
   if (!b) notFound();
-  const [t, tBookings, tListings, tMoney, tStay, locale, names] = await Promise.all([
+  const [t, tBookings, tListings, tMoney, tStay, tPay, locale, names] = await Promise.all([
     getTranslations("Admin"),
     getTranslations("Bookings"),
     getTranslations("Listings"),
     getTranslations("Money"),
     getTranslations("MyStay"),
+    getTranslations("ManualPay"),
     getLocale(),
     actorNames(b.events.map((e) => e.actorId)),
   ]);
@@ -127,6 +129,15 @@ export default async function AdminBookingPage({ params }: Props) {
           </Panel>
         </div>
         <div className="flex flex-col gap-5">
+          {(b.status === "PENDING_PAYMENT" || b.status === "EXPIRED") && (
+            <Panel title={tPay("confirmTitle")}>
+              <ConfirmPayment
+                reference={b.reference}
+                total={b.total}
+                claimed={b.payments.find((p) => p.status === "PENDING" && p.provider === "manual")?.providerReference ?? null}
+              />
+            </Panel>
+          )}
           {b.requests.length > 0 && (
             <Panel title={tStay("requestsTitle")}>
               <ul className="flex flex-col gap-3">

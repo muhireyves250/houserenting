@@ -851,13 +851,15 @@
       "booking": {
         "checkIn": "Arrivée enregistrée",
         "checkOut": "Départ enregistré",
-        "paid": "Paiement vérifié",
+        "paid": "Paiement confirmé",
         "cancel": "Blocage libéré par l'équipe",
         "refunded": "Remboursement envoyé",
         "refundDeclined": "Remboursement refusé",
         "noShow": "Marqué non présenté",
         "guestId": "Pièce d'identité envoyée",
-        "guestIdView": "Pièce d'identité ouverte"
+        "guestIdView": "Pièce d'identité ouverte",
+        "paymentClaim": "Voyageur dit avoir payé",
+        "paymentRejected": "Paiement non reçu"
       },
       "settings": {
         "update": "Paramètres modifiés"
@@ -1169,7 +1171,9 @@
       "orderPlaced": "Nouvelle commande {reference} chez {title} ({total} RWF).",
       "orderStatus": "Votre commande {reference} chez {title} : {statusLabel}.",
       "promoterApplied": "Quelqu'un souhaite devenir promoteur.",
-      "promoterStatus": "Votre compte promoteur est maintenant : {statusLabel}. {reason}"
+      "promoterStatus": "Votre compte promoteur est maintenant : {statusLabel}. {reason}",
+      "paymentClaim": "Un voyageur dit avoir payé {reference} à {title}. Merci de confirmer.",
+      "paymentNotReceived": "Votre paiement pour {reference} à {title} n'a pas été trouvé : {reason}"
     }
   },
   "Rooms": {
@@ -1249,7 +1253,11 @@
     "taxTitle": "Taux d'imposition (pour les estimations)",
     "vat": "TVA (%)",
     "cit": "IS (%)",
-    "taxHint": "Utilisés seulement pour estimer les impôts dans Rapports. Confirmez le traitement fiscal avant de vous y fier."
+    "taxHint": "Utilisés seulement pour estimer les impôts dans Rapports. Confirmez le traitement fiscal avant de vous y fier.",
+    "paymentTitle": "Instructions de paiement",
+    "paymentInstructions": "Comment les voyageurs paient",
+    "paymentInstructionsHint": "ex. MTN MoMo 078 000 0000 (VIIPA Ltd)",
+    "paymentHint": "Affiché sur les réservations impayées tant qu'aucun prestataire n'est connecté. Le propriétaire ou l'équipe confirme chaque paiement."
   },
   "Money": {
     "notConnected": "Les paiements ne sont pas encore connectés : définissez PAYMENT_WEBHOOK_SECRET et connectez un prestataire. D'ici là, rien ne change ici automatiquement.",
@@ -1813,7 +1821,13 @@
     "seeMenu": "Voir le menu",
     "homeBanner": "Commandez près de chez vous",
     "homeBannerSub": "Les restaurants livrent à votre porte ou dans votre chambre.",
-    "ownersOnly": "Les restaurants sont ajoutés par les propriétaires et l'équipe VIIPA. Vous pouvez commander dans tous les restaurants du site."
+    "ownersOnly": "Les restaurants sont ajoutés par les propriétaires et l'équipe VIIPA. Vous pouvez commander dans tous les restaurants du site.",
+    "addPhoto": "Ajouter une photo",
+    "changePhoto": "Changer la photo",
+    "removePhoto": "Retirer la photo",
+    "photoUploading": "Envoi…",
+    "photoUnavailable": "L'envoi de photos n'est pas encore configuré.",
+    "photoFailed": "L'envoi a échoué. Réessayez."
   },
   "Promoters": {
     "title": "Promouvoir et gagner",
@@ -1924,5 +1938,43 @@
     "ordersTitle": "Commandes restaurants (livrées)",
     "restaurant": "Restaurant",
     "delivery": "Frais de livraison"
+  },
+  "ManualPay": {
+    "howToPay": "Comment payer {amount}",
+    "noInstructions": "Notre équipe vous indiquera comment payer. Utilisez Aide en cas de doute.",
+    "useReference": "Indiquez {reference} dans le message du paiement si possible.",
+    "transactionId": "ID de transaction",
+    "transactionHint": "Dans le SMS de confirmation mobile money",
+    "ivePaid": "J'ai payé",
+    "waiting": "Merci ! Le paiement {reference} est en cours de vérification par le propriétaire ou notre équipe. Vos dates restent bloquées.",
+    "claimError": {
+      "notPayable": "Cette réservation ne peut plus être payée.",
+      "transaction": "Vérifiez l'ID de transaction.",
+      "used": "Cet ID de transaction a déjà été utilisé.",
+      "waiting": "Votre paiement est déjà en cours de vérification.",
+      "auth": "Reconnectez-vous."
+    },
+    "confirmTitle": "Paiement",
+    "guestSaysPaid": "Le voyageur dit avoir payé. Transaction : {tx}",
+    "notPaidYet": "Pas encore payé : {amount}",
+    "amountReceived": "Montant reçu (RWF)",
+    "checkFirst": "Confirmez seulement après avoir vu l'argent sur votre compte mobile money ou bancaire.",
+    "confirm": "Confirmer le paiement",
+    "notReceived": "Pas reçu",
+    "rejectReason": "Pourquoi (visible par le voyageur)",
+    "notReceivedConfirm": "Prévenir le voyageur",
+    "confirmError": {
+      "notAllowed": "Seuls le propriétaire ou l'équipe VIIPA peuvent confirmer.",
+      "notFound": "Réservation introuvable.",
+      "transaction": "Vérifiez l'ID de transaction.",
+      "amount": "Le montant doit être le total de la réservation.",
+      "duplicate": "Ce paiement est déjà enregistré.",
+      "unknownBooking": "Réservation introuvable.",
+      "amountMismatch": "Le montant ne correspond pas ; notre équipe est prévenue.",
+      "notPending": "Cette réservation n'attend pas de paiement.",
+      "datesTaken": "Les dates ont été prises après la fin du blocage ; notre équipe est prévenue pour rembourser.",
+      "failedRecorded": "Enregistré comme échoué.",
+      "auth": "Reconnectez-vous."
+    }
   }
 }

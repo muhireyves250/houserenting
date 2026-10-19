@@ -93,6 +93,18 @@ export function SettingsForm({ initial, envHoldMinutes }: { initial: SettingsInp
         />
         <p className="mt-3 text-[13px] text-muted">{t("referralHint")}</p>
       </Card>
+      <Card title={t("paymentTitle")}>
+        <AreaField
+          label={t("paymentInstructions")}
+          rows={3}
+          maxLength={500}
+          placeholder={t("paymentInstructionsHint")}
+          value={form.paymentInstructions ?? ""}
+          onChange={(e) => set("paymentInstructions", e.target.value)}
+          error={err("paymentInstructions")}
+        />
+        <p className="mt-2 text-[13px] text-muted">{t("paymentHint")}</p>
+      </Card>
       <Card title={t("feesTitle")}>
         <SelectField label={t("feeModel")} value={form.feeModel ?? "ADD_ON"} onChange={(e) => set("feeModel", e.target.value as "ADD_ON" | "INCLUDED")}>
           <option value="ADD_ON">{t("feeModelAddOn")}</option>

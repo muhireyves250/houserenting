@@ -30,6 +30,7 @@ export async function portalBookings(userId: string, now: Date = new Date()) {
       guest: { select: { name: true, phone: true } },
       listing: { select: { title: true } },
       guestDocument: { select: { filename: true } },
+      payments: { where: { status: "PENDING", provider: "manual" }, select: { providerReference: true }, take: 1 },
       requests: { where: { status: "PENDING" }, select: { id: true, kind: true, reason: true, newCheckOut: true, transferTo: true } },
     },
   });

@@ -42,7 +42,9 @@ export type NotificationKind =
   | "orderPlaced"
   | "orderStatus"
   | "promoterApplied"
-  | "promoterStatus";
+  | "promoterStatus"
+  | "paymentClaim"
+  | "paymentNotReceived";
 
 export async function notify(
   client: Client,

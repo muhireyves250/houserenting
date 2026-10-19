@@ -613,6 +613,8 @@ model PlatformConfig {
   /// ADD_ON: the guest fee is added to the price; INCLUDED: guests pay the listed price and the platform's share comes from it.
   feeModel              FeeModel @default(ADD_ON)
   /// Tax rates for report estimates (basis points), until the tax treatment is confirmed.
+  /// How guests pay while there's no payment provider (e.g. "MTN MoMo 078… — VIIPA Ltd"), shown on unpaid bookings.
+  paymentInstructions   String?
   vatBps                Int?
   citBps                Int?
   updatedAt             DateTime            @updatedAt

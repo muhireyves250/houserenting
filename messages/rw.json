@@ -857,7 +857,9 @@
         "refundDeclined": "Gusubiza byanzwe",
         "noShow": "Byanditswe ko ataje",
         "guestId": "Indangamuntu yoherejwe",
-        "guestIdView": "Indangamuntu yafunguwe"
+        "guestIdView": "Indangamuntu yafunguwe",
+        "paymentClaim": "Umushyitsi avuga ko yishyuye",
+        "paymentRejected": "Amafaranga ntiyageze"
       },
       "settings": {
         "update": "Igenamiterere ryahinduwe"
@@ -1169,7 +1171,9 @@
       "orderPlaced": "Ibitumijwe bishya {reference} kuri {title} ({total} RWF).",
       "orderStatus": "Ibyo watumije {reference} kuri {title}: {statusLabel}.",
       "promoterApplied": "Hari umuntu wasabye kuba umwamamaza.",
-      "promoterStatus": "Konti yawe y'umwamamaza ubu ni: {statusLabel}. {reason}"
+      "promoterStatus": "Konti yawe y'umwamamaza ubu ni: {statusLabel}. {reason}",
+      "paymentClaim": "Umushyitsi avuga ko yishyuye {reference} kuri {title}. Byemeze.",
+      "paymentNotReceived": "Kwishyura kwawe kwa {reference} kuri {title} ntikwabonetse: {reason}"
     }
   },
   "Rooms": {
@@ -1249,7 +1253,11 @@
     "taxTitle": "Ibipimo by'imisoro (ku igereranya)",
     "vat": "TVA (%)",
     "cit": "CIT (%)",
-    "taxHint": "Bikoreshwa gusa mu kugereranya imisoro muri Raporo. Emeza uko imisoro ibarwa mbere yo kubyizera."
+    "taxHint": "Bikoreshwa gusa mu kugereranya imisoro muri Raporo. Emeza uko imisoro ibarwa mbere yo kubyizera.",
+    "paymentTitle": "Amabwiriza yo kwishyura",
+    "paymentInstructions": "Uko abashyitsi bishyura",
+    "paymentInstructionsHint": "urugero MTN MoMo 078 000 0000 (VIIPA Ltd)",
+    "paymentHint": "Bigaragara ku mafatwa atishyuwe igihe nta buryo bwo kwishyura buhujwe. Nyir'inzu cyangwa abakozi bemeza buri kwishyura."
   },
   "Money": {
     "notConnected": "Kwishyura ntikurahuzwa: shyiraho PAYMENT_WEBHOOK_SECRET kandi uhuze utanga serivisi. Kugeza icyo gihe, nta kintu gihinduka hano ubwacyo.",
@@ -1813,7 +1821,13 @@
     "seeMenu": "Reba urutonde rw'ibiryo",
     "homeBanner": "Tumiza ibiryo hafi yawe",
     "homeBannerSub": "Resitora zikugezaho ibiryo aho uri cyangwa mu cyumba cyawe.",
-    "ownersOnly": "Resitora zishyirwaho na ba nyir'inzu n'itsinda rya VIIPA. Ushobora gutumiza muri resitora iyo ari yo yose iri ku rubuga."
+    "ownersOnly": "Resitora zishyirwaho na ba nyir'inzu n'itsinda rya VIIPA. Ushobora gutumiza muri resitora iyo ari yo yose iri ku rubuga.",
+    "addPhoto": "Ongeraho ifoto",
+    "changePhoto": "Hindura ifoto",
+    "removePhoto": "Kuraho ifoto",
+    "photoUploading": "Biroherezwa…",
+    "photoUnavailable": "Kohereza amafoto ntibirashyirwaho.",
+    "photoFailed": "Kohereza byanze. Ongera ugerageze."
   },
   "Promoters": {
     "title": "Kwamamaza no kwinjiza",
@@ -1924,5 +1938,43 @@
     "ordersTitle": "Ibyatumijwe muri resitora (byagejejwe)",
     "restaurant": "Resitora",
     "delivery": "Amafaranga yo kugeza"
+  },
+  "ManualPay": {
+    "howToPay": "Uko wishyura {amount}",
+    "noInstructions": "Itsinda ryacu rizakubwira uko wishyura. Koresha Ubufasha niba ufite ikibazo.",
+    "useReference": "Andika {reference} mu butumwa bwo kwishyura niba bishoboka.",
+    "transactionId": "Nimero y'ihererekanya",
+    "transactionHint": "Iri mu butumwa bugufi bwa mobile money",
+    "ivePaid": "Narishyuye",
+    "waiting": "Murakoze! Kwishyura {reference} biri kugenzurwa na nyir'inzu cyangwa itsinda ryacu. Iminsi yawe ikomeza kubikwa.",
+    "claimError": {
+      "notPayable": "Iri fatwa ntirigishobora kwishyurwa.",
+      "transaction": "Reba nimero y'ihererekanya.",
+      "used": "Iyi nimero y'ihererekanya yarakoreshejwe.",
+      "waiting": "Kwishyura kwawe kurimo kugenzurwa.",
+      "auth": "Ongera winjire."
+    },
+    "confirmTitle": "Kwishyura",
+    "guestSaysPaid": "Umushyitsi avuga ko yishyuye. Ihererekanya: {tx}",
+    "notPaidYet": "Ntiharishyurwa: {amount}",
+    "amountReceived": "Amafaranga yakiriwe (RWF)",
+    "checkFirst": "Emeza gusa umaze kubona amafaranga kuri konti yawe ya mobile money cyangwa ya banki.",
+    "confirm": "Emeza kwishyura",
+    "notReceived": "Ntiyageze",
+    "rejectReason": "Impamvu (umushyitsi arayibona)",
+    "notReceivedConfirm": "Menyesha umushyitsi",
+    "confirmError": {
+      "notAllowed": "Nyir'inzu cyangwa abakozi ba VIIPA bonyine ni bo bemeza kwishyura.",
+      "notFound": "Ifatwa ntiryabonetse.",
+      "transaction": "Reba nimero y'ihererekanya.",
+      "amount": "Amafaranga agomba kuba igiteranyo cy'ifatwa.",
+      "duplicate": "Uku kwishyura kwamaze kwandikwa.",
+      "unknownBooking": "Ifatwa ntiryabonetse.",
+      "amountMismatch": "Amafaranga ntahura; itsinda ryacu ryamenyeshejwe.",
+      "notPending": "Iri fatwa ntiritegereje kwishyurwa.",
+      "datesTaken": "Iminsi yafashwe igihe cyo kubika kirangiye; itsinda ryacu ryamenyeshejwe gusubiza amafaranga.",
+      "failedRecorded": "Byanditswe ko byanze.",
+      "auth": "Ongera winjire."
+    }
   }
 }
