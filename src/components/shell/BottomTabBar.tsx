@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { useLayoutEffect, useRef, useState } from "react";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
-import { isActive, navHref, navItems } from "./nav-items";
+import { isActive, navHref, PHONE_NAV_ITEMS } from "./nav-items";
 
 // The site's sliding motion (header nav, search bar, filters).
 const SLIDE = "duration-500 ease-[cubic-bezier(0.25,0.8,0.25,1)] motion-reduce:transition-none";
@@ -67,8 +67,7 @@ export function BottomTabBar({ signedIn = true }: { signedIn?: boolean }) {
             SLIDE,
           )}
         />
-        {/* Phones keep five tabs; orders are reached from Profile and the restaurant pages. */}
-        {navItems(false).map(({ key, href, icon: Icon }) => {
+        {PHONE_NAV_ITEMS.map(({ key, href, icon: Icon }) => {
           const active = isActive(pathname, href);
           // White while the pill is under it: the hovered tab, or the current tab when nothing is hovered.
           const onPill = hovered ? hovered === key : active;

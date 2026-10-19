@@ -18,6 +18,9 @@ export function navItems(orders: boolean): readonly { key: NavKey; href: string;
   return orders ? [...NAV_ITEMS.slice(0, 4), ORDERS_ITEM, NAV_ITEMS[4]!] : NAV_ITEMS;
 }
 
+/** Phones: HOME, ORDERS, BOOKINGS, MY STAY, PROFILE (saved places are a tile on Profile). */
+export const PHONE_NAV_ITEMS: readonly { key: NavKey; href: string; icon: LucideIcon }[] = [NAV_ITEMS[0]!, ORDERS_ITEM, NAV_ITEMS[2]!, NAV_ITEMS[3]!, NAV_ITEMS[4]!];
+
 /** `pathname` is locale-less, as returned by next-intl's usePathname. */
 export function isActive(pathname: string, href: string): boolean {
   if (href === "/") return pathname === "/" || pathname === "/search" || pathname.startsWith("/search/");
