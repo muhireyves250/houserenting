@@ -619,7 +619,9 @@
     "payTitle": "Payer pour confirmer",
     "messageHost": "Écrire à l'hôte",
     "time": "Heure",
-    "openMyStay": "Ouvrir Mon séjour"
+    "openMyStay": "Ouvrir Mon séjour",
+    "messageShort": "Message",
+    "placeShort": "Logement"
   },
   "Host": {
     "title": "Vos annonces",
@@ -1374,7 +1376,8 @@
     "unread": "Non lu",
     "host": "Hôte",
     "guest": "Voyageur",
-    "startHint": "Dites bonjour à {name} et posez vos questions sur le logement."
+    "startHint": "Dites bonjour à {name} et posez vos questions sur le logement.",
+    "listIntro": "Vos messages avec les hôtes et les voyageurs."
   },
   "Places": {
     "statusTitle": "Statut",

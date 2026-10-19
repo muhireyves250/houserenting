@@ -20,7 +20,7 @@ export async function startConversation(guestId: string, listingId: string): Pro
   return { ok: true, id: conversation.id };
 }
 
-const PARTY = { select: { id: true, name: true } } as const;
+const PARTY = { select: { id: true, name: true, image: true } } as const;
 
 /** Everyone's chats, newest first: as a guest and as a host. */
 export async function listConversations(userId: string) {

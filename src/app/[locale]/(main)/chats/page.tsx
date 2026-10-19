@@ -28,8 +28,9 @@ export default async function ChatsPage() {
   const now = new Date();
 
   return (
-    <PageContainer className="max-w-3xl py-6 md:py-10">
-      <h1 className="mb-6 text-[26px] leading-8 font-bold tracking-[-0.03em] md:text-[32px] md:leading-10">{tNav("chats")}</h1>
+    <PageContainer className="max-w-3xl pt-5 pb-10 md:py-10">
+      <h1 className="mb-1 text-[26px] leading-8 font-bold tracking-[-0.03em] md:text-[32px] md:leading-10">{tNav("chats")}</h1>
+      <p className="mb-5 text-[14px] text-muted">{t("listIntro")}</p>
       {chats.length === 0 ? (
         <EmptyState
           icon={<MessageSquare />}
@@ -49,11 +50,12 @@ export default async function ChatsPage() {
           {chats.map((chat) => (
             <li key={chat.id}>
               <Link href={`/chats/${chat.id}`} className="flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-canvas active:bg-canvas">
+                {/* The place first (guests think by place), with the person's photo on its corner. */}
                 <span className="relative shrink-0">
-                  <Avatar name={chat.other.name} className="size-12 text-base" />
-                  <span className="absolute -right-1 -bottom-1 flex size-6 items-center justify-center overflow-hidden rounded-lg bg-primary-soft text-primary ring-2 ring-surface">
-                    {chat.listing.photo ? <Image src={chat.listing.photo} alt="" fill sizes="24px" className="object-cover" /> : <House className="size-3.5" aria-hidden="true" />}
+                  <span className="relative flex size-14 items-center justify-center overflow-hidden rounded-2xl bg-primary-soft text-primary">
+                    {chat.listing.photo ? <Image src={chat.listing.photo} alt="" fill sizes="56px" className="object-cover" /> : <House className="size-6" aria-hidden="true" />}
                   </span>
+                  <Avatar name={chat.other.name} image={chat.other.image} className="absolute -right-1.5 -bottom-1.5 size-7 text-[10px] ring-2 ring-surface" />
                 </span>
                 <span className="flex min-w-0 flex-1 flex-col">
                   <span className="flex items-baseline justify-between gap-2">

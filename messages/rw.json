@@ -619,7 +619,9 @@
     "payTitle": "Ishyura kugira ngo byemezwe",
     "messageHost": "Andikira nyir'inzu",
     "time": "Isaha",
-    "openMyStay": "Fungura Aho ncumbitse"
+    "openMyStay": "Fungura Aho ncumbitse",
+    "messageShort": "Ubutumwa",
+    "placeShort": "Inzu"
   },
   "Host": {
     "title": "Aho wakira abashyitsi",
@@ -1374,7 +1376,8 @@
     "unread": "Bitarasomwa",
     "host": "Nyir'inzu",
     "guest": "Umushyitsi",
-    "startHint": "Suhuza {name} ubaze icyo ushaka ku hantu."
+    "startHint": "Suhuza {name} ubaze icyo ushaka ku hantu.",
+    "listIntro": "Ubutumwa n'abakira n'abashyitsi ku byerekeye amafatwa yawe."
   },
   "Places": {
     "statusTitle": "Uko bihagaze",

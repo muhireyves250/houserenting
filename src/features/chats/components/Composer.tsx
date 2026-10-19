@@ -46,7 +46,7 @@ export function Composer({ conversationId }: { conversationId: string }) {
   }
 
   return (
-    <div className="sticky bottom-[calc(82px+env(safe-area-inset-bottom))] z-20 mt-4 md:bottom-4">
+    <div className="sticky bottom-[calc(8px+env(safe-area-inset-bottom))] z-20 mt-4 md:bottom-4">
       {failed && (
         <p role="alert" className="mb-1 text-center text-[13px] font-medium text-danger">
           {t("sendFailed")}

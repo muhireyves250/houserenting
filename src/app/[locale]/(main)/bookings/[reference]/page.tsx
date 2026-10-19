@@ -1,4 +1,4 @@
-import { ChevronLeft, House, LifeBuoy, MessageSquare, Navigation } from "lucide-react";
+import { ChevronLeft, ChevronRight, House, LifeBuoy, MessageSquare, Navigation, Receipt } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -30,15 +30,16 @@ type Props = { params: Promise<{ reference: string }> };
 // Booking pages are private: keep them out of search engines.
 export const metadata: Metadata = { robots: { index: false, follow: false } };
 
-const card = "rounded-3xl bg-surface p-6 shadow-[0_10px_30px_-14px_rgba(16,24,40,0.3)] ring-1 ring-black/[0.04] max-md:ring-line print:shadow-none";
-const pillLink =
-  "inline-flex items-center gap-2 rounded-full border border-line bg-surface px-4 py-2 text-[13px] font-semibold text-ink transition-[background-color,transform] duration-300 hover:bg-canvas active:scale-95 max-md:border-primary max-md:text-primary print:hidden";
+const card = "rounded-3xl bg-surface p-4 md:p-6 shadow-[0_10px_30px_-14px_rgba(16,24,40,0.3)] ring-1 ring-black/[0.04] max-md:ring-line print:shadow-none";
+/** Phones: small square button with the icon over the word; computers: a pill. */
+const action =
+  "flex flex-col items-center justify-center gap-1 rounded-2xl bg-surface px-1 py-2.5 text-center text-[12px] font-semibold text-ink ring-1 ring-line transition-colors hover:ring-primary active:scale-95 md:flex-row md:gap-2 md:rounded-full md:px-4 md:py-2 md:text-[13px]";
 
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="flex items-start justify-between gap-4 py-3">
-      <dt className="text-[15px] text-muted">{label}</dt>
-      <dd className="text-right text-[15px] font-medium text-ink">{children}</dd>
+    <div className="flex items-start justify-between gap-4 py-2 md:py-3">
+      <dt className="text-[14px] text-muted md:text-[15px]">{label}</dt>
+      <dd className="text-right text-[14px] font-medium text-ink md:text-[15px]">{children}</dd>
     </div>
   );
 }
@@ -78,36 +79,55 @@ export default async function BookingPage({ params }: Props) {
       </Link>
 
       {/* The place and where the booking stands */}
-      <section className={cn(card, "flex flex-col gap-5 p-4 md:flex-row md:items-center md:p-5")}>
-        <span className="relative flex aspect-[4/3] w-full shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-primary-soft text-primary md:size-32 md:aspect-auto">
-          {listing.photos[0] ? (
-            <Image src={listing.photos[0].url} alt="" fill sizes="(min-width: 768px) 128px, 100vw" className="object-cover" priority />
-          ) : (
-            <House className="size-8" aria-hidden="true" />
-          )}
-        </span>
+      <section className={cn(card, "flex flex-col gap-3 md:flex-row md:items-center md:gap-5")}>
+        <div className="flex items-center gap-3 md:contents">
+          <span className="relative flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-primary-soft text-primary md:size-32">
+            {listing.photos[0] ? (
+              <Image src={listing.photos[0].url} alt="" fill sizes="(min-width: 768px) 128px, 80px" className="object-cover" priority />
+            ) : (
+              <House className="size-8" aria-hidden="true" />
+            )}
+          </span>
+          <div className="flex min-w-0 flex-1 flex-col gap-1 md:hidden">
+            <StatusBadge status={booking.status} label={t(`status.${booking.status}`)} className="self-start" />
+            <h1 className="line-clamp-2 text-[17px] leading-6 font-bold tracking-[-0.01em] text-ink">{listing.title}</h1>
+            <p className="truncate text-[12px] text-muted">
+              {listing.district}, {listing.city}
+            </p>
+          </div>
+        </div>
         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-          <StatusBadge status={booking.status} label={t(`status.${booking.status}`)} className="self-start" />
-          <h1 className="text-[22px] leading-7 font-bold tracking-[-0.02em] text-ink">{listing.title}</h1>
-          <p className="text-[13px] text-muted">
-            {tType(listing.type)} · {listing.addressLine}, {listing.district}, {listing.city}
-          </p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            <Link href={`/listings/${listing.id}`} className={pillLink}>
-              {t("viewPlace")}
+          <div className="hidden flex-col gap-1.5 md:flex">
+            <StatusBadge status={booking.status} label={t(`status.${booking.status}`)} className="self-start" />
+            <p className="text-[22px] leading-7 font-bold tracking-[-0.02em] text-ink">{listing.title}</p>
+            <p className="text-[13px] text-muted">
+              {tType(listing.type)} · {listing.addressLine}, {listing.district}, {listing.city}
+            </p>
+          </div>
+          {/* Phones: four small buttons on one row; computers: pills. */}
+          <div className="grid grid-cols-4 gap-2 md:mt-2 md:flex md:flex-wrap print:hidden">
+            <Link href={`/listings/${listing.id}`} className={action}>
+              <House className="size-5 text-primary md:size-4" aria-hidden="true" />
+              <span className="md:hidden">{t("placeShort")}</span>
+              <span className="hidden md:inline">{t("viewPlace")}</span>
             </Link>
-            {live && (
-              <a href={directionsUrl(listing.lat, listing.lng)} target="_blank" rel="noopener noreferrer" className={pillLink}>
-                <Navigation className="size-4" aria-hidden="true" />
+            {live ? (
+              <a href={directionsUrl(listing.lat, listing.lng)} target="_blank" rel="noopener noreferrer" className={action}>
+                <Navigation className="size-5 text-primary md:size-4" aria-hidden="true" />
                 {t("directions")}
               </a>
+            ) : (
+              <a href="#receipt" className={action}>
+                <Receipt className="size-5 text-primary md:size-4" aria-hidden="true" />
+                {t("receipt")}
+              </a>
             )}
-            <MessageHostButton listingId={listing.id} signedIn className={pillLink}>
-              <MessageSquare className="size-4" aria-hidden="true" />
-              {t("messageHost")}
+            <MessageHostButton listingId={listing.id} signedIn className={cn(action, "w-full md:w-auto")}>
+              <MessageSquare className="size-5 text-primary md:size-4" aria-hidden="true" />
+              {t("messageShort")}
             </MessageHostButton>
-            <Link href={{ pathname: "/support", query: { booking: booking.reference } }} className={pillLink}>
-              <LifeBuoy className="size-4" aria-hidden="true" />
+            <Link href={{ pathname: "/support", query: { booking: booking.reference } }} className={action}>
+              <LifeBuoy className="size-5 text-primary md:size-4" aria-hidden="true" />
               {t("getHelp")}
             </Link>
           </div>
@@ -201,8 +221,12 @@ export default async function BookingPage({ params }: Props) {
       </section>
 
       {/* What the guest agreed to, as it was at booking time */}
-      <section className={cn(card, "mt-4")}>
-        <h2 className="mb-3 text-lg font-bold text-ink">{t("agreed")}</h2>
+      <details className={cn(card, "group mt-4")}>
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden">
+          <h2 className="text-lg font-bold text-ink">{t("agreed")}</h2>
+          <ChevronRight className="size-5 text-ink/50 transition-transform group-open:rotate-90" aria-hidden="true" />
+        </summary>
+        <div className="mt-3">
         <h3 className="mb-1.5 text-[15px] font-semibold text-ink">{tListings("houseRules")}</h3>
         <ul className="mb-4 flex flex-col gap-1 text-[15px] text-ink/80">
           {policy.checkInTime && <li>{tListings("checkIn", { time: policy.checkInTime })}</li>}
@@ -215,13 +239,17 @@ export default async function BookingPage({ params }: Props) {
         <p className="text-[15px] whitespace-pre-line text-ink/80">
           {policyText(policy.cancellationPolicy, locale) ?? `${tListings("cancelWhileUnpaid")} ${t("cancelPaid")}`}
         </p>
-      </section>
+        </div>
+      </details>
 
       {/* Status history (only once something has happened) */}
       {booking.events.length > 0 && (
-      <section className={cn(card, "mt-4")}>
-        <h2 className="mb-4 text-lg font-bold text-ink">{t("timeline")}</h2>
-        <ol className="relative flex flex-col gap-5 border-l-2 border-line pl-6">
+      <details className={cn(card, "group mt-4")}>
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden">
+          <h2 className="text-lg font-bold text-ink">{t("timeline")}</h2>
+          <ChevronRight className="size-5 text-ink/50 transition-transform group-open:rotate-90" aria-hidden="true" />
+        </summary>
+        <ol className="relative mt-4 flex flex-col gap-5 border-l-2 border-line pl-6">
           {booking.events.map((event, index) => (
             <li key={index} className="relative">
               <span
@@ -236,7 +264,7 @@ export default async function BookingPage({ params }: Props) {
             </li>
           ))}
         </ol>
-      </section>
+      </details>
       )}
 
       {reviewable && (

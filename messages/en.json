@@ -619,7 +619,9 @@
     "payTitle": "Pay to confirm",
     "messageHost": "Message host",
     "time": "Time",
-    "openMyStay": "Open My stay"
+    "openMyStay": "Open My stay",
+    "messageShort": "Message",
+    "placeShort": "Place"
   },
   "Host": {
     "title": "Your listings",
@@ -1374,7 +1376,8 @@
     "unread": "Unread",
     "host": "Host",
     "guest": "Guest",
-    "startHint": "Say hello to {name} and ask anything about the place."
+    "startHint": "Say hello to {name} and ask anything about the place.",
+    "listIntro": "Messages with hosts and guests about your bookings."
   },
   "Places": {
     "statusTitle": "Status",

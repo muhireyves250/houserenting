@@ -47,6 +47,8 @@ export function BottomTabBar({ signedIn = true }: { signedIn?: boolean }) {
     };
   }, [pathname, hovered]);
 
+  // Inside a conversation the chat takes the whole screen (its own back button and message box).
+  if (/^\/chats\/[^/]+/.test(pathname)) return null;
   return (
     <nav
       aria-label={t("mainNav")}
