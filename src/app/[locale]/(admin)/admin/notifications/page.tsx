@@ -12,10 +12,11 @@ import { requireAdmin } from "@/lib/permissions";
 /** Staff notices (listings waiting, new support requests, payments to check…), inside the dashboard. */
 export default async function AdminNotificationsPage() {
   const user = await requireAdmin("/admin/notifications");
-  const [t, tNotes, tSupport, locale, items] = await Promise.all([
+  const [t, tNotes, tSupport, tStay, locale, items] = await Promise.all([
     getTranslations("Admin"),
     getTranslations("Notifications"),
     getTranslations("Support"),
+    getTranslations("MyStay"),
     getLocale(),
     listNotifications(user.id, 100),
   ]);
@@ -33,6 +34,7 @@ export default async function AdminNotificationsPage() {
           <ul className="divide-y divide-line">
             {items.map((n) => {
               const data = { ...(n.data as Record<string, string | number>) };
+              if (typeof data.kindLabel === "string") data.kindLabel = dynamicMessage(tStay, `kind.${data.kindLabel}`, data.kindLabel).toLowerCase();
               if (typeof data.status === "string") data.statusLabel = dynamicMessage(tSupport, `status.${data.status}`, data.status);
               // Notices made before staff had their own area may point at client pages; keep them inside admin.
               const href = n.href && n.href.startsWith("/admin") ? n.href : null;

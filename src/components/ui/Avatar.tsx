@@ -8,13 +8,19 @@ export function initials(name: string): string {
   return (first + last).toUpperCase();
 }
 
-export function Avatar({ name, className }: { name: string; className?: string }) {
+/** The person's photo when they added one, otherwise their initials. Decorative: the name is always next to it. */
+export function Avatar({ name, image, className }: { name: string; image?: string | null; className?: string }) {
   return (
     <span
       aria-hidden="true"
-      className={cn("flex size-9 items-center justify-center rounded-full bg-primary-soft text-sm font-semibold text-primary", className)}
+      className={cn("relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary-soft text-sm font-semibold text-primary", className)}
     >
-      {initials(name)}
+      {image ? (
+        // eslint-disable-next-line @next/next/no-img-element -- small same-site photo, already sized
+        <img src={image} alt="" className="absolute inset-0 size-full object-cover" loading="lazy" decoding="async" />
+      ) : (
+        initials(name)
+      )}
     </span>
   );
 }

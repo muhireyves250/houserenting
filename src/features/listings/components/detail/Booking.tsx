@@ -3,6 +3,7 @@
 import { Tag } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { createContext, useContext, useId, useState, type ReactNode } from "react";
+import { dayClosed, type Window } from "@/features/bookings/availability";
 import { LONG_UNITS, type BookingUnit } from "@/features/bookings/period";
 import { discountedPrice, type Unit } from "@/features/listings/pricing";
 import { nightsBetween } from "@/features/listings/quote";
@@ -60,6 +61,9 @@ type Stay = {
   /** Every unit except nights: first day (and start time for hours) and how many. */
   plan: Plan;
   setPlan: (plan: Plan) => void;
+  /** When the place can be booked (management agreement and its own dates) and on which days bookings may start. */
+  window: Window;
+  workingDays: number[];
 };
 
 const StayContext = createContext<Stay | null>(null);
@@ -80,26 +84,35 @@ export function StayProvider({
   booked = [],
   holdMinutes = 30,
   rooms = [],
+  initialRoom = null,
   bookingModel = "WHOLE_PROPERTY",
   guestFeeBps = null,
   cancellationPolicy = null,
   longStay = null,
   defaultUnit = "NIGHT",
+  window = {},
+  workingDays = [],
 }: {
   children: ReactNode;
   listingId?: string;
   booked?: (BookedRange & { roomId?: string | null })[];
   holdMinutes?: number;
   rooms?: PublicRoom[];
+  /** Chosen up front (a room's own link); ignored unless guests can book that room. */
+  initialRoom?: string | null;
   bookingModel?: BookingModel;
   guestFeeBps?: number | null;
   cancellationPolicy?: string | null;
   longStay?: LongStayConfig;
   defaultUnit?: BookingUnit;
+  window?: Window;
+  workingDays?: number[];
 }) {
   const [range, setRange] = useState<DateRange>({});
   const [guests, setGuests] = useState(1);
-  const [choice, setChoice] = useState<StayChoice>(bookingModel === "ROOM_BY_ROOM" ? null : "whole");
+  const [choice, setChoice] = useState<StayChoice>(
+    initialRoom && rooms.some((r) => r.id === initialRoom) ? initialRoom : bookingModel === "ROOM_BY_ROOM" ? null : "whole",
+  );
   const [unit, setUnit] = useState<BookingUnit>(defaultUnit);
   const [plan, setPlan] = useState<Plan>({ start: "", quantity: 1, startTime: "" });
   const normalized = booked.map((b) => ({ ...b, roomId: b.roomId ?? null }));
@@ -124,6 +137,8 @@ export function StayProvider({
         setUnit,
         plan,
         setPlan,
+        window,
+        workingDays,
       }}
     >
       {children}
@@ -169,6 +184,7 @@ function useOffer(rates: BookingRate[]) {
 
 const feeOf = (amount: number, bps: number | null) => (bps ? Math.round((amount * bps) / 10_000) : 0);
 const DEFAULT_MAX: Record<BookingUnit, number> = { HOUR: 12, DAY: 30, NIGHT: 365, WEEK: 12, MONTH: 24, YEAR: 5 };
+const addDaysISO = (iso: string, days: number) => new Date(Date.parse(`${iso}T00:00:00Z`) + days * 86_400_000).toISOString().slice(0, 10);
 const toMinutes = (hhmm: string) => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3, 5));
 
 /** The lengths this rate allows (hours also stop at closing time), and the plan's length kept inside them. */
@@ -276,7 +292,7 @@ export function RoomPicker({ wholeRates }: { wholeRates: { unit: Unit; price: nu
 export function StayCalendar({ city, rates, today = todayISO() }: { city: string; rates?: BookingRate[]; today?: string }) {
   const t = useTranslations("Listings");
   const locale = useLocale();
-  const { range, setRange, booked: allBooked, choice } = useStay();
+  const { range, setRange, booked: allBooked, choice, window: open, workingDays } = useStay();
   const { current } = useOffer(rates ?? []);
   if (rates && current?.unit !== "NIGHT") return null;
   const booked = takenFor(allBooked, choice);
@@ -299,7 +315,11 @@ export function StayCalendar({ city, rates, today = todayISO() }: { city: string
         onRangeChange={setRange}
         onFlexChange={() => {}}
         showFlex={false}
-        isBlocked={booked.length > 0 ? (day) => isDayBlocked(range, day, booked) : undefined}
+        isBlocked={(day) =>
+          // Check-in days must be open; a checkout day only has to be inside the window.
+          (!range.checkIn || range.checkOut || day <= range.checkIn ? dayClosed(day, open, workingDays) : Boolean(open.until && day > addDaysISO(open.until, 1))) ||
+          (booked.length > 0 && isDayBlocked(range, day, booked))
+        }
       />
     </section>
   );
@@ -532,16 +552,12 @@ export function BookingCard({
                 <dd>{formatRWF(quote.plan.deposit, locale)}</dd>
               </div>
             )}
-            {guestFee > 0 && (
-              <div className="flex justify-between text-ink/80">
-                <dt>{t("serviceFee")}</dt>
-                <dd>{formatRWF(guestFee, locale)}</dd>
-              </div>
-            )}
+            {/* One total: platform fees are part of it, never a separate row. */}
             <div className="flex justify-between border-t border-line pt-3 font-bold text-ink">
               <dt>{long ? t("dueNow") : t("total")}</dt>
               <dd>{formatRWF(quote.plan.subtotal + quote.plan.deposit + guestFee, locale)}</dd>
             </div>
+            {guestFee > 0 && <p className="-mt-2 text-right text-xs font-normal text-muted">{t("feesIncluded")}</p>}
           </dl>
         )}
 
@@ -557,7 +573,7 @@ export function BookingCard({
 /** Start (and start time for hours) and how many, for every way of booking except nights. */
 function PlanFields({ rate }: { rate: BookingRate }) {
   const t = useTranslations("Listings");
-  const { plan, setPlan } = useStay();
+  const { plan, setPlan, window: bookable } = useStay();
   const startId = useId();
   const timeId = useId();
   const countId = useId();
@@ -576,7 +592,8 @@ function PlanFields({ rate }: { rate: BookingRate }) {
         <input
           id={startId}
           type="date"
-          min={todayISO()}
+          min={bookable.from && bookable.from > todayISO() ? bookable.from : todayISO()}
+          max={bookable.until}
           value={plan.start}
           onChange={(e) => setPlan({ ...plan, start: e.target.value })}
           className="bg-transparent text-sm text-ink outline-none"

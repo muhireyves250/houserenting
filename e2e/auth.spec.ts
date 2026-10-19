@@ -81,13 +81,13 @@ test("signed-out: a members-only menu link opens the login modal, then lands on 
   test.skip(testInfo.project.name !== "desktop", "header menu is desktop-only; phones use the bottom tabs");
   await skipOnboarding(page);
   await page.goto("/en/search");
-  await page.getByRole("navigation", { name: "Main navigation" }).getByRole("link", { name: "Chats" }).click();
+  await page.getByRole("navigation", { name: "Main navigation" }).getByRole("link", { name: "My stay" }).click();
   const dialog = page.getByRole("dialog", { name: "Rent your perfect fit" });
   await expect(dialog).toBeVisible();
-  await expect(page).toHaveURL(/\/en\/login\?next=%2Fchats/);
+  await expect(page).toHaveURL(/\/en\/login\?next=%2Fmy-stay/);
   await dialog.getByLabel("Email").fill("host@spacerental.rw");
   await dialog.getByLabel("Password", { exact: true }).fill("SpaceRental-demo-2026");
   await dialog.getByRole("button", { name: "Log in" }).click();
-  await expect(page).toHaveURL(/\/en\/chats$/);
-  await expect(page.getByText("No messages yet")).toBeVisible();
+  await expect(page).toHaveURL(/\/en\/my-stay$/);
+  await expect(page.getByRole("heading", { name: "My stay", level: 1 })).toBeVisible();
 });

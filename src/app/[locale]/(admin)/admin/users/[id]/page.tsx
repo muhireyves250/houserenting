@@ -15,6 +15,7 @@ import { cn } from "@/lib/cn";
 import { dynamicMessage } from "@/lib/dynamic-message";
 import { formatRWF } from "@/lib/format";
 import { requireAdmin } from "@/lib/permissions";
+import { canManageStaff } from "@/features/admin/service";
 
 type Props = { params: Promise<{ id: string }> };
 const iso = (d: Date) => d.toISOString().slice(0, 10);
@@ -33,6 +34,7 @@ export default async function AdminUserPage({ params }: Props) {
     recentAudit({ entityType: "user", entityId: id, take: 20 }),
   ]);
   const self = admin.id === user.id;
+  const manageStaff = await canManageStaff(admin);
   const badge = "rounded-full px-2.5 py-0.5 text-xs font-semibold";
 
   return (
@@ -45,7 +47,7 @@ export default async function AdminUserPage({ params }: Props) {
           <p className="truncate text-[13px] text-muted">{user.email}</p>
         </div>
         <span className="flex flex-wrap gap-1.5">
-          {user.role === "ADMIN" && <span className={cn(badge, "bg-primary/10 text-primary")}>{t("staff")}</span>}
+          {user.role !== "USER" && <span className={cn(badge, "bg-primary/10 text-primary")}>{t(`roleName.${user.role}`)}</span>}
           {user.isHost && <span className={cn(badge, "bg-canvas text-ink/80")}>{t("hostBadge")}</span>}
           <span className={cn(badge, user.status === "SUSPENDED" ? "bg-red-50 text-red-800" : "bg-emerald-50 text-emerald-800")}>{t(`userStatus.${user.status}`)}</span>
         </span>
@@ -115,8 +117,8 @@ export default async function AdminUserPage({ params }: Props) {
           </Panel>
           <Panel title={t("staffAccess")}>
             <div className="flex items-center justify-between gap-3">
-              <span className="text-[13px] text-muted">{user.role === "ADMIN" ? t("isStaff") : t("notStaff")}</span>
-              <RoleToggle userId={user.id} role={user.role} self={self} />
+              <span className="text-[13px] text-muted">{t(`roleName.${user.role}`)}</span>
+              <RoleToggle userId={user.id} role={user.role} self={self} canManage={manageStaff} />
             </div>
           </Panel>
           {!self && (

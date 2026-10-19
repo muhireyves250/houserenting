@@ -12,7 +12,9 @@ import { newBookingReference } from "./reference";
 import { audit } from "@/features/audit/service";
 import { checkPromo, claimPromoUse, type PromoCheck } from "@/features/promotions/service";
 import { maybeCreateReward } from "@/features/referrals/service";
-import { priceBreakdown } from "./money";
+import { maybePromoterReward } from "@/features/promoters/service";
+import { feesFor, priceBreakdown } from "./money";
+import { bookableWindow, insideWindow, onWorkingDays } from "./availability";
 import { BOOKING_UNITS, LONG_UNITS, periodFor, unitsAllowedFor, withinHours, type BookingUnit } from "./period";
 import { BLOCKING_STATUSES, canTransition } from "./status";
 
@@ -28,7 +30,18 @@ export type BookingRequest = {
   payment: { method: MoMoProvider; phone: string };
 };
 
-export type BookingError = "invalid" | "notFound" | "ownListing" | "stayLength" | "phone" | "unavailable" | "promo" | "notOffered" | "identity";
+export type BookingError =
+  | "invalid"
+  | "notFound"
+  | "ownListing"
+  | "stayLength"
+  | "phone"
+  | "unavailable"
+  | "promo"
+  | "notOffered"
+  | "identity"
+  | "outsideWindow"
+  | "closedDay";
 export type CreateBookingResult = { ok: true; reference: string } | { ok: false; error: BookingError };
 
 /** What the guest agreed to, stored with the booking so later edits to the listing don't change it. */
@@ -73,7 +86,7 @@ async function expireHolds(tx: Tx, where: Prisma.BookingWhereInput, now: Date): 
 }
 
 /** Postgres refused the insert because the nights overlap an active booking (constraint "booking_no_overlap"). */
-function isOverlapError(error: unknown): boolean {
+export function isOverlapError(error: unknown): boolean {
   for (let e: unknown = error, depth = 0; e && depth < 5; depth++) {
     const text = `${(e as { code?: string }).code ?? ""} ${(e as { message?: string }).message ?? ""} ${JSON.stringify((e as { meta?: unknown }).meta ?? "")}`;
     if (text.includes("23P01") || text.includes("booking_no_overlap")) return true;
@@ -124,7 +137,21 @@ export async function createRentalBooking(request: RentalRequest, now: Date = ne
 
   const listing = await db.listing.findFirst({
     where: { id: listingId, status: "PUBLISHED" },
-    select: { title: true, type: true, hostId: true, maxGuests: true, discountPercent: true, termsOfRent: true, bookingModel: true, rates: true },
+    select: {
+      title: true,
+      type: true,
+      hostId: true,
+      maxGuests: true,
+      discountPercent: true,
+      termsOfRent: true,
+      bookingModel: true,
+      rates: true,
+      contractStart: true,
+      contractEnd: true,
+      availableFrom: true,
+      availableUntil: true,
+      workingDays: true,
+    },
   });
   if (!listing) return { ok: false, error: "notFound" };
   if (listing.hostId === guestId) return { ok: false, error: "ownListing" };
@@ -154,6 +181,18 @@ export async function createRentalBooking(request: RentalRequest, now: Date = ne
   if (rate && (quantity < rate.minUnits || (rate.maxUnits !== null && quantity > rate.maxUnits))) return { ok: false, error: "stayLength" };
   if (unit === "HOUR" && !withinHours(startTime!, quantity, rate?.dayStartTime ?? null, rate?.dayEndTime ?? null)) return { ok: false, error: "stayLength" };
 
+  // Inside the management agreement and the place's own dates, starting on a working day.
+  const span = periodFor(unit, start, quantity, startTime);
+  const day = (d: Date | null) => d?.toISOString().slice(0, 10) ?? null;
+  const window = bookableWindow({
+    contractStart: day(listing.contractStart),
+    contractEnd: day(listing.contractEnd),
+    availableFrom: day(listing.availableFrom),
+    availableUntil: day(listing.availableUntil),
+  });
+  if (!insideWindow(span.checkIn, span.checkOut, window)) return { ok: false, error: "outsideWindow" };
+  if (!onWorkingDays(unit, span.checkIn, span.checkOut, listing.workingDays)) return { ok: false, error: "closedDay" };
+
   const phone = parseMobileMoney(request.payment.method, request.payment.phone);
   if (!phone.ok) return { ok: false, error: "phone" };
 
@@ -173,7 +212,8 @@ export async function createRentalBooking(request: RentalRequest, now: Date = ne
   // Deposit for long stays: a percent of one month's rent (a year's rent / 12).
   const monthRent = unit === "MONTH" ? unitPrice : unit === "YEAR" ? Math.round(unitPrice / 12) : 0;
   const deposit = long && settings.monthlyDepositPercent ? Math.round((monthRent * settings.monthlyDepositPercent) / 100) : 0;
-  const fees = { commissionBps: settings.commissionBps, guestFeeBps: settings.guestFeeBps };
+  // Category commission and fee model in force now; kept on the booking (policySnapshot.fees).
+  const fees = feesFor(settings, listing.type);
   let promo: Extract<PromoCheck, { ok: true }> | null = null;
   if (request.promoCode) {
     const checked = await checkPromo(db, request.promoCode, unitPrice * paidUnits, now);
@@ -276,6 +316,25 @@ async function holdAndInsert(args: {
           select: { id: true },
         });
         if (clash) throw new Unavailable();
+        // Maintenance / unavailable / offline blocks: the whole place blocks everything; a room block blocks that room
+        // (and a whole-place booking, which needs every room).
+        const blocked = await tx.availabilityBlock.findFirst({
+          where: {
+            listingId,
+            endedAt: null,
+            startsAt: { lt: endAt },
+            OR: [{ endsAt: null }, { endsAt: { gt: startAt } }],
+            ...(roomId ? { roomId: { in: [roomId] } } : {}),
+          },
+          select: { id: true },
+        });
+        const wholeBlocked = roomId
+          ? await tx.availabilityBlock.findFirst({
+              where: { listingId, roomId: null, endedAt: null, startsAt: { lt: endAt }, OR: [{ endsAt: null }, { endsAt: { gt: startAt } }] },
+              select: { id: true },
+            })
+          : null;
+        if (blocked || wholeBlocked) throw new Unavailable();
         if (args.promoId && !(await claimPromoUse(tx, args.promoId))) throw new PromoGone();
         const created = await tx.booking.create({
           data: {
@@ -334,7 +393,20 @@ export async function bookedRanges(listingId: string, now: Date = new Date()): P
     select: { checkIn: true, checkOut: true, roomId: true },
     orderBy: { checkIn: "asc" },
   });
-  return rows.map((r) => ({ checkIn: asISO(r.checkIn), checkOut: asISO(r.checkOut), roomId: r.roomId }));
+  const blocks = await db.availabilityBlock.findMany({
+    where: { listingId, endedAt: null, OR: [{ endsAt: null }, { endsAt: { gt: now } }] },
+    select: { startsAt: true, endsAt: true, roomId: true },
+  });
+  // A block with no end shows as taken for the next two years (until someone ends it).
+  const kigaliDay = (d: Date) => new Date(d.getTime() + 2 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const blockRanges = blocks.map((b) => {
+    const end = b.endsAt ?? new Date(now.getTime() + 730 * 86_400_000);
+    const endDay = kigaliDay(end);
+    // A block ending mid-day still takes that day.
+    const checkOut = end.getTime() + 2 * 60 * 60 * 1000 === Date.parse(`${endDay}T00:00:00Z`) ? endDay : asISO(new Date(Date.parse(`${endDay}T00:00:00Z`) + 86_400_000));
+    return { checkIn: kigaliDay(b.startsAt), checkOut, roomId: b.roomId };
+  });
+  return [...rows.map((r) => ({ checkIn: asISO(r.checkIn), checkOut: asISO(r.checkOut), roomId: r.roomId })), ...blockRanges];
 }
 
 const GUEST_SELECT = {
@@ -447,7 +519,10 @@ export async function staffMoveBooking(
       data: { bookingId: booking.id, fromStatus: booking.status, toStatus: to, actorId: staffId, reason: to === "CHECKED_IN" ? "checked in" : "checked out" },
     });
     await audit(tx, { actorId: staffId, action: to === "CHECKED_IN" ? "booking.checkIn" : "booking.checkOut", entityType: "booking", entityId: reference });
-    if (to === "COMPLETED") await maybeCreateReward(tx, booking.id);
+    if (to === "COMPLETED") {
+      await maybeCreateReward(tx, booking.id);
+      await maybePromoterReward(tx, booking.id, now);
+    }
     return true;
   });
 }

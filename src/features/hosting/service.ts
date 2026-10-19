@@ -1,6 +1,7 @@
 import "server-only";
 import { audit } from "@/features/audit/service";
 import { notifyAdmins } from "@/features/notifications/service";
+import { moveListing } from "@/features/places/status-service";
 import { db } from "@/lib/db";
 import { listingInput, type ListingInput } from "./validation";
 
@@ -36,52 +37,53 @@ export type HostListing = NonNullable<Awaited<ReturnType<typeof getHostListing>>
  * Creates or updates a host's listing. Changes never publish by themselves: a published listing that is edited
  * goes back to review, so staff see every change before guests do.
  */
-export async function saveListing(hostId: string, id: string | null, raw: ListingInput): Promise<SaveResult> {
+export async function saveListing(
+  hostId: string,
+  id: string | null,
+  raw: ListingInput,
+  /** Staff saving for an owner (or for VIIPA): edits keep the current status, nothing goes back to review. */
+  staff?: { staffId: string; operator?: "OWNER" | "VIIPA" },
+  /** Who is saving, when not the owner (a manager of the place); recorded in the audit log. */
+  editorId?: string,
+): Promise<SaveResult> {
   const parsed = listingInput.safeParse(raw);
   if (!parsed.success) {
     const errors: Record<string, string> = {};
     for (const issue of parsed.error.issues) errors[issue.path.join(".") || "form"] ??= issue.message;
     return { ok: false, errors };
   }
-  const { rates, ...fields } = parsed.data;
+  const { rates, availableFrom, availableUntil, ...rest } = parsed.data;
+  const asDate = (v: string | null) => (v ? new Date(`${v}T00:00:00Z`) : null);
+  const fields = { ...rest, availableFrom: asDate(availableFrom), availableUntil: asDate(availableUntil) };
 
   return db.$transaction(async (tx) => {
     if (id === null) {
-      const created = await tx.listing.create({ data: { ...fields, hostId, status: "DRAFT", rates: { create: rates } } });
+      const created = await tx.listing.create({
+        data: { ...fields, hostId, status: "DRAFT", operator: staff?.operator ?? "OWNER", rates: { create: rates } },
+      });
       await tx.user.update({ where: { id: hostId }, data: { isHost: true } });
-      await audit(tx, { actorId: hostId, action: "listing.create", entityType: "listing", entityId: created.id });
+      await audit(tx, { actorId: staff?.staffId ?? hostId, action: "listing.create", entityType: "listing", entityId: created.id, data: staff ? { forHost: hostId } : undefined });
       return { ok: true, id: created.id };
     }
     const existing = await tx.listing.findFirst({ where: { id, hostId, status: { not: "ARCHIVED" } }, select: { status: true } });
     if (!existing) return { ok: false, error: "notFound" };
-    const status = existing.status === "PUBLISHED" ? "PENDING_REVIEW" : existing.status;
+    const status = existing.status === "PUBLISHED" && !staff ? "PENDING_REVIEW" : existing.status;
     await tx.rateOption.deleteMany({ where: { listingId: id } });
     await tx.listing.update({ where: { id }, data: { ...fields, status, rates: { create: rates } } });
-    await audit(tx, { actorId: hostId, action: "listing.update", entityType: "listing", entityId: id, data: { from: existing.status, to: status } });
-    if (existing.status === "PUBLISHED") await notifyAdmins(tx, "listingSubmitted", { title: fields.title }, `/admin/listings/${id}`);
+    await audit(tx, { actorId: staff?.staffId ?? editorId ?? hostId, action: "listing.update", entityType: "listing", entityId: id, data: { from: existing.status, to: status } });
+    if (existing.status === "PUBLISHED" && !staff) await notifyAdmins(tx, "listingSubmitted", { title: fields.title }, `/admin/listings/${id}`);
     return { ok: true, id };
   });
 }
 
-/** Draft or rejected → waiting for staff review. */
+/** Draft, rejected or sent back → waiting for staff review. */
 export async function submitForReview(hostId: string, id: string): Promise<boolean> {
-  return db.$transaction(async (tx) => {
-    const listing = await tx.listing.findFirst({ where: { id, hostId, status: { in: ["DRAFT", "REJECTED"] } }, select: { title: true, status: true } });
-    if (!listing) return false;
-    await tx.listing.update({ where: { id }, data: { status: "PENDING_REVIEW", rejectionReason: null } });
-    await audit(tx, { actorId: hostId, action: "listing.submit", entityType: "listing", entityId: id, data: { from: listing.status } });
-    await notifyAdmins(tx, "listingSubmitted", { title: listing.title }, `/admin/listings/${id}`);
-    return true;
-  });
+  return (await moveListing({ id: hostId }, id, "submit")).ok;
 }
 
 /** Takes a listing off the site for good (bookings and history stay). */
 export async function archiveListing(hostId: string, id: string): Promise<boolean> {
-  return db.$transaction(async (tx) => {
-    const { count } = await tx.listing.updateMany({ where: { id, hostId, status: { not: "ARCHIVED" } }, data: { status: "ARCHIVED" } });
-    if (count === 1) await audit(tx, { actorId: hostId, action: "listing.archive", entityType: "listing", entityId: id });
-    return count === 1;
-  });
+  return (await moveListing({ id: hostId }, id, "archive")).ok;
 }
 
 const MAX_PHOTOS = 20;

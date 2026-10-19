@@ -102,7 +102,7 @@ describe("getPublishedListing", () => {
     const found = await getPublishedListing(created.id);
     expect(found?.photos.map((p) => p.position)).toEqual([0, 1]);
     expect(found?.rates).toHaveLength(2);
-    expect(found?.host).toEqual({ name: "Sabrina Ghilaci", createdAt: expect.any(Date) });
+    expect(found?.host).toEqual({ name: "Sabrina Ghilaci", createdAt: expect.any(Date), image: null });
   });
 
   it("hides unpublished or unknown listings", async () => {

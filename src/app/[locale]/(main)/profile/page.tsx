@@ -1,7 +1,8 @@
-import { Bell, ChevronRight, Heart, House, KeyRound, LifeBuoy, MessageSquare, UserRound } from "lucide-react";
+import { Bell, ChevronRight, Heart, House, KeyRound, LifeBuoy, MessageSquare, QrCode, UserRound } from "lucide-react";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { Avatar } from "@/components/ui/Avatar";
+import { ProfilePhoto } from "@/features/users/components/ProfilePhoto";
+import { db } from "@/lib/db";
 import { PageContainer } from "@/components/ui/PageContainer";
 import { ProfileForm } from "@/features/users/components/ProfileForm";
 import { SignOutButton } from "@/features/users/components/SignOutButton";
@@ -25,6 +26,7 @@ const TILES = [
 export default async function ProfilePage() {
   const user = await requireUser("/profile");
   const profile = await getProfile(user.id);
+  const photo = (await db.user.findUnique({ where: { id: user.id }, select: { image: true } }))?.image ?? null;
   if (!profile) notFound();
   const [t, tNav, unread, settings] = await Promise.all([getTranslations("Profile"), getTranslations("Nav"), unreadCount(user.id), getSettings()]);
   const referral = settings.referralEnabled
@@ -39,7 +41,7 @@ export default async function ProfilePage() {
 
       {/* Who you are */}
       <section className={`${card} flex flex-col items-center px-6 py-8 text-center`}>
-        <Avatar name={profile.name} className="size-24 bg-orange-100 text-4xl text-orange-800" />
+        <ProfilePhoto name={profile.name} image={photo} />
         <p className="mt-4 text-2xl leading-8 font-bold tracking-[-0.02em] text-ink">{profile.name.split(" ")[0]}</p>
         <p className="text-sm text-muted">{user.isHost ? t("roleHost") : t("roleGuest")}</p>
       </section>
@@ -87,6 +89,13 @@ export default async function ProfilePage() {
           <Link href="/host" className={row}>
             <KeyRound className="size-6" strokeWidth={1.6} aria-hidden="true" />
             <span className="flex-1">{user.isHost ? t("yourListings") : t("hostYourPlace")}</span>
+            <ChevronRight className="size-5 text-ink/60" aria-hidden="true" />
+          </Link>
+        </li>
+        <li>
+          <Link href="/promote" className={row}>
+            <QrCode className="size-6" strokeWidth={1.6} aria-hidden="true" />
+            <span className="flex-1">{t("promote")}</span>
             <ChevronRight className="size-5 text-ink/60" aria-hidden="true" />
           </Link>
         </li>

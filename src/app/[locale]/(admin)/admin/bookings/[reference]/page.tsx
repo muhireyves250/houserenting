@@ -13,6 +13,8 @@ import { cn } from "@/lib/cn";
 import { dynamicMessage } from "@/lib/dynamic-message";
 import { formatRWF } from "@/lib/format";
 import { requireAdmin } from "@/lib/permissions";
+import { DecideRequest, NoShowButton, SettleRefund } from "@/features/stay/components/StaffStayPanels";
+import { priceChangeFor } from "@/features/stay/rules";
 
 type Props = { params: Promise<{ reference: string }> };
 const iso = (d: Date) => d.toISOString().slice(0, 10);
@@ -23,11 +25,12 @@ export default async function AdminBookingPage({ params }: Props) {
   if (!isBookingReference(reference)) notFound();
   const b = await bookingForStaff(reference);
   if (!b) notFound();
-  const [t, tBookings, tListings, tMoney, locale, names] = await Promise.all([
+  const [t, tBookings, tListings, tMoney, tStay, locale, names] = await Promise.all([
     getTranslations("Admin"),
     getTranslations("Bookings"),
     getTranslations("Listings"),
     getTranslations("Money"),
+    getTranslations("MyStay"),
     getLocale(),
     actorNames(b.events.map((e) => e.actorId)),
   ]);
@@ -48,6 +51,7 @@ export default async function AdminBookingPage({ params }: Props) {
           <>
             {b.status === "CONFIRMED" && iso(b.checkIn) <= todayISO() && <CheckInOut reference={b.reference} to="CHECKED_IN" />}
             {b.status === "CHECKED_IN" && <CheckInOut reference={b.reference} to="COMPLETED" />}
+            {b.status === "CONFIRMED" && iso(b.checkIn) < todayISO() && <NoShowButton reference={b.reference} />}
             <Link href={`/admin/listings/${b.listing.id}`} className="rounded-full border border-line bg-surface px-4 py-2 text-[13px] font-semibold text-ink hover:border-primary">
               {t("viewListing")}
             </Link>
@@ -123,6 +127,61 @@ export default async function AdminBookingPage({ params }: Props) {
           </Panel>
         </div>
         <div className="flex flex-col gap-5">
+          {b.requests.length > 0 && (
+            <Panel title={tStay("requestsTitle")}>
+              <ul className="flex flex-col gap-3">
+                {b.requests.map((r) => {
+                  const newOut = r.newCheckOut ? iso(r.newCheckOut) : null;
+                  const change = newOut ? priceChangeFor({ checkIn: iso(b.checkIn), checkOut: iso(b.checkOut), subtotal: b.subtotal }, newOut) : null;
+                  return (
+                    <li key={r.id} className="rounded-xl border border-line p-3 text-[14px]">
+                      <span className="flex items-center justify-between gap-2">
+                        <b className="font-semibold">{tStay(`kind.${r.kind}`)}</b>
+                        <span className="text-xs font-semibold text-muted">{tStay(`requestStatus.${r.status}`)}</span>
+                      </span>
+                      {newOut && <span className="block text-[13px] text-ink">{tStay("until", { date: formatStayDates(locale, newOut, newOut) })}</span>}
+                      {r.transferTo && <span className="block text-[13px] text-ink">{tStay("transferToShort", { place: r.transferTo })}</span>}
+                      <span className="block text-[13px] text-muted">{r.reason}</span>
+                      {r.status === "PENDING" && change !== null && r.kind === "EXTEND" && (
+                        <span className="block text-[13px] font-semibold text-ink">{tStay("extraCost", { amount: rwf(change) })}</span>
+                      )}
+                      {r.response && <span className="block text-[13px] text-ink">{tStay("staffReply", { text: r.response })}</span>}
+                      {r.status === "PENDING" && (
+                        <DecideRequest
+                          requestId={r.id}
+                          kind={r.kind}
+                          total={b.total}
+                          suggestedRefund={r.kind === "CANCEL" ? b.total : r.kind === "SHORTEN" && change !== null ? -change : null}
+                        />
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </Panel>
+          )}
+          {b.refundStatus !== "NONE" && (
+            <Panel title={tStay("refundTitle")}>
+              {b.refundStatus === "PENDING" ? (
+                <SettleRefund reference={b.reference} amount={b.refundAmount ?? 0} />
+              ) : (
+                <p className="text-[14px] text-ink">{tStay(`refund.${b.refundStatus}`, { amount: rwf(b.refundAmount ?? 0) })}</p>
+              )}
+            </Panel>
+          )}
+          {b.feedback && (
+            <Panel title={tStay("feedbackTitle")}>
+              <p className="text-[14px] font-semibold text-ink">{b.feedback.liked ? tStay("like") : tStay("dislike")}</p>
+              {b.feedback.comment && <p className="text-[13px] text-muted">{b.feedback.comment}</p>}
+            </Panel>
+          )}
+          {b.guestDocument && (
+            <Panel title={tStay("idTitle")}>
+              <a href={`/api/v1/bookings/${b.reference}/guest-id`} target="_blank" rel="noopener" className="text-[14px] font-semibold text-primary hover:underline">
+                {b.guestDocument.filename}
+              </a>
+            </Panel>
+          )}
           <Panel title={t("guest")}>
             <Facts
               rows={[

@@ -18,19 +18,19 @@ describe("BottomTabBar", () => {
     renderWithIntl(<BottomTabBar />, "fr");
     const nav = screen.getByRole("navigation", { name: "Navigation principale" });
     expect(nav.querySelectorAll("a")).toHaveLength(5);
-    expect(screen.getByRole("link", { name: "Rechercher" })).toHaveAttribute("href", "/");
+    expect(screen.getByRole("link", { name: "Accueil" })).toHaveAttribute("href", "/");
   });
 
   it("marks only the current tab as the current page", () => {
     renderWithIntl(<BottomTabBar />);
-    expect(screen.getByRole("link", { name: "Favorites" })).toHaveAttribute("aria-current", "page");
-    expect(screen.getByRole("link", { name: "Search" })).not.toHaveAttribute("aria-current");
+    expect(screen.getByRole("link", { name: "Saved" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "Home" })).not.toHaveAttribute("aria-current");
   });
 
   it("shows every tab's name under its icon, with the current one on the sliding pill", () => {
     renderWithIntl(<BottomTabBar />);
-    expect(screen.getByRole("link", { name: "Favorites" })).toHaveTextContent("Favorites");
-    expect(screen.getByRole("link", { name: "Chats" })).toHaveTextContent("Chats");
+    expect(screen.getByRole("link", { name: "Saved" })).toHaveTextContent("Saved");
+    expect(screen.getByRole("link", { name: "My stay" })).toHaveTextContent("My stay");
     expect(screen.getByTestId("tab-pill")).toBeInTheDocument();
   });
 });

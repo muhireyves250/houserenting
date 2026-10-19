@@ -2,12 +2,12 @@
 
 import { Check, LoaderCircle } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { PLACE_TYPES } from "@/features/search/params";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
-import { saveListingAction } from "../actions";
+import { adminSaveListingAction, saveListingAction } from "../actions";
 import { FACILITIES, RATE_UNITS, rateUnitsFor, type ListingInput } from "../validation";
 import { AreaField, Card, Chip, Field, SelectField } from "./fields";
 
@@ -44,6 +44,10 @@ export const EMPTY_LISTING: ListingInput = {
   depositMonths: null,
   discountPercent: null,
   rates: [],
+  availableFrom: null,
+  availableUntil: null,
+  workingDays: [],
+  guestIdPolicy: "NONE",
 };
 
 const NEW_RATE: Record<Unit, Rate> = {
@@ -58,13 +62,29 @@ const NEW_RATE: Record<Unit, Rate> = {
 const num = (value: string) => (value === "" ? 0 : Number(value));
 const optionalNum = (value: string) => (value === "" ? null : Number(value));
 const lines = (value: string) => value.split("\n");
+// Monday first; 0 is Sunday as in Date.getDay().
+const WEEK = [1, 2, 3, 4, 5, 6, 0];
+// 2026-10-18 was a Sunday, so adding the day number gives that weekday.
+const weekday = (locale: string, day: number) => new Intl.DateTimeFormat(locale, { weekday: "short", timeZone: "UTC" }).format(new Date(Date.UTC(2026, 9, 18 + day)));
 
 /** Create or edit a place: everything guests see except photos (added once the place is saved). */
-export function ListingForm({ listingId, initial, live }: { listingId: string | null; initial: ListingInput; live: boolean }) {
+export function ListingForm({
+  listingId,
+  initial,
+  live,
+  staff,
+}: {
+  listingId: string | null;
+  initial: ListingInput;
+  live: boolean;
+  /** Set when staff fill it in: for that owner (ownerId) or for VIIPA (null). */
+  staff?: { ownerId: string | null };
+}) {
   const t = useTranslations("Host");
   const tType = useTranslations("ListingType");
   const tFacility = useTranslations("Facility");
   const tListings = useTranslations("Listings");
+  const locale = useLocale();
   const router = useRouter();
   const [form, setForm] = useState<ListingInput>(initial);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -97,11 +117,11 @@ export function ListingForm({ listingId, initial, live }: { listingId: string | 
 
   function save() {
     startSaving(async () => {
-      const result = await saveListingAction(listingId, form);
+      const result = staff ? await adminSaveListingAction(listingId, form, staff.ownerId) : await saveListingAction(listingId, form);
       if (result.ok) {
         setErrors({});
         setStatus("saved");
-        if (listingId === null) router.replace(`/host/listings/${result.id}`);
+        if (listingId === null) router.replace(staff ? `/admin/listings/${result.id}/edit` : `/host/listings/${result.id}`);
         else router.refresh();
         return;
       }
@@ -319,6 +339,51 @@ export function ListingForm({ listingId, initial, live }: { listingId: string | 
             error={err("depositMonths")}
           />
         </div>
+      </Card>
+
+      <Card title={t("sections.availability")}>
+        <p className="-mt-2 mb-4 text-[13px] text-muted">{t("availabilityIntro")}</p>
+        <div className="grid grid-cols-2 gap-3">
+          <Field
+            label={t("fields.availableFrom")}
+            type="date"
+            value={form.availableFrom ?? ""}
+            onChange={(e) => set("availableFrom", e.target.value || null)}
+            error={err("availableFrom")}
+          />
+          <Field
+            label={t("fields.availableUntil")}
+            type="date"
+            min={form.availableFrom ?? undefined}
+            value={form.availableUntil ?? ""}
+            onChange={(e) => set("availableUntil", e.target.value || null)}
+            error={errors.availableUntil === "untilBeforeFrom" ? t("errors.untilBeforeFrom") : err("availableUntil")}
+          />
+        </div>
+        <p className="mt-4 mb-2 text-[13px] font-semibold text-ink">{t("fields.workingDays")}</p>
+        <div className="flex flex-wrap gap-2">
+          {WEEK.map((day) => {
+            const days = form.workingDays ?? [];
+            return (
+              <Chip key={day} on={days.includes(day)} onToggle={() => set("workingDays", days.includes(day) ? days.filter((d) => d !== day) : [...days, day])}>
+                {weekday(locale, day)}
+              </Chip>
+            );
+          })}
+        </div>
+        <p className="mt-1.5 text-xs text-muted">{t("workingDaysHint")}</p>
+        <SelectField
+          className="mt-4"
+          label={t("fields.guestIdPolicy")}
+          value={form.guestIdPolicy ?? "NONE"}
+          onChange={(e) => set("guestIdPolicy", e.target.value as NonNullable<ListingInput["guestIdPolicy"]>)}
+        >
+          {(["NONE", "UPLOAD_ONLINE", "AT_CHECK_IN"] as const).map((p) => (
+            <option key={p} value={p}>
+              {t(`guestIdPolicy.${p}`)}
+            </option>
+          ))}
+        </SelectField>
       </Card>
 
       <Card title={t("sections.extras")}>

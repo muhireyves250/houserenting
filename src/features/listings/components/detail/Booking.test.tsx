@@ -136,7 +136,7 @@ describe("Confirm and pay", () => {
     await userEvent.type(within(dialog).getByLabelText("Mobile money number"), "0788123456");
     await userEvent.click(within(dialog).getByRole("button", { name: "Next" }));
     await userEvent.click(within(dialog).getByRole("button", { name: "Book and hold these dates" }));
-    expect(await within(dialog).findByRole("alert")).toHaveTextContent("Someone just booked some of these nights. Choose other dates.");
+    expect(await within(dialog).findByRole("alert")).toHaveTextContent("Some of these dates aren't available any more. Choose other dates.");
   });
 
   it("Change closes the window so dates can be edited on the page", async () => {
@@ -167,7 +167,7 @@ describe("Rooms and fees", () => {
     { id: "r2", name: "Lake room", description: "", maxGuests: 3, facilities: [], rates: [{ unit: "NIGHT" as const, price: 30000 }] },
   ];
 
-  it("asks for a room first, then prices that room and adds the service fee", async () => {
+  it("asks for a room first, then prices that room with the service fee in one total", async () => {
     renderWithIntl(
       <StayProvider listingId="abc" rooms={rooms} bookingModel="ROOM_BY_ROOM" guestFeeBps={500} booked={[{ checkIn: "2026-10-20", checkOut: "2026-10-23", roomId: "r1" }]}>
         <RoomPicker wholeRates={[]} />
@@ -182,9 +182,10 @@ describe("Rooms and fees", () => {
     await userEvent.click(screen.getByRole("radio", { name: /Lake room/ }));
     expect(screen.getByRole("button", { name: /October 21, 2026/ })).toBeEnabled();
     await pickDates();
-    // 2 nights × 30,000 = 60,000, plus a 5% service fee = 63,000.
-    expect(screen.getByText("Service fee").nextSibling).toHaveTextContent("RWF 3,000");
+    // 2 nights × 30,000 = 60,000, plus a 5% service fee = 63,000, shown as one total (no fee row).
+    expect(screen.queryByText("Service fee")).toBeNull();
     expect(screen.getByText("Total").nextSibling).toHaveTextContent("RWF 63,000");
+    expect(screen.getByText("All fees included")).toBeInTheDocument();
     expect(screen.getByText("Room:").parentElement).toHaveTextContent("Room: Lake room");
   });
 });

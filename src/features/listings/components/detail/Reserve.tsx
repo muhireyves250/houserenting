@@ -404,17 +404,13 @@ export function ReserveDialog({
                       <span>{formatRWF(deposit, locale)}</span>
                     </div>
                   )}
-                  {guestFee > 0 && (
-                    <div className="mt-1 flex justify-between text-[15px] text-ink/80">
-                      <span>{t("serviceFee")}</span>
-                      <span>{formatRWF(guestFee, locale)}</span>
-                    </div>
-                  )}
                 </div>
+                {/* One total: platform fees are part of it, never a separate row. */}
                 <div className="flex justify-between border-t border-line pt-5 text-[15px] font-bold text-ink tabular-nums">
                   <span>{long ? t("dueNow") : t("total")} (RWF)</span>
                   <span>{formatRWF(dueNow, locale)}</span>
                 </div>
+                {guestFee > 0 && <p className="mt-1 text-right text-xs text-muted">{t("feesIncluded")}</p>}
                 {plan.unit === "MONTH" && plan.paidQuantity < plan.quantity && (
                   <p className="mt-2 text-[13px] text-muted">{t("monthlyNote", { months: plan.quantity, upfront: plan.paidQuantity })}</p>
                 )}

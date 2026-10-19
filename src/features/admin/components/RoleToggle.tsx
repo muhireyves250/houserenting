@@ -5,25 +5,31 @@ import { useTransition } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { setUserRoleAction } from "../actions";
 
-export function RoleToggle({ userId, role, self }: { userId: string; role: string; self: boolean }) {
+type Role = "USER" | "ADMIN" | "SUPER_ADMIN";
+
+/** Customer, VIIPA admin or super admin. Shown only to staff allowed to manage staff. */
+export function RoleToggle({ userId, role, self, canManage }: { userId: string; role: string; self: boolean; canManage: boolean }) {
   const t = useTranslations("Admin");
   const router = useRouter();
   const [pending, start] = useTransition();
   if (self) return <span className="text-xs text-muted">{t("you")}</span>;
-  const next = role === "ADMIN" ? "USER" : "ADMIN";
+  if (!canManage) return <span className="text-xs text-muted">{t("superAdminOnly")}</span>;
   return (
-    <button
-      type="button"
+    <select
+      aria-label={t("staffAccess")}
+      value={role}
       disabled={pending}
-      onClick={() =>
+      onChange={(e) =>
         start(async () => {
-          await setUserRoleAction(userId, next);
+          await setUserRoleAction(userId, e.target.value as Role);
           router.refresh();
         })
       }
-      className="rounded-lg bg-canvas px-3 py-1.5 text-[13px] font-semibold text-ink transition-colors hover:bg-line/70 disabled:opacity-50"
+      className="rounded-lg border border-line bg-surface px-3 py-1.5 text-[13px] font-semibold text-ink disabled:opacity-50"
     >
-      {next === "ADMIN" ? t("makeAdmin") : t("removeAdmin")}
-    </button>
+      <option value="USER">{t("roleName.USER")}</option>
+      <option value="ADMIN">{t("roleName.ADMIN")}</option>
+      <option value="SUPER_ADMIN">{t("roleName.SUPER_ADMIN")}</option>
+    </select>
   );
 }

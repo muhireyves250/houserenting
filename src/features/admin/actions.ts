@@ -34,9 +34,9 @@ export async function unpublishListingAction(listingId: string, why: string): Pr
   return { ok };
 }
 
-export async function setUserRoleAction(userId: string, role: "USER" | "ADMIN"): Promise<{ ok: boolean }> {
+export async function setUserRoleAction(userId: string, role: "USER" | "ADMIN" | "SUPER_ADMIN"): Promise<{ ok: boolean }> {
   const admin = await staff();
-  if (!admin || !id.safeParse(userId).success || (role !== "USER" && role !== "ADMIN")) return { ok: false };
+  if (!admin || !id.safeParse(userId).success || !["USER", "ADMIN", "SUPER_ADMIN"].includes(role)) return { ok: false };
   const ok = await setUserRole(admin.id, userId, role);
   if (ok) revalidatePath("/[locale]/admin/users", "page");
   return { ok };

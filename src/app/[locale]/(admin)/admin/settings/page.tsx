@@ -19,6 +19,14 @@ export default async function AdminSettingsPage() {
         monthlyIdentity: settings.monthlyIdentity,
         referralEnabled: settings.referralEnabled,
         referralRewardAmount: settings.referralRewardAmount,
+        dislikeHideCount: settings.dislikeHideCount,
+        promoterEnabled: settings.promoterEnabled,
+        promoterRewardFixed: settings.promoterRewardFixed,
+        promoterRewardPercent: fromBps(settings.promoterRewardBps),
+        commissionByTypePercent: Object.fromEntries(Object.entries(settings.commissionByType ?? {}).map(([k, v]) => [k, fromBps(v)])),
+        feeModel: settings.feeModel,
+        vatPercent: fromBps(settings.vatBps),
+        citPercent: fromBps(settings.citBps),
         cancellationPolicy: settings.cancellationPolicy,
       }}
     />

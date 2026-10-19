@@ -2,6 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { cookies } from "next/headers";
+import { PROMOTER_COOKIE } from "@/features/promoters/cookie";
+import { attributeBooking } from "@/features/promoters/service";
 import { logger } from "@/lib/logger";
 import { getCurrentUser } from "@/lib/session";
 import { isBookingReference } from "./reference";
@@ -20,6 +23,15 @@ const input = z.object({
   payment: z.object({ method: z.enum(["mtn", "airtel"]), phone: z.string().max(20) }),
 });
 
+/** Credits the booking to the promoter whose QR link the guest opened (checked on the server). Never blocks booking. */
+async function creditPromoter(reference: string, guestId: string) {
+  try {
+    await attributeBooking(reference, guestId, (await cookies()).get(PROMOTER_COOKIE)?.value);
+  } catch (err) {
+    logger.warn({ err, reference }, "promoter attribution failed");
+  }
+}
+
 export type BookStayResult = { reference: string } | { error: BookingError | "auth" | "failed" };
 
 export async function bookStayAction(raw: unknown): Promise<BookStayResult> {
@@ -30,6 +42,7 @@ export async function bookStayAction(raw: unknown): Promise<BookStayResult> {
   try {
     const result = await createBooking({ guestId: user.id, ...parsed.data });
     if (!result.ok) return { error: result.error };
+    await creditPromoter(result.reference, user.id);
     revalidatePath("/[locale]/bookings", "page");
     revalidatePath(`/[locale]/listings/${parsed.data.listingId}`, "page");
     return { reference: result.reference };
@@ -69,6 +82,7 @@ export async function bookMonthlyAction(raw: unknown): Promise<BookStayResult> {
   try {
     const result = await createMonthlyBooking({ guestId: user.id, ...parsed.data });
     if (!result.ok) return { error: result.error };
+    await creditPromoter(result.reference, user.id);
     revalidatePath("/[locale]/bookings", "page");
     return { reference: result.reference };
   } catch (err) {
@@ -108,6 +122,7 @@ export async function bookRentalAction(raw: unknown): Promise<BookStayResult> {
   try {
     const result = await createRentalBooking({ guestId: user.id, ...parsed.data });
     if (!result.ok) return { error: result.error };
+    await creditPromoter(result.reference, user.id);
     revalidatePath("/[locale]/bookings", "page");
     revalidatePath(`/[locale]/listings/${parsed.data.listingId}`, "page");
     return { reference: result.reference };

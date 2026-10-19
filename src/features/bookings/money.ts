@@ -1,4 +1,22 @@
-export type FeeConfig = { commissionBps: number | null; guestFeeBps: number | null };
+export type FeeModel = "ADD_ON" | "INCLUDED";
+export type FeeConfig = { commissionBps: number | null; guestFeeBps: number | null; model?: FeeModel };
+
+/**
+ * The fees for one booking: the commission for the place's category (or the default), and the guest fee only when
+ * fees are added on top. With fees included, guests pay the listed price and the platform's share comes out of it.
+ */
+export function feesFor(
+  settings: { commissionBps: number | null; guestFeeBps: number | null; feeModel?: FeeModel; commissionByType?: Record<string, number> | null },
+  placeType: string,
+): FeeConfig {
+  const model = settings.feeModel ?? "ADD_ON";
+  const byType = settings.commissionByType?.[placeType];
+  return {
+    commissionBps: typeof byType === "number" && byType >= 0 ? byType : settings.commissionBps,
+    guestFeeBps: model === "INCLUDED" ? null : settings.guestFeeBps,
+    model,
+  };
+}
 
 /** A promo discount and who pays for it: the platform (the owner still gets the full price) or the owner. */
 export type Discount = { amount: number; fundedBy: "PLATFORM" | "HOST" };

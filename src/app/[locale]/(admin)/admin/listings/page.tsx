@@ -1,4 +1,4 @@
-import { ChevronRight, House } from "lucide-react";
+import { ChevronRight, House, Plus } from "lucide-react";
 import Image from "next/image";
 import { getLocale, getTranslations } from "next-intl/server";
 import { allListings } from "@/features/admin/stats";
@@ -7,8 +7,9 @@ import { HostStatus } from "@/features/hosting/components/HostStatus";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { requireAdmin } from "@/lib/permissions";
+import { contractsEnding } from "@/features/places/status-service";
 
-const STATUSES = ["PENDING_REVIEW", "PUBLISHED", "REJECTED", "DRAFT"] as const;
+const STATUSES = ["PENDING_REVIEW", "PUBLISHED", "CHANGES_REQUESTED", "HIDDEN", "PAUSED", "SUSPENDED", "REJECTED", "DRAFT"] as const;
 type Status = (typeof STATUSES)[number];
 type Props = { searchParams: Promise<{ status?: string }> };
 
@@ -16,20 +17,38 @@ export default async function AdminListingsPage({ searchParams }: Props) {
   await requireAdmin("/admin/listings");
   const raw = (await searchParams).status;
   // With no filter chosen: what waits for review, or everything when nothing does.
-  let status: Status | undefined = STATUSES.includes(raw as Status) ? (raw as Status) : raw === "all" ? undefined : "PENDING_REVIEW";
+  const endingSoon = raw === "ending";
+  let status: Status | undefined = STATUSES.includes(raw as Status) ? (raw as Status) : raw === "all" || endingSoon ? undefined : "PENDING_REVIEW";
   let listings = await allListings(status);
+  // Agreements ending within a month (from the dashboard's renewal reminder).
+  if (endingSoon) {
+    const ids = new Set((await contractsEnding()).map((l) => l.id));
+    listings = listings.filter((l) => ids.has(l.id));
+  }
   if (!raw && listings.length === 0) {
     status = undefined;
     listings = await allListings();
   }
-  const [t, tHost, tType, locale] = await Promise.all([getTranslations("Admin"), getTranslations("Host"), getTranslations("ListingType"), getLocale()]);
-  const filters: { value: Status | "all"; label: string }[] = [...STATUSES.map((s) => ({ value: s, label: tHost(`status.${s}`) })), { value: "all", label: t("all") }];
+  const [t, tHost, tType, tPlaces, locale] = await Promise.all([
+    getTranslations("Admin"),
+    getTranslations("Host"),
+    getTranslations("ListingType"),
+    getTranslations("Places"),
+    getLocale(),
+  ]);
+  const filters: { value: Status | "ending" | "all"; label: string }[] = [...STATUSES.map((s) => ({ value: s, label: tHost(`status.${s}`) })), { value: "ending", label: tPlaces("endingSoon") }, { value: "all", label: t("all") }];
 
   return (
     <div className="flex flex-col gap-5">
+      <div className="flex justify-end">
+        <Link href="/admin/listings/new" className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-[14px] font-semibold text-white hover:bg-primary-hover">
+          <Plus className="size-4" aria-hidden="true" />
+          {tPlaces("addPlace")}
+        </Link>
+      </div>
       <div className="flex flex-wrap gap-2">
         {filters.map((f) => {
-          const on = (status ?? "all") === f.value;
+          const on = (endingSoon ? "ending" : (status ?? "all")) === f.value;
           return (
             <Link
               key={f.value}

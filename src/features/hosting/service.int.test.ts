@@ -18,6 +18,8 @@ beforeEach(async () => {
       { id: "admin", name: "Admin", email: "admin@example.com", role: "ADMIN" },
     ],
   });
+  // Owner-run places need checked payout details before they go live.
+  await db.payoutAccount.create({ data: { userId: "host", method: "MOBILE_MONEY", accountName: "Host", accountNumber: "0788000000", verifiedAt: new Date() } });
 });
 
 async function created() {

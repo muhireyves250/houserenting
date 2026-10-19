@@ -7,9 +7,12 @@ datasource db {
   provider = "postgresql"
 }
 
+/// Platform roles: customers and owners are USER; VIIPA staff are ADMIN; SUPER_ADMIN also manages staff.
+/// Roles inside a place (manager, receptionist) are PlaceMember rows; restaurant roles are RestaurantMember rows.
 enum Role {
   USER
   ADMIN
+  SUPER_ADMIN
 }
 
 enum UserStatus {
@@ -18,42 +21,49 @@ enum UserStatus {
 }
 
 model User {
-  id            String     @id
-  name          String
-  email         String     @unique
-  emailVerified Boolean    @default(false)
-  image         String?
-  phone         String?
-  locale        String     @default("en")
-  role          Role       @default(USER)
-  isHost        Boolean    @default(false)
-  status        UserStatus @default(ACTIVE)
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-  sessions      Session[]
-  accounts      Account[]
-  listings      Listing[]
-  favorites     Favorite[]
-  bookings      Booking[]
-  auditLogs     AuditLog[]
-  questions     ListingQuestion[] @relation("asker")
-  answers       ListingQuestion[] @relation("answerer")
-  reviews       Review[]
-  notifications Notification[]
-  tickets       SupportTicket[]
-  ticketMessages SupportMessage[]
+  id               String             @id
+  name             String
+  email            String             @unique
+  emailVerified    Boolean            @default(false)
+  image            String?
+  phone            String?
+  locale           String             @default("en")
+  role             Role               @default(USER)
+  isHost           Boolean            @default(false)
+  status           UserStatus         @default(ACTIVE)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  sessions         Session[]
+  accounts         Account[]
+  listings         Listing[]
+  favorites        Favorite[]
+  bookings         Booking[]
+  auditLogs        AuditLog[]
+  questions        ListingQuestion[]  @relation("asker")
+  answers          ListingQuestion[]  @relation("answerer")
+  reviews          Review[]
+  notifications    Notification[]
+  tickets          SupportTicket[]
+  ticketMessages   SupportMessage[]
   /// Code this person shares to invite friends (made when first needed).
-  referralCode  String?        @unique
+  referralCode     String?            @unique
   /// Who invited this person (set once, never to themselves).
-  referredById  String?
-  referredBy    User?          @relation("referrals", fields: [referredById], references: [id], onDelete: SetNull)
-  referrals     User[]         @relation("referrals")
-  rewardsEarned ReferralReward[] @relation("rewardReferrer")
-  rewardFrom    ReferralReward?  @relation("rewardReferee")
-  settlements   Settlement[]
-  guestChats    Conversation[] @relation("chatGuest")
-  hostChats     Conversation[] @relation("chatHost")
-  messagesSent  Message[]
+  referredById     String?
+  referredBy       User?              @relation("referrals", fields: [referredById], references: [id], onDelete: SetNull)
+  referrals        User[]             @relation("referrals")
+  rewardsEarned    ReferralReward[]   @relation("rewardReferrer")
+  rewardFrom       ReferralReward?    @relation("rewardReferee")
+  settlements      Settlement[]
+  payoutAccount    PayoutAccount?
+  guestChats       Conversation[]     @relation("chatGuest")
+  hostChats        Conversation[]     @relation("chatHost")
+  messagesSent     Message[]
+  placeMembers     PlaceMember[]
+  restaurantsOwned Restaurant[]       @relation("RestaurantOwner")
+  promoter         Promoter?
+  photo            UserPhoto?
+  restaurantRoles  RestaurantMember[]
+  foodOrders       FoodOrder[]        @relation("OrderCustomer")
 
   @@map("user")
 }
@@ -120,14 +130,53 @@ enum ListingType {
   PRIVATE_HOUSE
   LODGE
   ROOM
+  GUEST_HOUSE
+  OTHER
 }
 
+/// DRAFT → PENDING_REVIEW (submitted / under review) → PUBLISHED, or CHANGES_REQUESTED / REJECTED.
+/// A live place can be HIDDEN (staff), PAUSED (owner) or SUSPENDED (staff); ARCHIVED is final. Only PUBLISHED is bookable.
 enum ListingStatus {
   DRAFT
   PENDING_REVIEW
   PUBLISHED
   REJECTED
   ARCHIVED
+  CHANGES_REQUESTED
+  HIDDEN
+  PAUSED
+  SUSPENDED
+}
+
+/// Who runs the place day to day: its owner, or VIIPA itself.
+enum Operator {
+  OWNER
+  VIIPA
+}
+
+/// How a guest's ID or passport is handled for this place.
+enum GuestIdPolicy {
+  NONE
+  UPLOAD_ONLINE
+  AT_CHECK_IN
+}
+
+enum BlockKind {
+  MAINTENANCE
+  UNAVAILABLE
+  OFFLINE_BOOKING
+}
+
+enum DocumentKind {
+  OWNER_ID
+  OWNERSHIP_PROOF
+  MANAGEMENT_AUTHORIZATION
+  OTHER
+}
+
+enum PayoutMethod {
+  MOBILE_MONEY
+  BANK
 }
 
 enum RateUnit {
@@ -157,18 +206,18 @@ enum Facility {
 }
 
 model Listing {
-  id              String        @id @default(cuid())
+  id              String              @id @default(cuid())
   hostId          String
-  host            User          @relation(fields: [hostId], references: [id], onDelete: Cascade)
+  host            User                @relation(fields: [hostId], references: [id], onDelete: Cascade)
   title           String
   description     String
   type            ListingType
-  status          ListingStatus @default(DRAFT)
+  status          ListingStatus       @default(DRAFT)
   rejectionReason String?
   addressLine     String
   district        String
   city            String
-  country         String        @default("RW")
+  country         String              @default("RW")
   lat             Float
   lng             Float
   sizeM2          Int
@@ -176,17 +225,17 @@ model Listing {
   bedrooms        Int
   bathrooms       Int
   maxGuests       Int
-  petsAllowed     Boolean       @default(false)
+  petsAllowed     Boolean             @default(false)
   facilities      Facility[]
   characteristics String[]
   termsOfRent     String[]
   depositMonths   Int?
   discountPercent Int?
-  ratingAvg       Float         @default(0)
-  ratingCount     Int           @default(0)
+  ratingAvg       Float               @default(0)
+  ratingCount     Int                 @default(0)
   publishedAt     DateTime?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
   photos          ListingPhoto[]
   rates           RateOption[]
   favoritedBy     Favorite[]
@@ -194,9 +243,27 @@ model Listing {
   questions       ListingQuestion[]
   reviews         Review[]
   /// Whole place, single rooms, or either.
-  bookingModel    BookingModel  @default(WHOLE_PROPERTY)
+  bookingModel    BookingModel        @default(WHOLE_PROPERTY)
   roomUnits       Room[]
   conversations   Conversation[]
+  /// Shown in the "Highlighted" row on the home page.
+  featured        Boolean             @default(false)
+  /// Staff override: never hide this place automatically because of dislikes.
+  keepVisible     Boolean             @default(false)
+  operator        Operator            @default(OWNER)
+  /// Management agreement: bookings are only accepted inside it; staff are reminded a month before it ends.
+  contractStart   DateTime?           @db.Date
+  contractEnd     DateTime?           @db.Date
+  /// The place's own bookable window (inside the contract).
+  availableFrom   DateTime?           @db.Date
+  availableUntil  DateTime?           @db.Date
+  /// Days of the week bookings may start on (0 = Sunday … 6); empty = every day.
+  workingDays     Int[]               @default([])
+  guestIdPolicy   GuestIdPolicy       @default(NONE)
+  blocks          AvailabilityBlock[]
+  team            PlaceMember[]
+  restaurants     Restaurant[]
+  documents       ListingDocument[]
 
   @@index([status, city])
   @@index([hostId])
@@ -254,26 +321,36 @@ enum BookingStatus {
   COMPLETED
   CANCELLED
   EXPIRED
+  /// The guest never arrived (marked by staff after the check-in day).
+  NO_SHOW
+}
+
+/// Money going back to a guest after a paid booking is cancelled or shortened.
+enum RefundStatus {
+  NONE
+  PENDING
+  REFUNDED
+  DECLINED
 }
 
 /// Overlapping active bookings of one listing are refused by the database (exclusion constraint "booking_no_overlap").
 model Booking {
-  id             String         @id @default(cuid())
+  id             String           @id @default(cuid())
   /// Short code shown to guests and on receipts, e.g. "SR-7K2M9Q".
-  reference      String         @unique
+  reference      String           @unique
   listingId      String
-  listing        Listing        @relation(fields: [listingId], references: [id], onDelete: Restrict)
+  listing        Listing          @relation(fields: [listingId], references: [id], onDelete: Restrict)
   guestId        String
-  guest          User           @relation(fields: [guestId], references: [id], onDelete: Restrict)
+  guest          User             @relation(fields: [guestId], references: [id], onDelete: Restrict)
   /// Set when one room is booked; null = the whole place.
   roomId         String?
-  room           Room?          @relation(fields: [roomId], references: [id], onDelete: Restrict)
-  status         BookingStatus  @default(PENDING_PAYMENT)
-  checkIn        DateTime       @db.Date
-  checkOut       DateTime       @db.Date
+  room           Room?            @relation(fields: [roomId], references: [id], onDelete: Restrict)
+  status         BookingStatus    @default(PENDING_PAYMENT)
+  checkIn        DateTime         @db.Date
+  checkOut       DateTime         @db.Date
   /// How it was booked (hours, days, nights, weeks, months, years) and how many.
-  unit           RateUnit       @default(NIGHT)
-  quantity       Int            @default(1)
+  unit           RateUnit         @default(NIGHT)
+  quantity       Int              @default(1)
   /// Exact time the place is taken from and until (end not included); double booking is checked on these.
   startAt        DateTime
   endAt          DateTime
@@ -282,40 +359,50 @@ model Booking {
   /// Prices in whole RWF, worked out on the server when booked.
   nightlyPrice   Int
   /// nights × nightly price
-  subtotal       Int            @default(0)
+  subtotal       Int              @default(0)
   /// Platform fee paid by the guest (from settings at booking time).
-  guestFee       Int            @default(0)
+  guestFee       Int              @default(0)
   /// What the guest pays: subtotal + guestFee.
   total          Int
   /// Platform commission taken from the subtotal, and what the property owner is owed.
-  commission     Int            @default(0)
-  hostPayout     Int            @default(0)
-  currency       String         @default("RWF")
+  commission     Int              @default(0)
+  hostPayout     Int              @default(0)
+  currency       String           @default("RWF")
   paymentMethod  String?
   /// Masked payer number ("078 ••• 4567"); the full number is not stored.
   payerPhone     String?
   /// What the guest saw and agreed to: check-in/out times, house rules, cancellation terms.
   policySnapshot Json
   holdExpiresAt  DateTime?
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
   events         BookingEvent[]
   review         Review?
   /// Nightly stay or monthly rental.
-  rentalMode     RentalMode     @default(STAY)
+  rentalMode     RentalMode       @default(STAY)
   /// Monthly rentals: number of months, and months paid when booking.
   months         Int?
   upfrontMonths  Int?
   /// Monthly rentals: deposit due with the first payment.
-  deposit        Int            @default(0)
+  deposit        Int              @default(0)
   /// Promo code used and the discount it gave (and who funds it).
   promoCodeId    String?
-  promoCode      PromoCode?     @relation(fields: [promoCodeId], references: [id], onDelete: SetNull)
-  discount       Int            @default(0)
+  promoCode      PromoCode?       @relation(fields: [promoCodeId], references: [id], onDelete: SetNull)
+  discount       Int              @default(0)
   payments       Payment[]
   ledger         LedgerEntry[]
   referralReward ReferralReward?
   identity       BookingIdentity?
+  /// Refund after a paid cancellation or a shorter stay: how much, and where it stands.
+  refundStatus   RefundStatus     @default(NONE)
+  refundAmount   Int?
+  requests       StayRequest[]
+  feedback       StayFeedback?
+  guestDocument  GuestDocument?
+  /// The promoter whose QR link brought this guest (set on the server from their link, never by the guest).
+  promoterId     String?
+  promoter       Promoter?        @relation(fields: [promoterId], references: [id], onDelete: SetNull)
+  promoterReward PromoterReward?  @relation("promoterRewardBooking")
 
   @@index([guestId, checkIn])
   @@index([listingId, checkIn])
@@ -477,19 +564,19 @@ enum RoomStatus {
 }
 
 model Room {
-  id           String     @id @default(cuid())
-  listingId    String
-  listing      Listing    @relation(fields: [listingId], references: [id], onDelete: Cascade)
-  name         String
-  description  String     @default("")
-  maxGuests    Int
-  facilities   Facility[]
-  status       RoomStatus @default(AVAILABLE)
-  rates        RoomRate[]
-  position     Int        @default(0)
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  bookings     Booking[]
+  id          String     @id @default(cuid())
+  listingId   String
+  listing     Listing    @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  name        String
+  description String     @default("")
+  maxGuests   Int
+  facilities  Facility[]
+  status      RoomStatus @default(AVAILABLE)
+  rates       RoomRate[]
+  position    Int        @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  bookings    Booking[]
 
   @@index([listingId, position])
   @@map("room")
@@ -497,7 +584,7 @@ model Room {
 
 /// Business settings staff control (one row). Empty values mean "not set": nothing is charged or promised for them.
 model PlatformConfig {
-  id                    Int      @id @default(1)
+  id                    Int                 @id @default(1)
   /// Basis points (100 = 1%) of the stay price kept by the platform.
   commissionBps         Int?
   /// Basis points added on top of the stay price for the guest.
@@ -513,9 +600,22 @@ model PlatformConfig {
   /// Identity details asked from monthly renters (only what the business approved).
   monthlyIdentity       IdentityRequirement @default(NONE)
   /// Referrals: on/off, and the reward (RWF) for the inviter after the friend's first finished stay (null = no reward).
-  referralEnabled       Boolean  @default(false)
+  referralEnabled       Boolean             @default(false)
   referralRewardAmount  Int?
-  updatedAt             DateTime @updatedAt
+  /// Feedback: hide a place automatically after this many dislikes in the last 90 days (null = never).
+  dislikeHideCount      Int?
+  /// Promoters: on/off, and the reward per finished stay: a fixed RWF amount, or basis points of the stay price.
+  promoterEnabled       Boolean             @default(false)
+  promoterRewardFixed   Int?
+  promoterRewardBps     Int?
+  /// Commission per place category, in basis points: { "APARTMENT": 1200, ... }; missing = the default commission.
+  commissionByType      Json?
+  /// ADD_ON: the guest fee is added to the price; INCLUDED: guests pay the listed price and the platform's share comes from it.
+  feeModel              FeeModel @default(ADD_ON)
+  /// Tax rates for report estimates (basis points), until the tax treatment is confirmed.
+  vatBps                Int?
+  citBps                Int?
+  updatedAt             DateTime            @updatedAt
   updatedById           String?
 
   @@map("platformConfig")
@@ -553,12 +653,12 @@ model Payment {
 
 /// Every provider callback received, keyed by the provider's event id: a repeat is recognised and ignored.
 model PaymentEvent {
-  id          String   @id
-  provider    String
-  type        String
-  payload     Json
-  outcome     String
-  receivedAt  DateTime @default(now())
+  id         String   @id
+  provider   String
+  type       String
+  payload    Json
+  outcome    String
+  receivedAt DateTime @default(now())
 
   @@map("paymentEvent")
 }
@@ -573,6 +673,7 @@ enum LedgerKind {
   SETTLEMENT
   REFERRAL_REWARD
   REFUND
+  PROMOTER_REWARD
 }
 
 /// Money movements, never edited: the guest's payment, the platform's share, what owners are owed and paid.
@@ -729,4 +830,385 @@ model RoomRate {
 
   @@unique([roomId, unit])
   @@map("roomRate")
+}
+
+/// The place (or one room) can't be booked over this period: repairs, unavailable, or booked outside the site.
+/// No end = until someone ends it. Ended blocks are kept as history.
+model AvailabilityBlock {
+  id          String    @id @default(cuid())
+  listingId   String
+  listing     Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  /// One room; null = the whole place (all rooms).
+  roomId      String?
+  kind        BlockKind
+  startsAt    DateTime
+  endsAt      DateTime?
+  reason      String
+  createdById String
+  createdAt   DateTime  @default(now())
+  endedAt     DateTime?
+  endedById   String?
+
+  @@index([listingId, startsAt])
+  @@map("availabilityBlock")
+}
+
+/// Private property paperwork (owner ID, proof of ownership, management authorisation). Staff only.
+model ListingDocument {
+  id           String       @id @default(cuid())
+  listingId    String
+  listing      Listing      @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  kind         DocumentKind
+  filename     String
+  mimeType     String
+  size         Int
+  data         Bytes
+  uploadedById String
+  createdAt    DateTime     @default(now())
+
+  @@index([listingId])
+  @@map("listingDocument")
+}
+
+/// Where an owner's earnings are paid. Required before a paid listing goes live; staff verify it.
+model PayoutAccount {
+  id            String       @id @default(cuid())
+  userId        String       @unique
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  method        PayoutMethod
+  accountName   String
+  accountNumber String
+  bankName      String?
+  verifiedAt    DateTime?
+  verifiedById  String?
+  updatedAt     DateTime     @updatedAt
+
+  @@map("payoutAccount")
+}
+
+enum StayRequestKind {
+  EXTEND
+  SHORTEN
+  TRANSFER
+  CANCEL
+}
+
+enum StayRequestStatus {
+  PENDING
+  APPROVED
+  DECLINED
+  WITHDRAWN
+}
+
+/// A guest asks to change a paid stay: stay longer, leave earlier, move to another place, or cancel.
+model StayRequest {
+  id          String            @id @default(cuid())
+  bookingId   String
+  booking     Booking           @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  kind        StayRequestKind
+  status      StayRequestStatus @default(PENDING)
+  reason      String
+  /// EXTEND / SHORTEN: the new last day out (check-out date).
+  newCheckOut DateTime?         @db.Date
+  /// TRANSFER: where the guest would like to go instead (a town or a place).
+  transferTo  String?
+  /// Price difference worked out when deciding: positive = the guest pays more, negative = refund.
+  priceChange Int?
+  response    String?
+  decidedById String?
+  decidedAt   DateTime?
+  createdAt   DateTime          @default(now())
+
+  @@index([bookingId, createdAt])
+  @@index([status, createdAt])
+  @@map("stayRequest")
+}
+
+/// Like or dislike from a guest about their stay (one per booking).
+model StayFeedback {
+  bookingId String   @id
+  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  listingId String
+  liked     Boolean
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([listingId, liked, createdAt])
+  @@map("stayFeedback")
+}
+
+/// The guest's ID, uploaded before arrival when the place asks for it. Private to the guest, the owner and staff.
+model GuestDocument {
+  bookingId String   @id
+  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  filename  String
+  mimeType  String
+  size      Int
+  data      Bytes
+  createdAt DateTime @default(now())
+
+  @@map("guestDocument")
+}
+
+/// Who helps run a place besides its owner.
+enum PlaceRole {
+  /// Edits the place, rooms and closed dates; handles bookings and guest requests. No money, documents or team.
+  MANAGER
+  /// Front desk: sees bookings, checks guests in and out, marks no-shows.
+  RECEPTIONIST
+}
+
+model PlaceMember {
+  id        String    @id @default(cuid())
+  listingId String
+  listing   Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      PlaceRole
+  addedById String
+  createdAt DateTime  @default(now())
+
+  @@unique([listingId, userId])
+  @@index([userId])
+  @@map("placeMember")
+}
+
+enum RestaurantStatus {
+  DRAFT
+  PUBLISHED
+  HIDDEN
+}
+
+/// A restaurant (on its own, or inside a place guests stay at) that takes food orders.
+model Restaurant {
+  id           String             @id @default(cuid())
+  ownerId      String
+  owner        User               @relation("RestaurantOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+  /// Set when the restaurant belongs to a place; its guests see it first.
+  listingId    String?
+  listing      Listing?           @relation(fields: [listingId], references: [id], onDelete: SetNull)
+  name         String
+  description  String             @default("")
+  phone        String?
+  addressLine  String
+  district     String
+  city         String
+  lat          Float
+  lng          Float
+  /// Opening hours shown to customers, e.g. "Mon–Sat 07:00–22:00".
+  openingHours String             @default("")
+  photoUrl     String?
+  pickup       Boolean            @default(true)
+  delivery     Boolean            @default(false)
+  /// Flat delivery fee in RWF, and how far the restaurant delivers (km).
+  deliveryFee  Int                @default(0)
+  deliveryKm   Int                @default(5)
+  /// Not taking orders right now (closed, too busy) without being hidden.
+  paused       Boolean            @default(false)
+  status       RestaurantStatus   @default(DRAFT)
+  statusReason String?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  menu         MenuItem[]
+  team         RestaurantMember[]
+  orders       FoodOrder[]
+
+  @@index([status, city])
+  @@map("restaurant")
+}
+
+model MenuItem {
+  id           String     @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  /// Free grouping shown as menu sections ("Breakfast", "Drinks").
+  section      String     @default("")
+  name         String
+  description  String     @default("")
+  /// RWF
+  price        Int
+  available    Boolean    @default(true)
+  position     Int        @default(0)
+  createdAt    DateTime   @default(now())
+
+  @@index([restaurantId, position])
+  @@map("menuItem")
+}
+
+enum RestaurantRole {
+  MANAGER
+  STAFF
+  DELIVERY
+}
+
+model RestaurantMember {
+  id           String         @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant     @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role         RestaurantRole
+  addedById    String
+  createdAt    DateTime       @default(now())
+
+  @@unique([restaurantId, userId])
+  @@index([userId])
+  @@map("restaurantMember")
+}
+
+enum OrderStatus {
+  PLACED
+  ACCEPTED
+  PREPARING
+  READY
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+enum Fulfilment {
+  PICKUP
+  DELIVERY
+  /// Brought to the customer's room at the place they're staying.
+  TO_STAY
+}
+
+model FoodOrder {
+  id            String       @id @default(cuid())
+  /// Short code, e.g. "OR-7K2M9Q".
+  reference     String       @unique
+  restaurantId  String
+  restaurant    Restaurant   @relation(fields: [restaurantId], references: [id], onDelete: Restrict)
+  customerId    String
+  customer      User         @relation("OrderCustomer", fields: [customerId], references: [id], onDelete: Restrict)
+  status        OrderStatus  @default(PLACED)
+  fulfilment    Fulfilment
+  /// Where to deliver (DELIVERY), or the stay it goes to (TO_STAY).
+  address       String?
+  bookingId     String?
+  phone         String
+  note          String?
+  subtotal      Int
+  deliveryFee   Int          @default(0)
+  total         Int
+  /// Paid when handed over until online payment for orders is chosen.
+  paymentMethod String       @default("ON_DELIVERY")
+  courierId     String?
+  cancelReason  String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  items         OrderItem[]
+  events        OrderEvent[]
+
+  @@index([restaurantId, createdAt])
+  @@index([customerId, createdAt])
+  @@map("foodOrder")
+}
+
+model OrderItem {
+  id         String    @id @default(cuid())
+  orderId    String
+  order      FoodOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItemId String?
+  /// Name and price as ordered (menus change).
+  name       String
+  price      Int
+  quantity   Int
+
+  @@map("orderItem")
+}
+
+model OrderEvent {
+  id        String       @id @default(cuid())
+  orderId   String
+  order     FoodOrder    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  from      OrderStatus?
+  to        OrderStatus
+  actorId   String?
+  note      String?
+  createdAt DateTime     @default(now())
+
+  @@index([orderId, createdAt])
+  @@map("orderEvent")
+}
+
+enum PromoterStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+}
+
+/// Someone who brings guests with their own QR code / link and earns a reward per finished stay.
+model Promoter {
+  id           String           @id @default(cuid())
+  userId       String           @unique
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Short public code in their QR link, e.g. "P-7K2M9Q".
+  code         String           @unique
+  status       PromoterStatus   @default(PENDING)
+  /// Where rewards are paid.
+  payoutMethod PayoutMethod?
+  payoutName   String?
+  payoutNumber String?
+  bankName     String?
+  /// Where they promote (shown to staff when approving).
+  about        String           @default("")
+  statusReason String?
+  decidedById  String?
+  decidedAt    DateTime?
+  createdAt    DateTime         @default(now())
+  visits       PromoterVisit[]
+  rewards      PromoterReward[]
+  bookings     Booking[]
+
+  @@map("promoter")
+}
+
+/// One visitor per day per promoter (a hashed visitor key, never the raw address), for honest visit counts.
+model PromoterVisit {
+  id         String   @id @default(cuid())
+  promoterId String
+  promoter   Promoter @relation(fields: [promoterId], references: [id], onDelete: Cascade)
+  day        DateTime @db.Date
+  visitor    String
+  createdAt  DateTime @default(now())
+
+  @@unique([promoterId, day, visitor])
+  @@map("promoterVisit")
+}
+
+/// Earned when a guest the promoter brought finishes a paid stay; staff approve, then pay.
+model PromoterReward {
+  id          String       @id @default(cuid())
+  promoterId  String
+  promoter    Promoter     @relation(fields: [promoterId], references: [id], onDelete: Cascade)
+  bookingId   String       @unique
+  booking     Booking      @relation("promoterRewardBooking", fields: [bookingId], references: [id], onDelete: Restrict)
+  guestId     String
+  amount      Int
+  status      RewardStatus @default(PENDING)
+  createdAt   DateTime     @default(now())
+  decidedById String?
+  decidedAt   DateTime?
+  paidAt      DateTime?
+
+  @@index([promoterId, status])
+  @@map("promoterReward")
+}
+
+enum FeeModel {
+  ADD_ON
+  INCLUDED
+}
+
+/// A person's profile photo (small, public: shown next to their name). user.image points at it.
+model UserPhoto {
+  userId    String   @id
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mimeType  String
+  data      Bytes
+  updatedAt DateTime @updatedAt
+
+  @@map("userPhoto")
 }

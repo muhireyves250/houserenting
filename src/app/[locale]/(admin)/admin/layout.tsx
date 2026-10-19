@@ -16,7 +16,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   return (
     <AdminShell
       user={{ name: user.name, email: user.email }}
-      counts={{ listings: counts.listings, moderation: counts.moderation, support: counts.tickets, money: counts.payments + counts.rewards }}
+      counts={{ listings: counts.listings, moderation: counts.moderation, support: counts.tickets, money: counts.payments + counts.rewards, requests: counts.requests + counts.refunds }}
       unread={unread}
       languageSwitcher={
         <Suspense>

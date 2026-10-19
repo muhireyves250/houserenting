@@ -12,9 +12,14 @@ import { dynamicMessage } from "@/lib/dynamic-message";
 
 export default async function NotificationsPage() {
   const user = await requireUser("/notifications");
-  const [t, tSupport, locale, items] = await Promise.all([
+  const [t, tSupport, tHost, tStay, tPlaces, tFood, tPromoters, locale, items] = await Promise.all([
     getTranslations("Notifications"),
     getTranslations("Support"),
+    getTranslations("Host"),
+    getTranslations("MyStay"),
+    getTranslations("Places"),
+    getTranslations("Food"),
+    getTranslations("Promoters"),
     getLocale(),
     listNotifications(user.id),
   ]);
@@ -31,7 +36,19 @@ export default async function NotificationsPage() {
         <ul className="divide-y divide-line rounded-3xl bg-surface px-5 shadow-[0_10px_30px_-14px_rgba(16,24,40,0.3)] ring-1 ring-black/[0.04] max-md:ring-line">
           {items.map((n) => {
             const data = { ...(n.data as Record<string, string | number>) };
-            if (typeof data.status === "string") data.statusLabel = dynamicMessage(tSupport, `status.${data.status}`, data.status);
+            // Listing notices carry a listing status; ticket notices a ticket status.
+            if (typeof data.status === "string")
+              data.statusLabel =
+                n.kind === "orderStatus"
+                  ? dynamicMessage(tFood, `status.${data.status}`, data.status)
+                  : n.kind === "promoterStatus"
+                    ? dynamicMessage(tPromoters, `status.${data.status}`, data.status)
+                  : n.kind === "restaurantStatus"
+                    ? dynamicMessage(tFood, `restaurantStatus.${data.status}`, data.status)
+                    : dynamicMessage(n.kind === "listingStatus" ? tHost : tSupport, `status.${data.status}`, data.status);
+            if (typeof data.roleLabel === "string" && n.kind === "restaurantTeamAdded") data.roleLabel = dynamicMessage(tFood, `role.${data.roleLabel}`, data.roleLabel).toLowerCase();
+            if (typeof data.kindLabel === "string") data.kindLabel = dynamicMessage(tStay, `kind.${data.kindLabel}`, data.kindLabel).toLowerCase();
+            if (typeof data.roleLabel === "string" && n.kind === "teamAdded") data.roleLabel = dynamicMessage(tPlaces, `teamRole.${data.roleLabel}`, data.roleLabel).toLowerCase();
             const text = dynamicMessage(t, `kind.${n.kind}`, n.kind, data);
             const body = (
               <span className="flex gap-3 py-4">

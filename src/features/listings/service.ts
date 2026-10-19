@@ -123,13 +123,23 @@ export function featuredListings(limit = 6): Promise<ListingCardData[]> {
   });
 }
 
+/** Places staff chose to highlight on the home page, newest first. */
+export function highlightedListings(limit = 10): Promise<ListingCardData[]> {
+  return db.listing.findMany({
+    where: { status: "PUBLISHED", featured: true },
+    select: CARD_SELECT,
+    orderBy: [{ publishedAt: "desc" }, { id: "asc" }],
+    take: limit,
+  });
+}
+
 export function getPublishedListing(id: string) {
   return db.listing.findFirst({
     where: { id, status: "PUBLISHED" },
     include: {
       photos: { orderBy: { position: "asc" } },
       rates: true,
-      host: { select: { name: true, createdAt: true } },
+      host: { select: { name: true, createdAt: true, image: true } },
     },
   });
 }
@@ -140,6 +150,29 @@ export async function getPublishedListingByParam(candidates: string[]) {
   const found = await db.listing.findMany({ where: { id: { in: candidates.slice(0, 20) }, status: "PUBLISHED" }, select: { id: true } });
   const id = candidates.find((c) => found.some((f) => f.id === c));
   return id ? getPublishedListing(id) : null;
+}
+
+/**
+ * A listing that exists but isn't bookable now (hidden, paused, suspended, archived, being revised): its link shows
+ * an accurate notice rather than "not found" or another place. Drafts and submissions never existed publicly.
+ */
+export async function listingNotice(candidates: string[]) {
+  if (candidates.length === 0) return null;
+  const found = await db.listing.findMany({
+    where: { id: { in: candidates.slice(0, 20) }, status: { in: ["HIDDEN", "PAUSED", "SUSPENDED", "ARCHIVED", "CHANGES_REQUESTED"] } },
+    select: { id: true, title: true, status: true, city: true, photos: { select: { url: true }, orderBy: { position: "asc" }, take: 1 } },
+  });
+  const id = candidates.find((c) => found.some((f) => f.id === c));
+  return found.find((f) => f.id === id) ?? null;
+}
+
+/** A whole-place maintenance or unavailable block in force now (shown as a notice on the listing). */
+export function currentWholeBlock(listingId: string, now: Date = new Date()) {
+  return db.availabilityBlock.findFirst({
+    where: { listingId, roomId: null, endedAt: null, startsAt: { lte: now }, OR: [{ endsAt: null }, { endsAt: { gt: now } }] },
+    orderBy: { startsAt: "asc" },
+    select: { kind: true, endsAt: true },
+  });
 }
 
 export type ListingDetail = NonNullable<Awaited<ReturnType<typeof getPublishedListing>>>;

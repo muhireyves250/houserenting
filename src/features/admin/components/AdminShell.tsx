@@ -5,15 +5,18 @@ import {
   Bell,
   UserRound,
   CalendarCheck,
+  ChartColumn,
   ClipboardList,
   Home,
   LayoutDashboard,
   LifeBuoy,
   Menu,
   MessageSquareWarning,
+  QrCode,
   ScrollText,
   Settings,
   Users,
+  UtensilsCrossed,
   Wallet,
   X,
   type LucideIcon,
@@ -25,7 +28,7 @@ import { LogoMark } from "@/components/ui/Logo";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 
-type Key = "overview" | "listings" | "bookings" | "money" | "promotions" | "moderation" | "support" | "users" | "settings" | "audit" | "account" | "notifications";
+type Key = "reports" | "overview" | "listings" | "bookings" | "requests" | "restaurants" | "promoters" | "money" | "promotions" | "moderation" | "support" | "users" | "settings" | "audit" | "account" | "notifications";
 
 const GROUPS: { label: "operate" | "money" | "people" | "system"; items: { key: Key; href: string; icon: LucideIcon }[] }[] = [
   {
@@ -34,6 +37,8 @@ const GROUPS: { label: "operate" | "money" | "people" | "system"; items: { key: 
       { key: "overview", href: "/admin", icon: LayoutDashboard },
       { key: "listings", href: "/admin/listings", icon: Home },
       { key: "bookings", href: "/admin/bookings", icon: CalendarCheck },
+      { key: "requests", href: "/admin/requests", icon: ClipboardList },
+      { key: "restaurants", href: "/admin/restaurants", icon: UtensilsCrossed },
       { key: "moderation", href: "/admin/moderation", icon: MessageSquareWarning },
       { key: "support", href: "/admin/support", icon: LifeBuoy },
     ],
@@ -42,7 +47,9 @@ const GROUPS: { label: "operate" | "money" | "people" | "system"; items: { key: 
     label: "money",
     items: [
       { key: "money", href: "/admin/money", icon: Wallet },
+      { key: "reports", href: "/admin/reports", icon: ChartColumn },
       { key: "promotions", href: "/admin/promotions", icon: BadgePercent },
+      { key: "promoters", href: "/admin/promoters", icon: QrCode },
     ],
   },
   { label: "people", items: [{ key: "users", href: "/admin/users", icon: Users }] },
@@ -154,7 +161,7 @@ export function AdminShell({
   return (
     <div className="min-h-dvh bg-canvas">
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-line bg-surface lg:block">{sidebar}</aside>
+      <aside data-print-hide className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-line bg-surface lg:block">{sidebar}</aside>
 
       {/* Phone / tablet menu */}
       {open && (
@@ -174,7 +181,7 @@ export function AdminShell({
         </div>
       )}
 
-      <div className="lg:pl-64">
+      <div className="lg:pl-64 print:pl-0">
         <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-line bg-surface/90 px-4 backdrop-blur-md md:px-8">
           <button
             type="button"

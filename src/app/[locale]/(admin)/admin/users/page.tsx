@@ -48,9 +48,9 @@ export default async function AdminUsersPage({ searchParams }: Props) {
               </td>
               <td className={td}>
                 <span className="flex flex-wrap gap-1">
-                  {u.role === "ADMIN" && <span className={cn(badge, "bg-primary/10 text-primary")}>{t("staff")}</span>}
+                  {u.role !== "USER" && <span className={cn(badge, "bg-primary/10 text-primary")}>{t(`roleName.${u.role}`)}</span>}
                   {u.isHost && <span className={cn(badge, "bg-canvas text-ink/80")}>{t("hostBadge")}</span>}
-                  {u.role !== "ADMIN" && !u.isHost && <span className="text-[13px] text-muted">{t("guestRole")}</span>}
+                  {u.role === "USER" && !u.isHost && <span className="text-[13px] text-muted">{t("guestRole")}</span>}
                 </span>
               </td>
               <td className={`${td} text-[13px] text-ink/80 tabular-nums`}>{t("activityLine", { bookings: u._count.bookings, listings: u._count.listings })}</td>

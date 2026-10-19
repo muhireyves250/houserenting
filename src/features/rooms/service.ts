@@ -8,13 +8,13 @@ import { roomInput, ROOM_STATUSES, type RoomInput, type RoomStatus } from "./val
 
 type Actor = { id: string; role?: string | null };
 
-/** The listing, if the actor may manage it (its host, or staff). */
+/** The listing, if the actor may manage it (its owner, a manager of the place, or staff). */
 async function managed(tx: Prisma.TransactionClient, actor: Actor, listingId: string) {
   const listing = await tx.listing.findFirst({
     where: { id: listingId, status: { not: "ARCHIVED" } },
-    select: { id: true, hostId: true, status: true, title: true },
+    select: { id: true, hostId: true, status: true, title: true, team: { where: { userId: actor.id, role: "MANAGER" }, select: { id: true } } },
   });
-  if (!listing || (listing.hostId !== actor.id && !isAdmin(actor))) return null;
+  if (!listing || (listing.hostId !== actor.id && listing.team.length === 0 && !isAdmin(actor))) return null;
   return listing;
 }
 

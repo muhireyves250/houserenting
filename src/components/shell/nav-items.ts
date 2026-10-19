@@ -1,14 +1,22 @@
-import { Heart, House, MessageSquare, Search, User, type LucideIcon } from "lucide-react";
+import { CalendarDays, Heart, House, KeyRound, ShoppingBag, User, type LucideIcon } from "lucide-react";
 
-export type NavKey = "search" | "favorites" | "bookings" | "chats" | "profile";
+export type NavKey = "search" | "favorites" | "bookings" | "myStay" | "orders" | "profile";
 
+/** HOME, SAVED, BOOKINGS, MY STAY, PROFILE: the same tabs on phones and computers. */
 export const NAV_ITEMS: readonly { key: NavKey; href: string; icon: LucideIcon }[] = [
-  { key: "search", href: "/", icon: Search },
+  { key: "search", href: "/", icon: House },
   { key: "favorites", href: "/favorites", icon: Heart },
-  { key: "bookings", href: "/bookings", icon: House },
-  { key: "chats", href: "/chats", icon: MessageSquare },
+  { key: "bookings", href: "/bookings", icon: CalendarDays },
+  { key: "myStay", href: "/my-stay", icon: KeyRound },
   { key: "profile", href: "/profile", icon: User },
 ];
+
+/** ORDERS joins the tabs (before PROFILE) once restaurants take orders. */
+const ORDERS_ITEM = { key: "orders" as const, href: "/orders", icon: ShoppingBag };
+
+export function navItems(orders: boolean): readonly { key: NavKey; href: string; icon: LucideIcon }[] {
+  return orders ? [...NAV_ITEMS.slice(0, 4), ORDERS_ITEM, NAV_ITEMS[4]!] : NAV_ITEMS;
+}
 
 /** `pathname` is locale-less, as returned by next-intl's usePathname. */
 export function isActive(pathname: string, href: string): boolean {
@@ -17,7 +25,7 @@ export function isActive(pathname: string, href: string): boolean {
 }
 
 /** Pages that need an account; signed-out visitors go to the login modal first. */
-const MEMBERS_ONLY = new Set(["/favorites", "/bookings", "/chats", "/profile"]);
+const MEMBERS_ONLY = new Set(["/favorites", "/bookings", "/my-stay", "/orders", "/chats", "/profile"]);
 
 export type NavHref = string | { pathname: "/login"; query: { next: string } };
 

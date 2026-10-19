@@ -37,9 +37,12 @@ import { LocationMapLazy } from "@/features/listings/components/detail/LocationM
 import { SaveButton } from "@/features/listings/components/detail/SaveButton";
 import { ShareButton } from "@/features/listings/components/detail/ShareButton";
 import { discountedPrice } from "@/features/listings/pricing";
-import { getPublishedListingByParam, nearbyListings } from "@/features/listings/service";
+import { currentWholeBlock, getPublishedListingByParam, listingNotice, nearbyListings } from "@/features/listings/service";
+import { ListingNotice } from "@/features/listings/components/detail/ListingNotice";
 import { bookedRanges } from "@/features/bookings/service";
 import { getEnv } from "@/lib/env";
+import { feesFor } from "@/features/bookings/money";
+import { bookableWindow } from "@/features/bookings/availability";
 import QRCode from "qrcode";
 import { listingIdCandidates, listingPath } from "@/features/listings/links";
 import { AskQuestion } from "@/features/questions/components/AskQuestion";
@@ -54,8 +57,9 @@ import { Link } from "@/i18n/navigation";
 import { formatRWF } from "@/lib/format";
 import { getCurrentUser } from "@/lib/session";
 
-type Props = { params: Promise<{ id: string }> };
+type Props = { params: Promise<{ id: string }>; searchParams?: Promise<{ room?: string | string[] }> };
 
+const isoDay = (d: Date | null) => d?.toISOString().slice(0, 10) ?? null;
 const UNIT_ORDER = ["HOUR", "DAY", "NIGHT", "WEEK", "MONTH", "YEAR"] as const;
 
 const FACILITY_ICONS: Record<string, LucideIcon> = {
@@ -76,10 +80,11 @@ const FACILITY_ICONS: Record<string, LucideIcon> = {
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const listing = await getPublishedListingByParam(listingIdCandidates((await params).id));
-  return listing
-    ? { title: listing.title, description: listing.description.slice(0, 160), alternates: { canonical: listingPath(listing.id, listing.title) } }
-    : {};
+  const candidates = listingIdCandidates((await params).id);
+  const listing = await getPublishedListingByParam(candidates);
+  if (listing) return { title: listing.title, description: listing.description.slice(0, 160), alternates: { canonical: listingPath(listing.id, listing.title) } };
+  const notice = await listingNotice(candidates);
+  return notice ? { title: notice.title, robots: { index: false, follow: false } } : {};
 }
 
 function Section({ title, children, id }: { title?: string; children: ReactNode; id?: string }) {
@@ -91,9 +96,19 @@ function Section({ title, children, id }: { title?: string; children: ReactNode;
   );
 }
 
-export default async function ListingPage({ params }: Props) {
-  const listing = await getPublishedListingByParam(listingIdCandidates((await params).id));
-  if (!listing) notFound();
+export default async function ListingPage({ params, searchParams }: Props) {
+  // A room's permanent link (/rooms/<id>) lands here with that room already chosen.
+  const roomParam = (await searchParams)?.room;
+  const initialRoom = typeof roomParam === "string" ? roomParam : null;
+  const candidates = listingIdCandidates((await params).id);
+  const listing = await getPublishedListingByParam(candidates);
+  if (!listing) {
+    // Hidden, paused, suspended or archived: say so honestly on its own link.
+    const notice = await listingNotice(candidates);
+    if (notice) return <ListingNotice listing={notice} />;
+    notFound();
+  }
+  const block = await currentWholeBlock(listing.id);
 
   const [t, tFacility, tType, user, locale] = await Promise.all([
     getTranslations("Listings"),
@@ -176,6 +191,8 @@ export default async function ListingPage({ params }: Props) {
         night?.checkOutTime && t("checkOut", { time: night.checkOutTime }),
         t("maxGuests", { count: listing.maxGuests }),
         listing.petsAllowed ? t("petsAllowed") : t("noPets"),
+        listing.guestIdPolicy === "UPLOAD_ONLINE" && t("idUploadOnline"),
+        listing.guestIdPolicy === "AT_CHECK_IN" && t("idAtCheckIn"),
         ...listing.termsOfRent,
       ].filter((rule): rule is string => Boolean(rule)),
     ),
@@ -198,8 +215,9 @@ export default async function ListingPage({ params }: Props) {
       booked={booked}
       holdMinutes={holdMinutesFrom(settings)}
       rooms={rooms}
+      initialRoom={initialRoom}
       bookingModel={listing.bookingModel}
-      guestFeeBps={settings.guestFeeBps}
+      guestFeeBps={feesFor(settings, listing.type).guestFeeBps}
       cancellationPolicy={policyText(settings.cancellationPolicy, locale)}
       longStay={
         listing.type === "LODGE"
@@ -207,6 +225,13 @@ export default async function ListingPage({ params }: Props) {
           : { upfrontMonths: settings.monthlyUpfrontMonths, depositPercent: settings.monthlyDepositPercent, identity: settings.monthlyIdentity }
       }
       defaultUnit={rates.some((r) => r.unit === "NIGHT") ? "NIGHT" : (rates[0]?.unit ?? "NIGHT")}
+      window={bookableWindow({
+        contractStart: isoDay(listing.contractStart),
+        contractEnd: isoDay(listing.contractEnd),
+        availableFrom: isoDay(listing.availableFrom),
+        availableUntil: isoDay(listing.availableUntil),
+      })}
+      workingDays={listing.workingDays}
     >
       <TrackView
         listing={{
@@ -286,9 +311,17 @@ export default async function ListingPage({ params }: Props) {
               </p>
             </div>
 
+            {block && (
+              <p className="mb-4 rounded-2xl bg-amber-50 px-5 py-3.5 text-[14px] text-amber-900 ring-1 ring-amber-200/70">
+                {block.endsAt
+                  ? t("blockedUntil", { kind: t(`blockKind.${block.kind}`), date: new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeZone: "Africa/Kigali" }).format(block.endsAt) })
+                  : t("blockedOpen", { kind: t(`blockKind.${block.kind}`) })}
+              </p>
+            )}
+
             {/* Host */}
             <div className="flex items-center gap-4 border-t border-line py-6">
-              <Avatar name={listing.host.name} className="size-12 text-base" />
+              <Avatar name={listing.host.name} image={listing.host.image} className="size-12 text-base" />
               <div>
                 <p className="text-[15px] font-semibold text-ink">{t("hostedBy", { name: listing.host.name })}</p>
                 <p className="text-sm text-muted">{t("hostingSince", { year: listing.host.createdAt.getFullYear() })}</p>
@@ -390,7 +423,7 @@ export default async function ListingPage({ params }: Props) {
         <Section title={t("meetHost")}>
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:gap-12">
             <div className="flex w-full max-w-sm flex-col items-center gap-2 rounded-3xl bg-surface px-8 py-8 shadow-[0_12px_36px_-14px_rgba(16,24,40,0.35)]">
-              <Avatar name={listing.host.name} className="size-24 text-3xl" />
+              <Avatar name={listing.host.name} image={listing.host.image} className="size-24 text-3xl" />
               <p className="mt-2 font-display text-[26px] font-bold tracking-[-0.02em] text-ink">{listing.host.name}</p>
               <p className="text-sm text-muted">{t("hostingSince", { year: listing.host.createdAt.getFullYear() })}</p>
             </div>

@@ -27,7 +27,22 @@ export type NotificationKind =
   | "rewardApproved"
   | "rewardToCheck"
   | "payoutRecorded"
-  | "newMessage";
+  | "newMessage"
+  | "listingStatus"
+  | "contractEnding"
+  | "stayRequest"
+  | "stayRequestApproved"
+  | "stayRequestDeclined"
+  | "refundSent"
+  | "refundDeclined"
+  | "listingAutoHidden"
+  | "teamAdded"
+  | "restaurantStatus"
+  | "restaurantTeamAdded"
+  | "orderPlaced"
+  | "orderStatus"
+  | "promoterApplied"
+  | "promoterStatus";
 
 export async function notify(
   client: Client,
@@ -41,7 +56,7 @@ export async function notify(
 
 /** Tells every admin (e.g. a listing waits for review). */
 export async function notifyAdmins(client: Client, kind: NotificationKind, data: Record<string, string | number>, href: string | null) {
-  const admins = await client.user.findMany({ where: { role: "ADMIN" }, select: { id: true } });
+  const admins = await client.user.findMany({ where: { role: { in: ["ADMIN", "SUPER_ADMIN"] } }, select: { id: true } });
   if (admins.length === 0) return;
   await client.notification.createMany({ data: admins.map((a) => ({ userId: a.id, kind, data, href })) });
 }

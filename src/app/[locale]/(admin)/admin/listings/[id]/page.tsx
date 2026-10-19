@@ -1,7 +1,14 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
-import { ReviewListing } from "@/features/admin/components/ReviewListing";
+import { movesFrom } from "@/features/listings/lifecycle";
+import { AdminPlaceSettings, VerifyPayoutButton } from "@/features/places/components/AdminPlaceSettings";
+import { BlocksPanel } from "@/features/places/components/BlocksPanel";
+import { DocumentsPanel } from "@/features/places/components/DocumentsPanel";
+import { StatusActions } from "@/features/places/components/StatusActions";
+import { listingBlocks } from "@/features/places/blocks-service";
+import { listingDocuments } from "@/features/places/documents-service";
+import { maskAccount, payoutAccountOf } from "@/features/places/payout-service";
 import { listingForReview } from "@/features/admin/service";
 import { recentAudit } from "@/features/audit/service";
 import { formatKigaliDateTime } from "@/features/bookings/format";
@@ -38,6 +45,13 @@ export default async function AdminListingPage({ params }: Props) {
     getTranslations("Bookings"),
     getTranslations("Rooms"),
   ]);
+  const [tPlaces, blocks, documents, payout] = await Promise.all([
+    getTranslations("Places"),
+    listingBlocks(id),
+    listingDocuments(id),
+    payoutAccountOf(listing.host.id),
+  ]);
+  const day = (d: Date | null) => (d ? iso(d) : null);
   const iso = (d: Date) => d.toISOString().slice(0, 10);
 
   return (
@@ -46,6 +60,14 @@ export default async function AdminListingPage({ params }: Props) {
       <div className="flex flex-wrap items-center gap-3">
         <h2 className="text-[22px] leading-7 font-bold text-ink">{listing.title}</h2>
         <HostStatus status={listing.status} label={tHost(`status.${listing.status}`)} />
+        {listing.featured && <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-900">{tPlaces("featuredBadge")}</span>}
+        <span className="ml-auto flex gap-2">
+          {listing.status !== "ARCHIVED" && (
+            <Link href={`/admin/listings/${listing.id}/edit`} className="rounded-full border border-line bg-surface px-4 py-2 text-[13px] font-semibold text-ink hover:border-primary">
+              {tPlaces("editPlace")}
+            </Link>
+          )}
+        </span>
       </div>
 
       {listing.photos.length > 0 ? (
@@ -97,12 +119,49 @@ export default async function AdminListingPage({ params }: Props) {
         </p>
       </section>
 
-      {(listing.status === "PENDING_REVIEW" || listing.status === "PUBLISHED") && (
-        <section className={card}>
-          <h3 className="mb-3 text-[15px] font-semibold text-ink">{listing.status === "PENDING_REVIEW" ? t("decision") : t("takeDown")}</h3>
-          <ReviewListing listingId={listing.id} mode={listing.status === "PENDING_REVIEW" ? "review" : "live"} />
-        </section>
-      )}
+      <section className={card}>
+        <h3 className="mb-3 text-[15px] font-semibold text-ink">{tPlaces("statusTitle")}</h3>
+        {listing.rejectionReason && ["REJECTED", "CHANGES_REQUESTED", "HIDDEN", "SUSPENDED"].includes(listing.status) && (
+          <p className="mb-3 text-[13px] text-muted">{tPlaces("lastReason", { reason: listing.rejectionReason })}</p>
+        )}
+        <StatusActions listingId={listing.id} moves={movesFrom(listing.status, { isStaff: true, isOwner: false })} />
+      </section>
+
+      <section className={card}>
+        <h3 className="mb-3 text-[15px] font-semibold text-ink">{tPlaces("settingsTitle")}</h3>
+        <AdminPlaceSettings
+          listingId={listing.id}
+          initial={{ contractStart: day(listing.contractStart), contractEnd: day(listing.contractEnd), featured: listing.featured, operator: listing.operator, keepVisible: listing.keepVisible }}
+        />
+      </section>
+
+      <section className={card}>
+        <h3 className="mb-3 text-[15px] font-semibold text-ink">{tPlaces("payoutTitle")}</h3>
+        {payout ? (
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-[14px] text-ink">
+              {payout.method === "BANK" ? `${payout.bankName ?? ""} · ` : `${tPlaces("payoutMomo")} · `}
+              {payout.accountName} · <span className="font-mono">{maskAccount(payout.accountNumber)}</span>
+              <span className={payout.verifiedAt ? "ml-2 font-semibold text-emerald-700" : "ml-2 font-semibold text-amber-800"}>
+                {payout.verifiedAt ? tPlaces("payoutVerified") : tPlaces("payoutPending")}
+              </span>
+            </p>
+            {!payout.verifiedAt && <VerifyPayoutButton userId={listing.host.id} />}
+          </div>
+        ) : (
+          <p className="text-[13px] text-muted">{listing.operator === "VIIPA" ? tPlaces("payoutNotNeeded") : tPlaces("payoutNone")}</p>
+        )}
+      </section>
+
+      <section className={card}>
+        <h3 className="mb-3 text-[15px] font-semibold text-ink">{tPlaces("documentsTitle")}</h3>
+        <DocumentsPanel listingId={listing.id} documents={documents} />
+      </section>
+
+      <section className={card}>
+        <h3 className="mb-3 text-[15px] font-semibold text-ink">{tPlaces("blocksTitle")}</h3>
+        <BlocksPanel listingId={listing.id} rooms={rooms.map((r) => ({ id: r.id, name: r.name }))} active={blocks.active} past={blocks.past} />
+      </section>
 
       {rooms.length > 0 && (
         <Panel title={tRooms("title")} flush>
@@ -114,6 +173,7 @@ export default async function AdminListingPage({ params }: Props) {
                   <span className="block text-xs text-muted">
                     {room.rates.map((r) => `${formatRWF(r.price, locale)} ${tListings(`perUnit.${r.unit}`)}`).join(" · ")} · {tRooms("guests", { count: room.maxGuests })}
                   </span>
+                  <span className="block font-mono text-[11px] text-muted">{tPlaces("roomLink", { path: `/rooms/${room.id}` })}</span>
                 </span>
                 <RoomStatusSelect roomId={room.id} status={room.status} name={room.name} />
               </li>

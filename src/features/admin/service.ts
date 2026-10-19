@@ -1,6 +1,6 @@
 import "server-only";
 import { audit } from "@/features/audit/service";
-import { notify } from "@/features/notifications/service";
+import { moveListing } from "@/features/places/status-service";
 import { db } from "@/lib/db";
 
 export function pendingListings() {
@@ -32,47 +32,13 @@ export type ReviewDecision = { approve: true } | { approve: false; reason: strin
 
 /** Staff publish a listing waiting for review, or send it back with a reason the host sees. */
 export async function reviewListing(adminId: string, id: string, decision: ReviewDecision, now: Date = new Date()): Promise<boolean> {
-  const reason = decision.approve ? null : decision.reason.trim().slice(0, 500);
-  if (!decision.approve && !reason) return false;
-  return db.$transaction(async (tx) => {
-    const listing = await tx.listing.findFirst({ where: { id, status: "PENDING_REVIEW" }, select: { hostId: true, title: true, publishedAt: true } });
-    if (!listing) return false;
-    await tx.listing.update({
-      where: { id },
-      data: decision.approve
-        ? { status: "PUBLISHED", rejectionReason: null, publishedAt: listing.publishedAt ?? now }
-        : { status: "REJECTED", rejectionReason: reason },
-    });
-    await audit(tx, {
-      actorId: adminId,
-      action: decision.approve ? "listing.approve" : "listing.reject",
-      entityType: "listing",
-      entityId: id,
-      data: reason ? { reason } : undefined,
-    });
-    await notify(
-      tx,
-      listing.hostId,
-      decision.approve ? "listingApproved" : "listingRejected",
-      reason ? { title: listing.title, reason } : { title: listing.title },
-      decision.approve ? `/listings/${id}` : `/host/listings/${id}`,
-    );
-    return true;
-  });
+  const result = await moveListing({ id: adminId, role: "ADMIN" }, id, decision.approve ? "approve" : "reject", decision.approve ? "" : decision.reason, now);
+  return result.ok;
 }
 
-/** Staff can take a published listing down (e.g. after a complaint); the host can fix it and resubmit. */
+/** Staff take a live listing off the site (hidden) with a reason; they can show it again later. */
 export async function unpublishListing(adminId: string, id: string, reason: string): Promise<boolean> {
-  const why = reason.trim().slice(0, 500);
-  if (!why) return false;
-  return db.$transaction(async (tx) => {
-    const listing = await tx.listing.findFirst({ where: { id, status: "PUBLISHED" }, select: { hostId: true, title: true } });
-    if (!listing) return false;
-    await tx.listing.update({ where: { id }, data: { status: "REJECTED", rejectionReason: why } });
-    await audit(tx, { actorId: adminId, action: "listing.unpublish", entityType: "listing", entityId: id, data: { reason: why } });
-    await notify(tx, listing.hostId, "listingRejected", { title: listing.title, reason: why }, `/host/listings/${id}`);
-    return true;
-  });
+  return (await moveListing({ id: adminId, role: "ADMIN" }, id, "hide", reason)).ok;
 }
 
 export function findUsers(query: string) {
@@ -85,9 +51,21 @@ export function findUsers(query: string) {
   });
 }
 
-/** Grants or removes staff access. Admins can't change their own role (no accidental lock-out). */
-export async function setUserRole(adminId: string, userId: string, role: "USER" | "ADMIN"): Promise<boolean> {
+/** Whether this staff member may give or remove staff access: super admins, or any admin until a super admin exists. */
+export async function canManageStaff(actor: { id: string; role?: string | null }): Promise<boolean> {
+  if (actor.role === "SUPER_ADMIN") return true;
+  if (actor.role !== "ADMIN") return false;
+  return (await db.user.count({ where: { role: "SUPER_ADMIN" } })) === 0;
+}
+
+/**
+ * Grants or removes staff access (VIIPA admin or super admin). Only those allowed to manage staff may do it,
+ * and nobody changes their own role (no accidental lock-out).
+ */
+export async function setUserRole(adminId: string, userId: string, role: "USER" | "ADMIN" | "SUPER_ADMIN"): Promise<boolean> {
   if (adminId === userId) return false;
+  const actor = await db.user.findUnique({ where: { id: adminId }, select: { id: true, role: true } });
+  if (!actor || !(await canManageStaff(actor))) return false;
   return db.$transaction(async (tx) => {
     const user = await tx.user.findUnique({ where: { id: userId }, select: { role: true } });
     if (!user || user.role === role) return false;

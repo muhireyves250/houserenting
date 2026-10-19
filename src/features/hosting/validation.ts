@@ -37,6 +37,12 @@ const time = z
   .optional()
   .transform((v) => v ?? null);
 const count = (max: number) => z.number().int().min(0).max(max);
+const isoDate = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/)
+  .nullable()
+  .optional()
+  .transform((v) => v ?? null);
 
 const rate = z
   .object({
@@ -80,7 +86,13 @@ export const listingInput = z
     depositMonths: z.number().int().min(0).max(12).nullable(),
     discountPercent: z.number().int().min(0).max(90).nullable(),
     rates: z.array(rate).min(1).max(RATE_UNITS.length),
+    /** The place's own bookable dates (inside the management agreement), and the days bookings may start on. */
+    availableFrom: isoDate,
+    availableUntil: isoDate,
+    workingDays: z.array(z.number().int().min(0).max(6)).max(7).default([]).transform((d) => [...new Set(d)].sort()),
+    guestIdPolicy: z.enum(["NONE", "UPLOAD_ONLINE", "AT_CHECK_IN"]).default("NONE"),
   })
+  .refine((l) => !l.availableFrom || !l.availableUntil || l.availableUntil > l.availableFrom, { path: ["availableUntil"], message: "untilBeforeFrom" })
   .refine((l) => new Set(l.rates.map((r) => r.unit)).size === l.rates.length, { path: ["rates"], message: "duplicateUnit" })
   .refine((l) => l.rates.every((r) => rateUnitsFor(l.type).includes(r.unit)), { path: ["rates"], message: "lodgeUnits" });
 

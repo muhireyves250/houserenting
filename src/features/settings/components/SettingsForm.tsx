@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { AreaField, Card, Field, SelectField } from "@/features/hosting/components/fields";
 import { useRouter } from "@/i18n/navigation";
 import { updateSettingsAction } from "../actions";
+import { PLACE_TYPES } from "@/features/search/params";
 import type { SettingsInput } from "../validation";
 
 const num = (value: string) => (value.trim() === "" ? null : Number(value));
@@ -15,6 +16,7 @@ const show = (value: number | null) => (value === null ? "" : String(value));
 /** Platform business settings. Blank fields stay "not set": nothing is charged or promised for them. */
 export function SettingsForm({ initial, envHoldMinutes }: { initial: SettingsInput; envHoldMinutes: number }) {
   const t = useTranslations("Settings");
+  const tType = useTranslations("ListingType");
   const router = useRouter();
   const [form, setForm] = useState(initial);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -90,6 +92,80 @@ export function SettingsForm({ initial, envHoldMinutes }: { initial: SettingsInp
           error={err("referralRewardAmount")}
         />
         <p className="mt-3 text-[13px] text-muted">{t("referralHint")}</p>
+      </Card>
+      <Card title={t("feesTitle")}>
+        <SelectField label={t("feeModel")} value={form.feeModel ?? "ADD_ON"} onChange={(e) => set("feeModel", e.target.value as "ADD_ON" | "INCLUDED")}>
+          <option value="ADD_ON">{t("feeModelAddOn")}</option>
+          <option value="INCLUDED">{t("feeModelIncluded")}</option>
+        </SelectField>
+        <p className="mt-2 mb-4 text-[13px] text-muted">{t("feeModelHint")}</p>
+        <p className="mb-2 text-[13px] font-semibold text-ink">{t("commissionByType")}</p>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {PLACE_TYPES.map((type) => (
+            <Field
+              key={type}
+              label={tType(type)}
+              type="number"
+              step="0.01"
+              min={0}
+              max={50}
+              placeholder={show(form.commissionPercent ?? null)}
+              value={show(form.commissionByTypePercent?.[type] ?? null)}
+              onChange={(e) => set("commissionByTypePercent", { ...form.commissionByTypePercent, [type]: num(e.target.value) })}
+              error={err(`commissionByTypePercent.${type}`)}
+            />
+          ))}
+        </div>
+        <p className="mt-2 text-[13px] text-muted">{t("commissionByTypeHint")}</p>
+      </Card>
+      <Card title={t("taxTitle")}>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label={t("vat")} type="number" step="0.01" min={0} max={50} value={show(form.vatPercent ?? null)} onChange={(e) => set("vatPercent", num(e.target.value))} error={err("vatPercent")} />
+          <Field label={t("cit")} type="number" step="0.01" min={0} max={50} value={show(form.citPercent ?? null)} onChange={(e) => set("citPercent", num(e.target.value))} error={err("citPercent")} />
+        </div>
+        <p className="mt-3 text-[13px] text-muted">{t("taxHint")}</p>
+      </Card>
+      <Card title={t("promoters")}>
+        <label className="mb-3 flex cursor-pointer items-center gap-3 text-[15px] text-ink">
+          <input
+            type="checkbox"
+            checked={Boolean(form.promoterEnabled)}
+            onChange={(e) => set("promoterEnabled", e.target.checked)}
+            className="size-5 cursor-pointer accent-[var(--color-primary)]"
+          />
+          {t("promoterEnabled")}
+        </label>
+        <div className="grid grid-cols-2 gap-3">
+          <Field
+            label={t("promoterRewardFixed")}
+            type="number"
+            min={1}
+            value={show(form.promoterRewardFixed ?? null)}
+            onChange={(e) => set("promoterRewardFixed", num(e.target.value))}
+            error={err("promoterRewardFixed")}
+          />
+          <Field
+            label={t("promoterRewardPercent")}
+            type="number"
+            min={0}
+            step="0.5"
+            value={show(form.promoterRewardPercent ?? null)}
+            onChange={(e) => set("promoterRewardPercent", num(e.target.value))}
+            error={err("promoterRewardPercent")}
+          />
+        </div>
+        <p className="mt-3 text-[13px] text-muted">{t("promoterHint")}</p>
+      </Card>
+      <Card title={t("feedback")}>
+        <Field
+          label={t("dislikeHideCount")}
+          type="number"
+          min={1}
+          value={show(form.dislikeHideCount ?? null)}
+          onChange={(e) => set("dislikeHideCount", num(e.target.value))}
+          error={err("dislikeHideCount")}
+        />
+        <p className="mt-3 text-[13px] text-muted">{t("dislikeHint")}</p>
       </Card>
       <Card title={t("cancellation")}>
         <p className="-mt-2 mb-3 text-[13px] text-muted">{t("cancellationHint")}</p>

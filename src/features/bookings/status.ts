@@ -1,16 +1,18 @@
 import type { ISODate } from "@/features/search/date-range";
 
-export type BookingStatus = "PENDING_PAYMENT" | "CONFIRMED" | "CHECKED_IN" | "COMPLETED" | "CANCELLED" | "EXPIRED";
+export type BookingStatus = "PENDING_PAYMENT" | "CONFIRMED" | "CHECKED_IN" | "COMPLETED" | "CANCELLED" | "EXPIRED" | "NO_SHOW";
 
 /** The booking state machine: every status change must be listed here. */
 const TRANSITIONS: Record<BookingStatus, readonly BookingStatus[]> = {
   // Payment verified, hold ran out, or the guest let it go.
   PENDING_PAYMENT: ["CONFIRMED", "EXPIRED", "CANCELLED"],
-  CONFIRMED: ["CHECKED_IN", "CANCELLED"],
+  // Paid: arrives, is cancelled (unpaid by the guest, paid ones through an approved request), or never shows up.
+  CONFIRMED: ["CHECKED_IN", "CANCELLED", "NO_SHOW"],
   CHECKED_IN: ["COMPLETED"],
   COMPLETED: [],
   CANCELLED: [],
   EXPIRED: [],
+  NO_SHOW: [],
 };
 
 export function canTransition(from: BookingStatus, to: BookingStatus): boolean {

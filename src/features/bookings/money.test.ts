@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { priceBreakdown } from "./money";
+import { feesFor, priceBreakdown } from "./money";
 
 describe("priceBreakdown", () => {
   it("with nothing configured, the guest pays the stay and the owner gets all of it", () => {
@@ -44,5 +44,18 @@ describe("priceBreakdown", () => {
 
   it("never discounts below zero", () => {
     expect(priceBreakdown(5000, { commissionBps: null, guestFeeBps: null }, { amount: 9000, fundedBy: "PLATFORM" })).toMatchObject({ discount: 5000, total: 0 });
+  });
+});
+
+describe("feesFor", () => {
+  const settings = { commissionBps: 1000, guestFeeBps: 500, commissionByType: { LODGE: 1500 } };
+  it("uses the category's commission when set, else the default", () => {
+    expect(feesFor(settings, "LODGE").commissionBps).toBe(1500);
+    expect(feesFor(settings, "APARTMENT").commissionBps).toBe(1000);
+  });
+  it("adds the guest fee on top only in the add-on model", () => {
+    expect(feesFor(settings, "APARTMENT")).toEqual({ commissionBps: 1000, guestFeeBps: 500, model: "ADD_ON" });
+    expect(feesFor({ ...settings, feeModel: "INCLUDED" }, "APARTMENT")).toEqual({ commissionBps: 1000, guestFeeBps: null, model: "INCLUDED" });
+    expect(priceBreakdown(100_000, feesFor({ ...settings, feeModel: "INCLUDED" }, "APARTMENT")).total).toBe(100_000);
   });
 });

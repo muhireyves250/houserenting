@@ -7,10 +7,25 @@ import { ListingActions } from "@/features/hosting/components/ListingActions";
 import { ListingForm } from "@/features/hosting/components/ListingForm";
 import { ListingPhotosEditor } from "@/features/hosting/components/ListingPhotosEditor";
 import { getHostListing } from "@/features/hosting/service";
-import { rateUnitsFor, type ListingInput } from "@/features/hosting/validation";
+import { toListingInput } from "@/features/hosting/to-input";
+import { rateUnitsFor } from "@/features/hosting/validation";
 import { Link } from "@/i18n/navigation";
 import { uploadsEnabled } from "@/lib/cloudinary";
 import { requireUser } from "@/lib/session";
+import { movesFrom } from "@/features/listings/lifecycle";
+import { BlocksPanel } from "@/features/places/components/BlocksPanel";
+import { DocumentsPanel } from "@/features/places/components/DocumentsPanel";
+import { StatusActions } from "@/features/places/components/StatusActions";
+import { Card } from "@/features/hosting/components/fields";
+import { listingBlocks } from "@/features/places/blocks-service";
+import { listingDocuments } from "@/features/places/documents-service";
+import { payoutAccountOf } from "@/features/places/payout-service";
+import { can, placeRole } from "@/features/places/access";
+import { TeamPanel } from "@/features/places/components/TeamPanel";
+import { listTeam } from "@/features/places/team-service";
+import { redirect } from "@/i18n/navigation";
+import { db } from "@/lib/db";
+import { getLocale } from "next-intl/server";
 import { RoomsEditor } from "@/features/rooms/components/RoomsEditor";
 import { listingRooms } from "@/features/rooms/service";
 
@@ -19,43 +34,31 @@ type Props = { params: Promise<{ id: string }> };
 export default async function EditListingPage({ params }: Props) {
   const { id } = await params;
   const user = await requireUser(`/host/listings/${id}`);
-  const listing = await getHostListing(user.id, id);
+  // The owner and managers edit here; receptionists work from the bookings page.
+  const role = await placeRole(user, id);
+  if (role === "receptionist") redirect({ href: "/host/bookings", locale: await getLocale() });
+  if (!can(role, "edit")) notFound();
+  const owner = can(role, "money");
+  const hostId = (await db.listing.findUnique({ where: { id }, select: { hostId: true } }))!.hostId;
+  const listing = await getHostListing(hostId, id);
   if (!listing || listing.status === "ARCHIVED") notFound();
-  const [t, rooms] = await Promise.all([getTranslations("Host"), listingRooms(listing.id)]);
+  const [t, tPlaces, rooms, blocks, documents, payout, team] = await Promise.all([
+    getTranslations("Host"),
+    getTranslations("Places"),
+    listingRooms(listing.id),
+    listingBlocks(listing.id),
+    owner ? listingDocuments(listing.id) : [],
+    payoutAccountOf(hostId),
+    owner ? listTeam(listing.id) : [],
+  ]);
+  // Owners pause and resume here; sending for review and removing stay in ListingActions below.
+  const ownerMoves = owner ? movesFrom(listing.status, { isStaff: false, isOwner: true }).filter((m) => m === "pause" || m === "resume") : [];
 
-  const initial: ListingInput = {
-    title: listing.title,
-    description: listing.description,
-    type: listing.type,
-    bookingModel: listing.bookingModel,
-    addressLine: listing.addressLine,
-    district: listing.district,
-    city: listing.city,
-    lat: listing.lat,
-    lng: listing.lng,
-    sizeM2: listing.sizeM2,
-    rooms: listing.rooms,
-    bedrooms: listing.bedrooms,
-    bathrooms: listing.bathrooms,
-    maxGuests: listing.maxGuests,
-    petsAllowed: listing.petsAllowed,
-    facilities: listing.facilities,
-    characteristics: listing.characteristics,
-    termsOfRent: listing.termsOfRent,
-    depositMonths: listing.depositMonths,
-    discountPercent: listing.discountPercent,
-    rates: listing.rates.map(({ unit, price, minUnits, maxUnits, checkInTime, checkOutTime, dayStartTime, dayEndTime }) => ({
-      unit,
-      price,
-      minUnits,
-      maxUnits,
-      checkInTime,
-      checkOutTime,
-      dayStartTime,
-      dayEndTime,
-    })),
-  };
-  const canSubmit = listing.status === "DRAFT" || listing.status === "REJECTED";
+  const initial = toListingInput(listing);
+
+  const canSubmit = listing.status === "DRAFT" || listing.status === "REJECTED" || listing.status === "CHANGES_REQUESTED";
+  const reasonShown = ["REJECTED", "CHANGES_REQUESTED", "HIDDEN", "SUSPENDED"].includes(listing.status) && listing.rejectionReason;
+  const payoutNeeded = owner && listing.operator === "OWNER" && !payout?.verifiedAt;
 
   return (
     <PageContainer className="max-w-3xl py-6 md:py-10">
@@ -73,9 +76,17 @@ export default async function EditListingPage({ params }: Props) {
           </Link>
         )}
       </div>
-      {listing.status === "REJECTED" && listing.rejectionReason && (
+      {reasonShown && (
         <p className="mb-4 rounded-2xl bg-red-50 px-5 py-3.5 text-sm text-red-900 ring-1 ring-red-200/70">
-          {t("needsChanges", { reason: listing.rejectionReason })}
+          {t("needsChanges", { reason: listing.rejectionReason ?? "" })}
+        </p>
+      )}
+      {payoutNeeded && (
+        <p className="mb-4 rounded-2xl bg-amber-50 px-5 py-3.5 text-sm text-amber-900 ring-1 ring-amber-200/70">
+          {payout ? tPlaces("payoutAwaiting") : tPlaces("payoutNeeded")}{" "}
+          <Link href="/host/payout" className="font-semibold underline">
+            {tPlaces("payoutLink")}
+          </Link>
         </p>
       )}
       {listing.status === "PENDING_REVIEW" && (
@@ -91,7 +102,25 @@ export default async function EditListingPage({ params }: Props) {
             units={rateUnitsFor(listing.type)}
           />
         )}
-        <ListingActions listingId={listing.id} canSubmit={canSubmit} />
+        {ownerMoves.length > 0 && (
+          <Card title={tPlaces("statusTitle")}>
+            <StatusActions listingId={listing.id} moves={ownerMoves} />
+          </Card>
+        )}
+        <Card title={tPlaces("blocksTitle")}>
+          <BlocksPanel listingId={listing.id} rooms={rooms.map((r) => ({ id: r.id, name: r.name }))} active={blocks.active} past={blocks.past} />
+        </Card>
+        {owner && (
+          <>
+            <Card title={tPlaces("documentsTitle")}>
+              <DocumentsPanel listingId={listing.id} documents={documents} />
+            </Card>
+            <Card title={tPlaces("teamTitle")}>
+              <TeamPanel listingId={listing.id} members={team} />
+            </Card>
+            <ListingActions listingId={listing.id} canSubmit={canSubmit} />
+          </>
+        )}
       </div>
     </PageContainer>
   );

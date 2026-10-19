@@ -1,5 +1,6 @@
 import "server-only";
 import { cache } from "react";
+import { Prisma } from "@/generated/prisma/client";
 import { audit } from "@/features/audit/service";
 import type { FeeConfig } from "@/features/bookings/money";
 import { db } from "@/lib/db";
@@ -15,6 +16,14 @@ export type PlatformSettings = FeeConfig & {
   monthlyIdentity: "NONE" | "ID" | "ID_NATIONALITY";
   referralEnabled: boolean;
   referralRewardAmount: number | null;
+  dislikeHideCount: number | null;
+  promoterEnabled: boolean;
+  promoterRewardFixed: number | null;
+  promoterRewardBps: number | null;
+  commissionByType: Record<string, number> | null;
+  feeModel: "ADD_ON" | "INCLUDED";
+  vatBps: number | null;
+  citBps: number | null;
   cancellationPolicy: CancellationPolicy;
   updatedAt: Date | null;
 };
@@ -32,6 +41,14 @@ async function load(): Promise<PlatformSettings> {
     monthlyIdentity: row?.monthlyIdentity ?? "NONE",
     referralEnabled: row?.referralEnabled ?? false,
     referralRewardAmount: row?.referralRewardAmount ?? null,
+    dislikeHideCount: row?.dislikeHideCount ?? null,
+    promoterEnabled: row?.promoterEnabled ?? false,
+    promoterRewardFixed: row?.promoterRewardFixed ?? null,
+    promoterRewardBps: row?.promoterRewardBps ?? null,
+    commissionByType: (row?.commissionByType as Record<string, number> | null) ?? null,
+    feeModel: row?.feeModel ?? "ADD_ON",
+    vatBps: row?.vatBps ?? null,
+    citBps: row?.citBps ?? null,
     cancellationPolicy: { ...EMPTY_POLICY, ...((row?.cancellationPolicy as Partial<CancellationPolicy> | null) ?? {}) },
     updatedAt: row?.updatedAt ?? null,
   };
@@ -53,6 +70,12 @@ export function policyText(policy: Partial<CancellationPolicy> | null | undefine
   return policy[locale as keyof CancellationPolicy] ?? policy.en ?? policy.fr ?? policy.rw ?? null;
 }
 
+/** Percent per category → basis points, keeping only the categories that have a rate. */
+function byType(percents: Record<string, number | null> | undefined): Record<string, number> | null {
+  const entries = Object.entries(percents ?? {}).flatMap(([type, pct]) => (pct === null || pct === undefined ? [] : [[type, toBps(pct)!] as const]));
+  return entries.length ? Object.fromEntries(entries) : null;
+}
+
 export type UpdateResult = { ok: true } | { ok: false; errors: Record<string, string> };
 
 export async function updateSettings(adminId: string, raw: SettingsInput): Promise<UpdateResult> {
@@ -72,6 +95,14 @@ export async function updateSettings(adminId: string, raw: SettingsInput): Promi
     monthlyIdentity: v.monthlyIdentity,
     referralEnabled: v.referralEnabled,
     referralRewardAmount: v.referralRewardAmount,
+    dislikeHideCount: v.dislikeHideCount,
+    promoterEnabled: v.promoterEnabled,
+    promoterRewardFixed: v.promoterRewardFixed,
+    promoterRewardBps: toBps(v.promoterRewardPercent),
+    commissionByType: byType(v.commissionByTypePercent) ?? Prisma.DbNull,
+    feeModel: v.feeModel,
+    vatBps: toBps(v.vatPercent),
+    citBps: toBps(v.citPercent),
     cancellationPolicy: v.cancellationPolicy,
   };
   await db.$transaction(async (tx) => {
@@ -86,9 +117,17 @@ export async function updateSettings(adminId: string, raw: SettingsInput): Promi
       monthlyIdentity: before?.monthlyIdentity ?? "NONE",
       referralEnabled: before?.referralEnabled ?? false,
       referralRewardAmount: before?.referralRewardAmount ?? null,
+      dislikeHideCount: before?.dislikeHideCount ?? null,
+      promoterEnabled: before?.promoterEnabled ?? false,
+      promoterRewardFixed: before?.promoterRewardFixed ?? null,
+      promoterRewardBps: before?.promoterRewardBps ?? null,
+      commissionByType: (before?.commissionByType as Record<string, number> | null) ?? null,
+      feeModel: before?.feeModel ?? "ADD_ON",
+      vatBps: before?.vatBps ?? null,
+      citBps: before?.citBps ?? null,
       cancellationPolicy: (before?.cancellationPolicy as CancellationPolicy | null) ?? null,
     };
-    await audit(tx, { actorId: adminId, action: "settings.update", entityType: "settings", entityId: "platform", data: { from, to: next } });
+    await audit(tx, { actorId: adminId, action: "settings.update", entityType: "settings", entityId: "platform", data: { from, to: { ...next, commissionByType: byType(v.commissionByTypePercent) } } as Prisma.InputJsonObject });
   });
   return { ok: true };
 }

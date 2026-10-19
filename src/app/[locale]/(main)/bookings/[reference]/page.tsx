@@ -170,9 +170,9 @@ export default async function BookingPage({ params }: Props) {
             <Row label={tListings("promoLine", { code: booking.promoCode?.code ?? "" })}>−{formatRWF(booking.discount, locale)}</Row>
           )}
           {booking.deposit > 0 && <Row label={tListings("depositDue")}>{formatRWF(booking.deposit, locale)}</Row>}
-          {booking.guestFee > 0 && <Row label={t("serviceFee")}>{formatRWF(booking.guestFee, locale)}</Row>}
           <Row label={`${t("amount")} (${booking.currency})`}>
             <span className="font-bold">{formatRWF(booking.total, locale)}</span>
+            {booking.guestFee > 0 && <span className="block text-xs font-normal text-muted">{tListings("feesIncluded")}</span>}
           </Row>
           {methodName && (
             <Row label={t("paymentMethod")}>

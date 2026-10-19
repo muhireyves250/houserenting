@@ -1,6 +1,6 @@
 export type SearchMode = "short" | "long";
 
-export const PLACE_TYPES = ["APARTMENT", "DUPLEX", "PRIVATE_HOUSE", "LODGE", "ROOM"] as const;
+export const PLACE_TYPES = ["APARTMENT", "DUPLEX", "PRIVATE_HOUSE", "LODGE", "ROOM", "GUEST_HOUSE", "OTHER"] as const;
 export type PlaceType = (typeof PLACE_TYPES)[number];
 
 /** Visible map area: [south, west, north, east] in degrees. */

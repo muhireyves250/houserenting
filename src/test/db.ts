@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 
-const TABLES = ["roomRate", "message", "conversation", "bookingIdentity", "referralReward", "ledgerEntry", "settlement", "payment", "paymentEvent", "promoCode", "platformConfig", "supportMessage", "supportTicket", "notification", "review", "listingQuestion", "auditLog", "bookingEvent", "booking", "favorite", "rateLimit", "verification", "session", "account", "user"];
+const TABLES = ["userPhoto", "promoterReward", "promoterVisit", "promoter", "orderEvent", "orderItem", "foodOrder", "menuItem", "restaurantMember", "restaurant", "placeMember", "stayRequest", "stayFeedback", "guestDocument", "availabilityBlock", "listingDocument", "payoutAccount", "roomRate", "message", "conversation", "bookingIdentity", "referralReward", "ledgerEntry", "settlement", "payment", "paymentEvent", "promoCode", "platformConfig", "supportMessage", "supportTicket", "notification", "review", "listingQuestion", "auditLog", "bookingEvent", "booking", "favorite", "rateLimit", "verification", "session", "account", "user"];
 
 export async function resetDb(): Promise<void> {
   if (process.env.ALLOW_DB_RESET !== "1") {

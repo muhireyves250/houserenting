@@ -7,6 +7,7 @@ import { HostStatus } from "@/features/hosting/components/HostStatus";
 import { hostListings } from "@/features/hosting/service";
 import { Link } from "@/i18n/navigation";
 import { requireUser } from "@/lib/session";
+import { db } from "@/lib/db";
 import { AnswerQuestion } from "@/features/questions/components/AnswerQuestion";
 import { hostEarnings } from "@/features/ledger/service";
 import { formatRWF } from "@/lib/format";
@@ -18,13 +19,15 @@ const newButton =
 
 export default async function HostPage() {
   const user = await requireUser("/host");
-  const [t, tType, listings, questions, earnings, locale] = await Promise.all([
+  const [t, tType, tPlaces, listings, questions, earnings, locale, helping] = await Promise.all([
     getTranslations("Host"),
     getTranslations("ListingType"),
+    getTranslations("Places"),
     hostListings(user.id),
     hostQuestions(user.id),
     hostEarnings(user.id),
     getLocale(),
+    db.placeMember.findMany({ where: { userId: user.id, listing: { status: { not: "ARCHIVED" } } }, select: { role: true, listing: { select: { id: true, title: true, city: true } } } }),
   ]);
   const hasMoney = earnings.earned + earnings.upcoming + earnings.paidOut > 0;
 
@@ -39,6 +42,52 @@ export default async function HostPage() {
           </Link>
         )}
       </div>
+
+      {(listings.length > 0 || helping.length > 0) && (
+        <Link
+          href="/host/bookings"
+          className="mb-3 flex items-center justify-between gap-3 rounded-2xl bg-primary px-4 py-3 text-[14px] font-semibold text-white transition-colors hover:bg-primary-hover"
+        >
+          {tPlaces("portalLink")}
+          <ChevronRight className="size-4" aria-hidden="true" />
+        </Link>
+      )}
+      <Link
+        href="/host/restaurants"
+        className="mb-3 flex items-center justify-between gap-3 rounded-2xl bg-surface px-4 py-3 text-[14px] font-semibold text-ink ring-1 ring-line transition-colors hover:ring-primary"
+      >
+        {tPlaces("restaurantsLink")}
+        <ChevronRight className="size-4 text-ink/50" aria-hidden="true" />
+      </Link>
+      {helping.length > 0 && (
+        <section className="mb-5">
+          <h2 className="mb-2 text-[15px] font-semibold text-ink">{tPlaces("helpingTitle")}</h2>
+          <ul className="flex flex-col divide-y divide-line rounded-2xl bg-surface ring-1 ring-line">
+            {helping.map((h) => (
+              <li key={h.listing.id}>
+                <Link href={h.role === "MANAGER" ? `/host/listings/${h.listing.id}` : "/host/bookings"} className="flex items-center justify-between gap-3 px-4 py-3">
+                  <span>
+                    <span className="block text-[14px] font-semibold text-ink">{h.listing.title}</span>
+                    <span className="block text-xs text-muted">
+                      {tPlaces(`teamRole.${h.role}`)} · {h.listing.city}
+                    </span>
+                  </span>
+                  <ChevronRight className="size-4 text-ink/50" aria-hidden="true" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+      {listings.length > 0 && (
+        <Link
+          href="/host/payout"
+          className="mb-4 flex items-center justify-between gap-3 rounded-2xl bg-surface px-4 py-3 text-[14px] font-semibold text-ink ring-1 ring-line transition-colors hover:ring-primary"
+        >
+          {t("payoutLink")}
+          <ChevronRight className="size-4 text-ink/50" aria-hidden="true" />
+        </Link>
+      )}
 
       {listings.length === 0 ? (
         <EmptyState
@@ -69,7 +118,7 @@ export default async function HostPage() {
                   <span className="truncate text-[13px] text-muted">
                     {tType(listing.type)} · {listing.district}, {listing.city}
                   </span>
-                  {listing.status === "REJECTED" && listing.rejectionReason && (
+                  {(listing.status === "REJECTED" || listing.status === "CHANGES_REQUESTED") && listing.rejectionReason && (
                     <span className="text-xs font-medium text-red-800">{t("needsChanges", { reason: listing.rejectionReason })}</span>
                   )}
                 </span>

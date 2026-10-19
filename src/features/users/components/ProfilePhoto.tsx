@@ -1,0 +1,68 @@
+"use client";
+
+import { Camera } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
+import { Avatar } from "@/components/ui/Avatar";
+import { useRouter } from "@/i18n/navigation";
+
+/** The profile picture with a camera button to add or change it, and a way to remove it. */
+export function ProfilePhoto({ name, image }: { name: string; image: string | null }) {
+  const t = useTranslations("Profile");
+  const router = useRouter();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function send(init: RequestInit) {
+    setBusy(true);
+    setError(null);
+    const res = await fetch("/api/v1/me/photo", init).catch(() => null);
+    setBusy(false);
+    if (!res?.ok) {
+      const code = ((await res?.json().catch(() => null)) as { error?: string } | null)?.error;
+      setError(code === "tooLarge" ? t("photoTooLarge") : code === "badType" ? t("photoBadType") : t("photoFailed"));
+      return;
+    }
+    router.refresh();
+  }
+
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <div className="relative">
+        <Avatar name={name} image={image} className="size-24 bg-orange-100 text-4xl text-orange-800" />
+        <label
+          className="absolute -right-1 -bottom-1 flex size-9 cursor-pointer items-center justify-center rounded-full bg-primary text-white shadow-md ring-2 ring-surface hover:bg-primary-hover"
+          aria-label={image ? t("changePhoto") : t("addPhoto")}
+          title={image ? t("changePhoto") : t("addPhoto")}
+        >
+          <Camera className="size-4.5" aria-hidden="true" />
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="sr-only"
+            disabled={busy}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              e.target.value = "";
+              if (!file) return;
+              const body = new FormData();
+              body.append("file", file);
+              void send({ method: "POST", body });
+            }}
+          />
+        </label>
+      </div>
+      {busy && <span className="text-xs text-muted">{t("photoUploading")}</span>}
+      {image && !busy && (
+        <button type="button" onClick={() => void send({ method: "DELETE" })} className="text-xs font-semibold text-muted hover:text-danger">
+          {t("removePhoto")}
+        </button>
+      )}
+      {error && (
+        <p role="alert" className="text-xs font-medium text-danger">
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}

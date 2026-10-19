@@ -34,4 +34,5 @@ export const STATUS_TONE: Record<BookingStatus, string> = {
   COMPLETED: "bg-canvas text-ink/80 ring-line",
   CANCELLED: "bg-canvas text-muted ring-line",
   EXPIRED: "bg-canvas text-muted ring-line",
+  NO_SHOW: "bg-red-50 text-red-800 ring-red-200",
 };

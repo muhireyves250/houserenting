@@ -4,14 +4,14 @@ import { useTranslations } from "next-intl";
 import { useLayoutEffect, useRef, useState, type FocusEvent, type MouseEvent } from "react";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
-import { isActive, NAV_ITEMS, navHref } from "./nav-items";
+import { isActive, navHref, navItems } from "./nav-items";
 
 type Box = { left: number; width: number };
 
 const SLIDE = "duration-500 ease-[cubic-bezier(0.25,0.8,0.25,1)] motion-reduce:transition-none";
 
 /** `signedIn` decides whether members-only links go straight to the page or open the login modal. */
-export function HeaderNav({ signedIn = true }: { signedIn?: boolean }) {
+export function HeaderNav({ signedIn = true, orders = false }: { signedIn?: boolean; orders?: boolean }) {
   const t = useTranslations("Nav");
   const pathname = usePathname();
   const listRef = useRef<HTMLUListElement>(null);
@@ -95,7 +95,7 @@ export function HeaderNav({ signedIn = true }: { signedIn?: boolean }) {
             hoveringCurrent && "border-primary-hover bg-primary/[0.06] group-data-[overlay=true]/header:bg-white/10",
           )}
         />
-        {NAV_ITEMS.filter((item) => item.key !== "profile").map(({ key, href }) => {
+        {navItems(orders).filter((item) => item.key !== "profile").map(({ key, href }) => {
           const active = isActive(pathname, href);
           return (
             <li key={key}>
@@ -105,7 +105,7 @@ export function HeaderNav({ signedIn = true }: { signedIn?: boolean }) {
                 onMouseEnter={track}
                 onFocus={track}
                 className={cn(
-                  "relative block rounded-full px-3 py-2 text-[15px] font-semibold xl:px-4 tracking-[0.01em] transition-colors duration-300",
+                  "relative block rounded-full px-3 py-2 text-[15px] font-semibold whitespace-nowrap xl:px-4 tracking-[0.01em] transition-colors duration-300",
                   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
                   active
                     ? "text-primary group-data-[overlay=true]/header:text-white"

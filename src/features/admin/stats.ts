@@ -1,4 +1,5 @@
 import "server-only";
+import type { ListingStatus } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -73,15 +74,17 @@ export async function dashboardStats(now: Date = new Date()) {
 
 /** Everything waiting for staff, for the overview and the sidebar badges. */
 export async function attentionCounts() {
-  const [listings, questions, reviews, tickets, payments, rewards] = await Promise.all([
+  const [listings, questions, reviews, tickets, payments, rewards, requests, refunds] = await Promise.all([
     db.listing.count({ where: { status: "PENDING_REVIEW" } }),
     db.listingQuestion.count({ where: { status: "PENDING" } }),
     db.review.count({ where: { status: "PENDING" } }),
     db.supportTicket.count({ where: { status: { in: ["OPEN", "IN_PROGRESS"] } } }),
     db.paymentEvent.count({ where: { outcome: { in: ["amountMismatch", "datesTaken", "notPending", "unknownBooking"] } } }),
     db.referralReward.count({ where: { status: "PENDING" } }),
+    db.stayRequest.count({ where: { status: "PENDING" } }),
+    db.booking.count({ where: { refundStatus: "PENDING" } }),
   ]);
-  return { listings, moderation: questions + reviews, tickets, payments, rewards };
+  return { listings, moderation: questions + reviews, tickets, payments, rewards, requests, refunds };
 }
 
 export function latestBookings(take = 6) {
@@ -101,7 +104,7 @@ export function latestBookings(take = 6) {
   });
 }
 
-export function allListings(status?: "DRAFT" | "PENDING_REVIEW" | "PUBLISHED" | "REJECTED" | "ARCHIVED") {
+export function allListings(status?: ListingStatus) {
   return db.listing.findMany({
     where: status ? { status } : { status: { not: "ARCHIVED" } },
     orderBy: { updatedAt: "desc" },

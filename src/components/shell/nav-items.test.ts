@@ -3,7 +3,7 @@ import { isActive, NAV_ITEMS, navHref } from "./nav-items";
 
 describe("NAV_ITEMS", () => {
   it("matches the five tabs from the designs, in order", () => {
-    expect(NAV_ITEMS.map((i) => i.key)).toEqual(["search", "favorites", "bookings", "chats", "profile"]);
+    expect(NAV_ITEMS.map((i) => i.key)).toEqual(["search", "favorites", "bookings", "myStay", "profile"]);
   });
 });
 

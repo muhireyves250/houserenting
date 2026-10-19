@@ -29,7 +29,7 @@ describe("SiteFooter", () => {
 
   it("sends signed-out visitors to log in before account pages", () => {
     renderWithIntl(<SiteFooter signedIn={false} year={2026} />);
-    expect(screen.getByRole("link", { name: "Favorites" })).toHaveAttribute("href", "/login?next=%2Ffavorites");
+    expect(screen.getByRole("link", { name: "Saved" })).toHaveAttribute("href", "/login?next=%2Ffavorites");
   });
 
   it("switches language on the current page and marks the current one", () => {

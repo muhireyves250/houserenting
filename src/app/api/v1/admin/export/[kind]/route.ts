@@ -4,6 +4,7 @@ import { BOOKING_STATUSES, bookingsCsv, ledgerCsv, paymentsCsv, type BookingStat
 import { audit } from "@/features/audit/service";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { readFilter, reportCsv } from "@/features/reports/service";
 import { isAdmin } from "@/lib/roles";
 
 /** Staff-only CSV downloads: bookings (with the table's filters), payments, ledger. Each export is logged. */
@@ -14,7 +15,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   const search = request.nextUrl.searchParams;
   const status = BOOKING_STATUSES.includes(search.get("status") as BookingStatusFilter) ? (search.get("status") as BookingStatusFilter) : undefined;
   const csv =
-    kind === "bookings" ? await bookingsCsv(status, search.get("q")?.slice(0, 100) ?? undefined) : kind === "payments" ? await paymentsCsv() : kind === "ledger" ? await ledgerCsv() : null;
+    kind === "bookings" ? await bookingsCsv(status, search.get("q")?.slice(0, 100) ?? undefined) : kind === "payments" ? await paymentsCsv() : kind === "ledger"
+          ? await ledgerCsv()
+          : kind === "report"
+            ? await reportCsv(readFilter(Object.fromEntries(search.entries())))
+            : null;
   if (csv === null) return NextResponse.json({ error: "unknown export" }, { status: 404 });
   await audit(db, { actorId: session.user.id, action: "export.download", entityType: "export", entityId: kind });
   const day = new Date().toISOString().slice(0, 10);

@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { useLayoutEffect, useRef, useState } from "react";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
-import { isActive, NAV_ITEMS, navHref } from "./nav-items";
+import { isActive, navHref, navItems } from "./nav-items";
 
 // The site's sliding motion (header nav, search bar, filters).
 const SLIDE = "duration-500 ease-[cubic-bezier(0.25,0.8,0.25,1)] motion-reduce:transition-none";
@@ -13,7 +13,7 @@ const SLIDE = "duration-500 ease-[cubic-bezier(0.25,0.8,0.25,1)] motion-reduce:t
  * Phones: a floating white glass bar in the brand colours (blue edge and icons). Tabs are icons; the current one is a blue pill with its name,
  * and that pill slides and stretches to the tapped tab. Members-only tabs open the login modal when signed out.
  */
-export function BottomTabBar({ signedIn = true }: { signedIn?: boolean }) {
+export function BottomTabBar({ signedIn = true, orders = false }: { signedIn?: boolean; orders?: boolean }) {
   const t = useTranslations("Nav");
   const pathname = usePathname();
   const listRef = useRef<HTMLUListElement>(null);
@@ -67,7 +67,7 @@ export function BottomTabBar({ signedIn = true }: { signedIn?: boolean }) {
             SLIDE,
           )}
         />
-        {NAV_ITEMS.map(({ key, href, icon: Icon }) => {
+        {navItems(orders).map(({ key, href, icon: Icon }) => {
           const active = isActive(pathname, href);
           // White while the pill is under it: the hovered tab, or the current tab when nothing is hovered.
           const onPill = hovered ? hovered === key : active;

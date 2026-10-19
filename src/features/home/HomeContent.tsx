@@ -12,7 +12,7 @@ import { PendingArea, RowsSkeleton } from "@/components/ui/Skeletons";
 import { House } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { RecentlyViewedRow } from "@/features/listings/components/RecentlyViewed";
-import { featuredListings } from "@/features/listings/service";
+import { featuredListings, highlightedListings } from "@/features/listings/service";
 import { HERO_SEARCH_ID, SearchBar } from "@/features/search/components/SearchBar";
 import { getCurrentUser } from "@/lib/session";
 
@@ -32,15 +32,17 @@ const ROWS = {
 
 /** Home page body: hero search and rows of homes by destination. Also the backdrop for direct /login, /signup visits. */
 export async function HomeContent({ type = null }: { type?: PlaceType | null }) {
-  const [t, tListings, pool, user] = await Promise.all([
+  const [t, tListings, pool, highlighted, user] = await Promise.all([
     getTranslations("Home"),
     getTranslations("Listings"),
     featuredListings(ROW_POOL),
+    highlightedListings(),
     getCurrentUser(),
   ]);
+  const picks = type ? highlighted.filter((listing) => listing.type === type) : highlighted;
   // Category chips (phones) filter the rows right here, without leaving the page.
   const sections = buildHomeSections(type ? pool.filter((listing) => listing.type === type) : pool);
-  const saved = user ? await savedListingIds(user.id, pool.map((l) => l.id)) : new Set<string>();
+  const saved = user ? await savedListingIds(user.id, [...pool, ...highlighted].map((l) => l.id)) : new Set<string>();
   return (
     <>
       {/* md:-mt-[73px] (72px header + 1px border) tucks the hero under the transparent sticky header; the extra top padding keeps content clear of it. */}
@@ -103,6 +105,13 @@ export async function HomeContent({ type = null }: { type?: PlaceType | null }) 
       {sections.length > 0 && (
         // Keyed by category: switching chips fades the new rows in.
         <PageContainer key={type ?? "all"} className="flex flex-col gap-9 pt-4 pb-8 motion-safe:animate-pop-in md:gap-12 md:py-14">
+          {picks.length > 0 && (
+            <HomeRow title={tListings("rowHighlighted")} subtitle={tListings("rowHighlightedSub")}>
+              {picks.map((listing) => (
+                <CompactListingCard key={listing.id} listing={listing} mode="short" signedIn={user !== null} saved={saved.has(listing.id)} />
+              ))}
+            </HomeRow>
+          )}
           {!type && <RecentlyViewedRow />}
           {sections.map((section) => {
             const { title, subtitle } = ROWS[section.key];

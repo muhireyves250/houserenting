@@ -10,6 +10,8 @@ import { cn } from "@/lib/cn";
 import { dynamicMessage } from "@/lib/dynamic-message";
 import { formatRWF } from "@/lib/format";
 import { requireAdmin } from "@/lib/permissions";
+import { RenewalPopup } from "@/features/places/components/RenewalPopup";
+import { contractsEnding } from "@/features/places/status-service";
 
 const panel = "rounded-2xl border border-line bg-surface";
 
@@ -30,7 +32,7 @@ function Delta({ kpi, label, fresh }: { kpi: Kpi; label: string; fresh: string }
 
 export default async function AdminDashboardPage() {
   await requireAdmin("/admin");
-  const [t, tAdmin, tBookings, tListings, locale, stats, bookings, activity] = await Promise.all([
+  const [t, tAdmin, tBookings, tListings, locale, stats, bookings, activity, ending] = await Promise.all([
     getTranslations("Admin.dashboard"),
     getTranslations("Admin"),
     getTranslations("Bookings"),
@@ -39,6 +41,7 @@ export default async function AdminDashboardPage() {
     dashboardStats(),
     latestBookings(6),
     recentAudit({ take: 8 }),
+    contractsEnding(),
   ]);
   const compact = new Intl.NumberFormat(locale, { notation: "compact", maximumFractionDigits: 1 });
   const vsLast = t("vsLastMonth");
@@ -55,11 +58,16 @@ export default async function AdminDashboardPage() {
     { label: t("attention.tickets"), count: stats.attention.tickets, href: "/admin/support" },
     { label: t("attention.payments"), count: stats.attention.payments, href: "/admin/money" },
     { label: t("attention.rewards"), count: stats.attention.rewards, href: "/admin/money" },
+    { label: t("attention.requests"), count: stats.attention.requests + stats.attention.refunds, href: "/admin/requests" },
+    { label: t("attention.contracts"), count: ending.length, href: "/admin/listings?status=ending" },
   ];
   const waiting = attention.filter((a) => a.count > 0);
 
   return (
     <div className="flex flex-col gap-6">
+      <RenewalPopup
+        places={ending.map((l) => ({ id: l.id, title: l.title, contractEnd: l.contractEnd!.toISOString(), owner: l.host.name }))}
+      />
       <div>
         <p className="text-[22px] leading-8 font-bold tracking-[-0.02em] text-ink">{t("title")}</p>
         <p className="text-[14px] text-muted">{t("subtitle", { listings: stats.liveListings })}</p>

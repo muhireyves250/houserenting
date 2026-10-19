@@ -26,8 +26,8 @@ describe("HeaderNav hover", () => {
     const pill = screen.getByTestId("nav-hover");
     expect(pill).toHaveAttribute("data-visible", "false");
 
-    const favorites = screen.getByRole("link", { name: "Favorites" });
-    const chats = screen.getByRole("link", { name: "Chats" });
+    const favorites = screen.getByRole("link", { name: "Saved" });
+    const chats = screen.getByRole("link", { name: "My stay" });
     layout(favorites, 90, 96);
     layout(chats, 300, 70);
 
@@ -56,7 +56,7 @@ describe("HeaderNav hover", () => {
 
   it("marks the current page with an outlined pill and keeps the sliding shade off it", async () => {
     renderWithIntl(<HeaderNav />);
-    const current = screen.getByRole("link", { name: "Search" });
+    const current = screen.getByRole("link", { name: "Home" });
     expect(current).toHaveAttribute("aria-current", "page");
     expect(current).toHaveClass("text-primary");
     layout(current, 0, 80);
@@ -68,7 +68,7 @@ describe("HeaderNav hover", () => {
     currentPath = "/";
     const view = renderWithIntl(<HeaderNav />);
     const outline = screen.getByTestId("nav-active");
-    layout(screen.getByRole("link", { name: "Search" }), 0, 80);
+    layout(screen.getByRole("link", { name: "Home" }), 0, 80);
     layout(screen.getByRole("link", { name: "Bookings" }), 200, 104);
 
     currentPath = "/bookings";
@@ -82,11 +82,11 @@ describe("HeaderNav hover", () => {
   it("clears the hover shade once the hovered link becomes the current page", async () => {
     currentPath = "/";
     const view = renderWithIntl(<HeaderNav />);
-    const chats = screen.getByRole("link", { name: "Chats" });
+    const chats = screen.getByRole("link", { name: "My stay" });
     layout(chats, 300, 70);
     await userEvent.hover(chats);
     expect(screen.getByTestId("nav-hover")).toHaveAttribute("data-visible", "true");
-    currentPath = "/chats";
+    currentPath = "/my-stay";
     view.rerender(<HeaderNav />);
     expect(screen.getByTestId("nav-hover")).toHaveAttribute("data-visible", "false");
     currentPath = "/";

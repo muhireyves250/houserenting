@@ -8,7 +8,7 @@ export const PAGE_SIZE = 25;
 const pageOf = (page: number) => ({ skip: (Math.max(1, page) - 1) * PAGE_SIZE, take: PAGE_SIZE });
 const like = (q: string) => ({ contains: q.replace(/[\\%_]/g, (c) => `\\${c}`), mode: "insensitive" as const });
 
-export const BOOKING_STATUSES = ["PENDING_PAYMENT", "CONFIRMED", "CHECKED_IN", "COMPLETED", "CANCELLED", "EXPIRED"] as const;
+export const BOOKING_STATUSES = ["PENDING_PAYMENT", "CONFIRMED", "CHECKED_IN", "COMPLETED", "CANCELLED", "EXPIRED", "NO_SHOW"] as const;
 export type BookingStatusFilter = (typeof BOOKING_STATUSES)[number];
 
 function bookingWhere(status?: BookingStatusFilter, q?: string): Prisma.BookingWhereInput {
@@ -68,6 +68,9 @@ export function bookingForStaff(reference: string) {
       ledger: { orderBy: { createdAt: "asc" } },
       review: { select: { rating: true, comment: true, status: true } },
       events: { orderBy: { createdAt: "asc" } },
+      requests: { orderBy: { createdAt: "desc" } },
+      feedback: { select: { liked: true, comment: true } },
+      guestDocument: { select: { filename: true, createdAt: true } },
     },
   });
 }
@@ -99,7 +102,7 @@ export type UserFilter = "all" | "staff" | "hosts" | "suspended";
 
 function userWhere(filter: UserFilter, q?: string): Prisma.UserWhereInput {
   const where: Prisma.UserWhereInput =
-    filter === "staff" ? { role: "ADMIN" } : filter === "hosts" ? { isHost: true } : filter === "suspended" ? { status: "SUSPENDED" } : {};
+    filter === "staff" ? { role: { in: ["ADMIN" as const, "SUPER_ADMIN" as const] } } : filter === "hosts" ? { isHost: true } : filter === "suspended" ? { status: "SUSPENDED" } : {};
   const query = q?.trim();
   if (query) where.OR = [{ name: like(query) }, { email: like(query) }, { phone: { contains: query } }];
   return where;
