@@ -1,5 +1,6 @@
 import { hashPassword } from "@/features/auth/password";
 import type { PrismaClient } from "@/generated/prisma/client";
+import { SEED_RESTAURANTS } from "@/features/food/seed-data";
 import { SEED_LISTINGS } from "./seed-data";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -12,7 +13,7 @@ export const DEMO_HOST = {
   password: "SpaceRental-demo-2026",
 } as const;
 
-export async function seedDemoData(db: PrismaClient): Promise<{ listings: number }> {
+export async function seedDemoData(db: PrismaClient): Promise<{ listings: number; restaurants: number }> {
   // Explicit opt-in: set ALLOW_DEMO_SEED=1 only for dev/test databases, never for production.
   if (process.env.ALLOW_DEMO_SEED !== "1") {
     throw new Error("Refusing to seed demo data: set ALLOW_DEMO_SEED=1 (dev/test databases only).");
@@ -68,5 +69,24 @@ export async function seedDemoData(db: PrismaClient): Promise<{ listings: number
     ),
   );
 
-  return { listings: SEED_LISTINGS.length };
+  const restaurants = await seedDemoRestaurants(db, host.id);
+  return { listings: SEED_LISTINGS.length, restaurants };
+}
+
+/**
+ * Creates or refreshes the demo restaurants and their menus (published, owned by the demo host). Safe to run again:
+ * restaurants are updated in place, so their orders stay, and only demo places that exist are linked.
+ */
+export async function seedDemoRestaurants(db: PrismaClient, ownerId: string = DEMO_HOST.id): Promise<number> {
+  if (process.env.ALLOW_DEMO_SEED !== "1") {
+    throw new Error("Refusing to seed demo data: set ALLOW_DEMO_SEED=1.");
+  }
+  const places = new Set((await db.listing.findMany({ where: { id: { in: SEED_RESTAURANTS.flatMap((r) => (r.listingId ? [r.listingId] : [])) } }, select: { id: true } })).map((l) => l.id));
+  for (const { id, menu, listingId, ...fields } of SEED_RESTAURANTS) {
+    const data = { ...fields, ownerId, listingId: listingId && places.has(listingId) ? listingId : null, status: "PUBLISHED" as const, paused: false, statusReason: null };
+    await db.restaurant.upsert({ where: { id }, create: { id, ...data }, update: data });
+    await db.menuItem.deleteMany({ where: { restaurantId: id } });
+    await db.menuItem.createMany({ data: menu.map((dish, position) => ({ restaurantId: id, position, section: dish.section, name: dish.name, description: dish.description ?? "", price: dish.price })) });
+  }
+  return SEED_RESTAURANTS.length;
 }

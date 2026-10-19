@@ -19,6 +19,7 @@
     "db:test:migrate": "tsx scripts/with-test-db.ts prisma migrate deploy",
     "test:e2e": "playwright test",
     "db:seed": "prisma db seed",
+    "db:seed:restaurants": "tsx prisma/seed-restaurants.ts",
     "admin:grant": "tsx scripts/make-admin.ts"
   },
   "dependencies": {
