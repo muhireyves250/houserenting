@@ -1,4 +1,4 @@
-import { House } from "lucide-react";
+import { ChevronRight, House } from "lucide-react";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import type { BookingStatus } from "../status";
@@ -15,6 +15,8 @@ export type BookingTileData = {
   dates: string;
   meta: string;
   note: string | null;
+  /** The booking's total, formatted. */
+  total?: string;
 };
 
 export function BookingTile({ booking }: { booking: BookingTileData }) {
@@ -32,13 +34,16 @@ export function BookingTile({ booking }: { booking: BookingTileData }) {
       </span>
       <span className="flex min-w-0 flex-1 flex-col gap-1 py-1 pr-1">
         <StatusBadge status={booking.status} label={booking.statusLabel} className="self-start" />
-        <span className="truncate text-[15px] font-semibold text-ink">{booking.title}</span>
+        <span className="line-clamp-2 text-[15px] leading-5 font-semibold text-ink">{booking.title}</span>
         <span className="truncate text-[13px] text-muted">{booking.place}</span>
+        <span className="text-[13px] text-ink/80">{booking.dates}</span>
         <span className="text-[13px] text-ink/80">
-          {booking.dates} · {booking.meta}
+          {booking.meta}
+          {booking.total && <b className="font-semibold text-ink"> · {booking.total}</b>}
         </span>
         {booking.note && <span className="text-xs font-medium text-amber-800">{booking.note}</span>}
       </span>
+      <ChevronRight className="size-4 shrink-0 self-center text-ink/40" aria-hidden="true" />
     </Link>
   );
 }

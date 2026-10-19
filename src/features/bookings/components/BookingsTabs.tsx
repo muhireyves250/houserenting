@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
+import { Link } from "@/i18n/navigation";
 import { BookingTile, type BookingTileData } from "./BookingTile";
 
 type Tab = "upcoming" | "past";
@@ -14,7 +15,7 @@ export function BookingsTabs({
 }: {
   upcoming: BookingTileData[];
   past: BookingTileData[];
-  labels: { upcoming: string; past: string; noUpcoming: string; noPast: string; group: string };
+  labels: { upcoming: string; past: string; noUpcoming: string; noPast: string; group: string; findPlace?: string };
 }) {
   const [tab, setTab] = useState<Tab>(upcoming.length === 0 && past.length > 0 ? "past" : "upcoming");
   const list = tab === "upcoming" ? upcoming : past;
@@ -31,9 +32,16 @@ export function BookingsTabs({
         className="max-w-sm ring-1 ring-line"
       />
       {list.length === 0 ? (
-        <p className="py-10 text-center text-[15px] text-muted">{tab === "upcoming" ? labels.noUpcoming : labels.noPast}</p>
+        <div className="flex flex-col items-center gap-4 py-10 text-center">
+          <p className="text-[15px] text-muted">{tab === "upcoming" ? labels.noUpcoming : labels.noPast}</p>
+          {tab === "upcoming" && labels.findPlace && (
+            <Link href="/" className="rounded-full bg-primary px-5 py-2.5 text-[14px] font-semibold text-white hover:bg-primary-hover">
+              {labels.findPlace}
+            </Link>
+          )}
+        </div>
       ) : (
-        <ul key={tab} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ul key={tab} className="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {list.map((booking) => (
             <li key={booking.reference} className="motion-safe:animate-pop-in">
               <BookingTile booking={booking} />

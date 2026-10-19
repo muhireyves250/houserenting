@@ -217,7 +217,8 @@ export default async function BookingPage({ params }: Props) {
         </p>
       </section>
 
-      {/* Status history */}
+      {/* Status history (only once something has happened) */}
+      {booking.events.length > 0 && (
       <section className={cn(card, "mt-4")}>
         <h2 className="mb-4 text-lg font-bold text-ink">{t("timeline")}</h2>
         <ol className="relative flex flex-col gap-5 border-l-2 border-line pl-6">
@@ -236,6 +237,7 @@ export default async function BookingPage({ params }: Props) {
           ))}
         </ol>
       </section>
+      )}
 
       {reviewable && (
         <section className={cn(card, "mt-4 print:hidden")}>

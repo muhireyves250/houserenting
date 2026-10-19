@@ -618,7 +618,8 @@
     "rentalTerms": "{months} months, {upfront} paid when booking",
     "payTitle": "Pay to confirm",
     "messageHost": "Message host",
-    "time": "Time"
+    "time": "Time",
+    "openMyStay": "Open My stay"
   },
   "Host": {
     "title": "Your listings",
@@ -1903,7 +1904,19 @@
     "trackOrder": "Track",
     "orderNearStay": "Order near your stay",
     "orderFrom": "Order from",
-    "orderAgainShort": "Again"
+    "orderAgainShort": "Again",
+    "searchRestaurants": "Search restaurants or food",
+    "filter": {
+      "all": "All",
+      "delivery": "Delivery",
+      "pickup": "Pickup",
+      "open": "Open now"
+    },
+    "noRestaurantMatch": "No restaurant matches. Try another search or filter.",
+    "pickupOnly": "Pickup only",
+    "readyBy": "Ready by",
+    "arrivesBy": "Arrives by",
+    "orderHelp": "Problem with this order? Get help"
   },
   "Promoters": {
     "title": "Promote and earn",

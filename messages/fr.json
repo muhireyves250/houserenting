@@ -618,7 +618,8 @@
     "rentalTerms": "{months} mois, {upfront} payé(s) à la réservation",
     "payTitle": "Payer pour confirmer",
     "messageHost": "Écrire à l'hôte",
-    "time": "Heure"
+    "time": "Heure",
+    "openMyStay": "Ouvrir Mon séjour"
   },
   "Host": {
     "title": "Vos annonces",
@@ -1903,7 +1904,19 @@
     "trackOrder": "Suivre",
     "orderNearStay": "Commander près de votre logement",
     "orderFrom": "Commander chez",
-    "orderAgainShort": "Recommander"
+    "orderAgainShort": "Recommander",
+    "searchRestaurants": "Chercher un restaurant ou un plat",
+    "filter": {
+      "all": "Tous",
+      "delivery": "Livraison",
+      "pickup": "À emporter",
+      "open": "Ouverts"
+    },
+    "noRestaurantMatch": "Aucun restaurant ne correspond. Essayez une autre recherche ou un autre filtre.",
+    "pickupOnly": "À emporter seulement",
+    "readyBy": "Prête vers",
+    "arrivesBy": "Arrive vers",
+    "orderHelp": "Un problème avec cette commande ? Aide"
   },
   "Promoters": {
     "title": "Promouvoir et gagner",

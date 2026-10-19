@@ -618,7 +618,8 @@
     "rentalTerms": "Amezi {months}, {upfront} yishyurwa ubika",
     "payTitle": "Ishyura kugira ngo byemezwe",
     "messageHost": "Andikira nyir'inzu",
-    "time": "Isaha"
+    "time": "Isaha",
+    "openMyStay": "Fungura Aho ncumbitse"
   },
   "Host": {
     "title": "Aho wakira abashyitsi",
@@ -1903,7 +1904,19 @@
     "trackOrder": "Kurikirana",
     "orderNearStay": "Tumiza hafi y'aho ucumbitse",
     "orderFrom": "Tumiza kuri",
-    "orderAgainShort": "Ongera"
+    "orderAgainShort": "Ongera",
+    "searchRestaurants": "Shakisha resitora cyangwa ibiryo",
+    "filter": {
+      "all": "Zose",
+      "delivery": "Zibigeza",
+      "pickup": "Kuza kubifata",
+      "open": "Zifunguye"
+    },
+    "noRestaurantMatch": "Nta resitora ihuye n'ibyo ushaka. Gerageza ikindi.",
+    "pickupOnly": "Kuza kubifata gusa",
+    "readyBy": "Biba byiteguye",
+    "arrivesBy": "Bigera",
+    "orderHelp": "Hari ikibazo kuri ibi watumije? Saba ubufasha"
   },
   "Promoters": {
     "title": "Kwamamaza no kwinjiza",

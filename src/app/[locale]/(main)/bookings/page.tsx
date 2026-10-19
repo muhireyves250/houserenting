@@ -1,4 +1,4 @@
-import { House, LifeBuoy, MapPin, Navigation } from "lucide-react";
+import { House, KeyRound, LifeBuoy, MapPin, Navigation } from "lucide-react";
 import Image from "next/image";
 import { getLocale, getTranslations } from "next-intl/server";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -11,6 +11,7 @@ import { guestBookings, type GuestBooking } from "@/features/bookings/service";
 import { stayPhase } from "@/features/bookings/status";
 import { todayISO } from "@/features/search/date-range";
 import { Link } from "@/i18n/navigation";
+import { formatRWF } from "@/lib/format";
 import { requireUser } from "@/lib/session";
 
 const card = "rounded-3xl bg-surface shadow-[0_10px_30px_-14px_rgba(16,24,40,0.3)] ring-1 ring-black/[0.04] max-md:ring-line";
@@ -45,6 +46,7 @@ export default async function BookingsPage() {
         ? t("nightsGuests", { nights: b.nights, guests: b.guests })
         : tListings(`unitCount.${b.unit}`, { count: b.quantity }),
     note: b.status === "PENDING_PAYMENT" && b.holdExpiresAt ? t("heldUntil", { time: formatKigaliTime(locale, b.holdExpiresAt) }) : null,
+    total: formatRWF(b.total, locale),
   });
 
   const phase = (b: GuestBooking) => stayPhase(b, today, now);
@@ -63,27 +65,33 @@ export default async function BookingsPage() {
           {t("myStay")}
         </h2>
         {current ? (
-          <div className={`${card} flex flex-col gap-4 p-4 md:flex-row md:items-center`}>
-            <Link href={`/bookings/${current.reference}`} className="flex min-w-0 flex-1 items-center gap-4">
-              <span className="relative flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-primary-soft text-primary">
-                {current.listing.photos[0] ? (
-                  <Image src={current.listing.photos[0].url} alt="" fill sizes="80px" className="object-cover" />
-                ) : (
-                  <House className="size-7" aria-hidden="true" />
-                )}
-              </span>
-              <span className="flex min-w-0 flex-col gap-1">
-                <StatusBadge status={current.status} label={t(`status.${current.status}`)} className="self-start" />
-                <span className="truncate text-[15px] font-semibold text-ink">{current.listing.title}</span>
-                <span className="text-[13px] text-ink/80">{formatStayDates(locale, current.checkIn, current.checkOut)}</span>
+          <div className={`${card} overflow-hidden`}>
+            <Link href="/my-stay" className="relative block h-36 bg-primary-soft md:h-44">
+              {current.listing.photos[0] ? (
+                <Image src={current.listing.photos[0].url} alt="" fill sizes="(min-width: 768px) 900px, 100vw" className="object-cover" />
+              ) : (
+                <House className="absolute top-1/2 left-1/2 size-9 -translate-x-1/2 -translate-y-1/2 text-primary/60" aria-hidden="true" />
+              )}
+              <span className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+              <span className="absolute inset-x-0 bottom-0 p-4 text-white">
+                <StatusBadge status={current.status} label={t(`status.${current.status}`)} className="mb-1.5 bg-white text-primary ring-white" />
+                <span className="line-clamp-2 block text-[18px] leading-6 font-bold">{current.listing.title}</span>
+                <span className="block text-[13px] text-white/90">
+                  {formatStayDates(locale, current.checkIn, current.checkOut)} ·{" "}
+                  {current.unit === "NIGHT" ? t("nightsGuests", { nights: current.nights, guests: current.guests }) : tListings(`unitCount.${current.unit}`, { count: current.quantity })}
+                </span>
               </span>
             </Link>
-            <div className="flex flex-wrap gap-2">
-              <a href={directionsUrl(current.listing.lat, current.listing.lng)} target="_blank" rel="noopener noreferrer" className={pillLink}>
+            <div className="grid grid-cols-2 gap-2 p-3">
+              <Link href="/my-stay" className="col-span-2 inline-flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-2.5 text-[14px] font-semibold text-white hover:bg-primary-hover">
+                <KeyRound className="size-4" aria-hidden="true" />
+                {t("openMyStay")}
+              </Link>
+              <a href={directionsUrl(current.listing.lat, current.listing.lng)} target="_blank" rel="noopener noreferrer" className={`${pillLink} justify-center`}>
                 <Navigation className="size-4" aria-hidden="true" />
                 {t("directions")}
               </a>
-              <Link href={{ pathname: "/support", query: { booking: current.reference } }} className={pillLink}>
+              <Link href={{ pathname: "/support", query: { booking: current.reference } }} className={`${pillLink} justify-center`}>
                 <LifeBuoy className="size-4" aria-hidden="true" />
                 {t("getHelp")}
               </Link>
@@ -121,7 +129,7 @@ export default async function BookingsPage() {
           <BookingsTabs
             upcoming={upcoming}
             past={past}
-            labels={{ upcoming: t("upcoming"), past: t("past"), noUpcoming: t("noUpcoming"), noPast: t("noPast"), group: tNav("bookings") }}
+            labels={{ upcoming: t("upcoming"), past: t("past"), noUpcoming: t("noUpcoming"), noPast: t("noPast"), group: tNav("bookings"), findPlace: tFooter("startSearching") }}
           />
         )}
       </section>

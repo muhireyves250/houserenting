@@ -6,7 +6,7 @@ import { useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 
 /** Sorts restaurants by distance from where the phone is (asks for location only when tapped). */
-export function NearMe() {
+export function NearMe({ compact = false }: { compact?: boolean }) {
   const t = useTranslations("Food");
   const router = useRouter();
   const [state, setState] = useState<"idle" | "busy" | "denied">("idle");
@@ -27,12 +27,18 @@ export function NearMe() {
             { timeout: 10_000, maximumAge: 300_000 },
           );
         }}
-        className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-4 py-2 text-[14px] font-semibold text-ink hover:border-primary disabled:opacity-60"
+        aria-label={compact ? t("nearMe") : undefined}
+        title={compact ? t("nearMe") : undefined}
+        className={
+          compact
+            ? "flex size-11 shrink-0 items-center justify-center rounded-full border border-line bg-surface text-primary hover:border-primary disabled:opacity-60"
+            : "inline-flex items-center gap-2 rounded-full border border-line bg-surface px-4 py-2 text-[14px] font-semibold text-ink hover:border-primary disabled:opacity-60"
+        }
       >
-        <LocateFixed className="size-4 text-primary" aria-hidden="true" />
-        {state === "busy" ? t("locating") : t("nearMe")}
+        <LocateFixed className={state === "busy" ? "size-4 animate-pulse text-primary" : "size-4 text-primary"} aria-hidden="true" />
+        {!compact && (state === "busy" ? t("locating") : t("nearMe"))}
       </button>
-      {state === "denied" && <span className="text-[13px] text-muted">{t("locationDenied")}</span>}
+      {state === "denied" && !compact && <span className="text-[13px] text-muted">{t("locationDenied")}</span>}
     </span>
   );
 }

@@ -1,4 +1,4 @@
-import { Bike, BedDouble, ChevronLeft, Clock, MapPin, Phone, Store } from "lucide-react";
+import { Bike, BedDouble, CheckCircle2, ChefHat, ChevronLeft, CircleX, Clock, LifeBuoy, MapPin, PackageCheck, Phone, Receipt, Store, type LucideIcon } from "lucide-react";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { PageContainer } from "@/components/ui/PageContainer";
@@ -7,9 +7,10 @@ import { AutoRefresh } from "@/features/food/components/AutoRefresh";
 import { CancelOrder } from "@/features/food/components/CancelOrder";
 import { OrderAgain } from "@/features/food/components/OrderAgain";
 import { OrderProgress } from "@/features/food/components/OrderProgress";
-import { ACTIVE_ORDER } from "@/features/food/rules";
+import { ACTIVE_ORDER, type OrderStatus } from "@/features/food/rules";
 import { myOrder } from "@/features/food/service";
 import { Link } from "@/i18n/navigation";
+import { cn } from "@/lib/cn";
 import { formatRWF } from "@/lib/format";
 import { requireUser } from "@/lib/session";
 
@@ -20,7 +21,20 @@ export async function generateMetadata({ params }: Props) {
   return { title: t("orderTitle", { reference: (await params).reference }) };
 }
 
-/** One order: where it is now (updates by itself), what's in it, how it arrives, and who to call. */
+const card = "rounded-3xl bg-surface shadow-[0_10px_30px_-14px_rgba(16,24,40,0.3)] ring-1 ring-black/[0.04] max-md:ring-line";
+
+/** The picture and colour for each moment of an order. */
+const LOOK: Record<OrderStatus, { icon: LucideIcon; tone: string }> = {
+  PLACED: { icon: Receipt, tone: "bg-primary/10 text-primary" },
+  ACCEPTED: { icon: CheckCircle2, tone: "bg-primary/10 text-primary" },
+  PREPARING: { icon: ChefHat, tone: "bg-amber-100 text-amber-700" },
+  READY: { icon: PackageCheck, tone: "bg-emerald-100 text-emerald-700" },
+  OUT_FOR_DELIVERY: { icon: Bike, tone: "bg-emerald-100 text-emerald-700" },
+  DELIVERED: { icon: CheckCircle2, tone: "bg-emerald-100 text-emerald-700" },
+  CANCELLED: { icon: CircleX, tone: "bg-red-100 text-red-700" },
+};
+
+/** One order: where it is now (updates by itself), when it arrives, who's making it, what's in it, and help. */
 export default async function OrderPage({ params }: Props) {
   const { reference } = await params;
   const user = await requireUser(`/orders/${reference}`);
@@ -30,31 +44,44 @@ export default async function OrderPage({ params }: Props) {
   const active = ACTIVE_ORDER.includes(order.status);
   const time = new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Kigali" });
   const eta = new Date(order.createdAt.getTime() + (order.restaurant.prepMinutes + (order.fulfilment === "DELIVERY" ? 20 : 0)) * 60_000);
-  const card = "rounded-3xl bg-surface p-5 shadow-[0_10px_30px_-14px_rgba(16,24,40,0.3)] ring-1 ring-black/[0.04] max-md:ring-line md:p-6";
-  const Icon = order.fulfilment === "DELIVERY" ? Bike : order.fulfilment === "TO_STAY" ? BedDouble : Store;
+  const look = LOOK[order.status];
+  const StatusIcon = look.icon;
+  const Service = order.fulfilment === "DELIVERY" ? Bike : order.fulfilment === "TO_STAY" ? BedDouble : Store;
+  const roundButton = "flex size-11 items-center justify-center rounded-full ring-1 ring-line text-primary transition-colors hover:bg-primary/[0.06]";
 
   return (
-    <PageContainer className="max-w-2xl py-6 md:py-10">
+    <PageContainer className="max-w-2xl pt-4 pb-10 md:py-10">
       <AutoRefresh active={active} />
       <Link href="/orders" className="mb-3 inline-flex items-center gap-1 text-sm text-muted transition-colors hover:text-ink">
         <ChevronLeft className="size-4" aria-hidden="true" />
         {t("ordersTitle")}
       </Link>
 
-      <section className={card}>
-        <p className="text-[13px] text-muted">
-          <span className="font-mono">{order.reference}</span> · {formatKigaliDateTime(locale, order.createdAt)}
-        </p>
-        <h1 className="mt-1 text-[24px] leading-8 font-bold tracking-[-0.02em] text-ink">
-          {order.status === "CANCELLED" ? t("statusTitle.CANCELLED") : order.status === "DELIVERED" ? t("statusTitle.DELIVERED") : t(`statusTitle.${order.status}`)}
-        </h1>
+      {/* Where it is now */}
+      <section className={cn(card, "p-5 md:p-6")}>
+        <div className="flex items-start gap-4">
+          <span className={cn("flex size-14 shrink-0 items-center justify-center rounded-2xl", look.tone)}>
+            <StatusIcon className={cn("size-7", active && "motion-safe:animate-pulse")} aria-hidden="true" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <h1 className="text-[21px] leading-7 font-bold tracking-[-0.02em] text-ink md:text-[24px] md:leading-8">{t(`statusTitle.${order.status}`)}</h1>
+            <p className="text-[13px] text-muted">
+              <span className="font-mono">{order.reference}</span> · {formatKigaliDateTime(locale, order.createdAt)}
+            </p>
+          </div>
+        </div>
+
         {active && (
-          <p className="mt-1 inline-flex items-center gap-1.5 text-[15px] text-ink">
-            <Clock className="size-4 text-primary" aria-hidden="true" />
-            {order.fulfilment === "PICKUP" ? t("readyAround", { time: time.format(eta) }) : t("arrivesAround", { time: time.format(eta) })}
-          </p>
+          <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl bg-canvas px-4 py-3">
+            <span className="inline-flex items-center gap-2 text-[14px] text-muted">
+              <Clock className="size-4 text-primary" aria-hidden="true" />
+              {order.fulfilment === "PICKUP" ? t("readyBy") : t("arrivesBy")}
+            </span>
+            <span className="text-[24px] leading-7 font-bold text-ink tabular-nums">{time.format(eta)}</span>
+          </div>
         )}
-        {order.status === "CANCELLED" && order.cancelReason && <p className="mt-1 text-[14px] text-muted">{t("cancelledBecause", { reason: order.cancelReason })}</p>}
+        {order.status === "CANCELLED" && order.cancelReason && <p className="mt-3 rounded-2xl bg-red-50 px-4 py-3 text-[14px] text-red-900">{t("cancelledBecause", { reason: order.cancelReason })}</p>}
+
         {order.status !== "CANCELLED" && (
           <div className="mt-5">
             <OrderProgress status={order.status} fulfilment={order.fulfilment} />
@@ -63,43 +90,49 @@ export default async function OrderPage({ params }: Props) {
         {active && <p className="mt-4 text-center text-xs text-muted">{t("updatesItself")}</p>}
       </section>
 
-      <section className={`${card} mt-4`}>
-        <h2 className="text-[17px] font-bold text-ink">{order.restaurant.name}</h2>
-        <p className="mt-2 inline-flex items-start gap-2 text-[14px] text-ink">
-          <Icon className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
-          <span>
-            <b className="font-semibold">{t(`fulfilment.${order.fulfilment}`)}</b>
-            {order.fulfilment === "PICKUP" ? (
-              <span className="block text-muted">
-                {order.restaurant.addressLine}, {order.restaurant.district}, {order.restaurant.city}
-              </span>
-            ) : (
-              order.address && <span className="block text-muted">{order.address}</span>
+      {/* Who's making it and where it goes */}
+      <section className={cn(card, "mt-4 p-5")}>
+        <div className="flex items-center gap-3">
+          <span className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-primary-soft">
+            {order.restaurant.photoUrl && (
+              // eslint-disable-next-line @next/next/no-img-element -- restaurant photo
+              <img src={order.restaurant.photoUrl} alt="" className="absolute inset-0 size-full object-cover" />
             )}
           </span>
-        </p>
-        <div className="mt-3 flex flex-wrap gap-2">
+          <Link href={`/restaurants/${order.restaurant.id}`} className="min-w-0 flex-1">
+            <span className="block truncate text-[16px] font-bold text-ink">{order.restaurant.name}</span>
+            <span className="block truncate text-[13px] text-muted">
+              {order.restaurant.district}, {order.restaurant.city}
+            </span>
+          </Link>
           {order.restaurant.phone && (
-            <a href={`tel:${order.restaurant.phone}`} className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-[14px] font-semibold text-white hover:bg-primary-hover">
-              <Phone className="size-4" aria-hidden="true" />
-              {t("callRestaurant")}
+            <a href={`tel:${order.restaurant.phone}`} aria-label={t("callRestaurant")} className={roundButton}>
+              <Phone className="size-5" aria-hidden="true" />
             </a>
           )}
-          {order.fulfilment === "PICKUP" && (
-            <a
-              href={`https://www.google.com/maps/dir/?api=1&destination=${order.restaurant.lat},${order.restaurant.lng}`}
-              target="_blank"
-              rel="noopener"
-              className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-4 py-2 text-[14px] font-semibold text-ink hover:border-primary"
-            >
-              <MapPin className="size-4" aria-hidden="true" />
-              {t("directions")}
-            </a>
-          )}
+          <a
+            href={`https://www.google.com/maps/dir/?api=1&destination=${order.restaurant.lat},${order.restaurant.lng}`}
+            target="_blank"
+            rel="noopener"
+            aria-label={t("directions")}
+            className={roundButton}
+          >
+            <MapPin className="size-5" aria-hidden="true" />
+          </a>
+        </div>
+        <div className="mt-4 flex items-start gap-3 rounded-2xl bg-canvas px-4 py-3 text-[14px]">
+          <Service className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />
+          <span>
+            <b className="font-semibold text-ink">{t(`fulfilment.${order.fulfilment}`)}</b>
+            <span className="block text-muted">
+              {order.fulfilment === "PICKUP" ? `${order.restaurant.addressLine}, ${order.restaurant.district}` : order.address}
+            </span>
+          </span>
         </div>
       </section>
 
-      <section className={`${card} mt-4`}>
+      {/* What's in it */}
+      <section className={cn(card, "mt-4 p-5")}>
         <h2 className="mb-2 text-[17px] font-bold text-ink">{t("yourOrderTitle")}</h2>
         <ul className="flex flex-col divide-y divide-line text-[14px]">
           {order.items.map((i) => (
@@ -127,24 +160,29 @@ export default async function OrderPage({ params }: Props) {
         </dl>
         <p className="mt-2 text-xs text-muted">{t("payOnDelivery")}</p>
         {order.note && <p className="mt-2 text-[13px] text-muted">{t("yourNote", { note: order.note })}</p>}
+        <details className="mt-3 border-t border-line pt-3 text-[13px] text-muted">
+          <summary className="cursor-pointer font-semibold text-ink">{t("history")}</summary>
+          <ol className="mt-2 flex flex-col gap-1">
+            {order.events.map((e) => (
+              <li key={e.id}>
+                {t(`status.${e.to}`)} · {formatKigaliDateTime(locale, e.createdAt)}
+                {e.note && ` · ${e.note}`}
+              </li>
+            ))}
+          </ol>
+        </details>
       </section>
 
-      <section className="mt-4 flex flex-wrap items-center gap-4">
-        {order.status === "PLACED" && <CancelOrder reference={order.reference} />}
-        {!active && <OrderAgain restaurantId={order.restaurant.id} items={order.items} />}
+      <section className="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <span className="flex flex-wrap items-center gap-4">
+          {order.status === "PLACED" && <CancelOrder reference={order.reference} />}
+          {!active && <OrderAgain restaurantId={order.restaurant.id} items={order.items} />}
+        </span>
+        <Link href={{ pathname: "/support", query: { order: order.reference } }} className="inline-flex items-center gap-1.5 text-[14px] font-semibold text-primary hover:underline">
+          <LifeBuoy className="size-4" aria-hidden="true" />
+          {t("orderHelp")}
+        </Link>
       </section>
-
-      <details className="mt-6 text-[13px] text-muted">
-        <summary className="cursor-pointer font-semibold">{t("history")}</summary>
-        <ol className="mt-2 flex flex-col gap-1">
-          {order.events.map((e) => (
-            <li key={e.id}>
-              {t(`status.${e.to}`)} · {formatKigaliDateTime(locale, e.createdAt)}
-              {e.note && ` · ${e.note}`}
-            </li>
-          ))}
-        </ol>
-      </details>
     </PageContainer>
   );
 }
