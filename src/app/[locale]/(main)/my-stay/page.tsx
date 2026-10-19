@@ -171,7 +171,7 @@ export default async function MyStayPage() {
           </Card>
         )}
 
-        {food && underWay && (
+        {food && paid && (
           <Link href="/restaurants" className="flex items-center justify-between gap-3 rounded-3xl bg-primary px-5 py-4 text-white shadow-[0_10px_30px_-14px_rgba(0,87,184,0.6)]">
             <span>
               <span className="block text-[16px] font-bold">{t("orderFood")}</span>

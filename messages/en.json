@@ -24,7 +24,8 @@
     "notifications": "Notifications",
     "logout": "Log out",
     "help": "Help",
-    "orders": "Orders"
+    "orders": "Orders",
+    "restaurants": "Restaurants"
   },
   "Common": {
     "save": "Save",
@@ -1807,7 +1808,12 @@
     "hide": "Hide",
     "hideReason": "Reason (the owner sees this)",
     "publishFailed": "Couldn't change it. A restaurant needs at least one dish before it goes live.",
-    "viewOrder": "View order ({count})"
+    "viewOrder": "View order ({count})",
+    "atThisPlace": "Restaurants at this place",
+    "seeMenu": "See the menu",
+    "homeBanner": "Order food near you",
+    "homeBannerSub": "Restaurants deliver to your door or your room.",
+    "ownersOnly": "Restaurants are added by property owners and the VIIPA team. You can order from any restaurant on the site."
   },
   "Promoters": {
     "title": "Promote and earn",

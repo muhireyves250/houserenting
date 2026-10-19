@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, CalendarDays, KeyRound, LifeBuoy, LogOut, MessageSquare, Plus, UserRound } from "lucide-react";
+import { Bell, CalendarDays, KeyRound, LifeBuoy, LogOut, MessageSquare, Plus, UserRound, UtensilsCrossed } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { Avatar } from "@/components/ui/Avatar";
@@ -47,6 +47,7 @@ export function AccountMenu({ name, image }: { name: string; image?: string | nu
     { href: "/profile", icon: UserRound, label: t("profile") },
     { href: "/bookings", icon: CalendarDays, label: t("bookings") },
     { href: "/chats", icon: MessageSquare, label: t("messages") },
+    { href: "/restaurants", icon: UtensilsCrossed, label: t("restaurants") },
     { href: "/notifications", icon: Bell, label: t("notifications") },
     { href: "/host", icon: KeyRound, label: t("yourPlaces") },
     { href: "/host/listings/new", icon: Plus, label: t("addPlace") },

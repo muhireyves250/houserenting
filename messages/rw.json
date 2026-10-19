@@ -24,7 +24,8 @@
     "notifications": "Imenyesha",
     "logout": "Sohoka",
     "help": "Ubufasha",
-    "orders": "Ibyo natumije"
+    "orders": "Ibyo natumije",
+    "restaurants": "Resitora"
   },
   "Common": {
     "save": "Bika",
@@ -1807,7 +1808,12 @@
     "hide": "Hisha",
     "hideReason": "Impamvu (nyirayo arayibona)",
     "publishFailed": "Ntibyakunze. Resitora ikenera nibura ibiryo kimwe mbere yo kujya ku rubuga.",
-    "viewOrder": "Reba ibyo watumije ({count})"
+    "viewOrder": "Reba ibyo watumije ({count})",
+    "atThisPlace": "Resitora ziri aha",
+    "seeMenu": "Reba urutonde rw'ibiryo",
+    "homeBanner": "Tumiza ibiryo hafi yawe",
+    "homeBannerSub": "Resitora zikugezaho ibiryo aho uri cyangwa mu cyumba cyawe.",
+    "ownersOnly": "Resitora zishyirwaho na ba nyir'inzu n'itsinda rya VIIPA. Ushobora gutumiza muri resitora iyo ari yo yose iri ku rubuga."
   },
   "Promoters": {
     "title": "Kwamamaza no kwinjiza",

@@ -2,7 +2,7 @@ import { ChevronLeft, ChevronRight, Plus, UtensilsCrossed } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageContainer } from "@/components/ui/PageContainer";
-import { restaurantsRunBy } from "@/features/food/service";
+import { canAddRestaurant, restaurantsRunBy } from "@/features/food/service";
 import { Link } from "@/i18n/navigation";
 import { requireUser } from "@/lib/session";
 
@@ -14,7 +14,7 @@ export async function generateMetadata() {
 /** Restaurants someone owns or works at (manager, kitchen, delivery). */
 export default async function HostRestaurantsPage() {
   const user = await requireUser("/host/restaurants");
-  const [t, list] = await Promise.all([getTranslations("Food"), restaurantsRunBy(user.id)]);
+  const [t, list, canAdd] = await Promise.all([getTranslations("Food"), restaurantsRunBy(user.id), canAddRestaurant(user)]);
   const add = (
     <Link href="/host/restaurants/new" className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-[15px] font-semibold text-white hover:bg-primary-hover">
       <Plus className="size-4" aria-hidden="true" />
@@ -29,10 +29,23 @@ export default async function HostRestaurantsPage() {
       </Link>
       <div className="mb-6 flex items-center justify-between gap-4">
         <h1 className="text-[26px] leading-8 font-bold tracking-[-0.03em] text-ink md:text-[32px] md:leading-10">{t("yourRestaurants")}</h1>
-        {list.length > 0 && add}
+        {list.length > 0 && canAdd && add}
       </div>
       {list.length === 0 ? (
-        <EmptyState icon={<UtensilsCrossed />} title={t("noOwnRestaurants")} body={t("noOwnRestaurantsBody")} action={add} />
+        <EmptyState
+          icon={<UtensilsCrossed />}
+          title={t("noOwnRestaurants")}
+          body={canAdd ? t("noOwnRestaurantsBody") : t("ownersOnly")}
+          action={
+            canAdd ? (
+              add
+            ) : (
+              <Link href="/restaurants" className="inline-flex items-center rounded-full bg-primary px-5 py-2.5 text-[15px] font-semibold text-white">
+                {t("browseRestaurants")}
+              </Link>
+            )
+          }
+        />
       ) : (
         <ul className="flex flex-col divide-y divide-line rounded-3xl bg-surface ring-1 ring-line">
           {list.map((r) => (

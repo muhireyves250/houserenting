@@ -19,7 +19,7 @@ const newButton =
 
 export default async function HostPage() {
   const user = await requireUser("/host");
-  const [t, tType, tPlaces, listings, questions, earnings, locale, helping] = await Promise.all([
+  const [t, tType, tPlaces, listings, questions, earnings, locale, restaurantRoles, helping] = await Promise.all([
     getTranslations("Host"),
     getTranslations("ListingType"),
     getTranslations("Places"),
@@ -27,6 +27,7 @@ export default async function HostPage() {
     hostQuestions(user.id),
     hostEarnings(user.id),
     getLocale(),
+    db.restaurantMember.count({ where: { userId: user.id } }),
     db.placeMember.findMany({ where: { userId: user.id, listing: { status: { not: "ARCHIVED" } } }, select: { role: true, listing: { select: { id: true, title: true, city: true } } } }),
   ]);
   const hasMoney = earnings.earned + earnings.upcoming + earnings.paidOut > 0;
@@ -52,13 +53,15 @@ export default async function HostPage() {
           <ChevronRight className="size-4" aria-hidden="true" />
         </Link>
       )}
-      <Link
-        href="/host/restaurants"
-        className="mb-3 flex items-center justify-between gap-3 rounded-2xl bg-surface px-4 py-3 text-[14px] font-semibold text-ink ring-1 ring-line transition-colors hover:ring-primary"
-      >
-        {tPlaces("restaurantsLink")}
-        <ChevronRight className="size-4 text-ink/50" aria-hidden="true" />
-      </Link>
+      {(listings.length > 0 || restaurantRoles > 0) && (
+        <Link
+          href="/host/restaurants"
+          className="mb-3 flex items-center justify-between gap-3 rounded-2xl bg-surface px-4 py-3 text-[14px] font-semibold text-ink ring-1 ring-line transition-colors hover:ring-primary"
+        >
+          {tPlaces("restaurantsLink")}
+          <ChevronRight className="size-4 text-ink/50" aria-hidden="true" />
+        </Link>
+      )}
       {helping.length > 0 && (
         <section className="mb-5">
           <h2 className="mb-2 text-[15px] font-semibold text-ink">{tPlaces("helpingTitle")}</h2>

@@ -24,7 +24,8 @@
     "notifications": "Notifications",
     "logout": "Se déconnecter",
     "help": "Aide",
-    "orders": "Commandes"
+    "orders": "Commandes",
+    "restaurants": "Restaurants"
   },
   "Common": {
     "save": "Enregistrer",
@@ -1807,7 +1808,12 @@
     "hide": "Masquer",
     "hideReason": "Raison (visible par le propriétaire)",
     "publishFailed": "Modification impossible. Un restaurant a besoin d'au moins un plat pour être en ligne.",
-    "viewOrder": "Voir la commande ({count})"
+    "viewOrder": "Voir la commande ({count})",
+    "atThisPlace": "Restaurants sur place",
+    "seeMenu": "Voir le menu",
+    "homeBanner": "Commandez près de chez vous",
+    "homeBannerSub": "Les restaurants livrent à votre porte ou dans votre chambre.",
+    "ownersOnly": "Les restaurants sont ajoutés par les propriétaires et l'équipe VIIPA. Vous pouvez commander dans tous les restaurants du site."
   },
   "Promoters": {
     "title": "Promouvoir et gagner",

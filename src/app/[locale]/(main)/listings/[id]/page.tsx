@@ -1,25 +1,4 @@
-import {
-  AirVent,
-  ArrowLeft,
-  CalendarClock,
-  ChevronLeft,
-  CookingPot,
-  KeyRound,
-  Laptop,
-  type LucideIcon,
-  Microwave,
-  PawPrint,
-  ShieldCheck,
-  ShowerHead,
-  SquareParking,
-  Star,
-  Tv,
-  Utensils,
-  WashingMachine,
-  WavesLadder,
-  Wifi,
-  Zap,
-} from "lucide-react";
+import { AirVent, ArrowLeft, CalendarClock, ChevronLeft, CookingPot, KeyRound, Laptop, type LucideIcon, Microwave, PawPrint, ShieldCheck, ShowerHead, SquareParking, Star, Tv, Utensils, WashingMachine, WavesLadder, Wifi, Zap, UtensilsCrossed, ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -41,6 +20,7 @@ import { currentWholeBlock, getPublishedListingByParam, listingNotice, nearbyLis
 import { ListingNotice } from "@/features/listings/components/detail/ListingNotice";
 import { bookedRanges } from "@/features/bookings/service";
 import { getEnv } from "@/lib/env";
+import { db } from "@/lib/db";
 import { feesFor } from "@/features/bookings/money";
 import { bookableWindow } from "@/features/bookings/availability";
 import QRCode from "qrcode";
@@ -117,7 +97,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
     getCurrentUser(),
     getLocale(),
   ]);
-  const [nearby, booked, questions, reviews, tQuestions, tReviews, allRooms, settings] = await Promise.all([
+  const [nearby, booked, questions, reviews, tQuestions, tReviews, allRooms, settings, food, tFood] = await Promise.all([
     nearbyListings(listing),
     bookedRanges(listing.id),
     publishedQuestions(listing.id),
@@ -126,6 +106,8 @@ export default async function ListingPage({ params, searchParams }: Props) {
     getTranslations("Reviews"),
     listingRooms(listing.id),
     getSettings(),
+    db.restaurant.findMany({ where: { listingId: listing.id, status: "PUBLISHED" }, select: { id: true, name: true, openingHours: true, delivery: true, paused: true } }),
+    getTranslations("Food"),
   ]);
   // Only rooms guests can book now; places that rent whole don't show rooms.
   const rooms =
@@ -455,6 +437,25 @@ export default async function ListingPage({ params, searchParams }: Props) {
         </Section>
 
         {/* Things to know */}
+        {food.length > 0 && (
+          <Section title={tFood("atThisPlace")}>
+            <ul className="grid gap-3 sm:grid-cols-2">
+              {food.map((r) => (
+                <li key={r.id}>
+                  <Link href={`/restaurants/${r.id}`} className="flex items-center gap-3 rounded-2xl border border-line p-4 transition-colors hover:border-primary">
+                    <UtensilsCrossed className="size-6 shrink-0 text-primary" aria-hidden="true" />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[15px] font-semibold text-ink">{r.name}</span>
+                      <span className="block truncate text-[13px] text-muted">{r.paused ? tFood("closedNow") : r.openingHours || tFood("seeMenu")}</span>
+                    </span>
+                    <ChevronRight className="size-4 text-ink/50" aria-hidden="true" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </Section>
+        )}
+
         <Section title={t("thingsToKnow")}>
           <div className="grid gap-10 md:grid-cols-2 lg:max-w-4xl">
             <div>

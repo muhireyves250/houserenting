@@ -39,7 +39,16 @@ const errorsOf = (issues: { path: PropertyKey[]; message: string }[]) => {
 
 export type SaveRestaurantResult = { ok: true; id: string } | { ok: false; errors: Record<string, string> } | { ok: false; error: "notAllowed" };
 
-/** Anyone creates a restaurant (a draft until staff publish it); its owner, managers or staff edit it. */
+/**
+ * Who may add a restaurant themselves: VIIPA staff, and property owners (someone with a place on the site).
+ * Clients who only book can't; staff create restaurants for other owners from the dashboard.
+ */
+export async function canAddRestaurant(actor: Actor): Promise<boolean> {
+  if (isAdmin(actor)) return true;
+  return (await db.listing.count({ where: { hostId: actor.id, status: { not: "ARCHIVED" } } })) > 0;
+}
+
+/** Owners or staff create a restaurant (a draft until staff publish it); its owner, managers or staff edit it. */
 export async function saveRestaurant(actor: Actor, id: string | null, raw: RestaurantInput, ownerId?: string): Promise<SaveRestaurantResult> {
   const parsed = restaurantInput.safeParse(raw);
   if (!parsed.success) return { ok: false, errors: errorsOf(parsed.error.issues) };
@@ -49,6 +58,7 @@ export async function saveRestaurant(actor: Actor, id: string | null, raw: Resta
     if (!listing || (!isAdmin(actor) && listing.hostId !== (ownerId ?? actor.id))) data.listingId = null;
   }
   if (id === null) {
+    if (!(await canAddRestaurant(actor))) return { ok: false, error: "notAllowed" };
     const owner = isAdmin(actor) && ownerId ? ownerId : actor.id;
     const created = await db.restaurant.create({ data: { ...data, ownerId: owner } });
     await audit(db, { actorId: actor.id, action: "restaurant.create", entityType: "restaurant", entityId: created.id });

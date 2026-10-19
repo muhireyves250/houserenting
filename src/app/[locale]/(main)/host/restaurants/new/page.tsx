@@ -1,8 +1,8 @@
 import { ChevronLeft } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { PageContainer } from "@/components/ui/PageContainer";
 import { EMPTY_RESTAURANT, RestaurantForm } from "@/features/food/components/RestaurantForm";
-import { Link } from "@/i18n/navigation";
+import { Link, redirect } from "@/i18n/navigation";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 
@@ -12,6 +12,8 @@ export default async function NewRestaurantPage() {
     getTranslations("Food"),
     db.listing.findMany({ where: { hostId: user.id, status: { not: "ARCHIVED" } }, select: { id: true, title: true }, orderBy: { title: "asc" } }),
   ]);
+  // Only property owners add restaurants themselves; everyone else is sent to the list, which explains it.
+  if (places.length === 0) redirect({ href: "/host/restaurants", locale: await getLocale() });
   return (
     <PageContainer className="max-w-3xl py-6 md:py-10">
       <Link href="/host/restaurants" className="mb-3 inline-flex items-center gap-1 text-sm text-muted transition-colors hover:text-ink">
