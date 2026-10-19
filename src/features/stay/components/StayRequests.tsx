@@ -64,7 +64,7 @@ export function StayRequests({
         <p className="rounded-xl bg-amber-50 px-4 py-3 text-[14px] text-amber-900">{t("requestWaiting")}</p>
       ) : (
         <>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div className={cn("grid gap-2", kinds.length === 3 ? "grid-cols-3" : "grid-cols-2 sm:grid-cols-4")}>
             {kinds.map((k) => {
               const Icon = ICONS[k];
               return (
