@@ -72,7 +72,8 @@ describe("food from the kitchen of the guest's stay", () => {
     await saveMenuItem(admin, saved.id, null, { name: "Brochette", price: 3000 });
     expect(await setRestaurantStatus(admin, saved.id, "PUBLISHED")).toBe(true);
     expect((await kitchenForPlace("place"))?.id).toBe(saved.id);
-    expect(await kitchenForPlace("elsewhere")).toBeNull();
+    // A place without its own kitchen gets the nearest one.
+    expect((await kitchenForPlace("elsewhere"))?.id).toBe(saved.id);
     expect(await setRestaurantStatus(admin, saved.id, "HIDDEN")).toBe(false);
     expect(await setRestaurantStatus(admin, saved.id, "HIDDEN", "Health inspection")).toBe(true);
   });
@@ -82,8 +83,12 @@ describe("food from the kitchen of the guest's stay", () => {
     const dish = await db.menuItem.findFirstOrThrow();
     expect(await order(id, dish.id, { fulfilment: "DELIVERY", address: "KN 5 Rd" })).toEqual({ ok: false, error: "notOffered" });
     expect(await order(id, dish.id, { bookingReference: null })).toEqual({ ok: false, error: "noStay" });
+    // The stay's own kitchen cooks; another place's kitchen can't take the order.
     await db.restaurant.update({ where: { id }, data: { listingId: "elsewhere" } });
+    const own = await db.restaurant.create({ data: { ...(await db.restaurant.findUniqueOrThrow({ where: { id }, omit: { id: true, createdAt: true, updatedAt: true } })), name: "Lake house kitchen", listingId: "place" } });
+    await db.menuItem.create({ data: { restaurantId: own.id, name: "Fish", price: 5000 } });
     expect(await order(id, dish.id)).toEqual({ ok: false, error: "tooFar" });
+    await db.restaurant.delete({ where: { id: own.id } });
     await db.restaurant.update({ where: { id }, data: { listingId: "place" } });
 
     const placed = await order(id, dish.id);

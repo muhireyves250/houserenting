@@ -90,7 +90,7 @@ export default async function OrdersPage() {
                   <div className="flex items-center gap-3 p-4">
                     <Thumb photo={o.restaurant.photoUrl} className="size-14" />
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-[13px] font-semibold text-muted">{o.restaurant.listing?.title ?? t("yourStayKitchen")}</p>
+                      <p className="truncate text-[13px] font-semibold text-muted">{o.address?.split(" · ")[0] || t("yourStayKitchen")}</p>
                       <p className="text-[16px] leading-5 font-bold text-ink">{t(`statusTitle.${o.status}`)}</p>
                       <p className="mt-0.5 inline-flex items-center gap-1.5 text-[13px] text-ink">
                         <Clock className="size-3.5 text-primary" aria-hidden="true" />
@@ -144,7 +144,7 @@ export default async function OrdersPage() {
                   <Link href={`/orders/${o.reference}`} className="flex min-w-0 flex-1 items-center gap-3">
                     <Thumb photo={o.restaurant.photoUrl} className="size-12" />
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[15px] font-semibold text-ink">{o.restaurant.listing?.title ?? t("yourStayKitchen")}</span>
+                      <span className="block truncate text-[15px] font-semibold text-ink">{o.address?.split(" · ")[0] || t("yourStayKitchen")}</span>
                       <span className="block truncate text-[13px] text-muted">{items(o)}</span>
                       <span className="block truncate text-[12px] text-muted">
                         <span className={cn("font-semibold", o.status === "DELIVERED" ? "text-emerald-700" : "text-muted")}>{t(`status.${o.status}`)}</span>

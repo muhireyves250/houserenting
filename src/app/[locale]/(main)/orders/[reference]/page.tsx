@@ -96,7 +96,7 @@ export default async function OrderPage({ params }: Props) {
             <Service className="size-6" aria-hidden="true" />
           </span>
           <span className="min-w-0 flex-1 text-[14px]">
-            <b className="block text-[16px] font-bold text-ink">{t("kitchenAt", { place: order.restaurant.listing?.title ?? t("yourStayKitchen") })}</b>
+            <b className="block text-[16px] font-bold text-ink">{t("kitchenAt", { place: order.address?.split(" · ")[0] || t("yourStayKitchen") })}</b>
             <span className="block text-muted">{order.address ?? t(`fulfilment.${order.fulfilment}`)}</span>
           </span>
         </div>

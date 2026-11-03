@@ -178,16 +178,25 @@ export function publicRestaurant(id: string) {
   });
 }
 
+const KITCHEN_SELECT = {
+  ...PUBLIC_SELECT,
+  menu: { where: { available: true }, orderBy: [{ position: "asc" as const }], select: { id: true, section: true, name: true, description: true, price: true, photoUrl: true } },
+};
+
 /**
- * The kitchen that cooks for guests of a place (a published restaurant linked to it), with its menu.
- * Clients never pick a restaurant: food comes from where they're staying.
+ * The kitchen that cooks for guests of a place, with its menu: the place's own kitchen, or else the nearest VIIPA
+ * kitchen with dishes on its menu (VIIPA arranges the food to the guest's room). Clients never pick a restaurant.
  */
-export function kitchenForPlace(listingId: string) {
-  return db.restaurant.findFirst({
-    where: { listingId, status: "PUBLISHED" },
-    orderBy: { createdAt: "asc" },
-    select: { ...PUBLIC_SELECT, menu: { where: { available: true }, orderBy: [{ position: "asc" }], select: { id: true, section: true, name: true, description: true, price: true, photoUrl: true } } },
-  });
+export async function kitchenForPlace(listingId: string) {
+  const own = await db.restaurant.findFirst({ where: { listingId, status: "PUBLISHED", menu: { some: { available: true } } }, orderBy: { createdAt: "asc" }, select: KITCHEN_SELECT });
+  if (own) return own;
+  const [place, kitchens] = await Promise.all([
+    db.listing.findUnique({ where: { id: listingId }, select: { lat: true, lng: true } }),
+    db.restaurant.findMany({ where: { status: "PUBLISHED", menu: { some: { available: true } } }, select: { id: true, lat: true, lng: true } }),
+  ]);
+  if (!place || kitchens.length === 0) return null;
+  const nearest = kitchens.reduce((best, k) => (distanceKm(place, k) < distanceKm(place, best) ? k : best));
+  return db.restaurant.findUnique({ where: { id: nearest.id }, select: KITCHEN_SELECT });
 }
 
 export type Dish = { id: string; section: string; name: string; description: string; price: number; photoUrl: string | null };
@@ -250,7 +259,7 @@ export async function placeOrder(customerId: string, raw: OrderInput, now: Date 
   if (input.fulfilment !== "TO_STAY") return { ok: false, error: "notOffered" };
   const stay = await currentStay(customerId, input.bookingReference, now);
   if (!stay) return { ok: false, error: "noStay" };
-  if (r.listingId !== stay.listingId) return { ok: false, error: "tooFar" };
+  if ((await kitchenForPlace(stay.listingId))?.id !== r.id) return { ok: false, error: "tooFar" };
   bookingId = stay.id;
   address = [stay.listing.title, stay.room?.name, stay.reference].filter(Boolean).join(" · ");
 
