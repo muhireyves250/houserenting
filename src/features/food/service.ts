@@ -190,6 +190,28 @@ export function kitchenForPlace(listingId: string) {
   });
 }
 
+export type Dish = { id: string; section: string; name: string; description: string; price: number; photoUrl: string | null };
+
+/**
+ * What's cooked in the kitchens at VIIPA places, for guests not staying yet (no kitchen names: each guest orders
+ * from the kitchen where they stay). Every dish, once by name, dishes with photos first.
+ */
+export async function foodMenu(limit?: number): Promise<Dish[]> {
+  const items = await db.menuItem.findMany({
+    where: { available: true, restaurant: { status: "PUBLISHED", listingId: { not: null } } },
+    orderBy: [{ position: "asc" }, { createdAt: "asc" }],
+    select: { id: true, section: true, name: true, description: true, price: true, photoUrl: true },
+  });
+  const seen = new Set<string>();
+  const dishes = items.filter((d) => {
+    const key = d.name.trim().toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  return dishes.sort((a, b) => Number(!a.photoUrl) - Number(!b.photoUrl)).slice(0, limit);
+}
+
 /** Whether any restaurant takes orders: the ORDERS tab only shows when ordering is live. */
 export async function ordersLive(): Promise<boolean> {
   return (await db.restaurant.count({ where: { status: "PUBLISHED" } })) > 0;
