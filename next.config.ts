@@ -6,6 +6,9 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   serverExternalPackages: ["@node-rs/argon2"],
   images: {
+    // In dev the browser loads photos straight from Unsplash/Cloudinary: on slow connections the local optimizer's
+    // fetches time out (504). Production keeps optimised images.
+    unoptimized: process.env.NODE_ENV === "development",
     // 90 for the hero photo; 75 (default) elsewhere.
     qualities: [75, 90],
     remotePatterns: [
