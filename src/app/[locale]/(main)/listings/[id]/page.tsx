@@ -301,12 +301,14 @@ export default async function ListingPage({ params, searchParams }: Props) {
               </p>
             )}
 
-            {/* Host */}
+            {/* VIIPA looks after the place and the booking (guests don't deal with owners). */}
             <div className="flex items-center gap-4 border-t border-line py-6">
-              <Avatar name={listing.host.name} image={listing.host.image} className="size-12 text-base" />
+              <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary">
+                <ShieldCheck className="size-6" aria-hidden="true" />
+              </span>
               <div>
-                <p className="text-[15px] font-semibold text-ink">{t("hostedBy", { name: listing.host.name })}</p>
-                <p className="text-sm text-muted">{t("hostingSince", { year: listing.host.createdAt.getFullYear() })}</p>
+                <p className="text-[15px] font-semibold text-ink">{t("managedBy")}</p>
+                <p className="text-sm text-muted">{t("managedBySub")}</p>
               </div>
             </div>
 

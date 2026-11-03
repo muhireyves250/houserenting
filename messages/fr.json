@@ -98,7 +98,7 @@
   "Search": {
     "anywhere": "Partout au Rwanda",
     "emptyTitle": "Aucun logement ici pour l'instant",
-    "emptyBody": "Des hôtes ajoutent de nouveaux logements chaque jour. Revenez bientôt.",
+    "emptyBody": "De nouveaux logements sont ajoutés chaque jour. Revenez bientôt.",
     "title": "Logements à {place}",
     "price": "Prix",
     "typeOfPlace": "Type de logement",
@@ -240,7 +240,7 @@
     "bookingsTitle": "Aucune réservation pour l'instant",
     "bookingsBody": "Vos réservations et visites apparaîtront ici.",
     "chatsTitle": "Aucun message pour l'instant",
-    "chatsBody": "Vos conversations avec les hôtes apparaîtront ici."
+    "chatsBody": "Vos messages avec l'équipe VIIPA apparaîtront ici."
   },
   "Errors": {
     "title": "Une erreur s'est produite",
@@ -269,6 +269,8 @@
     "fr": "Français"
   },
   "Listings": {
+    "managedBySub": "Notre équipe s'occupe de votre réservation, du paiement et de toute aide.",
+    "managedBy": "Géré par VIIPA",
     "featured": "Logements à la une",
     "seeAll": "Tout voir",
     "perUnit": {
@@ -367,7 +369,7 @@
     "maxGuests": "{count, plural, one {# voyageur maximum} other {# voyageurs maximum}}",
     "petsAllowed": "Animaux acceptés",
     "noPets": "Animaux non acceptés",
-    "discountOffer": "Cet hôte propose une réduction",
+    "discountOffer": "Ce logement bénéficie d'une réduction",
     "checkInLabel": "Arrivée",
     "checkOutLabel": "Départ",
     "addDate": "Ajouter une date",
@@ -410,7 +412,7 @@
     "dates": "Dates",
     "priceDetails": "Détail du prix",
     "youSave": "Vous économisez {amount} sur ce séjour",
-    "agree": "En sélectionnant le bouton ci-dessous, j'accepte le règlement intérieur de l'hôte et de payer le total indiqué.",
+    "agree": "En sélectionnant le bouton ci-dessous, j'accepte le règlement intérieur et de payer le total indiqué.",
     "paymentsSoon": "Le paiement mobile money arrive bientôt. Vous ne serez pas débité.",
     "wontBeCharged": "Vous ne serez pas encore débité",
     "recentlyViewed": "Consultés récemment",
@@ -428,7 +430,7 @@
       "invalid": "Vérifiez vos dates et le nombre de voyageurs, puis réessayez.",
       "notFound": "Ce logement ne peut pas être réservé pour le moment.",
       "ownListing": "Vous ne pouvez pas réserver votre propre logement.",
-      "stayLength": "L'hôte n'accepte pas des séjours de cette durée. Essayez d'autres dates.",
+      "stayLength": "Ce logement n'accepte pas de séjours de cette durée. Essayez d'autres dates.",
       "phone": "Vérifiez votre numéro mobile money.",
       "unavailable": "Certaines de ces dates ne sont plus disponibles. Choisissez d'autres dates.",
       "auth": "Reconnectez-vous pour réserver.",
@@ -498,14 +500,14 @@
     "chooseTime": "Choisir une heure",
     "notice": {
       "HIDDEN": "Ce logement n'est pas disponible pour le moment. Il n'accepte pas de réservations.",
-      "PAUSED": "L'hôte a mis les réservations en pause pour le moment.",
+      "PAUSED": "Les réservations pour ce logement sont suspendues pour le moment.",
       "SUSPENDED": "Ce logement est suspendu et n'accepte pas de réservations.",
       "ARCHIVED": "Ce logement n'est plus proposé.",
       "CHANGES_REQUESTED": "Ce logement est en cours de mise à jour et n'accepte pas de réservations.",
       "findAnother": "Trouver un autre logement"
     },
     "blockedUntil": "{kind} jusqu'au {date}. Choisissez des dates après.",
-    "blockedOpen": "{kind} pour le moment. L'hôte le rouvrira.",
+    "blockedOpen": "{kind} pour le moment. Il rouvrira bientôt.",
     "blockKind": {
       "MAINTENANCE": "En maintenance",
       "UNAVAILABLE": "Indisponible",
@@ -1077,10 +1079,10 @@
   "Questions": {
     "title": "Questions et réponses",
     "none": "Aucune question répondue pour l'instant.",
-    "loginToAsk": "Connectez-vous pour poser une question à l'hôte",
-    "askLabel": "Poser une question à l'hôte",
+    "loginToAsk": "Connectez-vous pour nous poser une question",
+    "askLabel": "Posez une question à VIIPA",
     "ask": "Envoyer",
-    "sent": "Envoyée. L'hôte répond, puis notre équipe vérifie avant publication.",
+    "sent": "Envoyé. Notre équipe répond et la réponse s'affiche ici.",
     "moderationNote": "Les réponses s'affichent après vérification par notre équipe.",
     "error": {
       "invalid": "Écrivez entre 5 et 500 caractères.",
@@ -1368,7 +1370,7 @@
     "startError": {
       "notFound": "Impossible d'écrire pour ce logement pour le moment.",
       "ownListing": "C'est votre propre logement.",
-      "auth": "Connectez-vous pour écrire à l'hôte."
+      "auth": "Connectez-vous pour nous écrire."
     },
     "sendFailed": "Envoi impossible. Réessayez.",
     "placeholder": "Écrire un message",
@@ -1558,8 +1560,8 @@
       "DECLINED": "Pas de remboursement pour cette réservation."
     },
     "idTitle": "Votre pièce d'identité",
-    "idAsked": "Ce logement demande votre pièce d'identité avant l'arrivée. Photo ou PDF, 8 Mo maximum. Seuls vous, l'hôte et notre équipe pouvez la voir.",
-    "idAtCheckIn": "Apportez votre pièce d'identité : l'hôte la demandera à votre arrivée.",
+    "idAsked": "Ce logement demande votre pièce d'identité avant votre arrivée. Une photo ou un PDF, jusqu'à 8 Mo. Seuls vous et notre équipe pouvez la voir.",
+    "idAtCheckIn": "Apportez votre pièce d'identité : elle vous sera demandée à l'arrivée.",
     "idUpload": "Envoyer",
     "idReplace": "Remplacer",
     "idUploading": "Envoi…",

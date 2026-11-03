@@ -98,7 +98,7 @@
   "Search": {
     "anywhere": "Ahantu hose mu Rwanda",
     "emptyTitle": "Nta nzu zirahaba",
-    "emptyBody": "Ba nyir'amazu bongeramo amazu mashya buri munsi. Uzagaruke vuba.",
+    "emptyBody": "Amazu mashya yongerwaho buri munsi. Uzagaruke vuba.",
     "title": "Amacumbi i {place}",
     "price": "Igiciro",
     "typeOfPlace": "Ubwoko bw'icumbi",
@@ -240,7 +240,7 @@
     "bookingsTitle": "Nta byo watumije biraboneka",
     "bookingsBody": "Ibyo wafashe n'amasura yawe bizagaragara hano.",
     "chatsTitle": "Nta butumwa buraboneka",
-    "chatsBody": "Ibiganiro na ba nyir'amazu bizagaragara hano."
+    "chatsBody": "Ubutumwa bwawe n'itsinda rya VIIPA buzagaragara hano."
   },
   "Errors": {
     "title": "Hari ikitagenze neza",
@@ -269,6 +269,8 @@
     "fr": "Igifaransa"
   },
   "Listings": {
+    "managedBySub": "Itsinda ryacu rikurikirana ibyo wakodesheje, kwishyura n'ubufasha ukeneye.",
+    "managedBy": "Bicungwa na VIIPA",
     "featured": "Amazu yatoranyijwe",
     "seeAll": "Reba yose",
     "perUnit": {
@@ -367,7 +369,7 @@
     "maxGuests": "{count, plural, one {Umushyitsi # ntarengwa} other {Abashyitsi # ntarengwa}}",
     "petsAllowed": "Amatungo aremewe",
     "noPets": "Amatungo ntiyemewe",
-    "discountOffer": "Nyiri inzu atanga igabanywa",
+    "discountOffer": "Aha hantu hari igabanyirizwa",
     "checkInLabel": "Kugera",
     "checkOutLabel": "Kugenda",
     "addDate": "Ongeramo itariki",
@@ -410,7 +412,7 @@
     "dates": "Amatariki",
     "priceDetails": "Ibiciro birambuye",
     "youSave": "Uzigama {amount} kuri uru rugendo",
-    "agree": "Uhitamo buto iri hasi, wemeye amategeko y'inzu kandi wemeye kwishyura igiteranyo kigaragara.",
+    "agree": "Mu guhitamo buto iri hasi, nemeye amategeko y'inzu kandi nzishyura igiteranyo cyerekanwe.",
     "paymentsSoon": "Kwishyura na mobile money biraza vuba. Nta mafaranga uri bucibwe.",
     "wontBeCharged": "Nta mafaranga uracibwa",
     "recentlyViewed": "Ibyo uherutse kureba",
@@ -428,7 +430,7 @@
       "invalid": "Reba amatariki n'umubare w'abashyitsi, wongere ugerageze.",
       "notFound": "Aha ntihashobora kubikwa ubu.",
       "ownListing": "Ntushobora kubika aho wakiriye abashyitsi.",
-      "stayLength": "Nyir'inzu ntiyakira igihe kingana gutya. Gerageza indi minsi.",
+      "stayLength": "Aha hantu ntihakira igihe cy'uburebure nk'ubu. Gerageza andi matariki.",
       "phone": "Reba nimero yawe ya mobile money.",
       "unavailable": "Imwe muri iyi minsi ntikiboneka. Hitamo indi minsi.",
       "auth": "Ongera winjire kugira ngo ubike.",
@@ -498,14 +500,14 @@
     "chooseTime": "Hitamo isaha",
     "notice": {
       "HIDDEN": "Aha ntihaboneka ubu. Ntihakira ibyabitswe.",
-      "PAUSED": "Nyir'inzu yahagaritse ibyabitswe by'agateganyo.",
+      "PAUSED": "Gukodesha aha hantu byahagaritswe by'agateganyo.",
       "SUSPENDED": "Aha harahagaritswe kandi ntihakira ibyabitswe.",
       "ARCHIVED": "Aha ntihakiri ku rubuga.",
       "CHANGES_REQUESTED": "Aha hari kuvugururwa, ntihakira ibyabitswe ubu.",
       "findAnother": "Shaka ahandi"
     },
     "blockedUntil": "{kind} kugeza {date}. Hitamo iminsi ikurikira.",
-    "blockedOpen": "{kind} ubu. Nyir'inzu azahafungura.",
+    "blockedOpen": "{kind} by'agateganyo. Hazongera gufungura vuba.",
     "blockKind": {
       "MAINTENANCE": "Hari gusanwa",
       "UNAVAILABLE": "Ntihaboneka",
@@ -1077,10 +1079,10 @@
   "Questions": {
     "title": "Ibibazo n'ibisubizo",
     "none": "Nta kibazo kirasubizwa.",
-    "loginToAsk": "Injira kugira ngo ubaze nyir'inzu",
-    "askLabel": "Baza nyir'inzu",
+    "loginToAsk": "Injira kugira ngo utubaze ikibazo",
+    "askLabel": "Baza VIIPA ikibazo",
     "ask": "Baza",
-    "sent": "Byoherejwe. Nyir'inzu arasubiza, hanyuma itsinda ryacu rikagenzura mbere y'uko bigaragara.",
+    "sent": "Byoherejwe. Itsinda ryacu rirasubiza, igisubizo kikagaragara hano.",
     "moderationNote": "Ibisubizo bigaragara hano itsinda ryacu rimaze kubigenzura.",
     "error": {
       "invalid": "Andika inyuguti hagati ya 5 na 500.",
@@ -1368,7 +1370,7 @@
     "startError": {
       "notFound": "Ntushobora kwandikira aha hantu ubu.",
       "ownListing": "Aha ni ahawe.",
-      "auth": "Injira kugira ngo wandikire nyir'inzu."
+      "auth": "Injira kugira ngo utwandikire."
     },
     "sendFailed": "Kohereza byanze. Ongera ugerageze.",
     "placeholder": "Andika ubutumwa",
@@ -1558,8 +1560,8 @@
       "DECLINED": "Nta gusubizwa kuri iri fatwa."
     },
     "idTitle": "Indangamuntu yawe",
-    "idAsked": "Iyi nzu isaba indangamuntu yawe mbere yo kuhagera. Ifoto cyangwa PDF, kugeza kuri MB 8. Wowe, nyir'inzu n'itsinda ryacu ni mwe mwenyine muyibona.",
-    "idAtCheckIn": "Zana indangamuntu yawe: nyir'inzu azayisaba uhageze.",
+    "idAsked": "Aha hantu hasaba indangamuntu yawe mbere yo kuhagera. Ifoto cyangwa PDF, kugeza kuri MB 8. Ni wowe n'itsinda ryacu gusa babibona.",
+    "idAtCheckIn": "Zana indangamuntu yawe: uzasabwa kuyerekana uhageze.",
     "idUpload": "Ohereza indangamuntu",
     "idReplace": "Simbuza",
     "idUploading": "Biroherezwa…",

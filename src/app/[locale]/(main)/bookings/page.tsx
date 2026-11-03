@@ -65,8 +65,8 @@ export default async function BookingsPage() {
           {t("myStay")}
         </h2>
         {current ? (
-          <div className={`${card} overflow-hidden`}>
-            <Link href="/my-stay" className="relative block h-36 bg-primary-soft md:h-44">
+          <div className={`${card} overflow-hidden md:flex`}>
+            <Link href="/my-stay" className="relative block h-36 bg-primary-soft md:h-auto md:min-h-60 md:flex-1">
               {current.listing.photos[0] ? (
                 <Image src={current.listing.photos[0].url} alt="" fill sizes="(min-width: 768px) 900px, 100vw" className="object-cover" />
               ) : (
@@ -82,8 +82,8 @@ export default async function BookingsPage() {
                 </span>
               </span>
             </Link>
-            <div className="grid grid-cols-2 gap-2 p-3">
-              <Link href="/my-stay" className="col-span-2 inline-flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-2.5 text-[14px] font-semibold text-white hover:bg-primary-hover">
+            <div className="grid grid-cols-2 gap-2 p-3 md:w-80 md:shrink-0 md:grid-cols-1 md:content-center md:p-6">
+              <Link href="/my-stay" className="col-span-2 md:col-span-1 inline-flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-2.5 text-[14px] font-semibold text-white hover:bg-primary-hover">
                 <KeyRound className="size-4" aria-hidden="true" />
                 {t("openMyStay")}
               </Link>

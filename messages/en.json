@@ -98,7 +98,7 @@
   "Search": {
     "anywhere": "Anywhere in Rwanda",
     "emptyTitle": "No places here yet",
-    "emptyBody": "Hosts are adding new homes every day. Check back soon.",
+    "emptyBody": "New homes are added every day. Check back soon.",
     "title": "Homes in {place}",
     "price": "Price",
     "typeOfPlace": "Type of place",
@@ -240,7 +240,7 @@
     "bookingsTitle": "No bookings yet",
     "bookingsBody": "Your reservations and viewings will appear here.",
     "chatsTitle": "No messages yet",
-    "chatsBody": "Conversations with hosts will appear here."
+    "chatsBody": "Your messages with the VIIPA team will appear here."
   },
   "Errors": {
     "title": "Something went wrong",
@@ -269,6 +269,8 @@
     "fr": "French"
   },
   "Listings": {
+    "managedBySub": "Our team handles your booking, payment and any help you need.",
+    "managedBy": "Managed by VIIPA",
     "featured": "Featured homes",
     "seeAll": "See all",
     "perUnit": {
@@ -367,7 +369,7 @@
     "maxGuests": "{count, plural, one {# guest maximum} other {# guests maximum}}",
     "petsAllowed": "Pets allowed",
     "noPets": "No pets",
-    "discountOffer": "This host is offering a discount",
+    "discountOffer": "This place has a discount",
     "checkInLabel": "Check-in",
     "checkOutLabel": "Checkout",
     "addDate": "Add date",
@@ -410,7 +412,7 @@
     "dates": "Dates",
     "priceDetails": "Price details",
     "youSave": "You save {amount} on this stay",
-    "agree": "By selecting the button below, I agree to the host's house rules and to pay the total shown.",
+    "agree": "By selecting the button below, I agree to the house rules and to pay the total shown.",
     "paymentsSoon": "Mobile money payments open soon. You won't be charged.",
     "wontBeCharged": "You won't be charged yet",
     "recentlyViewed": "Recently viewed",
@@ -428,7 +430,7 @@
       "invalid": "Check your dates and guests, then try again.",
       "notFound": "This place can't be booked right now.",
       "ownListing": "You can't book your own place.",
-      "stayLength": "The host doesn't take stays of this length. Try other dates.",
+      "stayLength": "This place doesn't take stays of this length. Try other dates.",
       "phone": "Check your mobile money number.",
       "unavailable": "Some of these dates aren't available any more. Choose other dates.",
       "auth": "Log in again to book.",
@@ -498,14 +500,14 @@
     "chooseTime": "Choose a time",
     "notice": {
       "HIDDEN": "This place is not available right now. It isn't taking bookings.",
-      "PAUSED": "The host has paused bookings for this place for now.",
+      "PAUSED": "Bookings for this place are paused for now.",
       "SUSPENDED": "This place is suspended and isn't taking bookings.",
       "ARCHIVED": "This place is no longer listed.",
       "CHANGES_REQUESTED": "This place is being updated and isn't taking bookings right now.",
       "findAnother": "Find another place"
     },
     "blockedUntil": "{kind} until {date}. Pick dates after that.",
-    "blockedOpen": "{kind} for now. The host will reopen it.",
+    "blockedOpen": "{kind} for now. It will reopen soon.",
     "blockKind": {
       "MAINTENANCE": "Under maintenance",
       "UNAVAILABLE": "Not available",
@@ -1077,10 +1079,10 @@
   "Questions": {
     "title": "Questions and answers",
     "none": "No questions answered yet.",
-    "loginToAsk": "Log in to ask the host a question",
-    "askLabel": "Ask the host a question",
+    "loginToAsk": "Log in to ask us a question",
+    "askLabel": "Ask VIIPA a question",
     "ask": "Ask",
-    "sent": "Sent. The host answers, then our team checks it before it shows here.",
+    "sent": "Sent. Our team answers, and the answer shows here.",
     "moderationNote": "Answers show here after our team checks them.",
     "error": {
       "invalid": "Write between 5 and 500 characters.",
@@ -1368,7 +1370,7 @@
     "startError": {
       "notFound": "This place can't be messaged right now.",
       "ownListing": "This is your own place.",
-      "auth": "Log in to message the host."
+      "auth": "Log in to message us."
     },
     "sendFailed": "Couldn't send. Try again.",
     "placeholder": "Write a message",
@@ -1558,8 +1560,8 @@
       "DECLINED": "No refund for this booking."
     },
     "idTitle": "Your ID",
-    "idAsked": "This place asks for your ID before you arrive. A photo or PDF, up to 8 MB. Only you, the host and our team can see it.",
-    "idAtCheckIn": "Bring your ID: the host will ask to see it when you arrive.",
+    "idAsked": "This place asks for your ID before you arrive. A photo or PDF, up to 8 MB. Only you and our team can see it.",
+    "idAtCheckIn": "Bring your ID: you'll be asked to show it when you arrive.",
     "idUpload": "Upload ID",
     "idReplace": "Replace",
     "idUploading": "Uploading…",

@@ -87,7 +87,8 @@ export default async function MyStayPage() {
     );
   }
 
-  const policy = current.policySnapshot as PolicySnapshot;
+  const saved = (current.policySnapshot ?? {}) as Partial<PolicySnapshot>;
+  const policy = { ...saved, houseRules: saved.houseRules ?? [] } as PolicySnapshot;
   // Food: from the kitchen of this place, once the stay has started.
   const food = Boolean(await kitchenForPlace(current.listing.id)) && current.checkIn <= today;
   const paid = current.status === "CONFIRMED" || current.status === "CHECKED_IN";

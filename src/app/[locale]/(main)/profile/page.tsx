@@ -54,7 +54,7 @@ export default async function ProfilePage() {
           <Link
             key={key}
             href={href}
-            className={`${card} flex aspect-square flex-col items-center justify-center gap-4 p-4 text-[15px] font-semibold text-ink transition-transform duration-300 active:scale-[0.97]`}
+            className={`${card} flex aspect-square flex-col items-center justify-center gap-4 p-4 md:aspect-auto md:py-7 text-[15px] font-semibold text-ink transition-transform duration-300 active:scale-[0.97]`}
           >
             <span className={`flex size-20 items-center justify-center rounded-3xl ${tint}`}>
               <Icon className="size-10" strokeWidth={1.6} aria-hidden="true" />
