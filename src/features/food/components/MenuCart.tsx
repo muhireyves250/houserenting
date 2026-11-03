@@ -8,6 +8,7 @@ import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { formatRWF } from "@/lib/format";
 import { placeOrderAction } from "../actions";
+import { dishIcon, sectionRank } from "../menu-look";
 
 type Dish = { id: string; section: string; name: string; description: string; price: number; photoUrl: string | null };
 type Fulfilment = "PICKUP" | "DELIVERY" | "TO_STAY";
@@ -40,6 +41,7 @@ export function MenuCart({
   stay,
   defaultPhone,
   checkoutPath,
+  browseOnly = false,
 }: {
   restaurant: Restaurant;
   menu: Dish[];
@@ -49,6 +51,8 @@ export function MenuCart({
   defaultPhone: string | null;
   /** Where to come back after logging in (defaults to the restaurant's page). */
   checkoutPath?: string;
+  /** Just the menu to read (ordering isn't open to this guest yet): no buttons, no order panel. */
+  browseOnly?: boolean;
 }) {
   const t = useTranslations("Food");
   const locale = useLocale();
@@ -85,8 +89,10 @@ export function MenuCart({
       if (q && !`${dish.name} ${dish.description} ${dish.section}`.toLowerCase().includes(q)) continue;
       groups.set(dish.section || t("dishes"), [...(groups.get(dish.section || t("dishes")) ?? []), dish]);
     }
-    return [...groups.entries()];
+    return [...groups.entries()].sort(([a], [b]) => sectionRank(a) - sectionRank(b));
   }, [menu, query, t]);
+  // A few dishes with photos up top, like the first page of a printed menu.
+  const picks = useMemo(() => (menu.filter((d) => d.photoUrl).length >= 3 ? menu.filter((d) => d.photoUrl).slice(0, 8) : []), [menu]);
 
   // Section tabs follow the scroll.
   useEffect(() => {
@@ -124,7 +130,7 @@ export function MenuCart({
   );
 
   return (
-    <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_360px] lg:gap-10">
+    <div className={cn("grid gap-6 lg:gap-10", !browseOnly && "md:grid-cols-[minmax(0,1fr)_360px]")}>
       <div className="min-w-0">
         {/* Search and section tabs stay at the top while scrolling the menu. */}
         <div className="sticky top-0 z-20 -mx-4 bg-canvas/95 px-4 pt-2 pb-3 backdrop-blur-md md:top-[73px] md:mx-0 md:px-0">
@@ -162,13 +168,40 @@ export function MenuCart({
           <p className="py-10 text-center text-[15px] text-muted">{t("noMatch", { query })}</p>
         ) : (
           // Phones: room at the bottom so the floating order bar never hides the last dishes.
-          <div className="flex flex-col gap-8 pt-2 pb-36 md:pb-0">
+          <div className={cn("flex flex-col gap-9 pt-3", browseOnly ? "pb-10" : "pb-36 md:pb-0")}>
+            {picks.length > 0 && !query.trim() && (
+              <section aria-labelledby="menu-picks">
+                <h2 id="menu-picks" className="mb-3 text-[19px] font-bold tracking-[-0.01em] text-ink">
+                  {t("chefPicks")}
+                </h2>
+                <ul className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:mx-0 md:scroll-px-0 md:px-0 [&::-webkit-scrollbar]:hidden">
+                  {picks.map((dish) => (
+                    <li key={dish.id} className="w-[44%] shrink-0 snap-start sm:w-[30%] lg:w-[23%]">
+                      <span className="relative block aspect-[4/3] overflow-hidden rounded-2xl bg-primary-soft">
+                        {/* eslint-disable-next-line @next/next/no-img-element -- menu photo from the kitchen's Cloudinary upload */}
+                        <img src={dish.photoUrl!} alt="" loading="lazy" className="absolute inset-0 size-full object-cover" />
+                        {!browseOnly && (
+                          <span className="absolute right-2 bottom-2">
+                            <Stepper dish={dish} quantity={cart[dish.id] ?? 0} paused={restaurant.paused} onChange={(d) => update(dish.id, d)} />
+                          </span>
+                        )}
+                      </span>
+                      <span className="mt-2 block truncate text-[14px] font-semibold text-ink">{dish.name}</span>
+                      <span className="block text-[13px] font-medium text-primary tabular-nums">{formatRWF(dish.price, locale)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
             {sections.map(([name, dishes]) => (
               <section key={name} id={sectionId(name)} className="scroll-mt-40 md:scroll-mt-48">
-                <h2 className="mb-3 text-[19px] font-bold tracking-[-0.01em] text-ink">{name}</h2>
+                <div className="mb-3 flex items-baseline justify-between gap-3 border-b border-line pb-2">
+                  <h2 className="text-[19px] font-bold tracking-[-0.01em] text-ink">{name}</h2>
+                  <span className="text-[13px] text-muted">{t("dishCount", { count: dishes.length })}</span>
+                </div>
                 <ul className="grid gap-3 lg:grid-cols-2">
                   {dishes.map((dish) => (
-                    <DishCard key={dish.id} dish={dish} quantity={cart[dish.id] ?? 0} paused={restaurant.paused} onChange={(d) => update(dish.id, d)} />
+                    <DishCard key={dish.id} dish={dish} quantity={cart[dish.id] ?? 0} paused={restaurant.paused} browseOnly={browseOnly} onChange={(d) => update(dish.id, d)} />
                   ))}
                 </ul>
               </section>
@@ -178,10 +211,10 @@ export function MenuCart({
       </div>
 
       {/* Computers: the order beside the menu. */}
-      <aside className="hidden md:sticky md:top-24 md:block md:self-start">{checkout}</aside>
+      {!browseOnly && <aside className="hidden md:sticky md:top-24 md:block md:self-start">{checkout}</aside>}
 
       {/* Phones: a bar that opens the order as a sheet. */}
-      {count > 0 && (
+      {count > 0 && !browseOnly && (
         <button
           type="button"
           onClick={() => setSheet(true)}
@@ -203,31 +236,35 @@ export function MenuCart({
   );
 }
 
-function DishCard({ dish, quantity, paused, onChange }: { dish: Dish; quantity: number; paused: boolean; onChange: (delta: number) => void }) {
+function DishCard({ dish, quantity, paused, browseOnly, onChange }: { dish: Dish; quantity: number; paused: boolean; browseOnly: boolean; onChange: (delta: number) => void }) {
   const locale = useLocale();
   return (
-    <li className={cn("flex gap-3 rounded-2xl bg-surface p-3 ring-1 transition-shadow", quantity > 0 ? "ring-primary/60 shadow-[0_8px_24px_-14px_rgba(0,87,184,0.5)]" : "ring-line")}>
+    <li
+      className={cn(
+        "flex min-h-[7.5rem] gap-3 rounded-2xl bg-surface p-3 ring-1 transition-shadow",
+        quantity > 0 ? "shadow-[0_8px_24px_-14px_rgba(0,87,184,0.5)] ring-primary/60" : "ring-line hover:shadow-[0_8px_24px_-16px_rgba(16,24,40,0.35)]",
+      )}
+    >
       <div className="flex min-w-0 flex-1 flex-col">
-        <span className="text-[15px] font-semibold text-ink">{dish.name}</span>
-        {dish.description && <span className="mt-0.5 line-clamp-2 text-[13px] text-muted">{dish.description}</span>}
-        <span className="mt-auto pt-2 text-[15px] font-semibold tabular-nums text-ink">{formatRWF(dish.price, locale)}</span>
+        <span className="text-[15px] leading-5 font-semibold text-ink">{dish.name}</span>
+        {dish.description && <span className="mt-1 line-clamp-2 text-[13px] leading-[18px] text-muted">{dish.description}</span>}
+        <span className="mt-auto pt-2 text-[15px] font-bold text-primary tabular-nums">{formatRWF(dish.price, locale)}</span>
       </div>
-      {dish.photoUrl ? (
-        <div className="relative shrink-0">
-          <div className="relative size-24 overflow-hidden rounded-xl bg-primary-soft">
-            {/* eslint-disable-next-line @next/next/no-img-element -- menu photo from the restaurant's Cloudinary upload */}
+      <div className="relative shrink-0">
+        <div className="relative flex size-24 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-primary-soft to-primary/15">
+          {dish.photoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element -- menu photo from the kitchen's Cloudinary upload
             <img src={dish.photoUrl} alt="" loading="lazy" className="absolute inset-0 size-full object-cover" />
-          </div>
+          ) : (
+            dishIcon(dish.section, dish.name, "size-9 text-primary/70")
+          )}
+        </div>
+        {!browseOnly && (
           <span className={cn("absolute", quantity > 0 ? "-bottom-2 left-1/2 -translate-x-1/2" : "-right-1.5 -bottom-1.5")}>
             <Stepper dish={dish} quantity={quantity} paused={paused} onChange={onChange} />
           </span>
-        </div>
-      ) : (
-        // No photo: just the control, so the card doesn't show an empty box.
-        <div className="flex shrink-0 items-end">
-          <Stepper dish={dish} quantity={quantity} paused={paused} onChange={onChange} />
-        </div>
-      )}
+        )}
+      </div>
     </li>
   );
 }

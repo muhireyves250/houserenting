@@ -1,13 +1,11 @@
-import { BedDouble, Clock, KeyRound, UtensilsCrossed } from "lucide-react";
-import { getLocale } from "next-intl/server";
+import { ArrowRight, BedDouble, Clock, KeyRound, UtensilsCrossed } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { PageContainer } from "@/components/ui/PageContainer";
 import { MenuCart } from "@/features/food/components/MenuCart";
-import { foodMenu, kitchenForPlace, type Dish } from "@/features/food/service";
+import { foodMenu, kitchenForPlace } from "@/features/food/service";
 import { myStay } from "@/features/stay/service";
 import { Link } from "@/i18n/navigation";
 import { db } from "@/lib/db";
-import { formatRWF } from "@/lib/format";
 import { getCurrentUser } from "@/lib/session";
 
 export async function generateMetadata() {
@@ -35,24 +33,34 @@ export default async function FoodPage() {
     return (
       <PageContainer className="max-w-4xl pt-5 pb-10 md:py-10">
         {title}
-        <div className="mt-4 mb-6 flex flex-col gap-3 rounded-3xl bg-primary-soft p-5 sm:flex-row sm:items-center sm:justify-between">
-          <span className="flex items-start gap-3">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-surface text-primary">
-              {reason === "noKitchen" ? <UtensilsCrossed className="size-5" aria-hidden="true" /> : <KeyRound className="size-5" aria-hidden="true" />}
-            </span>
-            <span className="text-[14px]">
-              <b className="block text-[16px] font-bold text-ink">{t(`foodUnavailable.${reason}.title`)}</b>
-              <span className="text-muted">{t(`foodUnavailable.${reason}.body`, { place: current?.listing.title ?? "", day: current?.checkIn ?? "" })}</span>
-            </span>
+        <p className="mt-1 text-[14px] text-muted md:text-[15px]">{t("menuIntro")}</p>
+        <div className="mt-4 flex items-center gap-3 rounded-2xl bg-surface p-3 pr-4 ring-1 ring-line">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
+            {reason === "noKitchen" ? <UtensilsCrossed className="size-5" aria-hidden="true" /> : <KeyRound className="size-5" aria-hidden="true" />}
+          </span>
+          <span className="min-w-0 flex-1 text-[13px] leading-[18px]">
+            <b className="block text-[14px] font-semibold text-ink">{t(`foodUnavailable.${reason}.title`)}</b>
+            <span className="text-muted">{t(`foodUnavailable.${reason}.body`, { place: current?.listing.title ?? "", day: current?.checkIn ?? "" })}</span>
           </span>
           <Link
             href={reason === "noStay" ? "/" : "/my-stay"}
-            className="inline-flex shrink-0 items-center justify-center rounded-xl bg-primary px-6 py-3 text-[15px] font-semibold text-white hover:bg-primary-hover"
+            aria-label={reason === "noStay" ? t("findPlace") : t("openMyStay")}
+            className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary px-3 py-2 text-[13px] font-semibold text-white hover:bg-primary-hover sm:px-4"
           >
-            {reason === "noStay" ? t("findPlace") : t("openMyStay")}
+            <span className="max-sm:hidden">{reason === "noStay" ? t("findPlace") : t("openMyStay")}</span>
+            <ArrowRight className="size-4" aria-hidden="true" />
           </Link>
         </div>
-        <MenuList dishes={menu} />
+        <div className="mt-4">
+          <MenuCart
+            restaurant={{ id: "menu", pickup: false, delivery: false, deliveryFee: 0, paused: true, atYourStay: true, prepMinutes: 0, minOrder: 0 }}
+            menu={menu}
+            signedIn={Boolean(user)}
+            stay={null}
+            defaultPhone={null}
+            browseOnly
+          />
+        </div>
       </PageContainer>
     );
   }
@@ -83,43 +91,5 @@ export default async function FoodPage() {
         checkoutPath="/food"
       />
     </PageContainer>
-  );
-}
-
-const MEAL_ORDER = [/breakfast|petit|ifunguro/i, /starter|entr|soup|soupe/i, /lunch|déjeuner|saa sita/i, /dinner|dîner|ijoro/i, /main|plat/i, /grill|fish|poisson|meat|viande/i, /side|accomp/i, /dessert|sweet/i, /drink|boisson|ibinyobwa/i];
-
-/** The menu to read (ordering opens during the guest's stay): dishes grouped by section. */
-async function MenuList({ dishes }: { dishes: Dish[] }) {
-  const [t, locale] = await Promise.all([getTranslations("Food"), getLocale()]);
-  const sections = new Map<string, Dish[]>();
-  for (const dish of dishes) sections.set(dish.section || t("dishes"), [...(sections.get(dish.section || t("dishes")) ?? []), dish]);
-  // Meal order: breakfast first, drinks and desserts last; other sections in between.
-  const rank = (name: string) => MEAL_ORDER.findIndex((re) => re.test(name));
-  const ordered = [...sections].sort(([a], [b]) => (rank(a) < 0 ? 5 : rank(a)) - (rank(b) < 0 ? 5 : rank(b)));
-  return (
-    <div className="flex flex-col gap-8">
-      {ordered.map(([name, list]) => (
-        <section key={name}>
-          <h2 className="mb-3 text-[19px] font-bold tracking-[-0.01em] text-ink">{name}</h2>
-          <ul className="grid gap-3 md:grid-cols-2">
-            {list.map((dish) => (
-              <li key={dish.id} className="flex gap-3 rounded-2xl bg-surface p-3 ring-1 ring-line">
-                <span className="flex min-w-0 flex-1 flex-col">
-                  <span className="text-[15px] font-semibold text-ink">{dish.name}</span>
-                  {dish.description && <span className="mt-0.5 line-clamp-2 text-[13px] text-muted">{dish.description}</span>}
-                  <span className="mt-auto pt-2 text-[15px] font-semibold text-ink tabular-nums">{formatRWF(dish.price, locale)}</span>
-                </span>
-                {dish.photoUrl && (
-                  <span className="relative size-24 shrink-0 overflow-hidden rounded-xl bg-primary-soft">
-                    {/* eslint-disable-next-line @next/next/no-img-element -- menu photo from the kitchen's Cloudinary upload */}
-                    <img src={dish.photoUrl} alt="" loading="lazy" className="absolute inset-0 size-full object-cover" />
-                  </span>
-                )}
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))}
-    </div>
   );
 }
