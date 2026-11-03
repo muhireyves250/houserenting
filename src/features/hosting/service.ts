@@ -1,11 +1,12 @@
 import "server-only";
+import { OWNER_EDITABLE } from "@/features/listings/lifecycle";
 import { audit } from "@/features/audit/service";
 import { notifyAdmins } from "@/features/notifications/service";
 import { moveListing } from "@/features/places/status-service";
 import { db } from "@/lib/db";
 import { listingInput, type ListingInput } from "./validation";
 
-export type SaveResult = { ok: true; id: string } | { ok: false; errors: Record<string, string> } | { ok: false; error: "notFound" };
+export type SaveResult = { ok: true; id: string } | { ok: false; errors: Record<string, string> } | { ok: false; error: "notFound" | "locked" };
 
 const HOST_LIST_SELECT = {
   id: true,
@@ -67,6 +68,8 @@ export async function saveListing(
     }
     const existing = await tx.listing.findFirst({ where: { id, hostId, status: { not: "ARCHIVED" } }, select: { status: true } });
     if (!existing) return { ok: false, error: "notFound" };
+    // Once sent for review (or live), only VIIPA changes the place.
+    if (!staff && !OWNER_EDITABLE.includes(existing.status)) return { ok: false, error: "locked" };
     const status = existing.status === "PUBLISHED" && !staff ? "PENDING_REVIEW" : existing.status;
     await tx.rateOption.deleteMany({ where: { listingId: id } });
     await tx.listing.update({ where: { id }, data: { ...fields, status, rates: { create: rates } } });

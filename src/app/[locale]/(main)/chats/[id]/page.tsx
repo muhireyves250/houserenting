@@ -18,7 +18,7 @@ export const metadata: Metadata = { robots: { index: false, follow: false } };
 export default async function ConversationPage({ params }: Props) {
   const { id } = await params;
   const user = await requireUser(`/chats/${id}`);
-  const chat = await openConversation(user.id, id);
+  const chat = await openConversation(user, id);
   if (!chat) notFound();
   const [t, tNav, locale] = await Promise.all([getTranslations("Chats"), getTranslations("Nav"), getLocale()]);
   const time = new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Kigali" });
@@ -36,7 +36,7 @@ export default async function ConversationPage({ params }: Props) {
         <div className="min-w-0 flex-1">
           <p className="truncate text-[15px] font-semibold text-ink">{chat.other.name}</p>
           <p className="truncate text-xs text-muted">
-            {chat.role === "guest" ? t("host") : t("guest")} · {chat.listing.title}
+            {t("team")} · {chat.listing.title}
           </p>
         </div>
         <Link href={`/listings/${chat.listing.id}`} aria-label={chat.listing.title} className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primary-soft text-primary ring-1 ring-line">
@@ -48,7 +48,7 @@ export default async function ConversationPage({ params }: Props) {
       <ol className="flex flex-1 flex-col gap-1.5 pt-4">
         {chat.messages.length === 0 && <li className="py-10 text-center text-[15px] text-muted">{t("startHint", { name: chat.other.name.split(" ")[0] ?? "" })}</li>}
         {chat.messages.map((m, i) => {
-          const mine = m.senderId === user.id;
+          const mine = m.mine;
           const newDay = i === 0 || dayOf(chat.messages[i - 1]!.createdAt) !== dayOf(m.createdAt);
           return (
             <li key={m.id} className="flex flex-col">

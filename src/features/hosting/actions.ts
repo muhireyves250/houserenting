@@ -5,6 +5,7 @@ import { z } from "zod";
 import { uploadedImagePrefix, uploadTicket, type UploadTicket } from "@/lib/cloudinary";
 import { logger } from "@/lib/logger";
 import { db } from "@/lib/db";
+import { OWNER_EDITABLE } from "@/features/listings/lifecycle";
 import { canOn } from "@/features/places/access";
 import { isAdmin } from "@/lib/roles";
 import type { SessionUser } from "@/lib/auth";
@@ -40,7 +41,10 @@ export async function saveListingAction(listingId: string | null, input: Listing
  */
 async function ownerFor(user: SessionUser, listingId: string): Promise<string> {
   if (!(await canOn(user, listingId, "edit"))) return user.id;
-  return (await db.listing.findUnique({ where: { id: listingId }, select: { hostId: true } }))?.hostId ?? user.id;
+  const listing = await db.listing.findUnique({ where: { id: listingId }, select: { hostId: true, status: true } });
+  // Owners change photos only until the place is sent for review; staff any time.
+  if (!listing || (!isAdmin(user) && !OWNER_EDITABLE.includes(listing.status))) return "";
+  return listing.hostId;
 }
 
 /**

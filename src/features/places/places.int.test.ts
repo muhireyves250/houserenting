@@ -84,12 +84,13 @@ describe("listing status", () => {
     expect((await book()).ok).toBe(true);
   });
 
-  it("owners pause and resume their own place", async () => {
+  it("only staff pause and resume a place (owners can't)", async () => {
     await place();
     expect(await moveListing({ id: "guest" }, "house", "pause")).toEqual({ ok: false, error: "notAllowed" });
-    expect(await moveListing(host, "house", "pause")).toEqual({ ok: true });
+    expect(await moveListing(host, "house", "pause")).toEqual({ ok: false, error: "notAllowed" });
+    expect(await moveListing(admin, "house", "pause")).toEqual({ ok: true });
     expect(await book()).toEqual({ ok: false, error: "notFound" });
-    expect(await moveListing(host, "house", "resume")).toEqual({ ok: true });
+    expect(await moveListing(admin, "house", "resume")).toEqual({ ok: true });
   });
 
   it("staff edits keep a live place live", async () => {

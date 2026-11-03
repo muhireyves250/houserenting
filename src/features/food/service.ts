@@ -44,12 +44,13 @@ export type SaveRestaurantResult = { ok: true; id: string } | { ok: false; error
  * Clients who only book can't; staff create restaurants for other owners from the dashboard.
  */
 export async function canAddRestaurant(actor: Actor): Promise<boolean> {
-  if (isAdmin(actor)) return true;
-  return (await db.listing.count({ where: { hostId: actor.id, status: { not: "ARCHIVED" } } })) > 0;
+  // Kitchens are set up by VIIPA for the places they serve.
+  return isAdmin(actor);
 }
 
 /** Owners or staff create a restaurant (a draft until staff publish it); its owner, managers or staff edit it. */
 export async function saveRestaurant(actor: Actor, id: string | null, raw: RestaurantInput, ownerId?: string): Promise<SaveRestaurantResult> {
+  if (id === null && !(await canAddRestaurant(actor))) return { ok: false, error: "notAllowed" };
   const parsed = restaurantInput.safeParse(raw);
   if (!parsed.success) return { ok: false, errors: errorsOf(parsed.error.issues) };
   const data = parsed.data;
@@ -177,6 +178,18 @@ export function publicRestaurant(id: string) {
   });
 }
 
+/**
+ * The kitchen that cooks for guests of a place (a published restaurant linked to it), with its menu.
+ * Clients never pick a restaurant: food comes from where they're staying.
+ */
+export function kitchenForPlace(listingId: string) {
+  return db.restaurant.findFirst({
+    where: { listingId, status: "PUBLISHED" },
+    orderBy: { createdAt: "asc" },
+    select: { ...PUBLIC_SELECT, menu: { where: { available: true }, orderBy: [{ position: "asc" }], select: { id: true, section: true, name: true, description: true, price: true, photoUrl: true } } },
+  });
+}
+
 /** Whether any restaurant takes orders: the ORDERS tab only shows when ordering is live. */
 export async function ordersLive(): Promise<boolean> {
   return (await db.restaurant.count({ where: { status: "PUBLISHED" } })) > 0;
@@ -210,24 +223,14 @@ export async function placeOrder(customerId: string, raw: OrderInput, now: Date 
 
   let address: string | null = null;
   let bookingId: string | null = null;
-  let fee = 0;
-  if (input.fulfilment === "PICKUP") {
-    if (!r.pickup) return { ok: false, error: "notOffered" };
-  } else if (input.fulfilment === "DELIVERY") {
-    if (!r.delivery) return { ok: false, error: "notOffered" };
-    if (!input.address || input.address.length < 5) return { ok: false, error: "invalid" };
-    address = input.address;
-    fee = r.deliveryFee;
-  } else {
-    const stay = await currentStay(customerId, input.bookingReference, now);
-    if (!stay) return { ok: false, error: "noStay" };
-    // The restaurant at the place itself, or one that delivers that far.
-    const atPlace = r.listingId === stay.listingId;
-    if (!atPlace && (!r.delivery || distanceKm(r, stay.listing) > r.deliveryKm)) return { ok: false, error: "tooFar" };
-    bookingId = stay.id;
-    address = [stay.listing.title, stay.room?.name, stay.reference].filter(Boolean).join(" · ");
-    fee = atPlace ? 0 : r.deliveryFee;
-  }
+  const fee = 0;
+  // Food is cooked where the guest is staying and brought to their room: no pickup, no delivery elsewhere.
+  if (input.fulfilment !== "TO_STAY") return { ok: false, error: "notOffered" };
+  const stay = await currentStay(customerId, input.bookingReference, now);
+  if (!stay) return { ok: false, error: "noStay" };
+  if (r.listingId !== stay.listingId) return { ok: false, error: "tooFar" };
+  bookingId = stay.id;
+  address = [stay.listing.title, stay.room?.name, stay.reference].filter(Boolean).join(" · ");
 
   for (let attempt = 0; attempt < 3; attempt++) {
     const reference = newReference("OR");
@@ -297,7 +300,7 @@ export function myOrder(customerId: string, reference: string) {
     include: {
       items: true,
       events: { orderBy: { createdAt: "asc" } },
-      restaurant: { select: { id: true, name: true, phone: true, addressLine: true, district: true, city: true, lat: true, lng: true, prepMinutes: true, photoUrl: true } },
+      restaurant: { select: { id: true, name: true, phone: true, addressLine: true, district: true, city: true, lat: true, lng: true, prepMinutes: true, photoUrl: true, listing: { select: { title: true } } } },
     },
   });
 }
@@ -307,7 +310,7 @@ export function myOrders(customerId: string) {
     where: { customerId },
     orderBy: { createdAt: "desc" },
     take: 50,
-    include: { items: true, restaurant: { select: { id: true, name: true, phone: true, photoUrl: true, prepMinutes: true } }, events: { orderBy: { createdAt: "asc" } } },
+    include: { items: true, restaurant: { select: { id: true, name: true, phone: true, photoUrl: true, prepMinutes: true, listing: { select: { title: true } } } }, events: { orderBy: { createdAt: "asc" } } },
   });
 }
 

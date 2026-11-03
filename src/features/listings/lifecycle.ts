@@ -25,7 +25,10 @@ export type ListingMove =
 
 type Rule = { from: readonly ListingStatus[]; to: ListingStatus; who: "staff" | "owner" | "either"; reason: boolean };
 
-/** Every way a listing's status can change, who may do it, and whether a reason (shown to the owner) is required. */
+/**
+ * Every way a listing's status can change, who may do it, and whether a reason (shown to the owner) is required.
+ * Owners add places and send them for review; everything after that is VIIPA's (staff stand between owners and clients).
+ */
 export const LISTING_MOVES: Record<ListingMove, Rule> = {
   submit: { from: ["DRAFT", "REJECTED", "CHANGES_REQUESTED"], to: "PENDING_REVIEW", who: "either", reason: false },
   approve: { from: ["PENDING_REVIEW"], to: "PUBLISHED", who: "staff", reason: false },
@@ -35,12 +38,15 @@ export const LISTING_MOVES: Record<ListingMove, Rule> = {
   reject: { from: ["PENDING_REVIEW"], to: "REJECTED", who: "staff", reason: true },
   hide: { from: ["PUBLISHED", "PAUSED"], to: "HIDDEN", who: "staff", reason: true },
   unhide: { from: ["HIDDEN"], to: "PUBLISHED", who: "staff", reason: false },
-  pause: { from: ["PUBLISHED"], to: "PAUSED", who: "either", reason: false },
-  resume: { from: ["PAUSED"], to: "PUBLISHED", who: "either", reason: false },
+  pause: { from: ["PUBLISHED"], to: "PAUSED", who: "staff", reason: false },
+  resume: { from: ["PAUSED"], to: "PUBLISHED", who: "staff", reason: false },
   suspend: { from: ["PUBLISHED", "HIDDEN", "PAUSED"], to: "SUSPENDED", who: "staff", reason: true },
   reinstate: { from: ["SUSPENDED"], to: "PUBLISHED", who: "staff", reason: false },
-  archive: { from: ["DRAFT", "PENDING_REVIEW", "PUBLISHED", "REJECTED", "CHANGES_REQUESTED", "HIDDEN", "PAUSED", "SUSPENDED"], to: "ARCHIVED", who: "either", reason: false },
+  archive: { from: ["DRAFT", "PENDING_REVIEW", "PUBLISHED", "REJECTED", "CHANGES_REQUESTED", "HIDDEN", "PAUSED", "SUSPENDED"], to: "ARCHIVED", who: "staff", reason: false },
 };
+
+/** Statuses in which the owner may still change their place: before review, or when VIIPA sent it back. */
+export const OWNER_EDITABLE: readonly ListingStatus[] = ["DRAFT", "REJECTED", "CHANGES_REQUESTED"];
 
 export type MoveCheck = { ok: true; to: ListingStatus } | { ok: false; error: "notAllowed" | "wrongStatus" | "reasonNeeded" };
 

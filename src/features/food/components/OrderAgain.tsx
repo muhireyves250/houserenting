@@ -4,7 +4,7 @@ import { RotateCcw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 
-/** Puts the same dishes back in the restaurant's cart and opens its menu (prices are checked again there). */
+/** Puts the same dishes back in the cart and opens the food menu of the guest's stay (prices are checked again there). */
 export function OrderAgain({ restaurantId, items, compact = false }: { restaurantId: string; items: { menuItemId: string | null; quantity: number }[]; compact?: boolean }) {
   const t = useTranslations("Food");
   const router = useRouter();
@@ -16,7 +16,7 @@ export function OrderAgain({ restaurantId, items, compact = false }: { restauran
         try {
           localStorage.setItem(`sr_cart_${restaurantId}`, JSON.stringify(cart));
         } catch {}
-        router.push(`/restaurants/${restaurantId}`);
+        router.push("/food");
       }}
       aria-label={compact ? t("orderAgain") : undefined}
       className={

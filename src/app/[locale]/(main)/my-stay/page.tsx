@@ -10,7 +10,7 @@ import {
   MapPin,
   MessageSquare,
   Navigation,
-  Phone,
+  LifeBuoy,
   Receipt,
   ScrollText,
   UtensilsCrossed,
@@ -24,7 +24,7 @@ import { PageContainer } from "@/components/ui/PageContainer";
 import { MessageHostButton } from "@/features/chats/components/MessageHostButton";
 import { directionsUrl, formatKigaliTime } from "@/features/bookings/format";
 import type { PolicySnapshot } from "@/features/bookings/service";
-import { ordersLive } from "@/features/food/service";
+import { kitchenForPlace } from "@/features/food/service";
 import { policyText } from "@/features/settings/service";
 import { GuestIdUpload } from "@/features/stay/components/GuestIdUpload";
 import { ReportIssue } from "@/features/stay/components/ReportIssue";
@@ -88,7 +88,8 @@ export default async function MyStayPage() {
   }
 
   const policy = current.policySnapshot as PolicySnapshot;
-  const food = await ordersLive();
+  // Food: from the kitchen of this place, once the stay has started.
+  const food = Boolean(await kitchenForPlace(current.listing.id)) && current.checkIn <= today;
   const paid = current.status === "CONFIRMED" || current.status === "CHECKED_IN";
   const moment = stayMoment(current, today);
   const underWay = moment.kind === "during" || moment.kind === "departure" || (paid && moment.kind === "arrival");
@@ -188,19 +189,13 @@ export default async function MyStayPage() {
             <MessageSquare className="size-5 text-primary" aria-hidden="true" />
             {t("message")}
           </MessageHostButton>
-          {listing.host.phone ? (
-            <a href={`tel:${listing.host.phone}`} className={action}>
-              <Phone className="size-5 text-primary" aria-hidden="true" />
-              {t("callHost")}
-            </a>
-          ) : (
-            <Link href={{ pathname: "/support", query: { booking: current.reference } }} className={action}>
-              <Phone className="size-5 text-primary" aria-hidden="true" />
-              {t("help")}
-            </Link>
-          )}
+          {/* Clients deal with VIIPA, not the owner directly. */}
+          <Link href={{ pathname: "/support", query: { booking: current.reference } }} className={action}>
+            <LifeBuoy className="size-5 text-primary" aria-hidden="true" />
+            {t("help")}
+          </Link>
           {food && paid ? (
-            <Link href="/restaurants" className={action}>
+            <Link href="/food" className={action}>
               <UtensilsCrossed className="size-5 text-primary" aria-hidden="true" />
               {t("food")}
             </Link>

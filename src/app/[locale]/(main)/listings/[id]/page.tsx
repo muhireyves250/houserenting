@@ -1,4 +1,4 @@
-import { AirVent, ArrowLeft, CalendarClock, ChevronLeft, CookingPot, KeyRound, Laptop, type LucideIcon, Microwave, PawPrint, ShieldCheck, ShowerHead, SquareParking, Star, Tv, Utensils, WashingMachine, WavesLadder, Wifi, Zap, UtensilsCrossed, ChevronRight } from "lucide-react";
+import { AirVent, ArrowLeft, CalendarClock, ChevronLeft, CookingPot, KeyRound, Laptop, type LucideIcon, Microwave, PawPrint, ShieldCheck, ShowerHead, SquareParking, Star, Tv, Utensils, WashingMachine, WavesLadder, Wifi, Zap, UtensilsCrossed } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -106,7 +106,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
     getTranslations("Reviews"),
     listingRooms(listing.id),
     getSettings(),
-    db.restaurant.findMany({ where: { listingId: listing.id, status: "PUBLISHED" }, select: { id: true, name: true, openingHours: true, delivery: true, paused: true } }),
+    db.restaurant.findMany({ where: { listingId: listing.id, status: "PUBLISHED" }, select: { id: true } }),
     getTranslations("Food"),
   ]);
   // Only rooms guests can book now; places that rent whole don't show rooms.
@@ -401,13 +401,12 @@ export default async function ListingPage({ params, searchParams }: Props) {
           </div>
         </Section>
 
-        {/* Meet your host */}
-        <Section title={t("meetHost")}>
+        {/* VIIPA stands between guests and owners: questions and bookings go to the team. */}
+        <Section title={t("talkToUs")}>
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:gap-12">
-            <div className="flex w-full max-w-sm flex-col items-center gap-2 rounded-3xl bg-surface px-8 py-8 shadow-[0_12px_36px_-14px_rgba(16,24,40,0.35)]">
-              <Avatar name={listing.host.name} image={listing.host.image} className="size-24 text-3xl" />
-              <p className="mt-2 font-display text-[26px] font-bold tracking-[-0.02em] text-ink">{listing.host.name}</p>
-              <p className="text-sm text-muted">{t("hostingSince", { year: listing.host.createdAt.getFullYear() })}</p>
+            <div className="flex w-full max-w-sm flex-col gap-2 rounded-3xl bg-surface px-7 py-7 shadow-[0_12px_36px_-14px_rgba(16,24,40,0.35)]">
+              <p className="font-display text-[24px] font-bold tracking-[-0.02em] text-ink">VIIPA</p>
+              <p className="text-[15px] text-muted">{t("talkToUsBody")}</p>
             </div>
             <MessageHostButton
               listingId={listing.id}
@@ -437,22 +436,13 @@ export default async function ListingPage({ params, searchParams }: Props) {
         </Section>
 
         {/* Things to know */}
+        {/* Meals to the room (the kitchen itself isn't shown to guests) */}
         {food.length > 0 && (
-          <Section title={tFood("atThisPlace")}>
-            <ul className="grid gap-3 sm:grid-cols-2">
-              {food.map((r) => (
-                <li key={r.id}>
-                  <Link href={`/restaurants/${r.id}`} className="flex items-center gap-3 rounded-2xl border border-line p-4 transition-colors hover:border-primary">
-                    <UtensilsCrossed className="size-6 shrink-0 text-primary" aria-hidden="true" />
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[15px] font-semibold text-ink">{r.name}</span>
-                      <span className="block truncate text-[13px] text-muted">{r.paused ? tFood("closedNow") : r.openingHours || tFood("seeMenu")}</span>
-                    </span>
-                    <ChevronRight className="size-4 text-ink/50" aria-hidden="true" />
-                  </Link>
-                </li>
-              ))}
-            </ul>
+          <Section title={tFood("mealsTitle")}>
+            <p className="-mt-3 flex max-w-2xl items-start gap-3 text-[15px] text-ink">
+              <UtensilsCrossed className="mt-0.5 size-6 shrink-0 text-primary" aria-hidden="true" />
+              {tFood("mealsBody")}
+            </p>
           </Section>
         )}
 

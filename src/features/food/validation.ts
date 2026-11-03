@@ -22,7 +22,7 @@ export const restaurantInput = z.object({
   minOrder: z.number().int().min(0).max(1_000_000).default(0),
   /** The place it belongs to (its guests can order to their room). */
   listingId: z.string().max(64).nullable().default(null),
-}).refine((r) => r.pickup || r.delivery, { path: ["pickup"], message: "needsOne" });
+});
 
 export type RestaurantInput = z.input<typeof restaurantInput>;
 

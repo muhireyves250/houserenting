@@ -44,20 +44,21 @@ beforeEach(async () => {
 });
 
 describe("payments confirmed by the owner or staff", () => {
-  it("the guest says they paid; only the owner or staff confirm it, with the exact total", async () => {
+  it("the guest says they paid; only VIIPA staff confirm it, with the exact total", async () => {
     expect(await claimPayment("guest", "SR-PAY234", "MP2610.1234.A56789", NOW)).toEqual({ ok: true });
     const held = await db.booking.findUniqueOrThrow({ where: { reference: "SR-PAY234" } });
     expect(held.holdExpiresAt!.getTime()).toBeGreaterThan(NOW.getTime() + 23 * 3_600_000);
     expect(await db.notification.count({ where: { userId: "owner", kind: "paymentClaim" } })).toBe(1);
 
     expect(await confirmPaymentByHand({ id: "desk" }, "SR-PAY234", { transactionId: "MP2610.1234.A56789", amount: 100_000 })).toEqual({ ok: false, error: "notAllowed" });
-    expect(await confirmPaymentByHand({ id: "owner" }, "SR-PAY234", { transactionId: "MP2610.1234.A56789", amount: 90_000 })).toEqual({ ok: false, error: "amount" });
-    expect(await confirmPaymentByHand({ id: "owner" }, "SR-PAY234", { transactionId: "MP2610.1234.A56789", amount: 100_000 })).toEqual({ ok: true });
+    expect(await confirmPaymentByHand({ id: "owner" }, "SR-PAY234", { transactionId: "MP2610.1234.A56789", amount: 100_000 })).toEqual({ ok: false, error: "notAllowed" });
+    expect(await confirmPaymentByHand({ id: "admin", role: "ADMIN" }, "SR-PAY234", { transactionId: "MP2610.1234.A56789", amount: 90_000 })).toEqual({ ok: false, error: "amount" });
+    expect(await confirmPaymentByHand({ id: "admin", role: "ADMIN" }, "SR-PAY234", { transactionId: "MP2610.1234.A56789", amount: 100_000 })).toEqual({ ok: true });
 
     expect((await db.booking.findUniqueOrThrow({ where: { reference: "SR-PAY234" } })).status).toBe("CONFIRMED");
     expect(await db.payment.findMany({ select: { status: true, providerReference: true } })).toEqual([{ status: "SUCCEEDED", providerReference: "MP2610.1234.A56789" }]);
     expect(await db.ledgerEntry.count({ where: { kind: "GUEST_PAYMENT" } })).toBe(1);
-    expect(await db.bookingEvent.findFirst({ where: { toStatus: "CONFIRMED" } })).toMatchObject({ actorId: "owner" });
+    expect(await db.bookingEvent.findFirst({ where: { toStatus: "CONFIRMED" } })).toMatchObject({ actorId: "admin" });
   });
 
   it("staff can confirm without a claim, and a claim can be turned down with a reason", async () => {

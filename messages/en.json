@@ -25,7 +25,7 @@
     "logout": "Log out",
     "help": "Help",
     "orders": "Orders",
-    "restaurants": "Restaurants"
+    "restaurants": "Food"
   },
   "Common": {
     "save": "Save",
@@ -361,7 +361,7 @@
     "datesHint": "Add your travel dates for exact pricing",
     "whereYoullBe": "Where you'll be",
     "meetHost": "Meet your host",
-    "messageHost": "Message host",
+    "messageHost": "Message us",
     "thingsToKnow": "Things to know",
     "houseRules": "House rules",
     "maxGuests": "{count, plural, one {# guest maximum} other {# guests maximum}}",
@@ -515,7 +515,9 @@
     "rowHighlightedSub": "Places our team recommends",
     "idUploadOnline": "Guests upload their ID online before arrival",
     "idAtCheckIn": "Guests show their ID at check-in",
-    "feesIncluded": "All fees included"
+    "feesIncluded": "All fees included",
+    "talkToUs": "Questions? Talk to VIIPA",
+    "talkToUsBody": "Our team looks after this place and your booking. Ask us anything before or during your stay."
   },
   "Facility": {
     "KITCHEN": "Kitchen",
@@ -617,7 +619,7 @@
     "rental": "Rental",
     "rentalTerms": "{months} months, {upfront} paid when booking",
     "payTitle": "Pay to confirm",
-    "messageHost": "Message host",
+    "messageHost": "Message us",
     "time": "Time",
     "openMyStay": "Open My stay",
     "messageShort": "Message",
@@ -772,7 +774,8 @@
       "requests": "Guest requests",
       "restaurants": "Restaurants",
       "promoters": "Promoters",
-      "reports": "Reports"
+      "reports": "Reports",
+      "messages": "Messages"
     },
     "count": {
       "listings": "Listings to review",
@@ -1377,7 +1380,10 @@
     "host": "Host",
     "guest": "Guest",
     "startHint": "Say hello to {name} and ask anything about the place.",
-    "listIntro": "Messages with hosts and guests about your bookings."
+    "listIntro": "Your messages with the VIIPA team.",
+    "team": "VIIPA team",
+    "staffIntro": "Every client conversation. Clients write to VIIPA; owners don't see these. Unanswered first.",
+    "staffInbox": "Messages"
   },
   "Places": {
     "statusTitle": "Status",
@@ -1525,7 +1531,9 @@
     },
     "portalLink": "Bookings at your places",
     "helpingTitle": "Places you help run",
-    "restaurantsLink": "Your restaurants"
+    "restaurantsLink": "Your restaurants",
+    "managedByViipa": "VIIPA manages this place now. You can still mark dates as unavailable and update your papers.",
+    "askForChange": "Ask for a change"
   },
   "MyStay": {
     "title": "My stay",
@@ -1852,8 +1860,8 @@
     "viewOrder": "View order ({count})",
     "atThisPlace": "Restaurants at this place",
     "seeMenu": "See the menu",
-    "homeBanner": "Order food near you",
-    "homeBannerSub": "Restaurants deliver to your door or your room.",
+    "homeBanner": "Hungry? Order food",
+    "homeBannerSub": "The kitchen of your stay brings it to your room.",
     "ownersOnly": "Restaurants are added by property owners and the VIIPA team. You can order from any restaurant on the site.",
     "addPhoto": "Add a photo",
     "changePhoto": "Change photo",
@@ -1919,7 +1927,37 @@
     "pickupOnly": "Pickup only",
     "readyBy": "Ready by",
     "arrivesBy": "Arrives by",
-    "orderHelp": "Problem with this order? Get help"
+    "orderHelp": "Problem with this order? Get help",
+    "foodTitle": "Food",
+    "findPlace": "Find a place",
+    "openMyStay": "Open My stay",
+    "deliveredTo": "Brought to {place}",
+    "kitchenClosed": "Kitchen closed right now",
+    "orderFoodTitle": "Order food",
+    "orderFoodSub": "From the kitchen of {place}, to your room",
+    "yourStayKitchen": "Your stay's kitchen",
+    "menu": "Menu",
+    "kitchenAt": "Kitchen at {place}",
+    "mealsTitle": "Meals to your room",
+    "mealsBody": "During your stay you can order meals from this place's kitchen in the app. They're brought to your room.",
+    "foodUnavailable": {
+      "noStay": {
+        "title": "Food is for guests staying with us",
+        "body": "When you stay at one of our places, you can order meals from its kitchen to your room."
+      },
+      "unpaid": {
+        "title": "Pay for your stay first",
+        "body": "Once your booking is paid, you can order food during your stay."
+      },
+      "notStarted": {
+        "title": "Food opens when your stay starts",
+        "body": "You can order meals to your room from {day}."
+      },
+      "noKitchen": {
+        "title": "No meals at this place yet",
+        "body": "{place} doesn't serve meals yet. Message us if you need help with food."
+      }
+    }
   },
   "Promoters": {
     "title": "Promote and earn",

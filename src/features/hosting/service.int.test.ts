@@ -44,7 +44,7 @@ describe("hosting a place", () => {
     expect(await db.listing.count()).toBe(0);
   });
 
-  it("goes live only when staff approve it, and edits send it back to review", async () => {
+  it("goes live only when staff approve it; after that only staff change it", async () => {
     const id = await created();
     expect(await reviewListing("admin", id, { approve: true })).toBe(false); // not submitted yet
     expect(await submitForReview("other", id)).toBe(false);
@@ -55,16 +55,17 @@ describe("hosting a place", () => {
     expect(await getPublishedListing(id)).not.toBeNull();
     expect(await db.notification.findFirst({ where: { userId: "host" } })).toMatchObject({ kind: "listingApproved", href: `/listings/${id}` });
 
-    expect(await saveListing("host", id, { ...validListing, title: "Sunny studio, now with a view" })).toEqual({ ok: true, id });
-    expect(await getPublishedListing(id)).toBeNull();
-    expect((await db.listing.findUnique({ where: { id } }))?.status).toBe("PENDING_REVIEW");
+    // The owner can't change a live place; VIIPA can, and it stays live.
+    expect(await saveListing("host", id, { ...validListing, title: "Sunny studio, now with a view" })).toEqual({ ok: false, error: "locked" });
+    expect(await saveListing("host", id, { ...validListing, title: "Sunny studio, now with a view" }, { staffId: "admin" })).toEqual({ ok: true, id });
+    expect((await getPublishedListing(id))?.title).toBe("Sunny studio, now with a view");
 
     const log = await db.auditLog.findMany({ where: { entityId: id }, orderBy: { createdAt: "asc" } });
     expect(log.map((l) => [l.action, l.actorId])).toEqual([
       ["listing.create", "host"],
       ["listing.submit", "host"],
       ["listing.approve", "admin"],
-      ["listing.update", "host"],
+      ["listing.update", "admin"],
     ]);
   });
 
@@ -98,10 +99,10 @@ describe("hosting a place", () => {
     expect((await getHostListing("host", id))?.photos.map((p) => [p.publicId, p.position])).toEqual([["a", 0], ["b", 1]]);
   });
 
-  it("archives only the owner's listing", async () => {
+  it("owners can't remove a place; that's VIIPA's job", async () => {
     const id = await created();
     expect(await archiveListing("other", id)).toBe(false);
-    expect(await archiveListing("host", id)).toBe(true);
+    expect(await archiveListing("host", id)).toBe(false);
   });
 });
 

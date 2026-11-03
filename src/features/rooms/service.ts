@@ -1,8 +1,8 @@
 import "server-only";
 import type { Prisma } from "@/generated/prisma/client";
 import { audit } from "@/features/audit/service";
-import { notifyAdmins } from "@/features/notifications/service";
 import { db } from "@/lib/db";
+import { OWNER_EDITABLE } from "@/features/listings/lifecycle";
 import { isAdmin } from "@/lib/roles";
 import { roomInput, ROOM_STATUSES, type RoomInput, type RoomStatus } from "./validation";
 
@@ -15,6 +15,8 @@ async function managed(tx: Prisma.TransactionClient, actor: Actor, listingId: st
     select: { id: true, hostId: true, status: true, title: true, team: { where: { userId: actor.id, role: "MANAGER" }, select: { id: true } } },
   });
   if (!listing || (listing.hostId !== actor.id && listing.team.length === 0 && !isAdmin(actor))) return null;
+  // Owners change rooms only until the place is sent for review; staff any time.
+  if (!isAdmin(actor) && !OWNER_EDITABLE.includes(listing.status)) return null;
   return listing;
 }
 
@@ -54,10 +56,6 @@ export async function saveRoom(actor: Actor, listingId: string, roomId: string |
       await tx.roomRate.createMany({ data: rates.map((r) => ({ ...r, roomId })) });
     }
     await audit(tx, { actorId: actor.id, action: roomId ? "room.update" : "room.create", entityType: "listing", entityId: listingId, data: { room: parsed.data.name } });
-    if (listing.status === "PUBLISHED") {
-      await tx.listing.update({ where: { id: listingId }, data: { status: "PENDING_REVIEW" } });
-      await notifyAdmins(tx, "listingSubmitted", { title: listing.title }, `/admin/listings/${listingId}`);
-    }
     return { ok: true, id: id! };
   });
 }

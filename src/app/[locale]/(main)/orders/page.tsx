@@ -5,7 +5,7 @@ import { PageContainer } from "@/components/ui/PageContainer";
 import { AutoRefresh } from "@/features/food/components/AutoRefresh";
 import { OrderAgain } from "@/features/food/components/OrderAgain";
 import { ACTIVE_ORDER, type Fulfilment, type OrderStatus } from "@/features/food/rules";
-import { myOrders, restaurantsNear } from "@/features/food/service";
+import { kitchenForPlace, myOrders } from "@/features/food/service";
 import { todayISO } from "@/features/search/date-range";
 import { myStay } from "@/features/stay/service";
 import { Link } from "@/i18n/navigation";
@@ -47,7 +47,8 @@ export default async function OrdersPage() {
   const user = await requireUser("/orders");
   const [t, locale, orders, stayNow] = await Promise.all([getTranslations("Food"), getLocale(), myOrders(user.id), myStay(user.id)]);
   const stay = stayNow.current;
-  const nearby = (await restaurantsNear(stay ? { lat: stay.listing.lat, lng: stay.listing.lng } : null, stay?.listing.id ?? null)).slice(0, 8);
+  const started = Boolean(stay && (stay.status === "CONFIRMED" || stay.status === "CHECKED_IN") && stay.checkIn <= stayNow.today);
+  const kitchen = started && stay ? await kitchenForPlace(stay.listing.id) : null;
   const current = orders.filter((o) => ACTIVE_ORDER.includes(o.status));
   const past = orders.filter((o) => !ACTIVE_ORDER.includes(o.status));
 
@@ -69,9 +70,11 @@ export default async function OrdersPage() {
       <AutoRefresh active={current.length > 0} seconds={20} />
       <div className="mb-5 flex items-center justify-between gap-3">
         <h1 className="text-[26px] leading-8 font-bold tracking-[-0.03em] text-ink md:text-[32px] md:leading-10">{t("ordersTitle")}</h1>
-        <Link href="/restaurants" className="rounded-full border border-line bg-surface px-4 py-2 text-[14px] font-semibold text-ink hover:border-primary">
-          {t("browseRestaurants")}
-        </Link>
+        {kitchen && (
+          <Link href="/food" className="rounded-full border border-line bg-surface px-4 py-2 text-[14px] font-semibold text-ink hover:border-primary">
+            {t("menu")}
+          </Link>
+        )}
       </div>
 
       <div className="flex flex-col gap-7">
@@ -87,7 +90,7 @@ export default async function OrdersPage() {
                   <div className="flex items-center gap-3 p-4">
                     <Thumb photo={o.restaurant.photoUrl} className="size-14" />
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-[13px] font-semibold text-muted">{o.restaurant.name}</p>
+                      <p className="truncate text-[13px] font-semibold text-muted">{o.restaurant.listing?.title ?? t("yourStayKitchen")}</p>
                       <p className="text-[16px] leading-5 font-bold text-ink">{t(`statusTitle.${o.status}`)}</p>
                       <p className="mt-0.5 inline-flex items-center gap-1.5 text-[13px] text-ink">
                         <Clock className="size-3.5 text-primary" aria-hidden="true" />
@@ -117,24 +120,18 @@ export default async function OrdersPage() {
           </section>
         )}
 
-        {/* Where to order next */}
-        {nearby.length > 0 && (
-          <section>
-            <h2 className="mb-3 text-[17px] font-bold text-ink">{stay ? t("orderNearStay") : t("orderFrom")}</h2>
-            <ul className="-mx-4 flex snap-x scroll-px-4 gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:mx-0 md:px-0 [&::-webkit-scrollbar]:hidden">
-              {nearby.map((r) => (
-                <li key={r.id} className="w-36 shrink-0 snap-start">
-                  <Link href={`/restaurants/${r.id}`} className="block">
-                    <Thumb photo={r.photoUrl} className="aspect-[4/3] w-full" />
-                    <span className="mt-1.5 block truncate text-[14px] font-semibold text-ink">{r.name}</span>
-                    <span className="block truncate text-[12px] text-muted">
-                      {r.paused ? t("closedNow") : r.atYourStay ? t("atYourStay") : t("aboutMinutes", { minutes: r.prepMinutes })}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </section>
+        {/* Order food to the room during a stay (from the kitchen where the guest is staying) */}
+        {kitchen && (
+          <Link href="/food" className="flex items-center justify-between gap-3 rounded-3xl bg-primary px-5 py-4 text-white shadow-[0_10px_30px_-14px_rgba(0,87,184,0.6)]">
+            <span className="flex items-center gap-3">
+              <UtensilsCrossed className="size-6 shrink-0" aria-hidden="true" />
+              <span>
+                <span className="block text-[16px] font-bold">{t("orderFoodTitle")}</span>
+                <span className="block text-[13px] text-white/85">{t("orderFoodSub", { place: stay!.listing.title })}</span>
+              </span>
+            </span>
+            <ChevronRight className="size-5 shrink-0" aria-hidden="true" />
+          </Link>
         )}
 
         {/* Past orders */}
@@ -147,7 +144,7 @@ export default async function OrdersPage() {
                   <Link href={`/orders/${o.reference}`} className="flex min-w-0 flex-1 items-center gap-3">
                     <Thumb photo={o.restaurant.photoUrl} className="size-12" />
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[15px] font-semibold text-ink">{o.restaurant.name}</span>
+                      <span className="block truncate text-[15px] font-semibold text-ink">{o.restaurant.listing?.title ?? t("yourStayKitchen")}</span>
                       <span className="block truncate text-[13px] text-muted">{items(o)}</span>
                       <span className="block truncate text-[12px] text-muted">
                         <span className={cn("font-semibold", o.status === "DELIVERED" ? "text-emerald-700" : "text-muted")}>{t(`status.${o.status}`)}</span>
@@ -166,19 +163,19 @@ export default async function OrdersPage() {
           </section>
         )}
 
-        {orders.length === 0 && nearby.length === 0 && (
+        {orders.length === 0 && !kitchen && (
           <EmptyState
             icon={<ShoppingBag />}
             title={t("noOrdersYet")}
             body={t("noOrdersYetBody")}
             action={
-              <Link href="/restaurants" className="inline-flex items-center rounded-xl bg-primary px-7 py-3 text-[15px] font-semibold text-white">
-                {t("browseRestaurants")}
+              <Link href="/food" className="inline-flex items-center rounded-xl bg-primary px-7 py-3 text-[15px] font-semibold text-white">
+                {t("orderFoodTitle")}
               </Link>
             }
           />
         )}
-        {orders.length === 0 && nearby.length > 0 && <p className="text-center text-[14px] text-muted">{t("noOrdersYetBody")}</p>}
+        {orders.length === 0 && kitchen && <p className="text-center text-[14px] text-muted">{t("noOrdersYetBody")}</p>}
       </div>
     </PageContainer>
   );

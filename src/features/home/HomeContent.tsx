@@ -13,7 +13,8 @@ import { House, UtensilsCrossed, ChevronRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { RecentlyViewedRow } from "@/features/listings/components/RecentlyViewed";
 import { featuredListings, highlightedListings } from "@/features/listings/service";
-import { ordersLive } from "@/features/food/service";
+import { kitchenForPlace } from "@/features/food/service";
+import { myStay } from "@/features/stay/service";
 import { HERO_SEARCH_ID, SearchBar } from "@/features/search/components/SearchBar";
 import { getCurrentUser } from "@/lib/session";
 
@@ -33,15 +34,20 @@ const ROWS = {
 
 /** Home page body: hero search and rows of homes by destination. Also the backdrop for direct /login, /signup visits. */
 export async function HomeContent({ type = null }: { type?: PlaceType | null }) {
-  const [t, tListings, tFood, pool, highlighted, user, food] = await Promise.all([
+  const [t, tListings, tFood, pool, highlighted, user] = await Promise.all([
     getTranslations("Home"),
     getTranslations("Listings"),
     getTranslations("Food"),
     featuredListings(ROW_POOL),
     highlightedListings(),
     getCurrentUser(),
-    ordersLive(),
   ]);
+  // Food is for guests staying now, from the kitchen of their place.
+  const stayNow = user ? await myStay(user.id) : null;
+  const stay = stayNow?.current;
+  const food = Boolean(
+    stay && stayNow && (stay.status === "CONFIRMED" || stay.status === "CHECKED_IN") && stay.checkIn <= stayNow.today && (await kitchenForPlace(stay.listing.id)),
+  );
   const picks = type ? highlighted.filter((listing) => listing.type === type) : highlighted;
   // Category chips (phones) filter the rows right here, without leaving the page.
   const sections = buildHomeSections(type ? pool.filter((listing) => listing.type === type) : pool);
@@ -92,10 +98,10 @@ export async function HomeContent({ type = null }: { type?: PlaceType | null }) 
         }
       >
       {food && (
-        // Always on the home page (any category): food from nearby restaurants.
+        // Guests staying now: order food to their room (any category).
         <PageContainer className="pt-4 md:pt-10">
             <Link
-              href="/restaurants"
+              href="/food"
               className="flex items-center justify-between gap-4 rounded-3xl bg-primary px-5 py-4 text-white shadow-[0_10px_30px_-14px_rgba(0,87,184,0.6)] transition-transform active:scale-[0.99] md:px-7 md:py-5"
             >
               <span className="flex items-center gap-3">

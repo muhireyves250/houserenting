@@ -34,7 +34,8 @@ export async function answerQuestion(actor: { id: string; role?: string | null }
       where: { id: questionId, status: "PENDING" },
       select: { listing: { select: { hostId: true, title: true } } },
     });
-    if (!q || (q.listing.hostId !== actor.id && !isAdmin(actor))) return false;
+    // VIIPA answers guests' questions (staff stand between guests and owners).
+    if (!q || !isAdmin(actor)) return false;
     await tx.listingQuestion.update({ where: { id: questionId }, data: { answer, answeredById: actor.id, answeredAt: new Date() } });
     await audit(tx, { actorId: actor.id, action: "question.answer", entityType: "question", entityId: questionId });
     await notifyAdmins(tx, "questionToCheck", { title: q.listing.title }, "/admin/moderation");

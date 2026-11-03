@@ -5,8 +5,12 @@ vi.mock("@/lib/db", () => ({ db: {} }));
 const { can } = await import("./access");
 
 describe("place permissions", () => {
-  it("owners and staff do everything; managers no money, documents or team; receptionists the front desk only", () => {
-    expect(can("owner", "team")).toBe(true);
+  it("staff do everything; owners add places, block dates and upload papers; managers no money, documents or team; receptionists the front desk only", () => {
+    expect(can("owner", "team")).toBe(false);
+    expect(can("owner", "blocks")).toBe(true);
+    expect(can("owner", "requests")).toBe(false);
+    expect(can("owner", "checkIn")).toBe(false);
+    expect(can("staff", "team")).toBe(true);
     expect(can("staff", "money")).toBe(true);
     expect(can("manager", "edit")).toBe(true);
     expect(can("manager", "money")).toBe(false);

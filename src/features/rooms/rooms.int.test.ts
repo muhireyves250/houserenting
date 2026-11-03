@@ -80,7 +80,9 @@ describe("room-by-room and whole-place bookings", () => {
 
   it("doesn't book rooms that are being cleaned or repaired, and logs status changes", async () => {
     expect(await setRoomStatus({ id: "g1" }, roomA, "CLEANING")).toBe(false);
-    expect(await setRoomStatus(host, roomA, "CLEANING")).toBe(true);
+    // A live place's rooms are VIIPA's to manage, not the owner's.
+    expect(await setRoomStatus(host, roomA, "CLEANING")).toBe(false);
+    expect(await setRoomStatus({ id: "admin", role: "ADMIN" }, roomA, "CLEANING")).toBe(true);
     expect(await createBooking(stay({ roomId: roomA }), NOW)).toEqual({ ok: false, error: "unavailable" });
     expect(await setRoomStatus({ id: "admin", role: "ADMIN" }, roomA, "AVAILABLE")).toBe(true);
     expect((await createBooking(stay({ roomId: roomA }), NOW)).ok).toBe(true);
@@ -100,13 +102,15 @@ describe("room-by-room and whole-place bookings", () => {
     expect(await createBooking(stay({ roomId: roomA }), NOW)).toEqual({ ok: false, error: "notFound" });
   });
 
-  it("sends a live place back to review when its rooms change, and keeps booked rooms in history", async () => {
-    await saveRoom(host, "lodge", roomA, { ...room, name: "Room A (garden)", rates: [{ unit: "NIGHT", price: 45000 }] });
-    expect((await db.listing.findUnique({ where: { id: "lodge" } }))?.status).toBe("PENDING_REVIEW");
-    await db.listing.update({ where: { id: "lodge" }, data: { status: "PUBLISHED" } });
+  it("only staff change a live place's rooms (it stays live), and booked rooms stay in history", async () => {
+    const staff = { id: "admin", role: "ADMIN" };
+    expect((await saveRoom(host, "lodge", roomA, { ...room, name: "Room A (garden)", rates: [{ unit: "NIGHT", price: 45000 }] })).ok).toBe(false);
+    expect((await saveRoom(staff, "lodge", roomA, { ...room, name: "Room A (garden)", rates: [{ unit: "NIGHT", price: 45000 }] })).ok).toBe(true);
+    expect((await db.listing.findUnique({ where: { id: "lodge" } }))?.status).toBe("PUBLISHED");
     await createBooking(stay({ roomId: roomA }), NOW);
-    expect(await removeRoom(host, roomA)).toBe("disabled");
-    expect(await removeRoom(host, roomB)).toBe("deleted");
+    expect(await removeRoom(host, roomA)).toBe(false);
+    expect(await removeRoom(staff, roomA)).toBe("disabled");
+    expect(await removeRoom(staff, roomB)).toBe("deleted");
     expect(await removeRoom({ id: "g1" }, roomA)).toBe(false);
   });
 });

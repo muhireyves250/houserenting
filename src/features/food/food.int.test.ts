@@ -1,11 +1,12 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { db } from "@/lib/db";
 import { resetDb } from "@/test/db";
-import { addRestaurantMember, moveOrder, ordersLive, placeOrder, restaurantsNear, saveMenuItem, saveRestaurant, setRestaurantStatus } from "./service";
+import { addRestaurantMember, kitchenForPlace, moveOrder, ordersLive, placeOrder, saveMenuItem, saveRestaurant, setRestaurantStatus } from "./service";
 
 const admin = { id: "admin", role: "ADMIN" };
+const NOW = new Date("2026-11-03T08:00:00Z");
 const base = {
-  name: "Kivu Grill",
+  name: "Lake house kitchen",
   description: "",
   phone: null,
   addressLine: "Lake road",
@@ -15,20 +16,24 @@ const base = {
   lng: 29.26,
   openingHours: "",
   photoUrl: null,
-  pickup: true,
-  delivery: true,
-  deliveryFee: 1000,
+  pickup: false,
+  delivery: false,
+  deliveryFee: 0,
   deliveryKm: 5,
-  listingId: null,
+  listingId: "place",
 };
 
-async function liveRestaurant() {
-  const saved = await saveRestaurant({ id: "owner" }, null, base);
+/** A kitchen VIIPA set up for the place, with one dish, live. */
+async function liveKitchen() {
+  const saved = await saveRestaurant(admin, null, base);
   if (!saved.ok) throw new Error("save failed");
-  await saveMenuItem({ id: "owner" }, saved.id, null, { name: "Brochette", price: 3000 });
+  await saveMenuItem(admin, saved.id, null, { name: "Brochette", price: 3000 });
   expect(await setRestaurantStatus(admin, saved.id, "PUBLISHED")).toBe(true);
   return saved.id;
 }
+
+const order = (restaurantId: string, menuItemId: string, over: Record<string, unknown> = {}) =>
+  placeOrder("guest", { restaurantId, lines: [{ menuItemId, quantity: 2 }], fulfilment: "TO_STAY", address: null, bookingReference: "SR-FOOD23", phone: "0788123456", note: null, ...over }, NOW);
 
 beforeEach(async () => {
   await resetDb();
@@ -37,74 +42,69 @@ beforeEach(async () => {
     data: [
       { id: "owner", name: "Owner", email: "owner@example.com" },
       { id: "cook", name: "Cook", email: "cook@example.com" },
-      { id: "rider", name: "Rider", email: "rider@example.com" },
       { id: "guest", name: "Guest", email: "guest@example.com" },
       { id: "admin", name: "Admin", email: "admin@example.com", role: "ADMIN" },
     ],
   });
-  // Only property owners (and staff) add restaurants.
-  await db.listing.create({
-    data: { id: "place", hostId: "owner", title: "Lake house", description: "Nice", type: "PRIVATE_HOUSE", status: "PUBLISHED", addressLine: "KG 1", district: "Rubavu", city: "Gisenyi", lat: -1.7, lng: 29.26, sizeM2: 90, rooms: 3, bedrooms: 2, bathrooms: 1, maxGuests: 4 },
+  for (const id of ["place", "elsewhere"]) {
+    await db.listing.create({
+      data: { id, hostId: "owner", title: id === "place" ? "Lake house" : "City flat", description: "Nice", type: "PRIVATE_HOUSE", status: "PUBLISHED", addressLine: "KG 1", district: "Rubavu", city: "Gisenyi", lat: -1.7, lng: 29.26, sizeM2: 90, rooms: 3, bedrooms: 2, bathrooms: 1, maxGuests: 4 },
+    });
+  }
+  // The guest is staying at "place" right now.
+  await db.booking.create({
+    data: {
+      reference: "SR-FOOD23", listingId: "place", guestId: "guest", status: "CHECKED_IN",
+      checkIn: new Date("2026-11-02T00:00:00Z"), checkOut: new Date("2026-11-05T00:00:00Z"),
+      startAt: new Date("2026-11-02T12:00:00Z"), endAt: new Date("2026-11-05T09:00:00Z"),
+      nights: 3, guests: 2, nightlyPrice: 50_000, subtotal: 150_000, total: 150_000, hostPayout: 135_000, policySnapshot: {},
+    },
   });
 });
 
-describe("restaurants and orders", () => {
-  it("clients who only book can't add a restaurant; property owners can", async () => {
-    expect(await saveRestaurant({ id: "guest" }, null, base)).toEqual({ ok: false, error: "notAllowed" });
-    expect((await saveRestaurant({ id: "owner" }, null, base)).ok).toBe(true);
-  });
-
-  it("refuses orders below the restaurant's minimum", async () => {
-    const id = await liveRestaurant();
-    await db.restaurant.update({ where: { id }, data: { minOrder: 10_000 } });
-    const dish = await db.menuItem.findFirstOrThrow();
-    expect(await placeOrder("guest", { restaurantId: id, lines: [{ menuItemId: dish.id, quantity: 1 }], fulfilment: "PICKUP", address: null, bookingReference: null, phone: "0788123456", note: null })).toEqual({ ok: false, error: "minOrder" });
-  });
-
-  it("only staff publish; hiding needs a reason; ORDERS appears once one is live", async () => {
-    const saved = await saveRestaurant({ id: "owner" }, null, base);
+describe("food from the kitchen of the guest's stay", () => {
+  it("only VIIPA sets up kitchens; publishing needs a dish; hiding needs a reason", async () => {
+    expect(await saveRestaurant({ id: "owner" }, null, base)).toEqual({ ok: false, error: "notAllowed" });
+    const saved = await saveRestaurant(admin, null, base);
     if (!saved.ok) throw new Error("save failed");
     expect(await ordersLive()).toBe(false);
-    expect(await setRestaurantStatus({ id: "owner" }, saved.id, "PUBLISHED")).toBe(false);
     expect(await setRestaurantStatus(admin, saved.id, "PUBLISHED")).toBe(false); // no menu yet
-    await saveMenuItem({ id: "owner" }, saved.id, null, { name: "Brochette", price: 3000 });
+    await saveMenuItem(admin, saved.id, null, { name: "Brochette", price: 3000 });
     expect(await setRestaurantStatus(admin, saved.id, "PUBLISHED")).toBe(true);
-    expect(await ordersLive()).toBe(true);
+    expect((await kitchenForPlace("place"))?.id).toBe(saved.id);
+    expect(await kitchenForPlace("elsewhere")).toBeNull();
     expect(await setRestaurantStatus(admin, saved.id, "HIDDEN")).toBe(false);
     expect(await setRestaurantStatus(admin, saved.id, "HIDDEN", "Health inspection")).toBe(true);
-    expect(await restaurantsNear(null)).toEqual([]);
   });
 
-  it("prices orders from the menu and walks a delivery through kitchen and courier", async () => {
-    const id = await liveRestaurant();
+  it("brings orders to the guest's room only, from their own stay's kitchen", async () => {
+    const id = await liveKitchen();
     const dish = await db.menuItem.findFirstOrThrow();
-    await addRestaurantMember({ id: "owner" }, id, "cook@example.com", "STAFF");
-    await addRestaurantMember({ id: "owner" }, id, "rider@example.com", "DELIVERY");
+    expect(await order(id, dish.id, { fulfilment: "DELIVERY", address: "KN 5 Rd" })).toEqual({ ok: false, error: "notOffered" });
+    expect(await order(id, dish.id, { bookingReference: null })).toEqual({ ok: false, error: "noStay" });
+    await db.restaurant.update({ where: { id }, data: { listingId: "elsewhere" } });
+    expect(await order(id, dish.id)).toEqual({ ok: false, error: "tooFar" });
+    await db.restaurant.update({ where: { id }, data: { listingId: "place" } });
 
-    expect(await placeOrder("guest", { restaurantId: id, lines: [{ menuItemId: dish.id, quantity: 2 }], fulfilment: "DELIVERY", address: null, bookingReference: null, phone: "0788123456", note: null })).toEqual({ ok: false, error: "invalid" });
-    const placed = await placeOrder("guest", { restaurantId: id, lines: [{ menuItemId: dish.id, quantity: 2 }], fulfilment: "DELIVERY", address: "KN 5 Rd, house 12", bookingReference: null, phone: "0788123456", note: "No onions" });
+    const placed = await order(id, dish.id);
     if (!placed.ok) throw new Error("order failed");
-    expect(await db.foodOrder.findUniqueOrThrow({ where: { reference: placed.reference } })).toMatchObject({ subtotal: 6000, deliveryFee: 1000, total: 7000 });
+    expect(await db.foodOrder.findUniqueOrThrow({ where: { reference: placed.reference } })).toMatchObject({ subtotal: 6000, deliveryFee: 0, total: 6000, fulfilment: "TO_STAY" });
 
-    expect(await moveOrder({ id: "rider" }, placed.reference, "ACCEPTED")).toBe(false);
-    expect(await moveOrder({ id: "cook" }, placed.reference, "ACCEPTED")).toBe(true);
-    expect(await moveOrder({ id: "guest" }, placed.reference, "CANCELLED")).toBe(false); // already accepted
-    expect(await moveOrder({ id: "cook" }, placed.reference, "PREPARING")).toBe(true);
-    expect(await moveOrder({ id: "cook" }, placed.reference, "READY")).toBe(true);
-    expect(await moveOrder({ id: "rider" }, placed.reference, "OUT_FOR_DELIVERY")).toBe(true);
-    expect(await moveOrder({ id: "rider" }, placed.reference, "DELIVERED")).toBe(true);
-    expect(await db.orderEvent.count()).toBe(6);
-    expect(await db.notification.count({ where: { userId: "guest", kind: "orderStatus" } })).toBe(5);
+    await addRestaurantMember(admin, id, "cook@example.com", "STAFF");
+    expect(await moveOrder({ id: "guest" }, placed.reference, "ACCEPTED")).toBe(false);
+    for (const step of ["ACCEPTED", "PREPARING", "READY", "DELIVERED"] as const) expect(await moveOrder({ id: "cook" }, placed.reference, step)).toBe(true);
+    expect(await db.notification.count({ where: { userId: "guest", kind: "orderStatus" } })).toBe(4);
   });
 
-  it("refuses orders when paused, and lets customers cancel before acceptance", async () => {
-    const id = await liveRestaurant();
+  it("refuses orders when the kitchen is paused or below its minimum; guests cancel before acceptance", async () => {
+    const id = await liveKitchen();
     const dish = await db.menuItem.findFirstOrThrow();
-    const order = { restaurantId: id, lines: [{ menuItemId: dish.id, quantity: 1 }], fulfilment: "PICKUP" as const, address: null, bookingReference: null, phone: "0788123456", note: null };
-    const placed = await placeOrder("guest", order);
+    const placed = await order(id, dish.id);
     if (!placed.ok) throw new Error("order failed");
     expect(await moveOrder({ id: "guest" }, placed.reference, "CANCELLED")).toBe(true);
+    await db.restaurant.update({ where: { id }, data: { minOrder: 10_000 } });
+    expect(await order(id, dish.id)).toEqual({ ok: false, error: "minOrder" });
     await db.restaurant.update({ where: { id }, data: { paused: true } });
-    expect(await placeOrder("guest", order)).toEqual({ ok: false, error: "closed" });
+    expect(await order(id, dish.id)).toEqual({ ok: false, error: "closed" });
   });
 });

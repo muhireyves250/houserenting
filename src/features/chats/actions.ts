@@ -17,7 +17,10 @@ export async function startConversationAction(listingId: string): Promise<StartR
 export async function sendMessageAction(conversationId: string, body: string): Promise<{ ok: boolean }> {
   const user = await getCurrentUser();
   if (!user || !id.safeParse(conversationId).success || typeof body !== "string") return { ok: false };
-  const ok = await sendMessage(user.id, conversationId, body);
-  if (ok) revalidatePath("/[locale]/chats", "layout");
+  const ok = await sendMessage(user, conversationId, body);
+  if (ok) {
+    revalidatePath("/[locale]/chats", "layout");
+    revalidatePath("/[locale]/admin/messages", "layout");
+  }
   return { ok };
 }

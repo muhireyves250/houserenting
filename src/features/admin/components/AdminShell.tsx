@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   LifeBuoy,
   Menu,
+  MessageSquare,
   MessageSquareWarning,
   QrCode,
   ScrollText,
@@ -28,7 +29,7 @@ import { LogoMark } from "@/components/ui/Logo";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 
-type Key = "reports" | "overview" | "listings" | "bookings" | "requests" | "restaurants" | "promoters" | "money" | "promotions" | "moderation" | "support" | "users" | "settings" | "audit" | "account" | "notifications";
+type Key = "messages" | "reports" | "overview" | "listings" | "bookings" | "requests" | "restaurants" | "promoters" | "money" | "promotions" | "moderation" | "support" | "users" | "settings" | "audit" | "account" | "notifications";
 
 const GROUPS: { label: "operate" | "money" | "people" | "system"; items: { key: Key; href: string; icon: LucideIcon }[] }[] = [
   {
@@ -37,6 +38,7 @@ const GROUPS: { label: "operate" | "money" | "people" | "system"; items: { key: 
       { key: "overview", href: "/admin", icon: LayoutDashboard },
       { key: "listings", href: "/admin/listings", icon: Home },
       { key: "bookings", href: "/admin/bookings", icon: CalendarCheck },
+      { key: "messages", href: "/admin/messages", icon: MessageSquare },
       { key: "requests", href: "/admin/requests", icon: ClipboardList },
       { key: "restaurants", href: "/admin/restaurants", icon: UtensilsCrossed },
       { key: "moderation", href: "/admin/moderation", icon: MessageSquareWarning },

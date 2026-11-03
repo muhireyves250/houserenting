@@ -17,15 +17,16 @@ describe("listing lifecycle", () => {
     expect(checkMove("unhide", "HIDDEN", staff, "")).toEqual({ ok: true, to: "PUBLISHED" });
   });
 
-  it("lets owners submit, pause, resume and archive their own places", () => {
+  it("lets owners only send their places for review; pausing, resuming and removing are staff's", () => {
     expect(checkMove("submit", "CHANGES_REQUESTED", owner, "")).toEqual({ ok: true, to: "PENDING_REVIEW" });
-    expect(checkMove("pause", "PUBLISHED", owner, "")).toEqual({ ok: true, to: "PAUSED" });
-    expect(checkMove("resume", "PAUSED", owner, "")).toEqual({ ok: true, to: "PUBLISHED" });
-    expect(checkMove("resume", "HIDDEN", owner, "")).toEqual({ ok: false, error: "wrongStatus" });
+    expect(checkMove("pause", "PUBLISHED", owner, "")).toEqual({ ok: false, error: "notAllowed" });
+    expect(checkMove("archive", "DRAFT", owner, "")).toEqual({ ok: false, error: "notAllowed" });
+    expect(checkMove("pause", "PUBLISHED", staff, "")).toEqual({ ok: true, to: "PAUSED" });
   });
 
   it("lists the buttons each person gets", () => {
-    expect(movesFrom("PUBLISHED", owner)).toEqual(["pause", "archive"]);
+    expect(movesFrom("PUBLISHED", owner)).toEqual([]);
+    expect(movesFrom("DRAFT", owner)).toEqual(["submit"]);
     expect(movesFrom("PENDING_REVIEW", staff)).toEqual(["approve", "requestChanges", "reject", "archive"]);
     expect(movesFrom("ARCHIVED", staff)).toEqual([]);
   });

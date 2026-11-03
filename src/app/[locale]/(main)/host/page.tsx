@@ -8,25 +8,23 @@ import { hostListings } from "@/features/hosting/service";
 import { Link } from "@/i18n/navigation";
 import { requireUser } from "@/lib/session";
 import { db } from "@/lib/db";
-import { AnswerQuestion } from "@/features/questions/components/AnswerQuestion";
 import { hostEarnings } from "@/features/ledger/service";
 import { formatRWF } from "@/lib/format";
 import { getLocale } from "next-intl/server";
-import { hostQuestions } from "@/features/questions/service";
 
 const newButton =
   "inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-[#0a6fe0] px-5 py-2.5 text-[15px] font-semibold text-white shadow-[0_10px_24px_-10px_rgba(0,87,184,0.8)] transition-[filter,transform] duration-300 hover:brightness-110 active:scale-[0.97]";
 
 export default async function HostPage() {
   const user = await requireUser("/host");
-  const [t, tType, tPlaces, listings, questions, earnings, locale, restaurantRoles, helping] = await Promise.all([
+  const [t, tType, tPlaces, listings, earnings, locale, restaurantRoles, helping] = await Promise.all([
     getTranslations("Host"),
     getTranslations("ListingType"),
     getTranslations("Places"),
     hostListings(user.id),
-    hostQuestions(user.id),
     hostEarnings(user.id),
     getLocale(),
+    // Kitchen teams VIIPA set up (owners don't add restaurants themselves).
     db.restaurantMember.count({ where: { userId: user.id } }),
     db.placeMember.findMany({ where: { userId: user.id, listing: { status: { not: "ARCHIVED" } } }, select: { role: true, listing: { select: { id: true, title: true, city: true } } } }),
   ]);
@@ -53,7 +51,7 @@ export default async function HostPage() {
           <ChevronRight className="size-4" aria-hidden="true" />
         </Link>
       )}
-      {(listings.length > 0 || restaurantRoles > 0) && (
+      {restaurantRoles > 0 && (
         <Link
           href="/host/restaurants"
           className="mb-3 flex items-center justify-between gap-3 rounded-2xl bg-surface px-4 py-3 text-[14px] font-semibold text-ink ring-1 ring-line transition-colors hover:ring-primary"
@@ -162,20 +160,6 @@ export default async function HostPage() {
         </section>
       )}
 
-      {questions.length > 0 && (
-        <section id="questions" className="mt-10 scroll-mt-24">
-          <h2 className="mb-3 text-lg font-bold text-ink">{t("questionsTitle")}</h2>
-          <ul className="flex flex-col gap-3">
-            {questions.map((q) => (
-              <li key={q.id} className="rounded-3xl bg-surface p-5 shadow-[0_10px_30px_-14px_rgba(16,24,40,0.3)] ring-1 ring-black/[0.04] max-md:ring-line">
-                <p className="text-[13px] text-muted">{q.listing.title}</p>
-                <p className="mt-1 text-[15px] font-semibold text-ink">{q.question}</p>
-                <AnswerQuestion questionId={q.id} />
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
     </PageContainer>
   );
 }

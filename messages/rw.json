@@ -25,7 +25,7 @@
     "logout": "Sohoka",
     "help": "Ubufasha",
     "orders": "Ibyo natumije",
-    "restaurants": "Resitora"
+    "restaurants": "Ibiryo"
   },
   "Common": {
     "save": "Bika",
@@ -361,7 +361,7 @@
     "datesHint": "Ongeramo amatariki kugira ngo ubone igiciro nyacyo",
     "whereYoullBe": "Aho uzaba uri",
     "meetHost": "Menya ugwakira",
-    "messageHost": "Andikira nyiri inzu",
+    "messageHost": "Twandikire",
     "thingsToKnow": "Ibyo ukwiye kumenya",
     "houseRules": "Amategeko y'inzu",
     "maxGuests": "{count, plural, one {Umushyitsi # ntarengwa} other {Abashyitsi # ntarengwa}}",
@@ -515,7 +515,9 @@
     "rowHighlightedSub": "Inzu itsinda ryacu rigusabira",
     "idUploadOnline": "Abashyitsi bohereza indangamuntu kuri murandasi mbere yo kuhagera",
     "idAtCheckIn": "Abashyitsi berekana indangamuntu bahageze",
-    "feesIncluded": "Amafaranga yose arimo"
+    "feesIncluded": "Amafaranga yose arimo",
+    "talkToUs": "Ufite ikibazo? Vugana na VIIPA",
+    "talkToUsBody": "Itsinda ryacu ryita kuri iyi nzu no ku ifatwa ryawe. Tubaze icyo ushaka mbere cyangwa mu gihe ucumbitse."
   },
   "Facility": {
     "KITCHEN": "Igikoni",
@@ -617,7 +619,7 @@
     "rental": "Ubukode",
     "rentalTerms": "Amezi {months}, {upfront} yishyurwa ubika",
     "payTitle": "Ishyura kugira ngo byemezwe",
-    "messageHost": "Andikira nyir'inzu",
+    "messageHost": "Twandikire",
     "time": "Isaha",
     "openMyStay": "Fungura Aho ncumbitse",
     "messageShort": "Ubutumwa",
@@ -772,7 +774,8 @@
       "requests": "Ibyifuzo by'abashyitsi",
       "restaurants": "Resitora",
       "promoters": "Abamamaza",
-      "reports": "Raporo"
+      "reports": "Raporo",
+      "messages": "Ubutumwa"
     },
     "count": {
       "listings": "Ahantu ho kugenzura",
@@ -1377,7 +1380,10 @@
     "host": "Nyir'inzu",
     "guest": "Umushyitsi",
     "startHint": "Suhuza {name} ubaze icyo ushaka ku hantu.",
-    "listIntro": "Ubutumwa n'abakira n'abashyitsi ku byerekeye amafatwa yawe."
+    "listIntro": "Ubutumwa bwawe n'itsinda rya VIIPA.",
+    "team": "Itsinda rya VIIPA",
+    "staffIntro": "Ibiganiro byose by'abakiriya. Abakiriya bandikira VIIPA; ba nyir'inzu ntibabibona. Ibitarasubizwa mbere.",
+    "staffInbox": "Ubutumwa"
   },
   "Places": {
     "statusTitle": "Uko bihagaze",
@@ -1525,7 +1531,9 @@
     },
     "portalLink": "Amafatwa y'inzu zawe",
     "helpingTitle": "Inzu ufasha gucunga",
-    "restaurantsLink": "Resitora zawe"
+    "restaurantsLink": "Resitora zawe",
+    "managedByViipa": "VIIPA ni yo icunga iyi nzu ubu. Ushobora gukomeza gufunga iminsi no kuvugurura inyandiko zawe.",
+    "askForChange": "Saba impinduka"
   },
   "MyStay": {
     "title": "Aho ncumbitse",
@@ -1852,8 +1860,8 @@
     "viewOrder": "Reba ibyo watumije ({count})",
     "atThisPlace": "Resitora ziri aha",
     "seeMenu": "Reba urutonde rw'ibiryo",
-    "homeBanner": "Tumiza ibiryo hafi yawe",
-    "homeBannerSub": "Resitora zikugezaho ibiryo aho uri cyangwa mu cyumba cyawe.",
+    "homeBanner": "Ushonje? Tumiza ibiryo",
+    "homeBannerSub": "Igikoni cy'aho ucumbitse kibikuzanira mu cyumba.",
     "ownersOnly": "Resitora zishyirwaho na ba nyir'inzu n'itsinda rya VIIPA. Ushobora gutumiza muri resitora iyo ari yo yose iri ku rubuga.",
     "addPhoto": "Ongeraho ifoto",
     "changePhoto": "Hindura ifoto",
@@ -1919,7 +1927,37 @@
     "pickupOnly": "Kuza kubifata gusa",
     "readyBy": "Biba byiteguye",
     "arrivesBy": "Bigera",
-    "orderHelp": "Hari ikibazo kuri ibi watumije? Saba ubufasha"
+    "orderHelp": "Hari ikibazo kuri ibi watumije? Saba ubufasha",
+    "foodTitle": "Ibiryo",
+    "findPlace": "Shaka inzu",
+    "openMyStay": "Fungura Aho ncumbitse",
+    "deliveredTo": "Bizanwa kuri {place}",
+    "kitchenClosed": "Igikoni gifunze ubu",
+    "orderFoodTitle": "Tumiza ibiryo",
+    "orderFoodSub": "Mu gikoni cya {place}, bikakugeraho mu cyumba",
+    "yourStayKitchen": "Igikoni cy'aho ucumbitse",
+    "menu": "Urutonde",
+    "kitchenAt": "Igikoni cya {place}",
+    "mealsTitle": "Ibiryo mu cyumba",
+    "mealsBody": "Mu gihe ucumbitse, ushobora gutumiza ibiryo mu gikoni cy'iyi nzu ukoresheje porogaramu. Bikugeraho mu cyumba.",
+    "foodUnavailable": {
+      "noStay": {
+        "title": "Ibiryo ni iby'abacumbitse iwacu",
+        "body": "Nucumbika muri imwe mu nzu zacu, uzashobora gutumiza ibiryo mu gikoni cyayo bikakugeraho mu cyumba."
+      },
+      "unpaid": {
+        "title": "Banza wishyure icumbi",
+        "body": "Ifatwa rimaze kwishyurwa, uzashobora gutumiza ibiryo mu gihe ucumbitse."
+      },
+      "notStarted": {
+        "title": "Ibiryo bitangira icumbi ritangiye",
+        "body": "Uzashobora gutumiza ibiryo mu cyumba guhera ku wa {day}."
+      },
+      "noKitchen": {
+        "title": "Nta biryo biraboneka hano",
+        "body": "{place} ntiratanga ibiryo. Twandikire niba ukeneye ubufasha."
+      }
+    }
   },
   "Promoters": {
     "title": "Kwamamaza no kwinjiza",

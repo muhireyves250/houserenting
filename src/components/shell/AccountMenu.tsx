@@ -47,7 +47,7 @@ export function AccountMenu({ name, image }: { name: string; image?: string | nu
     { href: "/profile", icon: UserRound, label: t("profile") },
     { href: "/bookings", icon: CalendarDays, label: t("bookings") },
     { href: "/chats", icon: MessageSquare, label: t("messages") },
-    { href: "/restaurants", icon: UtensilsCrossed, label: t("restaurants") },
+    { href: "/food", icon: UtensilsCrossed, label: t("restaurants") },
     { href: "/notifications", icon: Bell, label: t("notifications") },
     { href: "/host", icon: KeyRound, label: t("yourPlaces") },
     { href: "/host/listings/new", icon: Plus, label: t("addPlace") },

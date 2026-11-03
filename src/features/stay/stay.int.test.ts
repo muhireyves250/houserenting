@@ -151,12 +151,13 @@ describe("feedback and guest ID", () => {
     expect(await saveStayFeedback("guest", ref, true, "", NOW)).toEqual({ ok: false });
   });
 
-  it("keeps the guest's ID private to the guest, the owner and staff", async () => {
+  it("keeps the guest's ID private to the guest and staff", async () => {
     const ref = await booking();
     expect(await uploadGuestId("guest", ref, "id.pdf", new TextEncoder().encode("hello"))).toEqual({ ok: false, error: "badType" });
     expect(await uploadGuestId("guest", ref, "id.pdf", PDF)).toEqual({ ok: true });
     expect(await readGuestId({ id: "stranger" }, ref)).toBeNull();
-    expect((await readGuestId({ id: "host" }, ref))?.filename).toBe("id.pdf");
+    // The owner doesn't see guests' IDs: VIIPA stands between them.
+    expect(await readGuestId({ id: "host" }, ref)).toBeNull();
     expect((await readGuestId(admin, ref))?.mimeType).toBe("application/pdf");
   });
 });

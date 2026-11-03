@@ -25,7 +25,7 @@
     "logout": "Se déconnecter",
     "help": "Aide",
     "orders": "Commandes",
-    "restaurants": "Restaurants"
+    "restaurants": "Repas"
   },
   "Common": {
     "save": "Enregistrer",
@@ -361,7 +361,7 @@
     "datesHint": "Ajoutez vos dates pour un prix exact",
     "whereYoullBe": "Où vous serez",
     "meetHost": "Faites connaissance avec votre hôte",
-    "messageHost": "Envoyer un message à l'hôte",
+    "messageHost": "Nous écrire",
     "thingsToKnow": "À savoir",
     "houseRules": "Règlement intérieur",
     "maxGuests": "{count, plural, one {# voyageur maximum} other {# voyageurs maximum}}",
@@ -515,7 +515,9 @@
     "rowHighlightedSub": "Les logements recommandés par notre équipe",
     "idUploadOnline": "Les voyageurs envoient leur pièce d'identité en ligne avant l'arrivée",
     "idAtCheckIn": "Les voyageurs présentent leur pièce d'identité à l'arrivée",
-    "feesIncluded": "Tous frais compris"
+    "feesIncluded": "Tous frais compris",
+    "talkToUs": "Des questions ? Parlez à VIIPA",
+    "talkToUsBody": "Notre équipe s'occupe de ce logement et de votre réservation. Posez-nous vos questions avant ou pendant votre séjour."
   },
   "Facility": {
     "KITCHEN": "Cuisine",
@@ -617,7 +619,7 @@
     "rental": "Location",
     "rentalTerms": "{months} mois, {upfront} payé(s) à la réservation",
     "payTitle": "Payer pour confirmer",
-    "messageHost": "Écrire à l'hôte",
+    "messageHost": "Nous écrire",
     "time": "Heure",
     "openMyStay": "Ouvrir Mon séjour",
     "messageShort": "Message",
@@ -772,7 +774,8 @@
       "requests": "Demandes des voyageurs",
       "restaurants": "Restaurants",
       "promoters": "Promoteurs",
-      "reports": "Rapports"
+      "reports": "Rapports",
+      "messages": "Messages"
     },
     "count": {
       "listings": "Annonces à vérifier",
@@ -1377,7 +1380,10 @@
     "host": "Hôte",
     "guest": "Voyageur",
     "startHint": "Dites bonjour à {name} et posez vos questions sur le logement.",
-    "listIntro": "Vos messages avec les hôtes et les voyageurs."
+    "listIntro": "Vos messages avec l'équipe VIIPA.",
+    "team": "Équipe VIIPA",
+    "staffIntro": "Toutes les conversations des clients. Les clients écrivent à VIIPA ; les propriétaires ne les voient pas. Les non répondues d'abord.",
+    "staffInbox": "Messages"
   },
   "Places": {
     "statusTitle": "Statut",
@@ -1525,7 +1531,9 @@
     },
     "portalLink": "Réservations de vos logements",
     "helpingTitle": "Logements que vous aidez à gérer",
-    "restaurantsLink": "Vos restaurants"
+    "restaurantsLink": "Vos restaurants",
+    "managedByViipa": "VIIPA gère désormais ce logement. Vous pouvez toujours bloquer des dates et mettre à jour vos documents.",
+    "askForChange": "Demander une modification"
   },
   "MyStay": {
     "title": "Mon séjour",
@@ -1852,8 +1860,8 @@
     "viewOrder": "Voir la commande ({count})",
     "atThisPlace": "Restaurants sur place",
     "seeMenu": "Voir le menu",
-    "homeBanner": "Commandez près de chez vous",
-    "homeBannerSub": "Les restaurants livrent à votre porte ou dans votre chambre.",
+    "homeBanner": "Une petite faim ? Commandez",
+    "homeBannerSub": "La cuisine de votre logement vous l'apporte dans votre chambre.",
     "ownersOnly": "Les restaurants sont ajoutés par les propriétaires et l'équipe VIIPA. Vous pouvez commander dans tous les restaurants du site.",
     "addPhoto": "Ajouter une photo",
     "changePhoto": "Changer la photo",
@@ -1919,7 +1927,37 @@
     "pickupOnly": "À emporter seulement",
     "readyBy": "Prête vers",
     "arrivesBy": "Arrive vers",
-    "orderHelp": "Un problème avec cette commande ? Aide"
+    "orderHelp": "Un problème avec cette commande ? Aide",
+    "foodTitle": "Repas",
+    "findPlace": "Trouver un logement",
+    "openMyStay": "Ouvrir Mon séjour",
+    "deliveredTo": "Apporté à {place}",
+    "kitchenClosed": "Cuisine fermée pour le moment",
+    "orderFoodTitle": "Commander à manger",
+    "orderFoodSub": "De la cuisine de {place}, dans votre chambre",
+    "yourStayKitchen": "La cuisine de votre logement",
+    "menu": "Menu",
+    "kitchenAt": "Cuisine de {place}",
+    "mealsTitle": "Repas dans la chambre",
+    "mealsBody": "Pendant votre séjour, commandez des repas de la cuisine de ce logement dans l'appli. Ils sont apportés dans votre chambre.",
+    "foodUnavailable": {
+      "noStay": {
+        "title": "Les repas sont pour nos voyageurs",
+        "body": "Quand vous séjournez dans l'un de nos logements, vous pouvez commander des repas de sa cuisine dans votre chambre."
+      },
+      "unpaid": {
+        "title": "Payez d'abord votre séjour",
+        "body": "Une fois la réservation payée, vous pourrez commander des repas pendant votre séjour."
+      },
+      "notStarted": {
+        "title": "Les repas ouvrent au début du séjour",
+        "body": "Vous pourrez commander des repas dans votre chambre à partir du {day}."
+      },
+      "noKitchen": {
+        "title": "Pas encore de repas ici",
+        "body": "{place} ne sert pas encore de repas. Écrivez-nous si vous avez besoin d'aide."
+      }
+    }
   },
   "Promoters": {
     "title": "Promouvoir et gagner",

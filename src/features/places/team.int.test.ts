@@ -44,12 +44,14 @@ beforeEach(async () => {
 });
 
 describe("place teams", () => {
-  it("the owner adds a manager and a receptionist, each limited to their role and place", async () => {
+  it("staff add a manager and a receptionist to a place (owners can't), each limited to their role and place", async () => {
+    const staff = { id: "admin", role: "ADMIN" };
+    expect(await addTeamMember({ id: "owner" }, "a", "manager@example.com", "MANAGER")).toEqual({ ok: false, error: "notAllowed" });
     expect(await addTeamMember({ id: "manager" }, "a", "desk@example.com", "RECEPTIONIST")).toEqual({ ok: false, error: "notAllowed" });
-    expect(await addTeamMember({ id: "owner" }, "a", "nobody@example.com", "MANAGER")).toEqual({ ok: false, error: "noAccount" });
-    expect(await addTeamMember({ id: "owner" }, "a", "owner@example.com", "MANAGER")).toEqual({ ok: false, error: "isOwner" });
-    expect(await addTeamMember({ id: "owner" }, "a", "manager@example.com", "MANAGER")).toEqual({ ok: true });
-    expect(await addTeamMember({ id: "owner" }, "a", "desk@example.com", "RECEPTIONIST")).toEqual({ ok: true });
+    expect(await addTeamMember(staff, "a", "nobody@example.com", "MANAGER")).toEqual({ ok: false, error: "noAccount" });
+    expect(await addTeamMember(staff, "a", "owner@example.com", "MANAGER")).toEqual({ ok: false, error: "isOwner" });
+    expect(await addTeamMember(staff, "a", "manager@example.com", "MANAGER")).toEqual({ ok: true });
+    expect(await addTeamMember(staff, "a", "desk@example.com", "RECEPTIONIST")).toEqual({ ok: true });
 
     expect(await placeRole({ id: "manager" }, "a")).toBe("manager");
     expect(await placeRole({ id: "manager" }, "b")).toBeNull();
@@ -68,7 +70,8 @@ describe("place teams", () => {
 
     const member = await db.placeMember.findFirstOrThrow({ where: { userId: "desk" } });
     expect(await removeTeamMember({ id: "manager" }, member.id)).toBe(false);
-    expect(await removeTeamMember({ id: "owner" }, member.id)).toBe(true);
+    expect(await removeTeamMember({ id: "owner" }, member.id)).toBe(false);
+    expect(await removeTeamMember({ id: "admin", role: "ADMIN" }, member.id)).toBe(true);
     expect(await placeRole({ id: "desk" }, "a")).toBeNull();
   });
 });

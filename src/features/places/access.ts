@@ -8,7 +8,8 @@ export type PlaceAction = "edit" | "status" | "blocks" | "rooms" | "documents" |
 
 const ALLOWED: Record<PlaceRole, readonly PlaceAction[]> = {
   staff: ["edit", "status", "blocks", "rooms", "documents", "team", "money", "bookings", "checkIn", "requests", "guestId"],
-  owner: ["edit", "status", "blocks", "rooms", "documents", "team", "money", "bookings", "checkIn", "requests", "guestId"],
+  // Owners add places (editing until sent for review), block dates, upload papers, and see bookings and earnings.
+  owner: ["edit", "blocks", "rooms", "documents", "money", "bookings"],
   manager: ["edit", "blocks", "rooms", "bookings", "checkIn", "requests", "guestId"],
   receptionist: ["bookings", "checkIn", "guestId"],
 };

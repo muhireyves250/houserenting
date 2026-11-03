@@ -39,6 +39,7 @@ export function MenuCart({
   signedIn,
   stay,
   defaultPhone,
+  checkoutPath,
 }: {
   restaurant: Restaurant;
   menu: Dish[];
@@ -46,6 +47,8 @@ export function MenuCart({
   /** The customer's stay today, when the restaurant can bring food there. */
   stay: { reference: string; label: string; free: boolean } | null;
   defaultPhone: string | null;
+  /** Where to come back after logging in (defaults to the restaurant's page). */
+  checkoutPath?: string;
 }) {
   const t = useTranslations("Food");
   const locale = useLocale();
@@ -116,6 +119,7 @@ export function MenuCart({
       signedIn={signedIn}
       stay={stay}
       defaultPhone={defaultPhone}
+      checkoutPath={checkoutPath ?? `/restaurants/${restaurant.id}`}
     />
   );
 
@@ -282,6 +286,7 @@ function Checkout({
   signedIn,
   stay,
   defaultPhone,
+  checkoutPath,
 }: {
   restaurant: Restaurant;
   menu: Dish[];
@@ -291,6 +296,7 @@ function Checkout({
   signedIn: boolean;
   stay: { reference: string; label: string; free: boolean } | null;
   defaultPhone: string | null;
+  checkoutPath: string;
 }) {
   const t = useTranslations("Food");
   const locale = useLocale();
@@ -316,7 +322,7 @@ function Checkout({
     start(async () => {
       setError(null);
       if (!signedIn) {
-        router.push({ pathname: "/login", query: { next: `/restaurants/${restaurant.id}` } });
+        router.push({ pathname: "/login", query: { next: checkoutPath } });
         return;
       }
       const result = await placeOrderAction({

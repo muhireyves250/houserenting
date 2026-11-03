@@ -23,7 +23,7 @@ export default async function ChatsPage() {
     getTranslations("Empty"),
     getTranslations("Footer"),
     getLocale(),
-    listConversations(user.id),
+    listConversations(user),
   ]);
   const now = new Date();
 
@@ -62,11 +62,9 @@ export default async function ChatsPage() {
                     <span className={cn("truncate text-[15px] text-ink", chat.unread ? "font-bold" : "font-semibold")}>{chat.other.name}</span>
                     {chat.last && <span className={cn("shrink-0 text-xs", chat.unread ? "font-semibold text-primary" : "text-muted")}>{when(locale, chat.last.createdAt, now)}</span>}
                   </span>
-                  <span className="truncate text-xs text-muted">
-                    {chat.role === "host" ? t("aboutYourPlace", { title: chat.listing.title }) : chat.listing.title}
-                  </span>
+                  <span className="truncate text-xs text-muted">{chat.listing.title}</span>
                   <span className={cn("truncate text-[13px]", chat.unread ? "font-semibold text-ink" : "text-ink/70")}>
-                    {chat.last ? `${chat.last.senderId === user.id ? `${t("you")}: ` : ""}${chat.last.body}` : t("noMessages")}
+                    {chat.last ? `${chat.mine ? `${t("you")}: ` : ""}${chat.last.body}` : t("noMessages")}
                   </span>
                 </span>
                 {chat.unread && <span className="size-2.5 shrink-0 rounded-full bg-primary" aria-label={t("unread")} />}

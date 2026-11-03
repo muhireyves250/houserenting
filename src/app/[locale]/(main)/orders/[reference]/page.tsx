@@ -1,4 +1,4 @@
-import { Bike, BedDouble, CheckCircle2, ChefHat, ChevronLeft, CircleX, Clock, LifeBuoy, MapPin, PackageCheck, Phone, Receipt, Store, type LucideIcon } from "lucide-react";
+import { Bike, BedDouble, CheckCircle2, ChefHat, ChevronLeft, CircleX, Clock, LifeBuoy, PackageCheck, Receipt, Store, type LucideIcon } from "lucide-react";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { PageContainer } from "@/components/ui/PageContainer";
@@ -47,7 +47,6 @@ export default async function OrderPage({ params }: Props) {
   const look = LOOK[order.status];
   const StatusIcon = look.icon;
   const Service = order.fulfilment === "DELIVERY" ? Bike : order.fulfilment === "TO_STAY" ? BedDouble : Store;
-  const roundButton = "flex size-11 items-center justify-center rounded-full ring-1 ring-line text-primary transition-colors hover:bg-primary/[0.06]";
 
   return (
     <PageContainer className="max-w-2xl pt-4 pb-10 md:py-10">
@@ -90,43 +89,15 @@ export default async function OrderPage({ params }: Props) {
         {active && <p className="mt-4 text-center text-xs text-muted">{t("updatesItself")}</p>}
       </section>
 
-      {/* Who's making it and where it goes */}
+      {/* Where it's cooked (the kitchen of the guest's stay) and where it goes */}
       <section className={cn(card, "mt-4 p-5")}>
-        <div className="flex items-center gap-3">
-          <span className="relative flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-primary-soft">
-            {order.restaurant.photoUrl && (
-              // eslint-disable-next-line @next/next/no-img-element -- restaurant photo
-              <img src={order.restaurant.photoUrl} alt="" className="absolute inset-0 size-full object-cover" />
-            )}
+        <div className="flex items-start gap-3">
+          <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary-soft text-primary">
+            <Service className="size-6" aria-hidden="true" />
           </span>
-          <Link href={`/restaurants/${order.restaurant.id}`} className="min-w-0 flex-1">
-            <span className="block truncate text-[16px] font-bold text-ink">{order.restaurant.name}</span>
-            <span className="block truncate text-[13px] text-muted">
-              {order.restaurant.district}, {order.restaurant.city}
-            </span>
-          </Link>
-          {order.restaurant.phone && (
-            <a href={`tel:${order.restaurant.phone}`} aria-label={t("callRestaurant")} className={roundButton}>
-              <Phone className="size-5" aria-hidden="true" />
-            </a>
-          )}
-          <a
-            href={`https://www.google.com/maps/dir/?api=1&destination=${order.restaurant.lat},${order.restaurant.lng}`}
-            target="_blank"
-            rel="noopener"
-            aria-label={t("directions")}
-            className={roundButton}
-          >
-            <MapPin className="size-5" aria-hidden="true" />
-          </a>
-        </div>
-        <div className="mt-4 flex items-start gap-3 rounded-2xl bg-canvas px-4 py-3 text-[14px]">
-          <Service className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />
-          <span>
-            <b className="font-semibold text-ink">{t(`fulfilment.${order.fulfilment}`)}</b>
-            <span className="block text-muted">
-              {order.fulfilment === "PICKUP" ? `${order.restaurant.addressLine}, ${order.restaurant.district}` : order.address}
-            </span>
+          <span className="min-w-0 flex-1 text-[14px]">
+            <b className="block text-[16px] font-bold text-ink">{t("kitchenAt", { place: order.restaurant.listing?.title ?? t("yourStayKitchen") })}</b>
+            <span className="block text-muted">{order.address ?? t(`fulfilment.${order.fulfilment}`)}</span>
           </span>
         </div>
       </section>
