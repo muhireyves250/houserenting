@@ -70,7 +70,8 @@ export async function HomeContent({ type = null }: { type?: PlaceType | null }) 
             fill
             priority
             quality={90}
-            sizes="100vw"
+            // Desktop only (hidden on phones), so phones fetch the smallest size.
+            sizes="(min-width: 768px) 100vw, 1px"
             className="object-cover object-center [filter:saturate(1.3)_contrast(1.12)_brightness(1.12)]"
           />
           <HeroVideo src={HERO_VIDEO} className="[filter:saturate(1.35)_contrast(1.15)_brightness(1.18)]" />
