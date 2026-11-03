@@ -26,7 +26,7 @@ export default async function HostPage() {
     getLocale(),
     // Kitchen teams VIIPA set up (owners don't add restaurants themselves).
     db.restaurantMember.count({ where: { userId: user.id } }),
-    db.placeMember.findMany({ where: { userId: user.id, listing: { status: { not: "ARCHIVED" } } }, select: { role: true, listing: { select: { id: true, title: true, city: true } } } }),
+    db.placeMember.findMany({ where: { userId: user.id, role: "MANAGER", listing: { status: { not: "ARCHIVED" } } }, select: { role: true, listing: { select: { id: true, title: true, city: true } } } }),
   ]);
   const hasMoney = earnings.earned + earnings.upcoming + earnings.paidOut > 0;
 
@@ -42,15 +42,6 @@ export default async function HostPage() {
         )}
       </div>
 
-      {(listings.length > 0 || helping.length > 0) && (
-        <Link
-          href="/host/bookings"
-          className="mb-3 flex items-center justify-between gap-3 rounded-2xl bg-primary px-4 py-3 text-[14px] font-semibold text-white transition-colors hover:bg-primary-hover"
-        >
-          {tPlaces("portalLink")}
-          <ChevronRight className="size-4" aria-hidden="true" />
-        </Link>
-      )}
       {restaurantRoles > 0 && (
         <Link
           href="/host/restaurants"
@@ -66,7 +57,7 @@ export default async function HostPage() {
           <ul className="flex flex-col divide-y divide-line rounded-2xl bg-surface ring-1 ring-line">
             {helping.map((h) => (
               <li key={h.listing.id}>
-                <Link href={h.role === "MANAGER" ? `/host/listings/${h.listing.id}` : "/host/bookings"} className="flex items-center justify-between gap-3 px-4 py-3">
+                <Link href={`/host/listings/${h.listing.id}`} className="flex items-center justify-between gap-3 px-4 py-3">
                   <span>
                     <span className="block text-[14px] font-semibold text-ink">{h.listing.title}</span>
                     <span className="block text-xs text-muted">

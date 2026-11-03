@@ -102,7 +102,6 @@ export async function requestStayChange(guestId: string, reference: string, inpu
     await audit(tx, { actorId: guestId, action: "stay.request", entityType: "booking", entityId: reference, data: { request: request.id, kind: input.kind } });
     const data = { reference, title: booking.listing.title, kindLabel: input.kind };
     await notifyAdmins(tx, "stayRequest", data, `/admin/bookings/${reference}`);
-    await notify(tx, booking.listing.hostId, "stayRequest", data, null);
   });
   return { ok: true };
 }

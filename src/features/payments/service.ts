@@ -145,7 +145,7 @@ async function apply(tx: Prisma.TransactionClient, event: CallbackBody, actorId:
   await tx.ledgerEntry.createMany({ data: entries.filter((e) => e.amount > 0) });
   await audit(tx, { actorId, action: "booking.paid", entityType: "booking", entityId: booking.reference, data: { amount: event.amount, provider: event.provider, providerReference: event.providerReference } });
   await notify(tx, booking.guestId, "bookingConfirmed", { title: booking.listing.title, reference: booking.reference }, `/bookings/${booking.reference}`);
-  await notify(tx, host, "newBooking", { title: booking.listing.title, reference: booking.reference }, "/host");
+  await notifyAdmins(tx, "newBooking", { title: booking.listing.title, reference: booking.reference }, `/admin/bookings/${booking.reference}`);
   return "confirmed";
 }
 

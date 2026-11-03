@@ -4,7 +4,6 @@ import { db } from "@/lib/db";
 import { resetDb } from "@/test/db";
 import { canOn, placeRole } from "./access";
 import { createBlock } from "./blocks-service";
-import { portalBookings } from "./portal";
 import { addTeamMember, removeTeamMember } from "./team-service";
 
 beforeEach(async () => {
@@ -57,15 +56,14 @@ describe("place teams", () => {
     expect(await placeRole({ id: "manager" }, "b")).toBeNull();
     expect(await canOn({ id: "manager" }, "a", "blocks")).toBe(true);
     expect(await canOn({ id: "manager" }, "a", "money")).toBe(false);
-    expect(await canOn({ id: "desk" }, "a", "checkIn")).toBe(true);
+    expect(await canOn({ id: "desk" }, "a", "checkIn")).toBe(false);
+    expect(await canOn({ id: "owner" }, "a", "bookings")).toBe(false);
     expect(await canOn({ id: "desk" }, "a", "edit")).toBe(false);
 
     const block = { roomId: null, kind: "MAINTENANCE" as const, startsAt: new Date("2026-12-01T00:00:00Z"), endsAt: null, reason: "Paint" };
     expect((await createBlock({ id: "manager" }, "a", block)).ok).toBe(true);
     expect(await createBlock({ id: "desk" }, "a", block)).toEqual({ ok: false, error: "notAllowed" });
 
-    expect((await portalBookings("desk")).places).toBe(1);
-    expect((await portalBookings("owner")).places).toBe(2);
     expect(await db.notification.count({ where: { kind: "teamAdded" } })).toBe(2);
 
     const member = await db.placeMember.findFirstOrThrow({ where: { userId: "desk" } });

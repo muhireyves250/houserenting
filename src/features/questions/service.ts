@@ -20,7 +20,7 @@ export async function askQuestion(userId: string, listingId: string, text: strin
   if (waiting >= MAX_WAITING_PER_LISTING) return { ok: false, error: "tooMany" };
   await db.$transaction(async (tx) => {
     await tx.listingQuestion.create({ data: { listingId, askerId: userId, question } });
-    await notify(tx, listing.hostId, "questionAsked", { title: listing.title }, "/host#questions");
+    await notifyAdmins(tx, "questionAsked", { title: listing.title }, "/admin/moderation");
   });
   return { ok: true };
 }

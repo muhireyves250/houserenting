@@ -48,7 +48,7 @@ describe("payments confirmed by the owner or staff", () => {
     expect(await claimPayment("guest", "SR-PAY234", "MP2610.1234.A56789", NOW)).toEqual({ ok: true });
     const held = await db.booking.findUniqueOrThrow({ where: { reference: "SR-PAY234" } });
     expect(held.holdExpiresAt!.getTime()).toBeGreaterThan(NOW.getTime() + 23 * 3_600_000);
-    expect(await db.notification.count({ where: { userId: "owner", kind: "paymentClaim" } })).toBe(1);
+    expect(await db.notification.count({ where: { userId: "owner", kind: "paymentClaim" } })).toBe(0);
 
     expect(await confirmPaymentByHand({ id: "desk" }, "SR-PAY234", { transactionId: "MP2610.1234.A56789", amount: 100_000 })).toEqual({ ok: false, error: "notAllowed" });
     expect(await confirmPaymentByHand({ id: "owner" }, "SR-PAY234", { transactionId: "MP2610.1234.A56789", amount: 100_000 })).toEqual({ ok: false, error: "notAllowed" });

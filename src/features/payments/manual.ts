@@ -13,14 +13,14 @@ export type ClaimResult = { ok: true } | { ok: false; error: "notPayable" | "tra
 
 /**
  * The guest says they paid by mobile money and gives the transaction id. Their dates stay held for 24 hours while
- * the owner or staff check it; the owner and staff are told. Nothing is confirmed until one of them does.
+ * VIIPA staff check it; staff are told. Nothing is confirmed until they do.
  */
 export async function claimPayment(guestId: string, reference: string, transactionId: string, now: Date = new Date()): Promise<ClaimResult> {
   const tx = transactionId.trim();
   if (!TX.test(tx)) return { ok: false, error: "transaction" };
   const booking = await db.booking.findFirst({
     where: { reference, guestId, status: "PENDING_PAYMENT", holdExpiresAt: { gt: now } },
-    select: { id: true, total: true, currency: true, holdExpiresAt: true, listing: { select: { hostId: true, title: true } }, payments: { where: { status: "PENDING" }, select: { id: true } } },
+    select: { id: true, total: true, currency: true, holdExpiresAt: true, listing: { select: { title: true } }, payments: { where: { status: "PENDING" }, select: { id: true } } },
   });
   if (!booking) return { ok: false, error: "notPayable" };
   if (booking.payments.length > 0) return { ok: false, error: "waiting" };
@@ -31,7 +31,6 @@ export async function claimPayment(guestId: string, reference: string, transacti
     await t.booking.update({ where: { id: booking.id }, data: { holdExpiresAt: keepUntil } });
     await audit(t, { actorId: guestId, action: "booking.paymentClaim", entityType: "booking", entityId: reference, data: { providerReference: tx } });
     const data = { reference, title: booking.listing.title };
-    await notify(t, booking.listing.hostId, "paymentClaim", data, "/host/bookings");
     await notifyAdmins(t, "paymentClaim", data, `/admin/bookings/${reference}`);
   });
   return { ok: true };
@@ -40,7 +39,7 @@ export async function claimPayment(guestId: string, reference: string, transacti
 export type ConfirmResult = { ok: true } | { ok: false; error: "notAllowed" | "notFound" | "transaction" | "amount" | Exclude<CallbackOutcome, "confirmed"> };
 
 /**
- * Staff or the place's owner confirm a payment they received (checked in their mobile money or bank statement).
+ * VIIPA staff confirm a payment they received (checked in their mobile money or bank statement).
  * It goes through the same steps as a provider confirmation: amount check, dates still free, ledger, receipt,
  * notifications, and it is recorded with who confirmed it.
  */
@@ -60,7 +59,7 @@ export async function confirmPaymentByHand(actor: Actor, reference: string, inpu
   return outcome === "confirmed" ? { ok: true } : { ok: false, error: outcome };
 }
 
-/** Staff or the owner say the money didn't arrive: the guest's note is closed with a reason they see. */
+/** Staff say the money didn't arrive: the guest's note is closed with a reason they see. */
 export async function rejectPaymentClaim(actor: Actor, reference: string, reason: string): Promise<boolean> {
   const why = reason.trim().slice(0, 300);
   if (!why) return false;

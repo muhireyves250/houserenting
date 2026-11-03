@@ -20,9 +20,7 @@ import { listingBlocks } from "@/features/places/blocks-service";
 import { listingDocuments } from "@/features/places/documents-service";
 import { payoutAccountOf } from "@/features/places/payout-service";
 import { can, placeRole } from "@/features/places/access";
-import { redirect } from "@/i18n/navigation";
 import { db } from "@/lib/db";
-import { getLocale } from "next-intl/server";
 import { RoomsEditor } from "@/features/rooms/components/RoomsEditor";
 import { listingRooms } from "@/features/rooms/service";
 
@@ -31,9 +29,8 @@ type Props = { params: Promise<{ id: string }> };
 export default async function EditListingPage({ params }: Props) {
   const { id } = await params;
   const user = await requireUser(`/host/listings/${id}`);
-  // The owner and managers edit here; receptionists work from the bookings page.
+  // The owner and managers edit here; bookings and the front desk are VIIPA's.
   const role = await placeRole(user, id);
-  if (role === "receptionist") redirect({ href: "/host/bookings", locale: await getLocale() });
   if (!can(role, "edit")) notFound();
   const owner = can(role, "money");
   const hostId = (await db.listing.findUnique({ where: { id }, select: { hostId: true } }))!.hostId;

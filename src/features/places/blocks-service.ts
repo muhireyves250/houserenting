@@ -1,6 +1,7 @@
 import "server-only";
 import { audit } from "@/features/audit/service";
 import { db } from "@/lib/db";
+import { isAdmin } from "@/lib/roles";
 import { canOn } from "./access";
 import type { Actor } from "./status-service";
 
@@ -14,7 +15,7 @@ export type BlockResult = { ok: true; overlapping: number } | { ok: false; error
 
 /**
  * Takes the whole place, or one room, out of booking from `startsAt` until `endsAt` (or until ended, when unknown).
- * Existing bookings in that time stay; their count is returned so staff can contact the guests.
+ * Existing bookings in that time stay; their count is returned so staff can contact the guests (owners get 0: only staff see bookings).
  */
 export async function createBlock(
   actor: Actor,
@@ -45,7 +46,8 @@ export async function createBlock(
         ...(input.roomId ? { OR: [{ roomId: input.roomId }, { roomId: null }] } : {}),
       },
     });
-    return { ok: true, overlapping } as const;
+    // Only staff see bookings: owners just learn the dates are blocked.
+    return { ok: true, overlapping: isAdmin(actor) ? overlapping : 0 } as const;
   });
 }
 

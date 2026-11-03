@@ -31,7 +31,7 @@ export async function addTeamMember(actor: Actor, listingId: string, email: stri
       update: { role },
     });
     await audit(tx, { actorId: actor.id, action: "team.add", entityType: "listing", entityId: listingId, data: { user: user.id, role } });
-    await notify(tx, user.id, "teamAdded", { title: listing.title, roleLabel: role }, "/host/bookings");
+    await notify(tx, user.id, "teamAdded", { title: listing.title, roleLabel: role }, "/host");
   });
   return { ok: true };
 }
