@@ -48,7 +48,7 @@ describe("Booking card", () => {
     const card = screen.getByRole("complementary");
     expect(card).toHaveTextContent("RWF 22,500");
     expect(card).toHaveTextContent("/ night");
-    expect(screen.getByText("This host is offering a discount")).toBeInTheDocument();
+    expect(screen.getByText("This place has a discount")).toBeInTheDocument();
     expect(screen.getByText("You won't be charged yet")).toBeInTheDocument();
   });
 
@@ -67,7 +67,7 @@ describe("Booking card", () => {
     expect(screen.getByRole("radio", { name: "By the night" })).toBeChecked();
     await userEvent.click(screen.getByRole("radio", { name: "By the hour" }));
     expect(screen.getByRole("complementary")).toHaveTextContent("RWF 9,000/ hour");
-    expect(screen.queryByText("This host is offering a discount")).not.toBeInTheDocument();
+    expect(screen.queryByText("This place has a discount")).not.toBeInTheDocument();
   });
 
   it("Reserve without dates takes you to the calendar", async () => {
