@@ -11,7 +11,7 @@ vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push }) }));
 beforeEach(() => {
   resetSearchState();
   push.mockReset();
-  vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ locations: [{ city: "Kigali", count: 3, photo: null }] }))));
+  vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ locations: [{ district: "Gasabo", city: "Kigali", count: 3, photo: null }] }))));
 });
 afterEach(() => vi.unstubAllGlobals());
 
@@ -22,17 +22,17 @@ describe("MobileSearch", () => {
     const sheet = screen.getByRole("dialog", { name: "Start your search" });
     expect(within(sheet).getByRole("heading", { name: "Where?" })).toBeInTheDocument();
 
-    await userEvent.click(await within(sheet).findByRole("option", { name: /Kigali/ }));
+    await userEvent.click(await within(sheet).findByRole("option", { name: /Gasabo/ }));
     expect(within(sheet).getByRole("heading", { name: "When?" })).toBeInTheDocument();
     // The finished step collapses to a summary row.
-    expect(within(sheet).getByRole("button", { name: /Where Kigali/ })).toBeInTheDocument();
+    expect(within(sheet).getByRole("button", { name: /Where Gasabo/ })).toBeInTheDocument();
 
     await userEvent.click(within(sheet).getByRole("button", { name: /Who/ }));
     expect(within(sheet).getByRole("heading", { name: "Who?" })).toBeInTheDocument();
     await userEvent.click(within(sheet).getByRole("button", { name: "Add one: Adults" }));
 
     await userEvent.click(within(sheet).getByRole("button", { name: "Search" }));
-    expect(push).toHaveBeenCalledWith({ pathname: "/search", query: { mode: "short", location: "Kigali", guests: "1" } });
+    expect(push).toHaveBeenCalledWith({ pathname: "/search", query: { mode: "short", location: "Gasabo", guests: "1" } });
     await vi.waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
   });
 

@@ -28,8 +28,8 @@ beforeEach(() => {
         new Response(
           JSON.stringify({
             locations: [
-              { city: "Kigali", count: 5, photo: "https://images.unsplash.com/photo-kigali" },
-              { city: "Musanze", count: 2, photo: null },
+              { district: "Gasabo", city: "Kigali", count: 5, photo: "https://images.unsplash.com/photo-kigali" },
+              { district: "Musanze", city: "Musanze", count: 2, photo: null },
             ],
           }),
         ),
@@ -90,14 +90,14 @@ describe("SearchBar", () => {
     expect(push).toHaveBeenCalledWith({ pathname: "/search", query: { mode: "long", location: "Huye" } });
   });
 
-  it("suggests destinations from real listings and fills the field on pick", async () => {
+  it("lists the districts that have homes (with their town) and fills the field on pick", async () => {
     renderWithIntl(<SearchBar today={TODAY} />);
     await userEvent.click(screen.getByRole("combobox", { name: "Where" }));
-    expect(await screen.findByText("Suggested destinations")).toBeInTheDocument();
-    const option = await screen.findByRole("option", { name: /Kigali, Rwanda/ });
+    expect(await screen.findByText("Districts with homes")).toBeInTheDocument();
+    const option = await screen.findByRole("option", { name: /Gasabo.*Kigali, Rwanda/ });
     expect(option).toHaveTextContent("5 places");
     await userEvent.click(option);
-    expect(screen.getByRole("combobox", { name: "Where" })).toHaveValue("Kigali");
+    expect(screen.getByRole("combobox", { name: "Where" })).toHaveValue("Gasabo");
     await waitFor(() => expect(fetch).toHaveBeenCalled());
   });
 
@@ -201,7 +201,7 @@ describe("SearchBar", () => {
     await userEvent.keyboard("{ArrowDown}");
     expect(input).toHaveAttribute("aria-activedescendant", musanze.id);
     await userEvent.keyboard("{ArrowUp}{Enter}");
-    expect(input).toHaveValue("Kigali");
+    expect(input).toHaveValue("Gasabo");
     expect(push).not.toHaveBeenCalled();
   });
 
@@ -242,10 +242,10 @@ describe("SearchBar", () => {
     expect(screen.getByRole("button", { name: /When/ })).toHaveTextContent("Add dates");
   });
 
-  it("shows each suggested city with its cover photo", async () => {
+  it("shows each district with its cover photo", async () => {
     renderWithIntl(<SearchBar today={TODAY} />);
     await userEvent.click(screen.getByRole("combobox", { name: "Where" }));
-    const kigali = await screen.findByRole("option", { name: /Kigali, Rwanda/ });
+    const kigali = await screen.findByRole("option", { name: /Gasabo/ });
     expect(kigali.querySelector("img")).toHaveAttribute("src", expect.stringContaining("photo-kigali"));
   });
 

@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/cn";
 
-export type Suggestion = { city: string; count: number; photo?: string | null };
+export type Suggestion = { district: string; city: string; count: number; photo?: string | null };
 
 export const optionId = (listboxId: string, index: number) => `${listboxId}-option-${index}`;
 
@@ -53,22 +53,22 @@ export function LocationPanel({
 
   return (
     <div className="flex flex-col gap-2">
-      <p className="px-2 text-[13px] font-semibold text-muted">{t("suggested")}</p>
+      <p className="px-2 text-[13px] font-semibold text-muted">{t("districts")}</p>
       {empty && <p className="px-2 py-4 text-sm text-muted">{t("noMatches", { text: text.trim() })}</p>}
       {/* Always rendered so the combobox's aria-controls resolves even when there are no matches. */}
-      <ul id={id} role="listbox" aria-label={t("suggested")} className="flex flex-col gap-0.5">
+      <ul id={id} role="listbox" aria-label={t("districts")} className="flex flex-col gap-0.5 md:max-h-[min(60vh,30rem)] md:overflow-y-auto md:overscroll-contain">
         {suggestions?.map((s, index) => {
           const active = index === activeIndex;
           return (
             <li
-              key={s.city}
+              key={s.district}
               id={optionId(id, index)}
               role="option"
               aria-selected={active}
               tabIndex={-1}
               // Keep focus in the input when choosing with the mouse.
               onMouseDown={(event) => event.preventDefault()}
-              onClick={() => onPick(s.city)}
+              onClick={() => onPick(s.district)}
               className={cn(
                 "group/option flex cursor-pointer items-center gap-4 rounded-2xl p-2.5 transition-colors duration-200",
                 "hover:bg-canvas",
@@ -79,9 +79,8 @@ export function LocationPanel({
                 <CityThumb photo={s.photo} />
               </span>
               <span className="flex flex-1 flex-col">
-                <span className="text-[15px] font-semibold text-ink">
-                  {s.city}, {t("country")}
-                </span>
+                <span className="text-[15px] font-semibold text-ink">{s.district}</span>
+                <span className="text-[13px] text-ink/70">{s.city.toLowerCase() === s.district.toLowerCase() ? t("country") : `${s.city}, ${t("country")}`}</span>
                 <span className="text-sm text-muted">{t("places", { count: s.count })}</span>
               </span>
               <ChevronRight

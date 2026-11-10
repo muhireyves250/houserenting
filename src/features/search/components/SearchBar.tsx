@@ -319,7 +319,7 @@ export function SearchBar({
               } else if (event.key === "Enter" && open === "where" && activeIndex >= 0 && suggestions?.[activeIndex]) {
                 // Enter on a highlighted suggestion picks it instead of submitting the search.
                 event.preventDefault();
-                pickLocation(suggestions[activeIndex].city);
+                pickLocation(suggestions[activeIndex].district);
               }
             }}
             autoComplete="off"

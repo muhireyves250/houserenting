@@ -93,7 +93,8 @@
     "catRooms": "Rooms",
     "categories": "Categories",
     "noTypeTitle": "No homes of this type yet",
-    "noTypeBody": "Try another category, or see every home."
+    "noTypeBody": "Try another category, or see every home.",
+    "districts": "Districts with homes"
   },
   "Search": {
     "anywhere": "Anywhere in Rwanda",

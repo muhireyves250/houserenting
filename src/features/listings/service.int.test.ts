@@ -122,31 +122,33 @@ describe("pets filter", () => {
 
 describe("suggestLocations", () => {
   beforeEach(async () => {
-    await listing({ city: "Kigali" });
-    await listing({ city: "Kigali" });
+    await listing({ city: "Kigali", district: "Gasabo" });
+    await listing({ city: "Kigali", district: "Gasabo" });
+    await listing({ city: "Kigali", district: "Kicukiro" });
     await listing({ city: "Musanze", district: "Musanze" });
-    await listing({ city: "Rubavu", district: "Rubavu", status: "DRAFT" });
+    await listing({ city: "Gisenyi", district: "Rubavu", status: "DRAFT" });
   });
 
-  it("lists cities with published places, most places first, with a cover photo", async () => {
+  it("lists every district with published places, most places first, with its town and a cover photo", async () => {
     const suggestions = await suggestLocations("");
-    expect(suggestions.map(({ city, count }) => ({ city, count }))).toEqual([
-      { city: "Kigali", count: 2 },
-      { city: "Musanze", count: 1 },
+    expect(suggestions.map(({ district, city, count }) => ({ district, city, count }))).toEqual([
+      { district: "Gasabo", city: "Kigali", count: 2 },
+      { district: "Kicukiro", city: "Kigali", count: 1 },
+      { district: "Musanze", city: "Musanze", count: 1 },
     ]);
-    // Cover = first photo of the newest published listing in that city.
+    // Cover = first photo of the newest published listing in that district.
     expect(suggestions[0].photo).toBe("https://images.unsplash.com/p2");
-    expect(suggestions[1].photo).toBe("https://images.unsplash.com/p3");
   });
 
-  it("filters by the typed text, ignoring case", async () => {
-    expect(await suggestLocations("mus")).toMatchObject([{ city: "Musanze", count: 1 }]);
+  it("filters by the typed district or town, ignoring case; drafts don't count", async () => {
+    expect(await suggestLocations("mus")).toMatchObject([{ district: "Musanze", count: 1 }]);
+    expect((await suggestLocations("kigali")).map((s) => s.district)).toEqual(["Gasabo", "Kicukiro"]);
     expect(await suggestLocations("rubavu")).toEqual([]);
+    expect(await suggestLocations("%")).toEqual([]);
   });
 
-  it("matches districts too and treats wildcards literally", async () => {
-    expect(await suggestLocations("gasabo")).toMatchObject([{ city: "Kigali", count: 2 }]);
-    expect(await suggestLocations("%")).toEqual([]);
+  it("searching a district finds its places", async () => {
+    expect(await searchListings({ mode: "short", location: "Kicukiro" })).toHaveLength(1);
   });
 });
 

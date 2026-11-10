@@ -93,7 +93,8 @@
     "catRooms": "Chambres",
     "categories": "Catégories",
     "noTypeTitle": "Pas encore de logement de ce type",
-    "noTypeBody": "Essayez une autre catégorie ou voyez tous les logements."
+    "noTypeBody": "Essayez une autre catégorie ou voyez tous les logements.",
+    "districts": "Districts avec des logements"
   },
   "Search": {
     "anywhere": "Partout au Rwanda",

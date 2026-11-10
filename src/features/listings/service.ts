@@ -84,10 +84,13 @@ export function searchListings(query: SearchQuery, limit = SEARCH_LIMIT, now: Da
   return db.listing.findMany({ where, select: CARD_SELECT, orderBy: [{ publishedAt: "desc" }, { id: "asc" }], take: limit });
 }
 
-export type LocationSuggestion = { city: string; count: number; photo: string | null };
+export type LocationSuggestion = { district: string; city: string; count: number; photo: string | null };
 
-/** Cities that have published places, optionally filtered by typed text (city or district). */
-export async function suggestLocations(text: string, limit = 6): Promise<LocationSuggestion[]> {
+/**
+ * Every district with published places (most places first), optionally filtered by typed text (district or town),
+ * with its town and a cover photo. Picking one searches that district.
+ */
+export async function suggestLocations(text: string, limit = 50): Promise<LocationSuggestion[]> {
   const where: Prisma.ListingWhereInput = { status: "PUBLISHED" };
   const q = text.trim().slice(0, 100);
   if (q) {
@@ -95,23 +98,23 @@ export async function suggestLocations(text: string, limit = 6): Promise<Locatio
     where.OR = [{ city: match }, { district: match }];
   }
   const groups = await db.listing.groupBy({
-    by: ["city"],
+    by: ["district"],
     where,
     _count: { _all: true },
-    orderBy: [{ _count: { city: "desc" } }, { city: "asc" }],
+    orderBy: [{ _count: { district: "desc" } }, { district: "asc" }],
     take: limit,
   });
-  // Cover photo per city: first photo of its newest published listing (one query for all cities).
+  // Town and cover photo per district: from its newest published listing (one query for all districts).
   const newest = await db.listing.findMany({
-    where: { status: "PUBLISHED", city: { in: groups.map((g) => g.city) } },
+    where: { status: "PUBLISHED", district: { in: groups.map((g) => g.district) } },
     orderBy: [{ publishedAt: "desc" }, { id: "asc" }],
-    select: { city: true, photos: { orderBy: { position: "asc" }, take: 1, select: { url: true } } },
+    select: { district: true, city: true, photos: { orderBy: { position: "asc" }, take: 1, select: { url: true } } },
   });
-  const cover = new Map<string, string>();
+  const first = new Map<string, { city: string; photo: string | null }>();
   for (const listing of newest) {
-    if (!cover.has(listing.city) && listing.photos[0]) cover.set(listing.city, listing.photos[0].url);
+    if (!first.has(listing.district)) first.set(listing.district, { city: listing.city, photo: listing.photos[0]?.url ?? null });
   }
-  return groups.map((g) => ({ city: g.city, count: g._count._all, photo: cover.get(g.city) ?? null }));
+  return groups.map((g) => ({ district: g.district, city: first.get(g.district)?.city ?? g.district, count: g._count._all, photo: first.get(g.district)?.photo ?? null }));
 }
 
 export function featuredListings(limit = 6): Promise<ListingCardData[]> {
