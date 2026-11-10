@@ -42,6 +42,7 @@ const STAY_SELECT = {
       lat: true,
       lng: true,
       guestIdPolicy: true,
+      laundryPricePerKg: true,
       hostId: true,
       host: { select: { name: true, phone: true } },
       photos: { orderBy: { position: "asc" as const }, take: 1, select: { url: true } },

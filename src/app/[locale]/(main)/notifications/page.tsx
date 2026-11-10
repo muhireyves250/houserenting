@@ -12,7 +12,7 @@ import { dynamicMessage } from "@/lib/dynamic-message";
 
 export default async function NotificationsPage() {
   const user = await requireUser("/notifications");
-  const [t, tSupport, tHost, tStay, tPlaces, tFood, tPromoters, locale, items] = await Promise.all([
+  const [t, tSupport, tHost, tStay, tPlaces, tFood, tPromoters, tLaundry, locale, items] = await Promise.all([
     getTranslations("Notifications"),
     getTranslations("Support"),
     getTranslations("Host"),
@@ -20,6 +20,7 @@ export default async function NotificationsPage() {
     getTranslations("Places"),
     getTranslations("Food"),
     getTranslations("Promoters"),
+    getTranslations("Laundry"),
     getLocale(),
     listNotifications(user.id),
   ]);
@@ -48,6 +49,7 @@ export default async function NotificationsPage() {
                     : dynamicMessage(n.kind === "listingStatus" ? tHost : tSupport, `status.${data.status}`, data.status);
             if (typeof data.roleLabel === "string" && n.kind === "restaurantTeamAdded") data.roleLabel = dynamicMessage(tFood, `role.${data.roleLabel}`, data.roleLabel).toLowerCase();
             if (typeof data.kindLabel === "string") data.kindLabel = dynamicMessage(tStay, `kind.${data.kindLabel}`, data.kindLabel).toLowerCase();
+            if (typeof data.statusLabel === "string" && n.kind === "laundryUpdate") data.statusLabel = dynamicMessage(tLaundry, `update.${data.statusLabel}`, data.statusLabel);
             if (typeof data.roleLabel === "string" && n.kind === "teamAdded") data.roleLabel = dynamicMessage(tPlaces, `teamRole.${data.roleLabel}`, data.roleLabel).toLowerCase();
             const text = dynamicMessage(t, `kind.${n.kind}`, n.kind, data);
             const body = (

@@ -48,6 +48,7 @@ export const EMPTY_LISTING: ListingInput = {
   availableUntil: null,
   workingDays: [],
   guestIdPolicy: "NONE",
+  laundryPricePerKg: null,
 };
 
 const NEW_RATE: Record<Unit, Rate> = {
@@ -83,6 +84,7 @@ export function ListingForm({
   const t = useTranslations("Host");
   const tType = useTranslations("ListingType");
   const tFacility = useTranslations("Facility");
+  const tLaundry = useTranslations("Laundry");
   const tListings = useTranslations("Listings");
   const locale = useLocale();
   const router = useRouter();
@@ -339,6 +341,30 @@ export function ListingForm({
             error={err("depositMonths")}
           />
         </div>
+        {/* Laundry for guests during their stay: not offered, free, or a price per kg (weighed after washing). */}
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <SelectField
+            label={tLaundry("placeLabel")}
+            value={form.laundryPricePerKg === null || form.laundryPricePerKg === undefined ? "off" : form.laundryPricePerKg === 0 ? "free" : "paid"}
+            onChange={(e) => set("laundryPricePerKg", e.target.value === "off" ? null : e.target.value === "free" ? 0 : form.laundryPricePerKg || 1500)}
+          >
+            <option value="off">{tLaundry("placeOff")}</option>
+            <option value="free">{tLaundry("placeFree")}</option>
+            <option value="paid">{tLaundry("placePaid")}</option>
+          </SelectField>
+          {(form.laundryPricePerKg ?? 0) > 0 && (
+            <Field
+              label={tLaundry("placePaid")}
+              type="number"
+              min={1}
+              max={100000}
+              value={form.laundryPricePerKg ?? ""}
+              onChange={(e) => set("laundryPricePerKg", optionalNum(e.target.value) || 1)}
+              error={err("laundryPricePerKg")}
+            />
+          )}
+        </div>
+        <p className="mt-2 text-[12px] text-muted">{tLaundry("placeHint")}</p>
       </Card>
 
       <Card title={t("sections.availability")}>

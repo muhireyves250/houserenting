@@ -777,7 +777,8 @@
       "restaurants": "Resitora",
       "promoters": "Abamamaza",
       "reports": "Raporo",
-      "messages": "Ubutumwa"
+      "messages": "Ubutumwa",
+      "laundry": "Kumesa imyenda"
     },
     "count": {
       "listings": "Ahantu ho kugenzura",
@@ -1167,6 +1168,9 @@
       "newMessage": "Ubutumwa bushya bwa {name} kuri {title}.",
       "listingStatus": "{title} ubu ni: {statusLabel}. {reason}",
       "contractEnding": "Amasezerano y'icunga ya {title} arangira ku wa {date}. Tangira kuyavugurura.",
+      "laundryRequested": "Imyenda {reference}: umushyitsi uri kuri {title} arasaba ko bayifata.",
+      "laundryPaymentClaim": "Imyenda {reference} kuri {title}: umushyitsi avuga ko yishyuye. Genzura wemeze.",
+      "laundryUpdate": "Imyenda {reference}: {statusLabel}.",
       "stayRequest": "Ifatwa {reference} kuri {title}: umushyitsi arasaba: {kindLabel}.",
       "stayRequestApproved": "Icyifuzo cyawe ({kindLabel}) kuri {title} cyemejwe. {response}",
       "stayRequestDeclined": "Icyifuzo cyawe ({kindLabel}) kuri {title} cyanzwe: {response}",
@@ -2119,6 +2123,92 @@
       "datesTaken": "Iminsi yafashwe igihe cyo kubika kirangiye; itsinda ryacu ryamenyeshejwe gusubiza amafaranga.",
       "failedRecorded": "Byanditswe ko byanze.",
       "auth": "Ongera winjire."
+    }
+  },
+  "Laundry": {
+    "title": "Kumesa imyenda",
+    "freeIntro": "Kumesa imyenda ni ubuntu: turaza gufata imyenda yawe, tukayimesa tukayigarura.",
+    "paidIntro": "Turaza gufata imyenda yawe, tukayimesa tukayigarura. {price} ku kilo, ipimwa imaze kumeswa.",
+    "noteLabel": "Icyo dukwiye kumenya (si ngombwa)",
+    "notePlaceholder": "urugero: amashati 3, amapantaro 2; muze nyuma ya saa yine",
+    "request": "Saba ko bafata imyenda",
+    "progress": "Aho imyenda igeze",
+    "status": {
+      "REQUESTED": "Wasabye ko bayifata",
+      "PICKED_UP": "Yafashwe, iri kumeswa",
+      "WASHED": "Yamaze kumeswa no gupimwa",
+      "RETURNED": "Yagaruwe mu cyumba",
+      "CANCELLED": "Byahagaritswe"
+    },
+    "step": {
+      "REQUESTED": "Wasabye",
+      "PICKED_UP": "Yafashwe",
+      "WASHED": "Yameswe",
+      "RETURNED": "Yagaruwe"
+    },
+    "yourNote": "Icyo wanditse: {note}",
+    "cancelledBecause": "Byahagaritswe: {reason}",
+    "weighed": "Kilo {kg} × {price}",
+    "free": "Ubuntu",
+    "paid": "Byishyuwe",
+    "howToPay": "Ishyura {amount} ukoresheje mobile money",
+    "noInstructions": "Saba itsinda ryacu nimero ya mobile money.",
+    "useReference": "Andika {reference} nk'impamvu y'ubwishyu.",
+    "transactionId": "Nimero y'ubwishyu (transaction ID)",
+    "transactionHint": "Iri mu butumwa bwa mobile money",
+    "ivePaid": "Narishyuye",
+    "waiting": "Murakoze! Turimo kugenzura ubwishyu {reference}.",
+    "cancel": "Hagarika iki gisabwa",
+    "error": {
+      "notOffered": "Aha hantu nta serivisi yo kumesa ihari.",
+      "noStay": "Kumesa ni iby'abashyitsi bari mu gihe bishyuye.",
+      "open": "Usanzwe ufite imyenda iri gukorwa.",
+      "auth": "Ongera winjire."
+    },
+    "payError": {
+      "notFound": "Iyi myenda ntishobora kwishyurwa ubu.",
+      "transaction": "Reba neza transaction ID.",
+      "auth": "Ongera winjire."
+    },
+    "admin": {
+      "intro": "Imyenda y'abashyitsi: yifate, uyipime imaze kumeswa (bigena igiciro), uyigarure, wemeze ubwishyu. Komisiyo n'umugabane w'aho hantu bijya muri Amafaranga.",
+      "empty": "Nta myenda irahari.",
+      "guest": "Umushyitsi",
+      "place": "Aho hantu",
+      "pickedUp": "Yafashwe",
+      "kg": "Uburemere (kilo)",
+      "washed": "Bika uburemere",
+      "returned": "Yagaruwe mu cyumba",
+      "cancelReason": "Kuki uhagarika?",
+      "cancel": "Hagarika",
+      "confirmPaid": "Emeza ubwishyu",
+      "paidRef": "Transaction",
+      "claimed": "Umushyitsi yishyuye na {reference}",
+      "owed": "Bitegereje ubwishyu",
+      "perKg": "{price}/kilo",
+      "freeRate": "ubuntu",
+      "error": {
+        "notAllowed": "Ni itsinda rya VIIPA gusa.",
+        "notFound": "Iki gisabwa cyahindutse. Ongera ufungure paji.",
+        "weight": "Andika uburemere mu kilo, urugero 2.5",
+        "reason": "Tanga impamvu.",
+        "transaction": "Andika transaction ID.",
+        "used": "Iyo transaction yamaze gukoreshwa."
+      }
+    },
+    "placeLabel": "Kumesa imyenda y'abashyitsi",
+    "placeOff": "Ntibihari",
+    "placeFree": "Ubuntu",
+    "placePaid": "Igiciro ku kilo",
+    "placeHint": "Abashyitsi bashobora gusaba kumesa igihe bacumbitse. Igiciro kigenwa n'uburemere nyuma yo kumesa; VIIPA ifata komisiyo yayo.",
+    "onListing": "Kumesa: {price} ku kilo",
+    "onListingFree": "Kumesa ni ubuntu",
+    "update": {
+      "PICKED_UP": "yafashwe mu cyumba cyawe",
+      "WASHED": "yamaze kumeswa no gupimwa, reba igiciro",
+      "RETURNED": "yagaruwe mu cyumba cyawe",
+      "CANCELLED": "byahagaritswe",
+      "PAID": "ubwishyu bwakiriwe, murakoze"
     }
   }
 }

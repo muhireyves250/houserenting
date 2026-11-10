@@ -109,6 +109,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
     db.restaurant.findMany({ where: { listingId: listing.id, status: "PUBLISHED" }, select: { id: true } }),
     getTranslations("Food"),
   ]);
+  const tLaundry = await getTranslations("Laundry");
   // Only rooms guests can book now; places that rent whole don't show rooms.
   const rooms =
     listing.bookingModel === "WHOLE_PROPERTY"
@@ -473,6 +474,9 @@ export default async function ListingPage({ params, searchParams }: Props) {
                   </li>
                 ))}
                 {listing.depositMonths && <li>{t("deposit", { months: listing.depositMonths })}</li>}
+                {listing.laundryPricePerKg !== null && (
+                  <li>{listing.laundryPricePerKg === 0 ? tLaundry("onListingFree") : tLaundry("onListing", { price: formatRWF(listing.laundryPricePerKg, locale) })}</li>
+                )}
               </ul>
             </div>
           </div>

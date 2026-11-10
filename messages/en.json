@@ -777,7 +777,8 @@
       "restaurants": "Restaurants",
       "promoters": "Promoters",
       "reports": "Reports",
-      "messages": "Messages"
+      "messages": "Messages",
+      "laundry": "Laundry"
     },
     "count": {
       "listings": "Listings to review",
@@ -1167,6 +1168,9 @@
       "newMessage": "New message from {name} about {title}.",
       "listingStatus": "{title} is now: {statusLabel}. {reason}",
       "contractEnding": "The management agreement for {title} ends on {date}. Start the renewal.",
+      "laundryRequested": "Laundry {reference}: a guest at {title} asks for a pickup.",
+      "laundryPaymentClaim": "Laundry {reference} at {title}: the guest says they paid. Check and confirm.",
+      "laundryUpdate": "Laundry {reference}: {statusLabel}.",
       "stayRequest": "Booking {reference} at {title}: the guest asks to {kindLabel}.",
       "stayRequestApproved": "Your request ({kindLabel}) for {title} was approved. {response}",
       "stayRequestDeclined": "Your request ({kindLabel}) for {title} was declined: {response}",
@@ -2119,6 +2123,92 @@
       "datesTaken": "The dates were taken after the hold ended; our team was told to refund.",
       "failedRecorded": "Recorded as failed.",
       "auth": "Log in again."
+    }
+  },
+  "Laundry": {
+    "title": "Laundry",
+    "freeIntro": "Free laundry for guests: we collect your clothes, wash them and bring them back.",
+    "paidIntro": "We collect your clothes, wash them and bring them back. {price} per kg, weighed after washing.",
+    "noteLabel": "Anything we should know (optional)",
+    "notePlaceholder": "e.g. 3 shirts, 2 trousers; collect after 10:00",
+    "request": "Request a pickup",
+    "progress": "Laundry progress",
+    "status": {
+      "REQUESTED": "Pickup requested",
+      "PICKED_UP": "Collected, being washed",
+      "WASHED": "Washed and weighed",
+      "RETURNED": "Back in your room",
+      "CANCELLED": "Cancelled"
+    },
+    "step": {
+      "REQUESTED": "Asked",
+      "PICKED_UP": "Collected",
+      "WASHED": "Washed",
+      "RETURNED": "Returned"
+    },
+    "yourNote": "Your note: {note}",
+    "cancelledBecause": "Cancelled: {reason}",
+    "weighed": "{kg} kg × {price}",
+    "free": "Free",
+    "paid": "Paid",
+    "howToPay": "Pay {amount} by mobile money",
+    "noInstructions": "Ask our team for the mobile money number.",
+    "useReference": "Use {reference} as the payment reason.",
+    "transactionId": "Transaction ID",
+    "transactionHint": "From your mobile money message",
+    "ivePaid": "I've paid",
+    "waiting": "Thanks! We're checking payment {reference}.",
+    "cancel": "Cancel this request",
+    "error": {
+      "notOffered": "This place doesn't offer laundry.",
+      "noStay": "Laundry is for guests during a paid stay.",
+      "open": "You already have laundry in progress.",
+      "auth": "Please log in again."
+    },
+    "payError": {
+      "notFound": "This laundry can't be paid now.",
+      "transaction": "Check the transaction ID.",
+      "auth": "Please log in again."
+    },
+    "admin": {
+      "intro": "Guests' laundry: collect it, weigh it after washing (that sets the price), bring it back, and confirm payments. Commission and the place's share go to Money.",
+      "empty": "No laundry yet.",
+      "guest": "Guest",
+      "place": "Place",
+      "pickedUp": "Collected",
+      "kg": "Weight (kg)",
+      "washed": "Save weight",
+      "returned": "Returned to the room",
+      "cancelReason": "Why cancel?",
+      "cancel": "Cancel",
+      "confirmPaid": "Confirm payment",
+      "paidRef": "Transaction",
+      "claimed": "Guest paid with {reference}",
+      "owed": "Waiting for payment",
+      "perKg": "{price}/kg",
+      "freeRate": "free",
+      "error": {
+        "notAllowed": "Only VIIPA staff can do this.",
+        "notFound": "This order changed. Refresh the page.",
+        "weight": "Type the weight in kg, e.g. 2.5",
+        "reason": "Give a reason.",
+        "transaction": "Type the transaction ID.",
+        "used": "That transaction was already used."
+      }
+    },
+    "placeLabel": "Laundry for guests",
+    "placeOff": "Not offered",
+    "placeFree": "Free",
+    "placePaid": "Price per kg",
+    "placeHint": "Guests can ask for laundry during their stay. Priced by weight after washing; VIIPA takes its commission.",
+    "onListing": "Laundry: {price} per kg",
+    "onListingFree": "Free laundry",
+    "update": {
+      "PICKED_UP": "collected from your room",
+      "WASHED": "washed and weighed, see the price",
+      "RETURNED": "brought back to your room",
+      "CANCELLED": "cancelled",
+      "PAID": "payment received, thank you"
     }
   }
 }

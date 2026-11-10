@@ -26,6 +26,7 @@ export function toListingInput(listing: HostListing): ListingInput {
     termsOfRent: listing.termsOfRent,
     depositMonths: listing.depositMonths,
     discountPercent: listing.discountPercent,
+    laundryPricePerKg: listing.laundryPricePerKg,
     availableFrom: day(listing.availableFrom),
     availableUntil: day(listing.availableUntil),
     workingDays: listing.workingDays,

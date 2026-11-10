@@ -777,7 +777,8 @@
       "restaurants": "Restaurants",
       "promoters": "Promoteurs",
       "reports": "Rapports",
-      "messages": "Messages"
+      "messages": "Messages",
+      "laundry": "Blanchisserie"
     },
     "count": {
       "listings": "Annonces à vérifier",
@@ -1167,6 +1168,9 @@
       "newMessage": "Nouveau message de {name} à propos de {title}.",
       "listingStatus": "{title} est maintenant : {statusLabel}. {reason}",
       "contractEnding": "Le contrat de gestion de {title} se termine le {date}. Lancez le renouvellement.",
+      "laundryRequested": "Linge {reference} : un voyageur à {title} demande un ramassage.",
+      "laundryPaymentClaim": "Linge {reference} à {title} : le voyageur dit avoir payé. Vérifiez et confirmez.",
+      "laundryUpdate": "Linge {reference} : {statusLabel}.",
       "stayRequest": "Réservation {reference} à {title} : le voyageur demande : {kindLabel}.",
       "stayRequestApproved": "Votre demande ({kindLabel}) pour {title} a été acceptée. {response}",
       "stayRequestDeclined": "Votre demande ({kindLabel}) pour {title} a été refusée : {response}",
@@ -2119,6 +2123,92 @@
       "datesTaken": "Les dates ont été prises après la fin du blocage ; notre équipe est prévenue pour rembourser.",
       "failedRecorded": "Enregistré comme échoué.",
       "auth": "Reconnectez-vous."
+    }
+  },
+  "Laundry": {
+    "title": "Blanchisserie",
+    "freeIntro": "Blanchisserie gratuite : nous récupérons vos vêtements, les lavons et les rapportons.",
+    "paidIntro": "Nous récupérons vos vêtements, les lavons et les rapportons. {price} par kg, pesé après lavage.",
+    "noteLabel": "À savoir (facultatif)",
+    "notePlaceholder": "ex. 3 chemises, 2 pantalons ; passer après 10 h",
+    "request": "Demander un ramassage",
+    "progress": "Suivi du linge",
+    "status": {
+      "REQUESTED": "Ramassage demandé",
+      "PICKED_UP": "Récupéré, en lavage",
+      "WASHED": "Lavé et pesé",
+      "RETURNED": "De retour dans votre chambre",
+      "CANCELLED": "Annulé"
+    },
+    "step": {
+      "REQUESTED": "Demandé",
+      "PICKED_UP": "Récupéré",
+      "WASHED": "Lavé",
+      "RETURNED": "Rapporté"
+    },
+    "yourNote": "Votre note : {note}",
+    "cancelledBecause": "Annulé : {reason}",
+    "weighed": "{kg} kg × {price}",
+    "free": "Gratuit",
+    "paid": "Payé",
+    "howToPay": "Payez {amount} par mobile money",
+    "noInstructions": "Demandez le numéro mobile money à notre équipe.",
+    "useReference": "Indiquez {reference} comme motif du paiement.",
+    "transactionId": "ID de transaction",
+    "transactionHint": "Dans votre message mobile money",
+    "ivePaid": "J'ai payé",
+    "waiting": "Merci ! Nous vérifions le paiement {reference}.",
+    "cancel": "Annuler cette demande",
+    "error": {
+      "notOffered": "Ce logement ne propose pas de blanchisserie.",
+      "noStay": "La blanchisserie est pour les voyageurs pendant un séjour payé.",
+      "open": "Vous avez déjà du linge en cours.",
+      "auth": "Veuillez vous reconnecter."
+    },
+    "payError": {
+      "notFound": "Ce linge ne peut pas être payé maintenant.",
+      "transaction": "Vérifiez l'ID de transaction.",
+      "auth": "Veuillez vous reconnecter."
+    },
+    "admin": {
+      "intro": "Le linge des voyageurs : le récupérer, le peser après lavage (ce qui fixe le prix), le rapporter et confirmer les paiements. Commission et part du logement vont dans Argent.",
+      "empty": "Pas encore de linge.",
+      "guest": "Voyageur",
+      "place": "Logement",
+      "pickedUp": "Récupéré",
+      "kg": "Poids (kg)",
+      "washed": "Enregistrer le poids",
+      "returned": "Rapporté dans la chambre",
+      "cancelReason": "Pourquoi annuler ?",
+      "cancel": "Annuler",
+      "confirmPaid": "Confirmer le paiement",
+      "paidRef": "Transaction",
+      "claimed": "Le voyageur a payé avec {reference}",
+      "owed": "En attente de paiement",
+      "perKg": "{price}/kg",
+      "freeRate": "gratuit",
+      "error": {
+        "notAllowed": "Réservé à l'équipe VIIPA.",
+        "notFound": "Cette commande a changé. Actualisez la page.",
+        "weight": "Saisissez le poids en kg, ex. 2,5",
+        "reason": "Donnez une raison.",
+        "transaction": "Saisissez l'ID de transaction.",
+        "used": "Cette transaction a déjà été utilisée."
+      }
+    },
+    "placeLabel": "Blanchisserie pour les voyageurs",
+    "placeOff": "Non proposée",
+    "placeFree": "Gratuite",
+    "placePaid": "Prix par kg",
+    "placeHint": "Les voyageurs peuvent demander la blanchisserie pendant leur séjour. Prix au poids après lavage ; VIIPA prend sa commission.",
+    "onListing": "Blanchisserie : {price} par kg",
+    "onListingFree": "Blanchisserie gratuite",
+    "update": {
+      "PICKED_UP": "récupéré dans votre chambre",
+      "WASHED": "lavé et pesé, voyez le prix",
+      "RETURNED": "rapporté dans votre chambre",
+      "CANCELLED": "annulé",
+      "PAID": "paiement reçu, merci"
     }
   }
 }

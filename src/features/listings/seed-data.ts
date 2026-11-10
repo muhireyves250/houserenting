@@ -55,6 +55,8 @@ export type SeedListing = {
   rates: SeedRate[];
   /** Lodges: guests book a room (or the whole place, with BOTH). */
   bookingModel?: "WHOLE_PROPERTY" | "ROOM_BY_ROOM" | "BOTH";
+  /** Laundry for guests: RWF per kg, 0 = free; missing = not offered. */
+  laundryPricePerKg?: number;
   roomList?: SeedRoom[];
 };
 
@@ -258,6 +260,7 @@ export const SEED_LISTINGS: SeedListing[] = [
       { unit: "DAY", price: 60000, minUnits: 1, maxUnits: 7, ...DAY },
     ],
     bookingModel: "ROOM_BY_ROOM",
+    laundryPricePerKg: 1500,
     roomList: [
       { name: "Volcano View Suite", description: "King bed and a window onto the Virunga volcanoes.", maxGuests: 2, facilities: ["WIFI", "HOT_WATER"], rates: [{ unit: "NIGHT", price: 120000 }, { unit: "DAY", price: 60000 }] },
       { name: "Garden Double", description: "Double bed, opens onto the garden.", maxGuests: 2, facilities: ["WIFI", "HOT_WATER"], rates: [{ unit: "NIGHT", price: 90000 }, { unit: "DAY", price: 45000 }] },
@@ -396,6 +399,7 @@ export const SEED_LISTINGS: SeedListing[] = [
       { unit: "DAY", price: 40000, minUnits: 1, ...DAY },
     ],
     bookingModel: "BOTH",
+    laundryPricePerKg: 0,
     roomList: [
       { name: "Lake View Room", description: "Double bed and a balcony over Lake Kivu.", maxGuests: 2, facilities: ["WIFI", "HOT_WATER"], rates: [{ unit: "NIGHT", price: 55000 }, { unit: "DAY", price: 30000 }] },
       { name: "Hillside Room", description: "Single bed, quiet side of the cottage.", maxGuests: 1, facilities: ["WIFI", "HOT_WATER"], rates: [{ unit: "NIGHT", price: 40000 }, { unit: "DAY", price: 22000 }] },

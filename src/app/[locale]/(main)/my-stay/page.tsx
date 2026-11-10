@@ -15,6 +15,7 @@ import {
   ScrollText,
   UtensilsCrossed,
   type LucideIcon,
+  Shirt,
 } from "lucide-react";
 import Image from "next/image";
 import type { ReactNode } from "react";
@@ -29,6 +30,9 @@ import { policyText } from "@/features/settings/service";
 import { GuestIdUpload } from "@/features/stay/components/GuestIdUpload";
 import { ReportIssue } from "@/features/stay/components/ReportIssue";
 import { StayFeedback } from "@/features/stay/components/StayFeedback";
+import { LaundryCard } from "@/features/laundry/components/LaundryCard";
+import { stayLaundry } from "@/features/laundry/service";
+import { getSettings } from "@/features/settings/service";
 import { StayRequests } from "@/features/stay/components/StayRequests";
 import { stayMoment } from "@/features/stay/moment";
 import { myStay } from "@/features/stay/service";
@@ -67,7 +71,7 @@ const action = "flex flex-col items-center justify-center gap-1.5 rounded-2xl bg
  */
 export default async function MyStayPage() {
   const user = await requireUser("/my-stay");
-  const [t, locale, { current, others, today }] = await Promise.all([getTranslations("MyStay"), getLocale(), myStay(user.id)]);
+  const [t, tLaundry, locale, { current, others, today }] = await Promise.all([getTranslations("MyStay"), getTranslations("Laundry"), getLocale(), myStay(user.id)]);
 
   if (!current) {
     return (
@@ -92,6 +96,9 @@ export default async function MyStayPage() {
   // Food: from the kitchen of this place, once the stay has started.
   const food = Boolean(await kitchenForPlace(current.listing.id)) && current.checkIn <= today;
   const paid = current.status === "CONFIRMED" || current.status === "CHECKED_IN";
+  // Laundry: at places that offer it, once the paid stay has started (free when the price is 0).
+  const laundryOn = paid && current.listing.laundryPricePerKg !== null && current.checkIn <= today;
+  const [laundry, settings] = laundryOn ? await Promise.all([stayLaundry(current.id), getSettings()]) : [[], null];
   const moment = stayMoment(current, today);
   const underWay = moment.kind === "during" || moment.kind === "departure" || (paid && moment.kind === "arrival");
   const { listing } = current;
@@ -258,6 +265,12 @@ export default async function MyStayPage() {
             <ChevronRight className="size-4" aria-hidden="true" />
           </Link>
         </Section>
+
+        {laundryOn && (
+          <Section title={tLaundry("title")} icon={Shirt}>
+            <LaundryCard booking={current.reference} pricePerKg={listing.laundryPricePerKg ?? 0} orders={laundry} instructions={settings?.paymentInstructions ?? null} />
+          </Section>
+        )}
 
         {listing.guestIdPolicy !== "NONE" && (
           <Section

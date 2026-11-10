@@ -20,8 +20,7 @@ import {
   UtensilsCrossed,
   Wallet,
   X,
-  type LucideIcon,
-} from "lucide-react";
+  type LucideIcon, Shirt } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, type ReactNode } from "react";
 import { Avatar } from "@/components/ui/Avatar";
@@ -29,7 +28,7 @@ import { LogoMark } from "@/components/ui/Logo";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 
-type Key = "messages" | "reports" | "overview" | "listings" | "bookings" | "requests" | "restaurants" | "promoters" | "money" | "promotions" | "moderation" | "support" | "users" | "settings" | "audit" | "account" | "notifications";
+type Key = "laundry" | "messages" | "reports" | "overview" | "listings" | "bookings" | "requests" | "restaurants" | "promoters" | "money" | "promotions" | "moderation" | "support" | "users" | "settings" | "audit" | "account" | "notifications";
 
 const GROUPS: { label: "operate" | "money" | "people" | "system"; items: { key: Key; href: string; icon: LucideIcon }[] }[] = [
   {
@@ -41,6 +40,7 @@ const GROUPS: { label: "operate" | "money" | "people" | "system"; items: { key: 
       { key: "messages", href: "/admin/messages", icon: MessageSquare },
       { key: "requests", href: "/admin/requests", icon: ClipboardList },
       { key: "restaurants", href: "/admin/restaurants", icon: UtensilsCrossed },
+      { key: "laundry", href: "/admin/laundry", icon: Shirt },
       { key: "moderation", href: "/admin/moderation", icon: MessageSquareWarning },
       { key: "support", href: "/admin/support", icon: LifeBuoy },
     ],

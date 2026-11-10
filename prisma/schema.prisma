@@ -206,64 +206,67 @@ enum Facility {
 }
 
 model Listing {
-  id              String              @id @default(cuid())
-  hostId          String
-  host            User                @relation(fields: [hostId], references: [id], onDelete: Cascade)
-  title           String
-  description     String
-  type            ListingType
-  status          ListingStatus       @default(DRAFT)
-  rejectionReason String?
-  addressLine     String
-  district        String
-  city            String
-  country         String              @default("RW")
-  lat             Float
-  lng             Float
-  sizeM2          Int
-  rooms           Int
-  bedrooms        Int
-  bathrooms       Int
-  maxGuests       Int
-  petsAllowed     Boolean             @default(false)
-  facilities      Facility[]
-  characteristics String[]
-  termsOfRent     String[]
-  depositMonths   Int?
-  discountPercent Int?
-  ratingAvg       Float               @default(0)
-  ratingCount     Int                 @default(0)
-  publishedAt     DateTime?
-  createdAt       DateTime            @default(now())
-  updatedAt       DateTime            @updatedAt
-  photos          ListingPhoto[]
-  rates           RateOption[]
-  favoritedBy     Favorite[]
-  bookings        Booking[]
-  questions       ListingQuestion[]
-  reviews         Review[]
+  id                String              @id @default(cuid())
+  hostId            String
+  host              User                @relation(fields: [hostId], references: [id], onDelete: Cascade)
+  title             String
+  description       String
+  type              ListingType
+  status            ListingStatus       @default(DRAFT)
+  rejectionReason   String?
+  addressLine       String
+  district          String
+  city              String
+  country           String              @default("RW")
+  lat               Float
+  lng               Float
+  sizeM2            Int
+  rooms             Int
+  bedrooms          Int
+  bathrooms         Int
+  maxGuests         Int
+  petsAllowed       Boolean             @default(false)
+  facilities        Facility[]
+  characteristics   String[]
+  termsOfRent       String[]
+  depositMonths     Int?
+  discountPercent   Int?
+  ratingAvg         Float               @default(0)
+  ratingCount       Int                 @default(0)
+  publishedAt       DateTime?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  photos            ListingPhoto[]
+  rates             RateOption[]
+  favoritedBy       Favorite[]
+  bookings          Booking[]
+  questions         ListingQuestion[]
+  reviews           Review[]
   /// Whole place, single rooms, or either.
-  bookingModel    BookingModel        @default(WHOLE_PROPERTY)
-  roomUnits       Room[]
-  conversations   Conversation[]
+  bookingModel      BookingModel        @default(WHOLE_PROPERTY)
+  roomUnits         Room[]
+  conversations     Conversation[]
   /// Shown in the "Highlighted" row on the home page.
-  featured        Boolean             @default(false)
+  featured          Boolean             @default(false)
   /// Staff override: never hide this place automatically because of dislikes.
-  keepVisible     Boolean             @default(false)
-  operator        Operator            @default(OWNER)
+  keepVisible       Boolean             @default(false)
+  operator          Operator            @default(OWNER)
   /// Management agreement: bookings are only accepted inside it; staff are reminded a month before it ends.
-  contractStart   DateTime?           @db.Date
-  contractEnd     DateTime?           @db.Date
+  contractStart     DateTime?           @db.Date
+  contractEnd       DateTime?           @db.Date
   /// The place's own bookable window (inside the contract).
-  availableFrom   DateTime?           @db.Date
-  availableUntil  DateTime?           @db.Date
+  availableFrom     DateTime?           @db.Date
+  availableUntil    DateTime?           @db.Date
   /// Days of the week bookings may start on (0 = Sunday … 6); empty = every day.
-  workingDays     Int[]               @default([])
-  guestIdPolicy   GuestIdPolicy       @default(NONE)
-  blocks          AvailabilityBlock[]
-  team            PlaceMember[]
-  restaurants     Restaurant[]
-  documents       ListingDocument[]
+  workingDays       Int[]               @default([])
+  guestIdPolicy     GuestIdPolicy       @default(NONE)
+  blocks            AvailabilityBlock[]
+  team              PlaceMember[]
+  restaurants       Restaurant[]
+  documents         ListingDocument[]
+  /// Laundry for guests staying here: null = not offered, 0 = free, otherwise RWF per kilogram.
+  laundryPricePerKg Int?
+  laundryOrders     LaundryOrder[]
 
   @@index([status, city])
   @@index([hostId])
@@ -403,6 +406,7 @@ model Booking {
   promoterId     String?
   promoter       Promoter?        @relation(fields: [promoterId], references: [id], onDelete: SetNull)
   promoterReward PromoterReward?  @relation("promoterRewardBooking")
+  laundryOrders  LaundryOrder[]
 
   @@index([guestId, checkIn])
   @@index([listingId, checkIn])
@@ -1217,4 +1221,43 @@ model UserPhoto {
   updatedAt DateTime @updatedAt
 
   @@map("userPhoto")
+}
+
+/// Laundry steps: the guest asks, staff collect, wash and weigh (the price is set), and bring it back.
+enum LaundryStatus {
+  REQUESTED
+  PICKED_UP
+  WASHED
+  RETURNED
+  CANCELLED
+}
+
+/// A guest's laundry during a stay. Priced by weight at the place's rate (free when the rate is 0); paid by mobile
+/// money and confirmed by staff, when the platform's commission and the place's share go to the ledger.
+model LaundryOrder {
+  id            String        @id @default(cuid())
+  reference     String        @unique
+  bookingId     String
+  booking       Booking       @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  listingId     String
+  listing       Listing       @relation(fields: [listingId], references: [id], onDelete: Restrict)
+  guestId       String
+  status        LaundryStatus @default(REQUESTED)
+  note          String?
+  /// RWF per kg when asked (0 = free).
+  pricePerKg    Int
+  /// Weighed after washing, in grams.
+  weightGrams   Int?
+  amount        Int?
+  /// Mobile money transaction the guest says they paid with, waiting for staff.
+  paymentClaim  String?
+  paidAt        DateTime?
+  paidReference String?       @unique
+  cancelReason  String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([status, createdAt])
+  @@index([bookingId])
+  @@map("laundryOrder")
 }

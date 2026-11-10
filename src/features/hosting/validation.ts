@@ -85,6 +85,8 @@ export const listingInput = z
     termsOfRent: list(12, 160),
     depositMonths: z.number().int().min(0).max(12).nullable(),
     discountPercent: z.number().int().min(0).max(90).nullable(),
+    /** Laundry for guests: null = not offered, 0 = free, otherwise RWF per kg. */
+    laundryPricePerKg: z.number().int().min(0).max(100_000).nullable().default(null),
     rates: z.array(rate).min(1).max(RATE_UNITS.length),
     /** The place's own bookable dates (inside the management agreement), and the days bookings may start on. */
     availableFrom: isoDate,
