@@ -53,7 +53,12 @@ export type SeedListing = {
   daysSincePublished: number;
   photos: string[];
   rates: SeedRate[];
+  /** Lodges: guests book a room (or the whole place, with BOTH). */
+  bookingModel?: "WHOLE_PROPERTY" | "ROOM_BY_ROOM" | "BOTH";
+  roomList?: SeedRoom[];
 };
+
+export type SeedRoom = { name: string; description: string; maxGuests: number; facilities: Facility[]; rates: { unit: "DAY" | "NIGHT"; price: number }[] };
 
 const photo = (id: string) => `https://images.unsplash.com/photo-${id}`;
 
@@ -248,7 +253,16 @@ export const SEED_LISTINGS: SeedListing[] = [
     ratingCount: 64,
     daysSincePublished: 7,
     photos: [P.cabin1, P.cottage1, P.bedroom2],
-    rates: [{ unit: "NIGHT", price: 120000, minUnits: 2, maxUnits: 14, ...NIGHT }],
+    rates: [
+      { unit: "NIGHT", price: 120000, minUnits: 1, maxUnits: 14, ...NIGHT },
+      { unit: "DAY", price: 60000, minUnits: 1, maxUnits: 7, ...DAY },
+    ],
+    bookingModel: "ROOM_BY_ROOM",
+    roomList: [
+      { name: "Volcano View Suite", description: "King bed and a window onto the Virunga volcanoes.", maxGuests: 2, facilities: ["WIFI", "HOT_WATER"], rates: [{ unit: "NIGHT", price: 120000 }, { unit: "DAY", price: 60000 }] },
+      { name: "Garden Double", description: "Double bed, opens onto the garden.", maxGuests: 2, facilities: ["WIFI", "HOT_WATER"], rates: [{ unit: "NIGHT", price: 90000 }, { unit: "DAY", price: 45000 }] },
+      { name: "Family Room", description: "A double and two singles, by the fireplace.", maxGuests: 4, facilities: ["WIFI", "HOT_WATER", "TV"], rates: [{ unit: "NIGHT", price: 150000 }, { unit: "DAY", price: 75000 }] },
+    ],
   },
   {
     id: "seed-musanze-house",
@@ -377,7 +391,15 @@ export const SEED_LISTINGS: SeedListing[] = [
     ratingCount: 29,
     daysSincePublished: 9,
     photos: [P.cottage1, P.cabin1, P.bedroom2],
-    rates: [{ unit: "NIGHT", price: 75000, minUnits: 1, ...NIGHT }],
+    rates: [
+      { unit: "NIGHT", price: 75000, minUnits: 1, ...NIGHT },
+      { unit: "DAY", price: 40000, minUnits: 1, ...DAY },
+    ],
+    bookingModel: "BOTH",
+    roomList: [
+      { name: "Lake View Room", description: "Double bed and a balcony over Lake Kivu.", maxGuests: 2, facilities: ["WIFI", "HOT_WATER"], rates: [{ unit: "NIGHT", price: 55000 }, { unit: "DAY", price: 30000 }] },
+      { name: "Hillside Room", description: "Single bed, quiet side of the cottage.", maxGuests: 1, facilities: ["WIFI", "HOT_WATER"], rates: [{ unit: "NIGHT", price: 40000 }, { unit: "DAY", price: 22000 }] },
+    ],
   },
   {
     id: "seed-rusizi-house",

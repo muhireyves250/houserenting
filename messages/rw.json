@@ -1185,6 +1185,12 @@
     }
   },
   "Rooms": {
+    "availabilityHint": "Hitamo umunsi urebe ibyumba biri ubusa, ku ijoro cyangwa ku manywa gusa.",
+    "checkDate": "Reba umunsi",
+    "today": "uyu munsi",
+    "availableOn": "Kiri ubusa {day}",
+    "bookedOn": "Cyafashwe {day}",
+    "freeFrom": "Kizongera kuboneka guhera {date}",
     "title": "Ibyumba",
     "intro": "Buri cyumba gifite igiciro cyacyo, abashyitsi n'ibikoresho. Icyumba kiri gusukurwa cyangwa gusanwa ntikibikwa.",
     "guests": "{count, plural, one {umushyitsi #} other {abashyitsi #}}",

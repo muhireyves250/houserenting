@@ -1185,6 +1185,12 @@
     }
   },
   "Rooms": {
+    "availabilityHint": "Choisissez un jour pour voir les chambres libres, pour une nuit ou en journée.",
+    "checkDate": "Vérifier un jour",
+    "today": "aujourd'hui",
+    "availableOn": "Libre {day}",
+    "bookedOn": "Réservée {day}",
+    "freeFrom": "De nouveau libre dès le {date}",
     "title": "Chambres",
     "intro": "Chaque chambre a son prix, son nombre de voyageurs et ses équipements. Une chambre en nettoyage ou en réparation ne peut pas être réservée.",
     "guests": "{count, plural, one {# voyageur} other {# voyageurs}}",

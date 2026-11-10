@@ -1185,6 +1185,12 @@
     }
   },
   "Rooms": {
+    "availabilityHint": "Pick a day to see which rooms are free, for a night or for day use.",
+    "checkDate": "Check a day",
+    "today": "today",
+    "availableOn": "Free {day}",
+    "bookedOn": "Booked {day}",
+    "freeFrom": "Free again from {date}",
     "title": "Rooms",
     "intro": "Each room has its own price, guests and amenities. Rooms being cleaned or repaired can't be booked.",
     "guests": "{count, plural, one {# guest} other {# guests}}",

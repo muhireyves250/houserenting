@@ -52,7 +52,7 @@ export async function seedDemoData(db: PrismaClient): Promise<{ listings: number
   await db.listing.deleteMany({ where: { id: { in: SEED_LISTINGS.map((l) => l.id) } } });
   const now = Date.now();
   await Promise.all(
-    SEED_LISTINGS.map(({ id, photos, rates, daysSincePublished, ...fields }) =>
+    SEED_LISTINGS.map(({ id, photos, rates, daysSincePublished, roomList = [], ...fields }) =>
       db.listing.create({
         data: {
           id,
@@ -64,6 +64,9 @@ export async function seedDemoData(db: PrismaClient): Promise<{ listings: number
             create: photos.map((url, position) => ({ url, publicId: `${id}-${position}`, width: 1600, height: 1067, position })),
           },
           rates: { create: rates },
+          roomUnits: {
+            create: roomList.map(({ rates: roomRates, ...room }, position) => ({ ...room, position, rates: { create: roomRates } })),
+          },
         },
       }),
     ),

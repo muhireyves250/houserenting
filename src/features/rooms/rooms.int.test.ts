@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { bookedRanges, createBooking } from "@/features/bookings/service";
+import { bookedRanges, createBooking, createRentalBooking } from "@/features/bookings/service";
+import { roomStatusOn } from "./availability";
 import { updateSettings } from "@/features/settings/service";
 import { db } from "@/lib/db";
 import { resetDb } from "@/test/db";
@@ -55,6 +56,20 @@ beforeEach(async () => {
 });
 
 describe("room-by-room and whole-place bookings", () => {
+  it("books a room for day use (no night) and shows it booked for that day only", async () => {
+    await db.listing.update({ where: { id: "lodge" }, data: { rates: { create: [{ unit: "DAY", price: 100000, minUnits: 1, dayStartTime: "08:00", dayEndTime: "20:00" }] } } });
+    await saveRoom({ id: "admin", role: "ADMIN" }, "lodge", roomA, { ...room, name: "Room A", rates: [{ unit: "NIGHT", price: 40000 }, { unit: "DAY", price: 20000 }] });
+    const day = { guestId: "g1", listingId: "lodge", unit: "DAY" as const, start: "2026-11-05", quantity: 1, guests: 1, payment: pay };
+    expect((await createRentalBooking({ ...day, roomId: roomA }, NOW)).ok).toBe(true);
+    expect(await db.booking.findFirstOrThrow({ where: { roomId: roomA } })).toMatchObject({ unit: "DAY", subtotal: 20000 });
+    expect(await createRentalBooking({ ...day, guestId: "g2", roomId: roomA }, NOW)).toEqual({ ok: false, error: "unavailable" });
+
+    const taken = await bookedRanges("lodge", NOW);
+    expect(roomStatusOn(taken, roomA, "2026-11-05")).toEqual({ free: false, freeFrom: "2026-11-06" });
+    expect(roomStatusOn(taken, roomA, "2026-11-06")).toEqual({ free: true });
+    expect(roomStatusOn(taken, roomB, "2026-11-05")).toEqual({ free: true });
+  });
+
   it("lets different rooms be booked for the same nights, but not the same room twice", async () => {
     expect((await createBooking(stay({ roomId: roomA }), NOW)).ok).toBe(true);
     expect((await createBooking(stay({ guestId: "g2", roomId: roomB }), NOW)).ok).toBe(true);

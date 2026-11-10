@@ -8,6 +8,7 @@ import { LONG_UNITS, type BookingUnit } from "@/features/bookings/period";
 import { discountedPrice, type Unit } from "@/features/listings/pricing";
 import { nightsBetween } from "@/features/listings/quote";
 import { DatePanel } from "@/features/search/components/DatePanel";
+import { roomStatusOn } from "@/features/rooms/availability";
 import { isDayBlocked, todayISO, type BookedRange, type DateRange } from "@/features/search/date-range";
 import { Link, usePathname } from "@/i18n/navigation";
 import { animateScrollTo } from "@/lib/animate-scroll";
@@ -233,23 +234,50 @@ function useQuote(rates: BookingRate[], discountPercent: number | null) {
 }
 
 /** "Choose a room" (places that rent by the room): the whole place (if offered) and each available room. */
-export function RoomPicker({ wholeRates }: { wholeRates: { unit: Unit; price: number }[] }) {
+export function RoomPicker({ wholeRates, today = todayISO() }: { wholeRates: { unit: Unit; price: number }[]; today?: string }) {
   const t = useTranslations("Rooms");
   const tListings = useTranslations("Listings");
   const tFacility = useTranslations("Facility");
   const locale = useLocale();
-  const { rooms, bookingModel, choice, setChoice, setRange, guests, setGuests, unit, setUnit } = useStay();
+  const { rooms, bookingModel, choice, setChoice, range, setRange, guests, setGuests, unit, setUnit, plan, setPlan, booked } = useStay();
+  // The day the guest is checking (a night or day use); follows the dates they already picked.
+  const [checkDay, setCheckDay] = useState<string>("");
   if (bookingModel === "WHOLE_PROPERTY" || rooms.length === 0) return null;
+  const day = checkDay || range.checkIn || plan.start || today;
+  const dayLabel = day === today ? t("today") : new Intl.DateTimeFormat(locale, { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" }).format(new Date(`${day}T00:00:00Z`));
+  const shortDate = new Intl.DateTimeFormat(locale, { month: "short", day: "numeric", timeZone: "UTC" });
+  const statusOf = (id: string) =>
+    id === "whole"
+      ? booked.some((b) => b.checkIn <= day && day < b.checkOut)
+        ? roomStatusOn(booked.map((b) => ({ ...b, roomId: null })), "whole", day)
+        : ({ free: true } as const)
+      : roomStatusOn(booked, id, day);
   const options: PublicRoom[] = [
     ...(bookingModel === "BOTH" && wholeRates.length > 0 ? [{ id: "whole", name: t("wholePlace"), description: "", maxGuests: 0, facilities: [], rates: wholeRates }] : []),
     ...rooms,
   ];
   return (
     <section id={ROOMS_ID} className="scroll-mt-28 border-t border-line py-10">
-      <h2 className="mb-6 font-display text-[22px] leading-7 font-bold tracking-[-0.02em] text-ink">{t("choose")}</h2>
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 className="font-display text-[22px] leading-7 font-bold tracking-[-0.02em] text-ink">{t("choose")}</h2>
+          <p className="mt-1 text-sm text-muted">{t("availabilityHint")}</p>
+        </div>
+        <label className="flex flex-col gap-1 text-[12px] font-semibold text-muted">
+          {t("checkDate")}
+          <input
+            type="date"
+            min={today}
+            value={day}
+            onChange={(e) => setCheckDay(e.target.value || today)}
+            className="rounded-xl border border-line-strong bg-surface px-3 py-2 text-[14px] font-medium text-ink outline-none focus:border-primary"
+          />
+        </label>
+      </div>
       <div role="radiogroup" aria-label={t("choose")} className="grid gap-3 sm:grid-cols-2">
         {options.map((option) => {
           const selected = choice === option.id;
+          const status = statusOf(option.id);
           return (
             <button
               key={option.id}
@@ -258,9 +286,11 @@ export function RoomPicker({ wholeRates }: { wholeRates: { unit: Unit; price: nu
               aria-checked={selected}
               onClick={() => {
                 setChoice(option.id);
-                // Dates chosen for another room may not suit this one; keep the way of booking if this one offers it.
-                setRange({});
-                if (!option.rates.some((r) => r.unit === unit) && option.rates[0]) setUnit([...option.rates].sort(byUnitOrder)[0]!.unit as BookingUnit);
+                // Keep the way of booking if this room offers it; start from the day being checked when it's free.
+                const next = option.rates.some((r) => r.unit === unit) || !option.rates[0] ? unit : ([...option.rates].sort(byUnitOrder)[0]!.unit as BookingUnit);
+                if (next !== unit) setUnit(next);
+                setRange(status.free && next === "NIGHT" ? { checkIn: day } : {});
+                if (status.free && next !== "NIGHT") setPlan({ ...plan, start: day });
                 if (option.maxGuests && guests > option.maxGuests) setGuests(option.maxGuests);
               }}
               className={cn(
@@ -268,7 +298,18 @@ export function RoomPicker({ wholeRates }: { wholeRates: { unit: Unit; price: nu
                 selected ? "border-primary shadow-[0_8px_24px_-12px_rgba(0,87,184,0.6)] ring-1 ring-primary" : "border-line hover:border-primary/60",
               )}
             >
-              <span className="text-[15px] font-semibold text-ink">{option.name}</span>
+              <span className="flex items-start justify-between gap-2">
+                <span className="text-[15px] font-semibold text-ink">{option.name}</span>
+                <span
+                  className={cn(
+                    "shrink-0 rounded-full px-2.5 py-0.5 text-[12px] font-semibold",
+                    status.free ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-800",
+                  )}
+                >
+                  {status.free ? t("availableOn", { day: dayLabel }) : t("bookedOn", { day: dayLabel })}
+                </span>
+              </span>
+              {!status.free && <span className="text-[12px] font-medium text-red-800">{t("freeFrom", { date: shortDate.format(new Date(`${status.freeFrom}T00:00:00Z`)) })}</span>}
               <span className="text-[13px] text-ink/80">
                 {[...option.rates]
                   .sort(byUnitOrder)
