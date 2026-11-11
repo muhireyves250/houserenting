@@ -1,3 +1,4 @@
+import { InstallApp } from "@/features/pwa/InstallApp";
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { PageContainer } from "@/components/ui/PageContainer";
@@ -92,6 +93,10 @@ export async function HomeContent({ type = null }: { type?: PlaceType | null }) 
           </PageContainer>
         }
       >
+      {/* Phones: offer the app (closes for good with ×; hidden once installed). */}
+      <PageContainer className="pt-3 empty:hidden md:hidden">
+        <InstallApp variant="banner" />
+      </PageContainer>
       {food && (
         // Always on the home page (any category): the menu, cooked at the guest's stay.
         <PageContainer className="pt-4 md:pt-10">

@@ -2211,5 +2211,17 @@
       "CANCELLED": "annulé",
       "PAID": "paiement reçu, merci"
     }
+  },
+  "Install": {
+    "cta": "Installer l'app VIIPA",
+    "close": "Fermer",
+    "iosTitle": "Ajoutez VIIPA à l'écran d'accueil",
+    "iosStep1": "Touchez le bouton Partager dans Safari",
+    "iosStep2": "Choisissez « Sur l'écran d'accueil »",
+    "otherTitle": "Installer VIIPA",
+    "otherBody": "Ouvrez le menu du navigateur (⋮ ou ⋯) et choisissez « Installer l'application » ou « Ajouter à l'écran d'accueil ». Dans Chrome sur ordinateur, utilisez l'icône d'installation dans la barre d'adresse.",
+    "bannerTitle": "L'app VIIPA",
+    "bannerBody": "Plus rapide à ouvrir, sur votre écran d'accueil.",
+    "install": "Installer"
   }
 }

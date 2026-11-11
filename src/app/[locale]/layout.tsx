@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
+import { PwaSetup } from "@/features/pwa/PwaSetup";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { ReactNode } from "react";
 import { SmoothScroll } from "@/components/shell/SmoothScroll";
@@ -34,6 +35,7 @@ export default async function LocaleLayout({ children, params }: { children: Rea
       <body className="min-h-dvh bg-canvas font-sans text-ink antialiased">
         <SmoothScroll />
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <PwaSetup />
       </body>
     </html>
   );

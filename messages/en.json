@@ -2211,5 +2211,17 @@
       "CANCELLED": "cancelled",
       "PAID": "payment received, thank you"
     }
+  },
+  "Install": {
+    "cta": "Install the VIIPA app",
+    "close": "Close",
+    "iosTitle": "Add VIIPA to your home screen",
+    "iosStep1": "Tap the Share button in Safari",
+    "iosStep2": "Choose “Add to Home Screen”",
+    "otherTitle": "Install VIIPA",
+    "otherBody": "Open your browser's menu (⋮ or ⋯) and choose “Install app” or “Add to Home screen”. In Chrome on a computer, use the install icon in the address bar.",
+    "bannerTitle": "Get the VIIPA app",
+    "bannerBody": "Quicker to open, right on your home screen.",
+    "install": "Install"
   }
 }

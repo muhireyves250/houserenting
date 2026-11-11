@@ -2,6 +2,7 @@ import { ArrowRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Logo } from "@/components/ui/Logo";
 import { Link } from "@/i18n/navigation";
+import { InstallApp } from "@/features/pwa/InstallApp";
 import { FooterLanguages } from "./FooterLanguages";
 import { NAV_ITEMS, navHref, type NavHref } from "./nav-items";
 
@@ -82,6 +83,7 @@ export function SiteFooter({ signedIn, year = new Date().getFullYear() }: { sign
             <Link href="/" className="w-fit rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
               <Logo withWordmark tile markClassName="h-7" wordmarkClassName="font-display text-xl text-white" />
             </Link>
+            <InstallApp />
             <p className="inline-flex items-center gap-2 text-sm text-white/75">
               {/* Rwanda flag colours. */}
               <span className="flex h-3 w-5 overflow-hidden rounded-[2px]" aria-hidden="true">

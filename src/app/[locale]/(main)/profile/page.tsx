@@ -1,3 +1,4 @@
+import { InstallApp } from "@/features/pwa/InstallApp";
 import { Bell, ChevronRight, Heart, House, KeyRound, LifeBuoy, MessageSquare, QrCode, ShoppingBag, UserRound } from "lucide-react";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -112,6 +113,9 @@ export default async function ProfilePage() {
             <span className="flex-1">{t("help")}</span>
             <ChevronRight className="size-5 text-ink/60" aria-hidden="true" />
           </Link>
+        </li>
+        <li className="empty:hidden">
+          <InstallApp variant="row" />
         </li>
         <li>
           <Link href="/chats" className={row}>

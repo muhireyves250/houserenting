@@ -2211,5 +2211,17 @@
       "CANCELLED": "byahagaritswe",
       "PAID": "ubwishyu bwakiriwe, murakoze"
     }
+  },
+  "Install": {
+    "cta": "Shyira VIIPA muri telefoni",
+    "close": "Funga",
+    "iosTitle": "Shyira VIIPA kuri ecran y'ibanze",
+    "iosStep1": "Kanda buto ya Share muri Safari",
+    "iosStep2": "Hitamo “Add to Home Screen”",
+    "otherTitle": "Shyira VIIPA muri telefoni",
+    "otherBody": "Fungura menu ya browser (⋮ cyangwa ⋯) uhitemo “Install app” cyangwa “Add to Home screen”. Muri Chrome kuri mudasobwa, kanda akamenyetso ko gushyiraho kari muri adresse.",
+    "bannerTitle": "Shyira VIIPA muri telefoni",
+    "bannerBody": "Ifunguka vuba, iri kuri ecran y'ibanze.",
+    "install": "Shyiraho"
   }
 }
