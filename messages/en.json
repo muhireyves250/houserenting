@@ -1230,7 +1230,10 @@
     "numbersHint": "e.g. 101, 102, 103 (leave empty for a single room)",
     "roomsCount": "{count, plural, one {# room} other {# rooms}}",
     "yourRoom": "Your room",
-    "roomNumber": "Room {number}"
+    "roomNumber": "Room {number}",
+    "pickRoom": "Choose your {name} room",
+    "freeCount": "{free} of {total} free {day}",
+    "anyRoom": "Any free room"
   },
   "Settings": {
     "note": "Leave a field empty until the business decision is made: nothing is charged or promised for empty fields. Every change is recorded in the audit log, and bookings keep the settings they were made with.",

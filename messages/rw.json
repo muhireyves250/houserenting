@@ -1230,7 +1230,10 @@
     "numbersHint": "urugero: 101, 102, 103 (siga ubusa niba ari icyumba kimwe)",
     "roomsCount": "{count, plural, one {Icyumba #} other {Ibyumba #}}",
     "yourRoom": "Icyumba cyawe",
-    "roomNumber": "Icyumba {number}"
+    "roomNumber": "Icyumba {number}",
+    "pickRoom": "Hitamo icyumba cyawe ({name})",
+    "freeCount": "{free} kuri {total} biri ubusa {day}",
+    "anyRoom": "Icyumba icyo ari cyo cyose kiri ubusa"
   },
   "Settings": {
     "note": "Siga ahantu ubusa kugeza icyemezo gifashwe: nta mafaranga yakwa kandi nta kintu gisezeranywa ku hasigaye ubusa. Buri mpinduka yandikwa mu nyandiko z'ibikorwa, kandi ibyabitswe bigumana igenamiterere ryariho.",

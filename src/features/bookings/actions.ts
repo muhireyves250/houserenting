@@ -108,6 +108,8 @@ const rentalInput = z.object({
   quantity: z.number().int().min(1).max(365),
   guests: z.number().int().min(1).max(50),
   roomId: z.string().min(1).max(64).nullable().optional(),
+  /** A specific room number the guest picked (rooms of a type are booked one by one). */
+  roomNumber: z.string().trim().min(1).max(12).nullable().optional(),
   promoCode: z.string().max(40).nullable().optional(),
   payment: z.object({ method: z.enum(["mtn", "airtel"]), phone: z.string().max(20) }),
   identity: z.object({ idNumber: z.string().trim().max(40), nationality: z.string().trim().max(60).nullable() }).nullable().optional(),

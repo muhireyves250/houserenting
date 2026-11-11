@@ -1230,7 +1230,10 @@
     "numbersHint": "ex. 101, 102, 103 (vide pour une seule chambre)",
     "roomsCount": "{count, plural, one {# chambre} other {# chambres}}",
     "yourRoom": "Votre chambre",
-    "roomNumber": "Chambre {number}"
+    "roomNumber": "Chambre {number}",
+    "pickRoom": "Choisissez votre chambre {name}",
+    "freeCount": "{free} sur {total} libres {day}",
+    "anyRoom": "N'importe quelle chambre libre"
   },
   "Settings": {
     "note": "Laissez un champ vide tant que la décision n'est pas prise : rien n'est facturé ni promis pour un champ vide. Chaque modification est inscrite au journal d'audit, et les réservations gardent les paramètres en vigueur à leur création.",

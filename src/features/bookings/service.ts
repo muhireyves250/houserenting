@@ -26,6 +26,8 @@ export type BookingRequest = {
   guests: number;
   /** One room of the place; null or missing = the whole place. */
   roomId?: string | null;
+  /** A specific room number of that room type; missing = the first free one. */
+  roomNumber?: string | null;
   promoCode?: string | null;
   payment: { method: MoMoProvider; phone: string };
 };
@@ -114,6 +116,8 @@ export type RentalRequest = {
   guests: number;
   /** One room of the place; null or missing = the whole place. */
   roomId?: string | null;
+  /** A specific room number of that room type; missing = the first free one. */
+  roomNumber?: string | null;
   promoCode?: string | null;
   payment: { method: MoMoProvider; phone: string };
   /** Long stays: only the details staff have said the business needs (Admin → Settings). */
@@ -175,6 +179,8 @@ export async function createRentalBooking(request: RentalRequest, now: Date = ne
     if (!roomRate) return { ok: false, error: "notOffered" };
     if (guests > found.maxGuests) return { ok: false, error: "invalid" };
     base = roomRate.price;
+    // A room number the guest picked must be one of this type's rooms.
+    if (request.roomNumber && !found.numbers.includes(request.roomNumber)) return { ok: false, error: "unavailable" };
     room = { id: found.id, name: found.name, numbers: found.numbers };
   }
   // Length and opening hours follow the place's rules for this unit (when set).
@@ -244,6 +250,7 @@ export async function createRentalBooking(request: RentalRequest, now: Date = ne
     endAt: period.endAt,
     roomId: room?.id ?? null,
     roomNumbers: room?.numbers ?? [],
+    preferredNumber: request.roomNumber ?? null,
     promoId: promo?.id ?? null,
     identity,
     now,
@@ -295,6 +302,8 @@ async function holdAndInsert(args: {
   roomId: string | null;
   /** The room type's numbered rooms (a free one is given to the guest); empty = a single room. */
   roomNumbers?: string[];
+  /** The room number the guest picked, if any (refused when someone holds it for this time). */
+  preferredNumber?: string | null;
   promoId: string | null;
   now: Date;
   /** Monthly rentals: identity details, kept apart from the booking and shown to staff only. */
@@ -324,7 +333,8 @@ async function holdAndInsert(args: {
         if (roomId && numbers.length > 0) {
           if (clashes.some((c) => c.roomId === null)) throw new Unavailable();
           const taken = new Set(clashes.map((c) => c.roomNumber));
-          roomNumber = numbers.find((n) => !taken.has(n)) ?? null;
+          const wanted = args.preferredNumber ?? null;
+          roomNumber = wanted ? (taken.has(wanted) ? null : wanted) : (numbers.find((n) => !taken.has(n)) ?? null);
           if (!roomNumber) throw new Unavailable();
         } else if (clashes.length > 0) throw new Unavailable();
         // Maintenance / unavailable / offline blocks: the whole place blocks everything; a room block blocks that room
@@ -594,4 +604,18 @@ export async function expireAllHolds(now: Date = new Date()): Promise<number> {
   const before = await db.booking.count({ where: { status: "PENDING_PAYMENT", holdExpiresAt: { lte: now } } });
   if (before > 0) await db.$transaction((tx) => expireHolds(tx, {}, now));
   return before;
+}
+
+/** Days each numbered room is taken from today on (paid stays and live holds), for picking a specific room. */
+export async function bookedRoomNumbers(listingId: string, now: Date = new Date()): Promise<{ roomId: string; roomNumber: string; checkIn: ISODate; checkOut: ISODate }[]> {
+  const rows = await db.booking.findMany({
+    where: {
+      listingId,
+      roomNumber: { not: null },
+      checkOut: { gt: asDate(todayISO(now)) },
+      OR: [{ status: { in: ["CONFIRMED", "CHECKED_IN"] } }, { status: "PENDING_PAYMENT", holdExpiresAt: { gt: now } }],
+    },
+    select: { roomId: true, roomNumber: true, checkIn: true, checkOut: true },
+  });
+  return rows.map((r) => ({ roomId: r.roomId!, roomNumber: r.roomNumber!, checkIn: asISO(r.checkIn), checkOut: asISO(r.checkOut) }));
 }

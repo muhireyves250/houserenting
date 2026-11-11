@@ -120,6 +120,7 @@ describe("Confirm and pay", () => {
       quantity: 2,
       guests: 1,
       roomId: null,
+      roomNumber: null,
       promoCode: null,
       payment: { method: "mtn", phone: "078 812 3456" },
       identity: null,

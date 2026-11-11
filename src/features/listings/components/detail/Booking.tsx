@@ -28,7 +28,9 @@ export type BookingRate = {
   dayEndTime: string | null;
 };
 
-export type PublicRoom = { id: string; name: string; description: string; maxGuests: number; facilities: string[]; rates: { unit: Unit; price: number }[] };
+export type PublicRoom = { id: string; name: string; description: string; maxGuests: number; facilities: string[]; rates: { unit: Unit; price: number }[]; numbers?: string[] };
+/** Days each numbered room is taken (rooms of a type are booked one by one). */
+export type NumberBooking = { roomId: string; roomNumber: string; checkIn: string; checkOut: string };
 export type BookingModel = "WHOLE_PROPERTY" | "ROOM_BY_ROOM" | "BOTH";
 /** "whole" = the whole place; a room id; null = a room still has to be chosen. */
 export type StayChoice = "whole" | string | null;
@@ -51,6 +53,10 @@ type Stay = {
   bookingModel: BookingModel;
   choice: StayChoice;
   setChoice: (choice: StayChoice) => void;
+  /** The room number the guest picked in a room type; null = any free one. */
+  roomNumber: string | null;
+  setRoomNumber: (n: string | null) => void;
+  numberBookings: NumberBooking[];
   /** Platform fee on top of the price, in basis points (null = none). */
   guestFeeBps: number | null;
   /** Published cancellation terms in the reader's language. */
@@ -93,8 +99,10 @@ export function StayProvider({
   defaultUnit = "NIGHT",
   window = {},
   workingDays = [],
+  numberBookings = [],
 }: {
   children: ReactNode;
+  numberBookings?: NumberBooking[];
   listingId?: string;
   booked?: (BookedRange & { roomId?: string | null })[];
   holdMinutes?: number;
@@ -115,6 +123,7 @@ export function StayProvider({
     initialRoom && rooms.some((r) => r.id === initialRoom) ? initialRoom : bookingModel === "ROOM_BY_ROOM" ? null : "whole",
   );
   const [unit, setUnit] = useState<BookingUnit>(defaultUnit);
+  const [roomNumber, setRoomNumber] = useState<string | null>(null);
   const [plan, setPlan] = useState<Plan>({ start: "", quantity: 1, startTime: "" });
   const normalized = booked.map((b) => ({ ...b, roomId: b.roomId ?? null }));
   return (
@@ -130,7 +139,13 @@ export function StayProvider({
         rooms,
         bookingModel,
         choice,
-        setChoice,
+        setChoice: (c: StayChoice) => {
+          setChoice(c);
+          setRoomNumber(null);
+        },
+        roomNumber,
+        setRoomNumber,
+        numberBookings,
         guestFeeBps,
         cancellationPolicy,
         longStay,
@@ -239,7 +254,7 @@ export function RoomPicker({ wholeRates, today = todayISO() }: { wholeRates: { u
   const tListings = useTranslations("Listings");
   const tFacility = useTranslations("Facility");
   const locale = useLocale();
-  const { rooms, bookingModel, choice, setChoice, range, setRange, guests, setGuests, unit, setUnit, plan, setPlan, booked } = useStay();
+  const { rooms, bookingModel, choice, setChoice, range, setRange, guests, setGuests, unit, setUnit, plan, setPlan, booked, roomNumber, setRoomNumber, numberBookings } = useStay();
   // The day the guest is checking (a night or day use); follows the dates they already picked.
   const [checkDay, setCheckDay] = useState<string>("");
   if (bookingModel === "WHOLE_PROPERTY" || rooms.length === 0) return null;
@@ -325,6 +340,57 @@ export function RoomPicker({ wholeRates, today = todayISO() }: { wholeRates: { u
           );
         })}
       </div>
+      {/* The chosen type's rooms, each booked on its own: pick a free one (or let us give you one). */}
+      {(() => {
+        const selected = rooms.find((r) => r.id === choice);
+        const numbers = selected?.numbers ?? [];
+        if (!selected || numbers.length < 2) return null;
+        const takenOn = (n: string) => numberBookings.some((b) => b.roomId === selected.id && b.roomNumber === n && b.checkIn <= day && day < b.checkOut);
+        const free = numbers.filter((n) => !takenOn(n)).length;
+        return (
+          <div className="mt-5 rounded-2xl bg-surface p-4 ring-1 ring-line">
+            <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+              <p className="text-[15px] font-semibold text-ink">{t("pickRoom", { name: selected.name })}</p>
+              <p className="text-[13px] text-muted">{t("freeCount", { free, total: numbers.length, day: dayLabel })}</p>
+            </div>
+            <div role="radiogroup" aria-label={t("pickRoom", { name: selected.name })} className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                role="radio"
+                aria-checked={roomNumber === null}
+                onClick={() => setRoomNumber(null)}
+                className={cn("rounded-full border-[1.5px] px-3.5 py-1.5 text-[13px] font-semibold", roomNumber === null ? "border-primary bg-primary text-white" : "border-primary/35 text-ink hover:border-primary")}
+              >
+                {t("anyRoom")}
+              </button>
+              {numbers.map((n) => {
+                const taken = takenOn(n);
+                return (
+                  <button
+                    key={n}
+                    type="button"
+                    role="radio"
+                    aria-checked={roomNumber === n}
+                    disabled={taken}
+                    title={taken ? t("bookedOn", { day: dayLabel }) : t("availableOn", { day: dayLabel })}
+                    onClick={() => setRoomNumber(n)}
+                    className={cn(
+                      "min-w-14 rounded-xl border-[1.5px] px-3 py-1.5 text-[14px] font-semibold tabular-nums",
+                      taken
+                        ? "cursor-not-allowed border-red-200 bg-red-50 text-red-700 line-through"
+                        : roomNumber === n
+                          ? "border-primary bg-primary text-white"
+                          : "border-emerald-300 bg-emerald-50 text-emerald-900 hover:border-primary",
+                    )}
+                  >
+                    {n}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })()}
     </section>
   );
 }
@@ -390,7 +456,7 @@ function ReserveButton({
 }) {
   const t = useTranslations("Listings");
   const pathname = usePathname();
-  const { guests, listingId, holdMinutes, choice, guestFeeBps, cancellationPolicy } = useStay();
+  const { guests, listingId, holdMinutes, choice, guestFeeBps, cancellationPolicy, roomNumber } = useStay();
   const quote = useQuote(rates, discountPercent);
   const [open, setOpen] = useState(false);
 
@@ -422,7 +488,7 @@ function ReserveButton({
         <ReserveDialog
           listingId={listingId}
           holdMinutes={holdMinutes}
-          room={quote.room ? { id: quote.room.id, name: quote.room.name } : null}
+          room={quote.room ? { id: quote.room.id, name: quote.room.name, number: roomNumber } : null}
           guestFeeBps={guestFeeBps}
           cancellationPolicy={cancellationPolicy}
           place={place}

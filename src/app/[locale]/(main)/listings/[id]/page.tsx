@@ -18,7 +18,7 @@ import { ShareButton } from "@/features/listings/components/detail/ShareButton";
 import { discountedPrice } from "@/features/listings/pricing";
 import { currentWholeBlock, getPublishedListingByParam, listingNotice, nearbyListings } from "@/features/listings/service";
 import { ListingNotice } from "@/features/listings/components/detail/ListingNotice";
-import { bookedRanges } from "@/features/bookings/service";
+import { bookedRanges, bookedRoomNumbers } from "@/features/bookings/service";
 import { getEnv } from "@/lib/env";
 import { db } from "@/lib/db";
 import { feesFor } from "@/features/bookings/money";
@@ -97,9 +97,10 @@ export default async function ListingPage({ params, searchParams }: Props) {
     getCurrentUser(),
     getLocale(),
   ]);
-  const [nearby, booked, questions, reviews, tQuestions, tReviews, allRooms, settings, food, tFood] = await Promise.all([
+  const [nearby, booked, numberBookings, questions, reviews, tQuestions, tReviews, allRooms, settings, food, tFood] = await Promise.all([
     nearbyListings(listing),
     bookedRanges(listing.id),
+    bookedRoomNumbers(listing.id),
     publishedQuestions(listing.id),
     publishedReviews(listing.id),
     getTranslations("Questions"),
@@ -116,7 +117,8 @@ export default async function ListingPage({ params, searchParams }: Props) {
       ? []
       : allRooms
           .filter((r) => r.status === "AVAILABLE")
-          .map(({ id, name, description, maxGuests, rates: roomRates, facilities }) => ({
+          .map(({ id, name, description, maxGuests, rates: roomRates, facilities, numbers }) => ({
+            numbers,
             id,
             name,
             description,
@@ -196,6 +198,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
     <StayProvider
       listingId={listing.id}
       booked={booked}
+      numberBookings={numberBookings}
       holdMinutes={holdMinutesFrom(settings)}
       rooms={rooms}
       initialRoom={initialRoom}

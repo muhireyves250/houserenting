@@ -65,7 +65,7 @@ export function ReserveDialog({
   listingId: string;
   holdMinutes: number;
   /** The room being booked; null = the whole place. */
-  room?: { id: string; name: string } | null;
+  room?: { id: string; name: string; number?: string | null } | null;
   /** Platform fee on top of the (discounted) price, in basis points. */
   guestFeeBps?: number | null;
   /** Published cancellation terms; when null, the unpaid-hold rule is shown. */
@@ -78,6 +78,7 @@ export function ReserveDialog({
   onChangeDates: () => void;
 }) {
   const t = useTranslations("Listings");
+  const tRooms = useTranslations("Rooms");
   const locale = useLocale();
   const ref = useRef<HTMLDivElement>(null);
   const titleId = useId();
@@ -158,6 +159,7 @@ export function ReserveDialog({
         quantity: plan.quantity,
         guests: long ? 1 : guests,
         roomId: room?.id ?? null,
+        roomNumber: room?.number ?? null,
         promoCode: promo?.code ?? null,
         payment: { method: provider, phone: number },
         identity: needsId ? { idNumber, nationality: needsNationality ? nationality : null } : null,
@@ -359,7 +361,12 @@ export function ReserveDialog({
                   <div className="min-w-0">
                     <p className="text-[17px] leading-6 font-bold text-ink">{place.title}</p>
                     <p className="mt-1 text-[13px] text-ink/80">{place.subtitle}</p>
-                    {room && <p className="mt-1 text-[13px] font-semibold text-ink">{room.name}</p>}
+                    {room && (
+                      <p className="mt-1 text-[13px] font-semibold text-ink">
+                        {room.name}
+                        {room.number && ` · ${tRooms("roomNumber", { number: room.number })}`}
+                      </p>
+                    )}
                   </div>
                 </div>
 

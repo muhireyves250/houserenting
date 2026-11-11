@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { bookedRanges, createBooking, createRentalBooking } from "@/features/bookings/service";
+import { bookedRanges, bookedRoomNumbers, createBooking, createRentalBooking } from "@/features/bookings/service";
 import { roomStatusOn } from "./availability";
 import { updateSettings } from "@/features/settings/service";
 import { db } from "@/lib/db";
@@ -65,6 +65,16 @@ describe("room-by-room and whole-place bookings", () => {
     const numbers = (await db.booking.findMany({ where: { roomId: roomA }, select: { roomNumber: true } })).map((b) => b.roomNumber).sort();
     expect(numbers).toEqual(["101", "102"]);
     expect(roomStatusOn(await bookedRanges("lodge", NOW), roomA, "2026-11-01")).toEqual({ free: false, freeFrom: "2026-11-03" });
+  });
+
+  it("each numbered room is booked on its own: a guest can pick a free one, never one someone holds", async () => {
+    await saveRoom({ id: "admin", role: "ADMIN" }, "lodge", roomA, { ...room, name: "Garden Double", rates: [{ unit: "NIGHT", price: 40000 }], numbers: ["101", "102", "103"] });
+    const night = { listingId: "lodge", unit: "NIGHT" as const, start: "2026-11-01", quantity: 2, guests: 1, payment: pay, roomId: roomA };
+    expect((await createRentalBooking({ ...night, guestId: "g1", roomNumber: "103" }, NOW)).ok).toBe(true);
+    expect(await createRentalBooking({ ...night, guestId: "g2", roomNumber: "103" }, NOW)).toEqual({ ok: false, error: "unavailable" });
+    expect(await createRentalBooking({ ...night, guestId: "g2", roomNumber: "999" }, NOW)).toEqual({ ok: false, error: "unavailable" });
+    expect((await createRentalBooking({ ...night, guestId: "g2", roomNumber: "101" }, NOW)).ok).toBe(true);
+    expect((await bookedRoomNumbers("lodge", NOW)).map((b) => b.roomNumber).sort()).toEqual(["101", "103"]);
   });
 
   it("books a room for day use (no night) and shows it booked for that day only", async () => {
