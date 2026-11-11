@@ -101,7 +101,7 @@ export function AdminShell({
     // Any link tapped in the phone menu closes it.
     <div className="flex h-full flex-col" onClick={(e) => (e.target as HTMLElement).closest("a") && setOpen(false)}>
       <Link href="/admin" className="flex items-center gap-3 px-5 py-5">
-        <LogoMark className="size-9" />
+        <LogoMark className="h-7" />
         <span className="flex flex-col leading-tight">
           <span className="text-[15px] font-bold text-ink">Space Rental</span>
           <span className="text-xs font-semibold tracking-wide text-primary uppercase">{tAdmin("console")}</span>

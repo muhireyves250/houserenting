@@ -2,7 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
-import { LogoMark } from "@/components/ui/Logo";
+import { FullLogo } from "@/components/ui/Logo";
 import { Modal } from "@/components/ui/Modal";
 import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
 import { usePathname, useRouter } from "@/i18n/navigation";
@@ -53,7 +53,7 @@ export function AuthModal({
       onClose={() => (standalone ? router.push("/") : router.back())}
       title={
         <span className="flex flex-col items-center gap-4">
-          <LogoMark className="h-16 w-[72px] text-primary" />
+          <FullLogo decorative className="h-24" />
           {/* Not shown, but still names the dialog for screen readers. */}
           <span className="sr-only">{t("tagline")}</span>
         </span>

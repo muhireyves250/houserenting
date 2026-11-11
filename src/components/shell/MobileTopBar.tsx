@@ -113,7 +113,7 @@ function HeaderRow() {
         href="/"
         className="flex h-12 shrink-0 items-center rounded-lg text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
-        <Logo className="[&_svg]:h-11 [&_svg]:w-[50px]" />
+        <Logo markClassName="h-9" />
       </Link>
       <MobileSearch className="min-w-0 flex-1" />
       <Suspense>

@@ -391,12 +391,16 @@ svg {
 .welcome-name {
   animation: splash-rise 700ms cubic-bezier(0.32, 0.72, 0, 1) 650ms both;
 }
+.welcome-mark {
+  animation: splash-rise 800ms cubic-bezier(0.32, 0.72, 0, 1) 100ms both;
+}
 .welcome-splash[data-leaving="true"] {
   animation: splash-out 500ms cubic-bezier(0.4, 0, 1, 1) forwards;
 }
 @media (prefers-reduced-motion: reduce) {
   .welcome-logo path,
   .welcome-name,
+  .welcome-mark,
   .welcome-splash[data-leaving="true"] {
     animation: none;
   }
