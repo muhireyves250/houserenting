@@ -77,6 +77,7 @@ const StayContext = createContext<Stay | null>(null);
 const CALENDAR_ID = "stay-calendar";
 const ROOMS_ID = "rooms";
 const PLAN_ID = "booking-plan";
+const MOBILE_PLAN_ID = "booking-plan-phone";
 
 function useStay(): Stay {
   const stay = useContext(StayContext);
@@ -479,7 +480,13 @@ function ReserveButton({
     <>
       <button
         type="button"
-        onClick={() => (choice === null ? scrollTo(ROOMS_ID) : quote.ready ? setOpen(true) : scrollTo(unit === "NIGHT" ? CALENDAR_ID : PLAN_ID))}
+        onClick={() =>
+          choice === null
+            ? scrollTo(ROOMS_ID)
+            : quote.ready
+              ? setOpen(true)
+              : scrollTo(unit === "NIGHT" ? CALENDAR_ID : window.matchMedia("(min-width: 768px)").matches ? PLAN_ID : MOBILE_PLAN_ID)
+        }
         className={className}
       >
         {choice === null ? t("chooseRoom") : t("reserve")}
@@ -780,5 +787,65 @@ export function MobileBookingBar({
         className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white disabled:opacity-60"
       />
     </div>
+  );
+}
+
+/**
+ * Phones: the booking card sits beside the page on computers only, so here the page itself asks how to book
+ * (hours, a day, nights, months…) and when, then guests. Nights pick their dates in the calendar below.
+ */
+export function MobileBookingPlan({ rates, maxGuests }: { rates: BookingRate[]; maxGuests: number }) {
+  const t = useTranslations("Listings");
+  const guestsId = useId();
+  const { guests, setGuests, setUnit } = useStay();
+  const { offered, current, room } = useOffer(rates);
+  const unit = (current?.unit ?? "NIGHT") as BookingUnit;
+  const long = LONG_UNITS.includes(unit);
+  const guestLimit = room?.maxGuests ?? maxGuests;
+  if (!current) return null;
+  return (
+    <section id={MOBILE_PLAN_ID} className="scroll-mt-24 border-t border-line py-8 md:hidden">
+      <h2 className="mb-4 font-display text-[22px] leading-7 font-bold tracking-[-0.02em] text-ink">{t("howToRent")}</h2>
+      {offered.length > 1 && (
+        <div role="radiogroup" aria-label={t("howToRent")} className="mb-4 flex flex-wrap gap-2">
+          {offered.map((rate) => {
+            const on = rate.unit === unit;
+            return (
+              <button
+                key={rate.unit}
+                type="button"
+                role="radio"
+                aria-checked={on}
+                onClick={() => setUnit(rate.unit as BookingUnit)}
+                className={cn(
+                  "rounded-full border-[1.5px] px-4 py-2 text-[14px] transition-colors duration-300",
+                  on ? "border-primary bg-primary font-semibold text-white" : "border-primary/35 text-ink hover:border-primary",
+                )}
+              >
+                {t(`by.${rate.unit}`)}
+              </button>
+            );
+          })}
+        </div>
+      )}
+      {(unit !== "NIGHT" || !long) && (
+        <div className="overflow-hidden rounded-xl border border-line-strong bg-surface">
+          {unit !== "NIGHT" && <PlanFields rate={current} />}
+          {!long && (
+            <label htmlFor={guestsId} className={cn("flex flex-col gap-0.5 px-3.5 py-2.5", unit !== "NIGHT" && "border-t border-line-strong")}>
+              <span className="text-xs font-semibold text-ink">{t("guestsLabel")}</span>
+              <select id={guestsId} value={guests} onChange={(event) => setGuests(Number(event.target.value))} className="-ml-1 bg-transparent text-sm text-ink outline-none">
+                {Array.from({ length: guestLimit }, (_, i) => i + 1).map((n) => (
+                  <option key={n} value={n}>
+                    {t("statGuests", { count: n })}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+        </div>
+      )}
+      {unit === "NIGHT" && <p className="mt-3 text-[13px] text-muted">{t("pickNightsBelow")}</p>}
+    </section>
   );
 }

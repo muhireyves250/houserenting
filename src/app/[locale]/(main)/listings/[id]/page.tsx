@@ -7,7 +7,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { PageContainer } from "@/components/ui/PageContainer";
 import { savedListingIds } from "@/features/favorites/service";
 import { isGuestFavorite } from "@/features/home/sections";
-import { BookingCard, MobileBookingBar, RoomPicker, StayCalendar, StayProvider } from "@/features/listings/components/detail/Booking";
+import { BookingCard, MobileBookingBar, MobileBookingPlan, RoomPicker, StayCalendar, StayProvider } from "@/features/listings/components/detail/Booking";
 import { listingRooms } from "@/features/rooms/service";
 import { getSettings, holdMinutesFrom, policyText } from "@/features/settings/service";
 import { TrackView } from "@/features/listings/components/RecentlyViewed";
@@ -360,6 +360,8 @@ export default async function ListingPage({ params, searchParams }: Props) {
             )}
 
             <RoomPicker wholeRates={rates.map((r) => ({ unit: r.unit, price: discountedPrice(r.price, listing.discountPercent) }))} />
+            {/* Phones: how and when to book (the booking card is beside the page on computers only). */}
+            <MobileBookingPlan rates={bookingRates} maxGuests={listing.maxGuests} />
             <StayCalendar city={listing.city} rates={bookingRates} />
           </div>
 

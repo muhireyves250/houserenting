@@ -523,7 +523,8 @@
     "feesIncluded": "All fees included",
     "talkToUs": "Questions? Talk to VIIPA",
     "talkToUsBody": "Our team looks after this place and your booking. Ask us anything before or during your stay.",
-    "dayUseHint": "Pick one date: you use the place that day and leave the same evening."
+    "dayUseHint": "Pick one date: you use the place that day and leave the same evening.",
+    "pickNightsBelow": "Pick your nights in the calendar below."
   },
   "Facility": {
     "KITCHEN": "Kitchen",

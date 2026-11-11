@@ -523,7 +523,8 @@
     "feesIncluded": "Tous frais compris",
     "talkToUs": "Des questions ? Parlez à VIIPA",
     "talkToUsBody": "Notre équipe s'occupe de ce logement et de votre réservation. Posez-nous vos questions avant ou pendant votre séjour.",
-    "dayUseHint": "Choisissez une date : vous profitez du lieu ce jour-là et partez le soir même."
+    "dayUseHint": "Choisissez une date : vous profitez du lieu ce jour-là et partez le soir même.",
+    "pickNightsBelow": "Choisissez vos nuits dans le calendrier ci-dessous."
   },
   "Facility": {
     "KITCHEN": "Cuisine",

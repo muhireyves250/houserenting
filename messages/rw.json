@@ -523,7 +523,8 @@
     "feesIncluded": "Amafaranga yose arimo",
     "talkToUs": "Ufite ikibazo? Vugana na VIIPA",
     "talkToUsBody": "Itsinda ryacu ryita kuri iyi nzu no ku ifatwa ryawe. Tubaze icyo ushaka mbere cyangwa mu gihe ucumbitse.",
-    "dayUseHint": "Hitamo itariki imwe: ukoresha aho hantu uwo munsi ukagenda nimugoroba."
+    "dayUseHint": "Hitamo itariki imwe: ukoresha aho hantu uwo munsi ukagenda nimugoroba.",
+    "pickNightsBelow": "Hitamo amajoro yawe muri kalendari iri hasi."
   },
   "Facility": {
     "KITCHEN": "Igikoni",
