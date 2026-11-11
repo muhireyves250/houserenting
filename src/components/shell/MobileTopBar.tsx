@@ -102,9 +102,9 @@ function Categories() {
 }
 
 // Pages with their own full-bleed top (listing photos) get no header.
-const NO_HEADER_PREFIXES = ["/listings/", "/restaurants/", "/chats/"];
+const NO_HEADER_PREFIXES = ["/listings/", "/restaurants/", "/chats/", "/orders/"];
 // Pages that open with their own blue top (PageHero): no logo bar above it.
-const HERO_PATHS = new Set(["/bookings", "/my-stay", "/orders", "/food", "/favorites", "/chats", "/notifications", "/profile", "/support", "/promote", "/host"]);
+const HERO_PATHS = new Set(["/bookings", "/my-stay", "/orders", "/food", "/favorites", "/chats", "/notifications", "/profile", "/support", "/promote", "/host", "/profile/personal"]);
 
 /** Logo (icon only), the search pill, and the language (flag) button, on one row. */
 function HeaderRow() {

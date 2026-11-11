@@ -1,3 +1,4 @@
+import { db } from "@/lib/db";
 import { laundryToHandle } from "@/features/laundry/service";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
@@ -14,11 +15,11 @@ export const metadata: Metadata = { title: "Admin", robots: { index: false, foll
 /** Staff area, outside the public site's header and tabs: every page under it is checked for the admin role on the server. */
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const user = await requireAdmin("/admin");
-  const [counts, unread, chats, laundry] = await Promise.all([attentionCounts(), unreadCount(user.id), unreadChats(user), laundryToHandle()]);
+  const [counts, unread, chats, laundry, foodPayments] = await Promise.all([attentionCounts(), unreadCount(user.id), unreadChats(user), laundryToHandle(), db.foodOrder.count({ where: { paymentMethod: "PAY_FIRST", paidAt: null, status: "PLACED", paymentClaim: { not: null } } })]);
   return (
     <AdminShell
       user={{ name: user.name, email: user.email }}
-      counts={{ listings: counts.listings, moderation: counts.moderation, support: counts.tickets, money: counts.payments + counts.rewards, requests: counts.requests + counts.refunds, messages: chats, laundry }}
+      counts={{ listings: counts.listings, moderation: counts.moderation, support: counts.tickets, money: counts.payments + counts.rewards, requests: counts.requests + counts.refunds, messages: chats, laundry, restaurants: foodPayments }}
       unread={unread}
       languageSwitcher={
         <Suspense>

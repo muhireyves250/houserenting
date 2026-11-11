@@ -94,7 +94,9 @@
     "categories": "Catégories",
     "noTypeTitle": "Pas encore de logement de ce type",
     "noTypeBody": "Essayez une autre catégorie ou voyez tous les logements.",
-    "districts": "Districts avec des logements"
+    "districts": "Districts avec des logements",
+    "typing": "Kigali · Musanze · Rubavu · Huye · Karongi · un lodge près des volcans · une chambre pour la journée",
+    "tryWord": "Essayez"
   },
   "Search": {
     "anywhere": "Partout au Rwanda",
@@ -1186,7 +1188,8 @@
       "promoterApplied": "Quelqu'un souhaite devenir promoteur.",
       "promoterStatus": "Votre compte promoteur est maintenant : {statusLabel}. {reason}",
       "paymentClaim": "Un voyageur dit avoir payé {reference} à {title}. Merci de confirmer.",
-      "paymentNotReceived": "Votre paiement pour {reference} à {title} n'a pas été trouvé : {reason}"
+      "paymentNotReceived": "Votre paiement pour {reference} à {title} n'a pas été trouvé : {reason}",
+      "orderPaymentClaim": "Commande {reference} à {title} ({total} RWF) : le voyageur dit avoir payé. Vérifiez et confirmez."
     }
   },
   "Rooms": {
@@ -1738,7 +1741,8 @@
       "READY": "Prête",
       "OUT_FOR_DELIVERY": "En route",
       "DELIVERED": "Livrée",
-      "CANCELLED": "Annulée"
+      "CANCELLED": "Annulée",
+      "PAID": "Payée"
     },
     "step": {
       "ACCEPTED": "Accepter",
@@ -1772,7 +1776,7 @@
     "noteHint": "ex. sans oignons",
     "deliveryFeeLine": "Livraison",
     "total": "Total",
-    "payOnDelivery": "Vous payez à la réception de la commande.",
+    "payOnDelivery": "Après la commande, vous payez par mobile money. La cuisine commence dès que VIIPA confirme votre paiement.",
     "placeOrder": "Commander",
     "loginToOrder": "Se connecter pour commander",
     "orderError": {
@@ -1976,7 +1980,45 @@
         "title": "Pas encore de repas ici",
         "body": "{place} ne sert pas encore de repas. Écrivez-nous si vous avez besoin d'aide."
       }
-    }
+    },
+    "pay": {
+      "title": "Payez pour envoyer votre commande",
+      "checkingTitle": "Vérification de votre paiement",
+      "howTo": "Payez {amount} par mobile money",
+      "noInstructions": "Demandez le numéro mobile money à notre équipe.",
+      "useReference": "Indiquez {reference} comme motif du paiement.",
+      "transactionId": "ID de transaction",
+      "transactionHint": "Dans votre message mobile money",
+      "ivePaid": "J'ai payé",
+      "waitingTitle": "Merci ! Nous vérifions votre paiement",
+      "waiting": "Transaction {reference}. La cuisine commence dès la confirmation.",
+      "kitchenWaits": "La cuisine commence dès que VIIPA confirme votre paiement.",
+      "payNow": "Payer",
+      "error": {
+        "notFound": "Cette commande ne peut pas être payée maintenant.",
+        "transaction": "Vérifiez l'ID de transaction.",
+        "auth": "Veuillez vous reconnecter."
+      }
+    },
+    "staffPay": {
+      "title": "Commandes en attente de paiement",
+      "intro": "Les voyageurs paient avant que la cuisine commence. Confirmez le paiement mobile money ; la commission et la part de la cuisine vont dans Argent.",
+      "empty": "Aucune commande en attente de paiement.",
+      "claimed": "Le voyageur a payé avec {reference}",
+      "notClaimed": "Pas encore payée",
+      "confirm": "Confirmer le paiement",
+      "paidRef": "Transaction",
+      "error": {
+        "notAllowed": "Réservé à l'équipe VIIPA.",
+        "notFound": "Cette commande a changé. Actualisez la page.",
+        "transaction": "Saisissez l'ID de transaction.",
+        "used": "Cette transaction a déjà été utilisée."
+      }
+    },
+    "removeOrder": "Supprimer",
+    "removeConfirm": "Supprimer cette commande annulée de votre liste ?",
+    "cancelledNoReason": "Cette commande a été annulée.",
+    "payOnDeliveryOld": "Payée à la réception."
   },
   "Promoters": {
     "title": "Promouvoir et gagner",
@@ -2195,7 +2237,10 @@
         "reason": "Donnez une raison.",
         "transaction": "Saisissez l'ID de transaction.",
         "used": "Cette transaction a déjà été utilisée."
-      }
+      },
+      "placesTitle": "Blanchisserie par logement",
+      "savePrice": "Enregistrer",
+      "saved": "Enregistré"
     },
     "placeLabel": "Blanchisserie pour les voyageurs",
     "placeOff": "Non proposée",

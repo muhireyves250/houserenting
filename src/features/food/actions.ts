@@ -7,6 +7,11 @@ import { isAdmin } from "@/lib/roles";
 import { getCurrentUser } from "@/lib/session";
 import { ORDER_STATUSES, type OrderStatus } from "./rules";
 import {
+  claimOrderPayment,
+  confirmOrderPayment,
+  hideMyOrder,
+  type ClaimOrderResult,
+  type ConfirmOrderResult,
   addRestaurantMember,
   deleteMenuItem,
   moveOrder,
@@ -103,4 +108,30 @@ export async function moveOrderAction(reference: string, to: OrderStatus, note: 
   const ok = await moveOrder(user, reference, to, typeof note === "string" ? note : "");
   if (ok) refresh();
   return { ok };
+}
+
+export async function hideMyOrderAction(reference: string): Promise<{ ok: boolean }> {
+  const user = await getCurrentUser();
+  if (!user || !z.string().min(1).max(40).safeParse(reference).success) return { ok: false };
+  const ok = await hideMyOrder(user.id, reference);
+  refresh();
+  return { ok };
+}
+
+export async function claimOrderPaymentAction(reference: string, transactionId: string): Promise<ClaimOrderResult | { ok: false; error: "auth" }> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, error: "auth" };
+  if (!z.string().min(1).max(40).safeParse(reference).success) return { ok: false, error: "notFound" };
+  const result = await claimOrderPayment(user.id, reference, String(transactionId ?? ""));
+  refresh();
+  return result;
+}
+
+export async function confirmOrderPaymentAction(reference: string, transactionId: string): Promise<ConfirmOrderResult> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, error: "notAllowed" };
+  if (!z.string().min(1).max(40).safeParse(reference).success) return { ok: false, error: "notFound" };
+  const result = await confirmOrderPayment(user, reference, String(transactionId ?? "") || undefined);
+  refresh();
+  return result;
 }

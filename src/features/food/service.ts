@@ -1,7 +1,8 @@
 import "server-only";
 import { audit } from "@/features/audit/service";
 import { newReference } from "@/features/bookings/reference";
-import { notify } from "@/features/notifications/service";
+import { notify, notifyAdmins } from "@/features/notifications/service";
+import { readSettings } from "@/features/settings/service";
 import { todayISO } from "@/features/search/date-range";
 import { db } from "@/lib/db";
 import { isAdmin } from "@/lib/roles";
@@ -280,6 +281,8 @@ export async function placeOrder(customerId: string, raw: OrderInput, now: Date 
             subtotal: cart.subtotal,
             deliveryFee: fee,
             total: cart.subtotal + fee,
+            // Paid by mobile money before the kitchen starts (staff confirm the payment).
+            paymentMethod: "PAY_FIRST",
             items: { create: cart.items },
             events: { create: { to: "PLACED", actorId: customerId } },
           },
@@ -299,7 +302,7 @@ export async function placeOrder(customerId: string, raw: OrderInput, now: Date 
 
 /** Moves an order one step (kitchen, courier or customer, each only their own steps). Every step is kept. */
 export async function moveOrder(actor: Actor, reference: string, to: OrderStatus, note = ""): Promise<boolean> {
-  const order = await db.foodOrder.findUnique({ where: { reference }, select: { id: true, status: true, fulfilment: true, customerId: true, restaurantId: true, courierId: true, restaurant: { select: { name: true } } } });
+  const order = await db.foodOrder.findUnique({ where: { reference }, select: { id: true, status: true, fulfilment: true, customerId: true, restaurantId: true, courierId: true, paymentMethod: true, paidAt: true, total: true, restaurant: { select: { name: true } } } });
   if (!order) return false;
   const role = await restaurantRole(actor, order.restaurantId);
   const actors: OrderActor[] = [];
@@ -308,6 +311,8 @@ export async function moveOrder(actor: Actor, reference: string, to: OrderStatus
   if (order.customerId === actor.id) actors.push("customer");
   const allowed = actors.some((a) => nextOrderSteps(order.status, order.fulfilment, a).includes(to));
   if (!allowed) return false;
+  // Pay-first orders: the kitchen only starts once VIIPA has confirmed the payment.
+  if (to === "ACCEPTED" && order.paymentMethod === "PAY_FIRST" && order.total > 0 && !order.paidAt) return false;
   // Once out, only the courier who took it (or the kitchen/staff) marks it delivered.
   if (to === "DELIVERED" && order.status === "OUT_FOR_DELIVERY" && !actors.includes("kitchen") && order.courierId && order.courierId !== actor.id) return false;
   const why = note.trim().slice(0, 300);
@@ -338,7 +343,7 @@ export function myOrder(customerId: string, reference: string) {
 
 export function myOrders(customerId: string) {
   return db.foodOrder.findMany({
-    where: { customerId },
+    where: { customerId, hiddenByCustomer: false },
     orderBy: { createdAt: "desc" },
     take: 50,
     include: { items: true, restaurant: { select: { id: true, name: true, phone: true, photoUrl: true, prepMinutes: true, listing: { select: { title: true } } } }, events: { orderBy: { createdAt: "asc" } } },
@@ -377,5 +382,77 @@ export function allRestaurants(status?: "DRAFT" | "PUBLISHED" | "HIDDEN") {
     orderBy: { updatedAt: "desc" },
     take: 200,
     select: { id: true, name: true, city: true, status: true, paused: true, owner: { select: { name: true } }, _count: { select: { menu: true, orders: true } } },
+  });
+}
+
+const TX = /^[A-Za-z0-9._\-/ ]{4,60}$/;
+
+/** The customer removes a cancelled order from their list (staff and the kitchen keep it). */
+export async function hideMyOrder(customerId: string, reference: string): Promise<boolean> {
+  const { count } = await db.foodOrder.updateMany({ where: { reference, customerId, status: "CANCELLED" }, data: { hiddenByCustomer: true } });
+  return count === 1;
+}
+
+export type ClaimOrderResult = { ok: true } | { ok: false; error: "notFound" | "transaction" };
+
+/** The customer says they paid the order by mobile money and gives the transaction id; VIIPA staff confirm. */
+export async function claimOrderPayment(customerId: string, reference: string, transactionId: string): Promise<ClaimOrderResult> {
+  const tx = transactionId.trim();
+  if (!TX.test(tx)) return { ok: false, error: "transaction" };
+  const order = await db.foodOrder.findFirst({ where: { reference, customerId, paymentMethod: "PAY_FIRST", status: "PLACED", paidAt: null }, select: { id: true, total: true, restaurant: { select: { name: true } } } });
+  if (!order) return { ok: false, error: "notFound" };
+  await db.$transaction(async (t) => {
+    await t.foodOrder.update({ where: { id: order.id }, data: { paymentClaim: tx } });
+    await audit(t, { actorId: customerId, action: "order.paymentClaim", entityType: "order", entityId: reference, data: { providerReference: tx } });
+    await notifyAdmins(t, "orderPaymentClaim", { reference, title: order.restaurant.name, total: order.total }, "/admin/restaurants");
+  });
+  return { ok: true };
+}
+
+export type ConfirmOrderResult = { ok: true } | { ok: false; error: "notAllowed" | "notFound" | "transaction" | "used" };
+
+/**
+ * VIIPA staff confirm the order's money arrived. The payment, the platform's commission and the kitchen owner's
+ * share go to the ledger once; the kitchen is told it can start.
+ */
+export async function confirmOrderPayment(actor: Actor, reference: string, transactionId?: string, now: Date = new Date()): Promise<ConfirmOrderResult> {
+  if (!isAdmin(actor)) return { ok: false, error: "notAllowed" };
+  const order = await db.foodOrder.findUnique({
+    where: { reference },
+    select: { id: true, total: true, status: true, paidAt: true, paymentClaim: true, customerId: true, bookingId: true, restaurant: { select: { id: true, name: true, ownerId: true, team: { where: { role: { in: ["MANAGER", "STAFF"] } }, select: { userId: true } } } } },
+  });
+  if (!order || order.paidAt || order.status === "CANCELLED" || order.total <= 0) return { ok: false, error: "notFound" };
+  const tx = (transactionId ?? order.paymentClaim ?? "").trim();
+  if (!TX.test(tx)) return { ok: false, error: "transaction" };
+  if (await db.foodOrder.findUnique({ where: { paidReference: tx }, select: { id: true } })) return { ok: false, error: "used" };
+  const commission = Math.round((order.total * ((await readSettings()).commissionBps ?? 0)) / 10_000);
+  const done = await db.$transaction(async (t) => {
+    const { count } = await t.foodOrder.updateMany({ where: { id: order.id, paidAt: null }, data: { paidAt: now, paidReference: tx } });
+    if (count !== 1) return false;
+    const note = `food ${reference}`;
+    await t.ledgerEntry.createMany({
+      data: [
+        { kind: "GUEST_PAYMENT" as const, amount: order.total, bookingId: order.bookingId, note },
+        { kind: "COMMISSION" as const, amount: commission, bookingId: order.bookingId, note },
+        { kind: "HOST_PAYABLE" as const, amount: order.total - commission, bookingId: order.bookingId, hostId: order.restaurant.ownerId, note },
+      ].filter((e) => e.amount > 0),
+    });
+    await audit(t, { actorId: actor.id, action: "order.paid", entityType: "order", entityId: reference, data: { amount: order.total, commission, providerReference: tx } });
+    await notify(t, order.customerId, "orderStatus", { reference, title: order.restaurant.name, status: "PAID" }, `/orders/${reference}`);
+    for (const userId of new Set([order.restaurant.ownerId, ...order.restaurant.team.map((m) => m.userId)])) {
+      await notify(t, userId, "orderPlaced", { reference, title: order.restaurant.name, total: order.total }, `/host/restaurants/${order.restaurant.id}`);
+    }
+    return true;
+  });
+  return done ? { ok: true } : { ok: false, error: "notFound" };
+}
+
+/** Staff: pay-first orders waiting for their payment to be confirmed, the ones the customer says they paid first. */
+export function ordersAwaitingPayment(take = 100) {
+  return db.foodOrder.findMany({
+    where: { paymentMethod: "PAY_FIRST", paidAt: null, status: "PLACED" },
+    orderBy: [{ paymentClaim: { sort: "desc", nulls: "last" } }, { createdAt: "desc" }],
+    take,
+    select: { reference: true, total: true, paymentClaim: true, createdAt: true, address: true, phone: true, restaurant: { select: { name: true } }, customer: { select: { name: true } } },
   });
 }

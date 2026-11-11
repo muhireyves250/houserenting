@@ -1,9 +1,10 @@
 import { getLocale, getTranslations } from "next-intl/server";
-import { PageIntro } from "@/features/admin/components/ui";
+import { PageIntro, Panel } from "@/features/admin/components/ui";
 import { formatKigaliDateTime } from "@/features/bookings/format";
 import { LaundryStaffActions } from "@/features/laundry/components/LaundryStaffActions";
 import { laundryOwed, OPEN_LAUNDRY } from "@/features/laundry/rules";
-import { staffLaundry } from "@/features/laundry/service";
+import { placesLaundry, staffLaundry } from "@/features/laundry/service";
+import { PlaceLaundrySetting } from "@/features/laundry/components/PlaceLaundrySetting";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { formatRWF } from "@/lib/format";
@@ -12,13 +13,28 @@ import { requireAdmin } from "@/lib/permissions";
 /** Staff: every guest's laundry, open orders and unpaid ones first. */
 export default async function AdminLaundryPage() {
   await requireAdmin("/admin/laundry");
-  const [t, locale, rows] = await Promise.all([getTranslations("Laundry"), getLocale(), staffLaundry()]);
+  const [t, locale, rows, places] = await Promise.all([getTranslations("Laundry"), getLocale(), staffLaundry(), placesLaundry()]);
   const needsWork = (o: (typeof rows)[number]) => OPEN_LAUNDRY.includes(o.status) || laundryOwed(o);
   const orders = [...rows.filter(needsWork), ...rows.filter((o) => !needsWork(o))];
 
   return (
     <div className="flex flex-col gap-5">
       <PageIntro description={t("admin.intro")} />
+      {/* Which places offer laundry: off, free, or a price per kg. */}
+      <Panel title={t("admin.placesTitle")}>
+        <p className="-mt-1 mb-3 text-[13px] text-muted">{t("placeHint")}</p>
+        <ul className="flex flex-col divide-y divide-line">
+          {places.map((p) => (
+            <li key={p.id} className="flex flex-wrap items-center justify-between gap-3 py-2.5">
+              <span className="min-w-0 text-[14px]">
+                <b className="block truncate font-semibold text-ink">{p.title}</b>
+                <span className="text-[13px] text-muted">{p.city}</span>
+              </span>
+              <PlaceLaundrySetting listingId={p.id} initial={p.laundryPricePerKg} />
+            </li>
+          ))}
+        </ul>
+      </Panel>
       {orders.length === 0 ? (
         <p className="rounded-2xl bg-surface py-10 text-center text-[14px] text-muted ring-1 ring-line">{t("admin.empty")}</p>
       ) : (

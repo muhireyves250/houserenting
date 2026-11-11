@@ -1,5 +1,6 @@
 "use client";
 
+import { useTypewriter } from "./useTypewriter";
 import { Search, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
@@ -68,6 +69,8 @@ export function SearchBar({
   const { whenSummary, whoSummary } = useSearchSummaries(search);
 
   const [open, setOpen] = useState<Panel | null>(initialOpen);
+  // A live hint in the empty Where box while it isn't being used.
+  const typed = useTypewriter(t("typing").split(" · "), !location && open !== "where");
   // Panel to move keyboard focus into once it is open (set when opened programmatically).
   const [focusPanel, setFocusPanel] = useState<Panel | null>(initialOpen);
   // Where combobox: suggestions from the API and the option highlighted with the arrow keys.
@@ -324,7 +327,7 @@ export function SearchBar({
             }}
             autoComplete="off"
             value={location}
-            placeholder={t("wherePlaceholder")}
+            placeholder={typed ? `${t("tryWord")} ${typed}` : t("wherePlaceholder")}
             onFocus={() => openPanel("where")}
             onClick={() => openPanel("where")}
             onChange={(event) => {

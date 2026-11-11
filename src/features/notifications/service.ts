@@ -44,6 +44,7 @@ export type NotificationKind =
   | "restaurantTeamAdded"
   | "orderPlaced"
   | "orderStatus"
+  | "orderPaymentClaim"
   | "promoterApplied"
   | "promoterStatus"
   | "paymentClaim"

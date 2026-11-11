@@ -94,7 +94,9 @@
     "categories": "Categories",
     "noTypeTitle": "No homes of this type yet",
     "noTypeBody": "Try another category, or see every home.",
-    "districts": "Districts with homes"
+    "districts": "Districts with homes",
+    "typing": "Kigali · Musanze · Rubavu · Huye · Karongi · a lodge near the volcanoes · a room for the day",
+    "tryWord": "Try"
   },
   "Search": {
     "anywhere": "Anywhere in Rwanda",
@@ -1186,7 +1188,8 @@
       "promoterApplied": "Someone applied to be a promoter.",
       "promoterStatus": "Your promoter account is now: {statusLabel}. {reason}",
       "paymentClaim": "A guest says they paid for {reference} at {title}. Please confirm it.",
-      "paymentNotReceived": "Your payment for {reference} at {title} wasn't found: {reason}"
+      "paymentNotReceived": "Your payment for {reference} at {title} wasn't found: {reason}",
+      "orderPaymentClaim": "Order {reference} at {title} ({total} RWF): the guest says they paid. Check and confirm."
     }
   },
   "Rooms": {
@@ -1738,7 +1741,8 @@
       "READY": "Ready",
       "OUT_FOR_DELIVERY": "On the way",
       "DELIVERED": "Delivered",
-      "CANCELLED": "Cancelled"
+      "CANCELLED": "Cancelled",
+      "PAID": "Paid"
     },
     "step": {
       "ACCEPTED": "Accept",
@@ -1772,7 +1776,7 @@
     "noteHint": "e.g. no onions",
     "deliveryFeeLine": "Delivery",
     "total": "Total",
-    "payOnDelivery": "You pay when you receive your order.",
+    "payOnDelivery": "After ordering, you pay by mobile money. The kitchen starts once VIIPA confirms your payment.",
     "placeOrder": "Place order",
     "loginToOrder": "Log in to order",
     "orderError": {
@@ -1976,7 +1980,45 @@
         "title": "No meals at this place yet",
         "body": "{place} doesn't serve meals yet. Message us if you need help with food."
       }
-    }
+    },
+    "pay": {
+      "title": "Pay to send your order",
+      "checkingTitle": "Checking your payment",
+      "howTo": "Pay {amount} by mobile money",
+      "noInstructions": "Ask our team for the mobile money number.",
+      "useReference": "Use {reference} as the payment reason.",
+      "transactionId": "Transaction ID",
+      "transactionHint": "From your mobile money message",
+      "ivePaid": "I've paid",
+      "waitingTitle": "Thanks! We're checking your payment",
+      "waiting": "Transaction {reference}. The kitchen starts as soon as it's confirmed.",
+      "kitchenWaits": "The kitchen starts cooking once VIIPA confirms your payment.",
+      "payNow": "Pay now",
+      "error": {
+        "notFound": "This order can't be paid now.",
+        "transaction": "Check the transaction ID.",
+        "auth": "Please log in again."
+      }
+    },
+    "staffPay": {
+      "title": "Food orders waiting for payment",
+      "intro": "Guests pay before the kitchen starts. Confirm the mobile money payment; the commission and the kitchen's share go to Money.",
+      "empty": "No orders waiting for payment.",
+      "claimed": "Guest paid with {reference}",
+      "notClaimed": "Not paid yet",
+      "confirm": "Confirm payment",
+      "paidRef": "Transaction",
+      "error": {
+        "notAllowed": "Only VIIPA staff can do this.",
+        "notFound": "This order changed. Refresh the page.",
+        "transaction": "Type the transaction ID.",
+        "used": "That transaction was already used."
+      }
+    },
+    "removeOrder": "Remove",
+    "removeConfirm": "Remove this cancelled order from your list?",
+    "cancelledNoReason": "This order was cancelled.",
+    "payOnDeliveryOld": "Paid when you received it."
   },
   "Promoters": {
     "title": "Promote and earn",
@@ -2195,7 +2237,10 @@
         "reason": "Give a reason.",
         "transaction": "Type the transaction ID.",
         "used": "That transaction was already used."
-      }
+      },
+      "placesTitle": "Laundry at each place",
+      "savePrice": "Save",
+      "saved": "Saved"
     },
     "placeLabel": "Laundry for guests",
     "placeOff": "Not offered",

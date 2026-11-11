@@ -1085,31 +1085,37 @@ enum Fulfilment {
 }
 
 model FoodOrder {
-  id            String       @id @default(cuid())
+  id               String       @id @default(cuid())
   /// Short code, e.g. "OR-7K2M9Q".
-  reference     String       @unique
-  restaurantId  String
-  restaurant    Restaurant   @relation(fields: [restaurantId], references: [id], onDelete: Restrict)
-  customerId    String
-  customer      User         @relation("OrderCustomer", fields: [customerId], references: [id], onDelete: Restrict)
-  status        OrderStatus  @default(PLACED)
-  fulfilment    Fulfilment
+  reference        String       @unique
+  restaurantId     String
+  restaurant       Restaurant   @relation(fields: [restaurantId], references: [id], onDelete: Restrict)
+  customerId       String
+  customer         User         @relation("OrderCustomer", fields: [customerId], references: [id], onDelete: Restrict)
+  status           OrderStatus  @default(PLACED)
+  fulfilment       Fulfilment
   /// Where to deliver (DELIVERY), or the stay it goes to (TO_STAY).
-  address       String?
-  bookingId     String?
-  phone         String
-  note          String?
-  subtotal      Int
-  deliveryFee   Int          @default(0)
-  total         Int
-  /// Paid when handed over until online payment for orders is chosen.
-  paymentMethod String       @default("ON_DELIVERY")
-  courierId     String?
-  cancelReason  String?
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-  items         OrderItem[]
-  events        OrderEvent[]
+  address          String?
+  bookingId        String?
+  phone            String
+  note             String?
+  subtotal         Int
+  deliveryFee      Int          @default(0)
+  total            Int
+  /// ON_DELIVERY (older orders) or PAY_FIRST: paid by mobile money and confirmed by staff before the kitchen starts.
+  paymentMethod    String       @default("ON_DELIVERY")
+  /// Mobile money transaction the customer says they paid with, waiting for staff.
+  paymentClaim     String?
+  paidAt           DateTime?
+  paidReference    String?      @unique
+  /// The customer removed this (cancelled) order from their list; staff and the kitchen still see it.
+  hiddenByCustomer Boolean      @default(false)
+  courierId        String?
+  cancelReason     String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  items            OrderItem[]
+  events           OrderEvent[]
 
   @@index([restaurantId, createdAt])
   @@index([customerId, createdAt])

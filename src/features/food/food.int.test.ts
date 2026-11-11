@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { db } from "@/lib/db";
 import { resetDb } from "@/test/db";
-import { addRestaurantMember, kitchenForPlace, moveOrder, ordersLive, placeOrder, saveMenuItem, saveRestaurant, setRestaurantStatus } from "./service";
+import { addRestaurantMember, claimOrderPayment, confirmOrderPayment, hideMyOrder, myOrders, kitchenForPlace, moveOrder, ordersLive, placeOrder, saveMenuItem, saveRestaurant, setRestaurantStatus } from "./service";
 
 const admin = { id: "admin", role: "ADMIN" };
 const NOW = new Date("2026-11-03T08:00:00Z");
@@ -97,8 +97,17 @@ describe("food from the kitchen of the guest's stay", () => {
 
     await addRestaurantMember(admin, id, "cook@example.com", "STAFF");
     expect(await moveOrder({ id: "guest" }, placed.reference, "ACCEPTED")).toBe(false);
+    // Pay first: the kitchen can't start until VIIPA confirms the guest's mobile money payment.
+    expect(await moveOrder({ id: "cook" }, placed.reference, "ACCEPTED")).toBe(false);
+    expect(await claimOrderPayment("guest", placed.reference, "MP2611.FOOD.001")).toEqual({ ok: true });
+    expect(await confirmOrderPayment({ id: "cook" }, placed.reference)).toEqual({ ok: false, error: "notAllowed" });
+    expect(await confirmOrderPayment(admin, placed.reference)).toEqual({ ok: true });
+    expect(await confirmOrderPayment(admin, placed.reference)).toEqual({ ok: false, error: "notFound" });
+    const ledger = await db.ledgerEntry.findMany({ where: { note: `food ${placed.reference}` } });
+    expect(ledger.find((e) => e.kind === "GUEST_PAYMENT")?.amount).toBe(6000);
+    expect(ledger.reduce((sum, e) => sum + (e.kind === "COMMISSION" || e.kind === "HOST_PAYABLE" ? e.amount : 0), 0)).toBe(6000);
     for (const step of ["ACCEPTED", "PREPARING", "READY", "DELIVERED"] as const) expect(await moveOrder({ id: "cook" }, placed.reference, step)).toBe(true);
-    expect(await db.notification.count({ where: { userId: "guest", kind: "orderStatus" } })).toBe(4);
+    expect(await db.notification.count({ where: { userId: "guest", kind: "orderStatus" } })).toBe(5); // paid + 4 steps
   });
 
   it("refuses orders when the kitchen is paused or below its minimum; guests cancel before acceptance", async () => {
@@ -107,6 +116,10 @@ describe("food from the kitchen of the guest's stay", () => {
     const placed = await order(id, dish.id);
     if (!placed.ok) throw new Error("order failed");
     expect(await moveOrder({ id: "guest" }, placed.reference, "CANCELLED")).toBe(true);
+    // A cancelled order can be removed from the guest's list (the kitchen still has it).
+    expect(await hideMyOrder("someone", placed.reference)).toBe(false);
+    expect(await hideMyOrder("guest", placed.reference)).toBe(true);
+    expect((await myOrders("guest")).some((o) => o.reference === placed.reference)).toBe(false);
     await db.restaurant.update({ where: { id }, data: { minOrder: 10_000 } });
     expect(await order(id, dish.id)).toEqual({ ok: false, error: "minOrder" });
     await db.restaurant.update({ where: { id }, data: { paused: true } });

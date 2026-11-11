@@ -170,3 +170,24 @@ export function staffLaundry(take = 100) {
 export function laundryToHandle() {
   return db.laundryOrder.count({ where: { OR: [{ status: { in: [...OPEN_LAUNDRY] } }, { paymentClaim: { not: null }, paidAt: null, status: { not: "CANCELLED" } }] } });
 }
+
+/** Staff: places and their laundry setting (null = not offered, 0 = free, otherwise RWF per kg). */
+export function placesLaundry() {
+  return db.listing.findMany({
+    where: { status: { in: ["PUBLISHED", "PAUSED"] } },
+    orderBy: [{ title: "asc" }],
+    select: { id: true, title: true, city: true, laundryPricePerKg: true },
+  });
+}
+
+/** Staff turn laundry on (free or a price per kg) or off for a place. Logged. */
+export async function setPlaceLaundry(actor: Actor, listingId: string, pricePerKg: number | null): Promise<boolean> {
+  if (!isAdmin(actor)) return false;
+  if (pricePerKg !== null && (!Number.isInteger(pricePerKg) || pricePerKg < 0 || pricePerKg > 100_000)) return false;
+  return db.$transaction(async (tx) => {
+    const { count } = await tx.listing.updateMany({ where: { id: listingId }, data: { laundryPricePerKg: pricePerKg } });
+    if (count !== 1) return false;
+    await audit(tx, { actorId: actor.id, action: "listing.laundry", entityType: "listing", entityId: listingId, data: { pricePerKg: pricePerKg ?? "off" } });
+    return true;
+  });
+}

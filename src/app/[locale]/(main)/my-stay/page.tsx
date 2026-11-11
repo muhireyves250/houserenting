@@ -1,3 +1,5 @@
+import { ReviewForm } from "@/features/reviews/components/ReviewForm";
+import { canReview } from "@/features/reviews/service";
 import { PageHero } from "@/components/shell/PageHero";
 import {
   BedDouble,
@@ -17,6 +19,7 @@ import {
   UtensilsCrossed,
   type LucideIcon,
   Shirt,
+  Star,
 } from "lucide-react";
 import Image from "next/image";
 import type { ReactNode } from "react";
@@ -101,6 +104,7 @@ export default async function MyStayPage() {
   // Laundry: at places that offer it, once the paid stay has started (free when the price is 0).
   const laundryOn = paid && current.listing.laundryPricePerKg !== null && current.checkIn <= today;
   const [laundry, settings] = laundryOn ? await Promise.all([stayLaundry(current.id), getSettings()]) : [[], null];
+  const [reviewable, tReviews] = await Promise.all([canReview(user.id, current.reference), getTranslations("Reviews")]);
   const moment = stayMoment(current, today);
   const underWay = moment.kind === "during" || moment.kind === "departure" || (paid && moment.kind === "arrival");
   const { listing } = current;
@@ -144,13 +148,13 @@ export default async function MyStayPage() {
 
   return (
     <PageContainer className="max-w-2xl pt-5 pb-10 md:py-10 max-md:pt-0">
-      <PageHero title={t("title")} icon={KeyRound} />
+      <PageHero title={t("title")} icon={KeyRound} photo={listing.photos[0]?.url ?? null} subtitle={[listing.title, current.room?.name].filter(Boolean).join(" · ")} />
       <h1 className="max-md:hidden mb-4 text-[26px] leading-8 font-bold tracking-[-0.03em] text-ink md:text-[32px] md:leading-10">{t("title")}</h1>
 
       <div className="flex flex-col gap-4">
         {/* The place and today's status */}
         <section className={cn(card, "overflow-hidden")}>
-          <div className="relative aspect-[16/9] bg-canvas md:aspect-[16/7]">
+          <div className="relative aspect-[16/9] bg-canvas max-md:hidden md:aspect-[16/7]">
             {listing.photos[0] && <Image src={listing.photos[0].url} alt="" fill sizes="(min-width: 768px) 672px, 100vw" className="object-cover" priority />}
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
             <div className="absolute inset-x-0 bottom-0 p-4 text-white md:p-5">
@@ -331,6 +335,13 @@ export default async function MyStayPage() {
         {underWay && (
           <Section title={t("feedbackTitle")} icon={BedDouble}>
             <StayFeedback reference={current.reference} initial={current.feedback} />
+          </Section>
+        )}
+
+        {/* Checked in: write a review (staff publish it on the place's page). */}
+        {reviewable && (
+          <Section title={tReviews("leave")} icon={Star}>
+            <ReviewForm reference={current.reference} />
           </Section>
         )}
 

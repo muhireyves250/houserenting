@@ -52,14 +52,15 @@ export function DatePanel({
     grid?.querySelector<HTMLButtonElement>(`[data-date="${target}"]:not(:disabled)`)?.focus();
   }
 
-  const months = [base, addMonths(base.year, base.month, 1)];
+  // One month at a time; the arrows move between months.
+  const months = [base];
   const shortDate = new Intl.DateTimeFormat(locale, { month: "short", day: "numeric", timeZone: "UTC" });
   const nights =
     range.checkIn && range.checkOut ? Math.round((utc(range.checkOut).getTime() - utc(range.checkIn).getTime()) / DAY_MS) : 0;
 
   return (
     <div className="flex flex-col gap-6" data-calendar>
-      <div className="relative grid gap-8 md:grid-cols-2">
+      <div className="relative mx-auto grid w-full max-w-sm gap-8">
         <button
           type="button"
           aria-label={t("prevMonth")}

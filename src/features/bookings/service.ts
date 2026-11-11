@@ -411,6 +411,8 @@ export async function bookedRanges(listingId: string, now: Date = new Date()): P
 
 const GUEST_SELECT = {
   reference: true,
+  /** Whether the guest already wrote a review (to offer "Write a review" otherwise). */
+  review: { select: { id: true } },
   status: true,
   checkIn: true,
   checkOut: true,

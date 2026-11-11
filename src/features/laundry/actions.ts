@@ -10,6 +10,7 @@ import {
   confirmLaundryPayment,
   moveLaundry,
   requestLaundry,
+  setPlaceLaundry,
   type ClaimLaundryResult,
   type ConfirmLaundryResult,
   type MoveLaundryResult,
@@ -66,4 +67,13 @@ export async function confirmLaundryPaymentAction(reference: string, transaction
   const result = await confirmLaundryPayment(user, reference, String(transactionId ?? "") || undefined);
   refresh();
   return result;
+}
+
+export async function setPlaceLaundryAction(listingId: string, pricePerKg: number | null): Promise<boolean> {
+  const user = await getCurrentUser();
+  if (!user || !ref.safeParse(listingId).success) return false;
+  const done = await setPlaceLaundry(user, listingId, pricePerKg === null ? null : Number(pricePerKg));
+  revalidatePath("/[locale]/admin/laundry", "page");
+  revalidatePath("/[locale]/listings/[id]", "page");
+  return done;
 }

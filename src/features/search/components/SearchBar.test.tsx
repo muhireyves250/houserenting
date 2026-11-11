@@ -67,8 +67,11 @@ describe("SearchBar", () => {
     await userEvent.click(screen.getByRole("button", { name: /When/ }));
     expect(screen.getByRole("button", { name: "Sunday, October 11, 2026" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Previous month" })).toBeDisabled();
+    // One month at a time: October, then November.
+    expect(screen.getByText("October 2026")).toBeInTheDocument();
+    expect(screen.queryByText("November 2026")).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Next month" }));
-    expect(screen.getByText("December 2026")).toBeInTheDocument();
+    expect(screen.getByText("November 2026")).toBeInTheDocument();
   });
 
   it("adds date flexibility from the chips", async () => {

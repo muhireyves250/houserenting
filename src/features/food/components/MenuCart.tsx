@@ -153,8 +153,8 @@ export function MenuCart({
                   href={`#${sectionId(name)}`}
                   data-tab={sectionId(name)}
                   className={cn(
-                    "shrink-0 rounded-full px-4 py-1.5 text-[13px] font-semibold whitespace-nowrap transition-colors",
-                    active === sectionId(name) ? "bg-ink text-white" : "bg-surface text-ink ring-1 ring-line hover:ring-primary",
+                    "shrink-0 rounded-full border-[1.5px] px-4 py-1.5 text-[13px] font-semibold whitespace-nowrap transition-colors",
+                    active === sectionId(name) ? "border-primary bg-primary text-white" : "border-primary/35 bg-surface text-ink hover:border-primary",
                   )}
                 >
                   {name}

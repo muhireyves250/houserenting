@@ -1,3 +1,5 @@
+import { InviteFriends } from "@/features/referrals/components/InviteFriends";
+import { ensureReferralCode, referralSummary } from "@/features/referrals/service";
 import { PageHero } from "@/components/shell/PageHero";
 import { ChevronLeft, Megaphone } from "lucide-react";
 import QRCode from "qrcode";
@@ -23,6 +25,10 @@ export default async function PromotePage() {
   const [t, locale, data, settings] = await Promise.all([getTranslations("Promoters"), getLocale(), promoterDashboard(user.id), getSettings()]);
   const reward = settings.promoterRewardFixed ? formatRWF(settings.promoterRewardFixed, locale) : settings.promoterRewardBps ? `${settings.promoterRewardBps / 100}%` : null;
   const link = data ? `${getEnv().BETTER_AUTH_URL.replace(/\/$/, "")}/api/v1/p/${data.promoter.code}` : null;
+  // Invite friends (referral rewards) lives here too, next to promoting.
+  const referral = settings.referralEnabled
+    ? { code: await ensureReferralCode(user.id), summary: await referralSummary(user.id), reward: settings.referralRewardAmount }
+    : null;
   const qr = link && data?.promoter.status === "ACTIVE" ? await QRCode.toString(link, { type: "svg", margin: 1, color: { dark: "#0b1b33", light: "#ffffff" } }) : null;
 
   return (
@@ -33,6 +39,17 @@ export default async function PromotePage() {
         {t("back")}
       </Link>
       <h1 className="max-md:hidden mb-1 text-[26px] leading-8 font-bold tracking-[-0.03em] text-ink md:text-[32px] md:leading-10">{t("title")}</h1>
+      {referral && (
+        <div className="mb-6 [&>*:first-child]:mt-0">
+          <InviteFriends
+            link={`${getEnv().BETTER_AUTH_URL}/?ref=${referral.code}`}
+            code={referral.code}
+            invited={referral.summary.invited}
+            earned={referral.summary.approved}
+            reward={referral.reward}
+          />
+        </div>
+      )}
       <p className="mb-5 text-[15px] text-muted">{settings.promoterEnabled ? (reward ? t("introReward", { reward }) : t("intro")) : t("notOpen")}</p>
       {!data ? (
         settings.promoterEnabled && (

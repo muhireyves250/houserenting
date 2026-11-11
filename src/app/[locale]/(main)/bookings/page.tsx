@@ -30,6 +30,7 @@ export default async function BookingsPage() {
     getTranslations("Listings"),
     getLocale(),
   ]);
+  const tReviews = await getTranslations("Reviews");
   const now = new Date();
   const today = todayISO(now);
   const bookings = await guestBookings(user.id, now);
@@ -48,6 +49,7 @@ export default async function BookingsPage() {
         : tListings(`unitCount.${b.unit}`, { count: b.quantity }),
     note: b.status === "PENDING_PAYMENT" && b.holdExpiresAt ? t("heldUntil", { time: formatKigaliTime(locale, b.holdExpiresAt) }) : null,
     total: formatRWF(b.total, locale),
+    review: (b.status === "COMPLETED" || b.status === "CHECKED_IN") && !b.review ? tReviews("leave") : null,
   });
 
   const phase = (b: GuestBooking) => stayPhase(b, today, now);

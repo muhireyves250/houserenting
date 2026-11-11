@@ -1,4 +1,4 @@
-import { ChevronRight, House } from "lucide-react";
+import { ChevronRight, House, Star } from "lucide-react";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import type { BookingStatus } from "../status";
@@ -17,6 +17,8 @@ export type BookingTileData = {
   note: string | null;
   /** The booking's total, formatted. */
   total?: string;
+  /** "Write a review" when the stay can be reviewed and hasn't been. */
+  review?: string | null;
 };
 
 export function BookingTile({ booking }: { booking: BookingTileData }) {
@@ -42,6 +44,12 @@ export function BookingTile({ booking }: { booking: BookingTileData }) {
           {booking.total && <b className="font-semibold text-ink"> · {booking.total}</b>}
         </span>
         {booking.note && <span className="text-xs font-medium text-amber-800">{booking.note}</span>}
+        {booking.review && (
+          <span className="mt-1 inline-flex items-center gap-1 self-start rounded-full bg-amber-50 px-2.5 py-1 text-[12px] font-semibold text-amber-900 ring-1 ring-amber-200">
+            <Star className="size-3.5 fill-amber-400 text-amber-500" aria-hidden="true" />
+            {booking.review}
+          </span>
+        )}
       </span>
       <ChevronRight className="size-4 shrink-0 self-center text-ink/40" aria-hidden="true" />
     </Link>

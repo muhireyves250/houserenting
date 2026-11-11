@@ -1,5 +1,6 @@
 "use client";
 
+import { useTypewriter } from "./useTypewriter";
 import { Search, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
@@ -55,6 +56,7 @@ export function MobileSearch({
   }
   const details = [whenSummary ?? t("compactWhen"), whoSummary ?? t("whoPlaceholder")].join(" · ");
   const chosen = Boolean(search.location || whenSummary || whoSummary);
+  const typed = useTypewriter(t("typing").split(" · "), !chosen && !results);
 
   return (
     <>
@@ -82,7 +84,18 @@ export function MobileSearch({
             <span className="block truncate text-xs text-muted">{details}</span>
           </span>
         ) : (
-          <span className="text-sm font-semibold text-ink">{t("startSearch")}</span>
+          // A live hint types places in; the button's name stays "Start your search".
+          <span className="min-w-0 truncate text-sm font-semibold text-ink" aria-hidden="true">
+            {typed ? (
+              <>
+                <span className="text-muted">{t("tryWord")} </span>
+                {typed}
+                <span className="ml-px inline-block h-4 w-[2px] translate-y-[3px] bg-primary motion-safe:animate-pulse" />
+              </>
+            ) : (
+              t("startSearch")
+            )}
+          </span>
         )}
       </button>
       {sheet &&

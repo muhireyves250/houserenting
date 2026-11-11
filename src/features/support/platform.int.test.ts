@@ -41,7 +41,7 @@ beforeEach(async () => {
 });
 
 describe("questions and answers", () => {
-  it("show publicly only after the host answers and staff publish", async () => {
+  it("show publicly only after VIIPA answers and staff publish", async () => {
     expect(await askQuestion("guest", "a", "Is there parking for two cars?")).toEqual({ ok: true });
     expect(await askQuestion("host", "a", "Asking my own place")).toEqual({ ok: false, error: "ownListing" });
     expect(await askQuestion("guest", "a", "Hi")).toEqual({ ok: false, error: "invalid" });
@@ -50,7 +50,9 @@ describe("questions and answers", () => {
 
     expect(await moderateQuestion("admin", q.id, true)).toBe(false); // no answer yet
     expect(await answerQuestion({ id: "other" }, q.id, "Yes")).toBe(false);
-    expect(await answerQuestion({ id: "host" }, q.id, "Yes, two spaces in the yard.")).toBe(true);
+    // VIIPA answers guests' questions; the owner can't.
+    expect(await answerQuestion({ id: "host" }, q.id, "Yes, two spaces in the yard.")).toBe(false);
+    expect(await answerQuestion({ id: "admin", role: "ADMIN" }, q.id, "Yes, two spaces in the yard.")).toBe(true);
     expect(await moderateQuestion("admin", q.id, true)).toBe(true);
     expect(await publishedQuestions("a")).toEqual([expect.objectContaining({ question: "Is there parking for two cars?", answer: "Yes, two spaces in the yard." })]);
     expect(await db.notification.findFirst({ where: { userId: "guest" } })).toMatchObject({ kind: "questionAnswered" });
@@ -63,7 +65,7 @@ describe("questions and answers", () => {
 });
 
 describe("post-stay feedback", () => {
-  it("is only for a finished stay, once, and counts after staff publish it", async () => {
+  it("is for a stay under way or finished, once, and counts after staff publish it", async () => {
     const booked = await createBooking(
       { guestId: "guest", listingId: "a", checkIn: "2026-11-01", checkOut: "2026-11-03", guests: 2, payment: { method: "mtn", phone: "0788123456" } },
       new Date("2026-10-14T08:00:00Z"),
@@ -72,6 +74,9 @@ describe("post-stay feedback", () => {
     expect(await canReview("guest", reference)).toBe(false);
     expect(await submitReview("guest", reference, 5, "Lovely stay by the lake")).toEqual({ ok: false, error: "notAllowed" });
 
+    // Checked in: the guest can already say how it's going.
+    await db.booking.update({ where: { reference }, data: { status: "CHECKED_IN" } });
+    expect(await canReview("guest", reference)).toBe(true);
     await db.booking.update({ where: { reference }, data: { status: "COMPLETED" } });
     expect(await canReview("other", reference)).toBe(false);
     expect(await submitReview("guest", reference, 6, "Lovely stay by the lake")).toEqual({ ok: false, error: "invalid" });

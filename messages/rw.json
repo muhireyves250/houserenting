@@ -94,7 +94,9 @@
     "categories": "Ibyiciro",
     "noTypeTitle": "Nta macumbi y'ubu bwoko aragera",
     "noTypeBody": "Gerageza ikindi cyiciro, cyangwa urebe amacumbi yose.",
-    "districts": "Uturere dufite amazu"
+    "districts": "Uturere dufite amazu",
+    "typing": "Kigali · Musanze · Rubavu · Huye · Karongi · lodge hafi y'ibirunga · icyumba cy'umunsi",
+    "tryWord": "Gerageza"
   },
   "Search": {
     "anywhere": "Ahantu hose mu Rwanda",
@@ -1186,7 +1188,8 @@
       "promoterApplied": "Hari umuntu wasabye kuba umwamamaza.",
       "promoterStatus": "Konti yawe y'umwamamaza ubu ni: {statusLabel}. {reason}",
       "paymentClaim": "Umushyitsi avuga ko yishyuye {reference} kuri {title}. Byemeze.",
-      "paymentNotReceived": "Kwishyura kwawe kwa {reference} kuri {title} ntikwabonetse: {reason}"
+      "paymentNotReceived": "Kwishyura kwawe kwa {reference} kuri {title} ntikwabonetse: {reason}",
+      "orderPaymentClaim": "Ibyatumijwe {reference} kuri {title} ({total} RWF): umushyitsi avuga ko yishyuye. Genzura wemeze."
     }
   },
   "Rooms": {
@@ -1738,7 +1741,8 @@
       "READY": "Yiteguye",
       "OUT_FOR_DELIVERY": "Iri mu nzira",
       "DELIVERED": "Yagejejwe",
-      "CANCELLED": "Yahagaritswe"
+      "CANCELLED": "Yahagaritswe",
+      "PAID": "Byishyuwe"
     },
     "step": {
       "ACCEPTED": "Emera",
@@ -1772,7 +1776,7 @@
     "noteHint": "urugero nta bitunguru",
     "deliveryFeeLine": "Kubigeza",
     "total": "Igiteranyo",
-    "payOnDelivery": "Wishyura ubyakiriye.",
+    "payOnDelivery": "Nyuma yo gutumiza, wishyura ukoresheje mobile money. Igikoni gitangira VIIPA imaze kwemeza ubwishyu bwawe.",
     "placeOrder": "Tumiza",
     "loginToOrder": "Injira kugira ngo utumize",
     "orderError": {
@@ -1976,7 +1980,45 @@
         "title": "Nta biryo biraboneka hano",
         "body": "{place} ntiratanga ibiryo. Twandikire niba ukeneye ubufasha."
       }
-    }
+    },
+    "pay": {
+      "title": "Ishyura kugira ngo ibyo watumije byoherezwe",
+      "checkingTitle": "Turimo kugenzura ubwishyu bwawe",
+      "howTo": "Ishyura {amount} ukoresheje mobile money",
+      "noInstructions": "Saba itsinda ryacu nimero ya mobile money.",
+      "useReference": "Andika {reference} nk'impamvu y'ubwishyu.",
+      "transactionId": "Nimero y'ubwishyu (transaction ID)",
+      "transactionHint": "Iri mu butumwa bwa mobile money",
+      "ivePaid": "Narishyuye",
+      "waitingTitle": "Murakoze! Turimo kugenzura ubwishyu bwawe",
+      "waiting": "Transaction {reference}. Igikoni gitangira bikimara kwemezwa.",
+      "kitchenWaits": "Igikoni gitangira guteka VIIPA imaze kwemeza ubwishyu bwawe.",
+      "payNow": "Ishyura",
+      "error": {
+        "notFound": "Ibi ntibishobora kwishyurwa ubu.",
+        "transaction": "Reba neza transaction ID.",
+        "auth": "Ongera winjire."
+      }
+    },
+    "staffPay": {
+      "title": "Ibyatumijwe bitegereje kwishyurwa",
+      "intro": "Abashyitsi bishyura mbere y'uko igikoni gitangira. Emeza ubwishyu bwa mobile money; komisiyo n'umugabane w'igikoni bijya muri Amafaranga.",
+      "empty": "Nta byatumijwe bitegereje kwishyurwa.",
+      "claimed": "Umushyitsi yishyuye na {reference}",
+      "notClaimed": "Ntibirishyurwa",
+      "confirm": "Emeza ubwishyu",
+      "paidRef": "Transaction",
+      "error": {
+        "notAllowed": "Ni itsinda rya VIIPA gusa.",
+        "notFound": "Ibi byahindutse. Ongera ufungure paji.",
+        "transaction": "Andika transaction ID.",
+        "used": "Iyo transaction yamaze gukoreshwa."
+      }
+    },
+    "removeOrder": "Siba",
+    "removeConfirm": "Siba ibi byahagaritswe ku rutonde rwawe?",
+    "cancelledNoReason": "Ibyo watumije byahagaritswe.",
+    "payOnDeliveryOld": "Byishyuwe ubyakiriye."
   },
   "Promoters": {
     "title": "Kwamamaza no kwinjiza",
@@ -2195,7 +2237,10 @@
         "reason": "Tanga impamvu.",
         "transaction": "Andika transaction ID.",
         "used": "Iyo transaction yamaze gukoreshwa."
-      }
+      },
+      "placesTitle": "Kumesa kuri buri hantu",
+      "savePrice": "Bika",
+      "saved": "Byabitswe"
     },
     "placeLabel": "Kumesa imyenda y'abashyitsi",
     "placeOff": "Ntibihari",

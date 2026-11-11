@@ -1,3 +1,4 @@
+import { RemoveOrder } from "@/features/food/components/RemoveOrder";
 import { PageHero } from "@/components/shell/PageHero";
 import { Bike, BedDouble, ChevronRight, Clock, ShoppingBag, Store, UtensilsCrossed } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -87,17 +88,23 @@ export default async function OrdersPage() {
             {current.map((o) => {
               const eta = new Date(o.createdAt.getTime() + (o.restaurant.prepMinutes + (o.fulfilment === "DELIVERY" ? 20 : 0)) * 60_000);
               const Icon = o.fulfilment === "DELIVERY" ? Bike : o.fulfilment === "TO_STAY" ? BedDouble : Store;
+              // Pay-first orders wait for their payment before the kitchen starts.
+              const unpaid = o.paymentMethod === "PAY_FIRST" && o.total > 0 && !o.paidAt;
               return (
                 <article key={o.id} className={cn(card, "overflow-hidden ring-primary/30")}>
                   <div className="flex items-center gap-3 p-4">
                     <Thumb photo={o.restaurant.photoUrl} className="size-14" />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-[13px] font-semibold text-muted">{o.address?.split(" · ")[0] || t("yourStayKitchen")}</p>
-                      <p className="text-[16px] leading-5 font-bold text-ink">{t(`statusTitle.${o.status}`)}</p>
-                      <p className="mt-0.5 inline-flex items-center gap-1.5 text-[13px] text-ink">
-                        <Clock className="size-3.5 text-primary" aria-hidden="true" />
-                        {o.fulfilment === "PICKUP" ? t("readyAround", { time: time.format(eta) }) : t("arrivesAround", { time: time.format(eta) })}
-                      </p>
+                      <p className="text-[16px] leading-5 font-bold text-ink">{unpaid ? (o.paymentClaim ? t("pay.checkingTitle") : t("pay.title")) : t(`statusTitle.${o.status}`)}</p>
+                      {unpaid ? (
+                        <p className="mt-0.5 text-[13px] font-semibold text-amber-800 tabular-nums">{formatRWF(o.total, locale)}</p>
+                      ) : (
+                        <p className="mt-0.5 inline-flex items-center gap-1.5 text-[13px] text-ink">
+                          <Clock className="size-3.5 text-primary" aria-hidden="true" />
+                          {o.fulfilment === "PICKUP" ? t("readyAround", { time: time.format(eta) }) : t("arrivesAround", { time: time.format(eta) })}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div className="mx-4 h-1.5 overflow-hidden rounded-full bg-primary/15" aria-hidden="true">
@@ -112,7 +119,7 @@ export default async function OrdersPage() {
                       <span className="block truncate">{items(o)}</span>
                     </p>
                     <Link href={`/orders/${o.reference}`} className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary px-4 py-2.5 text-[14px] font-semibold text-white hover:bg-primary-hover">
-                      {t("trackOrder")}
+                      {unpaid && !o.paymentClaim ? t("pay.payNow") : t("trackOrder")}
                       <ChevronRight className="size-4" aria-hidden="true" />
                     </Link>
                   </div>
@@ -157,7 +164,10 @@ export default async function OrdersPage() {
                   </Link>
                   <span className="flex shrink-0 flex-col items-end gap-1.5">
                     <span className="text-[14px] font-bold text-ink tabular-nums">{formatRWF(o.total, locale)}</span>
-                    <OrderAgain restaurantId={o.restaurant.id} items={o.items} compact />
+                    <span className="flex items-center gap-1">
+                      {o.status === "CANCELLED" && <RemoveOrder reference={o.reference} compact />}
+                      <OrderAgain restaurantId={o.restaurant.id} items={o.items} compact />
+                    </span>
                   </span>
                 </li>
               ))}

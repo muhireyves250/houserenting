@@ -4,10 +4,12 @@ import { cn } from "@/lib/cn";
 import type { Fulfilment, OrderStatus } from "../rules";
 
 /** Where the order is: the steps for its kind of service, done ones ticked, the current one highlighted. */
-export async function OrderProgress({ status, fulfilment }: { status: OrderStatus; fulfilment: Fulfilment }) {
+export async function OrderProgress({ status, fulfilment, payFirst = null }: { status: OrderStatus; fulfilment: Fulfilment; payFirst?: { paid: boolean } | null }) {
   const t = await getTranslations("Food");
-  const steps: OrderStatus[] = ["PLACED", "ACCEPTED", "PREPARING", "READY", ...(fulfilment === "DELIVERY" ? (["OUT_FOR_DELIVERY"] as const) : []), "DELIVERED"];
-  const at = steps.indexOf(status);
+  type Step = OrderStatus | "PAID";
+  // Pay-first orders: "Paid" comes right after ordering, and the kitchen waits for it.
+  const steps: Step[] = ["PLACED", ...(payFirst ? (["PAID"] as const) : []), "ACCEPTED", "PREPARING", "READY", ...(fulfilment === "DELIVERY" ? (["OUT_FOR_DELIVERY"] as const) : []), "DELIVERED"];
+  const at = payFirst && status === "PLACED" ? (payFirst.paid ? 2 : 1) : steps.indexOf(status);
   return (
     <ol className="grid gap-0" style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}>
       {steps.map((step, i) => {

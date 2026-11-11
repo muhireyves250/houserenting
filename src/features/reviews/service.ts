@@ -6,9 +6,9 @@ import { db } from "@/lib/db";
 
 export type ReviewResult = { ok: true } | { ok: false; error: "invalid" | "notAllowed" };
 
-/** Feedback is only for the guest of a stay that has finished, once per booking. */
+/** Feedback is for the guest of a stay that is under way (checked in) or finished, once per booking. */
 export async function canReview(userId: string, reference: string): Promise<boolean> {
-  const booking = await db.booking.findFirst({ where: { reference, guestId: userId, status: "COMPLETED", review: null }, select: { id: true } });
+  const booking = await db.booking.findFirst({ where: { reference, guestId: userId, status: { in: ["CHECKED_IN", "COMPLETED"] }, review: null }, select: { id: true } });
   return booking !== null;
 }
 
@@ -16,7 +16,7 @@ export async function submitReview(userId: string, reference: string, rating: nu
   const comment = text.trim();
   if (!Number.isInteger(rating) || rating < 1 || rating > 5 || comment.length < 10 || comment.length > 2000) return { ok: false, error: "invalid" };
   const booking = await db.booking.findFirst({
-    where: { reference, guestId: userId, status: "COMPLETED", review: null },
+    where: { reference, guestId: userId, status: { in: ["CHECKED_IN", "COMPLETED"] }, review: null },
     select: { id: true, listingId: true, listing: { select: { title: true } } },
   });
   if (!booking) return { ok: false, error: "notAllowed" };

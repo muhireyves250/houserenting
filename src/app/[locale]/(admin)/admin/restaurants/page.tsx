@@ -1,7 +1,10 @@
 import { Plus } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { FilterTabs, PageIntro, Panel, Table, td } from "@/features/admin/components/ui";
-import { allRestaurants } from "@/features/food/service";
+import { allRestaurants, ordersAwaitingPayment } from "@/features/food/service";
+import { ConfirmOrderPayment } from "@/features/food/components/ConfirmOrderPayment";
+import { formatKigaliDateTime } from "@/features/bookings/format";
+import { formatRWF } from "@/lib/format";
 import { Link } from "@/i18n/navigation";
 import { requireAdmin } from "@/lib/permissions";
 
@@ -12,7 +15,7 @@ export default async function AdminRestaurantsPage({ searchParams }: Props) {
   await requireAdmin("/admin/restaurants");
   const raw = (await searchParams).status;
   const status = STATUSES.find((s) => s === raw);
-  const [t, tFood, list] = await Promise.all([getTranslations("Admin"), getTranslations("Food"), allRestaurants(status)]);
+  const [t, tFood, list, awaiting, locale] = await Promise.all([getTranslations("Admin"), getTranslations("Food"), allRestaurants(status), ordersAwaitingPayment(), getLocale()]);
   return (
     <div>
       <PageIntro
@@ -24,6 +27,34 @@ export default async function AdminRestaurantsPage({ searchParams }: Props) {
           </Link>
         }
       />
+      {/* Pay-first food orders: confirm the money arrived so the kitchen can start. */}
+      <div className="mb-5">
+        <Panel title={tFood("staffPay.title")}>
+          <p className="-mt-1 mb-3 text-[13px] text-muted">{tFood("staffPay.intro")}</p>
+          {awaiting.length === 0 ? (
+            <p className="py-4 text-center text-[14px] text-muted">{tFood("staffPay.empty")}</p>
+          ) : (
+            <ul className="flex flex-col divide-y divide-line">
+              {awaiting.map((o) => (
+                <li key={o.reference} className="flex flex-wrap items-center justify-between gap-3 py-3">
+                  <div className="min-w-0">
+                    <p className="text-[14px] font-semibold text-ink">
+                      <span className="font-mono">{o.reference}</span> · {formatRWF(o.total, locale)}
+                    </p>
+                    <p className="text-[13px] text-muted">
+                      {o.customer.name} · {o.phone} · {o.address ?? o.restaurant.name} · {formatKigaliDateTime(locale, o.createdAt)}
+                    </p>
+                    <p className={o.paymentClaim ? "text-[13px] font-medium text-amber-800" : "text-[13px] text-muted"}>
+                      {o.paymentClaim ? tFood("staffPay.claimed", { reference: o.paymentClaim }) : tFood("staffPay.notClaimed")}
+                    </p>
+                  </div>
+                  <ConfirmOrderPayment reference={o.reference} claimed={o.paymentClaim} />
+                </li>
+              ))}
+            </ul>
+          )}
+        </Panel>
+      </div>
       <div className="mb-4">
         <FilterTabs
           items={[
