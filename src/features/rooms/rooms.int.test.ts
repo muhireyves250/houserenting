@@ -56,6 +56,16 @@ beforeEach(async () => {
 });
 
 describe("room-by-room and whole-place bookings", () => {
+  it("a lodge room can be booked by the hour, but not for a time that has already passed", async () => {
+    await db.listing.update({ where: { id: "lodge" }, data: { rates: { create: [{ unit: "HOUR", price: 10000, minUnits: 1, maxUnits: 8, dayStartTime: "07:00", dayEndTime: "22:00" }] } } });
+    await saveRoom({ id: "admin", role: "ADMIN" }, "lodge", roomA, { ...room, name: "Room A", rates: [{ unit: "NIGHT", price: 40000 }, { unit: "HOUR", price: 5000 }] });
+    const hour = { guestId: "g1", listingId: "lodge", unit: "HOUR" as const, quantity: 2, guests: 1, payment: pay, roomId: roomA };
+    expect((await createRentalBooking({ ...hour, start: "2026-11-05", startTime: "10:00" }, NOW)).ok).toBe(true);
+    expect(await db.booking.findFirstOrThrow({ where: { roomId: roomA } })).toMatchObject({ unit: "HOUR", subtotal: 10000 });
+    // NOW is 10:00 in Kigali on Oct 15: 09:00 that day has passed.
+    expect(await createRentalBooking({ ...hour, guestId: "g2", start: "2026-10-15", startTime: "09:00" }, NOW)).toEqual({ ok: false, error: "pastTime" });
+  });
+
   it("a room type with numbered rooms gives each guest a free number, and is only booked when all are taken", async () => {
     await saveRoom({ id: "admin", role: "ADMIN" }, "lodge", roomA, { ...room, name: "Garden Double", rates: [{ unit: "NIGHT", price: 40000 }], numbers: ["101", "102"] });
     expect((await createBooking(stay({ roomId: roomA }), NOW)).ok).toBe(true);

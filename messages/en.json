@@ -442,7 +442,8 @@
       "notOffered": "Monthly rentals can't be booked online yet.",
       "identity": "Fill in your details to book.",
       "outsideWindow": "This place can't be booked for those dates. Choose dates inside its open period.",
-      "closedDay": "This place doesn't take bookings starting (or on) that day of the week."
+      "closedDay": "This place doesn't take bookings starting (or on) that day of the week.",
+      "pastTime": "That time has already passed. Choose a later time."
     },
     "qrCode": "QR code",
     "qrCodeFor": "QR code for {title}",

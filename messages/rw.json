@@ -442,7 +442,8 @@
       "notOffered": "Ubukode bw'ukwezi ntiburabikwa kuri internet.",
       "identity": "Uzuza amakuru yawe kugira ngo ubike.",
       "outsideWindow": "Aha ntihabikwa kuri iyo minsi. Hitamo iminsi iri mu gihe hafunguye.",
-      "closedDay": "Aha ntihakira ibyabitswe kuri uwo munsi w'icyumweru."
+      "closedDay": "Aha ntihakira ibyabitswe kuri uwo munsi w'icyumweru.",
+      "pastTime": "Iyo saha yamaze kurenga. Hitamo isaha iri imbere."
     },
     "qrCode": "Kode ya QR",
     "qrCodeFor": "Kode ya QR ya {title}",

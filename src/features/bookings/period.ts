@@ -5,7 +5,7 @@ export const BOOKING_UNITS = ["HOUR", "DAY", "NIGHT", "WEEK", "MONTH", "YEAR"] a
 export type BookingUnit = (typeof BOOKING_UNITS)[number];
 
 /** Units a lodge may offer: by the night or by the day. */
-export const LODGE_UNITS: readonly BookingUnit[] = ["NIGHT", "DAY"];
+export const LODGE_UNITS: readonly BookingUnit[] = ["HOUR", "DAY", "NIGHT"];
 /** Long stays (moving in): deposits and upfront rules apply. */
 export const LONG_UNITS: readonly BookingUnit[] = ["MONTH", "YEAR"];
 

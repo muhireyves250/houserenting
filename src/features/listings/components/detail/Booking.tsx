@@ -697,7 +697,12 @@ function PlanFields({ rate }: { rate: BookingRate }) {
   const open = rate.dayStartTime ? toMinutes(rate.dayStartTime) : 0;
   const close = rate.dayEndTime ? toMinutes(rate.dayEndTime) : 24 * 60;
   const times: string[] = [];
-  for (let m = open; m + min * 60 <= close; m += 30) times.push(`${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`);
+  // Today: only times still ahead (Kigali time, next half hour).
+  const [openedAt] = useState(() => Date.now());
+  const kigaliNow = new Date(openedAt + 2 * 60 * 60 * 1000);
+  const nowMinutes = kigaliNow.getUTCHours() * 60 + kigaliNow.getUTCMinutes();
+  const first = plan.start === todayISO() ? Math.max(open, Math.ceil((nowMinutes + 1) / 30) * 30) : open;
+  for (let m = first; m + min * 60 <= close; m += 30) times.push(`${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`);
 
   return (
     <>

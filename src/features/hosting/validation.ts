@@ -20,7 +20,7 @@ export const FACILITIES = [
 
 export const RATE_UNITS = ["HOUR", "DAY", "NIGHT", "WEEK", "MONTH", "YEAR"] as const;
 /** Lodges are booked by the night or by the day only. */
-export const LODGE_RATE_UNITS = ["NIGHT", "DAY"] as const;
+export const LODGE_RATE_UNITS = ["HOUR", "DAY", "NIGHT"] as const;
 export function rateUnitsFor(type: string): readonly (typeof RATE_UNITS)[number][] {
   return type === "LODGE" ? LODGE_RATE_UNITS : RATE_UNITS;
 }

@@ -34,6 +34,7 @@ export type BookingRequest = {
 
 export type BookingError =
   | "invalid"
+  | "pastTime"
   | "notFound"
   | "ownListing"
   | "stayLength"
@@ -129,7 +130,7 @@ const HHMM = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 /**
  * Books a place (or one of its rooms) for the way the host offers it, and holds it until payment. Everything is
- * checked on the server: the unit must be one the place (or room) offers (lodges: nights or days only), the price
+ * checked on the server: the unit must be one the place (or room) offers (lodges: hours, days or nights), the price
  * comes from the host's rates, and overlapping bookings are refused on exact times by the database.
  */
 export async function createRentalBooking(request: RentalRequest, now: Date = new Date()): Promise<CreateBookingResult> {
@@ -189,6 +190,8 @@ export async function createRentalBooking(request: RentalRequest, now: Date = ne
 
   // Inside the management agreement and the place's own dates, starting on a working day.
   const span = periodFor(unit, start, quantity, startTime);
+  // Hours that have already started can't be booked.
+  if (unit === "HOUR" && span.startAt.getTime() < now.getTime()) return { ok: false, error: "pastTime" };
   const day = (d: Date | null) => d?.toISOString().slice(0, 10) ?? null;
   const window = bookableWindow({
     contractStart: day(listing.contractStart),

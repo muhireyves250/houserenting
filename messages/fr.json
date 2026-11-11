@@ -442,7 +442,8 @@
       "notOffered": "Les locations au mois ne se réservent pas encore en ligne.",
       "identity": "Renseignez vos informations pour réserver.",
       "outsideWindow": "Ce logement n'est pas réservable à ces dates. Choisissez des dates dans sa période d'ouverture.",
-      "closedDay": "Ce logement n'accepte pas de réservation ce jour de la semaine."
+      "closedDay": "Ce logement n'accepte pas de réservation ce jour de la semaine.",
+      "pastTime": "Cette heure est déjà passée. Choisissez une heure plus tard."
     },
     "qrCode": "Code QR",
     "qrCodeFor": "Code QR pour {title}",
