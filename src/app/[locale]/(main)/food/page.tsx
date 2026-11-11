@@ -1,3 +1,4 @@
+import { PageHero } from "@/components/shell/PageHero";
 import { ArrowRight, BedDouble, Clock, KeyRound, UtensilsCrossed } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { PageContainer } from "@/components/ui/PageContainer";
@@ -24,14 +25,19 @@ export default async function FoodPage() {
   const started = Boolean(paid && current && current.checkIn <= today);
   const kitchen = current ? await kitchenForPlace(current.listing.id) : null;
 
-  const title = <h1 className="text-[26px] leading-8 font-bold tracking-[-0.03em] text-ink md:text-[32px] md:leading-10">{t("foodTitle")}</h1>;
+  const title = (
+    <>
+      <PageHero title={t("foodTitle")} icon={UtensilsCrossed} />
+      <h1 className="text-[26px] leading-8 font-bold tracking-[-0.03em] text-ink max-md:hidden md:text-[32px] md:leading-10">{t("foodTitle")}</h1>
+    </>
+  );
 
   // No stay, not paid yet, not started yet, or no kitchen at the place: say why and what to do, and still show the menu.
   if (!user || !current || !paid || !started || !kitchen || kitchen.menu.length === 0) {
     const reason = !current ? "noStay" : !paid ? "unpaid" : !started ? "notStarted" : "noKitchen";
     const menu = kitchen && kitchen.menu.length > 0 ? kitchen.menu : await foodMenu();
     return (
-      <PageContainer className="max-w-4xl pt-5 pb-10 md:py-10">
+      <PageContainer className="max-w-4xl pt-5 pb-10 max-md:pt-0 md:py-10">
         {title}
         <p className="mt-1 text-[14px] text-muted md:text-[15px]">{t("menuIntro")}</p>
         <div className="mt-4 flex items-center gap-3 rounded-2xl bg-surface p-3 pr-4 ring-1 ring-line">
@@ -69,7 +75,7 @@ export default async function FoodPage() {
   const room = [current.listing.title, current.room?.name].filter(Boolean).join(" · ");
 
   return (
-    <PageContainer className="max-w-6xl pt-5 pb-10 md:py-10">
+    <PageContainer className="max-w-6xl pt-5 pb-10 max-md:pt-0 md:py-10">
       {title}
       <div className="mt-2 mb-5 flex flex-wrap gap-2">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-surface px-3 py-1.5 text-[13px] font-medium text-ink ring-1 ring-line">

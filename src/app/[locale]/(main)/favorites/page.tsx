@@ -1,3 +1,4 @@
+import { PageHero } from "@/components/shell/PageHero";
 import { Heart } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -13,8 +14,9 @@ export default async function FavoritesPage() {
   const [t, tNav, favorites] = await Promise.all([getTranslations("Empty"), getTranslations("Nav"), listFavorites(user.id)]);
   const tFooter = await getTranslations("Footer");
   return (
-    <PageContainer className="flex flex-col gap-6 py-6 md:py-10">
-      <h1 className="text-[26px] leading-8 font-bold tracking-[-0.03em] md:text-[32px] md:leading-10">{tNav("favorites")}</h1>
+    <PageContainer className="flex flex-col gap-6 py-6 md:py-10 max-md:pt-0">
+      <PageHero title={tNav("favorites")} icon={Heart} />
+      <h1 className="max-md:hidden text-[26px] leading-8 font-bold tracking-[-0.03em] md:text-[32px] md:leading-10">{tNav("favorites")}</h1>
       {favorites.length === 0 ? (
         <EmptyState icon={<Heart />} title={t("favoritesTitle")} body={t("favoritesBody")}
           action={<Link

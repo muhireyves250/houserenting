@@ -1,3 +1,4 @@
+import { PageHero } from "@/components/shell/PageHero";
 import { Bell } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -27,8 +28,9 @@ export default async function NotificationsPage() {
   const unread = items.some((n) => !n.readAt);
 
   return (
-    <PageContainer className="max-w-2xl py-6 md:py-10">
-      <h1 className="mb-6 text-[26px] leading-8 font-bold tracking-[-0.03em] text-ink md:text-[32px] md:leading-10">{t("title")}</h1>
+    <PageContainer className="max-w-2xl py-6 md:py-10 max-md:pt-0">
+      <PageHero title={t("title")} icon={Bell} />
+      <h1 className="max-md:hidden mb-6 text-[26px] leading-8 font-bold tracking-[-0.03em] text-ink md:text-[32px] md:leading-10">{t("title")}</h1>
       {/* Opening the page marks everything as read (after it has been shown as new once). */}
       {unread && <MarkRead />}
       {items.length === 0 ? (

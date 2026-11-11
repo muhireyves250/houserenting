@@ -1,3 +1,4 @@
+import { PageHero } from "@/components/shell/PageHero";
 import {
   BedDouble,
   CalendarCheck,
@@ -75,8 +76,9 @@ export default async function MyStayPage() {
 
   if (!current) {
     return (
-      <PageContainer className="max-w-2xl py-6 md:py-10">
-        <h1 className="mb-6 text-[26px] leading-8 font-bold tracking-[-0.03em] text-ink md:text-[32px] md:leading-10">{t("title")}</h1>
+      <PageContainer className="max-w-2xl py-6 md:py-10 max-md:pt-0">
+        <PageHero title={t("title")} icon={KeyRound} />
+      <h1 className="max-md:hidden mb-6 text-[26px] leading-8 font-bold tracking-[-0.03em] text-ink md:text-[32px] md:leading-10">{t("title")}</h1>
         <EmptyState
           icon={<KeyRound />}
           title={t("emptyTitle")}
@@ -141,8 +143,9 @@ export default async function MyStayPage() {
   const StatusIcon = status.icon;
 
   return (
-    <PageContainer className="max-w-2xl pt-5 pb-10 md:py-10">
-      <h1 className="mb-4 text-[26px] leading-8 font-bold tracking-[-0.03em] text-ink md:text-[32px] md:leading-10">{t("title")}</h1>
+    <PageContainer className="max-w-2xl pt-5 pb-10 md:py-10 max-md:pt-0">
+      <PageHero title={t("title")} icon={KeyRound} />
+      <h1 className="max-md:hidden mb-4 text-[26px] leading-8 font-bold tracking-[-0.03em] text-ink md:text-[32px] md:leading-10">{t("title")}</h1>
 
       <div className="flex flex-col gap-4">
         {/* The place and today's status */}

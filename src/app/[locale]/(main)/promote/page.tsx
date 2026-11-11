@@ -1,3 +1,4 @@
+import { PageHero } from "@/components/shell/PageHero";
 import { ChevronLeft, Megaphone } from "lucide-react";
 import QRCode from "qrcode";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -25,12 +26,13 @@ export default async function PromotePage() {
   const qr = link && data?.promoter.status === "ACTIVE" ? await QRCode.toString(link, { type: "svg", margin: 1, color: { dark: "#0b1b33", light: "#ffffff" } }) : null;
 
   return (
-    <PageContainer className="max-w-2xl py-6 md:py-10">
-      <Link href="/profile" className="mb-3 inline-flex items-center gap-1 text-sm text-muted transition-colors hover:text-ink">
+    <PageContainer className="max-w-2xl py-6 md:py-10 max-md:pt-0">
+      <PageHero title={t("title")} icon={Megaphone} />
+      <Link href="/profile" className="mb-3 max-md:hidden inline-flex items-center gap-1 text-sm text-muted transition-colors hover:text-ink">
         <ChevronLeft className="size-4" aria-hidden="true" />
         {t("back")}
       </Link>
-      <h1 className="mb-1 text-[26px] leading-8 font-bold tracking-[-0.03em] text-ink md:text-[32px] md:leading-10">{t("title")}</h1>
+      <h1 className="max-md:hidden mb-1 text-[26px] leading-8 font-bold tracking-[-0.03em] text-ink md:text-[32px] md:leading-10">{t("title")}</h1>
       <p className="mb-5 text-[15px] text-muted">{settings.promoterEnabled ? (reward ? t("introReward", { reward }) : t("intro")) : t("notOpen")}</p>
       {!data ? (
         settings.promoterEnabled && (

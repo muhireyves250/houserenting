@@ -1,4 +1,5 @@
-import { House, KeyRound, LifeBuoy, MapPin, Navigation } from "lucide-react";
+import { PageHero } from "@/components/shell/PageHero";
+import { House, KeyRound, LifeBuoy, MapPin, Navigation, CalendarDays } from "lucide-react";
 import Image from "next/image";
 import { getLocale, getTranslations } from "next-intl/server";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -56,8 +57,9 @@ export default async function BookingsPage() {
   const past = bookings.filter((b) => phase(b) === "past").map(tile);
 
   return (
-    <PageContainer className="py-6 md:py-10">
-      <h1 className="text-[26px] leading-8 font-bold tracking-[-0.03em] md:text-[32px] md:leading-10">{tNav("bookings")}</h1>
+    <PageContainer className="py-6 md:py-10 max-md:pt-0">
+      <PageHero title={tNav("bookings")} icon={CalendarDays} />
+      <h1 className="max-md:hidden text-[26px] leading-8 font-bold tracking-[-0.03em] md:text-[32px] md:leading-10">{tNav("bookings")}</h1>
 
       {/* My stay: always here; the active stay's details, directions and help, or "No active stay". */}
       <section aria-labelledby="my-stay" className="mt-6">

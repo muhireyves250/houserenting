@@ -1,4 +1,5 @@
-import { ChevronRight } from "lucide-react";
+import { PageHero } from "@/components/shell/PageHero";
+import { ChevronRight, LifeBuoy } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { PageContainer } from "@/components/ui/PageContainer";
 import { formatKigaliDateTime, formatStayDates } from "@/features/bookings/format";
@@ -20,8 +21,9 @@ export default async function SupportPage({ searchParams }: Props) {
   const preset = booking && isBookingReference(booking) && bookings.some((b) => b.reference === booking) ? booking : null;
 
   return (
-    <PageContainer className="max-w-3xl py-6 md:py-10">
-      <h1 className="text-[26px] leading-8 font-bold tracking-[-0.03em] text-ink md:text-[32px] md:leading-10">{t("title")}</h1>
+    <PageContainer className="max-w-3xl py-6 md:py-10 max-md:pt-0">
+      <PageHero title={t("title")} icon={LifeBuoy} />
+      <h1 className="max-md:hidden text-[26px] leading-8 font-bold tracking-[-0.03em] text-ink md:text-[32px] md:leading-10">{t("title")}</h1>
       <p className="mt-1 mb-6 text-[15px] text-muted">{t("intro")}</p>
 
       <section className={card}>

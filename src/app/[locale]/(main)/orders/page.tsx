@@ -1,3 +1,4 @@
+import { PageHero } from "@/components/shell/PageHero";
 import { Bike, BedDouble, ChevronRight, Clock, ShoppingBag, Store, UtensilsCrossed } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -66,10 +67,11 @@ export default async function OrdersPage() {
   const items = (o: (typeof orders)[number]) => o.items.map((i) => `${i.quantity} × ${i.name}`).join(", ");
 
   return (
-    <PageContainer className="max-w-2xl pt-5 pb-10 md:py-10">
+    <PageContainer className="max-w-2xl pt-5 pb-10 md:py-10 max-md:pt-0">
       <AutoRefresh active={current.length > 0} seconds={20} />
-      <div className="mb-5 flex items-center justify-between gap-3">
-        <h1 className="text-[26px] leading-8 font-bold tracking-[-0.03em] text-ink md:text-[32px] md:leading-10">{t("ordersTitle")}</h1>
+      <PageHero title={t("ordersTitle")} icon={ShoppingBag} />
+      <div className="mb-5 flex items-center justify-between gap-3 max-md:justify-end">
+        <h1 className="max-md:hidden text-[26px] leading-8 font-bold tracking-[-0.03em] text-ink md:text-[32px] md:leading-10">{t("ordersTitle")}</h1>
         {kitchen && (
           <Link href="/food" className="rounded-full border border-line bg-surface px-4 py-2 text-[14px] font-semibold text-ink hover:border-primary">
             {t("menu")}

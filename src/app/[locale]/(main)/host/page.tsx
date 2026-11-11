@@ -1,3 +1,4 @@
+import { PageHero } from "@/components/shell/PageHero";
 import { ChevronRight, House, Plus } from "lucide-react";
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
@@ -31,9 +32,10 @@ export default async function HostPage() {
   const hasMoney = earnings.earned + earnings.upcoming + earnings.paidOut > 0;
 
   return (
-    <PageContainer className="max-w-3xl py-6 md:py-10">
-      <div className="mb-6 flex items-center justify-between gap-4">
-        <h1 className="text-[26px] leading-8 font-bold tracking-[-0.03em] text-ink md:text-[32px] md:leading-10">{t("title")}</h1>
+    <PageContainer className="max-w-3xl py-6 md:py-10 max-md:pt-0">
+      <PageHero title={t("title")} icon={House} />
+      <div className="mb-6 flex items-center justify-between gap-4 max-md:justify-end">
+        <h1 className="max-md:hidden text-[26px] leading-8 font-bold tracking-[-0.03em] text-ink md:text-[32px] md:leading-10">{t("title")}</h1>
         {listings.length > 0 && (
           <Link href="/host/listings/new" className={newButton}>
             <Plus className="size-4" aria-hidden="true" />

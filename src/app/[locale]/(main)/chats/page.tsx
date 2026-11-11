@@ -1,3 +1,4 @@
+import { PageHero } from "@/components/shell/PageHero";
 import { House, MessageSquare } from "lucide-react";
 import Image from "next/image";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -28,8 +29,9 @@ export default async function ChatsPage() {
   const now = new Date();
 
   return (
-    <PageContainer className="max-w-3xl pt-5 pb-10 md:py-10">
-      <h1 className="mb-1 text-[26px] leading-8 font-bold tracking-[-0.03em] md:text-[32px] md:leading-10">{tNav("chats")}</h1>
+    <PageContainer className="max-w-3xl pt-5 pb-10 md:py-10 max-md:pt-0">
+      <PageHero title={tNav("chats")} icon={MessageSquare} />
+      <h1 className="max-md:hidden mb-1 text-[26px] leading-8 font-bold tracking-[-0.03em] md:text-[32px] md:leading-10">{tNav("chats")}</h1>
       <p className="mb-5 text-[14px] text-muted">{t("listIntro")}</p>
       {chats.length === 0 ? (
         <EmptyState

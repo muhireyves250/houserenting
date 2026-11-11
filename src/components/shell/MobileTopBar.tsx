@@ -103,6 +103,8 @@ function Categories() {
 
 // Pages with their own full-bleed top (listing photos) get no header.
 const NO_HEADER_PREFIXES = ["/listings/", "/restaurants/", "/chats/"];
+// Pages that open with their own blue top (PageHero): no logo bar above it.
+const HERO_PATHS = new Set(["/bookings", "/my-stay", "/orders", "/food", "/favorites", "/chats", "/notifications", "/profile", "/support", "/promote", "/host"]);
 
 /** Logo (icon only), the search pill, and the language (flag) button, on one row. */
 function HeaderRow() {
@@ -128,7 +130,7 @@ export function MobileTopBar() {
   const pathname = usePathname();
   const t = useTranslations("Nav");
   const { hidden, scrolled } = useScrollDirection();
-  if (NO_HEADER_PREFIXES.some((prefix) => pathname.startsWith(prefix))) return null;
+  if (NO_HEADER_PREFIXES.some((prefix) => pathname.startsWith(prefix)) || HERO_PATHS.has(pathname)) return null;
   if (!EXPLORE_PATHS.has(pathname)) {
     // Other pages (Favorites, Bookings, Chats, Profile): a slim header with the logo and language.
     return (

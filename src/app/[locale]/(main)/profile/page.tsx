@@ -1,3 +1,4 @@
+import { PageHero } from "@/components/shell/PageHero";
 import { InstallApp } from "@/features/pwa/InstallApp";
 import { Bell, ChevronRight, Heart, House, KeyRound, LifeBuoy, MessageSquare, QrCode, ShoppingBag, UserRound } from "lucide-react";
 import { notFound } from "next/navigation";
@@ -37,8 +38,9 @@ export default async function ProfilePage() {
   const row = "flex w-full items-center gap-4 py-4 text-[15px] text-ink transition-colors active:bg-ink/5";
 
   return (
-    <PageContainer className="max-w-2xl pt-6 pb-10 md:py-10">
-      <h1 className="mb-6 text-[26px] leading-8 md:text-[32px] md:leading-10 font-bold tracking-[-0.03em] text-ink">{t("title")}</h1>
+    <PageContainer className="max-w-2xl pt-6 pb-10 md:py-10 max-md:pt-0">
+      <PageHero title={t("title")} icon={UserRound} />
+      <h1 className="max-md:hidden mb-6 text-[26px] leading-8 md:text-[32px] md:leading-10 font-bold tracking-[-0.03em] text-ink">{t("title")}</h1>
 
       {/* Who you are */}
       <section className={`${card} flex flex-col items-center px-6 py-8 text-center`}>
