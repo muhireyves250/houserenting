@@ -4,6 +4,10 @@ import { securityHeaders } from "./src/lib/security-headers";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  experimental: {
+    // Pages already opened show again instantly from memory (data refreshes after any change, and after 3 minutes).
+    staleTimes: { dynamic: 180, static: 600 },
+  },
   serverExternalPackages: ["@node-rs/argon2"],
   images: {
     // In dev the browser loads photos straight from Unsplash/Cloudinary: on slow connections the local optimizer's

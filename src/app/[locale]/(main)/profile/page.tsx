@@ -8,9 +8,7 @@ import { db } from "@/lib/db";
 import { PageContainer } from "@/components/ui/PageContainer";
 import { SignOutButton } from "@/features/users/components/SignOutButton";
 import { getProfile } from "@/features/users/service";
-import { LocaleSwitcher } from "@/components/shell/LocaleSwitcher";
 import { Link } from "@/i18n/navigation";
-import { Suspense } from "react";
 import { requireUser } from "@/lib/session";
 import { unreadCount } from "@/features/notifications/service";
 
@@ -105,12 +103,6 @@ export default async function ProfilePage() {
           </Link>
         </li>
 
-        <li className="flex items-center justify-between gap-4 py-3 md:hidden">
-          <span className="text-[15px] text-ink">{tNav("language")}</span>
-          <Suspense>
-            <LocaleSwitcher />
-          </Suspense>
-        </li>
       </ul>
 
       <div className="mt-4 border-t border-line/70 pt-2">
