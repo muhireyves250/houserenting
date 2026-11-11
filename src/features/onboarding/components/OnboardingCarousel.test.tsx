@@ -8,7 +8,7 @@ describe("OnboardingCarousel", () => {
   it("walks through three slides and finishes on 'Get started'", async () => {
     const onFinish = vi.fn();
     renderWithIntl(<OnboardingCarousel onFinish={onFinish} />);
-    expect(screen.getByRole("heading", { name: "Space Rental" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "VIIPA" })).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Next" }));
     expect(screen.getByRole("heading", { name: "Search by location" })).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Next" }));
@@ -34,7 +34,7 @@ describe("OnboardingCarousel", () => {
     expect(screen.getByRole("heading", { name: "Search by location" })).toBeInTheDocument();
     fireEvent.pointerDown(stage, { clientX: 100, pointerId: 1 });
     fireEvent.pointerUp(stage, { clientX: 300, pointerId: 1 });
-    expect(screen.getByRole("heading", { name: "Space Rental" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "VIIPA" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "I already have an account" })).not.toBeInTheDocument();
   });
 });

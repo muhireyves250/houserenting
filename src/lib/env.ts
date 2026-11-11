@@ -14,7 +14,7 @@ const schema = z
     BETTER_AUTH_SECRET: z.string().min(32),
     BETTER_AUTH_URL: siteUrl,
     MAIL_DRIVER: z.enum(["resend", "file", "memory"]).default("file"),
-    MAIL_FROM: z.string().min(3).default("Space Rental <no-reply@spacerental.rw>"),
+    MAIL_FROM: z.string().min(3).default("VIIPA <no-reply@spacerental.rw>"),
     MAIL_OUTBOX_DIR: z.string().min(1).default(".mail-outbox"),
     RESEND_API_KEY: z.string().optional(),
     // Email verification for new accounts ("on" to require it). Off: sign-up signs people in at once, no email sent.

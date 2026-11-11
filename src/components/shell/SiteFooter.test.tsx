@@ -24,7 +24,7 @@ describe("SiteFooter", () => {
     expect(screen.getByRole("link", { name: "Long stays" })).toHaveAttribute("href", "/search?mode=long");
     expect(screen.getByRole("link", { name: "Short stays" })).toHaveAttribute("href", "/search?mode=short");
     expect(screen.getByRole("link", { name: "Start searching" })).toHaveAttribute("href", "/");
-    expect(screen.getByText("© 2026 Space Rental. All rights reserved.")).toBeInTheDocument();
+    expect(screen.getByText("© 2026 VIIPA. All rights reserved.")).toBeInTheDocument();
   });
 
   it("sends signed-out visitors to log in before account pages", () => {

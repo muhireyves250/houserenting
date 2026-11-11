@@ -36,9 +36,9 @@ export function Logo({
         <LogoMark className={markClassName} priority />
       </span>
       {withWordmark ? (
-        <span className={cn("text-lg font-bold tracking-tight text-ink", wordmarkClassName)}>Space Rental</span>
+        <span className={cn("text-lg font-bold tracking-tight text-ink", wordmarkClassName)}>VIIPA</span>
       ) : (
-        <span className="sr-only">Space Rental</span>
+        <span className="sr-only">VIIPA</span>
       )}
     </span>
   );

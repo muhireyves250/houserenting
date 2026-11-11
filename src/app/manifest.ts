@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Space Rental",
-    short_name: "Space Rental",
+    name: "VIIPA",
+    short_name: "VIIPA",
     description: "Rent houses, lodges and apartments in Rwanda.",
     start_url: "/",
     display: "standalone",

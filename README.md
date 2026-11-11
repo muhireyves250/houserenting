@@ -1,4 +1,4 @@
-# Space Rental
+# VIIPA
 
 Rent houses, lodges, apartments and rooms in Rwanda — by the hour, day, night (short-term) or month (from 6 months).
 Next.js 16 · PostgreSQL (Neon) · Prisma 7 · Better Auth · next-intl (en / rw / fr).

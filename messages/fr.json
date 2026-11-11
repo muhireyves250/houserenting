@@ -1,6 +1,6 @@
 {
   "Metadata": {
-    "title": "Space Rental",
+    "title": "VIIPA",
     "description": "Louez maisons, lodges et appartements au Rwanda — à l'heure, à la journée, à la nuit ou au mois."
   },
   "Nav": {
@@ -127,7 +127,7 @@
     "amenities": "Équipements"
   },
   "Onboarding": {
-    "slide1": "Space Rental",
+    "slide1": "VIIPA",
     "slide1Body": "Maisons, lodges et appartements — pour une heure, une nuit ou une année.",
     "slide2": "Recherchez par lieu",
     "slide2Body": "Trouvez un logement dans le quartier que vous aimez.",
@@ -148,7 +148,7 @@
     "createAccount": "Créer un compte",
     "logIn": "Se connecter",
     "haveAccount": "Vous avez déjà un compte ?",
-    "noAccount": "Nouveau sur Space Rental ?",
+    "noAccount": "Nouveau sur VIIPA ?",
     "forgotPassword": "Mot de passe oublié ?",
     "terms": "En continuant, vous acceptez nos Conditions d'utilisation et confirmez avoir lu notre Politique de confidentialité.",
     "checkEmailTitle": "Vérifiez votre e-mail",
@@ -184,7 +184,7 @@
       "emailInvalid": "Saisissez une adresse e-mail valide.",
       "suspended": "Ce compte est suspendu. Contactez l'assistance."
     },
-    "modalTitle": "Bienvenue sur Space Rental",
+    "modalTitle": "Bienvenue sur VIIPA",
     "welcomeBack": "Bon retour, {name}",
     "notYou": "Ce n'est pas vous ?",
     "createOne": "Créer un compte",
@@ -251,16 +251,16 @@
   },
   "Emails": {
     "greeting": "Bonjour {name},",
-    "verifySubject": "Confirmez votre e-mail pour Space Rental",
+    "verifySubject": "Confirmez votre e-mail pour VIIPA",
     "verifyBody": "Confirmez votre adresse e-mail pour terminer la création de votre compte.",
     "verifyButton": "Confirmer l'e-mail",
-    "resetSubject": "Réinitialisez votre mot de passe Space Rental",
+    "resetSubject": "Réinitialisez votre mot de passe VIIPA",
     "resetBody": "Nous avons reçu une demande de réinitialisation de votre mot de passe. Ce lien expire dans 1 heure.",
     "resetButton": "Réinitialiser le mot de passe",
     "linkFallback": "Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :",
     "ignore": "Si vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail.",
-    "footer": "Space Rental · Kigali, Rwanda",
-    "existingSubject": "Vous avez déjà un compte Space Rental",
+    "footer": "VIIPA · Kigali, Rwanda",
+    "existingSubject": "Vous avez déjà un compte VIIPA",
     "existingBody": "Quelqu'un (peut-être vous) vient d'essayer de créer un compte avec cet e-mail. Vous avez déjà un compte : connectez-vous, ou réinitialisez votre mot de passe si vous l'avez oublié.",
     "existingButton": "Se connecter"
   },
@@ -305,7 +305,7 @@
     "terms": "Conditions de location",
     "location": "Emplacement",
     "host": "Hôte",
-    "hostSince": "Sur Space Rental depuis {year}",
+    "hostSince": "Sur VIIPA depuis {year}",
     "prices": "Tarifs",
     "checkIn": "Arrivée à partir de {time}",
     "checkOut": "Départ avant {time}",
@@ -388,7 +388,7 @@
     "shareFacebook": "Facebook",
     "shareX": "X",
     "moreOptions": "Plus d'options",
-    "shareMessage": "Découvrez ce logement sur Space Rental : {title}",
+    "shareMessage": "Découvrez ce logement sur VIIPA : {title}",
     "saveTitle": "Enregistrer ce logement",
     "saveToFavorites": "Ajouter aux favoris",
     "removeFromFavorites": "Retirer des favoris",
@@ -557,7 +557,7 @@
     "rubavu": "Rubavu",
     "longStays": "Séjours longue durée",
     "language": "Langue",
-    "rights": "© {year} Space Rental. Tous droits réservés.",
+    "rights": "© {year} VIIPA. Tous droits réservés.",
     "madeIn": "Fait au Rwanda",
     "startSearching": "Commencer la recherche",
     "stays": "Séjours",
@@ -953,7 +953,7 @@
     "all": "Toutes",
     "dashboard": {
       "title": "Bonjour",
-      "subtitle": "{listings, plural, one {# logement est en ligne} other {# logements sont en ligne}} sur Space Rental.",
+      "subtitle": "{listings, plural, one {# logement est en ligne} other {# logements sont en ligne}} sur VIIPA.",
       "thisMonth": "Ce mois-ci",
       "kpi": {
         "bookings": "Réservations ce mois",
@@ -1137,7 +1137,7 @@
       "RESOLVED": "Résolue",
       "CLOSED": "Fermée"
     },
-    "staff": "Équipe Space Rental",
+    "staff": "Équipe VIIPA",
     "closedNote": "Cette demande est fermée. Ouvrez-en une nouvelle si besoin."
   },
   "Notifications": {
@@ -1519,7 +1519,7 @@
     "roomLink": "Lien permanent : {path}",
     "keepVisible": "Toujours visible (jamais masqué automatiquement après des « je n'aime pas »)",
     "teamTitle": "Équipe",
-    "teamIntro": "Ajoutez les personnes qui vous aident à gérer ce logement. Elles doivent d'abord avoir un compte Space Rental.",
+    "teamIntro": "Ajoutez les personnes qui vous aident à gérer ce logement. Elles doivent d'abord avoir un compte VIIPA.",
     "teamRole": {
       "MANAGER": "Gestionnaire",
       "RECEPTIONIST": "Réceptionniste"

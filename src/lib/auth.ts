@@ -31,7 +31,7 @@ function sendSafely(message: MailMessage, kind: string): Promise<void> {
 const localeOf = (user: unknown) => (user as { locale?: string }).locale;
 
 export const auth = betterAuth({
-  appName: "Space Rental",
+  appName: "VIIPA",
   baseURL: env.BETTER_AUTH_URL,
   trustedOrigins: vercelOrigins(),
   secret: env.BETTER_AUTH_SECRET,

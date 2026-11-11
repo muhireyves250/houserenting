@@ -60,7 +60,7 @@ describe("sign up", () => {
   it("sends the verification email in the user's language with a link to this app", async () => {
     await signUp("rw@example.com", "rw");
     const mail = await lastMailTo("rw@example.com");
-    expect(mail.subject).toBe("Emeza imeyili yawe kuri Space Rental");
+    expect(mail.subject).toBe("Emeza imeyili yawe kuri VIIPA");
     expect(linkIn(mail.text).startsWith(`${BASE}/api/auth/verify-email?token=`)).toBe(true);
   });
 
@@ -80,7 +80,7 @@ describe("sign up", () => {
     mailer.clear();
     await signUp("owner@example.com", "en").catch(() => undefined);
     const mail = await lastMailTo("owner@example.com");
-    expect(mail.subject).toBe("Vous avez déjà un compte Space Rental");
+    expect(mail.subject).toBe("Vous avez déjà un compte VIIPA");
     expect(linkIn(mail.text)).toBe(`${BASE}/fr/login`);
   });
 
@@ -139,7 +139,7 @@ describe("password reset", () => {
     mailer.clear();
     await auth.api.requestPasswordReset({ body: { email: "reset@example.com", redirectTo: "/en/reset-password" } });
     const mail = await lastMailTo("reset@example.com");
-    expect(mail.subject).toBe("Reset your Space Rental password");
+    expect(mail.subject).toBe("Reset your VIIPA password");
     const token = new URL(linkIn(mail.text)).pathname.split("/").at(-1)!;
 
     await auth.api.resetPassword({ body: { token, newPassword: "new-river-kivu-77" } });

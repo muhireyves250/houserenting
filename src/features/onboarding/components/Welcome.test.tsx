@@ -12,10 +12,10 @@ describe("Welcome", () => {
     vi.useFakeTimers();
     renderWithIntl(<Welcome />);
     expect(screen.getByTestId("logo-reveal")).toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "Space Rental" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "VIIPA" })).not.toBeInTheDocument();
     await act(async () => vi.advanceTimersByTimeAsync(1900));
     await act(async () => vi.advanceTimersByTimeAsync(600));
     expect(screen.queryByTestId("logo-reveal")).not.toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Space Rental" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "VIIPA" })).toBeInTheDocument();
   });
 });

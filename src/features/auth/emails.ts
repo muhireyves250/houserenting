@@ -35,7 +35,7 @@ function render(kind: Kind, { to, name, url, locale }: EmailInput): MailMessage 
 <html lang="${lang}"><body style="margin:0;background:#f2f2f2;font-family:Inter,Arial,sans-serif;color:#1a1c1e">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:32px 16px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border-radius:16px;padding:32px">
-<tr><td style="font-size:20px;font-weight:700;color:#0057b8;padding-bottom:24px">Space Rental</td></tr>
+<tr><td style="font-size:20px;font-weight:700;color:#0057b8;padding-bottom:24px">VIIPA</td></tr>
 <tr><td style="font-size:16px;padding-bottom:8px">${escapeHtml(greeting)}</td></tr>
 <tr><td style="font-size:16px;line-height:1.5;padding-bottom:24px">${escapeHtml(body)}</td></tr>
 <tr><td style="padding-bottom:24px"><a href="${href}" style="display:inline-block;background:#0057b8;color:#ffffff;text-decoration:none;font-weight:600;padding:14px 28px;border-radius:999px">${escapeHtml(button)}</a></td></tr>

@@ -103,7 +103,7 @@ export function AdminShell({
       <Link href="/admin" className="flex items-center gap-3 px-5 py-5">
         <LogoMark className="h-7" />
         <span className="flex flex-col leading-tight">
-          <span className="text-[15px] font-bold text-ink">Space Rental</span>
+          <span className="text-[15px] font-bold text-ink">VIIPA</span>
           <span className="text-xs font-semibold tracking-wide text-primary uppercase">{tAdmin("console")}</span>
         </span>
       </Link>

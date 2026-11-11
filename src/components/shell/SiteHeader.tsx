@@ -17,7 +17,7 @@ export async function SiteHeader({ user, orders = false }: { user: { name: strin
     <HeaderFrame>
       <div className="mx-auto flex h-[72px] max-w-7xl items-center gap-6 px-6 xl:gap-8">
         <Link href="/" className="shrink-0">
-          {/* Icon-only logo; "Space Rental" stays as the accessible name. Over the blue hero it sits on a white tile. */}
+          {/* Icon-only logo; "VIIPA" stays as the accessible name. Over the blue hero it sits on a white tile. */}
           <Logo
             markClassName="h-8"
             className="rounded-xl px-1.5 py-1 transition-colors duration-500 group-data-[overlay=true]/header:bg-white group-data-[overlay=true]/header:shadow-sm"

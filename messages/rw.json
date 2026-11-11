@@ -1,6 +1,6 @@
 {
   "Metadata": {
-    "title": "Space Rental",
+    "title": "VIIPA",
     "description": "Kodesha amazu, lodges n'amazu yo guturamo mu Rwanda — ku isaha, ku munsi, ku ijoro cyangwa ku kwezi."
   },
   "Nav": {
@@ -127,7 +127,7 @@
     "amenities": "Ibikoresho"
   },
   "Onboarding": {
-    "slide1": "Space Rental",
+    "slide1": "VIIPA",
     "slide1Body": "Amazu, lodges n'amazu yo guturamo — ku isaha, ijoro cyangwa umwaka.",
     "slide2": "Shakisha ukurikije ahantu",
     "slide2Body": "Shaka ahantu mu gace ukunda.",
@@ -148,7 +148,7 @@
     "createAccount": "Fungura konti",
     "logIn": "Injira",
     "haveAccount": "Usanzwe ufite konti?",
-    "noAccount": "Ubwa mbere kuri Space Rental?",
+    "noAccount": "Ubwa mbere kuri VIIPA?",
     "forgotPassword": "Wibagiwe ijambo ry'ibanga?",
     "terms": "Ukomeje, wemera Amabwiriza yacu kandi wemeza ko wasomye Politiki y'ibanga.",
     "checkEmailTitle": "Reba imeyili yawe",
@@ -184,7 +184,7 @@
       "emailInvalid": "Andika imeyili yemewe.",
       "suspended": "Iyi konti yarahagaritswe. Vugana n'ubufasha."
     },
-    "modalTitle": "Murakaza neza kuri Space Rental",
+    "modalTitle": "Murakaza neza kuri VIIPA",
     "welcomeBack": "Murakaza neza, {name}",
     "notYou": "Si wowe?",
     "createOne": "Fungura konti",
@@ -251,16 +251,16 @@
   },
   "Emails": {
     "greeting": "Muraho {name},",
-    "verifySubject": "Emeza imeyili yawe kuri Space Rental",
+    "verifySubject": "Emeza imeyili yawe kuri VIIPA",
     "verifyBody": "Emeza aderesi ya imeyili yawe kugira ngo urangize gufungura konti.",
     "verifyButton": "Emeza imeyili",
-    "resetSubject": "Hindura ijambo ry'ibanga rya Space Rental",
+    "resetSubject": "Hindura ijambo ry'ibanga rya VIIPA",
     "resetBody": "Twakiriye icyifuzo cyo guhindura ijambo ry'ibanga ryawe. Uyu murongo urangira mu isaha 1.",
     "resetButton": "Hindura ijambo ry'ibanga",
     "linkFallback": "Niba buto idakora, koporora uyu murongo uwushyire muri mushakisha yawe:",
     "ignore": "Niba atari wowe wabisabye, wirengagize iyi meyili.",
-    "footer": "Space Rental · Kigali, Rwanda",
-    "existingSubject": "Usanzwe ufite konti kuri Space Rental",
+    "footer": "VIIPA · Kigali, Rwanda",
+    "existingSubject": "Usanzwe ufite konti kuri VIIPA",
     "existingBody": "Umuntu (ushobora kuba ari wowe) yagerageje gufungura konti nshya akoresheje iyi meyili. Usanzwe ufite konti — injira, cyangwa uhindure ijambo ry'ibanga niba waryibagiwe.",
     "existingButton": "Injira"
   },
@@ -305,7 +305,7 @@
     "terms": "Amabwiriza y'ubukode",
     "location": "Aho iherereye",
     "host": "Nyir'inzu",
-    "hostSince": "Kuri Space Rental kuva {year}",
+    "hostSince": "Kuri VIIPA kuva {year}",
     "prices": "Ibiciro",
     "checkIn": "Kwinjira guhera {time}",
     "checkOut": "Gusohoka mbere ya {time}",
@@ -388,7 +388,7 @@
     "shareFacebook": "Facebook",
     "shareX": "X",
     "moreOptions": "Ubundi buryo",
-    "shareMessage": "Reba aha hantu kuri Space Rental: {title}",
+    "shareMessage": "Reba aha hantu kuri VIIPA: {title}",
     "saveTitle": "Bika aha hantu",
     "saveToFavorites": "Bika mu byo ukunda",
     "removeFromFavorites": "Kura mu byo ukunda",
@@ -557,7 +557,7 @@
     "rubavu": "Rubavu",
     "longStays": "Gukodesha igihe kirekire",
     "language": "Ururimi",
-    "rights": "© {year} Space Rental. Uburenganzira bwose burasigasiwe.",
+    "rights": "© {year} VIIPA. Uburenganzira bwose burasigasiwe.",
     "madeIn": "Byakorewe mu Rwanda",
     "startSearching": "Tangira gushakisha",
     "stays": "Amacumbi",
@@ -953,7 +953,7 @@
     "all": "Byose",
     "dashboard": {
       "title": "Murakaza neza",
-      "subtitle": "{listings, plural, one {Ahantu # haragaragara} other {Ahantu # haragaragara}} kuri Space Rental.",
+      "subtitle": "{listings, plural, one {Ahantu # haragaragara} other {Ahantu # haragaragara}} kuri VIIPA.",
       "thisMonth": "Uku kwezi",
       "kpi": {
         "bookings": "Ibyabitswe uku kwezi",
@@ -1137,7 +1137,7 @@
       "RESOLVED": "Byakemutse",
       "CLOSED": "Byafunzwe"
     },
-    "staff": "Itsinda rya Space Rental",
+    "staff": "Itsinda rya VIIPA",
     "closedNote": "Ubu busabe bwarafunzwe. Fungura ubundi niba ukeneye ubufasha."
   },
   "Notifications": {
@@ -1519,7 +1519,7 @@
     "roomLink": "Ihuza rihoraho: {path}",
     "keepVisible": "Ihore igaragara (ntihishwe ku buryo bwikora kubera abatayikunze)",
     "teamTitle": "Itsinda",
-    "teamIntro": "Ongeraho abantu bagufasha gucunga iyi nzu. Bagomba kubanza kugira konti kuri Space Rental.",
+    "teamIntro": "Ongeraho abantu bagufasha gucunga iyi nzu. Bagomba kubanza kugira konti kuri VIIPA.",
     "teamRole": {
       "MANAGER": "Ucunga inzu",
       "RECEPTIONIST": "Wakira abashyitsi"

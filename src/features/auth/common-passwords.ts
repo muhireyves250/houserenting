@@ -14,5 +14,5 @@ export const COMMON_PASSWORDS: ReadonlySet<string> = new Set([
   "pass1234", "internet", "samsung1", "google123", "facebook", "nokia123", "manchester",
   "liverpool", "arsenal1", "chelsea1", "barcelona", "realmadrid",
   "rwanda123", "rwanda2024", "rwanda2025", "rwanda2026", "kigali123", "kigali2026",
-  "spacerental", "space123",
+  "spacerental", "space123", "viipa", "viipa123",
 ]);

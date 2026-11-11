@@ -1,6 +1,6 @@
 {
   "Metadata": {
-    "title": "Space Rental",
+    "title": "VIIPA",
     "description": "Rent houses, lodges and apartments in Rwanda — by the hour, day, night or month."
   },
   "Nav": {
@@ -127,7 +127,7 @@
     "amenities": "Amenities"
   },
   "Onboarding": {
-    "slide1": "Space Rental",
+    "slide1": "VIIPA",
     "slide1Body": "Houses, lodges and apartments — for an hour, a night or a year.",
     "slide2": "Search by location",
     "slide2Body": "Find places in the neighborhood you love.",
@@ -148,7 +148,7 @@
     "createAccount": "Create account",
     "logIn": "Log in",
     "haveAccount": "Already have an account?",
-    "noAccount": "New to Space Rental?",
+    "noAccount": "New to VIIPA?",
     "forgotPassword": "Forgot password?",
     "terms": "By continuing, you agree to our Terms of Service and confirm that you have read our Privacy Policy.",
     "checkEmailTitle": "Check your email",
@@ -184,7 +184,7 @@
       "emailInvalid": "Enter a valid email address.",
       "suspended": "This account is suspended. Contact support."
     },
-    "modalTitle": "Welcome to Space Rental",
+    "modalTitle": "Welcome to VIIPA",
     "welcomeBack": "Welcome back, {name}",
     "notYou": "Not you?",
     "createOne": "Create an account",
@@ -251,16 +251,16 @@
   },
   "Emails": {
     "greeting": "Hello {name},",
-    "verifySubject": "Confirm your email for Space Rental",
+    "verifySubject": "Confirm your email for VIIPA",
     "verifyBody": "Confirm your email address to finish creating your account.",
     "verifyButton": "Confirm email",
-    "resetSubject": "Reset your Space Rental password",
+    "resetSubject": "Reset your VIIPA password",
     "resetBody": "We received a request to reset your password. This link expires in 1 hour.",
     "resetButton": "Reset password",
     "linkFallback": "If the button doesn't work, copy this link into your browser:",
     "ignore": "If you didn't request this, you can ignore this email.",
-    "footer": "Space Rental · Kigali, Rwanda",
-    "existingSubject": "You already have a Space Rental account",
+    "footer": "VIIPA · Kigali, Rwanda",
+    "existingSubject": "You already have a VIIPA account",
     "existingBody": "Someone (maybe you) just tried to create a new account with this email. You already have one — log in, or reset your password if you forgot it.",
     "existingButton": "Log in"
   },
@@ -305,7 +305,7 @@
     "terms": "Terms of rent",
     "location": "Location",
     "host": "Host",
-    "hostSince": "At Space Rental since {year}",
+    "hostSince": "At VIIPA since {year}",
     "prices": "Prices",
     "checkIn": "Check-in from {time}",
     "checkOut": "Check-out until {time}",
@@ -388,7 +388,7 @@
     "shareFacebook": "Facebook",
     "shareX": "X",
     "moreOptions": "More options",
-    "shareMessage": "Take a look at this place on Space Rental: {title}",
+    "shareMessage": "Take a look at this place on VIIPA: {title}",
     "saveTitle": "Save this place",
     "saveToFavorites": "Save to Favorites",
     "removeFromFavorites": "Remove from Favorites",
@@ -557,7 +557,7 @@
     "rubavu": "Rubavu",
     "longStays": "Long stays",
     "language": "Language",
-    "rights": "© {year} Space Rental. All rights reserved.",
+    "rights": "© {year} VIIPA. All rights reserved.",
     "madeIn": "Made in Rwanda",
     "startSearching": "Start searching",
     "stays": "Stays",
@@ -953,7 +953,7 @@
     "all": "All",
     "dashboard": {
       "title": "Good to see you",
-      "subtitle": "{listings, plural, one {# place is live} other {# places are live}} on Space Rental.",
+      "subtitle": "{listings, plural, one {# place is live} other {# places are live}} on VIIPA.",
       "thisMonth": "This month",
       "kpi": {
         "bookings": "Bookings this month",
@@ -1137,7 +1137,7 @@
       "RESOLVED": "Resolved",
       "CLOSED": "Closed"
     },
-    "staff": "Space Rental team",
+    "staff": "VIIPA team",
     "closedNote": "This request is closed. Start a new one if you need more help."
   },
   "Notifications": {
@@ -1519,7 +1519,7 @@
     "roomLink": "Permanent link: {path}",
     "keepVisible": "Keep visible (never hide automatically after dislikes)",
     "teamTitle": "Team",
-    "teamIntro": "Add people who help you run this place. They need an account on Space Rental first.",
+    "teamIntro": "Add people who help you run this place. They need an account on VIIPA first.",
     "teamRole": {
       "MANAGER": "Property manager",
       "RECEPTIONIST": "Receptionist"
