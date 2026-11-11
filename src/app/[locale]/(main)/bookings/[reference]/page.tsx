@@ -1,3 +1,4 @@
+import { PageHero } from "@/components/shell/PageHero";
 import { ChevronLeft, ChevronRight, House, LifeBuoy, MessageSquare, Navigation, Receipt } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -60,6 +61,7 @@ export default async function BookingPage({ params }: Props) {
     getLocale(),
     canReview(user.id, reference),
   ]);
+  const tRooms = await getTranslations("Rooms");
   const { listing, policySnapshot: policy } = booking;
   const holding = isHoldActive(booking, now);
   const [settings, claim] = await Promise.all([
@@ -72,15 +74,17 @@ export default async function BookingPage({ params }: Props) {
   const methodName = booking.paymentMethod === "mtn" ? tListings("mtnMomo") : booking.paymentMethod === "airtel" ? tListings("airtelMoney") : null;
 
   return (
-    <PageContainer className="max-w-3xl pt-6 pb-10 md:py-10">
-      <Link href="/bookings" className="mb-4 inline-flex items-center gap-1 text-sm text-muted transition-colors hover:text-ink print:hidden">
+    <PageContainer className="max-w-3xl pt-6 pb-10 max-md:pt-0 md:py-10">
+      {/* Phones: the place's photo is the top, like My stay. */}
+      <PageHero title={listing.title} icon={Receipt} photo={listing.photos[0]?.url ?? null} subtitle={`${t(`status.${booking.status}`)} · ${booking.reference}`} />
+      <Link href="/bookings" className="mb-4 inline-flex items-center gap-1 text-sm text-muted transition-colors hover:text-ink max-md:hidden print:hidden">
         <ChevronLeft className="size-4" aria-hidden="true" />
         {t("back")}
       </Link>
 
       {/* The place and where the booking stands */}
       <section className={cn(card, "flex flex-col gap-3 md:flex-row md:items-center md:gap-5")}>
-        <div className="flex items-center gap-3 md:contents">
+        <div className="flex items-center gap-3 max-md:hidden md:contents">
           <span className="relative flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-primary-soft text-primary md:size-32">
             {listing.photos[0] ? (
               <Image src={listing.photos[0].url} alt="" fill sizes="(min-width: 768px) 128px, 80px" className="object-cover" priority />
@@ -186,7 +190,15 @@ export default async function BookingPage({ params }: Props) {
             <span className="font-mono tracking-wider">{booking.reference}</span>
           </Row>
           <Row label={tListings("dates")}>{formatStayDates(locale, booking.checkIn, booking.checkOut)}</Row>
-          {booking.room && <Row label={t("room")}>{booking.room.name}</Row>}
+          {booking.room && (
+            <Row label={t("room")}>
+              {booking.room.name}
+              {/* The room number is given once the booking is paid. */}
+              {booking.roomNumber && ["CONFIRMED", "CHECKED_IN", "COMPLETED"].includes(booking.status) && (
+                <b className="ml-2 rounded-full bg-primary px-2.5 py-0.5 text-[12px] font-bold text-white">{tRooms("roomNumber", { number: booking.roomNumber })}</b>
+              )}
+            </Row>
+          )}
           {booking.rentalMode === "MONTHLY" && booking.months && (
             <Row label={t("rental")}>{t("rentalTerms", { months: booking.months, upfront: booking.upfrontMonths ?? booking.months })}</Row>
           )}

@@ -404,7 +404,7 @@ export async function claimOrderPayment(customerId: string, reference: string, t
   await db.$transaction(async (t) => {
     await t.foodOrder.update({ where: { id: order.id }, data: { paymentClaim: tx } });
     await audit(t, { actorId: customerId, action: "order.paymentClaim", entityType: "order", entityId: reference, data: { providerReference: tx } });
-    await notifyAdmins(t, "orderPaymentClaim", { reference, title: order.restaurant.name, total: order.total }, "/admin/restaurants");
+    await notifyAdmins(t, "orderPaymentClaim", { reference, title: order.restaurant.name, total: order.total }, "/admin/orders");
   });
   return { ok: true };
 }
@@ -454,5 +454,14 @@ export function ordersAwaitingPayment(take = 100) {
     orderBy: [{ paymentClaim: { sort: "desc", nulls: "last" } }, { createdAt: "desc" }],
     take,
     select: { reference: true, total: true, paymentClaim: true, createdAt: true, address: true, phone: true, restaurant: { select: { name: true } }, customer: { select: { name: true } } },
+  });
+}
+
+/** Staff: every kitchen's orders, newest first (open ones are picked out on the page). */
+export function allOrders(take = 150) {
+  return db.foodOrder.findMany({
+    orderBy: [{ createdAt: "desc" }],
+    take,
+    include: { items: true, customer: { select: { name: true } }, restaurant: { select: { name: true } } },
   });
 }

@@ -104,7 +104,7 @@ export default async function MyStayPage() {
   // Laundry: at places that offer it, once the paid stay has started (free when the price is 0).
   const laundryOn = paid && current.listing.laundryPricePerKg !== null && current.checkIn <= today;
   const [laundry, settings] = laundryOn ? await Promise.all([stayLaundry(current.id), getSettings()]) : [[], null];
-  const [reviewable, tReviews] = await Promise.all([canReview(user.id, current.reference), getTranslations("Reviews")]);
+  const [reviewable, tReviews, tRooms] = await Promise.all([canReview(user.id, current.reference), getTranslations("Reviews"), getTranslations("Rooms")]);
   const moment = stayMoment(current, today);
   const underWay = moment.kind === "during" || moment.kind === "departure" || (paid && moment.kind === "arrival");
   const { listing } = current;
@@ -148,7 +148,7 @@ export default async function MyStayPage() {
 
   return (
     <PageContainer className="max-w-2xl pt-5 pb-10 md:py-10 max-md:pt-0">
-      <PageHero title={t("title")} icon={KeyRound} photo={listing.photos[0]?.url ?? null} subtitle={[listing.title, current.room?.name].filter(Boolean).join(" · ")} />
+      <PageHero title={t("title")} icon={KeyRound} photo={listing.photos[0]?.url ?? null} subtitle={[listing.title, current.room?.name, paid && current.roomNumber ? tRooms("roomNumber", { number: current.roomNumber }) : null].filter(Boolean).join(" · ")} />
       <h1 className="max-md:hidden mb-4 text-[26px] leading-8 font-bold tracking-[-0.03em] text-ink md:text-[32px] md:leading-10">{t("title")}</h1>
 
       <div className="flex flex-col gap-4">
@@ -243,6 +243,15 @@ export default async function MyStayPage() {
               <dt className="text-muted">{t("guests")}</dt>
               <dd className="font-semibold text-ink">{current.guests}</dd>
             </div>
+            {current.room && (
+              <div className="flex justify-between gap-4 py-2.5">
+                <dt className="text-muted">{tRooms("yourRoom")}</dt>
+                <dd className="text-right font-semibold text-ink">
+                  {current.room.name}
+                  {paid && current.roomNumber && <span className="ml-2 rounded-full bg-primary px-2.5 py-0.5 text-[12px] font-bold text-white">{tRooms("roomNumber", { number: current.roomNumber })}</span>}
+                </dd>
+              </div>
+            )}
             <div className="flex justify-between gap-4 py-2.5">
               <dt className="text-muted">{t("reference")}</dt>
               <dd className="font-mono font-semibold text-ink">{current.reference}</dd>

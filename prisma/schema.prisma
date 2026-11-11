@@ -348,6 +348,8 @@ model Booking {
   /// Set when one room is booked; null = the whole place.
   roomId         String?
   room           Room?            @relation(fields: [roomId], references: [id], onDelete: Restrict)
+  /// The room number given to the guest when the room type has several (e.g. "102").
+  roomNumber     String?
   status         BookingStatus    @default(PENDING_PAYMENT)
   checkIn        DateTime         @db.Date
   checkOut       DateTime         @db.Date
@@ -576,6 +578,9 @@ model Room {
   maxGuests   Int
   facilities  Facility[]
   status      RoomStatus @default(AVAILABLE)
+  /// Several identical rooms of this type (e.g. "101", "102"): each can be booked once at a time and the guest is
+  /// given a free one. Empty = a single room.
+  numbers     String[]   @default([])
   rates       RoomRate[]
   position    Int        @default(0)
   createdAt   DateTime   @default(now())

@@ -640,6 +640,7 @@ function PlanFields({ rate }: { rate: BookingRate }) {
           className="bg-transparent text-sm text-ink outline-none"
         />
       </label>
+      {unit === "DAY" && quantity === 1 && <p className="border-t border-line-strong px-3.5 py-2 text-[12px] text-muted">{t("dayUseHint")}</p>}
       {unit === "HOUR" && (
         <label htmlFor={timeId} className="flex flex-col gap-0.5 border-t border-line-strong px-3.5 py-2.5 transition-colors hover:bg-canvas">
           <span className="text-xs font-semibold text-ink">{t("startTime")}</span>

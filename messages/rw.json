@@ -476,7 +476,7 @@
     "identityPrivacy": "Itsinda ryacu ryonyine ni ryo ribona aya makuru. Akoreshwa mu masezerano y'ubukode.",
     "by": {
       "HOUR": "Ku isaha",
-      "DAY": "Ku munsi",
+      "DAY": "Ku manywa gusa (nta joro)",
       "NIGHT": "Ku ijoro",
       "WEEK": "Ku cyumweru",
       "MONTH": "Ku kwezi",
@@ -522,7 +522,8 @@
     "idAtCheckIn": "Abashyitsi berekana indangamuntu bahageze",
     "feesIncluded": "Amafaranga yose arimo",
     "talkToUs": "Ufite ikibazo? Vugana na VIIPA",
-    "talkToUsBody": "Itsinda ryacu ryita kuri iyi nzu no ku ifatwa ryawe. Tubaze icyo ushaka mbere cyangwa mu gihe ucumbitse."
+    "talkToUsBody": "Itsinda ryacu ryita kuri iyi nzu no ku ifatwa ryawe. Tubaze icyo ushaka mbere cyangwa mu gihe ucumbitse.",
+    "dayUseHint": "Hitamo itariki imwe: ukoresha aho hantu uwo munsi ukagenda nimugoroba."
   },
   "Facility": {
     "KITCHEN": "Igikoni",
@@ -781,7 +782,8 @@
       "promoters": "Abamamaza",
       "reports": "Raporo",
       "messages": "Ubutumwa",
-      "laundry": "Kumesa imyenda"
+      "laundry": "Kumesa imyenda",
+      "orders": "Ibyatumijwe (ibiryo)"
     },
     "count": {
       "listings": "Ahantu ho kugenzura",
@@ -1222,7 +1224,13 @@
     "wholePlace": "Ahantu hose",
     "choose": "Hitamo icyumba",
     "perNight": "/ ijoro",
-    "howBooked": "Uko iki cyumba kibikwa"
+    "howBooked": "Uko iki cyumba kibikwa",
+    "typeName": "Ubwoko bw'icyumba (urugero: Garden Double)",
+    "numbers": "Nimero z'ibyumba by'ubu bwoko",
+    "numbersHint": "urugero: 101, 102, 103 (siga ubusa niba ari icyumba kimwe)",
+    "roomsCount": "{count, plural, one {Icyumba #} other {Ibyumba #}}",
+    "yourRoom": "Icyumba cyawe",
+    "roomNumber": "Icyumba {number}"
   },
   "Settings": {
     "note": "Siga ahantu ubusa kugeza icyemezo gifashwe: nta mafaranga yakwa kandi nta kintu gisezeranywa ku hasigaye ubusa. Buri mpinduka yandikwa mu nyandiko z'ibikorwa, kandi ibyabitswe bigumana igenamiterere ryariho.",
@@ -2018,7 +2026,13 @@
     "removeOrder": "Siba",
     "removeConfirm": "Siba ibi byahagaritswe ku rutonde rwawe?",
     "cancelledNoReason": "Ibyo watumije byahagaritswe.",
-    "payOnDeliveryOld": "Byishyuwe ubyakiriye."
+    "payOnDeliveryOld": "Byishyuwe ubyakiriye.",
+    "staffOrders": {
+      "intro": "Ibyo abashyitsi bose batumije, kuva ku kwishyura kugeza mu cyumba. Emeza ubwishyu, hanyuma ukomeze buri gikorwa kugeza bigezeyo.",
+      "open": "Ibiri gukorwa",
+      "noOpen": "Nta biri gukorwa.",
+      "done": "Ibyarangiye"
+    }
   },
   "Promoters": {
     "title": "Kwamamaza no kwinjiza",

@@ -10,12 +10,12 @@ import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { formatRWF } from "@/lib/format";
 import { removeRoomAction, saveRoomAction, setRoomStatusAction } from "../actions";
-import { ROOM_STATUSES, type RoomInput, type RoomStatus } from "../validation";
+import { parseRoomNumbers, ROOM_STATUSES, type RoomInput, type RoomStatus } from "../validation";
 
 type Room = RoomInput & { id: string; status: RoomStatus };
 
 type Unit = RoomInput["rates"][number]["unit"];
-const emptyRoom = (units: readonly Unit[]): RoomInput => ({ name: "", description: "", maxGuests: 2, rates: [{ unit: units[0] ?? "NIGHT", price: 0 }], facilities: [] });
+const emptyRoom = (units: readonly Unit[]): RoomInput => ({ name: "", description: "", maxGuests: 2, rates: [{ unit: units[0] ?? "NIGHT", price: 0 }], facilities: [], numbers: [] });
 
 const STATUS_TONE: Record<RoomStatus, string> = {
   AVAILABLE: "text-emerald-700",
@@ -59,6 +59,7 @@ export function RoomsEditor({ listingId, rooms, units }: { listingId: string; ro
                 <p className="text-[15px] font-semibold text-ink">{room.name}</p>
                 <p className="text-[13px] text-muted">
                   {room.rates.map((r) => `${formatRWF(r.price, locale)} ${tListings(`perUnit.${r.unit}`)}`).join(" · ")} · {t("guests", { count: room.maxGuests })}
+                  {(room.numbers?.length ?? 0) > 0 && ` · ${t("roomsCount", { count: room.numbers!.length })}: ${room.numbers!.join(", ")}`}
                 </p>
               </div>
               <label className="flex items-center gap-2 text-[13px] text-muted">
@@ -130,6 +131,7 @@ function RoomForm({
   const tListings = useTranslations("Listings");
   const tFacility = useTranslations("Facility");
   const [room, setRoom] = useState<RoomInput>(initial);
+  const [numbersText, setNumbersText] = useState((initial.numbers ?? []).join(", "));
   const set = <K extends keyof RoomInput>(key: K, value: RoomInput[K]) => setRoom((r) => ({ ...r, [key]: value }));
   const rates = room.rates ?? [];
   const valid = room.name.trim().length >= 2 && rates.length > 0 && rates.every((r) => r.price >= 100) && room.maxGuests >= 1;
@@ -139,7 +141,17 @@ function RoomForm({
   const setPrice = (unit: Unit, price: number) => set("rates", rates.map((r) => (r.unit === unit ? { ...r, price } : r)));
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-primary/40 bg-primary/[0.02] p-4">
-      <Field label={t("name")} value={room.name} maxLength={60} onChange={(e) => set("name", e.target.value)} />
+      <Field label={t("typeName")} value={room.name} maxLength={60} onChange={(e) => set("name", e.target.value)} />
+      {/* Several identical rooms of this type: list their numbers; each guest is given a free one. */}
+      <Field
+        label={t("numbers")}
+        value={numbersText}
+        placeholder={t("numbersHint")}
+        onChange={(e) => {
+          setNumbersText(e.target.value);
+          set("numbers", parseRoomNumbers(e.target.value));
+        }}
+      />
       <Field label={t("maxGuests")} type="number" min={1} value={room.maxGuests || ""} onChange={(e) => set("maxGuests", Number(e.target.value) || 0)} />
       {/* How this room is booked, each with its own price. */}
       <p className="text-xs font-semibold text-muted">{t("howBooked")}</p>

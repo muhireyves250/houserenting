@@ -476,7 +476,7 @@
     "identityPrivacy": "Seule notre équipe voit ces informations. Elles servent au contrat de location.",
     "by": {
       "HOUR": "À l'heure",
-      "DAY": "À la journée",
+      "DAY": "En journée (sans nuit)",
       "NIGHT": "À la nuit",
       "WEEK": "À la semaine",
       "MONTH": "Au mois",
@@ -522,7 +522,8 @@
     "idAtCheckIn": "Les voyageurs présentent leur pièce d'identité à l'arrivée",
     "feesIncluded": "Tous frais compris",
     "talkToUs": "Des questions ? Parlez à VIIPA",
-    "talkToUsBody": "Notre équipe s'occupe de ce logement et de votre réservation. Posez-nous vos questions avant ou pendant votre séjour."
+    "talkToUsBody": "Notre équipe s'occupe de ce logement et de votre réservation. Posez-nous vos questions avant ou pendant votre séjour.",
+    "dayUseHint": "Choisissez une date : vous profitez du lieu ce jour-là et partez le soir même."
   },
   "Facility": {
     "KITCHEN": "Cuisine",
@@ -781,7 +782,8 @@
       "promoters": "Promoteurs",
       "reports": "Rapports",
       "messages": "Messages",
-      "laundry": "Blanchisserie"
+      "laundry": "Blanchisserie",
+      "orders": "Commandes repas"
     },
     "count": {
       "listings": "Annonces à vérifier",
@@ -1222,7 +1224,13 @@
     "wholePlace": "Le logement entier",
     "choose": "Choisir une chambre",
     "perNight": "/ nuit",
-    "howBooked": "Comment cette chambre se réserve"
+    "howBooked": "Comment cette chambre se réserve",
+    "typeName": "Type de chambre (ex. Double jardin)",
+    "numbers": "Numéros des chambres de ce type",
+    "numbersHint": "ex. 101, 102, 103 (vide pour une seule chambre)",
+    "roomsCount": "{count, plural, one {# chambre} other {# chambres}}",
+    "yourRoom": "Votre chambre",
+    "roomNumber": "Chambre {number}"
   },
   "Settings": {
     "note": "Laissez un champ vide tant que la décision n'est pas prise : rien n'est facturé ni promis pour un champ vide. Chaque modification est inscrite au journal d'audit, et les réservations gardent les paramètres en vigueur à leur création.",
@@ -2018,7 +2026,13 @@
     "removeOrder": "Supprimer",
     "removeConfirm": "Supprimer cette commande annulée de votre liste ?",
     "cancelledNoReason": "Cette commande a été annulée.",
-    "payOnDeliveryOld": "Payée à la réception."
+    "payOnDeliveryOld": "Payée à la réception.",
+    "staffOrders": {
+      "intro": "Toutes les commandes des voyageurs, du paiement à la chambre. Confirmez les paiements, puis faites avancer chaque commande jusqu'à la livraison.",
+      "open": "Commandes en cours",
+      "noOpen": "Aucune commande en cours.",
+      "done": "Commandes terminées"
+    }
   },
   "Promoters": {
     "title": "Promouvoir et gagner",

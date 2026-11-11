@@ -60,7 +60,7 @@ export type SeedListing = {
   roomList?: SeedRoom[];
 };
 
-export type SeedRoom = { name: string; description: string; maxGuests: number; facilities: Facility[]; rates: { unit: "DAY" | "NIGHT"; price: number }[] };
+export type SeedRoom = { name: string; description: string; maxGuests: number; facilities: Facility[]; rates: { unit: "DAY" | "NIGHT"; price: number }[]; numbers?: string[] };
 
 const photo = (id: string) => `https://images.unsplash.com/photo-${id}`;
 
@@ -263,7 +263,7 @@ export const SEED_LISTINGS: SeedListing[] = [
     laundryPricePerKg: 1500,
     roomList: [
       { name: "Volcano View Suite", description: "King bed and a window onto the Virunga volcanoes.", maxGuests: 2, facilities: ["WIFI", "HOT_WATER"], rates: [{ unit: "NIGHT", price: 120000 }, { unit: "DAY", price: 60000 }] },
-      { name: "Garden Double", description: "Double bed, opens onto the garden.", maxGuests: 2, facilities: ["WIFI", "HOT_WATER"], rates: [{ unit: "NIGHT", price: 90000 }, { unit: "DAY", price: 45000 }] },
+      { name: "Garden Double", description: "Double bed, opens onto the garden.", maxGuests: 2, facilities: ["WIFI", "HOT_WATER"], rates: [{ unit: "NIGHT", price: 90000 }, { unit: "DAY", price: 45000 }], numbers: ["201", "202", "203"] },
       { name: "Family Room", description: "A double and two singles, by the fireplace.", maxGuests: 4, facilities: ["WIFI", "HOT_WATER", "TV"], rates: [{ unit: "NIGHT", price: 150000 }, { unit: "DAY", price: 75000 }] },
     ],
   },

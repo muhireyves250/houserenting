@@ -56,6 +56,17 @@ beforeEach(async () => {
 });
 
 describe("room-by-room and whole-place bookings", () => {
+  it("a room type with numbered rooms gives each guest a free number, and is only booked when all are taken", async () => {
+    await saveRoom({ id: "admin", role: "ADMIN" }, "lodge", roomA, { ...room, name: "Garden Double", rates: [{ unit: "NIGHT", price: 40000 }], numbers: ["101", "102"] });
+    expect((await createBooking(stay({ roomId: roomA }), NOW)).ok).toBe(true);
+    expect(roomStatusOn(await bookedRanges("lodge", NOW), roomA, "2026-11-01")).toEqual({ free: true }); // one of two left
+    expect((await createBooking(stay({ guestId: "g2", roomId: roomA }), NOW)).ok).toBe(true);
+    expect(await createBooking(stay({ guestId: "g2", roomId: roomA, checkIn: "2026-11-02", checkOut: "2026-11-04" }), NOW)).toEqual({ ok: false, error: "unavailable" });
+    const numbers = (await db.booking.findMany({ where: { roomId: roomA }, select: { roomNumber: true } })).map((b) => b.roomNumber).sort();
+    expect(numbers).toEqual(["101", "102"]);
+    expect(roomStatusOn(await bookedRanges("lodge", NOW), roomA, "2026-11-01")).toEqual({ free: false, freeFrom: "2026-11-03" });
+  });
+
   it("books a room for day use (no night) and shows it booked for that day only", async () => {
     await db.listing.update({ where: { id: "lodge" }, data: { rates: { create: [{ unit: "DAY", price: 100000, minUnits: 1, dayStartTime: "08:00", dayEndTime: "20:00" }] } } });
     await saveRoom({ id: "admin", role: "ADMIN" }, "lodge", roomA, { ...room, name: "Room A", rates: [{ unit: "NIGHT", price: 40000 }, { unit: "DAY", price: 20000 }] });

@@ -102,7 +102,7 @@ function Categories() {
 }
 
 // Pages with their own full-bleed top (listing photos) get no header.
-const NO_HEADER_PREFIXES = ["/listings/", "/restaurants/", "/chats/", "/orders/"];
+const NO_HEADER_PREFIXES = ["/listings/", "/restaurants/", "/chats/", "/orders/", "/bookings/"];
 // Pages that open with their own blue top (PageHero): no logo bar above it.
 const HERO_PATHS = new Set(["/bookings", "/my-stay", "/orders", "/food", "/favorites", "/chats", "/notifications", "/profile", "/support", "/promote", "/host", "/profile/personal"]);
 

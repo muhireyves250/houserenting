@@ -66,7 +66,7 @@ export default async function AdminBookingPage({ params }: Props) {
             <Facts
               rows={[
                 { label: t("col.place"), value: <Link href={`/admin/listings/${b.listing.id}`} className="text-primary hover:underline">{b.listing.title}</Link> },
-                ...(b.room ? [{ label: tBookings("room"), value: b.room.name }] : []),
+                ...(b.room ? [{ label: tBookings("room"), value: b.roomNumber ? `${b.room.name} · ${b.roomNumber}` : b.room.name }] : []),
                 { label: t("col.when"), value: formatStayDates(locale, iso(b.checkIn), iso(b.checkOut)) },
                 ...(b.unit === "HOUR" ? [{ label: tBookings("time"), value: time.formatRange(b.startAt, b.endAt) }] : []),
                 { label: t("length"), value: tListings(`unitCount.${b.unit}`, { count: b.quantity }) },

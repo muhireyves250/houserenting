@@ -31,6 +31,7 @@ const STAY_SELECT = {
   refundAmount: true,
   holdExpiresAt: true,
   room: { select: { name: true } },
+  roomNumber: true,
   policySnapshot: true,
   listing: {
     select: {

@@ -161,7 +161,7 @@ export async function createRentalBooking(request: RentalRequest, now: Date = ne
 
   // What is being booked: the whole place at its rate for this unit, or one available room at the room's rate.
   let base: number;
-  let room: { id: string; name: string } | null = null;
+  let room: { id: string; name: string; numbers: string[] } | null = null;
   if (roomId === null) {
     if (listing.bookingModel === "ROOM_BY_ROOM") return { ok: false, error: "notFound" };
     if (!rate) return { ok: false, error: "notOffered" };
@@ -175,7 +175,7 @@ export async function createRentalBooking(request: RentalRequest, now: Date = ne
     if (!roomRate) return { ok: false, error: "notOffered" };
     if (guests > found.maxGuests) return { ok: false, error: "invalid" };
     base = roomRate.price;
-    room = { id: found.id, name: found.name };
+    room = { id: found.id, name: found.name, numbers: found.numbers };
   }
   // Length and opening hours follow the place's rules for this unit (when set).
   if (rate && (quantity < rate.minUnits || (rate.maxUnits !== null && quantity > rate.maxUnits))) return { ok: false, error: "stayLength" };
@@ -243,6 +243,7 @@ export async function createRentalBooking(request: RentalRequest, now: Date = ne
     startAt: period.startAt,
     endAt: period.endAt,
     roomId: room?.id ?? null,
+    roomNumbers: room?.numbers ?? [],
     promoId: promo?.id ?? null,
     identity,
     now,
@@ -292,6 +293,8 @@ async function holdAndInsert(args: {
   startAt: Date;
   endAt: Date;
   roomId: string | null;
+  /** The room type's numbered rooms (a free one is given to the guest); empty = a single room. */
+  roomNumbers?: string[];
   promoId: string | null;
   now: Date;
   /** Monthly rentals: identity details, kept apart from the booking and shown to staff only. */
@@ -305,7 +308,7 @@ async function holdAndInsert(args: {
       await db.$transaction(async (tx) => {
         await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${listingId}))`;
         await expireHolds(tx, { listingId }, now);
-        const clash = await tx.booking.findFirst({
+        const clashes = await tx.booking.findMany({
           where: {
             listingId,
             status: { in: [...BLOCKING_STATUSES] },
@@ -313,9 +316,17 @@ async function holdAndInsert(args: {
             endAt: { gt: startAt },
             ...(roomId ? { OR: [{ roomId }, { roomId: null }] } : {}),
           },
-          select: { id: true },
+          select: { roomId: true, roomNumber: true },
         });
-        if (clash) throw new Unavailable();
+        // A room type with numbered rooms: give the first number nobody holds for this time.
+        const numbers = args.roomNumbers ?? [];
+        let roomNumber: string | null = null;
+        if (roomId && numbers.length > 0) {
+          if (clashes.some((c) => c.roomId === null)) throw new Unavailable();
+          const taken = new Set(clashes.map((c) => c.roomNumber));
+          roomNumber = numbers.find((n) => !taken.has(n)) ?? null;
+          if (!roomNumber) throw new Unavailable();
+        } else if (clashes.length > 0) throw new Unavailable();
         // Maintenance / unavailable / offline blocks: the whole place blocks everything; a room block blocks that room
         // (and a whole-place booking, which needs every room).
         const blocked = await tx.availabilityBlock.findFirst({
@@ -343,6 +354,7 @@ async function holdAndInsert(args: {
             listingId,
             guestId,
             roomId,
+            roomNumber,
             checkIn: asDate(checkIn),
             checkOut: asDate(checkOut),
             startAt,
@@ -393,6 +405,10 @@ export async function bookedRanges(listingId: string, now: Date = new Date()): P
     select: { checkIn: true, checkOut: true, roomId: true },
     orderBy: { checkIn: "asc" },
   });
+  // Room types with several numbered rooms are only taken on days when every one of them is booked.
+  const multi = new Map(
+    (await db.room.findMany({ where: { listingId }, select: { id: true, numbers: true } })).filter((r) => r.numbers.length > 1).map((r) => [r.id, r.numbers.length]),
+  );
   const blocks = await db.availabilityBlock.findMany({
     where: { listingId, endedAt: null, OR: [{ endsAt: null }, { endsAt: { gt: now } }] },
     select: { startsAt: true, endsAt: true, roomId: true },
@@ -406,7 +422,26 @@ export async function bookedRanges(listingId: string, now: Date = new Date()): P
     const checkOut = end.getTime() + 2 * 60 * 60 * 1000 === Date.parse(`${endDay}T00:00:00Z`) ? endDay : asISO(new Date(Date.parse(`${endDay}T00:00:00Z`) + 86_400_000));
     return { checkIn: kigaliDay(b.startsAt), checkOut, roomId: b.roomId };
   });
-  return [...rows.map((r) => ({ checkIn: asISO(r.checkIn), checkOut: asISO(r.checkOut), roomId: r.roomId })), ...blockRanges];
+  const singles = rows.filter((r) => !r.roomId || !multi.has(r.roomId)).map((r) => ({ checkIn: asISO(r.checkIn), checkOut: asISO(r.checkOut), roomId: r.roomId }));
+  const full: (BookedRange & { roomId: string | null })[] = [];
+  for (const [roomId, units] of multi) {
+    const perDay = new Map<string, number>();
+    for (const r of rows.filter((b) => b.roomId === roomId)) {
+      for (let d = r.checkIn.getTime(); d < r.checkOut.getTime(); d += 86_400_000) {
+        const key = new Date(d).toISOString().slice(0, 10);
+        perDay.set(key, (perDay.get(key) ?? 0) + 1);
+      }
+    }
+    // Merge the fully booked days into ranges.
+    const days = [...perDay].filter(([, n]) => n >= units).map(([d]) => d).sort();
+    for (const d of days) {
+      const last = full.at(-1);
+      const next = new Date(Date.parse(`${d}T00:00:00Z`) + 86_400_000).toISOString().slice(0, 10);
+      if (last && last.roomId === roomId && last.checkOut === d) last.checkOut = next;
+      else full.push({ checkIn: d, checkOut: next, roomId });
+    }
+  }
+  return [...singles, ...full, ...blockRanges];
 }
 
 const GUEST_SELECT = {
@@ -433,6 +468,7 @@ const GUEST_SELECT = {
   total: true,
   currency: true,
   room: { select: { name: true } },
+  roomNumber: true,
   promoCode: { select: { code: true } },
   payments: { where: { status: "SUCCEEDED" }, select: { provider: true, providerReference: true, createdAt: true }, take: 1 },
   paymentMethod: true,

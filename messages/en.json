@@ -476,7 +476,7 @@
     "identityPrivacy": "Only our staff can see these details. They're used for the rental agreement.",
     "by": {
       "HOUR": "By the hour",
-      "DAY": "By the day",
+      "DAY": "Day use (no night)",
       "NIGHT": "By the night",
       "WEEK": "By the week",
       "MONTH": "By the month",
@@ -522,7 +522,8 @@
     "idAtCheckIn": "Guests show their ID at check-in",
     "feesIncluded": "All fees included",
     "talkToUs": "Questions? Talk to VIIPA",
-    "talkToUsBody": "Our team looks after this place and your booking. Ask us anything before or during your stay."
+    "talkToUsBody": "Our team looks after this place and your booking. Ask us anything before or during your stay.",
+    "dayUseHint": "Pick one date: you use the place that day and leave the same evening."
   },
   "Facility": {
     "KITCHEN": "Kitchen",
@@ -781,7 +782,8 @@
       "promoters": "Promoters",
       "reports": "Reports",
       "messages": "Messages",
-      "laundry": "Laundry"
+      "laundry": "Laundry",
+      "orders": "Food orders"
     },
     "count": {
       "listings": "Listings to review",
@@ -1222,7 +1224,13 @@
     "wholePlace": "The whole place",
     "choose": "Choose a room",
     "perNight": "/ night",
-    "howBooked": "How this room is booked"
+    "howBooked": "How this room is booked",
+    "typeName": "Room type (e.g. Garden Double)",
+    "numbers": "Room numbers of this type",
+    "numbersHint": "e.g. 101, 102, 103 (leave empty for a single room)",
+    "roomsCount": "{count, plural, one {# room} other {# rooms}}",
+    "yourRoom": "Your room",
+    "roomNumber": "Room {number}"
   },
   "Settings": {
     "note": "Leave a field empty until the business decision is made: nothing is charged or promised for empty fields. Every change is recorded in the audit log, and bookings keep the settings they were made with.",
@@ -2018,7 +2026,13 @@
     "removeOrder": "Remove",
     "removeConfirm": "Remove this cancelled order from your list?",
     "cancelledNoReason": "This order was cancelled.",
-    "payOnDeliveryOld": "Paid when you received it."
+    "payOnDeliveryOld": "Paid when you received it.",
+    "staffOrders": {
+      "intro": "Every guest's food order, from payment to their room. Confirm payments, then move each order on until it's delivered.",
+      "open": "Orders in progress",
+      "noOpen": "No orders in progress.",
+      "done": "Finished orders"
+    }
   },
   "Promoters": {
     "title": "Promote and earn",
