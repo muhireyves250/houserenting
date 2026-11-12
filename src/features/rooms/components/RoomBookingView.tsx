@@ -1,4 +1,4 @@
-import { ArrowLeft, ChevronLeft, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ChevronLeft, MessageCircle, ShieldCheck } from "lucide-react";
 import { descriptionOfRoom, photosOfRoom } from "@/features/rooms/validation";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -7,6 +7,7 @@ import { bookableWindow } from "@/features/bookings/availability";
 import { feesFor } from "@/features/bookings/money";
 import { bookedForRoom } from "@/features/bookings/service";
 import { BookingCard, MobileBookingBar, MobileBookingPlan, StayCalendar, StayProvider } from "@/features/listings/components/detail/Booking";
+import { MessageHostButton } from "@/features/chats/components/MessageHostButton";
 import { DetailSection } from "@/features/listings/components/detail/DetailSection";
 import { FACILITY_ICONS } from "@/features/listings/components/detail/facility-icons";
 import { ListingPhotos } from "@/features/listings/components/detail/ListingPhotos";
@@ -139,6 +140,15 @@ export async function RoomBookingView({ listingId, roomId, number: asked }: { li
               <p className="mt-1 text-[15px] text-ink/80">
                 {listing.district}, {listing.city}
               </p>
+              {/* A question about this room: write to VIIPA. */}
+              <MessageHostButton
+                listingId={listing.id}
+                signedIn={user !== null}
+                className="mt-3 inline-flex items-center gap-2 rounded-full border-[1.5px] border-primary/40 bg-surface px-4 py-2 text-[14px] font-semibold text-primary transition-[border-color,transform] duration-300 hover:border-primary active:scale-95 disabled:opacity-60"
+              >
+                <MessageCircle className="size-4" aria-hidden="true" />
+                {t("messageHost")}
+              </MessageHostButton>
             </div>
 
             {about && (

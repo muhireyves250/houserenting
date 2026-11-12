@@ -1,4 +1,4 @@
-import { AirVent, ArrowLeft, CalendarClock, ChevronLeft, CookingPot, KeyRound, Laptop, type LucideIcon, Microwave, PawPrint, ShieldCheck, ShowerHead, SquareParking, Star, Tv, Utensils, WashingMachine, WavesLadder, Wifi, Zap, UtensilsCrossed } from "lucide-react";
+import { MessageCircle, ArrowLeft, CalendarClock, ChevronLeft, CookingPot, KeyRound, Laptop, type LucideIcon, Microwave, PawPrint, ShieldCheck, ShowerHead, SquareParking, Star, Tv, Utensils, WashingMachine, WavesLadder, Wifi, Zap, UtensilsCrossed } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -260,6 +260,19 @@ export default async function ListingPage({ params, searchParams }: Props) {
               <h2 className="text-[15px] font-semibold text-ink/80 md:font-display md:text-[22px] md:leading-7 md:font-bold md:tracking-[-0.02em] md:text-ink">
                 {t("typeInPlace", { type: tType(listing.type), place })}
               </h2>
+              {lodge && (
+                <>
+                  {/* Lodges: one small button to write to VIIPA (the rest of the page is the rooms). */}
+                  <MessageHostButton
+                    listingId={listing.id}
+                    signedIn={user !== null}
+                    className="mt-3 inline-flex items-center gap-2 rounded-full border-[1.5px] border-primary/40 bg-surface px-4 py-2 text-[14px] font-semibold text-primary transition-[border-color,transform] duration-300 hover:border-primary active:scale-95 disabled:opacity-60"
+                  >
+                    <MessageCircle className="size-4" aria-hidden="true" />
+                    {t("messageHost")}
+                  </MessageHostButton>
+                </>
+              )}
               {!lodge && (
                 <>
                 <p className="mt-1 text-[15px] text-ink/80">{stats.join(" · ")}</p>
