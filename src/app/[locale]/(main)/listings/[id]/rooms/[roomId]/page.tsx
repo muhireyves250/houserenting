@@ -8,6 +8,7 @@ import { listingIdCandidates, listingPath } from "@/features/listings/links";
 import { discountedPrice } from "@/features/listings/pricing";
 import { getPublishedListingByParam } from "@/features/listings/service";
 import { ONLY_ROOM, roomLabel } from "@/features/rooms/links";
+import { RoomRowCard } from "@/features/rooms/components/RoomRowCard";
 import { DetailSection } from "@/features/listings/components/detail/DetailSection";
 import { ListingPhotos } from "@/features/listings/components/detail/ListingPhotos";
 import { todayISO } from "@/features/search/date-range";
@@ -109,41 +110,25 @@ export default async function RoomTypePage({ params }: Props) {
         )}
 
         <DetailSection title={t("chooseRoomTitle")}>
-      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4">
+      {/* The same compact rows as the lodge's room types: each room with its own photo. */}
+      <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
         {rows.map(({ n, s }) => (
           <li key={n}>
-            <Link
+            <RoomRowCard
               href={`${base}/rooms/${room.id}/${encodeURIComponent(n)}`}
-              className={cn(
-                "flex h-full flex-col overflow-hidden rounded-2xl bg-surface ring-1 transition-shadow hover:shadow-[0_8px_24px_-14px_rgba(16,24,40,0.4)]",
-                s.free ? "ring-emerald-200" : "ring-red-200",
-              )}
-            >
-              <span className="relative block aspect-[4/3] bg-primary-soft">
-                {cardPhoto(n) ? (
-                  // eslint-disable-next-line @next/next/no-img-element -- room photo
-                  <img src={cardPhoto(n)!} alt="" loading="lazy" className="absolute inset-0 size-full object-cover" />
-                ) : (
-                  <BedDouble className="absolute inset-0 m-auto size-8 text-primary" aria-hidden="true" />
-                )}
-                <span className={cn("absolute top-2 left-2 rounded-full px-2.5 py-0.5 text-[12px] font-bold shadow-sm", s.free ? "bg-white text-emerald-800" : "bg-red-600 text-white")}>
-                  {s.free ? t("availableOn", { day: t("today") }) : t("bookedOn", { day: t("today") })}
-                </span>
-              </span>
-              <span className="flex flex-1 flex-col gap-1 p-3">
-                <span className="flex items-center justify-between gap-2">
-                  <b className="truncate text-[16px] font-bold text-ink tabular-nums">{label(n)}</b>
-                  <ChevronRight className="size-4 shrink-0 text-ink/40" aria-hidden="true" />
-                </span>
-                {n !== ONLY_ROOM && unitAbout(n) && <span className="line-clamp-2 text-[12px] leading-4 text-muted">{unitAbout(n)}</span>}
-                {cheapest && (
-                  <span className="text-[13px] text-ink">
-                    <b className="font-semibold">{formatRWF(discountedPrice(cheapest.price, listing.discountPercent), locale)}</b> {tListings(`perUnit.${cheapest.unit}`)}
-                  </span>
-                )}
-                {!s.free && <span className="text-[12px] text-muted">{t("freeFrom", { date: shortDate.format(new Date(`${s.freeFrom}T00:00:00Z`)) })}</span>}
-              </span>
-            </Link>
+              photo={cardPhoto(n)}
+              title={label(n)}
+              free={s.free}
+              status={s.free ? t("availableOn", { day: t("today") }) : `${t("bookedOn", { day: t("today") })} · ${t("freeFrom", { date: shortDate.format(new Date(`${s.freeFrom}T00:00:00Z`)) })}`}
+              note={n !== ONLY_ROOM ? unitAbout(n) : null}
+              price={
+                cheapest && (
+                  <>
+                    <b className="font-bold">{formatRWF(discountedPrice(cheapest.price, listing.discountPercent), locale)}</b> {tListings(`perUnit.${cheapest.unit}`)}
+                  </>
+                )
+              }
+            />
           </li>
         ))}
       </ul>

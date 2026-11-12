@@ -1,11 +1,10 @@
-import { BedDouble, ChevronRight } from "lucide-react";
+import { BedDouble } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { roomStatusOn } from "@/features/rooms/availability";
 import { discountedPrice } from "@/features/listings/pricing";
 import type { BookedRange } from "@/features/search/date-range";
-import { Link } from "@/i18n/navigation";
-import { cn } from "@/lib/cn";
 import { formatRWF } from "@/lib/format";
+import { RoomRowCard } from "./RoomRowCard";
 
 type RoomType = { id: string; name: string; description: string; maxGuests: number; photos: string[]; numbers: string[]; rates: { unit: "HOUR" | "DAY" | "NIGHT" | "WEEK" | "MONTH" | "YEAR"; price: number }[] };
 type Taken = BookedRange & { roomId: string | null };
@@ -42,7 +41,7 @@ export async function LodgeRoomTypes({
     <section id="room-types" className="scroll-mt-28 pb-8 md:border-t md:border-line md:pt-10">
       <h2 className="mb-5 font-display text-[22px] leading-7 font-bold tracking-[-0.02em] text-ink">{t("roomTypesTitle")}</h2>
       {/* Compact rows so every type fits on a phone screen. */}
-      <ul className="grid gap-3 md:grid-cols-2">
+      <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
         {types.map((type) => {
           const total = Math.max(1, type.numbers.length);
           const free = freeRoomsOn(type, booked, numbers, today);
@@ -50,37 +49,26 @@ export async function LodgeRoomTypes({
           const photo = type.photos[0] ?? fallbackPhoto;
           return (
             <li key={type.id}>
-              <Link
+              <RoomRowCard
                 href={`${basePath}/rooms/${type.id}`}
-                className="group flex items-center gap-3 rounded-2xl bg-surface p-2.5 pr-3 shadow-[0_8px_24px_-16px_rgba(16,24,40,0.35)] ring-1 ring-line transition-transform active:scale-[0.99]"
-              >
-                <span className="relative block size-[84px] shrink-0 overflow-hidden rounded-xl bg-primary-soft">
-                  {photo ? (
-                    // eslint-disable-next-line @next/next/no-img-element -- room type photo (Cloudinary/Unsplash)
-                    <img src={photo} alt="" className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                  ) : (
-                    <BedDouble className="absolute inset-0 m-auto size-7 text-primary" aria-hidden="true" />
-                  )}
-                </span>
-                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                  <b className="truncate text-[16px] font-bold text-ink">{type.name}</b>
-                  <span className="flex flex-wrap items-center gap-x-2 text-[12px]">
-                    <span className="inline-flex items-center gap-1 text-muted">
-                      <BedDouble className="size-3.5" aria-hidden="true" />
-                      {t("roomsCount", { count: total })}
-                    </span>
-                    <span className={cn("font-semibold", free > 0 ? "text-emerald-700" : "text-red-700")}>
-                      {total > 1 ? t("freeTodayCount", { free, total }) : free > 0 ? t("availableOn", { day: t("today") }) : t("bookedOn", { day: t("today") })}
-                    </span>
-                  </span>
-                  {cheapest && (
-                    <span className="text-[13px] text-ink">
+                photo={photo}
+                title={type.name}
+                details={
+                  <>
+                    <BedDouble className="size-3.5" aria-hidden="true" />
+                    {t("roomsCount", { count: total })}
+                  </>
+                }
+                free={free > 0}
+                status={total > 1 ? t("freeTodayCount", { free, total }) : free > 0 ? t("availableOn", { day: t("today") }) : t("bookedOn", { day: t("today") })}
+                price={
+                  cheapest && (
+                    <>
                       {t("fromPrice")} <b className="font-bold">{formatRWF(discountedPrice(cheapest.price, discountPercent), locale)}</b> {tListings(`perUnit.${cheapest.unit}`)}
-                    </span>
-                  )}
-                </span>
-                <ChevronRight className="size-5 shrink-0 text-ink/40" aria-hidden="true" />
-              </Link>
+                    </>
+                  )
+                }
+              />
             </li>
           );
         })}
