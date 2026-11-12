@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { unitDetailsMap } from "@/features/rooms/validation";
 import { getTranslations } from "next-intl/server";
 import { PageIntro } from "@/features/admin/components/ui";
 import { ListingForm } from "@/features/hosting/components/ListingForm";
@@ -31,7 +32,7 @@ export default async function AdminEditListingPage({ params }: Props) {
       {(listing.bookingModel !== "WHOLE_PROPERTY" || rooms.length > 0) && (
         <RoomsEditor
           listingId={id}
-          rooms={rooms.map(({ id: roomId, name, description, maxGuests, rates, facilities, status, numbers, photos }) => ({ id: roomId, name, description, maxGuests, rates, facilities, status, numbers, photos }))}
+          rooms={rooms.map(({ id: roomId, name, description, maxGuests, rates, facilities, status, numbers, photos, unitDetails }) => ({ id: roomId, name, description, maxGuests, rates, facilities, status, numbers, photos, unitDetails: unitDetailsMap(unitDetails) }))}
           units={rateUnitsFor(listing.type)}
         />
       )}

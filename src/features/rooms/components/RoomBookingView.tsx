@@ -1,4 +1,5 @@
 import { ArrowLeft, ChevronLeft, ShieldCheck } from "lucide-react";
+import { descriptionOfRoom, photosOfRoom } from "@/features/rooms/validation";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { PageContainer } from "@/components/ui/PageContainer";
@@ -51,7 +52,11 @@ export async function RoomBookingView({ listingId, roomId, number: asked }: { li
   // Lodge rooms have one bed: no guests to choose.
   const guestLimit = listing.type === "LODGE" ? 1 : room.maxGuests;
   const typePath = `${listingPath(listing.id, listing.title)}/rooms/${room.id}`;
-  const photos = (room.photos.length > 0 ? room.photos.map((url, i) => ({ id: `room-${i}`, url })) : listing.photos.map((p) => ({ id: p.id, url: p.url }))).slice(0, 12);
+  const about = descriptionOfRoom(room, number);
+  // This room's own photos, else its type's, else the place's.
+  const photos = photosOfRoom(room, number, listing.photos.map((p) => p.url))
+    .slice(0, 12)
+    .map((url, i) => ({ id: `photo-${i}`, url }));
   // The place's rules for each way of booking (hours, check-in…), with this room's own prices.
   const rates = listing.rates
     .filter((r) => room.rates.some((rr) => rr.unit === r.unit))
@@ -136,9 +141,9 @@ export async function RoomBookingView({ listingId, roomId, number: asked }: { li
               </p>
             </div>
 
-            {room.description && (
+            {about && (
               <DetailSection>
-                <p className="text-[15px] leading-7 whitespace-pre-line text-ink/85">{room.description}</p>
+                <p className="text-[15px] leading-7 whitespace-pre-line text-ink/85">{about}</p>
               </DetailSection>
             )}
             {room.facilities.length > 0 && (

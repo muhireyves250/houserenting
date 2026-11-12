@@ -583,6 +583,9 @@ model Room {
   numbers     String[]   @default([])
   /// Photos of this room type (Cloudinary URLs), shown on its page and on each of its rooms.
   photos      String[]   @default([])
+  /// Each room's own photos and description, by its name or number: { "101": { "photos": [], "description": "" } }.
+  /// A room without its own uses the type's.
+  unitDetails Json       @default("{}")
   rates       RoomRate[]
   position    Int        @default(0)
   createdAt   DateTime   @default(now())

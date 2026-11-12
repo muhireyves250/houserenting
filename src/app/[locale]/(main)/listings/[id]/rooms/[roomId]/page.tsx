@@ -1,4 +1,5 @@
 import { ArrowLeft, BedDouble, ChevronLeft, ChevronRight } from "lucide-react";
+import { descriptionOfRoom, photosOfRoom } from "@/features/rooms/validation";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { PageContainer } from "@/components/ui/PageContainer";
@@ -52,7 +53,10 @@ export default async function RoomTypePage({ params }: Props) {
   const rows = (room.numbers.length > 0 ? room.numbers : [ONLY_ROOM]).map((n) => ({ n, s: status(n) }));
   const free = rows.filter((r) => r.s.free).length;
   const photos = (room.photos.length > 0 ? room.photos.map((url, i) => ({ id: `room-${i}`, url })) : listing.photos.map((p) => ({ id: p.id, url: p.url }))).slice(0, 12);
-  const photo = photos[0]?.url ?? null;
+  // A room's own description, when staff wrote one (else nothing on the card; the type's is above).
+  const unitAbout = (n: string) => (descriptionOfRoom(room, n) !== room.description ? descriptionOfRoom(room, n) : null);
+  // Each room's card shows its own first photo (else the type's).
+  const cardPhoto = (n: string) => photosOfRoom(room, n === ONLY_ROOM ? null : n, listing.photos.map((p) => p.url))[0] ?? null;
   const label = (n: string) => (n === ONLY_ROOM ? room.name : roomLabel(n, (number) => t("roomNumber", { number })));
   const cheapest = [...room.rates].sort((a, b) => a.price - b.price)[0];
 
@@ -105,7 +109,6 @@ export default async function RoomTypePage({ params }: Props) {
         )}
 
         <DetailSection title={t("chooseRoomTitle")}>
-          <p className="-mt-3 mb-5 text-[14px] text-muted">{t("chooseRoomIntro")}</p>
       <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4">
         {rows.map(({ n, s }) => (
           <li key={n}>
@@ -117,9 +120,9 @@ export default async function RoomTypePage({ params }: Props) {
               )}
             >
               <span className="relative block aspect-[4/3] bg-primary-soft">
-                {photo ? (
+                {cardPhoto(n) ? (
                   // eslint-disable-next-line @next/next/no-img-element -- room photo
-                  <img src={photo} alt="" loading="lazy" className="absolute inset-0 size-full object-cover" />
+                  <img src={cardPhoto(n)!} alt="" loading="lazy" className="absolute inset-0 size-full object-cover" />
                 ) : (
                   <BedDouble className="absolute inset-0 m-auto size-8 text-primary" aria-hidden="true" />
                 )}
@@ -132,6 +135,7 @@ export default async function RoomTypePage({ params }: Props) {
                   <b className="truncate text-[16px] font-bold text-ink tabular-nums">{label(n)}</b>
                   <ChevronRight className="size-4 shrink-0 text-ink/40" aria-hidden="true" />
                 </span>
+                {n !== ONLY_ROOM && unitAbout(n) && <span className="line-clamp-2 text-[12px] leading-4 text-muted">{unitAbout(n)}</span>}
                 {cheapest && (
                   <span className="text-[13px] text-ink">
                     <b className="font-semibold">{formatRWF(discountedPrice(cheapest.price, listing.discountPercent), locale)}</b> {tListings(`perUnit.${cheapest.unit}`)}

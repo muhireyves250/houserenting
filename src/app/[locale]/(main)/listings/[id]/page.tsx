@@ -249,8 +249,8 @@ export default async function ListingPage({ params, searchParams }: Props) {
         {/* Phones: the details sit on a rounded sheet that overlaps the photo. */}
         <div
           className={
-            "relative z-[1] -mx-4 -mt-6 grid gap-x-16 rounded-t-[28px] bg-canvas px-4 pt-8 " +
-            "md:mx-0 md:mt-10 md:grid-cols-[minmax(0,1fr)_minmax(320px,380px)] md:rounded-none md:bg-transparent md:px-0 md:pt-0"
+            "relative z-[1] -mx-4 -mt-6 grid gap-x-16 rounded-t-[28px] bg-canvas px-4 pt-8 md:mx-0 md:mt-10 md:rounded-none md:bg-transparent md:px-0 md:pt-0 " +
+            (lodge ? "" : "md:grid-cols-[minmax(0,1fr)_minmax(320px,380px)]")
           }
         >
           <div className="min-w-0">
@@ -260,85 +260,95 @@ export default async function ListingPage({ params, searchParams }: Props) {
               <h2 className="text-[15px] font-semibold text-ink/80 md:font-display md:text-[22px] md:leading-7 md:font-bold md:tracking-[-0.02em] md:text-ink">
                 {t("typeInPlace", { type: tType(listing.type), place })}
               </h2>
-              <p className="mt-1 text-[15px] text-ink/80">{stats.join(" · ")}</p>
-              <p className="mt-2 flex items-center justify-center gap-1.5 text-[15px] font-semibold text-ink md:justify-start">
-                <Star className="size-4 fill-ink" aria-hidden="true" />
-                {listing.ratingCount > 0 ? (
-                  <>
-                    {listing.ratingAvg.toFixed(2)} ·{" "}
-                    <a href="#reviews" className="underline underline-offset-4">
-                      {t("reviews", { count: listing.ratingCount })}
-                    </a>
-                  </>
-                ) : (
-                  t("noReviews")
-                )}
-                {isGuestFavorite(listing) && (
-                  <span className="ml-2 rounded-full bg-primary/[0.08] px-2.5 py-0.5 text-xs font-semibold text-primary">{t("guestFavorite")}</span>
-                )}
-              </p>
-            </div>
-
-            {block && (
-              <p className="mb-4 rounded-2xl bg-amber-50 px-5 py-3.5 text-[14px] text-amber-900 ring-1 ring-amber-200/70">
-                {block.endsAt
-                  ? t("blockedUntil", { kind: t(`blockKind.${block.kind}`), date: new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeZone: "Africa/Kigali" }).format(block.endsAt) })
-                  : t("blockedOpen", { kind: t(`blockKind.${block.kind}`) })}
-              </p>
-            )}
-
-            {/* VIIPA looks after the place and the booking (guests don't deal with owners). */}
-            <div className="flex items-center gap-4 border-t border-line py-6">
-              <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary">
-                <ShieldCheck className="size-6" aria-hidden="true" />
-              </span>
-              <div>
-                <p className="text-[15px] font-semibold text-ink">{t("managedBy")}</p>
-                <p className="text-sm text-muted">{t("managedBySub")}</p>
-              </div>
-            </div>
-
-            {highlights.length > 0 && (
-              <ul className="flex flex-col gap-6 border-t border-line py-8">
-                {highlights.map(({ icon: Icon, title, body }) => (
-                  <li key={title} className="flex gap-5">
-                    <Icon className="mt-0.5 size-6 shrink-0 text-ink" strokeWidth={1.6} aria-hidden="true" />
-                    <div>
-                      <p className="text-[15px] font-semibold text-ink">{title}</p>
-                      <p className="text-sm text-muted">{body}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-
-            <Section>
-              <CollapsibleText text={listing.description} />
-              {listing.characteristics.length > 0 && (
-                <ul className="mt-5 flex flex-wrap gap-2">
-                  {listing.characteristics.map((c) => (
-                    <li key={c} className="rounded-full bg-surface px-3 py-1 text-[13px] font-medium text-ink/80 ring-1 ring-line/80">
-                      {c}
-                    </li>
-                  ))}
-                </ul>
+              {!lodge && (
+                <>
+                <p className="mt-1 text-[15px] text-ink/80">{stats.join(" · ")}</p>
+                <p className="mt-2 flex items-center justify-center gap-1.5 text-[15px] font-semibold text-ink md:justify-start">
+                  <Star className="size-4 fill-ink" aria-hidden="true" />
+                  {listing.ratingCount > 0 ? (
+                    <>
+                      {listing.ratingAvg.toFixed(2)} ·{" "}
+                      <a href="#reviews" className="underline underline-offset-4">
+                        {t("reviews", { count: listing.ratingCount })}
+                      </a>
+                    </>
+                  ) : (
+                    t("noReviews")
+                  )}
+                  {isGuestFavorite(listing) && (
+                    <span className="ml-2 rounded-full bg-primary/[0.08] px-2.5 py-0.5 text-xs font-semibold text-primary">{t("guestFavorite")}</span>
+                  )}
+                </p>
+                </>
               )}
-            </Section>
+            </div>
 
-            {listing.facilities.length > 0 && (
-              <Section title={t("offers")}>
-                <ul className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
-                  {listing.facilities.map((facility) => {
-                    const Icon = FACILITY_ICONS[facility] ?? ShieldCheck;
-                    return (
-                      <li key={facility} className="flex items-center gap-4 text-[15px] text-ink">
-                        <Icon className="size-6 shrink-0" strokeWidth={1.6} aria-hidden="true" />
-                        {tFacility(facility)}
+            {/* A lodge page shows its rooms only. */}
+            {!lodge && (
+              <>
+                {block && (
+                  <p className="mb-4 rounded-2xl bg-amber-50 px-5 py-3.5 text-[14px] text-amber-900 ring-1 ring-amber-200/70">
+                    {block.endsAt
+                      ? t("blockedUntil", { kind: t(`blockKind.${block.kind}`), date: new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeZone: "Africa/Kigali" }).format(block.endsAt) })
+                      : t("blockedOpen", { kind: t(`blockKind.${block.kind}`) })}
+                  </p>
+                )}
+
+                {/* VIIPA looks after the place and the booking (guests don't deal with owners). */}
+                <div className="flex items-center gap-4 border-t border-line py-6">
+                  <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary">
+                    <ShieldCheck className="size-6" aria-hidden="true" />
+                  </span>
+                  <div>
+                    <p className="text-[15px] font-semibold text-ink">{t("managedBy")}</p>
+                    <p className="text-sm text-muted">{t("managedBySub")}</p>
+                  </div>
+                </div>
+
+                {highlights.length > 0 && (
+                  <ul className="flex flex-col gap-6 border-t border-line py-8">
+                    {highlights.map(({ icon: Icon, title, body }) => (
+                      <li key={title} className="flex gap-5">
+                        <Icon className="mt-0.5 size-6 shrink-0 text-ink" strokeWidth={1.6} aria-hidden="true" />
+                        <div>
+                          <p className="text-[15px] font-semibold text-ink">{title}</p>
+                          <p className="text-sm text-muted">{body}</p>
+                        </div>
                       </li>
-                    );
-                  })}
-                </ul>
-              </Section>
+                    ))}
+                  </ul>
+                )}
+
+                <Section>
+                  <CollapsibleText text={listing.description} />
+                  {listing.characteristics.length > 0 && (
+                    <ul className="mt-5 flex flex-wrap gap-2">
+                      {listing.characteristics.map((c) => (
+                        <li key={c} className="rounded-full bg-surface px-3 py-1 text-[13px] font-medium text-ink/80 ring-1 ring-line/80">
+                          {c}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </Section>
+
+                {listing.facilities.length > 0 && (
+                  <Section title={t("offers")}>
+                    <ul className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
+                      {listing.facilities.map((facility) => {
+                        const Icon = FACILITY_ICONS[facility] ?? ShieldCheck;
+                        return (
+                          <li key={facility} className="flex items-center gap-4 text-[15px] text-ink">
+                            <Icon className="size-6 shrink-0" strokeWidth={1.6} aria-hidden="true" />
+                            {tFacility(facility)}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </Section>
+                )}
+
+              </>
             )}
 
             {lodge ? (
@@ -362,17 +372,9 @@ export default async function ListingPage({ params, searchParams }: Props) {
             )}
           </div>
 
-          <div className="hidden md:block">
-            <div className="sticky top-[97px]">
-              {lodge ? (
-                <div className="rounded-2xl border border-line/70 bg-surface p-6 shadow-[0_12px_32px_-14px_rgba(16,24,40,0.3)]">
-                  <p className="text-[20px] font-bold text-ink">{tRooms("lodgeCardTitle")}</p>
-                  <p className="mt-1 text-[14px] text-muted">{tRooms("lodgeCardBody")}</p>
-                  <a href="#room-types" className="mt-4 flex w-full items-center justify-center rounded-full bg-gradient-to-r from-primary to-[#0a6fe0] py-3.5 text-[15px] font-semibold text-white">
-                    {tRooms("seeRooms")}
-                  </a>
-                </div>
-              ) : (
+          {!lodge && (
+            <div className="hidden md:block">
+              <div className="sticky top-[97px]">
                 <BookingCard
                   rates={bookingRates}
                   discountPercent={listing.discountPercent}
@@ -380,13 +382,14 @@ export default async function ListingPage({ params, searchParams }: Props) {
                   place={preview}
                   signedIn={user !== null}
                 />
-              )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Guest feedback (published after staff check it) */}
-        {reviews.length > 0 && (
+        {/* A lodge page keeps to its rooms, where it is and things to know. */}
+        {!lodge && reviews.length > 0 && (
           <Section title={tReviews("title", { count: listing.ratingCount, rating: listing.ratingAvg.toFixed(2) })} id="reviews">
             <ul className="grid gap-8 md:grid-cols-2">
               {reviews.map((review) => (
@@ -416,43 +419,47 @@ export default async function ListingPage({ params, searchParams }: Props) {
           </div>
         </Section>
 
-        {/* VIIPA stands between guests and owners: questions and bookings go to the team. */}
-        <Section title={t("talkToUs")}>
-          <div className="flex flex-col gap-6 md:flex-row md:items-center md:gap-12">
-            <div className="flex w-full max-w-sm flex-col gap-2 rounded-3xl bg-surface px-7 py-7 shadow-[0_12px_36px_-14px_rgba(16,24,40,0.35)]">
-              <p className="font-display text-[24px] font-bold tracking-[-0.02em] text-ink">VIIPA</p>
-              <p className="text-[15px] text-muted">{t("talkToUsBody")}</p>
+        {!lodge && (
+          <>
+          {/* VIIPA stands between guests and owners: questions and bookings go to the team. */}
+          <Section title={t("talkToUs")}>
+            <div className="flex flex-col gap-6 md:flex-row md:items-center md:gap-12">
+              <div className="flex w-full max-w-sm flex-col gap-2 rounded-3xl bg-surface px-7 py-7 shadow-[0_12px_36px_-14px_rgba(16,24,40,0.35)]">
+                <p className="font-display text-[24px] font-bold tracking-[-0.02em] text-ink">VIIPA</p>
+                <p className="text-[15px] text-muted">{t("talkToUsBody")}</p>
+              </div>
+              <MessageHostButton
+                listingId={listing.id}
+                signedIn={user !== null}
+                className="inline-flex w-fit items-center rounded-xl border border-ink/80 max-md:border-primary bg-surface px-6 py-3 text-[15px] font-semibold text-ink transition-[background-color,transform] duration-300 hover:bg-canvas active:scale-95 disabled:opacity-60"
+              >
+                {t("messageHost")}
+              </MessageHostButton>
             </div>
-            <MessageHostButton
-              listingId={listing.id}
-              signedIn={user !== null}
-              className="inline-flex w-fit items-center rounded-xl border border-ink/80 max-md:border-primary bg-surface px-6 py-3 text-[15px] font-semibold text-ink transition-[background-color,transform] duration-300 hover:bg-canvas active:scale-95 disabled:opacity-60"
-            >
-              {t("messageHost")}
-            </MessageHostButton>
-          </div>
-        </Section>
+          </Section>
 
-        {/* Questions and answers (answered by the host, published by staff) */}
-        <Section title={tQuestions("title")} id="questions">
-          {questions.length > 0 ? (
-            <ul className="mb-8 flex max-w-3xl flex-col gap-6">
-              {questions.map((q) => (
-                <li key={q.id}>
-                  <p className="text-[15px] font-semibold text-ink">{q.question}</p>
-                  <p className="mt-1 border-l-2 border-primary/40 pl-3 text-[15px] leading-6 text-ink/80">{q.answer}</p>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="mb-5 text-[15px] text-muted">{tQuestions("none")}</p>
-          )}
-          <AskQuestion listingId={listing.id} signedIn={user !== null} />
-        </Section>
+          {/* Questions and answers (answered by the host, published by staff) */}
+          <Section title={tQuestions("title")} id="questions">
+            {questions.length > 0 ? (
+              <ul className="mb-8 flex max-w-3xl flex-col gap-6">
+                {questions.map((q) => (
+                  <li key={q.id}>
+                    <p className="text-[15px] font-semibold text-ink">{q.question}</p>
+                    <p className="mt-1 border-l-2 border-primary/40 pl-3 text-[15px] leading-6 text-ink/80">{q.answer}</p>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mb-5 text-[15px] text-muted">{tQuestions("none")}</p>
+            )}
+            <AskQuestion listingId={listing.id} signedIn={user !== null} />
+          </Section>
+          </>
+        )}
 
         {/* Things to know */}
         {/* Meals to the room (the kitchen itself isn't shown to guests) */}
-        {food.length > 0 && (
+        {!lodge && food.length > 0 && (
           <Section title={tFood("mealsTitle")}>
             <p className="-mt-3 flex max-w-2xl items-start gap-3 text-[15px] text-ink">
               <UtensilsCrossed className="mt-0.5 size-6 shrink-0 text-primary" aria-hidden="true" />
@@ -493,7 +500,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
             </div>
           </div>
         </Section>
-        {nearby.length > 0 && (
+        {!lodge && nearby.length > 0 && (
           <section className="border-t border-line py-10">
             <HomeRow title={t("moreNearby")} subtitle={t("moreNearbySub")}>
               {nearby.map((home) => (
@@ -510,17 +517,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
         )}
       </PageContainer>
 
-      {lodge ? (
-        <a
-          href="#room-types"
-          className="fixed inset-x-3 bottom-[calc(82px+env(safe-area-inset-bottom))] z-30 flex items-center justify-between gap-4 rounded-2xl border border-line bg-surface px-4 py-3 shadow-[0_10px_30px_-12px_rgba(16,24,40,0.35)] md:hidden"
-        >
-          <span className="text-[14px] font-semibold text-ink">{tRooms("lodgeCardTitle")}</span>
-          <span className="rounded-full bg-primary px-5 py-2.5 text-[14px] font-semibold text-white">{tRooms("seeRooms")}</span>
-        </a>
-      ) : (
-        rates.length > 0 && <MobileBookingBar rates={bookingRates} discountPercent={listing.discountPercent} place={preview} signedIn={user !== null} />
-      )}
+      {!lodge && rates.length > 0 && <MobileBookingBar rates={bookingRates} discountPercent={listing.discountPercent} place={preview} signedIn={user !== null} />}
     </StayProvider>
   );
 }

@@ -60,7 +60,7 @@ export type SeedListing = {
   roomList?: SeedRoom[];
 };
 
-export type SeedRoom = { name: string; description: string; maxGuests: number; facilities: Facility[]; rates: { unit: "DAY" | "NIGHT"; price: number }[]; numbers?: string[]; photos?: string[] };
+export type SeedRoom = { name: string; description: string; maxGuests: number; facilities: Facility[]; rates: { unit: "DAY" | "NIGHT"; price: number }[]; numbers?: string[]; photos?: string[]; unitDetails?: Record<string, { photos: string[]; description: string }> };
 
 const photo = (id: string) => `https://images.unsplash.com/photo-${id}`;
 
@@ -263,7 +263,7 @@ export const SEED_LISTINGS: SeedListing[] = [
     laundryPricePerKg: 1500,
     roomList: [
       { name: "Volcano View Suite", description: "King bed and a window onto the Virunga volcanoes.", maxGuests: 2, facilities: ["WIFI", "HOT_WATER"], rates: [{ unit: "NIGHT", price: 120000 }, { unit: "DAY", price: 60000 }], numbers: ["301", "302", "303"], photos: [P.bedroom2, P.cabin1] },
-      { name: "Garden Double", description: "Double bed, opens onto the garden.", maxGuests: 2, facilities: ["WIFI", "HOT_WATER"], rates: [{ unit: "NIGHT", price: 90000 }, { unit: "DAY", price: 45000 }], numbers: ["201", "202", "203", "204", "205"], photos: [P.bedroom1, P.cottage1] },
+      { name: "Garden Double", description: "Double bed, opens onto the garden.", maxGuests: 2, facilities: ["WIFI", "HOT_WATER"], rates: [{ unit: "NIGHT", price: 90000 }, { unit: "DAY", price: 45000 }], numbers: ["201", "202", "203", "204", "205"], photos: [P.bedroom1, P.cottage1], unitDetails: { "201": { photos: [P.bedroom4, P.living3], description: "Corner room with two windows onto the garden." }, "202": { photos: [P.bedroom2, P.interior1], description: "Quiet room at the end of the corridor, with a desk." }, "203": { photos: [P.studio1, P.bedroom1], description: "Next to the garden door; easy to reach." }, "204": { photos: [P.bedroom3, P.living1], description: "Largest room of the floor, with a sofa." } } },
       { name: "Family Room", description: "A double and two singles, by the fireplace.", maxGuests: 4, facilities: ["WIFI", "HOT_WATER", "TV"], rates: [{ unit: "NIGHT", price: 150000 }, { unit: "DAY", price: 75000 }], numbers: ["101", "102", "103", "104"], photos: [P.bedroom3, P.cabin1] },
     ],
   },

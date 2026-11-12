@@ -39,10 +39,10 @@ export async function LodgeRoomTypes({
 }) {
   const [t, tListings, locale] = await Promise.all([getTranslations("Rooms"), getTranslations("Listings"), getLocale()]);
   return (
-    <section id="room-types" className="scroll-mt-28 border-t border-line py-10">
-      <h2 className="font-display text-[22px] leading-7 font-bold tracking-[-0.02em] text-ink">{t("roomTypesTitle")}</h2>
-      <p className="mt-1 mb-5 text-sm text-muted">{t("roomTypesIntro")}</p>
-      <ul className="grid gap-4 sm:grid-cols-2">
+    <section id="room-types" className="scroll-mt-28 pb-8 md:border-t md:border-line md:pt-10">
+      <h2 className="mb-5 font-display text-[22px] leading-7 font-bold tracking-[-0.02em] text-ink">{t("roomTypesTitle")}</h2>
+      {/* Compact rows so every type fits on a phone screen. */}
+      <ul className="grid gap-3 md:grid-cols-2">
         {types.map((type) => {
           const total = Math.max(1, type.numbers.length);
           const free = freeRoomsOn(type, booked, numbers, today);
@@ -50,36 +50,36 @@ export async function LodgeRoomTypes({
           const photo = type.photos[0] ?? fallbackPhoto;
           return (
             <li key={type.id}>
-              <Link href={`${basePath}/rooms/${type.id}`} className="group block overflow-hidden rounded-3xl bg-surface shadow-[0_10px_30px_-14px_rgba(16,24,40,0.3)] ring-1 ring-line transition-transform active:scale-[0.99]">
-                <span className="relative block aspect-[16/10] bg-primary-soft">
+              <Link
+                href={`${basePath}/rooms/${type.id}`}
+                className="group flex items-center gap-3 rounded-2xl bg-surface p-2.5 pr-3 shadow-[0_8px_24px_-16px_rgba(16,24,40,0.35)] ring-1 ring-line transition-transform active:scale-[0.99]"
+              >
+                <span className="relative block size-[84px] shrink-0 overflow-hidden rounded-xl bg-primary-soft">
                   {photo ? (
                     // eslint-disable-next-line @next/next/no-img-element -- room type photo (Cloudinary/Unsplash)
                     <img src={photo} alt="" className="absolute inset-0 size-full object-cover transition-transform duration-500 group-hover:scale-105" />
                   ) : (
-                    <BedDouble className="absolute inset-0 m-auto size-10 text-primary" aria-hidden="true" />
+                    <BedDouble className="absolute inset-0 m-auto size-7 text-primary" aria-hidden="true" />
                   )}
-                  <span className={cn("absolute top-3 left-3 rounded-full px-2.5 py-1 text-[12px] font-bold shadow", free > 0 ? "bg-white text-emerald-800" : "bg-white text-red-700")}>
-                    {total > 1 ? t("freeTodayCount", { free, total }) : free > 0 ? t("availableOn", { day: t("today") }) : t("bookedOn", { day: t("today") })}
-                  </span>
                 </span>
-                <span className="flex items-end justify-between gap-3 p-4">
-                  <span className="min-w-0">
-                    <b className="block truncate text-[17px] font-bold text-ink">{type.name}</b>
-                    <span className="mt-0.5 inline-flex items-center gap-1 text-[13px] text-muted">
+                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                  <b className="truncate text-[16px] font-bold text-ink">{type.name}</b>
+                  <span className="flex flex-wrap items-center gap-x-2 text-[12px]">
+                    <span className="inline-flex items-center gap-1 text-muted">
                       <BedDouble className="size-3.5" aria-hidden="true" />
                       {t("roomsCount", { count: total })}
                     </span>
-                    {cheapest && (
-                      <span className="mt-1 block text-[14px] text-ink">
-                        {t("fromPrice")} <b className="font-bold">{formatRWF(discountedPrice(cheapest.price, discountPercent), locale)}</b> {tListings(`perUnit.${cheapest.unit}`)}
-                      </span>
-                    )}
+                    <span className={cn("font-semibold", free > 0 ? "text-emerald-700" : "text-red-700")}>
+                      {total > 1 ? t("freeTodayCount", { free, total }) : free > 0 ? t("availableOn", { day: t("today") }) : t("bookedOn", { day: t("today") })}
+                    </span>
                   </span>
-                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary px-3.5 py-2 text-[13px] font-semibold text-white">
-                    {t("seeRooms")}
-                    <ChevronRight className="size-4" aria-hidden="true" />
-                  </span>
+                  {cheapest && (
+                    <span className="text-[13px] text-ink">
+                      {t("fromPrice")} <b className="font-bold">{formatRWF(discountedPrice(cheapest.price, discountPercent), locale)}</b> {tListings(`perUnit.${cheapest.unit}`)}
+                    </span>
+                  )}
                 </span>
+                <ChevronRight className="size-5 shrink-0 text-ink/40" aria-hidden="true" />
               </Link>
             </li>
           );

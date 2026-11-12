@@ -11,12 +11,13 @@ import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { formatRWF } from "@/lib/format";
 import { removeRoomAction, saveRoomAction, setRoomStatusAction } from "../actions";
+import { roomLabel } from "../links";
 import { parseRoomNumbers, ROOM_STATUSES, type RoomInput, type RoomStatus } from "../validation";
 
 type Room = RoomInput & { id: string; status: RoomStatus };
 
 type Unit = RoomInput["rates"][number]["unit"];
-const emptyRoom = (units: readonly Unit[]): RoomInput => ({ name: "", description: "", maxGuests: 2, rates: [{ unit: units[0] ?? "NIGHT", price: 0 }], facilities: [], numbers: [], photos: [] });
+const emptyRoom = (units: readonly Unit[]): RoomInput => ({ name: "", description: "", maxGuests: 2, rates: [{ unit: units[0] ?? "NIGHT", price: 0 }], facilities: [], numbers: [], photos: [], unitDetails: {} });
 
 const STATUS_TONE: Record<RoomStatus, string> = {
   AVAILABLE: "text-emerald-700",
@@ -189,6 +190,7 @@ function RoomForm({
           ))}
       </div>
       <RoomPhotos listingId={listingId} photos={room.photos ?? []} onChange={(photos) => set("photos", photos)} />
+      <UnitDetailsEditor listingId={listingId} numbers={room.numbers ?? []} value={room.unitDetails ?? {}} onChange={(unitDetails) => set("unitDetails", unitDetails)} />
       <AreaField label={t("description")} rows={2} maxLength={500} value={room.description ?? ""} onChange={(e) => set("description", e.target.value)} />
       <div className="flex flex-wrap gap-2">
         {FACILITIES.map((f) => {
@@ -214,8 +216,54 @@ function RoomForm({
   );
 }
 
+/** Each room's own photos and description: tap a room to edit them (a room without its own shows the type's). */
+function UnitDetailsEditor({
+  listingId,
+  numbers,
+  value,
+  onChange,
+}: {
+  listingId: string;
+  numbers: string[];
+  value: Record<string, { photos?: string[]; description?: string }>;
+  onChange: (v: Record<string, { photos: string[]; description: string }>) => void;
+}) {
+  const t = useTranslations("Rooms");
+  const [open, setOpen] = useState<string | null>(null);
+  if (numbers.length === 0) return null;
+  const current = open && numbers.includes(open) ? open : null;
+  const label = (n: string) => roomLabel(n, (number) => t("roomNumber", { number }));
+  const details = (n: string) => ({ photos: value[n]?.photos ?? [], description: value[n]?.description ?? "" });
+  const update = (n: string, change: Partial<{ photos: string[]; description: string }>) => {
+    const all = Object.fromEntries(Object.keys(value).map((k) => [k, details(k)]));
+    onChange({ ...all, [n]: { ...details(n), ...change } });
+  };
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="text-xs font-semibold text-muted">{t("eachRoomDetails")}</p>
+      <div className="flex flex-wrap gap-2">
+        {numbers.map((n) => {
+          const d = details(n);
+          return (
+            <Chip key={n} on={current === n} onToggle={() => setOpen(current === n ? null : n)}>
+              {label(n)}
+              {(d.photos.length > 0 || d.description) && " ✓"}
+            </Chip>
+          );
+        })}
+      </div>
+      {current && (
+        <div key={current} className="flex flex-col gap-3 rounded-xl bg-surface p-3 ring-1 ring-line">
+          <RoomPhotos listingId={listingId} label={t("photosOfRoom", { room: label(current) })} photos={details(current).photos} onChange={(photos) => update(current, { photos })} />
+          <AreaField label={t("aboutRoom", { room: label(current) })} rows={2} maxLength={500} value={details(current).description} onChange={(e) => update(current, { description: e.target.value })} />
+        </div>
+      )}
+    </div>
+  );
+}
+
 /** The room type's photos: upload straight to our Cloudinary folder, remove, saved with the room. */
-function RoomPhotos({ listingId, photos, onChange }: { listingId: string; photos: string[]; onChange: (photos: string[]) => void }) {
+function RoomPhotos({ listingId, photos, onChange, label }: { listingId: string; photos: string[]; onChange: (photos: string[]) => void; label?: string }) {
   const t = useTranslations("Rooms");
   const input = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(0);
@@ -249,7 +297,7 @@ function RoomPhotos({ listingId, photos, onChange }: { listingId: string; photos
   }
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-xs font-semibold text-muted">{t("photos")}</p>
+      <p className="text-xs font-semibold text-muted">{label ?? t("photos")}</p>
       <div className="flex flex-wrap gap-2">
         {photos.map((url) => (
           <span key={url} className="relative size-20 overflow-hidden rounded-xl bg-canvas ring-1 ring-line">

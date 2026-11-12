@@ -96,6 +96,12 @@ describe("room-by-room and whole-place bookings", () => {
     expect((await saveRoom(admin, "lodge", roomA, { ...room, name: "First floor", rates: [{ unit: "NIGHT", price: 40000 }], numbers: ["101", "Lake Kivu", "102"] })).ok).toBe(true);
   });
 
+  it("saves each room's own photos and description with its room type", async () => {
+    const details = { "101": { photos: ["https://res.cloudinary.com/demo/101.jpg"], description: "Corner room" } };
+    await saveRoom({ id: "admin", role: "ADMIN" }, "lodge", roomA, { ...room, name: "First floor", rates: [{ unit: "NIGHT", price: 40000 }], numbers: ["101", "102"], unitDetails: details });
+    expect((await db.room.findUnique({ where: { id: roomA }, select: { unitDetails: true } }))?.unitDetails).toEqual(details);
+  });
+
   it("a room's own calendar shows only that room's bookings (and the whole place's)", async () => {
     await saveRoom({ id: "admin", role: "ADMIN" }, "lodge", roomA, { ...room, name: "Garden Double", rates: [{ unit: "NIGHT", price: 40000 }], numbers: ["101", "102"] });
     const night = { listingId: "lodge", unit: "NIGHT" as const, start: "2026-11-01", quantity: 2, guests: 1, payment: pay, roomId: roomA };

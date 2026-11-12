@@ -1,4 +1,5 @@
 import { ChevronLeft, ExternalLink, ShieldCheck } from "lucide-react";
+import { unitDetailsMap } from "@/features/rooms/validation";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { PageContainer } from "@/components/ui/PageContainer";
@@ -104,7 +105,7 @@ export default async function EditListingPage({ params }: Props) {
             {(listing.bookingModel !== "WHOLE_PROPERTY" || rooms.length > 0) && (
               <RoomsEditor
                 listingId={listing.id}
-                rooms={rooms.map(({ id, name, description, maxGuests, rates, facilities, status, numbers, photos }) => ({ id, name, description, maxGuests, rates, facilities, status, numbers, photos }))}
+                rooms={rooms.map(({ id, name, description, maxGuests, rates, facilities, status, numbers, photos, unitDetails }) => ({ id, name, description, maxGuests, rates, facilities, status, numbers, photos, unitDetails: unitDetailsMap(unitDetails) }))}
                 units={rateUnitsFor(listing.type)}
               />
             )}
