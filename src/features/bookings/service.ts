@@ -622,3 +622,25 @@ export async function bookedRoomNumbers(listingId: string, now: Date = new Date(
   });
   return rows.map((r) => ({ roomId: r.roomId!, roomNumber: r.roomNumber!, checkIn: asISO(r.checkIn), checkOut: asISO(r.checkOut) }));
 }
+
+/**
+ * One room's taken days from today on (for its own calendar): its own bookings (that room number, or the room
+ * type when it has no numbers), whole-place bookings, and blocks on the room type or the whole place.
+ */
+export async function bookedForRoom(listingId: string, roomId: string, roomNumber: string | null, now: Date = new Date()): Promise<(BookedRange & { roomId: string | null })[]> {
+  const all = await bookedRanges(listingId, now);
+  const own = await db.booking.findMany({
+    where: {
+      listingId,
+      roomId,
+      checkOut: { gt: asDate(todayISO(now)) },
+      AND: [
+        ...(roomNumber ? [{ OR: [{ roomNumber }, { roomNumber: null }] }] : []),
+        { OR: [{ status: { in: ["CONFIRMED" as const, "CHECKED_IN" as const] } }, { status: "PENDING_PAYMENT" as const, holdExpiresAt: { gt: now } }] },
+      ],
+    },
+    select: { checkIn: true, checkOut: true },
+  });
+  // Whole-place bookings and blocks, the room type's blocks (and days all its rooms are taken), plus this room's own.
+  return [...all.filter((r) => r.roomId === null || r.roomId === roomId), ...own.map((b) => ({ checkIn: asISO(b.checkIn), checkOut: asISO(b.checkOut), roomId }))];
+}

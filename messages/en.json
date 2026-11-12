@@ -96,7 +96,9 @@
     "noTypeBody": "Try another category, or see every home.",
     "districts": "Districts with homes",
     "typing": "Kigali · Musanze · Rubavu · Huye · Karongi · a lodge near the volcanoes · a room for the day",
-    "tryWord": "Try"
+    "tryWord": "Try",
+    "bookedDay": "Booked",
+    "freeDay": "Free"
   },
   "Search": {
     "anywhere": "Anywhere in Rwanda",
@@ -525,7 +527,9 @@
     "talkToUs": "Questions? Talk to VIIPA",
     "talkToUsBody": "Our team looks after this place and your booking. Ask us anything before or during your stay.",
     "dayUseHint": "Pick one date: you use the place that day and leave the same evening.",
-    "pickNightsBelow": "Pick your nights in the calendar below."
+    "pickNightsBelow": "Pick your nights in the calendar below.",
+    "availabilityTitle": "When it's free",
+    "availabilityHint": "Booked days are marked in red. Tap a free day to choose it."
   },
   "Facility": {
     "KITCHEN": "Kitchen",
@@ -1235,7 +1239,22 @@
     "roomNumber": "Room {number}",
     "pickRoom": "Choose your {name} room",
     "freeCount": "{free} of {total} free {day}",
-    "anyRoom": "Any free room"
+    "anyRoom": "Any free room",
+    "photos": "Photos of this room type",
+    "addPhotos": "Add photos",
+    "uploading": "Uploading…",
+    "removePhoto": "Remove photo",
+    "photoFailed": "Some photos couldn't be uploaded. Try again.",
+    "allRoomsOf": "All {name} rooms",
+    "roomTypesTitle": "Room types",
+    "roomTypesIntro": "Choose a type to see its rooms, then pick a room to book it.",
+    "freeTodayCount": "{free} of {total} free today",
+    "fromPrice": "From",
+    "seeRooms": "See rooms",
+    "chooseRoomTitle": "Choose your room",
+    "chooseRoomIntro": "Each room is booked on its own. Open a room to see its calendar and book it.",
+    "lodgeCardTitle": "Book a room",
+    "lodgeCardBody": "This lodge is booked room by room. Choose a room type, then the room you want."
   },
   "Settings": {
     "note": "Leave a field empty until the business decision is made: nothing is charged or promised for empty fields. Every change is recorded in the audit log, and bookings keep the settings they were made with.",

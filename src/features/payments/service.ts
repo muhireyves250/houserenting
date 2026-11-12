@@ -146,6 +146,8 @@ async function apply(tx: Prisma.TransactionClient, event: CallbackBody, actorId:
   await audit(tx, { actorId, action: "booking.paid", entityType: "booking", entityId: booking.reference, data: { amount: event.amount, provider: event.provider, providerReference: event.providerReference } });
   await notify(tx, booking.guestId, "bookingConfirmed", { title: booking.listing.title, reference: booking.reference }, `/bookings/${booking.reference}`);
   await notifyAdmins(tx, "newBooking", { title: booking.listing.title, reference: booking.reference }, `/admin/bookings/${booking.reference}`);
+  // The owner is told their place is booked (VIIPA staff handle the booking; owners don't see booking details).
+  await notify(tx, host, "newBooking", { title: booking.listing.title, reference: booking.reference }, "/host");
   return "confirmed";
 }
 

@@ -31,7 +31,7 @@ export default async function AdminEditListingPage({ params }: Props) {
       {(listing.bookingModel !== "WHOLE_PROPERTY" || rooms.length > 0) && (
         <RoomsEditor
           listingId={id}
-          rooms={rooms.map(({ id: roomId, name, description, maxGuests, rates, facilities, status, numbers }) => ({ id: roomId, name, description, maxGuests, rates, facilities, status, numbers }))}
+          rooms={rooms.map(({ id: roomId, name, description, maxGuests, rates, facilities, status, numbers, photos }) => ({ id: roomId, name, description, maxGuests, rates, facilities, status, numbers, photos }))}
           units={rateUnitsFor(listing.type)}
         />
       )}

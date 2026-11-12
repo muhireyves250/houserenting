@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { bookedRanges, bookedRoomNumbers, createBooking, createRentalBooking } from "@/features/bookings/service";
+import { bookedForRoom, bookedRanges, bookedRoomNumbers, createBooking, createRentalBooking } from "@/features/bookings/service";
 import { roomStatusOn } from "./availability";
 import { updateSettings } from "@/features/settings/service";
 import { db } from "@/lib/db";
@@ -85,6 +85,15 @@ describe("room-by-room and whole-place bookings", () => {
     expect(await createRentalBooking({ ...night, guestId: "g2", roomNumber: "999" }, NOW)).toEqual({ ok: false, error: "unavailable" });
     expect((await createRentalBooking({ ...night, guestId: "g2", roomNumber: "101" }, NOW)).ok).toBe(true);
     expect((await bookedRoomNumbers("lodge", NOW)).map((b) => b.roomNumber).sort()).toEqual(["101", "103"]);
+  });
+
+  it("a room's own calendar shows only that room's bookings (and the whole place's)", async () => {
+    await saveRoom({ id: "admin", role: "ADMIN" }, "lodge", roomA, { ...room, name: "Garden Double", rates: [{ unit: "NIGHT", price: 40000 }], numbers: ["101", "102"] });
+    const night = { listingId: "lodge", unit: "NIGHT" as const, start: "2026-11-01", quantity: 2, guests: 1, payment: pay, roomId: roomA };
+    expect((await createRentalBooking({ ...night, guestId: "g1", roomNumber: "101" }, NOW)).ok).toBe(true);
+    const days = async (n: string) => (await bookedForRoom("lodge", roomA, n, NOW)).map((r) => `${r.checkIn}/${r.checkOut}`);
+    expect(await days("101")).toEqual(["2026-11-01/2026-11-03"]);
+    expect(await days("102")).toEqual([]);
   });
 
   it("books a room for day use (no night) and shows it booked for that day only", async () => {

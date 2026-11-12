@@ -101,9 +101,12 @@ export function StayProvider({
   window = {},
   workingDays = [],
   numberBookings = [],
+  initialRoomNumber = null,
 }: {
   children: ReactNode;
   numberBookings?: NumberBooking[];
+  /** A room's own page: that room number is the one booked. */
+  initialRoomNumber?: string | null;
   listingId?: string;
   booked?: (BookedRange & { roomId?: string | null })[];
   holdMinutes?: number;
@@ -124,7 +127,7 @@ export function StayProvider({
     initialRoom && rooms.some((r) => r.id === initialRoom) ? initialRoom : bookingModel === "ROOM_BY_ROOM" ? null : "whole",
   );
   const [unit, setUnit] = useState<BookingUnit>(defaultUnit);
-  const [roomNumber, setRoomNumber] = useState<string | null>(null);
+  const [roomNumber, setRoomNumber] = useState<string | null>(initialRoomNumber);
   const [plan, setPlan] = useState<Plan>({ start: "", quantity: 1, startTime: "" });
   const normalized = booked.map((b) => ({ ...b, roomId: b.roomId ?? null }));
   return (
@@ -397,12 +400,35 @@ export function RoomPicker({ wholeRates, today = todayISO() }: { wholeRates: { u
 }
 
 /** "2 nights in Kigali" calendar section (left column), shown while booking by the night. */
-export function StayCalendar({ city, rates, today = todayISO() }: { city: string; rates?: BookingRate[]; today?: string }) {
+export function StayCalendar({ city, rates, today = todayISO(), always = false }: { city: string; rates?: BookingRate[]; today?: string; always?: boolean }) {
   const t = useTranslations("Listings");
   const locale = useLocale();
-  const { range, setRange, booked: allBooked, choice, window: open, workingDays } = useStay();
+  const { range, setRange, booked: allBooked, choice, window: open, workingDays, plan, setPlan } = useStay();
   const { current } = useOffer(rates ?? []);
-  if (rates && current?.unit !== "NIGHT") return null;
+  const single = Boolean(rates && current?.unit !== "NIGHT");
+  if (single && !always) return null;
+  if (single) {
+    // Hours, a day, months…: the calendar shows which days are booked; tapping a free day picks the date.
+    const takenDays = takenFor(allBooked, choice);
+    return (
+      <section id={CALENDAR_ID} className="scroll-mt-28 border-t border-line py-10">
+        <h2 className="font-display text-[22px] leading-7 font-bold tracking-[-0.02em] text-ink">{t("availabilityTitle")}</h2>
+        <p className="mt-1 mb-6 text-sm text-muted">{t("availabilityHint")}</p>
+        <DatePanel
+          today={today}
+          range={plan.start ? { checkIn: plan.start } : {}}
+          flex={0}
+          onRangeChange={(r) => {
+            const day = r.checkOut && r.checkIn === plan.start ? r.checkOut : r.checkIn;
+            setPlan({ ...plan, start: day ?? "" });
+          }}
+          onFlexChange={() => {}}
+          showFlex={false}
+          isBlocked={(day) => dayClosed(day, open, workingDays) || takenDays.some((b) => b.checkIn <= day && day < b.checkOut)}
+        />
+      </section>
+    );
+  }
   const booked = takenFor(allBooked, choice);
   const nights = nightsBetween(range);
   const short = new Intl.DateTimeFormat(locale, { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });

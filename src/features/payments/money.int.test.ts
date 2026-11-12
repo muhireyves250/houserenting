@@ -75,7 +75,8 @@ describe("payment callbacks", () => {
     expect(await db.payment.count({ where: { bookingId: b.id } })).toBe(1);
     const ledger = await db.ledgerEntry.findMany({ where: { bookingId: b.id } });
     expect(Object.fromEntries(ledger.map((e) => [e.kind, e.amount]))).toEqual({ GUEST_PAYMENT: 100000, HOST_PAYABLE: 90000, COMMISSION: 10000 });
-    expect(await db.notification.findFirst({ where: { userId: "host", kind: "newBooking" } })).toBeNull();
+    // The owner is notified only (staff handle the booking).
+    expect(await db.notification.findFirst({ where: { userId: "host", kind: "newBooking" } })).not.toBeNull();
   });
 
   it("don't confirm when the amount is wrong, and record failures without confirming", async () => {

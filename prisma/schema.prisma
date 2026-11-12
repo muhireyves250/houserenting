@@ -581,6 +581,8 @@ model Room {
   /// Several identical rooms of this type (e.g. "101", "102"): each can be booked once at a time and the guest is
   /// given a free one. Empty = a single room.
   numbers     String[]   @default([])
+  /// Photos of this room type (Cloudinary URLs), shown on its page and on each of its rooms.
+  photos      String[]   @default([])
   rates       RoomRate[]
   position    Int        @default(0)
   createdAt   DateTime   @default(now())

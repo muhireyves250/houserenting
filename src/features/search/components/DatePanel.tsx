@@ -106,7 +106,7 @@ export function DatePanel({
                           <button
                             type="button"
                             data-date={day}
-                            aria-label={dayLabel.format(utc(day))}
+                            aria-label={blocked ? `${dayLabel.format(utc(day))} · ${t("bookedDay")}` : dayLabel.format(utc(day))}
                             aria-pressed={isEdge}
                             aria-current={day === today ? "date" : undefined}
                             disabled={past || blocked}
@@ -115,7 +115,11 @@ export function DatePanel({
                             className={cn(
                               "relative mx-auto flex size-10 items-center justify-center rounded-full text-sm font-medium transition-[background-color,box-shadow,color] duration-200",
                               "focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary",
-                              past || blocked ? "cursor-not-allowed text-ink/30 line-through decoration-ink/20" : "text-ink hover:ring-2 hover:ring-primary/40",
+                              past
+                                ? "cursor-not-allowed text-ink/30 line-through decoration-ink/20"
+                                : blocked
+                                  ? "cursor-not-allowed bg-red-50 text-red-700/80 line-through decoration-red-400"
+                                  : "text-ink hover:ring-2 hover:ring-primary/40",
                               // Today: bold with a small dot underneath.
                               day === today && "font-bold after:absolute after:bottom-1 after:size-1 after:rounded-full after:bg-primary",
                               isEdge &&
@@ -155,6 +159,20 @@ export function DatePanel({
           </button>
         ))}
       </div>
+      )}
+
+      {/* A place's calendar: what the red days mean. */}
+      {isBlocked && (
+        <p className="-mt-2 flex items-center justify-center gap-4 text-[12px] text-muted">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="size-3 rounded-full bg-red-100 ring-1 ring-red-300" aria-hidden="true" />
+            {t("bookedDay")}
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="size-3 rounded-full bg-surface ring-1 ring-line-strong" aria-hidden="true" />
+            {t("freeDay")}
+          </span>
+        </p>
       )}
 
       {/* Summary of the chosen stay and a quick way to start over. */}

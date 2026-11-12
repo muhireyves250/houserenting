@@ -16,6 +16,11 @@ export const roomInput = z.object({
     .refine((rates) => new Set(rates.map((r) => r.unit)).size === rates.length, { message: "duplicateUnit" }),
   facilities: z.array(z.enum(FACILITIES)).max(FACILITIES.length).transform((f) => [...new Set(f)]),
   /** Identical rooms of this type ("101", "102"…); each guest is given a free one. Empty = a single room. */
+  /** Photos of this room type: our uploads (Cloudinary) or the demo photos. */
+  photos: z
+    .array(z.string().max(500).regex(/^https:\/\/(res\.cloudinary\.com|images\.unsplash\.com)\//))
+    .max(12)
+    .default([]),
   numbers: z
     .array(z.string().trim().min(1).max(12))
     .max(200)

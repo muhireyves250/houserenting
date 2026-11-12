@@ -1,8 +1,9 @@
 "use client";
 
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { ImagePlus, Pencil, Plus, Trash2, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
+import { photoUploadAction } from "@/features/hosting/actions";
 import { Button } from "@/components/ui/Button";
 import { AreaField, Card, Chip, Field } from "@/features/hosting/components/fields";
 import { FACILITIES } from "@/features/hosting/validation";
@@ -15,7 +16,7 @@ import { parseRoomNumbers, ROOM_STATUSES, type RoomInput, type RoomStatus } from
 type Room = RoomInput & { id: string; status: RoomStatus };
 
 type Unit = RoomInput["rates"][number]["unit"];
-const emptyRoom = (units: readonly Unit[]): RoomInput => ({ name: "", description: "", maxGuests: 2, rates: [{ unit: units[0] ?? "NIGHT", price: 0 }], facilities: [], numbers: [] });
+const emptyRoom = (units: readonly Unit[]): RoomInput => ({ name: "", description: "", maxGuests: 2, rates: [{ unit: units[0] ?? "NIGHT", price: 0 }], facilities: [], numbers: [], photos: [] });
 
 const STATUS_TONE: Record<RoomStatus, string> = {
   AVAILABLE: "text-emerald-700",
@@ -51,7 +52,7 @@ export function RoomsEditor({ listingId, rooms, units }: { listingId: string; ro
         {rooms.map((room) =>
           editing === room.id ? (
             <li key={room.id}>
-              <RoomForm initial={room} units={units} pending={pending} onCancel={() => setEditing(null)} onSave={(input) => run(() => saveRoomAction(listingId, room.id, input), () => setEditing(null))} />
+              <RoomForm listingId={listingId} initial={room} units={units} pending={pending} onCancel={() => setEditing(null)} onSave={(input) => run(() => saveRoomAction(listingId, room.id, input), () => setEditing(null))} />
             </li>
           ) : (
             <li key={room.id} className="flex flex-col gap-3 rounded-2xl border border-line p-4 sm:flex-row sm:items-center">
@@ -102,7 +103,7 @@ export function RoomsEditor({ listingId, rooms, units }: { listingId: string; ro
       )}
       <div className="mt-4">
         {editing === "new" ? (
-          <RoomForm initial={emptyRoom(units)} units={units} pending={pending} onCancel={rooms.length > 0 ? () => setEditing(null) : undefined} onSave={(input) => run(() => saveRoomAction(listingId, null, input), () => setEditing(null))} />
+          <RoomForm listingId={listingId} initial={emptyRoom(units)} units={units} pending={pending} onCancel={rooms.length > 0 ? () => setEditing(null) : undefined} onSave={(input) => run(() => saveRoomAction(listingId, null, input), () => setEditing(null))} />
         ) : (
           <Button variant="outline" onClick={() => setEditing("new")}>
             <Plus className="size-4" aria-hidden="true" />
@@ -115,12 +116,14 @@ export function RoomsEditor({ listingId, rooms, units }: { listingId: string; ro
 }
 
 function RoomForm({
+  listingId,
   initial,
   units,
   pending,
   onSave,
   onCancel,
 }: {
+  listingId: string;
   initial: RoomInput;
   units: readonly Unit[];
   pending: boolean;
@@ -176,6 +179,7 @@ function RoomForm({
             />
           ))}
       </div>
+      <RoomPhotos listingId={listingId} photos={room.photos ?? []} onChange={(photos) => set("photos", photos)} />
       <AreaField label={t("description")} rows={2} maxLength={500} value={room.description ?? ""} onChange={(e) => set("description", e.target.value)} />
       <div className="flex flex-wrap gap-2">
         {FACILITIES.map((f) => {
@@ -197,6 +201,75 @@ function RoomForm({
           {t("save")}
         </Button>
       </div>
+    </div>
+  );
+}
+
+/** The room type's photos: upload straight to our Cloudinary folder, remove, saved with the room. */
+function RoomPhotos({ listingId, photos, onChange }: { listingId: string; photos: string[]; onChange: (photos: string[]) => void }) {
+  const t = useTranslations("Rooms");
+  const input = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(0);
+  const [failed, setFailed] = useState(false);
+  async function onFiles(files: FileList | null) {
+    if (!files?.length) return;
+    setFailed(false);
+    const images = [...files].filter((f) => f.type.startsWith("image/") && f.size <= 10 * 1024 * 1024).slice(0, 12 - photos.length);
+    setBusy(images.length);
+    const added: string[] = [];
+    for (const file of images) {
+      const ticket = await photoUploadAction(listingId).catch(() => null);
+      if (!ticket) {
+        setFailed(true);
+        setBusy((n) => n - 1);
+        continue;
+      }
+      const body = new FormData();
+      body.append("file", file);
+      body.append("api_key", ticket.apiKey);
+      body.append("timestamp", String(ticket.timestamp));
+      body.append("folder", ticket.folder);
+      body.append("signature", ticket.signature);
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${ticket.cloudName}/image/upload`, { method: "POST", body }).catch(() => null);
+      if (res?.ok) added.push(((await res.json()) as { secure_url: string }).secure_url);
+      else setFailed(true);
+      setBusy((n) => n - 1);
+    }
+    if (added.length) onChange([...photos, ...added]);
+    if (input.current) input.current.value = "";
+  }
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="text-xs font-semibold text-muted">{t("photos")}</p>
+      <div className="flex flex-wrap gap-2">
+        {photos.map((url) => (
+          <span key={url} className="relative size-20 overflow-hidden rounded-xl bg-canvas ring-1 ring-line">
+            {/* eslint-disable-next-line @next/next/no-img-element -- uploaded room photo */}
+            <img src={url} alt="" className="size-full object-cover" />
+            <button
+              type="button"
+              aria-label={t("removePhoto")}
+              onClick={() => onChange(photos.filter((p) => p !== url))}
+              className="absolute top-1 right-1 flex size-6 items-center justify-center rounded-full bg-white/90 text-ink shadow"
+            >
+              <X className="size-3.5" aria-hidden="true" />
+            </button>
+          </span>
+        ))}
+        {photos.length < 12 && (
+          <button
+            type="button"
+            disabled={busy > 0}
+            onClick={() => input.current?.click()}
+            className="flex size-20 flex-col items-center justify-center gap-1 rounded-xl border-[1.5px] border-dashed border-primary/40 text-[11px] font-semibold text-primary hover:border-primary disabled:opacity-60"
+          >
+            <ImagePlus className="size-5" aria-hidden="true" />
+            {busy > 0 ? t("uploading") : t("addPhotos")}
+          </button>
+        )}
+      </div>
+      <input ref={input} type="file" accept="image/*" multiple hidden onChange={(e) => void onFiles(e.target.files)} />
+      {failed && <p className="text-[12px] text-danger">{t("photoFailed")}</p>}
     </div>
   );
 }

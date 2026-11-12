@@ -60,7 +60,7 @@ export type SeedListing = {
   roomList?: SeedRoom[];
 };
 
-export type SeedRoom = { name: string; description: string; maxGuests: number; facilities: Facility[]; rates: { unit: "DAY" | "NIGHT"; price: number }[]; numbers?: string[] };
+export type SeedRoom = { name: string; description: string; maxGuests: number; facilities: Facility[]; rates: { unit: "DAY" | "NIGHT"; price: number }[]; numbers?: string[]; photos?: string[] };
 
 const photo = (id: string) => `https://images.unsplash.com/photo-${id}`;
 
@@ -262,9 +262,9 @@ export const SEED_LISTINGS: SeedListing[] = [
     bookingModel: "ROOM_BY_ROOM",
     laundryPricePerKg: 1500,
     roomList: [
-      { name: "Volcano View Suite", description: "King bed and a window onto the Virunga volcanoes.", maxGuests: 2, facilities: ["WIFI", "HOT_WATER"], rates: [{ unit: "NIGHT", price: 120000 }, { unit: "DAY", price: 60000 }] },
-      { name: "Garden Double", description: "Double bed, opens onto the garden.", maxGuests: 2, facilities: ["WIFI", "HOT_WATER"], rates: [{ unit: "NIGHT", price: 90000 }, { unit: "DAY", price: 45000 }], numbers: ["201", "202", "203"] },
-      { name: "Family Room", description: "A double and two singles, by the fireplace.", maxGuests: 4, facilities: ["WIFI", "HOT_WATER", "TV"], rates: [{ unit: "NIGHT", price: 150000 }, { unit: "DAY", price: 75000 }] },
+      { name: "Volcano View Suite", description: "King bed and a window onto the Virunga volcanoes.", maxGuests: 2, facilities: ["WIFI", "HOT_WATER"], rates: [{ unit: "NIGHT", price: 120000 }, { unit: "DAY", price: 60000 }], photos: [P.bedroom2, P.cabin1] },
+      { name: "Garden Double", description: "Double bed, opens onto the garden.", maxGuests: 2, facilities: ["WIFI", "HOT_WATER"], rates: [{ unit: "NIGHT", price: 90000 }, { unit: "DAY", price: 45000 }], numbers: ["201", "202", "203"], photos: [P.bedroom1, P.cottage1] },
+      { name: "Family Room", description: "A double and two singles, by the fireplace.", maxGuests: 4, facilities: ["WIFI", "HOT_WATER", "TV"], rates: [{ unit: "NIGHT", price: 150000 }, { unit: "DAY", price: 75000 }], photos: [P.bedroom3, P.cabin1] },
     ],
   },
   {

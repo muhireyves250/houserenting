@@ -14,5 +14,5 @@ export default async function RoomLinkPage({ params }: Props) {
   const { id } = await params;
   const room = await db.room.findUnique({ where: { id }, select: { id: true, listing: { select: { id: true, title: true } } } });
   if (!room) notFound();
-  redirect({ href: { pathname: listingPath(room.listing.id, room.listing.title), query: { room: room.id } }, locale: await getLocale() });
+  redirect({ href: `${listingPath(room.listing.id, room.listing.title)}/rooms/${room.id}`, locale: await getLocale() });
 }

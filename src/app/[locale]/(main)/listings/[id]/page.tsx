@@ -9,6 +9,8 @@ import { savedListingIds } from "@/features/favorites/service";
 import { isGuestFavorite } from "@/features/home/sections";
 import { BookingCard, MobileBookingBar, MobileBookingPlan, RoomPicker, StayCalendar, StayProvider } from "@/features/listings/components/detail/Booking";
 import { listingRooms } from "@/features/rooms/service";
+import { LodgeRoomTypes } from "@/features/rooms/components/LodgeRoomTypes";
+import { todayISO } from "@/features/search/date-range";
 import { getSettings, holdMinutesFrom, policyText } from "@/features/settings/service";
 import { TrackView } from "@/features/listings/components/RecentlyViewed";
 import { ListingPhotos } from "@/features/listings/components/detail/ListingPhotos";
@@ -126,6 +128,10 @@ export default async function ListingPage({ params, searchParams }: Props) {
             rates: roomRates.map((r) => ({ unit: r.unit, price: r.price })),
             facilities,
           }));
+  // Lodges are booked room by room from their own pages (room type → room); the lodge page shows the types.
+  const lodge = listing.type === "LODGE" && rooms.length > 0;
+  const roomTypes = allRooms.filter((r) => r.status === "AVAILABLE").map(({ id, name, description, maxGuests, photos, numbers, rates: rr }) => ({ id, name, description, maxGuests, photos, numbers, rates: rr.map((x) => ({ unit: x.unit, price: x.price })) }));
+  const tRooms = await getTranslations("Rooms");
   const monthYear = new Intl.DateTimeFormat(locale, { month: "long", year: "numeric", timeZone: "Africa/Kigali" });
   const savedIds = user ? await savedListingIds(user.id, [listing.id, ...nearby.map((l) => l.id)]) : new Set<string>();
   const saved = savedIds.has(listing.id);
@@ -359,21 +365,46 @@ export default async function ListingPage({ params, searchParams }: Props) {
               </Section>
             )}
 
-            <RoomPicker wholeRates={rates.map((r) => ({ unit: r.unit, price: discountedPrice(r.price, listing.discountPercent) }))} />
-            {/* Phones: how and when to book (the booking card is beside the page on computers only). */}
-            <MobileBookingPlan rates={bookingRates} maxGuests={listing.maxGuests} />
-            <StayCalendar city={listing.city} rates={bookingRates} />
+            {lodge ? (
+              // Lodges: the room types; each opens its rooms, and each room is booked on its own page.
+              <LodgeRoomTypes
+                basePath={listingPath(listing.id, listing.title)}
+                types={roomTypes}
+                booked={booked}
+                numbers={numberBookings}
+                today={todayISO()}
+                fallbackPhoto={listing.photos[0]?.url ?? null}
+                discountPercent={listing.discountPercent}
+              />
+            ) : (
+              <>
+                <RoomPicker wholeRates={rates.map((r) => ({ unit: r.unit, price: discountedPrice(r.price, listing.discountPercent) }))} />
+                {/* Phones: how and when to book (the booking card is beside the page on computers only). */}
+                <MobileBookingPlan rates={bookingRates} maxGuests={listing.maxGuests} />
+                <StayCalendar city={listing.city} rates={bookingRates} />
+              </>
+            )}
           </div>
 
           <div className="hidden md:block">
             <div className="sticky top-[97px]">
-              <BookingCard
-                rates={bookingRates}
-                discountPercent={listing.discountPercent}
-                maxGuests={listing.maxGuests}
-                place={preview}
-                signedIn={user !== null}
-              />
+              {lodge ? (
+                <div className="rounded-2xl border border-line/70 bg-surface p-6 shadow-[0_12px_32px_-14px_rgba(16,24,40,0.3)]">
+                  <p className="text-[20px] font-bold text-ink">{tRooms("lodgeCardTitle")}</p>
+                  <p className="mt-1 text-[14px] text-muted">{tRooms("lodgeCardBody")}</p>
+                  <a href="#room-types" className="mt-4 flex w-full items-center justify-center rounded-full bg-gradient-to-r from-primary to-[#0a6fe0] py-3.5 text-[15px] font-semibold text-white">
+                    {tRooms("seeRooms")}
+                  </a>
+                </div>
+              ) : (
+                <BookingCard
+                  rates={bookingRates}
+                  discountPercent={listing.discountPercent}
+                  maxGuests={listing.maxGuests}
+                  place={preview}
+                  signedIn={user !== null}
+                />
+              )}
             </div>
           </div>
         </div>
@@ -503,7 +534,17 @@ export default async function ListingPage({ params, searchParams }: Props) {
         )}
       </PageContainer>
 
-      {rates.length > 0 && <MobileBookingBar rates={bookingRates} discountPercent={listing.discountPercent} place={preview} signedIn={user !== null} />}
+      {lodge ? (
+        <a
+          href="#room-types"
+          className="fixed inset-x-3 bottom-[calc(82px+env(safe-area-inset-bottom))] z-30 flex items-center justify-between gap-4 rounded-2xl border border-line bg-surface px-4 py-3 shadow-[0_10px_30px_-12px_rgba(16,24,40,0.35)] md:hidden"
+        >
+          <span className="text-[14px] font-semibold text-ink">{tRooms("lodgeCardTitle")}</span>
+          <span className="rounded-full bg-primary px-5 py-2.5 text-[14px] font-semibold text-white">{tRooms("seeRooms")}</span>
+        </a>
+      ) : (
+        rates.length > 0 && <MobileBookingBar rates={bookingRates} discountPercent={listing.discountPercent} place={preview} signedIn={user !== null} />
+      )}
     </StayProvider>
   );
 }

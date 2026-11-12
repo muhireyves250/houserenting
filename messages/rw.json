@@ -96,7 +96,9 @@
     "noTypeBody": "Gerageza ikindi cyiciro, cyangwa urebe amacumbi yose.",
     "districts": "Uturere dufite amazu",
     "typing": "Kigali · Musanze · Rubavu · Huye · Karongi · lodge hafi y'ibirunga · icyumba cy'umunsi",
-    "tryWord": "Gerageza"
+    "tryWord": "Gerageza",
+    "bookedDay": "Byafashwe",
+    "freeDay": "Biri ubusa"
   },
   "Search": {
     "anywhere": "Ahantu hose mu Rwanda",
@@ -525,7 +527,9 @@
     "talkToUs": "Ufite ikibazo? Vugana na VIIPA",
     "talkToUsBody": "Itsinda ryacu ryita kuri iyi nzu no ku ifatwa ryawe. Tubaze icyo ushaka mbere cyangwa mu gihe ucumbitse.",
     "dayUseHint": "Hitamo itariki imwe: ukoresha aho hantu uwo munsi ukagenda nimugoroba.",
-    "pickNightsBelow": "Hitamo amajoro yawe muri kalendari iri hasi."
+    "pickNightsBelow": "Hitamo amajoro yawe muri kalendari iri hasi.",
+    "availabilityTitle": "Igihe kiri ubusa",
+    "availabilityHint": "Iminsi yafashwe iri mu mutuku. Kanda umunsi uri ubusa uwuhitemo."
   },
   "Facility": {
     "KITCHEN": "Igikoni",
@@ -1235,7 +1239,22 @@
     "roomNumber": "Icyumba {number}",
     "pickRoom": "Hitamo icyumba cyawe ({name})",
     "freeCount": "{free} kuri {total} biri ubusa {day}",
-    "anyRoom": "Icyumba icyo ari cyo cyose kiri ubusa"
+    "anyRoom": "Icyumba icyo ari cyo cyose kiri ubusa",
+    "photos": "Amafoto y'ubu bwoko bw'icyumba",
+    "addPhotos": "Ongeraho amafoto",
+    "uploading": "Biri koherezwa…",
+    "removePhoto": "Kuraho ifoto",
+    "photoFailed": "Amafoto amwe ntiyoherejwe. Ongera ugerageze.",
+    "allRoomsOf": "Ibyumba byose bya {name}",
+    "roomTypesTitle": "Ubwoko bw'ibyumba",
+    "roomTypesIntro": "Hitamo ubwoko urebe ibyumba byabwo, hanyuma uhitemo icyumba ukodesha.",
+    "freeTodayCount": "{free} kuri {total} biri ubusa uyu munsi",
+    "fromPrice": "Guhera",
+    "seeRooms": "Reba ibyumba",
+    "chooseRoomTitle": "Hitamo icyumba cyawe",
+    "chooseRoomIntro": "Buri cyumba gikodeshwa ukwacyo. Fungura icyumba urebe kalendari yacyo ukikodeshe.",
+    "lodgeCardTitle": "Kodesha icyumba",
+    "lodgeCardBody": "Iyi lodge ikodeshwa icyumba ku cyumba. Hitamo ubwoko, hanyuma icyumba ushaka."
   },
   "Settings": {
     "note": "Siga ahantu ubusa kugeza icyemezo gifashwe: nta mafaranga yakwa kandi nta kintu gisezeranywa ku hasigaye ubusa. Buri mpinduka yandikwa mu nyandiko z'ibikorwa, kandi ibyabitswe bigumana igenamiterere ryariho.",
