@@ -8,6 +8,7 @@ import { bookedForRoom } from "@/features/bookings/service";
 import { BookingCard, MobileBookingBar, MobileBookingPlan, StayCalendar, StayProvider } from "@/features/listings/components/detail/Booking";
 import { ListingPhotos } from "@/features/listings/components/detail/ListingPhotos";
 import { listingPath } from "@/features/listings/links";
+import { ONLY_ROOM } from "@/features/rooms/links";
 import { discountedPrice } from "@/features/listings/pricing";
 import { getSettings, holdMinutesFrom, policyText } from "@/features/settings/service";
 import { Link } from "@/i18n/navigation";
@@ -22,7 +23,7 @@ const isoDay = (d: Date | null) => d?.toISOString().slice(0, 10) ?? null;
  * One room of a lodge: its photos, details and prices, its own calendar (days it's booked are marked) and the
  * booking card, which books exactly this room (this number of the room type).
  */
-export async function RoomBookingView({ listingId, roomId, number }: { listingId: string; roomId: string; number: string | null }) {
+export async function RoomBookingView({ listingId, roomId, number: asked }: { listingId: string; roomId: string; number: string }) {
   const [listing, room] = await Promise.all([
     db.listing.findFirst({
       where: { id: listingId, status: "PUBLISHED" },
@@ -31,6 +32,8 @@ export async function RoomBookingView({ listingId, roomId, number }: { listingId
     db.room.findFirst({ where: { id: roomId, listingId, status: "AVAILABLE" }, include: { rates: true } }),
   ]);
   if (!listing || !room) notFound();
+  // A type with no room numbers is a single room, opened as ONLY_ROOM.
+  const number = room.numbers.length === 0 && asked === ONLY_ROOM ? null : asked;
   if (number !== null && !room.numbers.includes(number)) notFound();
 
   const [t, tRooms, tListings, tFacility, tType, locale, settings, booked, user] = await Promise.all([
@@ -95,7 +98,7 @@ export async function RoomBookingView({ listingId, roomId, number }: { listingId
       <PageContainer className="pt-4 pb-40 md:pt-8 md:pb-16">
         <Link href={`${listingPath(listing.id, listing.title)}/rooms/${room.id}`} className="mb-3 inline-flex items-center gap-1 text-sm text-muted transition-colors hover:text-ink">
           <ChevronLeft className="size-4" aria-hidden="true" />
-          {room.numbers.length > 1 ? tRooms("allRoomsOf", { name: room.name }) : listing.title}
+          {tRooms("allRoomsOf", { name: room.name })}
         </Link>
         <h1 className="mb-1 text-[26px] leading-8 font-bold tracking-[-0.03em] text-ink md:text-[32px] md:leading-10">{title}</h1>
         <p className="mb-5 text-[14px] text-muted">

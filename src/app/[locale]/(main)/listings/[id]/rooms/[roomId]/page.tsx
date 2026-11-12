@@ -6,7 +6,7 @@ import { bookedRanges, bookedRoomNumbers } from "@/features/bookings/service";
 import { listingIdCandidates, listingPath } from "@/features/listings/links";
 import { discountedPrice } from "@/features/listings/pricing";
 import { getPublishedListingByParam } from "@/features/listings/service";
-import { RoomBookingView } from "@/features/rooms/components/RoomBookingView";
+import { ONLY_ROOM } from "@/features/rooms/links";
 import { todayISO } from "@/features/search/date-range";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
@@ -17,7 +17,8 @@ type Props = { params: Promise<{ id: string; roomId: string }> };
 
 /**
  * A lodge's room type: every room of that type with whether it's free today (and when booked rooms are free
- * again); tapping one opens that room's page to book it. A type that is a single room opens straight to it.
+ * again), each with its photo, guests and price; tapping one opens that room's page to book it. A type without
+ * room numbers is one room.
  */
 export default async function RoomTypePage({ params }: Props) {
   const { id, roomId } = await params;
@@ -25,7 +26,6 @@ export default async function RoomTypePage({ params }: Props) {
   if (!listing) notFound();
   const room = await db.room.findFirst({ where: { id: roomId, listingId: listing.id, status: "AVAILABLE" }, include: { rates: true } });
   if (!room) notFound();
-  if (room.numbers.length <= 1) return <RoomBookingView listingId={listing.id} roomId={room.id} number={room.numbers[0] ?? null} />;
 
   const [t, tListings, locale, booked, numbers] = await Promise.all([getTranslations("Rooms"), getTranslations("Listings"), getLocale(), bookedRanges(listing.id), bookedRoomNumbers(listing.id)]);
   const today = todayISO();
@@ -34,7 +34,8 @@ export default async function RoomTypePage({ params }: Props) {
   // Whole-place bookings and blocks on this type take every room.
   const allTaken = booked.find((b) => (b.roomId === null || b.roomId === room.id) && b.checkIn <= today && today < b.checkOut);
   const status = (n: string) => {
-    const own = numbers.filter((b) => b.roomId === room.id && b.roomNumber === n);
+    // A type without numbers is one room: its bookings are the type's own.
+    const own = n === ONLY_ROOM ? booked.filter((b) => b.roomId === null || b.roomId === room.id) : numbers.filter((b) => b.roomId === room.id && b.roomNumber === n);
     const now = allTaken ?? own.find((b) => b.checkIn <= today && today < b.checkOut);
     if (!now) return { free: true as const };
     // Follow back-to-back bookings to the first free day.
@@ -46,7 +47,7 @@ export default async function RoomTypePage({ params }: Props) {
     }
     return { free: false as const, freeFrom: free };
   };
-  const rows = room.numbers.map((n) => ({ n, s: status(n) }));
+  const rows = (room.numbers.length > 0 ? room.numbers : [ONLY_ROOM]).map((n) => ({ n, s: status(n) }));
   const free = rows.filter((r) => r.s.free).length;
   const photo = room.photos[0] ?? listing.photos[0]?.url ?? null;
   const cheapest = [...room.rates].sort((a, b) => a.price - b.price)[0];
@@ -73,7 +74,7 @@ export default async function RoomTypePage({ params }: Props) {
               <Users className="size-4" aria-hidden="true" />
               {t("guests", { count: room.maxGuests })}
             </span>
-            <span>{t("roomsCount", { count: room.numbers.length })}</span>
+            <span>{t("roomsCount", { count: rows.length })}</span>
           </p>
           {cheapest && (
             <p className="text-[15px] text-ink">
@@ -82,31 +83,50 @@ export default async function RoomTypePage({ params }: Props) {
           )}
           {room.description && <p className="text-[14px] leading-6 text-ink/80">{room.description}</p>}
           <p className={cn("mt-1 self-start rounded-full px-3 py-1 text-[13px] font-bold", free > 0 ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-700")}>
-            {t("freeTodayCount", { free, total: room.numbers.length })}
+            {t("freeTodayCount", { free, total: rows.length })}
           </p>
         </div>
       </section>
 
       <h2 className="mt-8 mb-1 text-[20px] font-bold text-ink">{t("chooseRoomTitle")}</h2>
       <p className="mb-4 text-[14px] text-muted">{t("chooseRoomIntro")}</p>
-      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4">
         {rows.map(({ n, s }) => (
           <li key={n}>
             <Link
               href={`${base}/rooms/${room.id}/${encodeURIComponent(n)}`}
               className={cn(
-                "flex h-full flex-col gap-1 rounded-2xl bg-surface p-4 ring-1 transition-shadow hover:shadow-[0_8px_24px_-14px_rgba(16,24,40,0.4)]",
+                "flex h-full flex-col overflow-hidden rounded-2xl bg-surface ring-1 transition-shadow hover:shadow-[0_8px_24px_-14px_rgba(16,24,40,0.4)]",
                 s.free ? "ring-emerald-200" : "ring-red-200",
               )}
             >
-              <span className="flex items-center justify-between gap-2">
-                <b className="text-[18px] font-bold text-ink tabular-nums">{t("roomNumber", { number: n })}</b>
-                <ChevronRight className="size-4 text-ink/40" aria-hidden="true" />
+              <span className="relative block aspect-[4/3] bg-primary-soft">
+                {photo ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- room photo
+                  <img src={photo} alt="" loading="lazy" className="absolute inset-0 size-full object-cover" />
+                ) : (
+                  <BedDouble className="absolute inset-0 m-auto size-8 text-primary" aria-hidden="true" />
+                )}
+                <span className={cn("absolute top-2 left-2 rounded-full px-2.5 py-0.5 text-[12px] font-bold shadow-sm", s.free ? "bg-white text-emerald-800" : "bg-red-600 text-white")}>
+                  {s.free ? t("availableOn", { day: t("today") }) : t("bookedOn", { day: t("today") })}
+                </span>
               </span>
-              <span className={cn("text-[13px] font-semibold", s.free ? "text-emerald-700" : "text-red-700")}>
-                {s.free ? t("availableOn", { day: t("today") }) : t("bookedOn", { day: t("today") })}
+              <span className="flex flex-1 flex-col gap-1 p-3">
+                <span className="flex items-center justify-between gap-2">
+                  <b className="truncate text-[16px] font-bold text-ink tabular-nums">{n === ONLY_ROOM ? room.name : t("roomNumber", { number: n })}</b>
+                  <ChevronRight className="size-4 shrink-0 text-ink/40" aria-hidden="true" />
+                </span>
+                <span className="inline-flex items-center gap-1 text-[12px] text-muted">
+                  <Users className="size-3.5" aria-hidden="true" />
+                  {t("guests", { count: room.maxGuests })}
+                </span>
+                {cheapest && (
+                  <span className="text-[13px] text-ink">
+                    <b className="font-semibold">{formatRWF(discountedPrice(cheapest.price, listing.discountPercent), locale)}</b> {tListings(`perUnit.${cheapest.unit}`)}
+                  </span>
+                )}
+                {!s.free && <span className="text-[12px] text-muted">{t("freeFrom", { date: shortDate.format(new Date(`${s.freeFrom}T00:00:00Z`)) })}</span>}
               </span>
-              {!s.free && <span className="text-[12px] text-muted">{t("freeFrom", { date: shortDate.format(new Date(`${s.freeFrom}T00:00:00Z`)) })}</span>}
             </Link>
           </li>
         ))}
