@@ -14,6 +14,8 @@ import { todayISO } from "@/features/search/date-range";
 import { getSettings, holdMinutesFrom, policyText } from "@/features/settings/service";
 import { TrackView } from "@/features/listings/components/RecentlyViewed";
 import { ListingPhotos } from "@/features/listings/components/detail/ListingPhotos";
+import { DetailSection as Section } from "@/features/listings/components/detail/DetailSection";
+import { FACILITY_ICONS } from "@/features/listings/components/detail/facility-icons";
 import { LocationMapLazy } from "@/features/listings/components/detail/LocationMapLazy";
 import { SaveButton } from "@/features/listings/components/detail/SaveButton";
 import { ShareButton } from "@/features/listings/components/detail/ShareButton";
@@ -44,22 +46,6 @@ type Props = { params: Promise<{ id: string }>; searchParams?: Promise<{ room?: 
 const isoDay = (d: Date | null) => d?.toISOString().slice(0, 10) ?? null;
 const UNIT_ORDER = ["HOUR", "DAY", "NIGHT", "WEEK", "MONTH", "YEAR"] as const;
 
-const FACILITY_ICONS: Record<string, LucideIcon> = {
-  KITCHEN: CookingPot,
-  WIFI: Wifi,
-  AIR_CONDITIONER: AirVent,
-  WORKPLACE: Laptop,
-  WASHING_MACHINE: WashingMachine,
-  DISHWASHER: Utensils,
-  OVEN: CookingPot,
-  MICROWAVE: Microwave,
-  PARKING: SquareParking,
-  TV: Tv,
-  HOT_WATER: ShowerHead,
-  SECURITY: ShieldCheck,
-  GENERATOR: Zap,
-  POOL: WavesLadder,
-};
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const candidates = listingIdCandidates((await params).id);
@@ -69,14 +55,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return notice ? { title: notice.title, robots: { index: false, follow: false } } : {};
 }
 
-function Section({ title, children, id }: { title?: string; children: ReactNode; id?: string }) {
-  return (
-    <section id={id} className="scroll-reveal border-t border-line py-10">
-      {title && <h2 className="mb-6 font-display text-[22px] leading-7 font-bold tracking-[-0.02em] text-ink">{title}</h2>}
-      {children}
-    </section>
-  );
-}
 
 export default async function ListingPage({ params, searchParams }: Props) {
   // A room's permanent link (/rooms/<id>) lands here with that room already chosen.
@@ -139,12 +117,10 @@ export default async function ListingPage({ params, searchParams }: Props) {
   const night = rates.find((r) => r.unit === "NIGHT");
   const place = `${listing.district}, ${listing.city}`;
 
-  const stats = [
-    t("statGuests", { count: listing.maxGuests }),
-    t("statBedrooms", { count: listing.bedrooms }),
-    t("statBaths", { count: listing.bathrooms }),
-    t("size", { size: listing.sizeM2 }),
-  ];
+  // A lodge is its rooms (one bed each); a house is its guests, bedrooms, baths and size.
+  const stats = lodge
+    ? [tRooms("roomsCount", { count: roomTypes.reduce((n, r) => n + Math.max(1, r.numbers.length), 0) })]
+    : [t("statGuests", { count: listing.maxGuests }), t("statBedrooms", { count: listing.bedrooms }), t("statBaths", { count: listing.bathrooms }), t("size", { size: listing.sizeM2 })];
 
   // Up to three highlights the data can honestly back.
   const highlights = [
@@ -180,7 +156,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
       [
         night?.checkInTime && t("checkIn", { time: night.checkInTime }),
         night?.checkOutTime && t("checkOut", { time: night.checkOutTime }),
-        t("maxGuests", { count: listing.maxGuests }),
+        !lodge && t("maxGuests", { count: listing.maxGuests }),
         listing.petsAllowed ? t("petsAllowed") : t("noPets"),
         listing.guestIdPolicy === "UPLOAD_ONLINE" && t("idUploadOnline"),
         listing.guestIdPolicy === "AT_CHECK_IN" && t("idAtCheckIn"),

@@ -87,6 +87,15 @@ describe("room-by-room and whole-place bookings", () => {
     expect((await bookedRoomNumbers("lodge", NOW)).map((b) => b.roomNumber).sort()).toEqual(["101", "103"]);
   });
 
+  it("each room of a place has its own name or number, never in two room types", async () => {
+    const admin = { id: "admin", role: "ADMIN" };
+    expect((await saveRoom(admin, "lodge", roomA, { ...room, name: "First floor", rates: [{ unit: "NIGHT", price: 40000 }], numbers: ["101", "Lake Kivu"] })).ok).toBe(true);
+    expect(await saveRoom(admin, "lodge", roomB, { ...room, name: "Second floor", rates: [{ unit: "NIGHT", price: 40000 }], numbers: ["201", "lake kivu"] })).toEqual({ ok: false, errors: { numbers: "taken:lake kivu" } });
+    expect((await saveRoom(admin, "lodge", roomB, { ...room, name: "Second floor", rates: [{ unit: "NIGHT", price: 40000 }], numbers: ["201", "202"] })).ok).toBe(true);
+    // Saving a type again with its own rooms is fine.
+    expect((await saveRoom(admin, "lodge", roomA, { ...room, name: "First floor", rates: [{ unit: "NIGHT", price: 40000 }], numbers: ["101", "Lake Kivu", "102"] })).ok).toBe(true);
+  });
+
   it("a room's own calendar shows only that room's bookings (and the whole place's)", async () => {
     await saveRoom({ id: "admin", role: "ADMIN" }, "lodge", roomA, { ...room, name: "Garden Double", rates: [{ unit: "NIGHT", price: 40000 }], numbers: ["101", "102"] });
     const night = { listingId: "lodge", unit: "NIGHT" as const, start: "2026-11-01", quantity: 2, guests: 1, payment: pay, roomId: roomA };

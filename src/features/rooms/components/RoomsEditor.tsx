@@ -34,11 +34,15 @@ export function RoomsEditor({ listingId, rooms, units }: { listingId: string; ro
   const [editing, setEditing] = useState<string | "new" | null>(rooms.length === 0 ? "new" : null);
   const [pending, start] = useTransition();
   const [failed, setFailed] = useState(false);
+  // Room names already used by another type of this place.
+  const [taken, setTaken] = useState<string | null>(null);
 
-  const run = (action: () => Promise<{ ok: boolean }>, after?: () => void) =>
+  const run = (action: () => Promise<{ ok: boolean; errors?: Record<string, string> }>, after?: () => void) =>
     start(async () => {
-      const { ok } = await action();
-      setFailed(!ok);
+      const { ok, errors } = await action();
+      const clash = errors?.numbers?.startsWith("taken:") ? errors.numbers.slice(6) : null;
+      setTaken(clash);
+      setFailed(!ok && !clash);
       if (ok) {
         after?.();
         router.refresh();
@@ -96,6 +100,11 @@ export function RoomsEditor({ listingId, rooms, units }: { listingId: string; ro
           ),
         )}
       </ul>
+      {taken && (
+        <p role="alert" className="mt-3 text-[13px] font-medium text-danger">
+          {t("numbersTaken", { names: taken })}
+        </p>
+      )}
       {failed && (
         <p role="alert" className="mt-3 text-[13px] font-medium text-danger">
           {t("failed")}

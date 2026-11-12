@@ -10,6 +10,7 @@ import { LONG_UNITS, periodFor, type BookingUnit } from "@/features/bookings/per
 import { maskPhone, parseMobileMoney, type MoMoProvider } from "@/features/listings/mobile-money";
 import { useRouter } from "@/i18n/navigation";
 import { useModal } from "@/lib/use-modal";
+import { roomLabel } from "@/features/rooms/links";
 import { cn } from "@/lib/cn";
 import { formatRWF } from "@/lib/format";
 import type { PlacePreviewData } from "./PlacePreview";
@@ -364,7 +365,7 @@ export function ReserveDialog({
                     {room && (
                       <p className="mt-1 text-[13px] font-semibold text-ink">
                         {room.name}
-                        {room.number && ` · ${tRooms("roomNumber", { number: room.number })}`}
+                        {room.number && ` · ${roomLabel(room.number, (number) => tRooms("roomNumber", { number }))}`}
                       </p>
                     )}
                   </div>

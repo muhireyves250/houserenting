@@ -22,7 +22,7 @@ export const roomInput = z.object({
     .max(12)
     .default([]),
   numbers: z
-    .array(z.string().trim().min(1).max(12))
+    .array(z.string().trim().min(1).max(40))
     .max(200)
     .default([])
     .transform((n) => [...new Set(n)]),
@@ -30,7 +30,7 @@ export const roomInput = z.object({
 
 /** "101, 102 103" → ["101", "102", "103"] (commas, spaces or new lines). */
 export function parseRoomNumbers(text: string): string[] {
-  return [...new Set(text.split(/[\s,;]+/).map((n) => n.trim()).filter(Boolean))].slice(0, 200);
+  return [...new Set(text.split(/[,;\n]+/).map((n) => n.trim()).filter(Boolean))].slice(0, 200);
 }
 
 export type RoomInput = z.input<typeof roomInput>;

@@ -13,6 +13,7 @@ import { directionsUrl, formatDay, formatKigaliDateTime, formatKigaliTime, forma
 import { isBookingReference } from "@/features/bookings/reference";
 import { getGuestBooking } from "@/features/bookings/service";
 import { isHoldActive } from "@/features/bookings/status";
+import { roomLabel } from "@/features/rooms/links";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { formatRWF } from "@/lib/format";
@@ -195,7 +196,7 @@ export default async function BookingPage({ params }: Props) {
               {booking.room.name}
               {/* The room number is given once the booking is paid. */}
               {booking.roomNumber && ["CONFIRMED", "CHECKED_IN", "COMPLETED"].includes(booking.status) && (
-                <b className="ml-2 rounded-full bg-primary px-2.5 py-0.5 text-[12px] font-bold text-white">{tRooms("roomNumber", { number: booking.roomNumber })}</b>
+                <b className="ml-2 rounded-full bg-primary px-2.5 py-0.5 text-[12px] font-bold text-white">{roomLabel(booking.roomNumber, (number) => tRooms("roomNumber", { number }))}</b>
               )}
             </Row>
           )}

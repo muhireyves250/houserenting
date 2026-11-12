@@ -1,4 +1,4 @@
-import { BedDouble, ChevronLeft, ChevronRight, Users } from "lucide-react";
+import { ArrowLeft, BedDouble, ChevronLeft, ChevronRight } from "lucide-react";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { PageContainer } from "@/components/ui/PageContainer";
@@ -6,7 +6,9 @@ import { bookedRanges, bookedRoomNumbers } from "@/features/bookings/service";
 import { listingIdCandidates, listingPath } from "@/features/listings/links";
 import { discountedPrice } from "@/features/listings/pricing";
 import { getPublishedListingByParam } from "@/features/listings/service";
-import { ONLY_ROOM } from "@/features/rooms/links";
+import { ONLY_ROOM, roomLabel } from "@/features/rooms/links";
+import { DetailSection } from "@/features/listings/components/detail/DetailSection";
+import { ListingPhotos } from "@/features/listings/components/detail/ListingPhotos";
 import { todayISO } from "@/features/search/date-range";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
@@ -17,7 +19,7 @@ type Props = { params: Promise<{ id: string; roomId: string }> };
 
 /**
  * A lodge's room type: every room of that type with whether it's free today (and when booked rooms are free
- * again), each with its photo, guests and price; tapping one opens that room's page to book it. A type without
+ * again), each with its photo and price; tapping one opens that room's page to book it. A type without
  * room numbers is one room.
  */
 export default async function RoomTypePage({ params }: Props) {
@@ -49,47 +51,61 @@ export default async function RoomTypePage({ params }: Props) {
   };
   const rows = (room.numbers.length > 0 ? room.numbers : [ONLY_ROOM]).map((n) => ({ n, s: status(n) }));
   const free = rows.filter((r) => r.s.free).length;
-  const photo = room.photos[0] ?? listing.photos[0]?.url ?? null;
+  const photos = (room.photos.length > 0 ? room.photos.map((url, i) => ({ id: `room-${i}`, url })) : listing.photos.map((p) => ({ id: p.id, url: p.url }))).slice(0, 12);
+  const photo = photos[0]?.url ?? null;
+  const label = (n: string) => (n === ONLY_ROOM ? room.name : roomLabel(n, (number) => t("roomNumber", { number })));
   const cheapest = [...room.rates].sort((a, b) => a.price - b.price)[0];
 
   return (
-    <PageContainer className="max-w-4xl pt-4 pb-16 md:pt-8">
-      <Link href={`${base}#room-types`} className="mb-3 inline-flex items-center gap-1 text-sm text-muted transition-colors hover:text-ink">
-        <ChevronLeft className="size-4" aria-hidden="true" />
-        {listing.title}
-      </Link>
-      <section className="overflow-hidden rounded-3xl bg-surface shadow-[0_10px_30px_-14px_rgba(16,24,40,0.3)] ring-1 ring-line md:flex">
-        <span className="relative block aspect-[16/10] bg-primary-soft md:aspect-auto md:w-1/2">
-          {photo ? (
-            // eslint-disable-next-line @next/next/no-img-element -- room type photo
-            <img src={photo} alt="" className="absolute inset-0 size-full object-cover" />
-          ) : (
-            <BedDouble className="absolute inset-0 m-auto size-10 text-primary" aria-hidden="true" />
-          )}
-        </span>
-        <div className="flex flex-col gap-2 p-5 md:w-1/2 md:p-7">
-          <h1 className="text-[26px] leading-8 font-bold tracking-[-0.03em] text-ink">{room.name}</h1>
-          <p className="flex flex-wrap gap-x-4 text-[14px] text-muted">
-            <span className="inline-flex items-center gap-1">
-              <Users className="size-4" aria-hidden="true" />
-              {t("guests", { count: room.maxGuests })}
-            </span>
-            <span>{t("roomsCount", { count: rows.length })}</span>
+    <PageContainer className="pt-0 pb-16 md:pt-8">
+      {/* Computers: back to the lodge, and the type's name. */}
+      <div className="mb-6 hidden md:block">
+        <Link href={`${base}#room-types`} className="mb-2 inline-flex items-center gap-1 text-sm text-muted transition-colors hover:text-ink">
+          <ChevronLeft className="size-4" aria-hidden="true" />
+          {listing.title}
+        </Link>
+        <h1 className="font-display text-[28px] leading-9 font-bold tracking-[-0.025em] text-ink">{room.name}</h1>
+      </div>
+
+      <div className="relative">
+        <ListingPhotos title={room.name} photos={photos} />
+        {/* Phones: round back button over the photo. */}
+        <Link
+          href={`${base}#room-types`}
+          aria-label={listing.title}
+          className="absolute top-4 left-0 z-10 flex size-10 items-center justify-center rounded-full bg-white/95 text-ink shadow-[0_4px_14px_rgba(0,0,0,0.25)] backdrop-blur transition-transform duration-200 active:scale-90 md:hidden"
+        >
+          <ArrowLeft className="size-[18px]" aria-hidden="true" />
+        </Link>
+      </div>
+
+      {/* Phones: the details sit on a rounded sheet that overlaps the photo. */}
+      <div className="relative z-[1] -mx-4 -mt-6 rounded-t-[28px] bg-canvas px-4 pt-8 md:mx-0 md:mt-10 md:rounded-none md:bg-transparent md:px-0 md:pt-0">
+        <div className="pb-8 text-center md:text-left">
+          <h1 className="mb-3 font-display text-[22px] leading-7 font-bold tracking-[-0.025em] md:hidden">{room.name}</h1>
+          <h2 className="text-[15px] font-semibold text-ink/80 md:font-display md:text-[22px] md:leading-7 md:font-bold md:tracking-[-0.02em] md:text-ink">{listing.title}</h2>
+          <p className="mt-1 text-[15px] text-ink/80">
+            {t("roomsCount", { count: rows.length })}
+            {cheapest && (
+              <>
+                {" · "}
+                {t("fromPrice")} <b className="font-semibold text-ink">{formatRWF(discountedPrice(cheapest.price, listing.discountPercent), locale)}</b> {tListings(`perUnit.${cheapest.unit}`)}
+              </>
+            )}
           </p>
-          {cheapest && (
-            <p className="text-[15px] text-ink">
-              {t("fromPrice")} <b className="font-bold">{formatRWF(discountedPrice(cheapest.price, listing.discountPercent), locale)}</b> {tListings(`perUnit.${cheapest.unit}`)}
-            </p>
-          )}
-          {room.description && <p className="text-[14px] leading-6 text-ink/80">{room.description}</p>}
-          <p className={cn("mt-1 self-start rounded-full px-3 py-1 text-[13px] font-bold", free > 0 ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-700")}>
+          <p className={cn("mt-3 inline-block rounded-full px-3 py-1 text-[13px] font-bold", free > 0 ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-700")}>
             {t("freeTodayCount", { free, total: rows.length })}
           </p>
         </div>
-      </section>
 
-      <h2 className="mt-8 mb-1 text-[20px] font-bold text-ink">{t("chooseRoomTitle")}</h2>
-      <p className="mb-4 text-[14px] text-muted">{t("chooseRoomIntro")}</p>
+        {room.description && (
+          <DetailSection>
+            <p className="text-[15px] leading-7 whitespace-pre-line text-ink/85">{room.description}</p>
+          </DetailSection>
+        )}
+
+        <DetailSection title={t("chooseRoomTitle")}>
+          <p className="-mt-3 mb-5 text-[14px] text-muted">{t("chooseRoomIntro")}</p>
       <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-4">
         {rows.map(({ n, s }) => (
           <li key={n}>
@@ -113,12 +129,8 @@ export default async function RoomTypePage({ params }: Props) {
               </span>
               <span className="flex flex-1 flex-col gap-1 p-3">
                 <span className="flex items-center justify-between gap-2">
-                  <b className="truncate text-[16px] font-bold text-ink tabular-nums">{n === ONLY_ROOM ? room.name : t("roomNumber", { number: n })}</b>
+                  <b className="truncate text-[16px] font-bold text-ink tabular-nums">{label(n)}</b>
                   <ChevronRight className="size-4 shrink-0 text-ink/40" aria-hidden="true" />
-                </span>
-                <span className="inline-flex items-center gap-1 text-[12px] text-muted">
-                  <Users className="size-3.5" aria-hidden="true" />
-                  {t("guests", { count: room.maxGuests })}
                 </span>
                 {cheapest && (
                   <span className="text-[13px] text-ink">
@@ -131,6 +143,8 @@ export default async function RoomTypePage({ params }: Props) {
           </li>
         ))}
       </ul>
+        </DetailSection>
+      </div>
     </PageContainer>
   );
 }

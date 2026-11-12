@@ -1,6 +1,7 @@
 import { ReviewForm } from "@/features/reviews/components/ReviewForm";
 import { canReview } from "@/features/reviews/service";
 import { PageHero } from "@/components/shell/PageHero";
+import { roomLabel } from "@/features/rooms/links";
 import {
   BedDouble,
   CalendarCheck,
@@ -148,7 +149,7 @@ export default async function MyStayPage() {
 
   return (
     <PageContainer className="max-w-2xl pt-5 pb-10 md:py-10 max-md:pt-0">
-      <PageHero title={t("title")} icon={KeyRound} photo={listing.photos[0]?.url ?? null} subtitle={[listing.title, current.room?.name, paid && current.roomNumber ? tRooms("roomNumber", { number: current.roomNumber }) : null].filter(Boolean).join(" · ")} />
+      <PageHero title={t("title")} icon={KeyRound} photo={listing.photos[0]?.url ?? null} subtitle={[listing.title, current.room?.name, paid && current.roomNumber ? roomLabel(current.roomNumber, (number) => tRooms("roomNumber", { number })) : null].filter(Boolean).join(" · ")} />
       <h1 className="max-md:hidden mb-4 text-[26px] leading-8 font-bold tracking-[-0.03em] text-ink md:text-[32px] md:leading-10">{t("title")}</h1>
 
       <div className="flex flex-col gap-4">
@@ -248,7 +249,7 @@ export default async function MyStayPage() {
                 <dt className="text-muted">{tRooms("yourRoom")}</dt>
                 <dd className="text-right font-semibold text-ink">
                   {current.room.name}
-                  {paid && current.roomNumber && <span className="ml-2 rounded-full bg-primary px-2.5 py-0.5 text-[12px] font-bold text-white">{tRooms("roomNumber", { number: current.roomNumber })}</span>}
+                  {paid && current.roomNumber && <span className="ml-2 rounded-full bg-primary px-2.5 py-0.5 text-[12px] font-bold text-white">{roomLabel(current.roomNumber, (number) => tRooms("roomNumber", { number }))}</span>}
                 </dd>
               </div>
             )}

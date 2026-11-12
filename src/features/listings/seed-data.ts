@@ -262,9 +262,9 @@ export const SEED_LISTINGS: SeedListing[] = [
     bookingModel: "ROOM_BY_ROOM",
     laundryPricePerKg: 1500,
     roomList: [
-      { name: "Volcano View Suite", description: "King bed and a window onto the Virunga volcanoes.", maxGuests: 2, facilities: ["WIFI", "HOT_WATER"], rates: [{ unit: "NIGHT", price: 120000 }, { unit: "DAY", price: 60000 }], photos: [P.bedroom2, P.cabin1] },
-      { name: "Garden Double", description: "Double bed, opens onto the garden.", maxGuests: 2, facilities: ["WIFI", "HOT_WATER"], rates: [{ unit: "NIGHT", price: 90000 }, { unit: "DAY", price: 45000 }], numbers: ["201", "202", "203"], photos: [P.bedroom1, P.cottage1] },
-      { name: "Family Room", description: "A double and two singles, by the fireplace.", maxGuests: 4, facilities: ["WIFI", "HOT_WATER", "TV"], rates: [{ unit: "NIGHT", price: 150000 }, { unit: "DAY", price: 75000 }], photos: [P.bedroom3, P.cabin1] },
+      { name: "Volcano View Suite", description: "King bed and a window onto the Virunga volcanoes.", maxGuests: 2, facilities: ["WIFI", "HOT_WATER"], rates: [{ unit: "NIGHT", price: 120000 }, { unit: "DAY", price: 60000 }], numbers: ["301", "302", "303"], photos: [P.bedroom2, P.cabin1] },
+      { name: "Garden Double", description: "Double bed, opens onto the garden.", maxGuests: 2, facilities: ["WIFI", "HOT_WATER"], rates: [{ unit: "NIGHT", price: 90000 }, { unit: "DAY", price: 45000 }], numbers: ["201", "202", "203", "204", "205"], photos: [P.bedroom1, P.cottage1] },
+      { name: "Family Room", description: "A double and two singles, by the fireplace.", maxGuests: 4, facilities: ["WIFI", "HOT_WATER", "TV"], rates: [{ unit: "NIGHT", price: 150000 }, { unit: "DAY", price: 75000 }], numbers: ["101", "102", "103", "104"], photos: [P.bedroom3, P.cabin1] },
     ],
   },
   {
@@ -401,8 +401,8 @@ export const SEED_LISTINGS: SeedListing[] = [
     bookingModel: "BOTH",
     laundryPricePerKg: 0,
     roomList: [
-      { name: "Lake View Room", description: "Double bed and a balcony over Lake Kivu.", maxGuests: 2, facilities: ["WIFI", "HOT_WATER"], rates: [{ unit: "NIGHT", price: 55000 }, { unit: "DAY", price: 30000 }] },
-      { name: "Hillside Room", description: "Single bed, quiet side of the cottage.", maxGuests: 1, facilities: ["WIFI", "HOT_WATER"], rates: [{ unit: "NIGHT", price: 40000 }, { unit: "DAY", price: 22000 }] },
+      { name: "Lake View Room", description: "Double bed and a balcony over Lake Kivu.", maxGuests: 2, facilities: ["WIFI", "HOT_WATER"], rates: [{ unit: "NIGHT", price: 55000 }, { unit: "DAY", price: 30000 }], numbers: ["11", "12", "13", "14", "15"] },
+      { name: "Hillside Room", description: "Single bed, quiet side of the cottage.", maxGuests: 1, facilities: ["WIFI", "HOT_WATER"], rates: [{ unit: "NIGHT", price: 40000 }, { unit: "DAY", price: 22000 }], numbers: ["21", "22", "23", "24"] },
     ],
   },
   {

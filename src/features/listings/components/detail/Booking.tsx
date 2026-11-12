@@ -649,7 +649,8 @@ export function BookingCard({
           ) : (
             current && <PlanFields rate={current} />
           )}
-          {!long && (
+          {/* No guests question for one-person rooms (lodge rooms). */}
+          {!long && guestLimit > 1 && (
             <label htmlFor={guestsId} className="flex flex-col gap-0.5 border-t border-line-strong px-3.5 py-2.5 transition-colors hover:bg-canvas">
               <span className="text-xs font-semibold text-ink">{t("guestsLabel")}</span>
               <select
@@ -833,6 +834,7 @@ export function MobileBookingPlan({ rates, maxGuests }: { rates: BookingRate[]; 
   const unit = (current?.unit ?? "NIGHT") as BookingUnit;
   const long = LONG_UNITS.includes(unit);
   const guestLimit = room?.maxGuests ?? maxGuests;
+  const askGuests = !long && guestLimit > 1;
   if (!current) return null;
   return (
     <section id={MOBILE_PLAN_ID} className="scroll-mt-24 border-t border-line py-8 md:hidden">
@@ -859,10 +861,10 @@ export function MobileBookingPlan({ rates, maxGuests }: { rates: BookingRate[]; 
           })}
         </div>
       )}
-      {(unit !== "NIGHT" || !long) && (
+      {(unit !== "NIGHT" || askGuests) && (
         <div className="overflow-hidden rounded-xl border border-line-strong bg-surface">
           {unit !== "NIGHT" && <PlanFields rate={current} />}
-          {!long && (
+          {askGuests && (
             <label htmlFor={guestsId} className={cn("flex flex-col gap-0.5 px-3.5 py-2.5", unit !== "NIGHT" && "border-t border-line-strong")}>
               <span className="text-xs font-semibold text-ink">{t("guestsLabel")}</span>
               <select id={guestsId} value={guests} onChange={(event) => setGuests(Number(event.target.value))} className="-ml-1 bg-transparent text-sm text-ink outline-none">

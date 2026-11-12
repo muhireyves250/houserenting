@@ -1,4 +1,4 @@
-import { BedDouble, ChevronRight, Users } from "lucide-react";
+import { BedDouble, ChevronRight } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { roomStatusOn } from "@/features/rooms/availability";
 import { discountedPrice } from "@/features/listings/pricing";
@@ -19,7 +19,7 @@ export function freeRoomsOn(type: RoomType, booked: Taken[], numbers: NumberTake
   return type.numbers.filter((n) => !numbers.some((b) => b.roomId === type.id && b.roomNumber === n && b.checkIn <= day && day < b.checkOut)).length;
 }
 
-/** A lodge's room types as cards (photo, price, guests, rooms free today); each opens the type's own page. */
+/** A lodge's room types as cards (photo, rooms, price, rooms free today); each opens the type's own page. */
 export async function LodgeRoomTypes({
   basePath,
   types,
@@ -65,12 +65,9 @@ export async function LodgeRoomTypes({
                 <span className="flex items-end justify-between gap-3 p-4">
                   <span className="min-w-0">
                     <b className="block truncate text-[17px] font-bold text-ink">{type.name}</b>
-                    <span className="mt-0.5 flex flex-wrap items-center gap-x-3 text-[13px] text-muted">
-                      <span className="inline-flex items-center gap-1">
-                        <Users className="size-3.5" aria-hidden="true" />
-                        {t("guests", { count: type.maxGuests })}
-                      </span>
-                      {total > 1 && <span>{t("roomsCount", { count: total })}</span>}
+                    <span className="mt-0.5 inline-flex items-center gap-1 text-[13px] text-muted">
+                      <BedDouble className="size-3.5" aria-hidden="true" />
+                      {t("roomsCount", { count: total })}
                     </span>
                     {cheapest && (
                       <span className="mt-1 block text-[14px] text-ink">

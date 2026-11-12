@@ -45,6 +45,11 @@ export async function saveRoom(actor: Actor, listingId: string, roomId: string |
     const listing = await managed(tx, actor, listingId);
     if (!listing) return { ok: false };
     const { rates, ...fields } = parsed.data;
+    // Each room of the place has its own name or number: none may be in another room type too.
+    const others = await tx.room.findMany({ where: { listingId, ...(roomId ? { id: { not: roomId } } : {}) }, select: { numbers: true } });
+    const used = new Set(others.flatMap((r) => r.numbers.map((n) => n.toLowerCase())));
+    const taken = fields.numbers.filter((n) => used.has(n.toLowerCase()));
+    if (taken.length > 0) return { ok: false, errors: { numbers: `taken:${taken.join(", ")}` } };
     let id = roomId;
     if (roomId === null) {
       const count = await tx.room.count({ where: { listingId } });
