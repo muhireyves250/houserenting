@@ -853,7 +853,8 @@
         "reinstate": "Yagaruwe",
         "adminSettings": "Amasezerano cyangwa igaragara byahinduwe",
         "autoHide": "Yahishwe kubera abatayikunze",
-        "restore": "Hagaruwe"
+        "restore": "Hagaruwe",
+        "laundry": "Igiciro cyo kumesa cyahinduwe"
       },
       "user": {
         "role": "Uruhare rwahinduwe",
@@ -895,7 +896,10 @@
         "create": "Icyumba cyongewe",
         "update": "Icyumba cyahinduwe",
         "status": "Uko icyumba gihagaze byahindutse",
-        "delete": "Icyumba cyasibwe"
+        "delete": "Icyumba cyasibwe",
+        "unitAdd": "Icyumba cyongewemo",
+        "unitUpdate": "Icyumba cyahinduwe",
+        "unitRemove": "Icyumba cyakuweho"
       },
       "settlement": {
         "record": "Kwishyura byanditswe"
@@ -944,10 +948,14 @@
         "hide": "Yahishwe",
         "pause": "Kwakira byahagaritswe",
         "resume": "Kwakira byafunguwe",
-        "team": "Itsinda ryahinduwe"
+        "team": "Itsinda ryahinduwe",
+        "delete": "Resitora yasibwe"
       },
       "order": {
-        "place": "Byatumijwe"
+        "place": "Byatumijwe",
+        "paid": "Ibiryo byishyuwe",
+        "paymentClaim": "Umukiriya yohereje ubwishyu bw'ibiryo",
+        "delete": "Ibyatumijwe byasibwe"
       },
       "promoter": {
         "apply": "Yasabye kuba umwamamaza",
@@ -957,6 +965,15 @@
         "rewardApprove": "Igihembo cyemejwe",
         "rewardVoid": "Igihembo cyakuweho",
         "rewardPaid": "Igihembo cyishyuwe"
+      },
+      "laundry": {
+        "request": "Gusaba kumesa",
+        "picked_up": "Imyenda yafashwe",
+        "washed": "Imyenda yapimwe",
+        "returned": "Imyenda yagaruwe",
+        "cancelled": "Kumesa byahagaritswe",
+        "paid": "Kumesa byishyuwe",
+        "paymentClaim": "Umukiriya yohereje ubwishyu bwo kumesa"
       }
     },
     "money": "Umushyitsi yishyura {total} · nyir'inzu {payout} · urubuga {commission}",
@@ -993,12 +1010,22 @@
         "payments": "Ubwishyu bwo kureba",
         "rewards": "Ibihembo byo kwemeza",
         "contracts": "Amasezerano agiye kurangira",
-        "requests": "Ibyifuzo n'amafaranga yo gusubiza"
+        "requests": "Ibyifuzo n'amafaranga yo gusubiza",
+        "food": "Ibiryo byatumijwe",
+        "laundry": "Kumesa",
+        "messages": "Ubutumwa bwo gusubiza"
       },
       "latestBookings": "Ibyabitswe vuba",
       "seeAll": "Reba byose",
       "activity": "Ibikorwa biheruka",
-      "newThisMonth": "Bishya uku kwezi"
+      "newThisMonth": "Bishya uku kwezi",
+      "desk": {
+        "title": "Uyu munsi ku kwakira",
+        "arriving": "Abaza",
+        "leaving": "Abagenda uyu munsi",
+        "overdue": "Bari bakwiye kuba baragiye",
+        "none": "Ntawe."
+      }
     },
     "bookingsIntro": "Ibyabitswe byose: shakisha nimero, umushyitsi cyangwa ahantu, toranya uko bihagaze, fungura kimwe urebe byose.",
     "exportCsv": "Kuramo CSV",

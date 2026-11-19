@@ -1,10 +1,15 @@
-import { ArrowDownRight, ArrowRight, ArrowUpRight, CircleAlert, Minus } from "lucide-react";
+import { ArrowDownRight, ArrowRight, ArrowUpRight, Minus, Phone } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { BookingsChart } from "@/features/admin/components/BookingsChart";
-import { dashboardStats, latestBookings, type Kpi } from "@/features/admin/stats";
+import { CheckInOut } from "@/features/admin/components/StaffButtons";
+import { dashboardStats, frontDesk, latestBookings, type DeskBooking, type Kpi } from "@/features/admin/stats";
+import { unreadChats } from "@/features/chats/service";
+import { laundryToHandle } from "@/features/laundry/service";
+import { roomLabel } from "@/features/rooms/links";
+import { db } from "@/lib/db";
 import { recentAudit } from "@/features/audit/service";
 import { StatusBadge } from "@/features/bookings/components/StatusBadge";
-import { formatKigaliDateTime } from "@/features/bookings/format";
+import { formatKigaliDateTime, formatStayDates } from "@/features/bookings/format";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { dynamicMessage } from "@/lib/dynamic-message";
@@ -31,17 +36,23 @@ function Delta({ kpi, label, fresh }: { kpi: Kpi; label: string; fresh: string }
 }
 
 export default async function AdminDashboardPage() {
-  await requireAdmin("/admin");
-  const [t, tAdmin, tBookings, tListings, locale, stats, bookings, activity, ending] = await Promise.all([
+  const user = await requireAdmin("/admin");
+  const [t, tAdmin, tBookings, tListings, tRooms, locale, stats, bookings, activity, ending, desk, laundry, chats, foodOrders] = await Promise.all([
     getTranslations("Admin.dashboard"),
     getTranslations("Admin"),
     getTranslations("Bookings"),
     getTranslations("Listings"),
+    getTranslations("Rooms"),
     getLocale(),
     dashboardStats(),
     latestBookings(6),
     recentAudit({ take: 8 }),
     contractsEnding(),
+    frontDesk(),
+    laundryToHandle(),
+    unreadChats(user),
+    // Food orders waiting for staff: a payment to check, or one to send.
+    db.foodOrder.count({ where: { OR: [{ status: "PLACED", paymentClaim: { not: null }, paidAt: null }, { status: { in: ["ACCEPTED", "PREPARING", "READY"] } }] } }),
   ]);
   const compact = new Intl.NumberFormat(locale, { notation: "compact", maximumFractionDigits: 1 });
   const vsLast = t("vsLastMonth");
@@ -53,6 +64,9 @@ export default async function AdminDashboardPage() {
     { label: t("kpi.newUsers"), value: compact.format(stats.kpis.newUsers.value), kpi: stats.kpis.newUsers },
   ];
   const attention = [
+    { label: t("attention.food"), count: foodOrders, href: "/admin/orders" },
+    { label: t("attention.laundry"), count: laundry, href: "/admin/laundry" },
+    { label: t("attention.messages"), count: chats, href: "/admin/messages?show=waiting" },
     { label: t("attention.listings"), count: stats.attention.listings, href: "/admin/listings?status=PENDING_REVIEW" },
     { label: t("attention.moderation"), count: stats.attention.moderation, href: "/admin/moderation" },
     { label: t("attention.tickets"), count: stats.attention.tickets, href: "/admin/support" },
@@ -72,6 +86,36 @@ export default async function AdminDashboardPage() {
         <p className="text-[22px] leading-8 font-bold tracking-[-0.02em] text-ink">{t("title")}</p>
         <p className="text-[14px] text-muted">{t("subtitle", { listings: stats.liveListings })}</p>
       </div>
+
+      {/* Today at the front desk: who arrives, who leaves, who should have left. */}
+      <section aria-label={t("desk.title")} className="flex flex-col gap-3">
+        <h2 className="text-[17px] font-bold text-ink">{t("desk.title")}</h2>
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-3 lg:grid-cols-3">
+          {(
+            [
+              ["arriving", desk.arriving, "CHECKED_IN", "bg-primary/10 text-primary"],
+              ["leaving", desk.leaving, "COMPLETED", "bg-emerald-100 text-emerald-800"],
+              ["overdue", desk.overdue, "COMPLETED", "bg-red-50 text-red-700"],
+            ] as const
+          ).map(([key, list, to, tone]) => (
+            <div key={key} className={cn(panel, "flex flex-col p-4")}>
+              <h3 className="mb-3 flex items-center gap-2 text-[15px] font-semibold text-ink">
+                {t(`desk.${key}`)}
+                <span className={cn("rounded-full px-2 py-0.5 text-[12px] font-bold tabular-nums", list.length > 0 ? tone : "bg-canvas text-muted")}>{list.length}</span>
+              </h3>
+              {list.length === 0 ? (
+                <p className="py-4 text-center text-[13px] text-muted">{t("desk.none")}</p>
+              ) : (
+                <ul className="flex flex-col gap-2">
+                  {list.map((b) => (
+                    <DeskRow key={b.reference} b={b} to={to} locale={locale} room={(n) => roomLabel(n, (number) => tRooms("roomNumber", { number }))} />
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* This month at a glance */}
       <section aria-label={t("thisMonth")} className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -95,13 +139,12 @@ export default async function AdminDashboardPage() {
           {waiting.length === 0 ? (
             <p className="flex flex-1 items-center justify-center py-8 text-center text-[14px] text-muted">{t("allClear")}</p>
           ) : (
-            <ul className="flex flex-col gap-2">
+            <ul className="grid grid-cols-2 gap-2">
               {waiting.map((a) => (
                 <li key={a.label}>
-                  <Link href={a.href} className="flex items-center gap-3 rounded-xl border border-line px-3 py-2.5 transition-colors hover:border-primary">
-                    <CircleAlert className="size-4 shrink-0 text-amber-600" aria-hidden="true" />
-                    <span className="flex-1 text-[14px] text-ink">{a.label}</span>
-                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary tabular-nums">{a.count}</span>
+                  <Link href={a.href} className="flex h-full flex-col gap-0.5 rounded-xl border border-line px-3 py-2.5 transition-colors hover:border-primary">
+                    <span className="text-[22px] leading-7 font-bold text-primary tabular-nums">{a.count}</span>
+                    <span className="text-[12px] leading-4 font-semibold text-ink">{a.label}</span>
                   </Link>
                 </li>
               ))}
@@ -169,5 +212,33 @@ export default async function AdminDashboardPage() {
         </section>
       </div>
     </div>
+  );
+}
+
+/** One guest at the front desk: who, where, when, and the button for the next step. */
+function DeskRow({ b, to, locale, room }: { b: DeskBooking; to: "CHECKED_IN" | "COMPLETED"; locale: string; room: (n: string) => string }) {
+  const iso = (d: Date) => d.toISOString().slice(0, 10);
+  return (
+    <li className="flex flex-col gap-2 rounded-xl bg-canvas p-3">
+      <div className="flex items-start justify-between gap-2">
+        <span className="min-w-0">
+          <span className="block truncate text-[14px] font-semibold text-ink">{b.guest.name}</span>
+          {b.guest.phone && (
+            <a href={`tel:${b.guest.phone}`} className="inline-flex items-center gap-1 text-[12px] text-primary hover:underline">
+              <Phone className="size-3" aria-hidden="true" />
+              {b.guest.phone}
+            </a>
+          )}
+        </span>
+        <Link href={`/admin/bookings/${b.reference}`} className="shrink-0 font-mono text-[12px] font-semibold text-primary hover:underline">
+          {b.reference}
+        </Link>
+      </div>
+      <span className="truncate text-[12px] text-muted">
+        {b.listing.title}
+        {b.room && ` · ${[b.room.name, b.roomNumber && room(b.roomNumber)].filter(Boolean).join(" ")}`} · {formatStayDates(locale, iso(b.checkIn), iso(b.checkOut))}
+      </span>
+      <CheckInOut reference={b.reference} to={to} />
+    </li>
   );
 }

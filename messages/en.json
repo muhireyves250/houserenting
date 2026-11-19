@@ -853,7 +853,8 @@
         "reinstate": "Reinstated",
         "adminSettings": "Agreement or visibility changed",
         "autoHide": "Hidden after dislikes",
-        "restore": "Restored"
+        "restore": "Restored",
+        "laundry": "Laundry price changed"
       },
       "user": {
         "role": "Role changed",
@@ -895,7 +896,10 @@
         "create": "Room added",
         "update": "Room edited",
         "status": "Room status changed",
-        "delete": "Room deleted"
+        "delete": "Room deleted",
+        "unitAdd": "Room added",
+        "unitUpdate": "Room edited",
+        "unitRemove": "Room removed"
       },
       "settlement": {
         "record": "Payout recorded"
@@ -944,10 +948,14 @@
         "hide": "Hidden",
         "pause": "Orders paused",
         "resume": "Orders opened",
-        "team": "Team changed"
+        "team": "Team changed",
+        "delete": "Restaurant deleted"
       },
       "order": {
-        "place": "Order placed"
+        "place": "Order placed",
+        "paid": "Food order paid",
+        "paymentClaim": "Food payment sent by guest",
+        "delete": "Food order deleted"
       },
       "promoter": {
         "apply": "Applied as promoter",
@@ -957,6 +965,15 @@
         "rewardApprove": "Reward approved",
         "rewardVoid": "Reward voided",
         "rewardPaid": "Reward paid"
+      },
+      "laundry": {
+        "request": "Laundry requested",
+        "picked_up": "Laundry collected",
+        "washed": "Laundry weighed",
+        "returned": "Laundry returned",
+        "cancelled": "Laundry cancelled",
+        "paid": "Laundry paid",
+        "paymentClaim": "Laundry payment sent by guest"
       }
     },
     "money": "Guest pays {total} · owner {payout} · platform {commission}",
@@ -993,12 +1010,22 @@
         "payments": "Payments to check",
         "rewards": "Rewards to approve",
         "contracts": "Agreements ending soon",
-        "requests": "Guest requests and refunds"
+        "requests": "Guest requests and refunds",
+        "food": "Food orders",
+        "laundry": "Laundry",
+        "messages": "Messages to answer"
       },
       "latestBookings": "Latest bookings",
       "seeAll": "See all",
       "activity": "Recent activity",
-      "newThisMonth": "New this month"
+      "newThisMonth": "New this month",
+      "desk": {
+        "title": "Today at the front desk",
+        "arriving": "Arriving",
+        "leaving": "Leaving today",
+        "overdue": "Should have left",
+        "none": "No one."
+      }
     },
     "bookingsIntro": "Every booking: search by reference, guest or place, filter by status, open one for the full record.",
     "exportCsv": "Export CSV",

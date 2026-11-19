@@ -853,7 +853,8 @@
         "reinstate": "Rétabli",
         "adminSettings": "Contrat ou visibilité modifiés",
         "autoHide": "Masqué après des « je n'aime pas »",
-        "restore": "Restauré"
+        "restore": "Restauré",
+        "laundry": "Prix de la lessive modifié"
       },
       "user": {
         "role": "Rôle modifié",
@@ -895,7 +896,10 @@
         "create": "Chambre ajoutée",
         "update": "Chambre modifiée",
         "status": "Statut de chambre modifié",
-        "delete": "Chambre supprimée"
+        "delete": "Chambre supprimée",
+        "unitAdd": "Chambre ajoutée",
+        "unitUpdate": "Chambre modifiée",
+        "unitRemove": "Chambre retirée"
       },
       "settlement": {
         "record": "Versement enregistré"
@@ -944,10 +948,14 @@
         "hide": "Masqué",
         "pause": "Commandes suspendues",
         "resume": "Commandes ouvertes",
-        "team": "Équipe modifiée"
+        "team": "Équipe modifiée",
+        "delete": "Restaurant supprimé"
       },
       "order": {
-        "place": "Commande passée"
+        "place": "Commande passée",
+        "paid": "Commande de repas payée",
+        "paymentClaim": "Paiement repas envoyé par le client",
+        "delete": "Commande de repas supprimée"
       },
       "promoter": {
         "apply": "Candidature promoteur",
@@ -957,6 +965,15 @@
         "rewardApprove": "Récompense validée",
         "rewardVoid": "Récompense annulée",
         "rewardPaid": "Récompense payée"
+      },
+      "laundry": {
+        "request": "Lessive demandée",
+        "picked_up": "Lessive récupérée",
+        "washed": "Lessive pesée",
+        "returned": "Lessive rapportée",
+        "cancelled": "Lessive annulée",
+        "paid": "Lessive payée",
+        "paymentClaim": "Paiement lessive envoyé par le client"
       }
     },
     "money": "Le voyageur paie {total} · propriétaire {payout} · plateforme {commission}",
@@ -993,12 +1010,22 @@
         "payments": "Paiements à vérifier",
         "rewards": "Récompenses à approuver",
         "contracts": "Contrats bientôt terminés",
-        "requests": "Demandes et remboursements"
+        "requests": "Demandes et remboursements",
+        "food": "Commandes de repas",
+        "laundry": "Lessive",
+        "messages": "Messages à répondre"
       },
       "latestBookings": "Dernières réservations",
       "seeAll": "Tout voir",
       "activity": "Activité récente",
-      "newThisMonth": "Nouveau ce mois-ci"
+      "newThisMonth": "Nouveau ce mois-ci",
+      "desk": {
+        "title": "Aujourd'hui à l'accueil",
+        "arriving": "Arrivées",
+        "leaving": "Départs du jour",
+        "overdue": "Auraient dû partir",
+        "none": "Personne."
+      }
     },
     "bookingsIntro": "Toutes les réservations : recherchez par référence, voyageur ou logement, filtrez par statut, ouvrez-en une pour le dossier complet.",
     "exportCsv": "Exporter en CSV",

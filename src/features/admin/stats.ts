@@ -122,3 +122,31 @@ export function allListings(status?: ListingStatus) {
     },
   });
 }
+
+const DESK_SELECT = {
+  reference: true,
+  status: true,
+  checkIn: true,
+  checkOut: true,
+  unit: true,
+  quantity: true,
+  roomNumber: true,
+  room: { select: { name: true } },
+  guest: { select: { name: true, phone: true } },
+  listing: { select: { id: true, title: true } },
+} as const;
+
+/**
+ * The front desk today (Kigali): paid guests due in (today or late, still before their last day), guests leaving
+ * today, and guests whose stay has ended but who were never checked out.
+ */
+export async function frontDesk(now: Date = new Date()) {
+  const today = new Date(`${kigaliDay(now)}T00:00:00Z`);
+  const [arriving, leaving, overdue] = await Promise.all([
+    db.booking.findMany({ where: { status: "CONFIRMED", checkIn: { lte: today }, checkOut: { gt: today } }, orderBy: { checkIn: "asc" }, take: 30, select: DESK_SELECT }),
+    db.booking.findMany({ where: { status: "CHECKED_IN", checkOut: today }, orderBy: { checkIn: "asc" }, take: 30, select: DESK_SELECT }),
+    db.booking.findMany({ where: { status: "CHECKED_IN", checkOut: { lt: today } }, orderBy: { checkOut: "asc" }, take: 30, select: DESK_SELECT }),
+  ]);
+  return { arriving, leaving, overdue };
+}
+export type DeskBooking = Awaited<ReturnType<typeof frontDesk>>["arriving"][number];
