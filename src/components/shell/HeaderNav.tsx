@@ -101,6 +101,8 @@ export function HeaderNav({ signedIn = true, orders = false }: { signedIn?: bool
             <li key={key}>
               <Link
                 href={navHref(href, signedIn)}
+                // Signed in: the page loads fully in the background, so opening it is instant.
+                prefetch={signedIn ? true : undefined}
                 aria-current={active ? "page" : undefined}
                 onMouseEnter={track}
                 onFocus={track}

@@ -64,8 +64,9 @@ export default async function BookingsPage() {
       <h1 className="max-md:hidden text-[26px] leading-8 font-bold tracking-[-0.03em] md:text-[32px] md:leading-10">{tNav("bookings")}</h1>
 
       {/* My stay: always here; the active stay's details, directions and help, or "No active stay". */}
-      <section aria-labelledby="my-stay" className="mt-6">
-        <h2 id="my-stay" className="mb-3 text-lg font-bold tracking-[-0.01em] text-ink">
+      <section aria-labelledby="my-stay" className="mt-6 lg:mt-0">
+        {/* No visible heading: the stay card speaks for itself (still named for screen readers). */}
+        <h2 id="my-stay" className="sr-only">
           {t("myStay")}
         </h2>
         {current ? (

@@ -6,7 +6,34 @@ const BLOCK = "bg-line/45 motion-safe:animate-pulse";
  * Shown the moment a link is tapped, while the next page loads: on phones the blue top with a title bar, then
  * cards; on computers a title and cards. Server-safe (no client code), so it appears instantly.
  */
-export function PageSkeleton({ variant = "page" }: { variant?: "page" | "listing" | "admin" }) {
+export function PageSkeleton({ variant = "page" }: { variant?: "page" | "listing" | "admin" | "home" }) {
+  if (variant === "home") {
+    return (
+      <div aria-busy="true" aria-hidden="true">
+        {/* The blue search top, then rows of places. */}
+        <div className="flex h-[300px] flex-col items-center justify-center gap-4 bg-gradient-to-b from-primary/80 to-primary/40 px-4">
+          <div className="h-10 w-72 max-w-full rounded-full bg-white/70" />
+          <div className="h-14 w-[560px] max-w-full rounded-full bg-white/85" />
+        </div>
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-9 px-4 py-8 md:px-6">
+          {[0, 1, 2].map((row) => (
+            <div key={row} className="flex flex-col gap-4">
+              <div className={cn(BLOCK, "h-5 w-48 rounded-md")} />
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <div key={i} className={cn("flex flex-col gap-2.5", i > 1 && "max-md:hidden")}>
+                    <div className={cn(BLOCK, "aspect-[20/19] rounded-2xl")} />
+                    <div className={cn(BLOCK, "h-3.5 w-3/4 rounded-md")} />
+                    <div className={cn(BLOCK, "h-3 w-1/2 rounded-md")} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
   if (variant === "listing") {
     return (
       <div className="mx-auto w-full max-w-7xl md:px-6 md:py-6" aria-busy="true" aria-hidden="true">

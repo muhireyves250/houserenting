@@ -83,6 +83,8 @@ export function BottomTabBar({ signedIn = true }: { signedIn?: boolean }) {
             >
               <Link
                 href={navHref(href, signedIn)}
+                // Signed in: the page loads fully in the background, so opening it is instant.
+                prefetch={signedIn ? true : undefined}
                 aria-label={t(key)}
                 data-tab={key}
                 aria-current={active ? "page" : undefined}

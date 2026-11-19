@@ -20,7 +20,7 @@ export function AccountNav({ user, unread }: { user: { name: string; email: stri
   return (
     // Fills the screen's height under the header and stays put while the page scrolls.
     <aside className="sticky top-[96px] hidden h-[calc(100dvh-120px)] min-h-[26rem] self-start lg:block">
-      <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-surface shadow-[0_10px_30px_-18px_rgba(16,24,40,0.35)]">
+      <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-primary/25 bg-surface shadow-card">
         <Link href="/profile/personal" className="flex items-center gap-3 border-b border-line px-4 py-4 transition-colors hover:bg-canvas/60">
           <Avatar name={user.name} image={user.image} className="size-11 text-sm" />
           <span className="min-w-0">

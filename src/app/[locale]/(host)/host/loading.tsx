@@ -1,6 +1,6 @@
-import { PageSkeleton } from "@/components/ui/PageSkeleton";
+import { DashSkeleton } from "@/components/ui/DashSkeleton";
 
-/** Shown instantly when an owner page is opened, while it loads. */
+/** Shown the first time this page opens, laid out like it, while its data loads. */
 export default function Loading() {
-  return <PageSkeleton variant="admin" />;
+  return <DashSkeleton shape="overview" />;
 }
