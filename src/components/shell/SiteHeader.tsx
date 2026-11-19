@@ -31,6 +31,8 @@ export async function SiteHeader({ user, orders = false }: { user: { name: strin
           <Suspense>
             <LocaleSwitcher />
           </Suspense>
+          {/* Keeps the room the old "Add a place" link took, so the search bar and spacing stay where they were. */}
+          <span aria-hidden="true" className="hidden h-9 w-10 lg:block 2xl:w-[127px]" />
           {user ? (
             <>
               <Link
