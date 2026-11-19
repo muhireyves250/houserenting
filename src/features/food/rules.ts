@@ -12,14 +12,13 @@ const KITCHEN: Partial<Record<OrderStatus, OrderStatus[]>> = {
 
 /**
  * Room orders (food brought to the guest's stay), run by VIIPA staff: confirmed once paid → sent to the place →
- * the guest says they got it (staff can also close it).
+ * only the guest says they got it.
  */
 const TO_STAY_KITCHEN: Partial<Record<OrderStatus, OrderStatus[]>> = {
   PLACED: ["ACCEPTED", "CANCELLED"],
   ACCEPTED: ["OUT_FOR_DELIVERY", "CANCELLED"],
   PREPARING: ["OUT_FOR_DELIVERY"],
   READY: ["OUT_FOR_DELIVERY"],
-  OUT_FOR_DELIVERY: ["DELIVERED"],
 };
 
 /**

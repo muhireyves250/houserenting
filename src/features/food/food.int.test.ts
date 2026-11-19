@@ -117,7 +117,8 @@ describe("food from the kitchen of the guest's stay", () => {
     const seen = await ordersForHost("owner", NOW);
     expect(seen.map((o) => [o.reference, o.status, o.stay.reference])).toEqual([[placed.reference, "OUT_FOR_DELIVERY", "SR-FOOD23"]]);
     expect(await ordersForHost("cook", NOW)).toEqual([]);
-    // The guest confirms they got it; staff are told.
+    // Only the guest confirms they got it; staff are told.
+    expect(await moveOrder(admin, placed.reference, "DELIVERED")).toBe(false);
     expect(await moveOrder({ id: "guest" }, placed.reference, "DELIVERED")).toBe(true);
     expect(await db.notification.count({ where: { userId: "admin", kind: "orderReceived" } })).toBe(1);
     expect(await db.notification.count({ where: { userId: "guest", kind: "orderStatus" } })).toBe(2); // confirmed + sent

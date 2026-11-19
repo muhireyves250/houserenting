@@ -20,7 +20,7 @@ describe("nextOrderSteps", () => {
   it("room orders: VIIPA confirms, then sends; the guest says when they got it", () => {
     expect(nextOrderSteps("PLACED", "TO_STAY", "kitchen")).toEqual(["ACCEPTED", "CANCELLED"]);
     expect(nextOrderSteps("ACCEPTED", "TO_STAY", "kitchen")).toEqual(["OUT_FOR_DELIVERY", "CANCELLED"]);
-    expect(nextOrderSteps("OUT_FOR_DELIVERY", "TO_STAY", "kitchen")).toEqual(["DELIVERED"]);
+    expect(nextOrderSteps("OUT_FOR_DELIVERY", "TO_STAY", "kitchen")).toEqual([]);
     expect(nextOrderSteps("PLACED", "TO_STAY", "customer")).toEqual(["CANCELLED"]);
     expect(nextOrderSteps("ACCEPTED", "TO_STAY", "customer")).toEqual([]);
     expect(nextOrderSteps("OUT_FOR_DELIVERY", "TO_STAY", "customer")).toEqual(["DELIVERED"]);
