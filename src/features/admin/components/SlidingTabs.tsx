@@ -29,10 +29,6 @@ export function SlidingTabs({ items, label }: { items: SlidingTab[]; label: stri
   const [hoverAt, setHoverAt] = useState(0);
   const router = useRouter();
   const [loading, start] = useTransition();
-  // The other tabs load in the background, so switching is quick.
-  useEffect(() => {
-    for (const item of items) if (!item.on) router.prefetch(item.href);
-  }, [items, router]);
   // While the new tab loads, the page under the tabs fades and a thin bar runs along the top.
   useEffect(() => {
     document.documentElement.toggleAttribute("data-tab-loading", loading);
@@ -56,6 +52,8 @@ export function SlidingTabs({ items, label }: { items: SlidingTab[]; label: stri
             <Link
               key={key}
               href={href}
+              // Every tab's whole page loads in the background, so switching shows it at once.
+              prefetch
               aria-current={index === current ? "page" : undefined}
               onClick={(event) => {
                 if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;

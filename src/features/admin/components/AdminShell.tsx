@@ -136,7 +136,7 @@ export function AdminShell({
   const sidebar = (
     // Any link tapped in the phone menu closes it.
     <div className="flex h-full flex-col" onClick={(e) => (e.target as HTMLElement).closest("a") && setOpen(false)}>
-      <Link href="/admin" className="flex items-center gap-3 border-b border-line/60 px-5 py-4">
+      <Link href="/admin" className="flex items-start gap-3 border-b border-line/60 px-5 py-4">
         <LogoMark className="h-7" />
         <span className="flex flex-col gap-1 leading-tight">
           <LogoWordmark className="h-3" priority />
@@ -153,6 +153,8 @@ export function AdminShell({
               <li key={key}>
                 <Link
                   href={href}
+                  // Staff pages load fully in the background so opening one is instant.
+                  prefetch
                   aria-current={on ? "page" : undefined}
                   className={cn(
                     "group relative flex items-center gap-3 rounded-lg px-3 py-2 text-[14px] transition-colors duration-150",
@@ -267,6 +269,7 @@ export function AdminShell({
                 <li key={key} className="min-w-0 flex-1">
                   <Link
                     href={href}
+                    prefetch
                     aria-current={on ? "page" : undefined}
                     className={cn("relative flex h-14 flex-col items-center justify-center gap-0.5 rounded-full transition-colors", on ? "bg-primary text-white" : "text-primary")}
                   >

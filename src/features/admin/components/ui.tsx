@@ -67,6 +67,7 @@ export function FilterTabs({ items }: { items: { label: string; href: string | {
         <Link
           key={item.label}
           href={item.href}
+          prefetch
           className={cn(
             "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[13px] whitespace-nowrap transition-colors",
             item.on ? "border-primary bg-primary font-semibold text-white" : "border-line bg-surface text-ink hover:border-primary/60",
