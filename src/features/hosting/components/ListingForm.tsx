@@ -142,7 +142,7 @@ export function ListingForm({
     <div className="flex flex-col gap-4">
       {live && <p className="rounded-2xl bg-amber-50 px-5 py-3.5 text-sm text-amber-900 ring-1 ring-amber-200/70">{t("reviewNote")}</p>}
 
-      <Card title={t("sections.basics")}>
+      <Card title={t("sections.basics")} id="basics">
         <div className="grid gap-3">
           <Field label={t("fields.title")} value={form.title} maxLength={100} onChange={(e) => set("title", e.target.value)} error={err("title")} />
           <SelectField
@@ -183,7 +183,7 @@ export function ListingForm({
         </div>
       </Card>
 
-      <Card title={t("sections.location")}>
+      <Card title={t("sections.location")} id="location">
         <div className="grid gap-3 sm:grid-cols-2">
           <Field label={t("fields.address")} className="sm:col-span-2" value={form.addressLine} onChange={(e) => set("addressLine", e.target.value)} error={err("addressLine")} />
           <Field label={t("fields.district")} value={form.district} onChange={(e) => set("district", e.target.value)} error={err("district")} />
@@ -202,7 +202,7 @@ export function ListingForm({
         </div>
       </Card>
 
-      <Card title={t("sections.space")}>
+      <Card title={t("sections.space")} id="space">
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {(
             [
@@ -236,7 +236,7 @@ export function ListingForm({
         </label>
       </Card>
 
-      <Card title={t("sections.amenities")}>
+      <Card title={t("sections.amenities")} id="amenities">
         <div className="flex flex-wrap gap-2">
           {FACILITIES.map((facility) => {
             const on = (form.facilities ?? []).includes(facility);
@@ -253,7 +253,7 @@ export function ListingForm({
         </div>
       </Card>
 
-      <Card title={t("sections.prices")}>
+      <Card title={t("sections.prices")} id="prices">
         <p className="-mt-2 mb-4 text-[13px] text-muted">
           {t("pricesHint")} {form.bookingModel !== "WHOLE_PROPERTY" && t("pricesRoomsHint")}
         </p>
@@ -367,7 +367,7 @@ export function ListingForm({
         <p className="mt-2 text-[12px] text-muted">{tLaundry("placeHint")}</p>
       </Card>
 
-      <Card title={t("sections.availability")}>
+      <Card title={t("sections.availability")} id="availability">
         <p className="-mt-2 mb-4 text-[13px] text-muted">{t("availabilityIntro")}</p>
         <div className="grid grid-cols-2 gap-3">
           <Field
@@ -412,7 +412,7 @@ export function ListingForm({
         </SelectField>
       </Card>
 
-      <Card title={t("sections.extras")}>
+      <Card title={t("sections.extras")} id="extras">
         <div className="grid gap-3">
           <AreaField
             label={t("fields.characteristics")}
@@ -432,7 +432,13 @@ export function ListingForm({
       </Card>
 
       {/* Save bar: stays in reach while scrolling the long form. */}
-      <div className="sticky bottom-[calc(82px+env(safe-area-inset-bottom))] z-20 flex items-center justify-between gap-4 rounded-2xl border border-line bg-surface/95 px-4 py-3 shadow-[0_10px_30px_-12px_rgba(16,24,40,0.35)] backdrop-blur md:bottom-4">
+      {/* Above the app's bottom menu for owners; staff pages have none, so it sits at the very bottom. */}
+      <div
+        className={cn(
+          "sticky z-20 flex items-center justify-between gap-4 rounded-2xl border border-line bg-surface/95 px-4 py-3 shadow-[0_10px_30px_-12px_rgba(16,24,40,0.35)] backdrop-blur md:bottom-4",
+          staff ? "bottom-[calc(12px+env(safe-area-inset-bottom))]" : "bottom-[calc(82px+env(safe-area-inset-bottom))]",
+        )}
+      >
         <p role="status" className={cn("text-[13px]", status === "saved" ? "text-emerald-700" : status === "idle" ? "text-muted" : "font-medium text-danger")}>
           {status === "saved" && (
             <span className="inline-flex items-center gap-1.5">

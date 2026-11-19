@@ -1594,7 +1594,8 @@
     "confirmMove": {
       "archive": "Archive this place? Guests won't see or book it. You can restore it later."
     },
-    "editShort": "Edit"
+    "editShort": "Edit",
+    "jumpTo": "Jump to"
   },
   "MyStay": {
     "title": "My stay",

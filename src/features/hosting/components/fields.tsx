@@ -91,7 +91,7 @@ export function Chip({ on, onToggle, children }: { on: boolean; onToggle: () => 
 
 export function Card({ title, children, id }: { title: string; children: ReactNode; id?: string }) {
   return (
-    <section id={id} className="scroll-mt-24 rounded-3xl bg-surface p-5 shadow-[0_10px_30px_-14px_rgba(16,24,40,0.3)] ring-1 ring-black/[0.04] max-md:ring-line md:p-6">
+    <section id={id} className="scroll-mt-32 rounded-3xl bg-surface p-5 shadow-[0_10px_30px_-14px_rgba(16,24,40,0.3)] ring-1 ring-black/[0.04] max-md:ring-line md:p-6">
       <h2 className="mb-4 text-lg font-bold text-ink">{title}</h2>
       {children}
     </section>

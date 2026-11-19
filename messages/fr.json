@@ -1594,7 +1594,8 @@
     "confirmMove": {
       "archive": "Archiver ce lieu ? Les clients ne le verront plus et ne pourront plus le réserver. Vous pourrez le restaurer plus tard."
     },
-    "editShort": "Modifier"
+    "editShort": "Modifier",
+    "jumpTo": "Aller à"
   },
   "MyStay": {
     "title": "Mon séjour",

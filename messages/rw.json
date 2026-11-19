@@ -1594,7 +1594,8 @@
     "confirmMove": {
       "archive": "Ushaka kubika aha hantu? Abakiriya ntibazongera kuhabona cyangwa kuhakodesha. Uzashobora kuhagarura nyuma."
     },
-    "editShort": "Hindura"
+    "editShort": "Hindura",
+    "jumpTo": "Jya kuri"
   },
   "MyStay": {
     "title": "Aho ncumbitse",
