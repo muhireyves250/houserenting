@@ -63,8 +63,9 @@ export function SiteFooter({ signedIn, year = new Date().getFullYear() }: { sign
       <div className="mx-auto max-w-7xl px-4 md:px-6">
         {/* Headline band */}
         <div className="flex flex-col gap-6 border-b border-white/10 py-12 md:flex-row md:items-end md:justify-between md:py-16">
-          <div className="flex max-w-xl flex-col gap-3">
-            <p className="text-[15px] leading-6 text-white/80">{t("about")}</p>
+          <div className="flex max-w-3xl flex-col gap-2">
+            <h2 className="text-[28px] leading-9 font-bold tracking-[-0.02em] text-white md:text-[34px] md:leading-[42px]">{t("headline")}</h2>
+            <p className="text-[15px] leading-6 text-white/75">{t("about")}</p>
           </div>
           <Link
             href="/"

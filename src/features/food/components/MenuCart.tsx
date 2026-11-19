@@ -133,7 +133,7 @@ export function MenuCart({
   );
 
   return (
-    <div className={cn("grid gap-6 lg:gap-10", !browseOnly && !single && "md:grid-cols-[minmax(0,1fr)_360px]")}>
+    <div className={cn("@container grid gap-6 lg:gap-10", !browseOnly && !single && "md:grid-cols-[minmax(0,1fr)_360px]")}>
       <div className="min-w-0">
         {/* Search and section tabs stay at the top while scrolling the menu. */}
         <div className="sticky top-0 z-20 -mx-4 bg-canvas/95 px-4 pt-2 pb-3 backdrop-blur-md md:top-[73px] md:mx-0 md:px-0">
@@ -179,7 +179,7 @@ export function MenuCart({
                 </h2>
                 <ul className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] md:mx-0 md:scroll-px-0 md:px-0 [&::-webkit-scrollbar]:hidden">
                   {picks.map((dish) => (
-                    <li key={dish.id} className="w-[44%] shrink-0 snap-start sm:w-[30%] lg:w-[23%]">
+                    <li key={dish.id} className="w-[44%] shrink-0 snap-start sm:w-[30%] lg:w-[calc((100%-36px)/4)]">
                       <span className="relative block aspect-[4/3] overflow-hidden rounded-2xl bg-primary-soft">
                         {/* eslint-disable-next-line @next/next/no-img-element -- menu photo from the kitchen's Cloudinary upload */}
                         <img src={dish.photoUrl!} alt="" loading="lazy" className="absolute inset-0 size-full object-cover" />
@@ -202,7 +202,7 @@ export function MenuCart({
                   <h2 className="text-[19px] font-bold tracking-[-0.01em] text-ink">{name}</h2>
                   <span className="text-[13px] text-muted">{t("dishCount", { count: dishes.length })}</span>
                 </div>
-                <ul className="grid gap-3 lg:grid-cols-2">
+                <ul className="grid gap-3 lg:grid-cols-2 @5xl:grid-cols-3">
                   {dishes.map((dish) => (
                     <DishCard key={dish.id} dish={dish} quantity={cart[dish.id] ?? 0} paused={restaurant.paused} browseOnly={browseOnly} onChange={(d) => update(dish.id, d)} />
                   ))}

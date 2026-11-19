@@ -28,7 +28,7 @@ test("long-term search shows monthly listings, booked by choosing a move-in date
   await skipOnboarding(page);
   await page.goto("/en/search?mode=long&location=Nyarutarama");
   await page.getByRole("link", { name: /^Family villa with garden in Nyarutarama/ }).click();
-  await expect(page.getByText("/ month").first()).toBeVisible();
+  await expect(page.getByText("/ month").filter({ visible: true }).first()).toBeVisible();
   await expect(page.getByLabel("Move-in date").filter({ visible: true })).toBeVisible();
   await expect(page.getByLabel("Length").filter({ visible: true })).toBeVisible();
   // Signed out: Reserve asks to log in first.

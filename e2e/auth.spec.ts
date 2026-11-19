@@ -6,7 +6,7 @@ test("sign up → verify → signed in → sign out → log in", async ({ page }
   const email = await signUpAndVerify(page);
   // The email shows on Personal info (Profile's own page for name, email and phone).
   await page.goto("/en/profile/personal");
-  await expect(page.getByText(email).first()).toBeVisible();
+  await expect(page.getByText(email).filter({ visible: true }).first()).toBeVisible();
   await page.goto("/en/profile");
 
   // Log out asks for confirmation first.

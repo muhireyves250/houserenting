@@ -37,7 +37,7 @@ export default async function FoodPage() {
     const reason = !current ? "noStay" : !paid ? "unpaid" : !started ? "notStarted" : "noKitchen";
     const menu = kitchen && kitchen.menu.length > 0 ? kitchen.menu : await foodMenu();
     return (
-      <PageContainer className="max-w-4xl pt-5 pb-10 max-md:pt-0 md:py-10">
+      <PageContainer className="max-w-6xl pt-5 pb-10 max-md:pt-0 md:py-10">
         {title}
         <p className="mt-1 text-[14px] text-muted md:text-[15px] lg:hidden">{t("menuIntro")}</p>
         <div className="mt-4 flex items-center gap-3 rounded-2xl bg-surface p-3 pr-4 ring-1 ring-line">
@@ -76,7 +76,7 @@ export default async function FoodPage() {
 
   // The same look as the menu without a stay: intro, one box saying where it goes, then the menu (with ordering).
   return (
-    <PageContainer className="max-w-4xl pt-5 pb-10 max-md:pt-0 md:py-10">
+    <PageContainer className="max-w-6xl pt-5 pb-10 max-md:pt-0 md:py-10">
       {title}
       <p className="mt-1 text-[14px] text-muted md:text-[15px] lg:hidden">{t("menuIntro")}</p>
       <div className="mt-4 flex items-center gap-3 rounded-2xl bg-surface p-3 pr-4 ring-1 ring-line">
