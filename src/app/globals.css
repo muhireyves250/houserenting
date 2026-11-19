@@ -606,13 +606,19 @@ svg {
 /* Staff pages: every white rounded card gets the same soft shadow, links lift on hover (client pages keep their
    own look). Marked by the admin shell's content area. */
 .admin-cards :is(.rounded-xl, .rounded-2xl, .rounded-3xl):is(.bg-surface, details) {
+  /* A thin brand-blue edge, then the soft drop. Cards drawn with a border get the same blue edge. */
+  box-shadow: 0 0 0 1px rgb(0 87 184 / 0.22), var(--shadow-card);
+  border-color: rgb(0 87 184 / 0.22);
+}
+/* Cards that already have a border: the border turns blue, no second edge on top. */
+.admin-cards :is(.rounded-xl, .rounded-2xl, .rounded-3xl):is(.bg-surface, details).border {
   box-shadow: var(--shadow-card);
 }
 .admin-cards a:is(.rounded-xl, .rounded-2xl, .rounded-3xl).bg-surface {
   transition: box-shadow 200ms ease, transform 200ms ease;
 }
 .admin-cards a:is(.rounded-xl, .rounded-2xl, .rounded-3xl).bg-surface:hover {
-  box-shadow: var(--shadow-card-hover);
+  box-shadow: 0 0 0 1px rgb(0 87 184 / 0.45), var(--shadow-card-hover);
   transform: translateY(-1px);
 }
 @media (prefers-reduced-motion: reduce) {
