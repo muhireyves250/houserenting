@@ -57,10 +57,9 @@ export function HostShell({
 
   const sidebar = (
     <div className="flex h-full flex-col" onClick={(e) => (e.target as HTMLElement).closest("a") && setOpen(false)}>
-      <Link href="/host" className="flex items-center justify-between gap-2 border-b border-line/60 px-5 py-4">
-        {/* The same logo as the site footer: the mark on its tile, the VIIPA lettering beside it. */}
-        <Logo withWordmark tile markClassName="h-6" wordmarkClassName="h-4" />
-        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10.5px] font-bold tracking-wide text-primary uppercase">{t("console")}</span>
+      <Link href="/host" className="flex items-center border-b border-line/60 px-5 py-4">
+        {/* The logo mark with the VIIPA lettering beside it, as in the site footer. */}
+        <Logo withWordmark markClassName="h-7" wordmarkClassName="h-4" />
       </Link>
       <nav aria-label={t("label")} className="flex-1 overflow-y-auto px-3 pt-3 pb-4">
         <ul className="mt-1 flex flex-col gap-0.5">

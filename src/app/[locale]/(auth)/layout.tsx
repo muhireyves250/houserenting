@@ -2,7 +2,7 @@ import { ChevronLeft } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Suspense, type ReactNode } from "react";
 import { LocaleSwitcher } from "@/components/shell/LocaleSwitcher";
-import { LogoMark, LogoWordmark } from "@/components/ui/Logo";
+import { LogoMark } from "@/components/ui/Logo";
 import { Link } from "@/i18n/navigation";
 
 export default async function AuthLayout({ children }: { children: ReactNode }) {
@@ -11,11 +11,10 @@ export default async function AuthLayout({ children }: { children: ReactNode }) 
   return (
     <div className="grid min-h-dvh md:grid-cols-2">
       <aside className="hidden flex-col justify-between bg-primary p-10 text-white md:flex">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/" aria-label="VIIPA" className="flex items-center gap-2">
           <span className="rounded-xl bg-white px-2 py-1.5 shadow-sm">
             <LogoMark className="h-7" />
           </span>
-          <LogoWordmark className="h-4 brightness-0 invert" />
         </Link>
         <p className="text-sm text-primary-soft">Kigali · Musanze · Rubavu · Huye</p>
       </aside>
