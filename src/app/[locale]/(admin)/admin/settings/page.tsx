@@ -1,6 +1,6 @@
 import { ScrollText, Settings, Users } from "lucide-react";
 import { getTranslations } from "next-intl/server";
-import { PageTabs } from "@/features/admin/components/kit";
+import { PageTabs, StickyTabs } from "@/features/admin/components/kit";
 import { ActivityLogView } from "@/features/admin/views/ActivityLogView";
 import { SettingsView } from "@/features/admin/views/SettingsView";
 import { UsersView } from "@/features/admin/views/UsersView";
@@ -28,7 +28,7 @@ export default async function SettingsPage({ searchParams }: Props) {
   if (tab === "users") return <UsersView searchParams={Promise.resolve(params)} tabs={tabs} />;
   return (
     <div className="flex flex-col gap-5">
-      {tabs}
+      <StickyTabs>{tabs}</StickyTabs>
       {tab === "log" ? <ActivityLogView searchParams={Promise.resolve(params)} /> : <SettingsView />}
     </div>
   );

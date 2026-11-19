@@ -1,6 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
+import { cn } from "@/lib/cn";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, type ReactNode } from "react";
 import { useRouter } from "@/i18n/navigation";
@@ -9,7 +10,7 @@ import { useRouter } from "@/i18n/navigation";
  * A staff form opened over the list it came from (add or edit a place or restaurant): a large window on
  * computers, a full-screen sheet on phones. Closing (✕, Esc, the back button, a tap outside) goes back to the list.
  */
-export function AdminModal({ children }: { children: ReactNode }) {
+export function AdminModal({ children, title, size = "lg" }: { children: ReactNode; /** A heading at the top of the window. */ title?: string; /** "sm" for short pages (account, notices). */ size?: "sm" | "lg" }) {
   const t = useTranslations("Admin");
   const router = useRouter();
   const panel = useRef<HTMLDivElement>(null);
@@ -33,7 +34,10 @@ export function AdminModal({ children }: { children: ReactNode }) {
       <div
         ref={panel}
         tabIndex={-1}
-        className="admin-modal admin-cards relative flex w-full flex-col overflow-hidden bg-canvas outline-none md:h-[min(92dvh,1000px)] md:max-w-5xl md:rounded-3xl md:shadow-[0_30px_80px_-20px_rgba(0,20,46,0.55)]"
+        className={cn(
+          "admin-modal admin-cards relative flex w-full flex-col overflow-hidden bg-canvas outline-none md:rounded-3xl",
+          size === "sm" ? "md:max-h-[88dvh] md:max-w-xl" : "md:h-[min(92dvh,1000px)] md:max-w-5xl md:shadow-[0_30px_80px_-20px_rgba(0,20,46,0.55)]",
+        )}
       >
         <button
           type="button"
@@ -43,6 +47,7 @@ export function AdminModal({ children }: { children: ReactNode }) {
         >
           <X className="size-5" aria-hidden="true" />
         </button>
+        {title && <h2 className="shrink-0 border-b border-line bg-surface px-5 py-4 pr-16 text-[17px] font-bold text-ink md:px-8">{title}</h2>}
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pt-4 pb-8 md:px-8 md:pt-6">{children}</div>
       </div>
     </div>

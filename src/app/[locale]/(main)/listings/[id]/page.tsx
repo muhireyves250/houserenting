@@ -1,3 +1,4 @@
+import { LogoWordmark } from "@/components/ui/Logo";
 import { MessageCircle, ArrowLeft, CalendarClock, ChevronLeft, KeyRound, Laptop, type LucideIcon, PawPrint, ShieldCheck, SquareParking, Star, WavesLadder, UtensilsCrossed } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -439,7 +440,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
           <Section title={t("talkToUs")}>
             <div className="flex flex-col gap-6 md:flex-row md:items-center md:gap-12">
               <div className="flex w-full max-w-sm flex-col gap-2 rounded-3xl bg-surface px-7 py-7 shadow-[0_12px_36px_-14px_rgba(16,24,40,0.35)]">
-                <p className="font-display text-[24px] font-bold tracking-[-0.02em] text-ink">VIIPA</p>
+                <LogoWordmark className="h-[22px] self-start" />
                 <p className="text-[15px] text-muted">{t("talkToUsBody")}</p>
               </div>
               <MessageHostButton

@@ -1,6 +1,6 @@
 import { ChartColumn, Receipt, Wallet } from "lucide-react";
 import { getTranslations } from "next-intl/server";
-import { PageTabs } from "@/features/admin/components/kit";
+import { PageTabs, StickyTabs } from "@/features/admin/components/kit";
 import { MoneyView } from "@/features/admin/views/MoneyView";
 import { ReportsView } from "@/features/admin/views/ReportsView";
 import { ReceiptForm } from "@/features/receipt/components/ReceiptForm";
@@ -17,6 +17,7 @@ export default async function MoneyAndReportsPage({ searchParams }: Props) {
   const t = await getTranslations("Admin");
   return (
     <div className="flex flex-col gap-5">
+      <StickyTabs>
       <PageTabs
         label={t("nav.money")}
         items={[
@@ -25,6 +26,7 @@ export default async function MoneyAndReportsPage({ searchParams }: Props) {
           { key: "receipt", label: t("pageTabs.receipt"), icon: Receipt, href: { pathname: "/admin/money", query: { tab: "receipt" } }, on: tab === "receipt" },
         ]}
       />
+      </StickyTabs>
       {tab === "reports" ? (
         <ReportsView searchParams={Promise.resolve(params)} />
       ) : tab === "receipt" ? (

@@ -18,7 +18,7 @@ import {
 import { useTranslations } from "next-intl";
 import { useState, type ReactNode } from "react";
 import { Avatar } from "@/components/ui/Avatar";
-import { LogoMark } from "@/components/ui/Logo";
+import { LogoMark, LogoWordmark } from "@/components/ui/Logo";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 
@@ -115,8 +115,8 @@ export function AdminShell({
     <div className="flex h-full flex-col" onClick={(e) => (e.target as HTMLElement).closest("a") && setOpen(false)}>
       <Link href="/admin" className="flex items-center gap-3 border-b border-line/60 px-5 py-4">
         <LogoMark className="h-7" />
-        <span className="flex flex-col leading-tight">
-          <span className="text-[15px] font-bold text-ink">VIIPA</span>
+        <span className="flex flex-col gap-1 leading-tight">
+          <LogoWordmark className="h-[15px]" priority />
           <span className="text-xs font-semibold tracking-wide text-primary uppercase">{tAdmin("console")}</span>
         </span>
       </Link>

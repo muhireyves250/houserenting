@@ -1,6 +1,6 @@
 import { BadgePercent, QrCode } from "lucide-react";
 import { getTranslations } from "next-intl/server";
-import { PageTabs } from "@/features/admin/components/kit";
+import { PageTabs, StickyTabs } from "@/features/admin/components/kit";
 import { PromotersView } from "@/features/admin/views/PromotersView";
 import { PromotionsView } from "@/features/admin/views/PromotionsView";
 import { requireAdmin } from "@/lib/permissions";
@@ -25,7 +25,7 @@ export default async function PromotionsPage({ searchParams }: Props) {
   if (!promoters) return <PromotionsView tabs={tabs} />;
   return (
     <div className="flex flex-col gap-5">
-      {tabs}
+      <StickyTabs>{tabs}</StickyTabs>
       <PromotersView />
     </div>
   );

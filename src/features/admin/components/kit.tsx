@@ -115,3 +115,8 @@ export function PageTabs({ items, label }: { items: PageTab[]; label: string }) 
     </nav>
   );
 }
+
+/** Page tabs that stay in place under the top bar while the page below them scrolls. */
+export function StickyTabs({ children }: { children: ReactNode }) {
+  return <div className="sticky top-16 z-10 -mx-2 -mt-3 bg-canvas px-2 pt-3 pb-2">{children}</div>;
+}

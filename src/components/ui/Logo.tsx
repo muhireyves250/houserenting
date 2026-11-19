@@ -6,6 +6,12 @@ export function LogoMark({ className, priority = false }: { className?: string; 
   return <Image src="/brand/viipa-mark.png" alt="" width={512} height={235} priority={priority} className={cn("h-8 w-auto select-none", className)} draggable={false} />;
 }
 
+/** The "VIIPA" lettering exactly as on the logo (transparent PNG, 990×172). Size it with a height class; on dark
+ * backgrounds add "brightness-0 invert" for a white version. */
+export function LogoWordmark({ className, priority = false }: { className?: string; priority?: boolean }) {
+  return <Image src="/brand/viipa-wordmark.png" alt="VIIPA" width={990} height={172} priority={priority} className={cn("h-4 w-auto select-none", className)} draggable={false} />;
+}
+
 /** The full VIIPA logo with "Care That Connects." (1000×704), for light backgrounds. */
 export function FullLogo({ className, priority = false, decorative = false }: { className?: string; priority?: boolean; decorative?: boolean }) {
   return (
@@ -36,7 +42,7 @@ export function Logo({
         <LogoMark className={markClassName} priority />
       </span>
       {withWordmark ? (
-        <span className={cn("text-lg font-bold tracking-tight text-ink", wordmarkClassName)}>VIIPA</span>
+        <LogoWordmark className={cn("h-[18px]", wordmarkClassName)} priority />
       ) : (
         <span className="sr-only">VIIPA</span>
       )}

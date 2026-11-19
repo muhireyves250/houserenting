@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useRef, useState, type PointerEvent } from "react";
 import { cn } from "@/lib/cn";
 import { WELCOME_ART } from "./WelcomeArt";
+import { LogoWordmark } from "@/components/ui/Logo";
 
 const SLIDES = [
   { title: "slide1", body: "slide1Body" },
@@ -54,7 +55,10 @@ export function OnboardingCarousel({ onFinish }: { onFinish: () => void }) {
 
         {/* Keyed by slide: the text rises in again on every step. */}
         <div key={slide.title} className="flex flex-col items-center gap-3">
-          <h1 className="welcome-rise text-[28px] leading-tight font-bold tracking-[-0.03em] text-primary">{t(slide.title)}</h1>
+          <h1 className="welcome-rise text-[28px] leading-tight font-bold tracking-[-0.03em] text-primary">
+            {/* The first slide is the name itself: shown as the logo's lettering. */}
+            {slide.title === "slide1" ? <LogoWordmark className="h-[30px]" priority /> : t(slide.title)}
+          </h1>
           <p className="welcome-rise max-w-xs text-[16px] leading-6 text-muted [animation-delay:120ms]">{t(slide.body)}</p>
         </div>
 
