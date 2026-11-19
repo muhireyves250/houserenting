@@ -614,8 +614,16 @@ svg {
 .admin-cards :is(.rounded-xl, .rounded-2xl, .rounded-3xl):is(.bg-surface, details).border {
   box-shadow: var(--shadow-card);
 }
-.admin-cards a:is(.rounded-xl, .rounded-2xl, .rounded-3xl).bg-surface {
-  transition: box-shadow 200ms ease, transform 200ms ease;
+.admin-cards :is(.rounded-xl, .rounded-2xl, .rounded-3xl):is(.bg-surface, details) {
+  transition: box-shadow 200ms ease, border-color 200ms ease, transform 200ms ease;
+}
+/* Every card answers the pointer: a stronger blue edge and a deeper shadow (links also lift a little). */
+.admin-cards :is(.rounded-xl, .rounded-2xl, .rounded-3xl):is(.bg-surface, details):hover {
+  box-shadow: 0 0 0 1px rgb(0 87 184 / 0.45), var(--shadow-card-hover);
+  border-color: rgb(0 87 184 / 0.45);
+}
+.admin-cards :is(.rounded-xl, .rounded-2xl, .rounded-3xl):is(.bg-surface, details).border:hover {
+  box-shadow: var(--shadow-card-hover);
 }
 .admin-cards a:is(.rounded-xl, .rounded-2xl, .rounded-3xl).bg-surface:hover {
   box-shadow: 0 0 0 1px rgb(0 87 184 / 0.45), var(--shadow-card-hover);

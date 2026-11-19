@@ -263,7 +263,7 @@ export function AdminShell({
       )}
 
       <div className="lg:pl-64 print:pl-0">
-        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-line bg-surface/90 px-4 backdrop-blur-md md:px-8">
+        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-line bg-surface/90 px-3 backdrop-blur-md md:px-5">
           <button
             type="button"
             onClick={() => setOpen(true)}
@@ -295,7 +295,7 @@ export function AdminShell({
           </Link>
         </header>
         {/* Phones: room under the page for the bottom bar. */}
-        <main className="admin-cards mx-auto max-w-6xl px-4 py-6 pb-28 md:px-8 md:py-8 lg:pb-8">{children}</main>
+        <main className="admin-cards px-3 py-6 pb-28 md:px-5 md:py-8 lg:pb-8">{children}</main>
       </div>
 
       {/* Phones and tablets: the main admin pages one tap away, and Menu for everything else. */}
