@@ -1,6 +1,6 @@
 import { PageHero } from "@/components/shell/PageHero";
 import { InstallApp } from "@/features/pwa/InstallApp";
-import { Bell, ChevronRight, Heart, KeyRound, LifeBuoy, MessageSquare, QrCode, ShoppingBag, UserRound } from "lucide-react";
+import { Bell, ChevronRight, Heart, LifeBuoy, MessageSquare, QrCode, ShoppingBag, UserRound } from "lucide-react";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ProfilePhoto } from "@/features/users/components/ProfilePhoto";
@@ -61,13 +61,6 @@ export default async function ProfilePage() {
                 {unread}
               </span>
             )}
-            <ChevronRight className="size-5 text-ink/60" aria-hidden="true" />
-          </Link>
-        </li>
-        <li>
-          <Link href="/host" className={row}>
-            <KeyRound className="size-6" strokeWidth={1.6} aria-hidden="true" />
-            <span className="flex-1">{user.isHost ? t("yourListings") : t("hostYourPlace")}</span>
             <ChevronRight className="size-5 text-ink/60" aria-hidden="true" />
           </Link>
         </li>

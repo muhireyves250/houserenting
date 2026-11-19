@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
-import { MessageSquare, Plus } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { HeaderSearch } from "@/features/search/components/HeaderSearch";
 import { Link } from "@/i18n/navigation";
@@ -31,15 +31,6 @@ export async function SiteHeader({ user, orders = false }: { user: { name: strin
           <Suspense>
             <LocaleSwitcher />
           </Suspense>
-          <Link
-            href={user ? "/host/listings/new" : { pathname: "/login", query: { next: "/host/listings/new" } }}
-            title={t("addPlace")}
-            className="hidden items-center gap-1.5 rounded-full px-3 py-2 text-[14px] font-semibold whitespace-nowrap text-ink/80 transition-colors hover:bg-primary/[0.08] hover:text-ink lg:inline-flex group-data-[overlay=true]/header:text-white group-data-[overlay=true]/header:hover:bg-white/15"
-          >
-            <Plus className="size-4" aria-hidden="true" />
-            {/* Laptops: just the + (named for screen readers and on hover); wide screens: the words too. */}
-            <span className="sr-only 2xl:not-sr-only">{t("addPlace")}</span>
-          </Link>
           {user ? (
             <>
               <Link
