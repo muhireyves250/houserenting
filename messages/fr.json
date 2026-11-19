@@ -784,7 +784,10 @@
       "promotions": "Promotions",
       "listings": "Annonces",
       "group": {
-        "operate": "Opérations",
+        "home": "Accueil",
+        "stays": "Lieux et séjours",
+        "services": "Services aux clients",
+        "care": "Aide et avis",
         "money": "Finances",
         "people": "Personnes",
         "system": "Système"

@@ -784,7 +784,10 @@
       "promotions": "Igabanywa",
       "listings": "Ahantu",
       "group": {
-        "operate": "Imikorere",
+        "home": "Ahabanza",
+        "stays": "Amazu n'ubukode",
+        "services": "Serivisi z'abakiriya",
+        "care": "Ubufasha n'ibitekerezo",
         "money": "Amafaranga",
         "people": "Abantu",
         "system": "Sisitemu"
