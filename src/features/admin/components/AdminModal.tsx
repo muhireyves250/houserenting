@@ -29,14 +29,21 @@ export function AdminModal({ children, title, size = "lg" }: { children: ReactNo
   }, [router]);
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-stretch justify-center md:items-center md:p-6" role="dialog" aria-modal="true">
+    <div
+      className={cn("fixed inset-0 z-[60] flex items-stretch", size === "sm" ? "justify-end" : "justify-center md:items-center md:p-6")}
+      role="dialog"
+      aria-modal="true"
+    >
       <div aria-hidden="true" onClick={() => router.back()} className="absolute inset-0 bg-[#00142e]/45 backdrop-blur-[3px] motion-safe:animate-[fade-in_200ms_ease-out]" />
       <div
         ref={panel}
         tabIndex={-1}
         className={cn(
-          "admin-modal admin-cards relative flex w-full flex-col overflow-hidden bg-canvas outline-none md:rounded-3xl",
-          size === "sm" ? "md:max-h-[88dvh] md:max-w-xl" : "md:h-[min(92dvh,1000px)] md:max-w-5xl md:shadow-[0_30px_80px_-20px_rgba(0,20,46,0.55)]",
+          "admin-modal admin-cards relative flex w-full flex-col overflow-hidden bg-canvas outline-none",
+          // "sm": a panel sliding in from the right edge, full height. Otherwise a large centred window.
+          size === "sm"
+            ? "h-full sm:max-w-md sm:shadow-[-20px_0_60px_-20px_rgba(0,20,46,0.5)] motion-safe:animate-[slide-in-right_260ms_cubic-bezier(0.22,1,0.36,1)]"
+            : "md:h-[min(92dvh,1000px)] md:max-w-5xl md:rounded-3xl md:shadow-[0_30px_80px_-20px_rgba(0,20,46,0.55)]",
         )}
       >
         <button

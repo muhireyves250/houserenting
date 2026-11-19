@@ -205,6 +205,15 @@ svg {
 }
 
 /* Header search over the page: the backdrop blurs in/out and the bar drops in/lifts away. */
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
 @keyframes backdrop-in {
   from {
     opacity: 0;
