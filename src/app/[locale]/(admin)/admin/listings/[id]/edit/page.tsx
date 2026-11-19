@@ -40,7 +40,7 @@ export default async function AdminEditListingPage({ params }: Props) {
       <PageIntro back={{ href: `/admin/listings/${id}`, label: listing.title }} />
       <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-4 lg:grid-cols-[minmax(0,1fr)_200px] lg:gap-8">
         {/* Section links: beside the form on computers, a row on top on phones. */}
-        <div className="sticky top-16 z-10 -mx-5 bg-canvas/95 px-5 py-2 backdrop-blur md:-mx-10 md:px-10 lg:top-24 lg:order-2 lg:mx-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
+        <div className="sticky top-16 z-10 -mx-7 bg-canvas/95 px-7 py-2 backdrop-blur md:-mx-20 md:px-20 lg:top-24 lg:order-2 lg:mx-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
           <SectionNav items={sections} label={tPlaces("jumpTo")} />
         </div>
         <div className="flex max-w-3xl min-w-0 flex-col gap-4 lg:order-1">

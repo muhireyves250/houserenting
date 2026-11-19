@@ -69,7 +69,7 @@ export default async function AdminDashboardPage() {
   const waiting = attention.filter((a) => a.count > 0);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="admin-overview flex flex-col gap-6">
       <RenewalPopup
         places={ending.map((l) => ({ id: l.id, title: l.title, contractEnd: l.contractEnd!.toISOString(), owner: l.host.name }))}
       />

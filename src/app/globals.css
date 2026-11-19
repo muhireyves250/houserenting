@@ -666,3 +666,11 @@ svg {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+/* The staff overview scrolls without showing a scrollbar (wheel, trackpad, touch and keys still scroll it). */
+html:has(.admin-overview) {
+  scrollbar-width: none;
+}
+html:has(.admin-overview)::-webkit-scrollbar {
+  display: none;
+}
