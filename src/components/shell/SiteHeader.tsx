@@ -15,7 +15,7 @@ export async function SiteHeader({ user, orders = false }: { user: { name: strin
 
   return (
     <HeaderFrame>
-      <div className="mx-auto flex h-[72px] max-w-7xl items-center gap-6 px-6 xl:gap-8">
+      <div className="mx-auto flex h-[72px] max-w-7xl items-center gap-6 px-6">
         <Link href="/" className="shrink-0">
           {/* Icon-only logo; "VIIPA" stays as the accessible name. Over the blue hero it sits on a white tile. */}
           <Logo
@@ -24,15 +24,14 @@ export async function SiteHeader({ user, orders = false }: { user: { name: strin
           />
         </Link>
         <HeaderNav signedIn={Boolean(user)} orders={orders} />
-        <div className="flex flex-1 justify-center">
+        {/* The search bar sits in the middle without pushing the sides: the header keeps the same margins with or without it. */}
+        <div className="flex min-w-0 flex-1 justify-center">
           <HeaderSearch />
         </div>
         <div className="flex shrink-0 items-center gap-3">
           <Suspense>
             <LocaleSwitcher />
           </Suspense>
-          {/* Keeps the room the old "Add a place" link took, so the search bar and spacing stay where they were. */}
-          <span aria-hidden="true" className="hidden h-9 w-10 lg:block 2xl:w-[127px]" />
           {user ? (
             <>
               <Link

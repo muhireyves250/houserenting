@@ -95,7 +95,7 @@ export function HeaderNav({ signedIn = true, orders = false }: { signedIn?: bool
             hoveringCurrent && "border-primary-hover bg-primary/[0.06] group-data-[overlay=true]/header:bg-white/10",
           )}
         />
-        {navItems(orders).filter((item) => item.key !== "profile").map(({ key, href }) => {
+        {navItems(orders).filter((item) => item.key !== "profile" && item.key !== "favorites").map(({ key, href }) => {
           const active = isActive(pathname, href);
           return (
             <li key={key}>

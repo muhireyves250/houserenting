@@ -16,7 +16,8 @@ test("mobile uses the bottom tab bar, desktop the header", async ({ page }, test
     await expect(nav.getByRole("link")).toHaveCount(5);
     await expect(page.getByRole("link", { name: "Log in" })).toBeHidden();
   } else {
-    await expect(nav.getByRole("link")).toHaveCount(5);
+    // Home, Bookings, My stay, Orders (Saved lives on the profile).
+    await expect(nav.getByRole("link")).toHaveCount(4);
     await expect(page.getByRole("link", { name: "Log in" })).toBeVisible();
   }
 });
