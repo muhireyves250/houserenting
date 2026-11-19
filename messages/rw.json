@@ -780,8 +780,8 @@
       "users": "Abakoresha",
       "audit": "Inyandiko z'ibikorwa",
       "settings": "Igenamiterere",
-      "money": "Amafaranga",
-      "promotions": "Igabanywa",
+      "money": "Amafaranga na raporo",
+      "promotions": "Promosiyo",
       "listings": "Ahantu",
       "group": {
         "home": "Ahabanza",
@@ -800,7 +800,7 @@
       "reports": "Raporo",
       "messages": "Ubutumwa",
       "laundry": "Kumesa imyenda",
-      "orders": "Ibyatumijwe (ibiryo)",
+      "orders": "Ibiryo",
       "short": {
         "overview": "Ahabanza",
         "bookings": "Ubukode",
@@ -904,7 +904,8 @@
         "paymentRejected": "Amafaranga ntiyageze"
       },
       "settings": {
-        "update": "Igenamiterere ryahinduwe"
+        "update": "Igenamiterere ryahinduwe",
+        "receipt": "Ibiri ku nyemezabwishyu byahinduwe"
       },
       "room": {
         "create": "Icyumba cyongewe",
@@ -978,7 +979,9 @@
         "suspend": "Umwamamaza yahagaritswe",
         "rewardApprove": "Igihembo cyemejwe",
         "rewardVoid": "Igihembo cyakuweho",
-        "rewardPaid": "Igihembo cyishyuwe"
+        "rewardPaid": "Igihembo cyishyuwe",
+        "add": "Umumamaza yongewemo",
+        "delete": "Umumamaza yasibwe"
       },
       "laundry": {
         "request": "Gusaba kumesa",
@@ -1153,6 +1156,21 @@
         "requests": "Ubufasha",
         "reviews": "Ibitekerezo"
       }
+    },
+    "pageTabs": {
+      "orders": "Ibiryo byatumijwe",
+      "ordersShort": "Ibyatumijwe",
+      "restaurants": "Resitora",
+      "promoCodes": "Kode za promosiyo",
+      "promoCodesShort": "Kode",
+      "promoters": "Abamamaza",
+      "settings": "Igenamiterere",
+      "log": "Ibyakozwe",
+      "logShort": "Ibyakozwe",
+      "money": "Amafaranga",
+      "reports": "Raporo",
+      "receipt": "Inyemezabwishyu",
+      "users": "Abakoresha"
     }
   },
   "Questions": {
@@ -1471,7 +1489,8 @@
     "uses": "{used} kuri {max}",
     "until": "kugeza {date}",
     "disable": "Funga",
-    "enable": "Fungura"
+    "enable": "Fungura",
+    "newCode": "Kode nshya ya promosiyo"
   },
   "Referrals": {
     "title": "Tumira inshuti",
@@ -2220,7 +2239,27 @@
       "PENDING": "Bitegereje",
       "ACTIVE": "Arakora",
       "SUSPENDED": "Yahagaritswe"
-    }
+    },
+    "method": {
+      "MOBILE_MONEY": "Mobile money",
+      "BANK": "Banki"
+    },
+    "cancel": "Reka",
+    "edit": "Hindura",
+    "delete": "Siba",
+    "deleteQuestion": "Usibe uyu mumamaza?",
+    "staffEmail": "Imeyili ya konti ye",
+    "addPromoter": "Ongeramo umumamaza",
+    "saveChanges": "Bika impinduka",
+    "staffError": {
+      "noAccount": "Nta konti ifite iyi meyili. Musabe abanze kwiyandikisha.",
+      "already": "Uyu muntu asanzwe ari umumamaza.",
+      "notFound": "Uyu mumamaza yahindutse. Ongera ufungure urupapuro.",
+      "hasRewards": "Afite ibihembo, ntashobora gusibwa. Mumuhagarike aho.",
+      "notAllowed": "Ntushobora gukora ibi."
+    },
+    "visitsN": "{count, plural, one {gusura #} other {gusura #}}",
+    "bookingsN": "{count, plural, one {ubukode #} other {ubukode #}}"
   },
   "Reports": {
     "intro": "Amafaranga n'ibikorwa bikurikije itariki y'icumbi. Amacumbi yishyuwe n'abataje arabarwa; ayahagaritswe abarwa gusa ku mafaranga yasubijwe. Ingwate zirabikwa, si inyungu.",
@@ -2428,5 +2467,26 @@
     "bannerTitle": "Shyira VIIPA muri telefoni",
     "bannerBody": "Ifunguka vuba, iri kuri ecran y'ibanze.",
     "install": "Shyiraho"
+  },
+  "Receipt": {
+    "title": "Ibigaragara ku nyemezabwishyu",
+    "intro": "Abakiriya babibona ku nyemezabwishyu ya buri bukode (n'iyo bayicapye). Siga ubusa ahantu udashaka ko hagaragara.",
+    "businessName": "Izina ry'ikigo",
+    "address": "Aderesi",
+    "addressHint": "urugero KG 7 Ave, Kigali",
+    "phone": "Telefoni",
+    "email": "Imeyili",
+    "emailError": "Andika imeyili nyayo.",
+    "tin": "Nimero y'umusoro (TIN)",
+    "tinShort": "TIN",
+    "footer": "Ubutumwa bwo hasi",
+    "footerHint": "urugero Murakoze kutugana. Gusubizwa amafaranga mu minsi 7.",
+    "save": "Bika",
+    "saved": "Byabitswe",
+    "failed": "Ntibyabitswe. Reba ibyo wanditse.",
+    "preview": "Uko bizagaragara",
+    "sampleLine": "RWF 90,000 × ijoro 1",
+    "sampleTotal": "Igiteranyo",
+    "noFooter": "(nta butumwa bwo hasi)"
   }
 }

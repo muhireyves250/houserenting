@@ -780,7 +780,7 @@
       "users": "Utilisateurs",
       "audit": "Journal d'audit",
       "settings": "Paramètres",
-      "money": "Finances",
+      "money": "Argent et rapports",
       "promotions": "Promotions",
       "listings": "Annonces",
       "group": {
@@ -800,7 +800,7 @@
       "reports": "Rapports",
       "messages": "Messages",
       "laundry": "Blanchisserie",
-      "orders": "Commandes repas",
+      "orders": "Repas",
       "short": {
         "overview": "Accueil",
         "bookings": "Réservations",
@@ -904,7 +904,8 @@
         "paymentRejected": "Paiement non reçu"
       },
       "settings": {
-        "update": "Paramètres modifiés"
+        "update": "Paramètres modifiés",
+        "receipt": "Détails du reçu modifiés"
       },
       "room": {
         "create": "Chambre ajoutée",
@@ -978,7 +979,9 @@
         "suspend": "Promoteur suspendu",
         "rewardApprove": "Récompense validée",
         "rewardVoid": "Récompense annulée",
-        "rewardPaid": "Récompense payée"
+        "rewardPaid": "Récompense payée",
+        "add": "Promoteur ajouté",
+        "delete": "Promoteur supprimé"
       },
       "laundry": {
         "request": "Lessive demandée",
@@ -1153,6 +1156,21 @@
         "requests": "Aide",
         "reviews": "Avis"
       }
+    },
+    "pageTabs": {
+      "orders": "Commandes de repas",
+      "ordersShort": "Commandes",
+      "restaurants": "Restaurants",
+      "promoCodes": "Codes promo",
+      "promoCodesShort": "Codes",
+      "promoters": "Promoteurs",
+      "settings": "Paramètres",
+      "log": "Journal d'activité",
+      "logShort": "Journal",
+      "money": "Argent",
+      "reports": "Rapports",
+      "receipt": "Reçu",
+      "users": "Utilisateurs"
     }
   },
   "Questions": {
@@ -1471,7 +1489,8 @@
     "uses": "{used} sur {max} utilisés",
     "until": "jusqu'au {date}",
     "disable": "Désactiver",
-    "enable": "Activer"
+    "enable": "Activer",
+    "newCode": "Nouveau code promo"
   },
   "Referrals": {
     "title": "Inviter des amis",
@@ -2220,7 +2239,27 @@
       "PENDING": "En attente",
       "ACTIVE": "Actif",
       "SUSPENDED": "Suspendu"
-    }
+    },
+    "method": {
+      "MOBILE_MONEY": "Mobile money",
+      "BANK": "Banque"
+    },
+    "cancel": "Annuler",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "deleteQuestion": "Supprimer ce promoteur ?",
+    "staffEmail": "E-mail de son compte",
+    "addPromoter": "Ajouter un promoteur",
+    "saveChanges": "Enregistrer",
+    "staffError": {
+      "noAccount": "Aucun compte avec cet e-mail. Demandez-lui de s'inscrire d'abord.",
+      "already": "Cette personne est déjà promoteur.",
+      "notFound": "Ce promoteur a changé. Actualisez la page.",
+      "hasRewards": "Il a des récompenses : il ne peut pas être supprimé. Suspendez-le plutôt.",
+      "notAllowed": "Vous ne pouvez pas faire cela."
+    },
+    "visitsN": "{count, plural, one {# visite} other {# visites}}",
+    "bookingsN": "{count, plural, one {# réservation} other {# réservations}}"
   },
   "Reports": {
     "intro": "Argent et activité par date de séjour. Les séjours payés et non présentés comptent ; les séjours annulés seulement pour leurs remboursements. Les cautions sont retenues, pas des revenus.",
@@ -2428,5 +2467,26 @@
     "bannerTitle": "L'app VIIPA",
     "bannerBody": "Plus rapide à ouvrir, sur votre écran d'accueil.",
     "install": "Installer"
+  },
+  "Receipt": {
+    "title": "Ce qu'affichent les reçus",
+    "intro": "Les clients voient ceci sur le reçu de chaque réservation (et à l'impression). Laissez un champ vide pour ne pas l'afficher.",
+    "businessName": "Nom de l'entreprise",
+    "address": "Adresse",
+    "addressHint": "ex. KG 7 Ave, Kigali",
+    "phone": "Téléphone",
+    "email": "E-mail",
+    "emailError": "Saisissez un e-mail valide.",
+    "tin": "Numéro fiscal (TIN)",
+    "tinShort": "TIN",
+    "footer": "Note en bas",
+    "footerHint": "ex. Merci de votre séjour. Remboursements sous 7 jours.",
+    "save": "Enregistrer",
+    "saved": "Enregistré",
+    "failed": "Impossible d'enregistrer. Vérifiez les champs.",
+    "preview": "Aperçu",
+    "sampleLine": "RWF 90 000 × 1 nuit",
+    "sampleTotal": "Total",
+    "noFooter": "(pas de note en bas)"
   }
 }

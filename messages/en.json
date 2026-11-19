@@ -780,7 +780,7 @@
       "users": "Users",
       "audit": "Audit log",
       "settings": "Settings",
-      "money": "Money",
+      "money": "Money and reports",
       "promotions": "Promotions",
       "listings": "Listings",
       "group": {
@@ -800,7 +800,7 @@
       "reports": "Reports",
       "messages": "Messages",
       "laundry": "Laundry",
-      "orders": "Food orders",
+      "orders": "Food",
       "short": {
         "overview": "Overview",
         "bookings": "Bookings",
@@ -904,7 +904,8 @@
         "paymentRejected": "Payment not received"
       },
       "settings": {
-        "update": "Settings changed"
+        "update": "Settings changed",
+        "receipt": "Receipt details changed"
       },
       "room": {
         "create": "Room added",
@@ -978,7 +979,9 @@
         "suspend": "Promoter suspended",
         "rewardApprove": "Reward approved",
         "rewardVoid": "Reward voided",
-        "rewardPaid": "Reward paid"
+        "rewardPaid": "Reward paid",
+        "add": "Promoter added",
+        "delete": "Promoter deleted"
       },
       "laundry": {
         "request": "Laundry requested",
@@ -1153,6 +1156,21 @@
         "requests": "Support",
         "reviews": "Reviews"
       }
+    },
+    "pageTabs": {
+      "orders": "Food orders",
+      "ordersShort": "Orders",
+      "restaurants": "Restaurants",
+      "promoCodes": "Promo codes",
+      "promoCodesShort": "Codes",
+      "promoters": "Promoters",
+      "settings": "Settings",
+      "log": "Activity log",
+      "logShort": "Activity",
+      "money": "Money",
+      "reports": "Reports",
+      "receipt": "Receipt",
+      "users": "Users"
     }
   },
   "Questions": {
@@ -1471,7 +1489,8 @@
     "uses": "{used} of {max} used",
     "until": "until {date}",
     "disable": "Turn off",
-    "enable": "Turn on"
+    "enable": "Turn on",
+    "newCode": "New promo code"
   },
   "Referrals": {
     "title": "Invite friends",
@@ -2220,7 +2239,27 @@
       "PENDING": "Waiting",
       "ACTIVE": "Active",
       "SUSPENDED": "Suspended"
-    }
+    },
+    "method": {
+      "MOBILE_MONEY": "Mobile money",
+      "BANK": "Bank"
+    },
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteQuestion": "Delete this promoter?",
+    "staffEmail": "Their account email",
+    "addPromoter": "Add a promoter",
+    "saveChanges": "Save changes",
+    "staffError": {
+      "noAccount": "No account with this email. Ask them to sign up first.",
+      "already": "This person is already a promoter.",
+      "notFound": "This promoter changed. Refresh the page.",
+      "hasRewards": "They have rewards, so they can't be deleted. Suspend them instead.",
+      "notAllowed": "You can't do this."
+    },
+    "visitsN": "{count, plural, one {# visit} other {# visits}}",
+    "bookingsN": "{count, plural, one {# booking} other {# bookings}}"
   },
   "Reports": {
     "intro": "Money and activity by stay date. Paid stays and no-shows count; cancelled stays only for their refunds. Deposits are held, not revenue.",
@@ -2428,5 +2467,26 @@
     "bannerTitle": "Get the VIIPA app",
     "bannerBody": "Quicker to open, right on your home screen.",
     "install": "Install"
+  },
+  "Receipt": {
+    "title": "What receipts show",
+    "intro": "Guests see these on the receipt of every booking (and when they print it). Leave a field empty to keep it off.",
+    "businessName": "Business name",
+    "address": "Address",
+    "addressHint": "e.g. KG 7 Ave, Kigali",
+    "phone": "Phone",
+    "email": "Email",
+    "emailError": "Enter a valid email.",
+    "tin": "Tax number (TIN)",
+    "tinShort": "TIN",
+    "footer": "Note at the bottom",
+    "footerHint": "e.g. Thank you for staying with us. Refunds within 7 days.",
+    "save": "Save",
+    "saved": "Saved",
+    "failed": "Couldn't save. Check the fields.",
+    "preview": "Preview",
+    "sampleLine": "RWF 90,000 × 1 night",
+    "sampleTotal": "Total",
+    "noFooter": "(no note at the bottom)"
   }
 }

@@ -8,6 +8,8 @@ import type { ReactNode } from "react";
 import { PageContainer } from "@/components/ui/PageContainer";
 import { CancelBooking } from "@/features/bookings/components/CancelBooking";
 import { PrintReceipt } from "@/features/bookings/components/PrintReceipt";
+import { ReceiptHeader } from "@/features/receipt/components/ReceiptForm";
+import { getReceiptDetails } from "@/features/receipt/service";
 import { StatusBadge } from "@/features/bookings/components/StatusBadge";
 import { directionsUrl, formatDay, formatKigaliDateTime, formatKigaliTime, formatStayDates } from "@/features/bookings/format";
 import { isBookingReference } from "@/features/bookings/reference";
@@ -62,7 +64,7 @@ export default async function BookingPage({ params }: Props) {
     getLocale(),
     canReview(user.id, reference),
   ]);
-  const tRooms = await getTranslations("Rooms");
+  const [tRooms, tReceipt, receiptDetails] = await Promise.all([getTranslations("Rooms"), getTranslations("Receipt"), getReceiptDetails()]);
   const { listing, policySnapshot: policy } = booking;
   const holding = isHoldActive(booking, now);
   const [settings, claim] = await Promise.all([
@@ -186,6 +188,10 @@ export default async function BookingPage({ params }: Props) {
           <h2 className="text-lg font-bold text-ink">{t("receipt")}</h2>
           <PrintReceipt label={t("print")} />
         </div>
+        {/* The business's details, as staff set them (Money and reports → Receipt). */}
+        <div className="mb-3 border-b border-dashed border-line pb-3">
+          <ReceiptHeader details={receiptDetails} tinLabel={tReceipt("tinShort")} />
+        </div>
         <dl className="divide-y divide-line tabular-nums">
           <Row label={t("reference")}>
             <span className="font-mono tracking-wider">{booking.reference}</span>
@@ -231,6 +237,7 @@ export default async function BookingPage({ params }: Props) {
           </Row>
         </dl>
         <p className="mt-3 text-[13px] text-muted">{t("bookedOn", { date: formatKigaliDateTime(locale, booking.createdAt) })}</p>
+        {receiptDetails.footer && <p className="mt-3 border-t border-dashed border-line pt-3 text-center text-[13px] whitespace-pre-line text-muted">{receiptDetails.footer}</p>}
       </section>
 
       {/* What the guest agreed to, as it was at booking time */}

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { staffMoveBooking } from "@/features/bookings/service";
 import { db } from "@/lib/db";
 import { resetDb } from "@/test/db";
-import { attributeBooking, decidePromoterReward, markPromoterRewardPaid, promoterDashboard, recordVisit, savePromoter, setPromoterStatus } from "./service";
+import { attributeBooking, decidePromoterReward, deletePromoter, markPromoterRewardPaid, promoterDashboard, recordVisit, savePromoter, setPromoterStatus, staffAddPromoter, staffEditPromoter } from "./service";
 
 const admin = { id: "admin", role: "ADMIN" };
 let n = 0;
@@ -79,4 +79,21 @@ describe("promoters", () => {
     expect(await db.ledgerEntry.findFirst({ where: { kind: "PROMOTER_REWARD" } })).toMatchObject({ amount: 5000 });
     expect(await promoterDashboard("pro")).toMatchObject({ visits30: 1, paid: 5000 });
   }, 180_000);
+});
+
+describe("staff manage promoters", () => {
+  const payout = { about: "Campus", payoutMethod: "MOBILE_MONEY" as const, payoutName: "Pro Moter", payoutNumber: "0788123456", bankName: null };
+
+  it("add someone with an account (active at once), edit them, and delete one without rewards", async () => {
+    expect(await staffAddPromoter({ id: "pro" }, "pro@example.com", payout)).toEqual({ ok: false, error: "notAllowed" });
+    expect(await staffAddPromoter(admin, "nobody@example.com", payout)).toEqual({ ok: false, error: "noAccount" });
+    expect(await staffAddPromoter(admin, "PRO@example.com", payout)).toEqual({ ok: true });
+    expect(await staffAddPromoter(admin, "pro@example.com", payout)).toEqual({ ok: false, error: "already" });
+    const p = await db.promoter.findUniqueOrThrow({ where: { userId: "pro" } });
+    expect(p.status).toBe("ACTIVE");
+    expect(await staffEditPromoter(admin, p.id, { ...payout, about: "Markets in Huye" })).toEqual({ ok: true });
+    expect((await db.promoter.findUniqueOrThrow({ where: { id: p.id } })).about).toBe("Markets in Huye");
+    expect(await deletePromoter(admin, p.id)).toEqual({ ok: true });
+    expect(await db.promoter.count({ where: { id: p.id } })).toBe(0);
+  });
 });

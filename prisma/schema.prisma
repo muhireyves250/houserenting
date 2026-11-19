@@ -631,6 +631,15 @@ model PlatformConfig {
   paymentInstructions   String?
   vatBps                Int?
   citBps                Int?
+  /// Printed on guests' receipts (all optional; the receipt falls back to "VIIPA").
+  receiptBusinessName   String?
+  receiptAddress        String?
+  receiptPhone          String?
+  receiptEmail          String?
+  /// Tax identification number shown on receipts.
+  receiptTin            String?
+  /// A short closing note at the bottom of receipts (e.g. thanks, refund terms).
+  receiptFooter         String?
   updatedAt             DateTime            @updatedAt
   updatedById           String?
 

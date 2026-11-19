@@ -151,7 +151,7 @@ export function allPromoters() {
   return db.promoter.findMany({
     orderBy: [{ status: "asc" }, { createdAt: "desc" }],
     take: 300,
-    include: { user: { select: { id: true, name: true, email: true } }, _count: { select: { visits: true, bookings: true } } },
+    include: { user: { select: { id: true, name: true, email: true } }, _count: { select: { visits: true, bookings: true, rewards: true } } },
   });
 }
 
@@ -161,4 +161,53 @@ export function openPromoterRewards() {
     orderBy: { createdAt: "asc" },
     include: { promoter: { select: { code: true, payoutMethod: true, payoutName: true, payoutNumber: true, bankName: true, user: { select: { name: true } } } }, booking: { select: { reference: true } } },
   });
+}
+
+export type StaffPromoterResult = { ok: true } | { ok: false; error: "notAllowed" | "noAccount" | "already" | "notFound" | "hasRewards" } | { ok: false; errors: Record<string, string> };
+
+/** Staff add a promoter for someone with an account (by email): active straight away, and told. */
+export async function staffAddPromoter(actor: Actor, email: string, raw: PromoterInput): Promise<StaffPromoterResult> {
+  if (!isAdmin(actor)) return { ok: false, error: "notAllowed" };
+  const parsed = promoterInput.safeParse(raw);
+  if (!parsed.success) return { ok: false, errors: errorsOf(parsed.error.issues) };
+  const user = await db.user.findUnique({ where: { email: email.trim().toLowerCase() }, select: { id: true, promoter: { select: { id: true } } } });
+  if (!user) return { ok: false, error: "noAccount" };
+  if (user.promoter) return { ok: false, error: "already" };
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      await db.$transaction(async (tx) => {
+        const created = await tx.promoter.create({ data: { userId: user.id, code: newReference("P"), status: "ACTIVE", decidedById: actor.id, decidedAt: new Date(), ...parsed.data } });
+        await audit(tx, { actorId: actor.id, action: "promoter.add", entityType: "promoter", entityId: created.id });
+        await notify(tx, user.id, "promoterStatus", { status: "ACTIVE", reason: "" }, "/promote");
+      });
+      return { ok: true };
+    } catch (error) {
+      if ((error as { code?: string }).code !== "P2002") throw error;
+    }
+  }
+  return { ok: false, error: "notAllowed" };
+}
+
+/** Staff change a promoter's details (where they promote, where rewards are paid). Logged. */
+export async function staffEditPromoter(actor: Actor, promoterId: string, raw: PromoterInput): Promise<StaffPromoterResult> {
+  if (!isAdmin(actor)) return { ok: false, error: "notAllowed" };
+  const parsed = promoterInput.safeParse(raw);
+  if (!parsed.success) return { ok: false, errors: errorsOf(parsed.error.issues) };
+  const { count } = await db.promoter.updateMany({ where: { id: promoterId }, data: parsed.data });
+  if (count !== 1) return { ok: false, error: "notFound" };
+  await audit(db, { actorId: actor.id, action: "promoter.update", entityType: "promoter", entityId: promoterId });
+  return { ok: true };
+}
+
+/** Staff delete a promoter who has no rewards (their history stays otherwise: suspend instead). */
+export async function deletePromoter(actor: Actor, promoterId: string): Promise<StaffPromoterResult> {
+  if (!isAdmin(actor)) return { ok: false, error: "notAllowed" };
+  const p = await db.promoter.findUnique({ where: { id: promoterId }, select: { code: true, _count: { select: { rewards: true } } } });
+  if (!p) return { ok: false, error: "notFound" };
+  if (p._count.rewards > 0) return { ok: false, error: "hasRewards" };
+  await db.$transaction(async (tx) => {
+    await tx.promoter.delete({ where: { id: promoterId } });
+    await audit(tx, { actorId: actor.id, action: "promoter.delete", entityType: "promoter", entityId: promoterId, data: { code: p.code } });
+  });
+  return { ok: true };
 }

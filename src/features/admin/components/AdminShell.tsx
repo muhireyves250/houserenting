@@ -5,23 +5,18 @@ import {
   Bell,
   UserRound,
   CalendarCheck,
-  ChartColumn,
   ClipboardList,
   Home,
   LayoutDashboard,
   LifeBuoy,
   Menu,
   MessageSquare,
-  QrCode,
-  ScrollText,
   Settings,
-  Users,
-  UtensilsCrossed,
   Wallet,
   X,
-  type LucideIcon, ChevronDown, Shirt, ShoppingBag } from "lucide-react";
+  type LucideIcon, Shirt, ShoppingBag } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { LogoMark } from "@/components/ui/Logo";
 import { Link, usePathname } from "@/i18n/navigation";
@@ -46,7 +41,6 @@ const GROUPS: { label: Group; items: { key: Key; href: string; icon: LucideIcon 
     label: "services",
     items: [
       { key: "orders", href: "/admin/orders", icon: ShoppingBag },
-      { key: "restaurants", href: "/admin/restaurants", icon: UtensilsCrossed },
       { key: "laundry", href: "/admin/laundry", icon: Shirt },
     ],
   },
@@ -60,42 +54,20 @@ const GROUPS: { label: Group; items: { key: Key; href: string; icon: LucideIcon 
     label: "money",
     items: [
       { key: "money", href: "/admin/money", icon: Wallet },
-      { key: "reports", href: "/admin/reports", icon: ChartColumn },
       { key: "promotions", href: "/admin/promotions", icon: BadgePercent },
-      { key: "promoters", href: "/admin/promoters", icon: QrCode },
     ],
   },
-  { label: "people", items: [{ key: "users", href: "/admin/users", icon: Users }] },
   {
     label: "system",
     items: [
       { key: "settings", href: "/admin/settings", icon: Settings },
-      { key: "audit", href: "/admin/audit", icon: ScrollText },
     ],
   },
 ];
 
-const FOLDED_KEY = "viipa-admin-folded";
-const foldedListeners = new Set<() => void>();
-const subscribeFolded = (listener: () => void) => {
-  foldedListeners.add(listener);
-  return () => foldedListeners.delete(listener);
-};
-const readFolded = () => {
-  try {
-    return window.localStorage.getItem(FOLDED_KEY) ?? "[]";
-  } catch {
-    return "[]";
-  }
-};
-const writeFolded = (value: string) => {
-  try {
-    window.localStorage.setItem(FOLDED_KEY, value);
-  } catch {
-    // Private mode: folding isn't remembered after a reload.
-  }
-  foldedListeners.forEach((listener) => listener());
-};
+
+/** The sidebar: every staff page in one list, in this order. */
+const NAV = GROUPS.flatMap((g) => g.items);
 
 /** Pages reached from the top bar (not listed in the sidebar), so the top bar can name them. */
 /** The phone bottom bar: the pages staff open most. */
@@ -136,17 +108,6 @@ export function AdminShell({
   const tAdmin = useTranslations("Admin");
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  // Groups folded by this person, remembered in this browser (all open while the page loads).
-  const foldedRaw = useSyncExternalStore(subscribeFolded, readFolded, () => "[]");
-  const folded = useMemo<Group[]>(() => {
-    try {
-      const list = JSON.parse(foldedRaw) as unknown;
-      return Array.isArray(list) ? (list as Group[]) : [];
-    } catch {
-      return [];
-    }
-  }, [foldedRaw]);
-  const toggle = (group: Group) => writeFolded(JSON.stringify(folded.includes(group) ? folded.filter((g) => g !== group) : [...folded, group]));
   const current = [...GROUPS.flatMap((g) => g.items), ...EXTRA].find((i) => isOn(pathname, i.href)) ?? GROUPS[0]!.items[0]!;
 
   const sidebar = (
@@ -160,63 +121,39 @@ export function AdminShell({
         </span>
       </Link>
       <nav aria-label={t("label")} className="flex-1 overflow-y-auto px-3 pt-3 pb-4">
-        {GROUPS.map((group) => {
-          const hasCurrent = group.items.some((i) => isOn(pathname, i.href));
-          // The group with the page you're on stays open.
-          const isFolded = group.label !== "home" && folded.includes(group.label) && !hasCurrent;
-          const waiting = group.items.reduce((n, i) => n + (counts[i.key] ?? 0), 0);
-          return (
-            <div key={group.label} className={cn(group.label === "home" ? "mt-1" : "mt-3 border-t border-line/60 pt-3")}>
-              {group.label !== "home" && (
-                <button
-                  type="button"
-                  onClick={() => toggle(group.label)}
-                  aria-expanded={!isFolded}
-                  className="group/title mb-1 flex w-full items-center gap-2 rounded-md px-3 py-1 text-left text-[10.5px] font-semibold tracking-[0.08em] text-muted/90 uppercase transition-colors hover:text-ink"
+        {/* One plain list (no groups). */}
+        <ul className="mt-1 flex flex-col gap-0.5">
+          {NAV.map(({ key, href, icon: Icon }) => {
+            const on = isOn(pathname, href);
+            const count = counts[key] ?? 0;
+            return (
+              <li key={key}>
+                <Link
+                  href={href}
+                  aria-current={on ? "page" : undefined}
+                  className={cn(
+                    "group relative flex items-center gap-3 rounded-lg px-3 py-2 text-[14px] transition-colors duration-150",
+                    // Current page: a solid blue button; the others turn light blue under the pointer.
+                    on
+                      ? "bg-primary font-semibold text-white"
+                      : "text-ink/75 hover:bg-primary/[0.08] hover:text-primary",
+                  )}
                 >
-                  <span className="flex-1">{t(`group.${group.label}`)}</span>
-                  {/* Folded: what waits inside still shows. */}
-                  {isFolded && waiting > 0 && <span className="rounded-full bg-primary/10 px-1.5 text-[11px] font-bold tracking-normal text-primary tabular-nums">{waiting}</span>}
-                  <ChevronDown className={cn("size-3.5 opacity-50 transition-[transform,opacity] group-hover/title:opacity-100", isFolded && "-rotate-90")} aria-hidden="true" />
-                </button>
-              )}
-              {!isFolded && (
-                <ul className="flex flex-col gap-0.5">
-                  {group.items.map(({ key, href, icon: Icon }) => {
-                    const on = isOn(pathname, href);
-                    const count = counts[key] ?? 0;
-                    return (
-                      <li key={key}>
-                        <Link
-                          href={href}
-                          aria-current={on ? "page" : undefined}
-                          className={cn(
-                            "group relative flex items-center gap-3 rounded-lg px-3 py-2 text-[14px] transition-colors duration-150",
-                            // Current page: a soft blue highlight with a slim bar on the left.
-                            on
-                              ? "bg-primary/[0.08] font-semibold text-primary before:absolute before:inset-y-1.5 before:-left-3 before:w-[3px] before:rounded-r-full before:bg-primary"
-                              : "text-ink/75 hover:bg-canvas hover:text-ink",
-                          )}
-                        >
-                          <Icon className={cn("size-[18px] shrink-0", on ? "text-primary" : "text-ink/50 group-hover:text-ink/80")} strokeWidth={1.9} aria-hidden="true" />
-                          <span className="flex-1">{t(key)}</span>
-                          {count > 0 && (
-                            <span
-                              className={cn("min-w-5 rounded-full px-1.5 py-px text-center text-[11px] font-semibold tabular-nums", on ? "bg-primary text-white" : "bg-primary/10 text-primary")}
-                              aria-label={tAdmin("waiting", { count })}
-                            >
-                              {count}
-                            </span>
-                          )}
-                        </Link>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </div>
-          );
-        })}
+                  <Icon className={cn("size-[18px] shrink-0", on ? "text-white" : "text-ink/50 group-hover:text-primary")} strokeWidth={1.9} aria-hidden="true" />
+                  <span className="flex-1">{t(key)}</span>
+                  {count > 0 && (
+                    <span
+                      className={cn("min-w-5 rounded-full px-1.5 py-px text-center text-[11px] font-semibold tabular-nums", on ? "bg-white/25 text-white" : "bg-primary/10 text-primary")}
+                      aria-label={tAdmin("waiting", { count })}
+                    >
+                      {count}
+                    </span>
+                  )}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
       </nav>
       <div className="border-t border-line p-3">
         <Link

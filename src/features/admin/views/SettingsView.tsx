@@ -1,0 +1,33 @@
+import { SettingsForm } from "@/features/settings/components/SettingsForm";
+import { getSettings } from "@/features/settings/service";
+import { fromBps } from "@/features/settings/validation";
+import { getEnv } from "@/lib/env";
+
+export async function SettingsView() {
+  const settings = await getSettings();
+  return (
+    <SettingsForm
+      envHoldMinutes={getEnv().BOOKING_HOLD_MINUTES}
+      initial={{
+        commissionPercent: fromBps(settings.commissionBps),
+        guestFeePercent: fromBps(settings.guestFeeBps),
+        holdMinutes: settings.holdMinutes,
+        monthlyDepositPercent: settings.monthlyDepositPercent,
+        monthlyUpfrontMonths: settings.monthlyUpfrontMonths,
+        monthlyIdentity: settings.monthlyIdentity,
+        referralEnabled: settings.referralEnabled,
+        referralRewardAmount: settings.referralRewardAmount,
+        dislikeHideCount: settings.dislikeHideCount,
+        promoterEnabled: settings.promoterEnabled,
+        promoterRewardFixed: settings.promoterRewardFixed,
+        promoterRewardPercent: fromBps(settings.promoterRewardBps),
+        commissionByTypePercent: Object.fromEntries(Object.entries(settings.commissionByType ?? {}).map(([k, v]) => [k, fromBps(v)])),
+        feeModel: settings.feeModel,
+        vatPercent: fromBps(settings.vatBps),
+        citPercent: fromBps(settings.citBps),
+        paymentInstructions: settings.paymentInstructions,
+        cancellationPolicy: settings.cancellationPolicy,
+      }}
+    />
+  );
+}

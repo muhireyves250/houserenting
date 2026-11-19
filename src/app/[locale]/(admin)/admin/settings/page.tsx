@@ -1,35 +1,35 @@
-import { SettingsForm } from "@/features/settings/components/SettingsForm";
-import { getSettings } from "@/features/settings/service";
-import { fromBps } from "@/features/settings/validation";
-import { getEnv } from "@/lib/env";
+import { ScrollText, Settings, Users } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+import { PageTabs } from "@/features/admin/components/kit";
+import { ActivityLogView } from "@/features/admin/views/ActivityLogView";
+import { SettingsView } from "@/features/admin/views/SettingsView";
+import { UsersView } from "@/features/admin/views/UsersView";
 import { requireAdmin } from "@/lib/permissions";
 
-export default async function AdminSettingsPage() {
+type Props = { searchParams: Promise<{ tab?: string; type?: string; page?: string; filter?: string; q?: string }> };
+
+/** Settings, users and the activity log (who changed what), as three tabs. */
+export default async function SettingsPage({ searchParams }: Props) {
   await requireAdmin("/admin/settings");
-  const settings = await getSettings();
-  return (
-    <SettingsForm
-      envHoldMinutes={getEnv().BOOKING_HOLD_MINUTES}
-      initial={{
-        commissionPercent: fromBps(settings.commissionBps),
-        guestFeePercent: fromBps(settings.guestFeeBps),
-        holdMinutes: settings.holdMinutes,
-        monthlyDepositPercent: settings.monthlyDepositPercent,
-        monthlyUpfrontMonths: settings.monthlyUpfrontMonths,
-        monthlyIdentity: settings.monthlyIdentity,
-        referralEnabled: settings.referralEnabled,
-        referralRewardAmount: settings.referralRewardAmount,
-        dislikeHideCount: settings.dislikeHideCount,
-        promoterEnabled: settings.promoterEnabled,
-        promoterRewardFixed: settings.promoterRewardFixed,
-        promoterRewardPercent: fromBps(settings.promoterRewardBps),
-        commissionByTypePercent: Object.fromEntries(Object.entries(settings.commissionByType ?? {}).map(([k, v]) => [k, fromBps(v)])),
-        feeModel: settings.feeModel,
-        vatPercent: fromBps(settings.vatBps),
-        citPercent: fromBps(settings.citBps),
-        paymentInstructions: settings.paymentInstructions,
-        cancellationPolicy: settings.cancellationPolicy,
-      }}
+  const params = await searchParams;
+  const tab = params.tab === "log" || params.tab === "users" ? params.tab : "settings";
+  const t = await getTranslations("Admin");
+  const tabs = (
+    <PageTabs
+      label={t("nav.settings")}
+      items={[
+        { key: "settings", label: t("pageTabs.settings"), icon: Settings, href: { pathname: "/admin/settings" }, on: tab === "settings" },
+        { key: "users", label: t("pageTabs.users"), icon: Users, href: { pathname: "/admin/settings", query: { tab: "users" } }, on: tab === "users" },
+        { key: "log", label: t("pageTabs.log"), short: t("pageTabs.logShort"), icon: ScrollText, href: { pathname: "/admin/settings", query: { tab: "log" } }, on: tab === "log" },
+      ]}
     />
+  );
+  // Users fill the screen (their list scrolls under the tabs); the others are ordinary pages.
+  if (tab === "users") return <UsersView searchParams={Promise.resolve(params)} tabs={tabs} />;
+  return (
+    <div className="flex flex-col gap-5">
+      {tabs}
+      {tab === "log" ? <ActivityLogView searchParams={Promise.resolve(params)} /> : <SettingsView />}
+    </div>
   );
 }

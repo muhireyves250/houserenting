@@ -1,0 +1,42 @@
+import "server-only";
+import { cache } from "react";
+import { audit } from "@/features/audit/service";
+import { db } from "@/lib/db";
+import { isAdmin } from "@/lib/roles";
+import { receiptInput, type ReceiptDetails, type ReceiptInput } from "./validation";
+
+/** The business details printed on guests' receipts (empty fields are left off). */
+export const getReceiptDetails = cache(async (): Promise<ReceiptDetails> => {
+  const row = await db.platformConfig.findUnique({
+    where: { id: 1 },
+    select: { receiptBusinessName: true, receiptAddress: true, receiptPhone: true, receiptEmail: true, receiptTin: true, receiptFooter: true },
+  });
+  return {
+    businessName: row?.receiptBusinessName ?? null,
+    address: row?.receiptAddress ?? null,
+    phone: row?.receiptPhone ?? null,
+    email: row?.receiptEmail ?? null,
+    tin: row?.receiptTin ?? null,
+    footer: row?.receiptFooter ?? null,
+  };
+});
+
+export type SaveReceiptResult = { ok: true } | { ok: false; errors: Record<string, string> } | { ok: false; error: "notAllowed" };
+
+/** Staff change what receipts show. Logged. */
+export async function saveReceiptDetails(actor: { id: string; role?: string | null }, raw: ReceiptInput): Promise<SaveReceiptResult> {
+  if (!isAdmin(actor)) return { ok: false, error: "notAllowed" };
+  const parsed = receiptInput.safeParse(raw);
+  if (!parsed.success) {
+    const errors: Record<string, string> = {};
+    for (const issue of parsed.error.issues) errors[String(issue.path[0] ?? "form")] ??= issue.message;
+    return { ok: false, errors };
+  }
+  const d = parsed.data;
+  const data = { receiptBusinessName: d.businessName, receiptAddress: d.address, receiptPhone: d.phone, receiptEmail: d.email, receiptTin: d.tin, receiptFooter: d.footer, updatedById: actor.id };
+  await db.$transaction(async (tx) => {
+    await tx.platformConfig.upsert({ where: { id: 1 }, create: { id: 1, ...data }, update: data });
+    await audit(tx, { actorId: actor.id, action: "settings.receipt", entityType: "settings", entityId: "receipt" });
+  });
+  return { ok: true };
+}

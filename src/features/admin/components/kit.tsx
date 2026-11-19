@@ -1,3 +1,4 @@
+import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
@@ -76,4 +77,41 @@ export function Toolbar({ children, actions }: { children: ReactNode; actions?: 
 /** The scrolling part of a list page (a little inner padding so card shadows aren't cut off). */
 export function ScrollArea({ children, className }: { children: ReactNode; className?: string }) {
   return <div className={cn("no-scrollbar -mx-1 min-h-0 flex-1 overflow-y-auto overscroll-contain px-1 pt-1 pb-3", className)}>{children}</div>;
+}
+
+export type PageTab = {
+  key: string;
+  label: string;
+  /** Shorter name for phones. */
+  short?: string;
+  icon: LucideIcon;
+  href: string | { pathname: string; query?: Record<string, string> };
+  on: boolean;
+  count?: number;
+};
+
+/** Tabs at the top of a page that brings two (or three) staff pages together. */
+export function PageTabs({ items, label }: { items: PageTab[]; label: string }) {
+  return (
+    <nav aria-label={label} className="flex shrink-0 gap-1.5 rounded-2xl bg-surface p-1.5 ring-1 ring-line">
+      {items.map(({ key, label: name, short, icon: Icon, href, on, count }) => (
+        <Link
+          key={key}
+          href={href}
+          aria-current={on ? "page" : undefined}
+          className={cn(
+            "flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-xl px-2 py-2.5 text-[13px] font-semibold transition-colors sm:gap-2 sm:px-3 sm:text-[14px]",
+            on ? "bg-primary text-white" : "text-ink/75 hover:bg-canvas hover:text-ink",
+          )}
+        >
+          <Icon className="size-4 shrink-0" aria-hidden="true" />
+          <span className={cn("truncate", short && "sm:hidden")}>{short ?? name}</span>
+          {short && <span className="hidden truncate sm:inline">{name}</span>}
+          {count !== undefined && count > 0 && (
+            <span className={cn("rounded-full px-1.5 text-[11px] font-bold tabular-nums", on ? "bg-white/25 text-white" : "bg-primary/10 text-primary")}>{count}</span>
+          )}
+        </Link>
+      ))}
+    </nav>
+  );
 }
