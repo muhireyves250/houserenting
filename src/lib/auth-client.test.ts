@@ -6,7 +6,9 @@ describe("authBaseURL", () => {
     expect(authBaseURL("houserenting-3qk3-nu.vercel.app")).toBe("https://houserenting-3qk3-nu.vercel.app");
     expect(authBaseURL(' "https://example.rw/" ')).toBe("https://example.rw");
     expect(authBaseURL("http://localhost:3000")).toBe("http://localhost:3000");
-    expect(authBaseURL(undefined)).toBe("http://localhost:3000");
+    // No address set ("" — passing undefined would read BETTER_AUTH_URL from the machine, which CI sets).
+    expect(authBaseURL("")).toBe("http://localhost:3000");
+    expect(authBaseURL("   ")).toBe("http://localhost:3000");
   });
 
   it("uses the page's own address in the browser", () => {

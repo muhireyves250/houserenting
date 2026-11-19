@@ -16,7 +16,7 @@ function niceMax(max: number): number {
  * Bookings made per day (last 30 days), one column per day in the brand blue. Hovering or focusing a day shows its
  * date and count; a table with the same numbers is there for screen readers.
  */
-export function BookingsChart({ days }: { days: { day: string; count: number }[] }) {
+export function BookingsChart({ days, barsClass = "h-56" }: { days: { day: string; count: number }[]; /** Height of the bars area (Tailwind class). */ barsClass?: string }) {
   const t = useTranslations("Admin.dashboard");
   const locale = useLocale();
   const [active, setActive] = useState<number | null>(null);
@@ -33,7 +33,7 @@ export function BookingsChart({ days }: { days: { day: string; count: number }[]
         <span className="text-[15px] font-semibold text-ink">{t("bookingsChart")}</span>
         <span className="text-[13px] text-muted tabular-nums">{t("bookingsTotal", { count: total })}</span>
       </figcaption>
-      <div className="relative flex h-56 gap-2">
+      <div className={`relative flex gap-2 ${barsClass}`}>
         {/* Y axis */}
         <div className="flex w-6 flex-col justify-between pb-6 text-right text-[11px] text-muted tabular-nums" aria-hidden="true">
           {ticks.map((tick) => (

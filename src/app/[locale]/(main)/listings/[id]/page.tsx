@@ -405,9 +405,10 @@ export default async function ListingPage({ params, searchParams }: Props) {
         {/* Published guest feedback shows on every place, lodges too. */}
         {reviews.length > 0 && (
           <Section title={tReviews("title", { count: listing.ratingCount, rating: listing.ratingAvg.toFixed(2) })} id="reviews">
-            <ul className="grid gap-8 md:grid-cols-2">
+            {/* Phones: a row of cards to swipe left and right (the next one peeks in); computers: two columns. */}
+            <ul className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none] md:mx-0 md:grid md:snap-none md:grid-cols-2 md:gap-8 md:overflow-visible md:px-0 md:pb-0 [&::-webkit-scrollbar]:hidden">
               {reviews.map((review) => (
-                <li key={review.id} className="flex flex-col gap-2">
+                <li key={review.id} className="flex w-[85%] shrink-0 snap-start flex-col gap-2 rounded-2xl bg-surface p-4 ring-1 ring-line md:w-auto md:rounded-none md:bg-transparent md:p-0 md:ring-0">
                   <div className="flex items-center gap-3">
                     <Avatar name={review.author.name} className="size-10 text-sm" />
                     <div>
@@ -416,7 +417,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
                     </div>
                   </div>
                   <Stars rating={review.rating} label={tReviews("stars", { count: review.rating })} />
-                  <p className="text-[15px] leading-6 text-ink/90">{review.comment}</p>
+                  <p className="line-clamp-6 text-[15px] leading-6 text-ink/90 md:line-clamp-none">{review.comment}</p>
                 </li>
               ))}
             </ul>

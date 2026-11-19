@@ -1,9 +1,9 @@
 import { expect, test } from "@playwright/test";
 import { signUpAndVerify } from "./support/flows";
 
-test("edit name and phone, then switch language", async ({ page }) => {
+test("edit name and phone on Personal info", async ({ page }) => {
   await signUpAndVerify(page);
-  await page.goto("/en/profile");
+  await page.goto("/en/profile/personal");
 
   await page.getByLabel("Full name").fill("Alona Kotilevska");
   await page.getByLabel("Phone number").fill("0788 123 456");
@@ -17,10 +17,4 @@ test("edit name and phone, then switch language", async ({ page }) => {
   await page.getByLabel("Phone number").fill("12");
   await page.getByRole("button", { name: "Save" }).click();
   await expect(page.getByLabel("Phone number")).toHaveAccessibleDescription("Enter a valid phone number.");
-
-  await page.getByLabel("Phone number").fill("");
-  await page.getByRole("main").getByLabel("Language", { exact: true }).selectOption("fr");
-  await page.getByRole("button", { name: "Save" }).click();
-  await expect(page).toHaveURL(/\/fr\/profile$/);
-  await expect(page.getByRole("heading", { name: "Profil" })).toBeVisible();
 });

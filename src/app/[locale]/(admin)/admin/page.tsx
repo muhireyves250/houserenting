@@ -1,19 +1,15 @@
-import { ArrowDownRight, ArrowRight, ArrowUpRight, Minus, Phone } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, Minus, Phone } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { BookingsChart } from "@/features/admin/components/BookingsChart";
 import { CheckInOut } from "@/features/admin/components/StaffButtons";
-import { dashboardStats, frontDesk, latestBookings, type DeskBooking, type Kpi } from "@/features/admin/stats";
+import { dashboardStats, frontDesk, type DeskBooking, type Kpi } from "@/features/admin/stats";
 import { unreadChats } from "@/features/chats/service";
 import { laundryToHandle } from "@/features/laundry/service";
 import { roomLabel } from "@/features/rooms/links";
 import { db } from "@/lib/db";
-import { recentAudit } from "@/features/audit/service";
-import { StatusBadge } from "@/features/bookings/components/StatusBadge";
-import { formatKigaliDateTime, formatStayDates } from "@/features/bookings/format";
+import { formatStayDates } from "@/features/bookings/format";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
-import { dynamicMessage } from "@/lib/dynamic-message";
-import { formatRWF } from "@/lib/format";
 import { requireAdmin } from "@/lib/permissions";
 import { RenewalPopup } from "@/features/places/components/RenewalPopup";
 import { contractsEnding } from "@/features/places/status-service";
@@ -37,16 +33,11 @@ function Delta({ kpi, label, fresh }: { kpi: Kpi; label: string; fresh: string }
 
 export default async function AdminDashboardPage() {
   const user = await requireAdmin("/admin");
-  const [t, tAdmin, tBookings, tListings, tRooms, locale, stats, bookings, activity, ending, desk, laundry, chats, foodOrders] = await Promise.all([
+  const [t, tRooms, locale, stats, ending, desk, laundry, chats, foodOrders] = await Promise.all([
     getTranslations("Admin.dashboard"),
-    getTranslations("Admin"),
-    getTranslations("Bookings"),
-    getTranslations("Listings"),
     getTranslations("Rooms"),
     getLocale(),
     dashboardStats(),
-    latestBookings(6),
-    recentAudit({ take: 8 }),
     contractsEnding(),
     frontDesk(),
     laundryToHandle(),
@@ -87,40 +78,6 @@ export default async function AdminDashboardPage() {
         <p className="text-[14px] text-muted">{t("subtitle", { listings: stats.liveListings })}</p>
       </div>
 
-      {/* Today at the front desk: who arrives, who leaves, who should have left. */}
-      <section aria-label={t("desk.title")} className="flex flex-col gap-3">
-        <h2 className="text-[17px] font-bold text-ink">{t("desk.title")}</h2>
-        {desk.arriving.length + desk.leaving.length + desk.overdue.length === 0 && (
-          <p className={cn(panel, "px-4 py-3 text-[14px] text-muted lg:hidden")}>{t("desk.nobody")}</p>
-        )}
-        <div className="grid grid-cols-[minmax(0,1fr)] gap-3 lg:grid-cols-3">
-          {(
-            [
-              ["arriving", desk.arriving, "CHECKED_IN", "bg-primary/10 text-primary"],
-              ["leaving", desk.leaving, "COMPLETED", "bg-emerald-100 text-emerald-800"],
-              ["overdue", desk.overdue, "COMPLETED", "bg-red-50 text-red-700"],
-            ] as const
-          ).map(([key, list, to, tone]) => (
-            // Phones: only the groups that have someone, to keep the page short.
-            <div key={key} className={cn(panel, "flex flex-col p-4", list.length === 0 && "max-lg:hidden")}>
-              <h3 className="mb-3 flex items-center gap-2 text-[15px] font-semibold text-ink">
-                {t(`desk.${key}`)}
-                <span className={cn("rounded-full px-2 py-0.5 text-[12px] font-bold tabular-nums", list.length > 0 ? tone : "bg-canvas text-muted")}>{list.length}</span>
-              </h3>
-              {list.length === 0 ? (
-                <p className="py-4 text-center text-[13px] text-muted">{t("desk.none")}</p>
-              ) : (
-                <ul className="flex flex-col gap-2">
-                  {list.map((b) => (
-                    <DeskRow key={b.reference} b={b} to={to} locale={locale} room={(n) => roomLabel(n, (number) => tRooms("roomNumber", { number }))} />
-                  ))}
-                </ul>
-              )}
-            </div>
-          ))}
-        </div>
-      </section>
-
       {/* This month at a glance */}
       <section aria-label={t("thisMonth")} className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {tiles.map((tile) => (
@@ -158,64 +115,34 @@ export default async function AdminDashboardPage() {
         </section>
       </div>
 
-      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-2">
-        {/* Latest bookings */}
-        <section className={panel}>
-          <div className="flex items-center justify-between px-5 pt-5 pb-3">
-            <h2 className="text-[15px] font-semibold text-ink">{t("latestBookings")}</h2>
-            <Link href="/admin/bookings" className="inline-flex items-center gap-1 text-[13px] font-semibold text-primary hover:underline">
-              {t("seeAll")}
-              <ArrowRight className="size-3.5" aria-hidden="true" />
-            </Link>
-          </div>
-          {bookings.length === 0 ? (
-            <p className="px-5 pb-6 text-[14px] text-muted">{tAdmin("nothingHere")}</p>
-          ) : (
-            <ul className="divide-y divide-line border-t border-line max-md:[&>li:nth-child(n+5)]:hidden">
-              {bookings.map((b) => (
-                <li key={b.reference} className="flex items-center gap-3 px-5 py-3">
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[14px] font-semibold text-ink">{b.listing.title}</span>
-                    <span className="block truncate text-xs text-muted">
-                      {b.guest.name} · {tListings(`unitCount.${b.unit}`, { count: b.quantity })} · {formatKigaliDateTime(locale, b.createdAt)}
-                    </span>
-                  </span>
-                  <span className="text-right">
-                    <span className="block text-[13px] font-semibold text-ink tabular-nums">{formatRWF(b.total, locale)}</span>
-                    <StatusBadge status={b.status} label={tBookings(`status.${b.status}`)} />
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-        {/* Recent activity */}
-        <section className={panel}>
-          <div className="flex items-center justify-between px-5 pt-5 pb-3">
-            <h2 className="text-[15px] font-semibold text-ink">{t("activity")}</h2>
-            <Link href="/admin/audit" className="inline-flex items-center gap-1 text-[13px] font-semibold text-primary hover:underline">
-              {t("seeAll")}
-              <ArrowRight className="size-3.5" aria-hidden="true" />
-            </Link>
-          </div>
-          {activity.length === 0 ? (
-            <p className="px-5 pb-6 text-[14px] text-muted">{tAdmin("noAudit")}</p>
-          ) : (
-            <ol className="divide-y divide-line border-t border-line max-md:[&>li:nth-child(n+5)]:hidden">
-              {activity.map((entry) => (
-                <li key={entry.id} className="flex items-start justify-between gap-3 px-5 py-3">
-                  <span className="min-w-0 text-[14px] text-ink">
-                    <b className="font-semibold">{dynamicMessage(tAdmin, `action.${entry.action}`, entry.action)}</b>
-                    <span className="block truncate text-xs text-muted">{entry.actor?.name ?? tAdmin("system")}</span>
-                  </span>
-                  <span className="shrink-0 text-xs text-muted">{formatKigaliDateTime(locale, entry.createdAt)}</span>
-                </li>
-              ))}
-            </ol>
-          )}
-        </section>
-      </div>
+      {/* The front desk, below the rest: each group folded like "Finished (11)", opened with a tap. */}
+      <section aria-label={t("desk.title")} className="flex flex-col gap-2.5">
+        <h2 className="text-[15px] font-semibold text-ink">{t("desk.title")}</h2>
+        {(
+          [
+            ["arriving", desk.arriving, "CHECKED_IN"],
+            ["leaving", desk.leaving, "COMPLETED"],
+            ["overdue", desk.overdue, "COMPLETED"],
+          ] as const
+        ).map(([key, list, to]) => (
+          <details key={key} className="rounded-2xl bg-surface px-4 ring-1 ring-line">
+            <summary className="cursor-pointer py-3.5 text-[15px] font-semibold text-ink">
+              {t(`desk.${key}`)} <span className={cn("tabular-nums", key === "overdue" && list.length > 0 ? "text-red-700" : "text-muted")}>({list.length})</span>
+            </summary>
+            <div className="border-t border-line py-3">
+              {list.length === 0 ? (
+                <p className="py-2 text-center text-[13px] text-muted">{t("desk.none")}</p>
+              ) : (
+                <ul className="grid gap-2 lg:grid-cols-2">
+                  {list.map((b) => (
+                    <DeskRow key={b.reference} b={b} to={to} locale={locale} room={(n) => roomLabel(n, (number) => tRooms("roomNumber", { number }))} />
+                  ))}
+                </ul>
+              )}
+            </div>
+          </details>
+        ))}
+      </section>
     </div>
   );
 }

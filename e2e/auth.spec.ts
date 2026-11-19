@@ -4,8 +4,10 @@ import { firstLink, waitForMail } from "./support/mail";
 
 test("sign up → verify → signed in → sign out → log in", async ({ page }) => {
   const email = await signUpAndVerify(page);
-  await page.goto("/en/profile");
+  // The email shows on Personal info (Profile's own page for name, email and phone).
+  await page.goto("/en/profile/personal");
   await expect(page.getByText(email).first()).toBeVisible();
+  await page.goto("/en/profile");
 
   // Log out asks for confirmation first.
   await page.getByRole("button", { name: "Log out" }).click();
@@ -39,7 +41,8 @@ test("protected pages send you to login and back", async ({ page }) => {
   await page.getByLabel("Password", { exact: true }).fill(PASSWORD);
   await page.getByRole("button", { name: "Log in" }).click();
   await expect(page).toHaveURL(/\/en\/bookings$/);
-  await expect(page.getByText("No bookings yet")).toBeVisible();
+  // The page shows its loading screen first; the data can take a while on a remote test database.
+  await expect(page.getByText("No bookings yet")).toBeVisible({ timeout: 45_000 });
 });
 
 test("an unsafe next parameter is ignored", async ({ page }) => {
@@ -63,7 +66,7 @@ test("forgot password → reset → log in with the new password", async ({ page
   await page.getByRole("button", { name: "Send reset link" }).click();
   await expect(page.getByRole("status")).toContainText("reset link is on its way");
 
-  await expect.poll(async () => (await waitForMail(email)).subject).toBe("Reset your Space Rental password");
+  await expect.poll(async () => (await waitForMail(email)).subject).toBe("Reset your VIIPA password");
   await page.goto(firstLink((await waitForMail(email)).text));
   await expect(page).toHaveURL(/\/en\/reset-password\?token=/);
   await page.getByLabel("New password").fill("new-river-kivu-77");
