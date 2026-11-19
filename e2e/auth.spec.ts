@@ -80,7 +80,7 @@ test("forgot password → reset → log in with the new password", async ({ page
   await expect(page).toHaveURL(/\/en$/);
 });
 
-test("signed-out: a members-only menu link opens the login modal, then lands on that page", async ({ page }, testInfo) => {
+test("signed-out: a members-only menu link opens the login modal; a house owner then lands on their dashboard", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== "desktop", "header menu is desktop-only; phones use the bottom tabs");
   await skipOnboarding(page);
   await page.goto("/en/search");
@@ -91,6 +91,7 @@ test("signed-out: a members-only menu link opens the login modal, then lands on 
   await dialog.getByLabel("Email").fill("host@spacerental.rw");
   await dialog.getByLabel("Password", { exact: true }).fill("SpaceRental-demo-2026");
   await dialog.getByRole("button", { name: "Log in" }).click();
-  await expect(page).toHaveURL(/\/en\/my-stay$/);
-  await expect(page.getByRole("heading", { name: "My stay", level: 1 })).toBeVisible();
+  // Owners only use their dashboard (they don't book stays).
+  await expect(page).toHaveURL(/\/en\/host$/);
+  await expect(page.getByRole("heading", { name: "Overview", level: 1 })).toBeVisible();
 });

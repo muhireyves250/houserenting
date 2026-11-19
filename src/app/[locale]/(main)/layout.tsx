@@ -11,8 +11,9 @@ import { getCurrentUser } from "@/lib/session";
 
 export default async function MainLayout({ children, modal }: { children: ReactNode; modal: ReactNode }) {
   const user = await getCurrentUser();
-  // Staff only use the admin dashboard: every client page sends them there.
+  // Staff only use the admin dashboard, and house owners theirs: every client page sends them there.
   if (user && isAdmin(user)) redirect({ href: "/admin", locale: await getLocale() });
+  if (user?.isHost) redirect({ href: "/host", locale: await getLocale() });
   const orders = await ordersLive();
   return (
     <>

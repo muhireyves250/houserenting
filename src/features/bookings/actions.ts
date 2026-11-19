@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 import { PROMOTER_COOKIE } from "@/features/promoters/cookie";
 import { attributeBooking } from "@/features/promoters/service";
 import { logger } from "@/lib/logger";
+import { isAdmin } from "@/lib/roles";
 import { getCurrentUser } from "@/lib/session";
 import { isBookingReference } from "./reference";
 import { checkPromo } from "@/features/promotions/service";
@@ -32,11 +33,15 @@ async function creditPromoter(reference: string, guestId: string) {
   }
 }
 
+/** Guests book stays; house owners and VIIPA staff don't. */
+const canBook = (user: { role?: string | null; isHost?: boolean | null }) => !isAdmin(user) && !user.isHost;
+
 export type BookStayResult = { reference: string } | { error: BookingError | "auth" | "failed" };
 
 export async function bookStayAction(raw: unknown): Promise<BookStayResult> {
   const user = await getCurrentUser();
-  if (!user) return { error: "auth" };
+  // Only guests book: house owners and staff use their dashboards.
+  if (!user || !canBook(user)) return { error: "auth" };
   const parsed = input.safeParse(raw);
   if (!parsed.success) return { error: "invalid" };
   try {
@@ -76,7 +81,8 @@ const monthlyInput = z.object({
 
 export async function bookMonthlyAction(raw: unknown): Promise<BookStayResult> {
   const user = await getCurrentUser();
-  if (!user) return { error: "auth" };
+  // Only guests book: house owners and staff use their dashboards.
+  if (!user || !canBook(user)) return { error: "auth" };
   const parsed = monthlyInput.safeParse(raw);
   if (!parsed.success) return { error: "invalid" };
   try {
@@ -118,7 +124,8 @@ const rentalInput = z.object({
 /** Books by the hour, day, night, week, month or year (whatever the place or room offers). */
 export async function bookRentalAction(raw: unknown): Promise<BookStayResult> {
   const user = await getCurrentUser();
-  if (!user) return { error: "auth" };
+  // Only guests book: house owners and staff use their dashboards.
+  if (!user || !canBook(user)) return { error: "auth" };
   const parsed = rentalInput.safeParse(raw);
   if (!parsed.success) return { error: "invalid" };
   try {

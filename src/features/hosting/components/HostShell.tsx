@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Bell, ChefHat, ClipboardList, House, LayoutDashboard, Menu, Settings, UtensilsCrossed, Wallet, X, type LucideIcon } from "lucide-react";
+import { Bell, ChefHat, ClipboardList, House, LayoutDashboard, Menu, Settings, UtensilsCrossed, Wallet, X, type LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, type ReactNode } from "react";
 import { Avatar } from "@/components/ui/Avatar";
@@ -90,10 +90,6 @@ export function HostShell({
             );
           })}
         </ul>
-        <Link href="/" className="mt-4 flex items-center gap-3 rounded-lg px-3 py-2 text-[14px] text-ink/75 transition-colors hover:bg-primary/[0.08] hover:text-primary">
-          <ArrowLeft className="size-[18px] shrink-0 text-ink/50" strokeWidth={1.9} aria-hidden="true" />
-          {t("backToSite")}
-        </Link>
       </nav>
       <div className="border-t border-line p-3">
         <Link
