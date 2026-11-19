@@ -1,8 +1,7 @@
-import { MessageCircle, ArrowLeft, CalendarClock, ChevronLeft, CookingPot, KeyRound, Laptop, type LucideIcon, Microwave, PawPrint, ShieldCheck, ShowerHead, SquareParking, Star, Tv, Utensils, WashingMachine, WavesLadder, Wifi, Zap, UtensilsCrossed } from "lucide-react";
+import { MessageCircle, ArrowLeft, CalendarClock, ChevronLeft, KeyRound, Laptop, type LucideIcon, PawPrint, ShieldCheck, SquareParking, Star, WavesLadder, UtensilsCrossed } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
-import type { ReactNode } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { PageContainer } from "@/components/ui/PageContainer";
 import { savedListingIds } from "@/features/favorites/service";

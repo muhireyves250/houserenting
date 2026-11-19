@@ -1,4 +1,4 @@
-import { ArrowLeft, BedDouble, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, ChevronLeft } from "lucide-react";
 import { descriptionOfRoom, photosOfRoom } from "@/features/rooms/validation";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
