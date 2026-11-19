@@ -152,7 +152,8 @@ export default async function MyStayPage() {
       <PageHero title={t("title")} icon={KeyRound} photo={listing.photos[0]?.url ?? null} subtitle={[listing.title, current.room?.name, paid && current.roomNumber ? roomLabel(current.roomNumber, (number) => tRooms("roomNumber", { number })) : null].filter(Boolean).join(" · ")} />
       <h1 className="max-md:hidden mb-4 text-[26px] leading-8 font-bold tracking-[-0.03em] text-ink md:text-[32px] md:leading-10">{t("title")}</h1>
 
-      <div className="flex flex-col gap-4">
+      {/* Computers: the cards flow in two columns instead of one long stack. */}
+      <div className="flex flex-col gap-4 lg:block lg:columns-2 lg:gap-4 lg:[&>*]:mb-4 lg:[&>*]:break-inside-avoid">
         {/* The place and today's status */}
         <section className={cn(card, "overflow-hidden")}>
           <div className="relative aspect-[16/9] bg-canvas max-md:hidden md:aspect-[16/7]">

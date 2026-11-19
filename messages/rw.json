@@ -25,7 +25,18 @@
     "logout": "Sohoka",
     "help": "Ubufasha",
     "orders": "Ibyo natumije",
-    "restaurants": "Ibiryo"
+    "restaurants": "Ibiryo",
+    "account": {
+      "bookings": "Ibyo nafashe",
+      "myStay": "Icumbi ryanjye",
+      "orders": "Ibyo kurya natumije",
+      "favorites": "Ibyo nabitse",
+      "chats": "Ibiganiro",
+      "notifications": "Imenyesha",
+      "profile": "Umwirondoro",
+      "promote": "Kwamamaza no kwinjiza",
+      "help": "Ubufasha"
+    }
   },
   "Common": {
     "save": "Bika",

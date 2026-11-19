@@ -26,9 +26,9 @@ export default async function ConversationPage({ params }: Props) {
   const dayOf = (d: Date) => day.format(d);
 
   return (
-    <PageContainer className="-mb-24 flex min-h-dvh max-w-3xl flex-col pb-2 md:mb-0 md:min-h-0 md:py-8">
+    <PageContainer className="-mb-24 flex min-h-dvh max-w-3xl flex-col pb-2 md:mb-0 md:min-h-0 md:py-8 lg:h-[calc(100dvh-152px)] lg:min-h-[28rem] lg:overflow-hidden lg:rounded-2xl lg:border lg:border-line lg:bg-surface lg:py-0 lg:shadow-[0_10px_30px_-18px_rgba(16,24,40,0.35)]">
       {/* Who and which place */}
-      <div className="sticky top-0 z-20 -mx-4 flex items-center gap-3 border-b border-line bg-canvas/95 px-4 py-2.5 backdrop-blur md:top-[73px] md:mx-0 md:rounded-2xl md:border md:bg-surface md:py-3">
+      <div className="sticky top-0 z-20 -mx-4 flex items-center gap-3 border-b border-line bg-canvas/95 px-4 py-2.5 backdrop-blur md:top-[73px] md:mx-0 md:rounded-2xl md:border md:bg-surface md:py-3 lg:static lg:shrink-0 lg:rounded-none lg:border-0 lg:border-b lg:px-5">
         <Link href="/chats" aria-label={tNav("chats")} className="flex size-10 shrink-0 items-center justify-center rounded-full bg-surface text-ink shadow-sm transition-transform active:scale-90 md:bg-canvas">
           <ArrowLeft className="size-5" aria-hidden="true" />
         </Link>
@@ -45,7 +45,8 @@ export default async function ConversationPage({ params }: Props) {
       </div>
 
       {/* Messages */}
-      <ol className="flex flex-1 flex-col gap-1.5 pt-4">
+      {/* Computers: the messages scroll inside the box, the answer box stays at its foot. */}
+      <ol id="guest-chat" className="flex flex-1 flex-col gap-1.5 pt-4 lg:no-scrollbar lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain lg:bg-canvas/40 lg:px-5 lg:pb-4">
         {chat.messages.length === 0 && <li className="py-10 text-center text-[15px] text-muted">{t("startHint", { name: chat.other.name.split(" ")[0] ?? "" })}</li>}
         {chat.messages.map((m, i) => {
           const mine = m.mine;
@@ -68,8 +69,10 @@ export default async function ConversationPage({ params }: Props) {
           );
         })}
       </ol>
-      <ScrollToEnd count={chat.messages.length} />
-      <Composer conversationId={chat.id} />
+      <ScrollToEnd count={chat.messages.length} targetId="guest-chat" />
+      <div className="max-lg:contents lg:shrink-0 lg:border-t lg:border-line lg:px-3 lg:pb-3 lg:[&>div]:static">
+        <Composer conversationId={chat.id} />
+      </div>
     </PageContainer>
   );
 }

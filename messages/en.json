@@ -25,7 +25,18 @@
     "logout": "Log out",
     "help": "Help",
     "orders": "Orders",
-    "restaurants": "Food"
+    "restaurants": "Food",
+    "account": {
+      "bookings": "Bookings",
+      "myStay": "My stay",
+      "orders": "Food orders",
+      "favorites": "Saved",
+      "chats": "Chats",
+      "notifications": "Notifications",
+      "profile": "Profile",
+      "promote": "Promote and earn",
+      "help": "Help and support"
+    }
   },
   "Common": {
     "save": "Save",

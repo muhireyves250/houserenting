@@ -25,7 +25,18 @@
     "logout": "Se déconnecter",
     "help": "Aide",
     "orders": "Commandes",
-    "restaurants": "Repas"
+    "restaurants": "Repas",
+    "account": {
+      "bookings": "Réservations",
+      "myStay": "Mon séjour",
+      "orders": "Commandes repas",
+      "favorites": "Favoris",
+      "chats": "Discussions",
+      "notifications": "Notifications",
+      "profile": "Profil",
+      "promote": "Promouvoir et gagner",
+      "help": "Aide et assistance"
+    }
   },
   "Common": {
     "save": "Enregistrer",

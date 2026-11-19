@@ -9,6 +9,8 @@ import { PageContainer } from "@/components/ui/PageContainer";
 import { SignOutButton } from "@/features/users/components/SignOutButton";
 import { getProfile } from "@/features/users/service";
 import { Link } from "@/i18n/navigation";
+import { ProfileForm } from "@/features/users/components/ProfileForm";
+import { toAppLocale } from "@/i18n/routing";
 import { requireUser } from "@/lib/session";
 import { unreadCount } from "@/features/notifications/service";
 
@@ -29,30 +31,36 @@ export default async function ProfilePage() {
       <PageHero title={firstName} subtitle={role} visual={<ProfilePhoto name={profile.name} image={photo} />} />
       <h1 className="max-md:hidden mb-6 text-[26px] leading-8 md:text-[32px] md:leading-10 font-bold tracking-[-0.03em] text-ink">{t("title")}</h1>
 
-      {/* Computers: who you are */}
-      <section className={`${card} flex flex-col items-center px-6 py-8 text-center max-md:hidden`}>
-        <ProfilePhoto name={profile.name} image={photo} />
-        <p className="mt-4 text-2xl leading-8 font-bold tracking-[-0.02em] text-ink">{firstName}</p>
-        <p className="text-sm text-muted">{role}</p>
-      </section>
+      {/* Computers: who you are, beside your details (the other pages are in the account menu on the left). */}
+      <div className="grid gap-5 max-md:hidden lg:grid-cols-[300px_minmax(0,1fr)] lg:items-start">
+        <section className={`${card} flex flex-col items-center px-6 py-8 text-center`}>
+          <ProfilePhoto name={profile.name} image={photo} />
+          <p className="mt-4 text-2xl leading-8 font-bold tracking-[-0.02em] text-ink">{firstName}</p>
+          <p className="text-sm text-muted">{role}</p>
+        </section>
+        <section className={`${card} hidden p-6 lg:block`}>
+          <h2 className="mb-4 text-[17px] font-bold text-ink">{t("personalInfo")}</h2>
+          <ProfileForm profile={{ ...profile, locale: toAppLocale(profile.locale) }} />
+        </section>
+      </div>
 
       {/* Settings list */}
-      <ul className="mt-2 divide-y divide-line/70 md:mt-6">
-        <li>
+      <ul className="mt-2 divide-y divide-line/70 md:mt-6 lg:mt-4">
+        <li className="lg:hidden">
           <Link href="/profile/personal" className={row}>
             <UserRound className="size-6" strokeWidth={1.6} aria-hidden="true" />
             <span className="flex-1">{t("personalInfo")}</span>
             <ChevronRight className="size-5 text-ink/60" aria-hidden="true" />
           </Link>
         </li>
-        <li>
+        <li className="lg:hidden">
           <Link href="/favorites" className={row}>
             <Heart className="size-6" strokeWidth={1.6} aria-hidden="true" />
             <span className="flex-1">{tNav("favorites")}</span>
             <ChevronRight className="size-5 text-ink/60" aria-hidden="true" />
           </Link>
         </li>
-        <li>
+        <li className="lg:hidden">
           <Link href="/notifications" className={row}>
             <Bell className="size-6" strokeWidth={1.6} aria-hidden="true" />
             <span className="flex-1">{t("notifications")}</span>
@@ -64,21 +72,21 @@ export default async function ProfilePage() {
             <ChevronRight className="size-5 text-ink/60" aria-hidden="true" />
           </Link>
         </li>
-        <li>
+        <li className="lg:hidden">
           <Link href="/orders" className={row}>
             <ShoppingBag className="size-6" strokeWidth={1.6} aria-hidden="true" />
             <span className="flex-1">{tNav("orders")}</span>
             <ChevronRight className="size-5 text-ink/60" aria-hidden="true" />
           </Link>
         </li>
-        <li>
+        <li className="lg:hidden">
           <Link href="/promote" className={row}>
             <QrCode className="size-6" strokeWidth={1.6} aria-hidden="true" />
             <span className="flex-1">{t("promote")}</span>
             <ChevronRight className="size-5 text-ink/60" aria-hidden="true" />
           </Link>
         </li>
-        <li>
+        <li className="lg:hidden">
           <Link href="/support" className={row}>
             <LifeBuoy className="size-6" strokeWidth={1.6} aria-hidden="true" />
             <span className="flex-1">{t("help")}</span>
@@ -88,7 +96,7 @@ export default async function ProfilePage() {
         <li className="empty:hidden">
           <InstallApp variant="row" />
         </li>
-        <li>
+        <li className="lg:hidden">
           <Link href="/chats" className={row}>
             <MessageSquare className="size-6" strokeWidth={1.6} aria-hidden="true" />
             <span className="flex-1">{tNav("chats")}</span>
@@ -98,7 +106,8 @@ export default async function ProfilePage() {
 
       </ul>
 
-      <div className="mt-4 border-t border-line/70 pt-2">
+      {/* Computers: Log out is at the foot of the account menu. */}
+      <div className="mt-4 border-t border-line/70 pt-2 lg:hidden">
         <SignOutButton />
       </div>
     </PageContainer>
