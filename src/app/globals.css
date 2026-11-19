@@ -739,3 +739,15 @@ html[data-tab-loading] .admin-cards :has(> nav[aria-busy="true"]) ~ * {
     padding-top: 0;
   }
 }
+
+/* Computers: the account menu already names the page, so the big page title is hidden (kept for screen readers). */
+@media (min-width: 1024px) {
+  .account-page h1.max-md\:hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}

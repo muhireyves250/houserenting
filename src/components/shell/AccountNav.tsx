@@ -1,23 +1,12 @@
 "use client";
 
-import { Bell, CalendarDays, Heart, KeyRound, LifeBuoy, MessageSquare, QrCode, ShoppingBag, UserRound, type LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Avatar } from "@/components/ui/Avatar";
 import { SignOutButton } from "@/features/users/components/SignOutButton";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
+import { ACCOUNT_ITEMS } from "./account-items";
 
-const ITEMS: { key: string; href: string; icon: LucideIcon }[] = [
-  { key: "bookings", href: "/bookings", icon: CalendarDays },
-  { key: "myStay", href: "/my-stay", icon: KeyRound },
-  { key: "orders", href: "/orders", icon: ShoppingBag },
-  { key: "favorites", href: "/favorites", icon: Heart },
-  { key: "chats", href: "/chats", icon: MessageSquare },
-  { key: "notifications", href: "/notifications", icon: Bell },
-  { key: "profile", href: "/profile", icon: UserRound },
-  { key: "promote", href: "/promote", icon: QrCode },
-  { key: "help", href: "/support", icon: LifeBuoy },
-];
 
 const isOn = (pathname: string, href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
@@ -41,7 +30,7 @@ export function AccountNav({ user, unread }: { user: { name: string; email: stri
         </Link>
         <nav aria-label={t("accountMenu")} className="no-scrollbar min-h-0 flex-1 overflow-y-auto p-2">
           <ul className="flex flex-col gap-0.5">
-            {ITEMS.map(({ key, href, icon: Icon }) => {
+            {ACCOUNT_ITEMS.map(({ key, href, icon: Icon }) => {
               const on = isOn(pathname, href) && !(href === "/profile" && pathname !== "/profile" && pathname !== "/profile/personal");
               return (
                 <li key={key}>

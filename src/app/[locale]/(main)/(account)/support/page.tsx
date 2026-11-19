@@ -24,7 +24,7 @@ export default async function SupportPage({ searchParams }: Props) {
     <PageContainer className="max-w-3xl py-6 md:py-10 max-md:pt-0">
       <PageHero title={t("title")} icon={LifeBuoy} />
       <h1 className="max-md:hidden text-[26px] leading-8 font-bold tracking-[-0.03em] text-ink md:text-[32px] md:leading-10">{t("title")}</h1>
-      <p className="mt-1 mb-6 text-[15px] text-muted">{t("intro")}</p>
+      <p className="mt-1 mb-6 text-[15px] text-muted lg:hidden">{t("intro")}</p>
 
       <section className={card}>
         <h2 className="mb-4 text-lg font-bold text-ink">{t("new")}</h2>

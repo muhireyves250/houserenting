@@ -39,7 +39,7 @@ export default async function FoodPage() {
     return (
       <PageContainer className="max-w-4xl pt-5 pb-10 max-md:pt-0 md:py-10">
         {title}
-        <p className="mt-1 text-[14px] text-muted md:text-[15px]">{t("menuIntro")}</p>
+        <p className="mt-1 text-[14px] text-muted md:text-[15px] lg:hidden">{t("menuIntro")}</p>
         <div className="mt-4 flex items-center gap-3 rounded-2xl bg-surface p-3 pr-4 ring-1 ring-line">
           <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
             {reason === "noKitchen" ? <UtensilsCrossed className="size-5" aria-hidden="true" /> : <KeyRound className="size-5" aria-hidden="true" />}
@@ -78,7 +78,7 @@ export default async function FoodPage() {
   return (
     <PageContainer className="max-w-4xl pt-5 pb-10 max-md:pt-0 md:py-10">
       {title}
-      <p className="mt-1 text-[14px] text-muted md:text-[15px]">{t("menuIntro")}</p>
+      <p className="mt-1 text-[14px] text-muted md:text-[15px] lg:hidden">{t("menuIntro")}</p>
       <div className="mt-4 flex items-center gap-3 rounded-2xl bg-surface p-3 pr-4 ring-1 ring-line">
         <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
           <BedDouble className="size-5" aria-hidden="true" />
