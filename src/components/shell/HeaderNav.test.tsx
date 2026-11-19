@@ -26,7 +26,7 @@ describe("HeaderNav hover", () => {
     const pill = screen.getByTestId("nav-hover");
     expect(pill).toHaveAttribute("data-visible", "false");
 
-    const favorites = screen.getByRole("link", { name: "Saved" });
+    const favorites = screen.getByRole("link", { name: "Bookings" });
     const chats = screen.getByRole("link", { name: "My stay" });
     layout(favorites, 90, 96);
     layout(chats, 300, 70);
