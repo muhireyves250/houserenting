@@ -238,7 +238,9 @@ export function AdminShell({
   );
 
   return (
-    <div className="min-h-dvh bg-canvas">
+    // Staff pages scroll natively: their lists and sidebar scroll inside their own boxes, which the site's
+    // smooth wheel scrolling (Lenis) would otherwise take over.
+    <div className="min-h-dvh bg-canvas" data-lenis-prevent>
       {/* Desktop sidebar */}
       <aside data-print-hide className="fixed inset-y-0 left-0 z-30 hidden w-64 border-r border-line bg-surface lg:block">{sidebar}</aside>
 
