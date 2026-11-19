@@ -503,7 +503,7 @@ export function ordersAwaitingPayment(take = 100) {
     where: { paymentMethod: "PAY_FIRST", paidAt: null, status: "PLACED" },
     orderBy: [{ paymentClaim: { sort: "desc", nulls: "last" } }, { createdAt: "desc" }],
     take,
-    select: { reference: true, total: true, paymentClaim: true, createdAt: true, address: true, phone: true, restaurant: { select: { name: true } }, customer: { select: { name: true } } },
+    select: { reference: true, total: true, paymentClaim: true, createdAt: true, address: true, phone: true, note: true, items: { select: { name: true, quantity: true } }, restaurant: { select: { name: true } }, customer: { select: { name: true } } },
   });
 }
 

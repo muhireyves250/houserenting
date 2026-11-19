@@ -8,6 +8,7 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { requireAdmin } from "@/lib/permissions";
 import { contractsEnding } from "@/features/places/status-service";
+import { db } from "@/lib/db";
 
 const STATUSES = ["PENDING_REVIEW", "PUBLISHED", "CHANGES_REQUESTED", "HIDDEN", "PAUSED", "SUSPENDED", "REJECTED", "DRAFT"] as const;
 type Status = (typeof STATUSES)[number];
@@ -36,7 +37,16 @@ export default async function AdminListingsPage({ searchParams }: Props) {
     getTranslations("Places"),
     getLocale(),
   ]);
-  const filters: { value: Status | "ending" | "all"; label: string }[] = [...STATUSES.map((s) => ({ value: s, label: tHost(`status.${s}`) })), { value: "ending", label: tPlaces("endingSoon") }, { value: "all", label: t("all") }];
+  // Only the filters that have places (with how many), so the row stays short.
+  const [counts, ending] = await Promise.all([db.listing.groupBy({ by: ["status"], _count: { _all: true } }), contractsEnding()]);
+  const countOf = (s: Status) => counts.find((c) => c.status === s)?._count._all ?? 0;
+  const total = counts.filter((c) => c.status !== "ARCHIVED").reduce((n, c) => n + c._count._all, 0);
+  type Filter = { value: Status | "ending" | "all"; label: string; count: number };
+  const filters = ([
+    { value: "all", label: t("all"), count: total },
+    ...STATUSES.map((s): Filter => ({ value: s, label: tHost(`status.${s}`), count: countOf(s) })),
+    { value: "ending", label: tPlaces("endingSoon"), count: ending.length },
+  ] as Filter[]).filter((f) => f.count > 0 || f.value === (endingSoon ? "ending" : (status ?? "all")));
 
   return (
     <div className="flex flex-col gap-5">
@@ -58,7 +68,7 @@ export default async function AdminListingsPage({ searchParams }: Props) {
                 on ? "border-primary bg-primary font-semibold text-white" : "border-line bg-surface text-ink hover:border-primary/60",
               )}
             >
-              {f.label}
+              {f.label} <span className={cn("tabular-nums", on ? "text-white/80" : "text-muted")}>{f.count}</span>
             </Link>
           );
         })}
@@ -77,8 +87,9 @@ export default async function AdminListingsPage({ searchParams }: Props) {
                   <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                     <span className="truncate text-[15px] font-semibold text-ink">{listing.title}</span>
                     <span className="truncate text-[13px] text-muted">
-                      {tType(listing.type)} · {listing.district}, {listing.city} · {listing.host.name}
+                      {tType(listing.type)} · {listing.district === listing.city ? listing.city : `${listing.district}, ${listing.city}`}
                     </span>
+                    <span className="truncate text-[12px] text-muted/80">{listing.host.name}</span>
                   </span>
                   <span className="hidden text-xs text-muted md:block">{formatKigaliDateTime(locale, listing.updatedAt)}</span>
                   <HostStatus status={listing.status} label={tHost(`status.${listing.status}`)} />

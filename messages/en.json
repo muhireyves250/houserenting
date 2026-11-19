@@ -1087,7 +1087,9 @@
       "ADMIN": "VIIPA admin",
       "SUPER_ADMIN": "Super admin"
     },
-    "superAdminOnly": "Only a super admin can change staff access."
+    "superAdminOnly": "Only a super admin can change staff access.",
+    "openToAnswer": "Open",
+    "aboutPlace": "About the place"
   },
   "Questions": {
     "title": "Questions and answers",
@@ -1685,7 +1687,6 @@
     "requestsTitle": "Guest requests",
     "refundsTitle": "Refunds to send",
     "refundTitle": "Refund",
-    "queueIntro": "Answer guests' change and cancellation requests, and confirm refunds once they're sent.",
     "what": "Request",
     "approve": "Approve",
     "decline": "Decline",
@@ -2036,8 +2037,6 @@
       }
     },
     "staffPay": {
-      "title": "Food orders waiting for payment",
-      "intro": "Guests pay first. Confirming the mobile money payment also confirms the order; the commission and the restaurant's share go to Money.",
       "empty": "No orders waiting for payment.",
       "claimed": "Guest paid with {reference}",
       "notClaimed": "Not paid yet",
@@ -2048,17 +2047,19 @@
         "notFound": "This order changed. Refresh the page.",
         "transaction": "Type the transaction ID.",
         "used": "That transaction was already used."
-      }
+      },
+      "claimedShort": "Paid — check"
     },
     "removeOrder": "Remove",
     "removeConfirm": "Remove this cancelled order from your list?",
     "cancelledNoReason": "This order was cancelled.",
     "payOnDeliveryOld": "Paid when you received it.",
     "staffOrders": {
-      "intro": "Every guest's food order. Confirm the payment (that confirms the order and tells the guest), get the food from the restaurant, then mark it sent: the guest and the owner of the place are told. The guest confirms when they get it.",
-      "open": "Orders in progress",
-      "noOpen": "No orders in progress.",
-      "done": "Finished orders"
+      "done": "Finished",
+      "toPay": "To pay",
+      "toSend": "To send",
+      "sent": "Sent",
+      "nothing": "Nothing here."
     },
     "gotIt": "I got my order",
     "gotItHint": "Tap when the food reaches you.",

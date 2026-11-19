@@ -1087,7 +1087,9 @@
       "ADMIN": "Admin VIIPA",
       "SUPER_ADMIN": "Super admin"
     },
-    "superAdminOnly": "Seul un super admin peut modifier les accès de l'équipe."
+    "superAdminOnly": "Seul un super admin peut modifier les accès de l'équipe.",
+    "openToAnswer": "Ouvrir",
+    "aboutPlace": "À propos du lieu"
   },
   "Questions": {
     "title": "Questions et réponses",
@@ -1685,7 +1687,6 @@
     "requestsTitle": "Demandes des voyageurs",
     "refundsTitle": "Remboursements à envoyer",
     "refundTitle": "Remboursement",
-    "queueIntro": "Répondez aux demandes de modification et d'annulation, et confirmez les remboursements une fois envoyés.",
     "what": "Demande",
     "approve": "Accepter",
     "decline": "Refuser",
@@ -2036,8 +2037,6 @@
       }
     },
     "staffPay": {
-      "title": "Commandes en attente de paiement",
-      "intro": "Les clients paient d'abord. Confirmer le paiement mobile money confirme aussi la commande ; la commission et la part du restaurant vont dans Argent.",
       "empty": "Aucune commande en attente de paiement.",
       "claimed": "Le voyageur a payé avec {reference}",
       "notClaimed": "Pas encore payée",
@@ -2048,17 +2047,19 @@
         "notFound": "Cette commande a changé. Actualisez la page.",
         "transaction": "Saisissez l'ID de transaction.",
         "used": "Cette transaction a déjà été utilisée."
-      }
+      },
+      "claimedShort": "Payé — à vérifier"
     },
     "removeOrder": "Supprimer",
     "removeConfirm": "Supprimer cette commande annulée de votre liste ?",
     "cancelledNoReason": "Cette commande a été annulée.",
     "payOnDeliveryOld": "Payée à la réception.",
     "staffOrders": {
-      "intro": "Toutes les commandes de repas. Confirmez le paiement (cela confirme la commande et prévient le client), récupérez le repas auprès du restaurant, puis marquez-la envoyée : le client et le propriétaire du lieu sont prévenus. Le client confirme quand il la reçoit.",
-      "open": "Commandes en cours",
-      "noOpen": "Aucune commande en cours.",
-      "done": "Commandes terminées"
+      "done": "Terminées",
+      "toPay": "À payer",
+      "toSend": "À envoyer",
+      "sent": "Envoyées",
+      "nothing": "Rien ici."
     },
     "gotIt": "J'ai reçu ma commande",
     "gotItHint": "Touchez quand le repas vous parvient.",

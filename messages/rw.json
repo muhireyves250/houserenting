@@ -1087,7 +1087,9 @@
       "ADMIN": "Umuyobozi wa VIIPA",
       "SUPER_ADMIN": "Umuyobozi mukuru"
     },
-    "superAdminOnly": "Umuyobozi mukuru wenyine ni we uhindura uburenganzira bw'abakozi."
+    "superAdminOnly": "Umuyobozi mukuru wenyine ni we uhindura uburenganzira bw'abakozi.",
+    "openToAnswer": "Fungura",
+    "aboutPlace": "Ibyerekeye aha hantu"
   },
   "Questions": {
     "title": "Ibibazo n'ibisubizo",
@@ -1685,7 +1687,6 @@
     "requestsTitle": "Ibyifuzo by'abashyitsi",
     "refundsTitle": "Amafaranga yo gusubiza",
     "refundTitle": "Gusubiza amafaranga",
-    "queueIntro": "Subiza ibyifuzo byo guhindura no guhagarika, kandi wemeze amafaranga yasubijwe amaze koherezwa.",
     "what": "Icyifuzo",
     "approve": "Emeza",
     "decline": "Yanga",
@@ -2036,8 +2037,6 @@
       }
     },
     "staffPay": {
-      "title": "Ibyatumijwe bitegereje kwishyurwa",
-      "intro": "Abakiriya bishyura mbere. Kwemeza ubwishyu bwa mobile money byemeza n'ibyatumijwe; komisiyo n'umugabane wa resitora bijya muri Amafaranga.",
       "empty": "Nta byatumijwe bitegereje kwishyurwa.",
       "claimed": "Umushyitsi yishyuye na {reference}",
       "notClaimed": "Ntibirishyurwa",
@@ -2048,17 +2047,19 @@
         "notFound": "Ibi byahindutse. Ongera ufungure paji.",
         "transaction": "Andika transaction ID.",
         "used": "Iyo transaction yamaze gukoreshwa."
-      }
+      },
+      "claimedShort": "Yishyuye — genzura"
     },
     "removeOrder": "Siba",
     "removeConfirm": "Siba ibi byahagaritswe ku rutonde rwawe?",
     "cancelledNoReason": "Ibyo watumije byahagaritswe.",
     "payOnDeliveryOld": "Byishyuwe ubyakiriye.",
     "staffOrders": {
-      "intro": "Ibiryo byose abakiriya batumije. Emeza ubwishyu (byemeza ibyatumijwe kandi bimenyesha umukiriya), fata ibiryo kuri resitora, hanyuma ubishyire ku 'byoherejwe': umukiriya na nyir'inzu barabimenyeshwa. Umukiriya yemeza igihe abibonye.",
-      "open": "Ibiri gukorwa",
-      "noOpen": "Nta biri gukorwa.",
-      "done": "Ibyarangiye"
+      "done": "Byarangiye",
+      "toPay": "Bitarishyurwa",
+      "toSend": "Byo kohereza",
+      "sent": "Byoherejwe",
+      "nothing": "Nta kintu."
     },
     "gotIt": "Nabonye ibyo natumije",
     "gotItHint": "Kanda igihe ibiryo bikugezeho.",

@@ -14,9 +14,9 @@ export function ConfirmOrderPayment({ reference, claimed }: { reference: string;
   const [pending, start] = useTransition();
   return (
     <div className="flex flex-col gap-1.5">
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex items-center gap-2">
         <input
-          className="w-44 rounded-xl border border-line-strong bg-surface px-3 py-2 text-[14px] text-ink outline-none focus:border-primary"
+          className="min-w-0 flex-1 rounded-xl border border-line-strong bg-surface px-3 py-2 text-[14px] text-ink outline-none focus:border-primary"
           placeholder={t("paidRef")}
           aria-label={t("paidRef")}
           value={tx}
@@ -34,7 +34,7 @@ export function ConfirmOrderPayment({ reference, claimed }: { reference: string;
               else setError(t(`error.${result.error}`));
             })
           }
-          className="rounded-full bg-primary px-4 py-2 text-[13px] font-semibold text-white hover:bg-primary-hover disabled:opacity-50"
+          className="shrink-0 rounded-full bg-primary px-4 py-2.5 text-[14px] font-semibold text-white hover:bg-primary-hover disabled:opacity-50"
         >
           {t("confirm")}
         </button>
