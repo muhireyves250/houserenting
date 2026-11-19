@@ -90,9 +90,9 @@ export default async function AdminDashboardPage() {
       </section>
 
       <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-        {/* The chart needs room: computers and tablets only. */}
-        <section className={cn(panel, "p-5 max-md:hidden")}>
-          <BookingsChart days={stats.bookingsPerDay} />
+        {/* The chart on every screen (a little shorter on phones). */}
+        <section className={cn(panel, "p-4 md:p-5")}>
+          <BookingsChart days={stats.bookingsPerDay} barsClass="h-44 md:h-56" />
         </section>
 
         {/* Needs attention */}

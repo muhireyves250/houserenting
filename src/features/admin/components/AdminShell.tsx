@@ -154,32 +154,32 @@ export function AdminShell({
   const sidebar = (
     // Any link tapped in the phone menu closes it.
     <div className="flex h-full flex-col" onClick={(e) => (e.target as HTMLElement).closest("a") && setOpen(false)}>
-      <Link href="/admin" className="flex items-center gap-3 px-5 py-5">
+      <Link href="/admin" className="flex items-center gap-3 border-b border-line/60 px-5 py-4">
         <LogoMark className="h-7" />
         <span className="flex flex-col leading-tight">
           <span className="text-[15px] font-bold text-ink">VIIPA</span>
           <span className="text-xs font-semibold tracking-wide text-primary uppercase">{tAdmin("console")}</span>
         </span>
       </Link>
-      <nav aria-label={t("label")} className="flex-1 overflow-y-auto px-3 pb-4">
+      <nav aria-label={t("label")} className="flex-1 overflow-y-auto px-3 pt-3 pb-4">
         {GROUPS.map((group) => {
           const hasCurrent = group.items.some((i) => isOn(pathname, i.href));
           // The group with the page you're on stays open.
           const isFolded = group.label !== "home" && folded.includes(group.label) && !hasCurrent;
           const waiting = group.items.reduce((n, i) => n + (counts[i.key] ?? 0), 0);
           return (
-            <div key={group.label} className="mt-3 first:mt-1">
+            <div key={group.label} className={cn(group.label === "home" ? "mt-1" : "mt-3 border-t border-line/60 pt-3")}>
               {group.label !== "home" && (
                 <button
                   type="button"
                   onClick={() => toggle(group.label)}
                   aria-expanded={!isFolded}
-                  className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-left text-[11px] font-semibold tracking-wider text-muted uppercase transition-colors hover:text-ink"
+                  className="group/title mb-1 flex w-full items-center gap-2 rounded-md px-3 py-1 text-left text-[10.5px] font-semibold tracking-[0.08em] text-muted/90 uppercase transition-colors hover:text-ink"
                 >
                   <span className="flex-1">{t(`group.${group.label}`)}</span>
                   {/* Folded: what waits inside still shows. */}
                   {isFolded && waiting > 0 && <span className="rounded-full bg-primary/10 px-1.5 text-[11px] font-bold tracking-normal text-primary tabular-nums">{waiting}</span>}
-                  <ChevronDown className={cn("size-3.5 transition-transform", isFolded && "-rotate-90")} aria-hidden="true" />
+                  <ChevronDown className={cn("size-3.5 opacity-50 transition-[transform,opacity] group-hover/title:opacity-100", isFolded && "-rotate-90")} aria-hidden="true" />
                 </button>
               )}
               {!isFolded && (
@@ -193,15 +193,18 @@ export function AdminShell({
                           href={href}
                           aria-current={on ? "page" : undefined}
                           className={cn(
-                            "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-[14px] transition-colors duration-200",
-                            on ? "bg-primary font-semibold text-white shadow-[0_6px_16px_-8px_rgba(0,87,184,0.9)]" : "text-ink/80 hover:bg-canvas hover:text-ink",
+                            "group relative flex items-center gap-3 rounded-lg px-3 py-2 text-[14px] transition-colors duration-150",
+                            // Current page: a soft blue highlight with a slim bar on the left.
+                            on
+                              ? "bg-primary/[0.08] font-semibold text-primary before:absolute before:inset-y-1.5 before:-left-3 before:w-[3px] before:rounded-r-full before:bg-primary"
+                              : "text-ink/75 hover:bg-canvas hover:text-ink",
                           )}
                         >
-                          <Icon className={cn("size-[18px] shrink-0", on ? "text-white" : "text-ink/60 group-hover:text-primary")} strokeWidth={1.9} aria-hidden="true" />
+                          <Icon className={cn("size-[18px] shrink-0", on ? "text-primary" : "text-ink/50 group-hover:text-ink/80")} strokeWidth={1.9} aria-hidden="true" />
                           <span className="flex-1">{t(key)}</span>
                           {count > 0 && (
                             <span
-                              className={cn("rounded-full px-2 py-0.5 text-[11px] font-bold tabular-nums", on ? "bg-white/25 text-white" : "bg-primary/10 text-primary")}
+                              className={cn("min-w-5 rounded-full px-1.5 py-px text-center text-[11px] font-semibold tabular-nums", on ? "bg-primary text-white" : "bg-primary/10 text-primary")}
                               aria-label={tAdmin("waiting", { count })}
                             >
                               {count}
@@ -290,7 +293,7 @@ export function AdminShell({
           </Link>
         </header>
         {/* Phones: room under the page for the bottom bar. */}
-        <main className="mx-auto max-w-6xl px-4 py-6 pb-28 md:px-8 md:py-8 lg:pb-8">{children}</main>
+        <main className="admin-cards mx-auto max-w-6xl px-4 py-6 pb-28 md:px-8 md:py-8 lg:pb-8">{children}</main>
       </div>
 
       {/* Phones and tablets: the main admin pages one tap away, and Menu for everything else. */}

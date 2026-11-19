@@ -16,6 +16,9 @@
   --color-warning: #f29d0a;
   --color-danger: #d93025;
   --radius-card: 1rem;
+  /* Cards on staff pages: a hairline edge and a soft, low drop (raised a little more on hover). */
+  --shadow-card: 0 1px 2px 0 rgb(16 24 40 / 0.05), 0 4px 14px -6px rgb(16 24 40 / 0.12);
+  --shadow-card-hover: 0 2px 4px 0 rgb(16 24 40 / 0.06), 0 12px 28px -12px rgb(16 24 40 / 0.24);
   --font-sans: var(--font-brand), ui-sans-serif, system-ui, sans-serif;
   /* Headings use the same face as body text (Geist), so the whole site reads as one typeface. */
   --font-display: var(--font-brand), ui-sans-serif, system-ui, sans-serif;
@@ -597,5 +600,23 @@ svg {
   nav[aria-label],
   [data-print-hide] {
     display: none !important;
+  }
+}
+
+/* Staff pages: every white rounded card gets the same soft shadow, links lift on hover (client pages keep their
+   own look). Marked by the admin shell's content area. */
+.admin-cards :is(.rounded-xl, .rounded-2xl, .rounded-3xl):is(.bg-surface, details) {
+  box-shadow: var(--shadow-card);
+}
+.admin-cards a:is(.rounded-xl, .rounded-2xl, .rounded-3xl).bg-surface {
+  transition: box-shadow 200ms ease, transform 200ms ease;
+}
+.admin-cards a:is(.rounded-xl, .rounded-2xl, .rounded-3xl).bg-surface:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-1px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .admin-cards a:is(.rounded-xl, .rounded-2xl, .rounded-3xl).bg-surface:hover {
+    transform: none;
   }
 }
