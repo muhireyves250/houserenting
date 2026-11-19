@@ -4,7 +4,7 @@ import { Bell, ChefHat, ClipboardList, House, LayoutDashboard, Menu, Settings, U
 import { useTranslations } from "next-intl";
 import { useState, type ReactNode } from "react";
 import { Avatar } from "@/components/ui/Avatar";
-import { LogoMark, LogoWordmark } from "@/components/ui/Logo";
+import { Logo } from "@/components/ui/Logo";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 
@@ -57,12 +57,10 @@ export function HostShell({
 
   const sidebar = (
     <div className="flex h-full flex-col" onClick={(e) => (e.target as HTMLElement).closest("a") && setOpen(false)}>
-      <Link href="/host" className="flex items-start gap-3 border-b border-line/60 px-5 py-4">
-        <LogoMark className="h-7" />
-        <span className="flex flex-col gap-1 leading-tight">
-          <LogoWordmark className="h-3" priority />
-          <span className="text-xs font-semibold tracking-wide text-primary uppercase">{t("console")}</span>
-        </span>
+      <Link href="/host" className="flex items-center justify-between gap-2 border-b border-line/60 px-5 py-4">
+        {/* The same logo as the site footer: the mark on its tile, the VIIPA lettering beside it. */}
+        <Logo withWordmark tile markClassName="h-6" wordmarkClassName="h-4" />
+        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10.5px] font-bold tracking-wide text-primary uppercase">{t("console")}</span>
       </Link>
       <nav aria-label={t("label")} className="flex-1 overflow-y-auto px-3 pt-3 pb-4">
         <ul className="mt-1 flex flex-col gap-0.5">
