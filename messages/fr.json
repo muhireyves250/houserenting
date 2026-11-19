@@ -760,7 +760,12 @@
       "AT_CHECK_IN": "À présenter à l'arrivée"
     },
     "payoutLink": "Coordonnées de paiement : où vous êtes payé",
-    "foodOrdersLink": "Commandes de repas de vos clients"
+    "foodOrdersLink": "Commandes de repas de vos clients",
+    "lodge": {
+      "amenitiesHint": "Pour le lodge dans son ensemble. Les équipements des chambres (TV, cuisine…) se règlent sur chaque catégorie de chambre ci-dessous.",
+      "rulesTitle": "Règles de réservation",
+      "rulesHint": "Comment les chambres se réservent : à la nuit ou à la journée, heures d'arrivée et de départ, séjour le plus court et le plus long. Chaque catégorie de chambre a son propre prix (ci-dessous)."
+    }
   },
   "Admin": {
     "title": "Administration",
@@ -1214,8 +1219,8 @@
     "availableOn": "Libre {day}",
     "bookedOn": "Réservée {day}",
     "freeFrom": "De nouveau libre dès le {date}",
-    "title": "Chambres",
-    "intro": "Chaque chambre a son prix, son nombre de voyageurs et ses équipements. Une chambre en nettoyage ou en réparation ne peut pas être réservée.",
+    "title": "Catégories de chambres et chambres",
+    "intro": "Chaque catégorie de chambres a ses prix, ses voyageurs et ses équipements ; chaque chambre peut avoir son propre nom, ses photos et sa description. Les chambres en nettoyage ou en réparation ne peuvent pas être réservées.",
     "guests": "{count, plural, one {# voyageur} other {# voyageurs}}",
     "status": "Statut",
     "statuses": {
@@ -1227,13 +1232,13 @@
     "edit": "Modifier {name}",
     "remove": "Retirer {name}",
     "failed": "Échec. Réessayez.",
-    "add": "Ajouter une chambre",
+    "add": "Ajouter une catégorie de chambres",
     "name": "Nom de la chambre",
-    "price": "Prix par nuit (RWF)",
+    "price": "Prix (RWF)",
     "maxGuests": "Voyageurs maximum",
     "description": "Description",
     "cancel": "Annuler",
-    "save": "Enregistrer la chambre",
+    "save": "Enregistrer la catégorie",
     "wholePlace": "Le logement entier",
     "choose": "Choisir une chambre",
     "perNight": "/ nuit",
@@ -1249,9 +1254,6 @@
     "freeCount": "{free} sur {total} libres {day}",
     "anyRoom": "N'importe quelle chambre libre",
     "photos": "Photos de ce type de chambre",
-    "eachRoomDetails": "Photos et description de chaque chambre (touchez une chambre)",
-    "aboutRoom": "À propos de {room} (laissez vide pour reprendre celle du type)",
-    "photosOfRoom": "Photos de {room}",
     "addPhotos": "Ajouter des photos",
     "uploading": "Envoi…",
     "removePhoto": "Retirer la photo",
@@ -1260,7 +1262,25 @@
     "roomTypesTitle": "Types de chambres",
     "freeTodayCount": "{free} sur {total} libres aujourd'hui",
     "fromPrice": "Dès",
-    "chooseRoomTitle": "Choisissez votre chambre"
+    "chooseRoomTitle": "Choisissez votre chambre",
+    "editCategory": "Modifier la catégorie",
+    "removeCategory": "Supprimer la catégorie",
+    "roomsInCategory": "{count, plural, =0 {Aucune chambre : ajoutez la première} one {# chambre — touchez-la pour la modifier} other {# chambres — touchez-en une pour la modifier}}",
+    "addRoom": "Ajouter une chambre",
+    "unitName": "Nom ou numéro de la chambre",
+    "unitNameHint": "ex. 101 ou Kivu",
+    "unitPhotos": "Photos de cette chambre",
+    "unitAbout": "À propos de cette chambre (vide = celle de la catégorie)",
+    "saveUnit": "Enregistrer la chambre",
+    "removeUnit": "Retirer la chambre",
+    "removeUnitQuestion": "Retirer cette chambre ?",
+    "unitError": {
+      "taken": "Une autre chambre de ce lieu a déjà ce nom ou numéro.",
+      "booked": "Cette chambre a une réservation en cours ou à venir : elle ne peut pas être retirée.",
+      "name": "Donnez un nom ou un numéro à la chambre.",
+      "notFound": "Cette chambre a changé. Actualisez la page.",
+      "notAllowed": "Vous ne pouvez pas modifier les chambres de ce lieu."
+    }
   },
   "Settings": {
     "note": "Laissez un champ vide tant que la décision n'est pas prise : rien n'est facturé ni promis pour un champ vide. Chaque modification est inscrite au journal d'audit, et les réservations gardent les paramètres en vigueur à leur création.",

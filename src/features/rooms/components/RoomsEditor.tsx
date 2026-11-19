@@ -10,7 +10,7 @@ import { FACILITIES } from "@/features/hosting/validation";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { formatRWF } from "@/lib/format";
-import { removeRoomAction, saveRoomAction, setRoomStatusAction } from "../actions";
+import { removeRoomAction, removeRoomUnitAction, saveRoomAction, saveRoomUnitAction, setRoomStatusAction } from "../actions";
 import { roomLabel } from "../links";
 import { parseRoomNumbers, ROOM_STATUSES, type RoomInput, type RoomStatus } from "../validation";
 
@@ -57,22 +57,22 @@ export function RoomsEditor({ listingId, rooms, units }: { listingId: string; ro
         {rooms.map((room) =>
           editing === room.id ? (
             <li key={room.id}>
-              <RoomForm listingId={listingId} initial={room} units={units} pending={pending} onCancel={() => setEditing(null)} onSave={(input) => run(() => saveRoomAction(listingId, room.id, input), () => setEditing(null))} />
+              <RoomForm listingId={listingId} initial={room} isNew={false} units={units} pending={pending} onCancel={() => setEditing(null)} onSave={(input) => run(() => saveRoomAction(listingId, room.id, input), () => setEditing(null))} />
             </li>
           ) : (
-            <li key={room.id} className="flex flex-col gap-3 rounded-2xl border border-line p-4 sm:flex-row sm:items-center">
-              <div className="min-w-0 flex-1">
-                <p className="text-[15px] font-semibold text-ink">{room.name}</p>
-                <p className="text-[13px] text-muted">
-                  {room.rates.map((r) => `${formatRWF(r.price, locale)} ${tListings(`perUnit.${r.unit}`)}`).join(" · ")} · {t("guests", { count: room.maxGuests })}
-                  {(room.numbers?.length ?? 0) > 0 && ` · ${t("roomsCount", { count: room.numbers!.length })}: ${room.numbers!.join(", ")}`}
-                </p>
-              </div>
-              <label className="flex items-center gap-2 text-[13px] text-muted">
-                {t("status")}
+            <li key={room.id} className="flex flex-col gap-3 rounded-2xl border border-line p-4">
+              {/* The category: its name, prices, status, and Edit category. */}
+              <div className="flex flex-wrap items-start gap-3">
+                <div className="min-w-0 flex-1">
+                  <p className="text-[16px] font-bold text-ink">{room.name}</p>
+                  <p className="text-[13px] text-muted">
+                    {room.rates.map((r) => `${formatRWF(r.price, locale)} ${tListings(`perUnit.${r.unit}`)}`).join(" · ")} · {t("guests", { count: room.maxGuests })}
+                  </p>
+                </div>
                 <select
                   value={room.status}
                   disabled={pending}
+                  aria-label={t("status")}
                   onChange={(e) => run(() => setRoomStatusAction(room.id, e.target.value as RoomStatus))}
                   className={cn("cursor-pointer rounded-lg border border-line-strong bg-surface px-2 py-1.5 text-[13px] font-semibold", STATUS_TONE[room.status])}
                 >
@@ -82,21 +82,25 @@ export function RoomsEditor({ listingId, rooms, units }: { listingId: string; ro
                     </option>
                   ))}
                 </select>
-              </label>
-              <div className="flex gap-2">
-                <button type="button" onClick={() => setEditing(room.id)} aria-label={t("edit", { name: room.name })} className="flex size-9 items-center justify-center rounded-full bg-canvas text-ink hover:bg-line/70">
-                  <Pencil className="size-4" aria-hidden="true" />
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button type="button" onClick={() => setEditing(room.id)} className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-[13px] font-semibold text-white hover:bg-primary-hover">
+                  <Pencil className="size-3.5" aria-hidden="true" />
+                  {t("editCategory")}
                 </button>
                 <button
                   type="button"
                   disabled={pending}
                   onClick={() => run(() => removeRoomAction(room.id))}
                   aria-label={t("remove", { name: room.name })}
-                  className="flex size-9 items-center justify-center rounded-full bg-canvas text-danger hover:bg-line/70"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-line px-3.5 py-2 text-[13px] font-semibold text-danger hover:border-danger"
                 >
-                  <Trash2 className="size-4" aria-hidden="true" />
+                  <Trash2 className="size-3.5" aria-hidden="true" />
+                  {t("removeCategory")}
                 </button>
               </div>
+              {/* Its rooms: tap one to edit it (name, photos, description), or add one. */}
+              <CategoryRooms listingId={listingId} room={room} />
             </li>
           ),
         )}
@@ -113,7 +117,7 @@ export function RoomsEditor({ listingId, rooms, units }: { listingId: string; ro
       )}
       <div className="mt-4">
         {editing === "new" ? (
-          <RoomForm listingId={listingId} initial={emptyRoom(units)} units={units} pending={pending} onCancel={rooms.length > 0 ? () => setEditing(null) : undefined} onSave={(input) => run(() => saveRoomAction(listingId, null, input), () => setEditing(null))} />
+          <RoomForm listingId={listingId} initial={emptyRoom(units)} isNew units={units} pending={pending} onCancel={rooms.length > 0 ? () => setEditing(null) : undefined} onSave={(input) => run(() => saveRoomAction(listingId, null, input), () => setEditing(null))} />
         ) : (
           <Button variant="outline" onClick={() => setEditing("new")}>
             <Plus className="size-4" aria-hidden="true" />
@@ -128,6 +132,7 @@ export function RoomsEditor({ listingId, rooms, units }: { listingId: string; ro
 function RoomForm({
   listingId,
   initial,
+  isNew,
   units,
   pending,
   onSave,
@@ -135,6 +140,8 @@ function RoomForm({
 }: {
   listingId: string;
   initial: RoomInput;
+  /** A new category also takes its rooms' numbers; an existing one's rooms are edited one by one below it. */
+  isNew: boolean;
   units: readonly Unit[];
   pending: boolean;
   onSave: (input: RoomInput) => void;
@@ -154,17 +161,20 @@ function RoomForm({
   const setPrice = (unit: Unit, price: number) => set("rates", rates.map((r) => (r.unit === unit ? { ...r, price } : r)));
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-primary/40 bg-primary/[0.02] p-4">
+      <p className="text-[15px] font-bold text-ink">{isNew ? t("add") : t("editCategory")}</p>
       <Field label={t("typeName")} value={room.name} maxLength={60} onChange={(e) => set("name", e.target.value)} />
-      {/* Several identical rooms of this type: list their numbers; each guest is given a free one. */}
-      <Field
-        label={t("numbers")}
-        value={numbersText}
-        placeholder={t("numbersHint")}
-        onChange={(e) => {
-          setNumbersText(e.target.value);
-          set("numbers", parseRoomNumbers(e.target.value));
-        }}
-      />
+      {/* A new category: list its rooms now (each is then edited on its own). */}
+      {isNew && (
+        <Field
+          label={t("numbers")}
+          value={numbersText}
+          placeholder={t("numbersHint")}
+          onChange={(e) => {
+            setNumbersText(e.target.value);
+            set("numbers", parseRoomNumbers(e.target.value));
+          }}
+        />
+      )}
       <Field label={t("maxGuests")} type="number" min={1} value={room.maxGuests || ""} onChange={(e) => set("maxGuests", Number(e.target.value) || 0)} />
       {/* How this room is booked, each with its own price. */}
       <p className="text-xs font-semibold text-muted">{t("howBooked")}</p>
@@ -190,7 +200,6 @@ function RoomForm({
           ))}
       </div>
       <RoomPhotos listingId={listingId} photos={room.photos ?? []} onChange={(photos) => set("photos", photos)} />
-      <UnitDetailsEditor listingId={listingId} numbers={room.numbers ?? []} value={room.unitDetails ?? {}} onChange={(unitDetails) => set("unitDetails", unitDetails)} />
       <AreaField label={t("description")} rows={2} maxLength={500} value={room.description ?? ""} onChange={(e) => set("description", e.target.value)} />
       <div className="flex flex-wrap gap-2">
         {FACILITIES.map((f) => {
@@ -216,48 +225,131 @@ function RoomForm({
   );
 }
 
-/** Each room's own photos and description: tap a room to edit them (a room without its own shows the type's). */
-function UnitDetailsEditor({
-  listingId,
-  numbers,
-  value,
-  onChange,
-}: {
-  listingId: string;
-  numbers: string[];
-  value: Record<string, { photos?: string[]; description?: string }>;
-  onChange: (v: Record<string, { photos: string[]; description: string }>) => void;
-}) {
+/**
+ * A category's rooms as buttons ("Room 11", "Lake Kivu"…). Tapping one opens its own form: name or number, photos
+ * and description (empty = the category's), save or remove. "Add a room" opens an empty one.
+ */
+function CategoryRooms({ listingId, room }: { listingId: string; room: Room }) {
   const t = useTranslations("Rooms");
-  const [open, setOpen] = useState<string | null>(null);
-  if (numbers.length === 0) return null;
-  const current = open && numbers.includes(open) ? open : null;
+  const [open, setOpen] = useState<string | "new" | null>(null);
+  const numbers = room.numbers ?? [];
+  const details = room.unitDetails ?? {};
   const label = (n: string) => roomLabel(n, (number) => t("roomNumber", { number }));
-  const details = (n: string) => ({ photos: value[n]?.photos ?? [], description: value[n]?.description ?? "" });
-  const update = (n: string, change: Partial<{ photos: string[]; description: string }>) => {
-    const all = Object.fromEntries(Object.keys(value).map((k) => [k, details(k)]));
-    onChange({ ...all, [n]: { ...details(n), ...change } });
-  };
   return (
-    <div className="flex flex-col gap-2">
-      <p className="text-xs font-semibold text-muted">{t("eachRoomDetails")}</p>
+    <div className="flex flex-col gap-2 border-t border-line pt-3">
+      <p className="text-[12px] font-semibold text-muted">{t("roomsInCategory", { count: numbers.length })}</p>
       <div className="flex flex-wrap gap-2">
         {numbers.map((n) => {
-          const d = details(n);
+          const own = (details[n]?.photos?.length ?? 0) > 0 || Boolean(details[n]?.description);
           return (
-            <Chip key={n} on={current === n} onToggle={() => setOpen(current === n ? null : n)}>
+            <button
+              key={n}
+              type="button"
+              aria-expanded={open === n}
+              onClick={() => setOpen(open === n ? null : n)}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[13px] font-semibold transition-colors",
+                open === n ? "border-primary bg-primary text-white" : "border-line bg-surface text-ink hover:border-primary",
+              )}
+            >
               {label(n)}
-              {(d.photos.length > 0 || d.description) && " ✓"}
-            </Chip>
+              {own && <span className={cn("size-1.5 rounded-full", open === n ? "bg-white" : "bg-primary")} aria-hidden="true" />}
+              <Pencil className="size-3" aria-hidden="true" />
+            </button>
           );
         })}
+        <button
+          type="button"
+          onClick={() => setOpen(open === "new" ? null : "new")}
+          className={cn("inline-flex items-center gap-1 rounded-full border border-dashed px-3.5 py-1.5 text-[13px] font-semibold", open === "new" ? "border-primary text-primary" : "border-primary/50 text-primary hover:border-primary")}
+        >
+          <Plus className="size-3.5" aria-hidden="true" />
+          {t("addRoom")}
+        </button>
       </div>
-      {current && (
-        <div key={current} className="flex flex-col gap-3 rounded-xl bg-surface p-3 ring-1 ring-line">
-          <RoomPhotos listingId={listingId} label={t("photosOfRoom", { room: label(current) })} photos={details(current).photos} onChange={(photos) => update(current, { photos })} />
-          <AreaField label={t("aboutRoom", { room: label(current) })} rows={2} maxLength={500} value={details(current).description} onChange={(e) => update(current, { description: e.target.value })} />
-        </div>
+      {open && (
+        <RoomUnitForm
+          key={open}
+          listingId={listingId}
+          roomId={room.id}
+          previous={open === "new" ? null : open}
+          initial={open === "new" ? { name: "", photos: [], description: "" } : { name: open, photos: details[open]?.photos ?? [], description: details[open]?.description ?? "" }}
+          onDone={() => setOpen(null)}
+        />
       )}
+    </div>
+  );
+}
+
+/** One room: its name or number, its own photos and description; save, remove, or close. */
+function RoomUnitForm({
+  listingId,
+  roomId,
+  previous,
+  initial,
+  onDone,
+}: {
+  listingId: string;
+  roomId: string;
+  previous: string | null;
+  initial: { name: string; photos: string[]; description: string };
+  onDone: () => void;
+}) {
+  const t = useTranslations("Rooms");
+  const router = useRouter();
+  const [unit, setUnit] = useState(initial);
+  const [error, setError] = useState<string | null>(null);
+  const [confirming, setConfirming] = useState(false);
+  const [pending, start] = useTransition();
+  const finish = (action: () => Promise<{ ok: boolean; error?: string }>) =>
+    start(async () => {
+      setError(null);
+      const result = await action();
+      if (result.ok) {
+        onDone();
+        router.refresh();
+      } else setError(t(`unitError.${(result.error ?? "notAllowed") as "taken"}`));
+    });
+  return (
+    <div className="flex flex-col gap-3 rounded-xl bg-canvas p-3">
+      <Field label={t("unitName")} value={unit.name} maxLength={40} placeholder={t("unitNameHint")} onChange={(e) => setUnit({ ...unit, name: e.target.value })} />
+      <RoomPhotos listingId={listingId} label={t("unitPhotos")} photos={unit.photos} onChange={(photos) => setUnit({ ...unit, photos })} />
+      <AreaField label={t("unitAbout")} rows={2} maxLength={500} value={unit.description} onChange={(e) => setUnit({ ...unit, description: e.target.value })} />
+      {error && (
+        <p role="alert" className="text-[13px] font-medium text-danger">
+          {error}
+        </p>
+      )}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        {previous !== null ? (
+          confirming ? (
+            <span className="inline-flex flex-wrap items-center gap-2 text-[13px] text-red-900">
+              {t("removeUnitQuestion")}
+              <button type="button" disabled={pending} onClick={() => finish(() => removeRoomUnitAction(roomId, previous))} className="rounded-full bg-danger px-3 py-1 font-semibold text-white disabled:opacity-50">
+                {t("removeUnit")}
+              </button>
+              <button type="button" onClick={() => setConfirming(false)} className="rounded-full px-2 py-1 font-semibold text-ink">
+                {t("cancel")}
+              </button>
+            </span>
+          ) : (
+            <button type="button" onClick={() => setConfirming(true)} className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-danger hover:underline">
+              <Trash2 className="size-3.5" aria-hidden="true" />
+              {t("removeUnit")}
+            </button>
+          )
+        ) : (
+          <span />
+        )}
+        <span className="flex gap-2">
+          <Button variant="ghost" onClick={onDone}>
+            {t("cancel")}
+          </Button>
+          <Button loading={pending} disabled={!unit.name.trim()} onClick={() => finish(() => saveRoomUnitAction(roomId, previous, unit))}>
+            {t("saveUnit")}
+          </Button>
+        </span>
+      </div>
     </div>
   );
 }

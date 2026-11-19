@@ -60,6 +60,9 @@ const NEW_RATE: Record<Unit, Rate> = {
   YEAR: { unit: "YEAR", price: 0, minUnits: 1, maxUnits: null },
 };
 
+/** Amenities of a lodge as a whole; the rest (TV, kitchen…) are set on each room category. */
+const LODGE_WIDE = ["WIFI", "PARKING", "SECURITY", "GENERATOR", "POOL"] as const;
+
 const num = (value: string) => (value === "" ? 0 : Number(value));
 const optionalNum = (value: string) => (value === "" ? null : Number(value));
 const lines = (value: string) => value.split("\n");
@@ -92,6 +95,8 @@ export function ListingForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<"idle" | "saved" | "failed" | "invalid">("idle");
   const [saving, startSaving] = useTransition();
+  // Lodges are booked room by room: size, guests, in-room amenities and prices belong to the rooms.
+  const lodge = form.type === "LODGE";
 
   const set = <K extends keyof ListingInput>(key: K, value: ListingInput[K]) => {
     setForm((f) => ({ ...f, [key]: value }));
@@ -119,7 +124,20 @@ export function ListingForm({
 
   function save() {
     startSaving(async () => {
-      const result = staff ? await adminSaveListingAction(listingId, form, staff.ownerId) : await saveListingAction(listingId, form);
+      // A lodge keeps valid place-wide values for what its rooms carry (hidden here).
+      const payload: ListingInput = lodge
+        ? {
+            ...form,
+            bookingModel: "ROOM_BY_ROOM",
+            sizeM2: form.sizeM2 || 1,
+            rooms: form.rooms || 1,
+            bedrooms: form.bedrooms || 1,
+            bathrooms: form.bathrooms || 1,
+            maxGuests: form.maxGuests || 1,
+            rates: form.rates.map((r) => (r.price >= 100 ? r : { ...r, price: 1000 })),
+          }
+        : form;
+      const result = staff ? await adminSaveListingAction(listingId, payload, staff.ownerId) : await saveListingAction(listingId, payload);
       if (result.ok) {
         setErrors({});
         setStatus("saved");
@@ -151,7 +169,7 @@ export function ListingForm({
             onChange={(e) => {
               const type = e.target.value as ListingInput["type"];
               // A lodge keeps only nightly and daily prices.
-              setForm((f) => ({ ...f, type, rates: f.rates.filter((r) => rateUnitsFor(type).includes(r.unit)) }));
+              setForm((f) => ({ ...f, type, rates: f.rates.filter((r) => rateUnitsFor(type).includes(r.unit)), ...(type === "LODGE" ? { bookingModel: "ROOM_BY_ROOM" as const } : {}) }));
               setStatus("idle");
             }}
           >
@@ -161,17 +179,19 @@ export function ListingForm({
               </option>
             ))}
           </SelectField>
-          <SelectField
-            label={t("fields.bookingModel")}
-            value={form.bookingModel}
-            onChange={(e) => set("bookingModel", e.target.value as NonNullable<ListingInput["bookingModel"]>)}
-          >
-            {(["WHOLE_PROPERTY", "ROOM_BY_ROOM", "BOTH"] as const).map((model) => (
-              <option key={model} value={model}>
-                {t(`bookingModel.${model}`)}
-              </option>
-            ))}
-          </SelectField>
+          {!lodge && (
+            <SelectField
+              label={t("fields.bookingModel")}
+              value={form.bookingModel}
+              onChange={(e) => set("bookingModel", e.target.value as NonNullable<ListingInput["bookingModel"]>)}
+            >
+              {(["WHOLE_PROPERTY", "ROOM_BY_ROOM", "BOTH"] as const).map((model) => (
+                <option key={model} value={model}>
+                  {t(`bookingModel.${model}`)}
+                </option>
+              ))}
+            </SelectField>
+          )}
           <AreaField
             label={t("fields.description")}
             value={form.description}
@@ -202,43 +222,46 @@ export function ListingForm({
         </div>
       </Card>
 
-      <Card title={t("sections.space")} id="space">
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {(
-            [
-              ["sizeM2", "size"],
-              ["rooms", "rooms"],
-              ["bedrooms", "bedrooms"],
-              ["bathrooms", "bathrooms"],
-              ["maxGuests", "maxGuests"],
-            ] as const
-          ).map(([key, label]) => (
-            <Field
-              key={key}
-              label={t(`fields.${label}`)}
-              type="number"
-              inputMode="numeric"
-              min={0}
-              value={form[key] || ""}
-              onChange={(e) => set(key, num(e.target.value))}
-              error={err(key)}
+      {!lodge && (
+        <Card title={t("sections.space")} id="space">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {(
+              [
+                ["sizeM2", "size"],
+                ["rooms", "rooms"],
+                ["bedrooms", "bedrooms"],
+                ["bathrooms", "bathrooms"],
+                ["maxGuests", "maxGuests"],
+              ] as const
+            ).map(([key, label]) => (
+              <Field
+                key={key}
+                label={t(`fields.${label}`)}
+                type="number"
+                inputMode="numeric"
+                min={0}
+                value={form[key] || ""}
+                onChange={(e) => set(key, num(e.target.value))}
+                error={err(key)}
+              />
+            ))}
+          </div>
+          <label className="mt-4 flex cursor-pointer items-center gap-3 text-[15px] text-ink">
+            <input
+              type="checkbox"
+              checked={form.petsAllowed}
+              onChange={(e) => set("petsAllowed", e.target.checked)}
+              className="size-5 cursor-pointer accent-[var(--color-primary)]"
             />
-          ))}
-        </div>
-        <label className="mt-4 flex cursor-pointer items-center gap-3 text-[15px] text-ink">
-          <input
-            type="checkbox"
-            checked={form.petsAllowed}
-            onChange={(e) => set("petsAllowed", e.target.checked)}
-            className="size-5 cursor-pointer accent-[var(--color-primary)]"
-          />
-          {t("fields.pets")}
-        </label>
-      </Card>
+            {t("fields.pets")}
+          </label>
+        </Card>
+      )}
 
       <Card title={t("sections.amenities")} id="amenities">
+        {lodge && <p className="-mt-2 mb-3 text-[13px] text-muted">{t("lodge.amenitiesHint")}</p>}
         <div className="flex flex-wrap gap-2">
-          {FACILITIES.map((facility) => {
+          {(lodge ? LODGE_WIDE : FACILITIES).map((facility) => {
             const on = (form.facilities ?? []).includes(facility);
             return (
               <Chip
@@ -253,10 +276,8 @@ export function ListingForm({
         </div>
       </Card>
 
-      <Card title={t("sections.prices")} id="prices">
-        <p className="-mt-2 mb-4 text-[13px] text-muted">
-          {t("pricesHint")} {form.bookingModel !== "WHOLE_PROPERTY" && t("pricesRoomsHint")}
-        </p>
+      <Card title={lodge ? t("lodge.rulesTitle") : t("sections.prices")} id="prices">
+        <p className="-mt-2 mb-4 text-[13px] text-muted">{lodge ? t("lodge.rulesHint") : <>{t("pricesHint")} {form.bookingModel !== "WHOLE_PROPERTY" && t("pricesRoomsHint")}</>}</p>
         <div className="mb-4 flex flex-wrap gap-2">
           {rateUnitsFor(form.type).map((unit) => (
             <Chip key={unit} on={rateIndex(unit) >= 0} onToggle={() => toggleRate(unit)}>
@@ -278,16 +299,18 @@ export function ListingForm({
               <fieldset key={unit} className="rounded-2xl border border-line p-4">
                 <legend className="px-1 text-[15px] font-semibold text-ink">{tListings(`unitName.${unit}`)}</legend>
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  <Field
-                    label={t("fields.price")}
-                    className="col-span-2"
-                    type="number"
-                    inputMode="numeric"
-                    min={0}
-                    value={rate.price || ""}
-                    onChange={(ev) => setRate(unit, { price: num(ev.target.value) })}
-                    error={e("price")}
-                  />
+                  {!lodge && (
+                    <Field
+                      label={t("fields.price")}
+                      className="col-span-2"
+                      type="number"
+                      inputMode="numeric"
+                      min={0}
+                      value={rate.price || ""}
+                      onChange={(ev) => setRate(unit, { price: num(ev.target.value) })}
+                      error={e("price")}
+                    />
+                  )}
                   <Field
                     label={t(`fields.min.${unit}`)}
                     type="number"
@@ -331,15 +354,18 @@ export function ListingForm({
             onChange={(e) => set("discountPercent", optionalNum(e.target.value))}
             error={err("discountPercent")}
           />
-          <Field
-            label={t("fields.deposit")}
-            type="number"
-            min={0}
-            max={12}
-            value={form.depositMonths ?? ""}
-            onChange={(e) => set("depositMonths", optionalNum(e.target.value))}
-            error={err("depositMonths")}
-          />
+          {/* A deposit in months is for monthly rentals, never a lodge. */}
+          {!lodge && (
+            <Field
+              label={t("fields.deposit")}
+              type="number"
+              min={0}
+              max={12}
+              value={form.depositMonths ?? ""}
+              onChange={(e) => set("depositMonths", optionalNum(e.target.value))}
+              error={err("depositMonths")}
+            />
+          )}
         </div>
         {/* Laundry for guests during their stay: not offered, free, or a price per kg (weighed after washing). */}
         <div className="mt-4 grid grid-cols-2 gap-3">

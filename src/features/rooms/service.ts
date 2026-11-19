@@ -4,7 +4,7 @@ import { audit } from "@/features/audit/service";
 import { db } from "@/lib/db";
 import { OWNER_EDITABLE } from "@/features/listings/lifecycle";
 import { isAdmin } from "@/lib/roles";
-import { roomInput, ROOM_STATUSES, type RoomInput, type RoomStatus } from "./validation";
+import { roomInput, roomUnitInput, ROOM_STATUSES, unitDetailsMap, type RoomInput, type RoomStatus, type RoomUnitInput } from "./validation";
 
 type Actor = { id: string; role?: string | null };
 
@@ -90,5 +90,52 @@ export async function removeRoom(actor: Actor, roomId: string): Promise<"deleted
     await tx.room.delete({ where: { id: roomId } });
     await audit(tx, { actorId: actor.id, action: "room.delete", entityType: "listing", entityId: room.listingId, data: { room: room.name } });
     return "deleted";
+  });
+}
+
+export type RoomUnitResult = { ok: true } | { ok: false; error: "notAllowed" | "notFound" | "name" | "taken" | "booked" };
+
+/**
+ * Adds a room to a room type, or edits one (`previous` is its current name): its name or number, photos and
+ * description. A new name must be free in the whole place; renaming moves the room's bookings with it.
+ */
+export async function saveRoomUnit(actor: Actor, roomId: string, previous: string | null, raw: RoomUnitInput): Promise<RoomUnitResult> {
+  const parsed = roomUnitInput.safeParse(raw);
+  if (!parsed.success) return { ok: false, error: "name" };
+  const { name, photos, description } = parsed.data;
+  return db.$transaction(async (tx) => {
+    const room = await tx.room.findUnique({ where: { id: roomId }, select: { listingId: true, name: true, numbers: true, unitDetails: true } });
+    if (!room || !(await managed(tx, actor, room.listingId))) return { ok: false, error: "notAllowed" } as const;
+    if (previous !== null && !room.numbers.includes(previous)) return { ok: false, error: "notFound" } as const;
+    const others = await tx.room.findMany({ where: { listingId: room.listingId, id: { not: roomId } }, select: { numbers: true } });
+    const lower = name.toLowerCase();
+    const clash = others.some((r) => r.numbers.some((n) => n.toLowerCase() === lower)) || room.numbers.some((n) => n !== previous && n.toLowerCase() === lower);
+    if (clash) return { ok: false, error: "taken" } as const;
+    const numbers = previous === null ? [...room.numbers, name] : room.numbers.map((n) => (n === previous ? name : n));
+    const details = unitDetailsMap(room.unitDetails);
+    if (previous !== null) delete details[previous];
+    if (photos.length > 0 || description) details[name] = { photos, description };
+    await tx.room.update({ where: { id: roomId }, data: { numbers, unitDetails: details } });
+    // The room's bookings follow its new name.
+    if (previous !== null && previous !== name) await tx.booking.updateMany({ where: { roomId, roomNumber: previous }, data: { roomNumber: name } });
+    await audit(tx, { actorId: actor.id, action: previous === null ? "room.unitAdd" : "room.unitUpdate", entityType: "listing", entityId: room.listingId, data: { room: room.name, unit: name, ...(previous && previous !== name ? { from: previous } : {}) } });
+    return { ok: true } as const;
+  });
+}
+
+/** Takes a room out of its type; refused while it has a current or coming booking. */
+export async function removeRoomUnit(actor: Actor, roomId: string, name: string, now: Date = new Date()): Promise<RoomUnitResult> {
+  return db.$transaction(async (tx) => {
+    const room = await tx.room.findUnique({ where: { id: roomId }, select: { listingId: true, name: true, numbers: true, unitDetails: true } });
+    if (!room || !(await managed(tx, actor, room.listingId))) return { ok: false, error: "notAllowed" } as const;
+    if (!room.numbers.includes(name)) return { ok: false, error: "notFound" } as const;
+    const today = new Date(`${now.toISOString().slice(0, 10)}T00:00:00Z`);
+    const booked = await tx.booking.count({ where: { roomId, roomNumber: name, status: { in: ["PENDING_PAYMENT", "CONFIRMED", "CHECKED_IN"] }, checkOut: { gte: today } } });
+    if (booked > 0) return { ok: false, error: "booked" } as const;
+    const details = unitDetailsMap(room.unitDetails);
+    delete details[name];
+    await tx.room.update({ where: { id: roomId }, data: { numbers: room.numbers.filter((n) => n !== name), unitDetails: details } });
+    await audit(tx, { actorId: actor.id, action: "room.unitRemove", entityType: "listing", entityId: room.listingId, data: { room: room.name, unit: name } });
+    return { ok: true } as const;
   });
 }

@@ -760,7 +760,12 @@
       "AT_CHECK_IN": "Show at check-in"
     },
     "payoutLink": "Payout details: where you get paid",
-    "foodOrdersLink": "Food orders for your guests"
+    "foodOrdersLink": "Food orders for your guests",
+    "lodge": {
+      "amenitiesHint": "For the lodge as a whole. In-room amenities (TV, kitchen…) are set on each room category below.",
+      "rulesTitle": "Booking rules",
+      "rulesHint": "How rooms can be booked: by the night or the day, check-in and check-out times, shortest and longest stay. Each room category has its own price (below)."
+    }
   },
   "Admin": {
     "title": "Admin",
@@ -1214,8 +1219,8 @@
     "availableOn": "Free {day}",
     "bookedOn": "Booked {day}",
     "freeFrom": "Free again from {date}",
-    "title": "Rooms",
-    "intro": "Each room has its own price, guests and amenities. Rooms being cleaned or repaired can't be booked.",
+    "title": "Room categories and rooms",
+    "intro": "Each room category has its prices, guests and amenities; each room in it can have its own name, photos and description. Rooms being cleaned or repaired can't be booked.",
     "guests": "{count, plural, one {# guest} other {# guests}}",
     "status": "Status",
     "statuses": {
@@ -1227,13 +1232,13 @@
     "edit": "Edit {name}",
     "remove": "Remove {name}",
     "failed": "That didn't work. Try again.",
-    "add": "Add a room",
+    "add": "Add a room category",
     "name": "Room name",
-    "price": "Price per night (RWF)",
+    "price": "Price (RWF)",
     "maxGuests": "Maximum guests",
     "description": "Description",
     "cancel": "Cancel",
-    "save": "Save room",
+    "save": "Save category",
     "wholePlace": "The whole place",
     "choose": "Choose a room",
     "perNight": "/ night",
@@ -1249,9 +1254,6 @@
     "freeCount": "{free} of {total} free {day}",
     "anyRoom": "Any free room",
     "photos": "Photos of this room type",
-    "eachRoomDetails": "Each room's own photos and description (tap a room)",
-    "aboutRoom": "About {room} (leave empty to use the type's)",
-    "photosOfRoom": "Photos of {room}",
     "addPhotos": "Add photos",
     "uploading": "Uploading…",
     "removePhoto": "Remove photo",
@@ -1260,7 +1262,25 @@
     "roomTypesTitle": "Room types",
     "freeTodayCount": "{free} of {total} free today",
     "fromPrice": "From",
-    "chooseRoomTitle": "Choose your room"
+    "chooseRoomTitle": "Choose your room",
+    "editCategory": "Edit category",
+    "removeCategory": "Delete category",
+    "roomsInCategory": "{count, plural, =0 {No rooms yet: add the first one} one {# room — tap one to edit it} other {# rooms — tap one to edit it}}",
+    "addRoom": "Add a room",
+    "unitName": "Room name or number",
+    "unitNameHint": "e.g. 101 or Kivu",
+    "unitPhotos": "This room's photos",
+    "unitAbout": "About this room (leave empty to use the category's)",
+    "saveUnit": "Save room",
+    "removeUnit": "Remove room",
+    "removeUnitQuestion": "Remove this room?",
+    "unitError": {
+      "taken": "Another room of this place already has this name or number.",
+      "booked": "This room has a current or coming booking, so it can't be removed.",
+      "name": "Give the room a name or number.",
+      "notFound": "This room changed. Refresh the page.",
+      "notAllowed": "You can't change this place's rooms."
+    }
   },
   "Settings": {
     "note": "Leave a field empty until the business decision is made: nothing is charged or promised for empty fields. Every change is recorded in the audit log, and bookings keep the settings they were made with.",

@@ -70,3 +70,11 @@ export function parseRoomNumbers(text: string): string[] {
 }
 
 export type RoomInput = z.input<typeof roomInput>;
+
+/** One room of a room type: its name or number, and its own photos and description (empty = the type's). */
+export const roomUnitInput = z.object({
+  name: z.string().trim().min(1).max(40),
+  photos: z.array(photoUrl).max(12).default([]),
+  description: z.string().trim().max(500).default(""),
+});
+export type RoomUnitInput = z.input<typeof roomUnitInput>;

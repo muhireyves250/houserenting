@@ -4,7 +4,7 @@ import { roomStatusOn } from "./availability";
 import { updateSettings } from "@/features/settings/service";
 import { db } from "@/lib/db";
 import { resetDb } from "@/test/db";
-import { removeRoom, saveRoom, setRoomStatus } from "./service";
+import { removeRoom, removeRoomUnit, saveRoom, saveRoomUnit, setRoomStatus } from "./service";
 
 const NOW = new Date("2026-10-15T08:00:00Z");
 const pay = { method: "mtn" as const, phone: "0788123456" };
@@ -101,6 +101,28 @@ describe("room-by-room and whole-place bookings", () => {
     await saveRoom({ id: "admin", role: "ADMIN" }, "lodge", roomA, { ...room, name: "First floor", rates: [{ unit: "NIGHT", price: 40000 }], numbers: ["101", "102"], unitDetails: details });
     expect((await db.room.findUnique({ where: { id: roomA }, select: { unitDetails: true } }))?.unitDetails).toEqual(details);
   });
+
+  it("each room of a category is added, renamed (its bookings follow) and removed on its own", async () => {
+    const admin = { id: "admin", role: "ADMIN" };
+    await saveRoom(admin, "lodge", roomA, { ...room, name: "First floor", rates: [{ unit: "NIGHT", price: 40000 }], numbers: ["101"] });
+    await saveRoom(admin, "lodge", roomB, { ...room, name: "Second floor", rates: [{ unit: "NIGHT", price: 40000 }], numbers: ["201"] });
+    const photo = "https://res.cloudinary.com/demo/kivu.jpg";
+    expect(await saveRoomUnit(admin, roomA, null, { name: "102", photos: [], description: "" })).toEqual({ ok: true });
+    expect(await saveRoomUnit(admin, roomA, null, { name: "201", photos: [], description: "" })).toEqual({ ok: false, error: "taken" });
+    expect(await saveRoomUnit({ id: "g1" }, roomA, null, { name: "103", photos: [], description: "" })).toEqual({ ok: false, error: "notAllowed" });
+    const night = { listingId: "lodge", unit: "NIGHT" as const, start: "2026-11-01", quantity: 2, guests: 1, payment: pay, roomId: roomA };
+    expect((await createRentalBooking({ ...night, guestId: "g1", roomNumber: "101" }, NOW)).ok).toBe(true);
+    // Renaming 101 to "Kivu" (with its own photo and words) moves the booking too.
+    expect(await saveRoomUnit(admin, roomA, "101", { name: "Kivu", photos: [photo], description: "Corner room" })).toEqual({ ok: true });
+    const a = await db.room.findUniqueOrThrow({ where: { id: roomA }, select: { numbers: true, unitDetails: true } });
+    expect(a.numbers).toEqual(["Kivu", "102"]);
+    expect(a.unitDetails).toEqual({ Kivu: { photos: [photo], description: "Corner room" } });
+    expect((await db.booking.findFirstOrThrow({ where: { roomId: roomA } })).roomNumber).toBe("Kivu");
+    // A booked room can't be removed; a free one can.
+    expect(await removeRoomUnit(admin, roomA, "Kivu", NOW)).toEqual({ ok: false, error: "booked" });
+    expect(await removeRoomUnit(admin, roomA, "102", NOW)).toEqual({ ok: true });
+    expect((await db.room.findUniqueOrThrow({ where: { id: roomA } })).numbers).toEqual(["Kivu"]);
+  }, 180_000);
 
   it("a room's own calendar shows only that room's bookings (and the whole place's)", async () => {
     await saveRoom({ id: "admin", role: "ADMIN" }, "lodge", roomA, { ...room, name: "Garden Double", rates: [{ unit: "NIGHT", price: 40000 }], numbers: ["101", "102"] });

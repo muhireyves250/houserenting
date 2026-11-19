@@ -3,8 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/session";
-import { removeRoom, saveRoom, setRoomStatus, type SaveRoomResult } from "./service";
-import { ROOM_STATUSES, type RoomInput, type RoomStatus } from "./validation";
+import { removeRoom, removeRoomUnit, saveRoom, saveRoomUnit, setRoomStatus, type RoomUnitResult, type SaveRoomResult } from "./service";
+import { ROOM_STATUSES, type RoomInput, type RoomStatus, type RoomUnitInput } from "./validation";
 
 const id = z.string().min(1).max(64);
 
@@ -34,4 +34,20 @@ export async function removeRoomAction(roomId: string): Promise<{ ok: boolean }>
   const result = await removeRoom(user, roomId);
   if (result) refresh();
   return { ok: result !== false };
+}
+
+export async function saveRoomUnitAction(roomId: string, previous: string | null, input: RoomUnitInput): Promise<RoomUnitResult> {
+  const user = await getCurrentUser();
+  if (!user || !id.safeParse(roomId).success || (previous !== null && typeof previous !== "string")) return { ok: false, error: "notAllowed" };
+  const result = await saveRoomUnit(user, roomId, previous, input);
+  if (result.ok) refresh();
+  return result;
+}
+
+export async function removeRoomUnitAction(roomId: string, name: string): Promise<RoomUnitResult> {
+  const user = await getCurrentUser();
+  if (!user || !id.safeParse(roomId).success || typeof name !== "string" || name.length > 40) return { ok: false, error: "notAllowed" };
+  const result = await removeRoomUnit(user, roomId, name);
+  if (result.ok) refresh();
+  return result;
 }

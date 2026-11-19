@@ -760,7 +760,12 @@
       "AT_CHECK_IN": "Yerekanwa ugeze"
     },
     "payoutLink": "Aho wishyurirwa",
-    "foodOrdersLink": "Ibiryo abakiriya bawe batumije"
+    "foodOrdersLink": "Ibiryo abakiriya bawe batumije",
+    "lodge": {
+      "amenitiesHint": "Ibya lodge yose. Ibiri mu byumba (TV, igikoni…) bishyirwa kuri buri bwoko bw'icyumba hepfo.",
+      "rulesTitle": "Amabwiriza yo gukodesha",
+      "rulesHint": "Uko ibyumba bikodeshwa: ku ijoro cyangwa ku munsi, amasaha yo kwinjira no gusohoka, igihe gito n'ikirekire. Buri bwoko bw'icyumba bufite igiciro cyabwo (hepfo)."
+    }
   },
   "Admin": {
     "title": "Ubuyobozi",
@@ -1214,8 +1219,8 @@
     "availableOn": "Kiri ubusa {day}",
     "bookedOn": "Cyafashwe {day}",
     "freeFrom": "Kizongera kuboneka guhera {date}",
-    "title": "Ibyumba",
-    "intro": "Buri cyumba gifite igiciro cyacyo, abashyitsi n'ibikoresho. Icyumba kiri gusukurwa cyangwa gusanwa ntikibikwa.",
+    "title": "Amoko y'ibyumba n'ibyumba",
+    "intro": "Buri bwoko bw'ibyumba bufite ibiciro byabwo, abashyitsi n'ibikoresho; buri cyumba kirimo gishobora kugira izina ryacyo, amafoto n'ibisobanuro. Ibyumba biri gusukurwa cyangwa gusanwa ntibishobora gukodeshwa.",
     "guests": "{count, plural, one {umushyitsi #} other {abashyitsi #}}",
     "status": "Uko gihagaze",
     "statuses": {
@@ -1227,13 +1232,13 @@
     "edit": "Hindura {name}",
     "remove": "Kuraho {name}",
     "failed": "Byanze. Ongera ugerageze.",
-    "add": "Ongeraho icyumba",
+    "add": "Ongeramo ubwoko bw'ibyumba",
     "name": "Izina ry'icyumba",
-    "price": "Igiciro ku ijoro (RWF)",
+    "price": "Igiciro (RWF)",
     "maxGuests": "Abashyitsi benshi",
     "description": "Ibisobanuro",
     "cancel": "Reka",
-    "save": "Bika icyumba",
+    "save": "Bika ubwoko",
     "wholePlace": "Ahantu hose",
     "choose": "Hitamo icyumba",
     "perNight": "/ ijoro",
@@ -1249,9 +1254,6 @@
     "freeCount": "{free} kuri {total} biri ubusa {day}",
     "anyRoom": "Icyumba icyo ari cyo cyose kiri ubusa",
     "photos": "Amafoto y'ubu bwoko bw'icyumba",
-    "eachRoomDetails": "Amafoto n'ibisobanuro bya buri cyumba (kanda ku cyumba)",
-    "aboutRoom": "Ibisobanuro bya {room} (siga ubusa ukoreshe iby'ubwoko)",
-    "photosOfRoom": "Amafoto ya {room}",
     "addPhotos": "Ongeraho amafoto",
     "uploading": "Biri koherezwa…",
     "removePhoto": "Kuraho ifoto",
@@ -1260,7 +1262,25 @@
     "roomTypesTitle": "Ubwoko bw'ibyumba",
     "freeTodayCount": "{free} kuri {total} biri ubusa uyu munsi",
     "fromPrice": "Guhera",
-    "chooseRoomTitle": "Hitamo icyumba cyawe"
+    "chooseRoomTitle": "Hitamo icyumba cyawe",
+    "editCategory": "Hindura ubwoko",
+    "removeCategory": "Siba ubwoko",
+    "roomsInCategory": "{count, plural, =0 {Nta byumba birimo: ongeramo icya mbere} one {Icyumba # — kanda kugira ngo ugihindure} other {Ibyumba # — kanda kimwe ugihindure}}",
+    "addRoom": "Ongeramo icyumba",
+    "unitName": "Izina cyangwa nimero y'icyumba",
+    "unitNameHint": "urugero 101 cyangwa Kivu",
+    "unitPhotos": "Amafoto y'iki cyumba",
+    "unitAbout": "Ibyerekeye iki cyumba (siga ubusa ukoreshe iby'ubwoko)",
+    "saveUnit": "Bika icyumba",
+    "removeUnit": "Kuramo icyumba",
+    "removeUnitQuestion": "Ukuremo iki cyumba?",
+    "unitError": {
+      "taken": "Ikindi cyumba cy'aha hantu gisanzwe gifite iri zina cyangwa nimero.",
+      "booked": "Iki cyumba gifite ubukode buriho cyangwa buzaza, ntigishobora gukurwamo.",
+      "name": "Ha icyumba izina cyangwa nimero.",
+      "notFound": "Iki cyumba cyahindutse. Ongera ufungure urupapuro.",
+      "notAllowed": "Ntushobora guhindura ibyumba by'aha hantu."
+    }
   },
   "Settings": {
     "note": "Siga ahantu ubusa kugeza icyemezo gifashwe: nta mafaranga yakwa kandi nta kintu gisezeranywa ku hasigaye ubusa. Buri mpinduka yandikwa mu nyandiko z'ibikorwa, kandi ibyabitswe bigumana igenamiterere ryariho.",
