@@ -20,7 +20,7 @@ export async function answerQuestionAction(questionId: string, text: string): Pr
   const ok = await answerQuestion(user, questionId, text);
   if (ok) {
     revalidatePath("/[locale]/host", "page");
-    revalidatePath("/[locale]/admin/moderation", "page");
+    revalidatePath("/[locale]/admin/support", "page");
   }
   return { ok };
 }

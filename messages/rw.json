@@ -775,7 +775,7 @@
       "label": "Ibice by'ubuyobozi",
       "overview": "Incamake",
       "moderation": "Igenzura",
-      "support": "Ubufasha",
+      "support": "Ubufasha n'ibitekerezo",
       "bookings": "Ibyabitswe",
       "users": "Abakoresha",
       "audit": "Inyandiko z'ibikorwa",
@@ -1145,7 +1145,15 @@
       "hideQuestion": "Ukureho iki? Ntikizongera kugaragara ku hantu.",
       "publishedEmpty": "Nta kintu cyatangajwe."
     },
-    "closeWindow": "Funga"
+    "closeWindow": "Funga",
+    "supportTabs": {
+      "requests": "Ubusabe bw'ubufasha",
+      "reviews": "Ibitekerezo n'ibibazo",
+      "short": {
+        "requests": "Ubufasha",
+        "reviews": "Ibitekerezo"
+      }
+    }
   },
   "Questions": {
     "title": "Ibibazo n'ibisubizo",

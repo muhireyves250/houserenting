@@ -775,7 +775,7 @@
       "label": "Sections d'administration",
       "overview": "Vue d'ensemble",
       "moderation": "Modération",
-      "support": "Assistance",
+      "support": "Aide et avis",
       "bookings": "Réservations",
       "users": "Utilisateurs",
       "audit": "Journal d'audit",
@@ -1145,7 +1145,15 @@
       "hideQuestion": "Retirer ceci ? Il ne s'affichera plus sur le lieu.",
       "publishedEmpty": "Rien de publié pour l'instant."
     },
-    "closeWindow": "Fermer"
+    "closeWindow": "Fermer",
+    "supportTabs": {
+      "requests": "Demandes d'aide",
+      "reviews": "Avis et questions",
+      "short": {
+        "requests": "Aide",
+        "reviews": "Avis"
+      }
+    }
   },
   "Questions": {
     "title": "Questions et réponses",

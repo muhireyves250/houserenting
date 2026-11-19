@@ -19,7 +19,7 @@ export default async function AdminLayout({ children, modal }: { children: React
   return (
     <AdminShell
       user={{ name: user.name, email: user.email }}
-      counts={{ listings: counts.listings, moderation: counts.moderation, support: counts.tickets, money: counts.payments + counts.rewards, bookings: counts.requests + counts.refunds, messages: chats, laundry, orders: foodPayments }}
+      counts={{ listings: counts.listings, support: counts.tickets + counts.moderation, money: counts.payments + counts.rewards, bookings: counts.requests + counts.refunds, messages: chats, laundry, orders: foodPayments }}
       unread={unread}
       languageSwitcher={
         <Suspense>

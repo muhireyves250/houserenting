@@ -23,7 +23,7 @@ export async function submitReview(userId: string, reference: string, rating: nu
   try {
     await db.$transaction(async (tx) => {
       await tx.review.create({ data: { bookingId: booking.id, listingId: booking.listingId, authorId: userId, rating, comment } });
-      await notifyAdmins(tx, "reviewSubmitted", { title: booking.listing.title }, "/admin/moderation");
+      await notifyAdmins(tx, "reviewSubmitted", { title: booking.listing.title }, "/admin/support?tab=reviews");
     });
   } catch (error) {
     // A second submit for the same booking (double click) hits the one-review-per-booking rule.

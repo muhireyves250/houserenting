@@ -775,7 +775,7 @@
       "label": "Admin sections",
       "overview": "Overview",
       "moderation": "Moderation",
-      "support": "Support",
+      "support": "Support and reviews",
       "bookings": "Bookings",
       "users": "Users",
       "audit": "Audit log",
@@ -1145,7 +1145,15 @@
       "hideQuestion": "Take this down? It stops showing on the place.",
       "publishedEmpty": "Nothing published yet."
     },
-    "closeWindow": "Close"
+    "closeWindow": "Close",
+    "supportTabs": {
+      "requests": "Support requests",
+      "reviews": "Reviews and questions",
+      "short": {
+        "requests": "Support",
+        "reviews": "Reviews"
+      }
+    }
   },
   "Questions": {
     "title": "Questions and answers",

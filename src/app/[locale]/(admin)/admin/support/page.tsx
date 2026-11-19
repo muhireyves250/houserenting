@@ -1,75 +1,45 @@
-import { ArrowRight, User } from "lucide-react";
-import { getLocale, getTranslations } from "next-intl/server";
-import { Chip, FillScreen, ScrollArea, StatTiles, Toolbar, adminCard } from "@/features/admin/components/kit";
-import { TicketStatusSelect } from "@/features/admin/components/StaffButtons";
-import { formatKigaliDateTime } from "@/features/bookings/format";
-import { TicketStatusBadge } from "@/features/support/components/TicketStatusBadge";
-import { staffTickets, type TicketStatus } from "@/features/support/service";
+import { LifeBuoy, MessageSquareWarning } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+import { attentionCounts } from "@/features/admin/stats";
+import { ModerationView } from "@/features/admin/views/ModerationView";
+import { SupportView } from "@/features/admin/views/SupportView";
 import { Link } from "@/i18n/navigation";
-import { db } from "@/lib/db";
+import { cn } from "@/lib/cn";
 import { requireAdmin } from "@/lib/permissions";
 
-type Props = { searchParams: Promise<{ status?: string }> };
-const STATUSES = ["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"] as const;
+type Props = { searchParams: Promise<{ tab?: string; status?: string; show?: string }> };
 
-/** Help requests from guests and owners: counts by status on top, one card each with its status and Open. */
-export default async function AdminSupportPage({ searchParams }: Props) {
+/** Support and reviews on one page: help requests in one tab, guests' questions and feedback in the other. */
+export default async function SupportAndReviewsPage({ searchParams }: Props) {
   await requireAdmin("/admin/support");
-  const raw = (await searchParams).status;
-  const status = STATUSES.find((s) => s === raw) as TicketStatus | undefined;
-  const [t, tAdmin, locale, tickets, counts] = await Promise.all([
-    getTranslations("Support"),
-    getTranslations("Admin"),
-    getLocale(),
-    staffTickets(status),
-    db.supportTicket.groupBy({ by: ["status"], _count: { _all: true } }),
-  ]);
-  const count = (s: TicketStatus) => counts.find((c) => c.status === s)?._count._all ?? 0;
-  return (
-    <FillScreen>
-      <Toolbar>
-        <StatTiles
-          items={STATUSES.map((s) => ({
-            label: t(`status.${s}`),
-            count: count(s),
-            // "Open" also lists those in progress (everything still to handle).
-            href: s === "OPEN" ? { pathname: "/admin/support" } : { pathname: "/admin/support", query: { status: s } },
-            on: s === "OPEN" ? !status : status === s,
-            tone: s === "OPEN" ? "text-amber-700" : s === "IN_PROGRESS" ? "text-primary" : "text-emerald-700",
-          }))}
-        />
-      </Toolbar>
-      <ScrollArea className="flex flex-col gap-5">
-      {tickets.length === 0 ? (
-        <p className="rounded-2xl bg-surface py-10 text-center text-[14px] text-muted ring-1 ring-line">{tAdmin("nothingHere")}</p>
-      ) : (
-        <ul className="grid gap-3 lg:grid-cols-2">
-          {tickets.map((ticket) => (
-            <li key={ticket.reference} className={adminCard}>
-              <div className="flex flex-wrap items-center gap-2">
-                <TicketStatusBadge status={ticket.status} label={t(`status.${ticket.status}`)} />
-                <Chip>{t(`categories.${ticket.category}`)}</Chip>
-                <span className="ml-auto text-[12px] text-muted">{formatKigaliDateTime(locale, ticket.updatedAt)}</span>
-              </div>
-              <Link href={`/admin/support/${ticket.reference}`} className="text-[16px] font-bold text-ink hover:text-primary">
-                {ticket.subject}
-              </Link>
-              <span className="flex items-center gap-2 text-[13px] text-muted">
-                <User className="size-4 shrink-0 text-primary" aria-hidden="true" />
-                {ticket.user.name} · <span className="font-mono">{ticket.reference}</span>
-              </span>
-              <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3">
-                <TicketStatusSelect reference={ticket.reference} status={ticket.status} />
-                <Link href={`/admin/support/${ticket.reference}`} className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-[13px] font-semibold text-white hover:bg-primary-hover">
-                  {tAdmin("openToAnswer")}
-                  <ArrowRight className="size-4" aria-hidden="true" />
-                </Link>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-      </ScrollArea>
-    </FillScreen>
+  const params = await searchParams;
+  const reviews = params.tab === "reviews";
+  const [t, counts] = await Promise.all([getTranslations("Admin"), attentionCounts()]);
+  const tabs = (
+    <nav aria-label={t("nav.support")} className="flex shrink-0 gap-2 rounded-2xl bg-surface p-1.5 ring-1 ring-line">
+      {(
+        [
+          ["requests", LifeBuoy, counts.tickets, !reviews, { pathname: "/admin/support" }],
+          ["reviews", MessageSquareWarning, counts.moderation, reviews, { pathname: "/admin/support", query: { tab: "reviews" } }],
+        ] as const
+      ).map(([key, Icon, count, on, href]) => (
+        <Link
+          key={key}
+          href={href}
+          aria-current={on ? "page" : undefined}
+          className={cn(
+            "flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-xl px-2 py-2.5 text-[13px] font-semibold transition-colors sm:gap-2 sm:px-3 sm:text-[14px]",
+            on ? "bg-primary text-white" : "text-ink/75 hover:bg-canvas hover:text-ink",
+          )}
+        >
+          <Icon className="size-4 shrink-0" aria-hidden="true" />
+          {/* Phones: the short name; computers: the full one. */}
+          <span className="truncate sm:hidden">{t(`supportTabs.short.${key}`)}</span>
+          <span className="hidden truncate sm:inline">{t(`supportTabs.${key}`)}</span>
+          {count > 0 && <span className={cn("rounded-full px-1.5 text-[11px] font-bold tabular-nums", on ? "bg-white/25 text-white" : "bg-primary/10 text-primary")}>{count}</span>}
+        </Link>
+      ))}
+    </nav>
   );
+  return reviews ? <ModerationView showPublished={params.show === "published"} tabs={tabs} /> : <SupportView raw={params.status} tabs={tabs} />;
 }

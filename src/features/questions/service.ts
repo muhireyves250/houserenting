@@ -20,7 +20,7 @@ export async function askQuestion(userId: string, listingId: string, text: strin
   if (waiting >= MAX_WAITING_PER_LISTING) return { ok: false, error: "tooMany" };
   await db.$transaction(async (tx) => {
     await tx.listingQuestion.create({ data: { listingId, askerId: userId, question } });
-    await notifyAdmins(tx, "questionAsked", { title: listing.title }, "/admin/moderation");
+    await notifyAdmins(tx, "questionAsked", { title: listing.title }, "/admin/support?tab=reviews");
   });
   return { ok: true };
 }
@@ -38,7 +38,7 @@ export async function answerQuestion(actor: { id: string; role?: string | null }
     if (!q || !isAdmin(actor)) return false;
     await tx.listingQuestion.update({ where: { id: questionId }, data: { answer, answeredById: actor.id, answeredAt: new Date() } });
     await audit(tx, { actorId: actor.id, action: "question.answer", entityType: "question", entityId: questionId });
-    await notifyAdmins(tx, "questionToCheck", { title: q.listing.title }, "/admin/moderation");
+    await notifyAdmins(tx, "questionToCheck", { title: q.listing.title }, "/admin/support?tab=reviews");
     return true;
   });
 }

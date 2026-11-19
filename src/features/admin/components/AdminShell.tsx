@@ -12,7 +12,6 @@ import {
   LifeBuoy,
   Menu,
   MessageSquare,
-  MessageSquareWarning,
   QrCode,
   ScrollText,
   Settings,
@@ -55,7 +54,6 @@ const GROUPS: { label: Group; items: { key: Key; href: string; icon: LucideIcon 
     label: "care",
     items: [
       { key: "support", href: "/admin/support", icon: LifeBuoy },
-      { key: "moderation", href: "/admin/moderation", icon: MessageSquareWarning },
     ],
   },
   {

@@ -59,7 +59,7 @@ export default async function AdminDashboardPage() {
     { label: t("attention.laundry"), count: laundry, href: "/admin/laundry" },
     { label: t("attention.messages"), count: chats, href: "/admin/messages?show=waiting" },
     { label: t("attention.listings"), count: stats.attention.listings, href: "/admin/listings?status=PENDING_REVIEW" },
-    { label: t("attention.moderation"), count: stats.attention.moderation, href: "/admin/moderation" },
+    { label: t("attention.moderation"), count: stats.attention.moderation, href: "/admin/support?tab=reviews" },
     { label: t("attention.tickets"), count: stats.attention.tickets, href: "/admin/support" },
     { label: t("attention.payments"), count: stats.attention.payments, href: "/admin/money" },
     { label: t("attention.rewards"), count: stats.attention.rewards, href: "/admin/money" },
