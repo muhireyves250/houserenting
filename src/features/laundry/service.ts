@@ -6,7 +6,7 @@ import { notify, notifyAdmins } from "@/features/notifications/service";
 import { todayISO } from "@/features/search/date-range";
 import { readSettings } from "@/features/settings/service";
 import { db } from "@/lib/db";
-import { isAdmin } from "@/lib/roles";
+import { canStaff } from "@/lib/roles";
 import { gramsFromKg, laundryPrice, laundrySplit, NEXT_LAUNDRY_STEP, OPEN_LAUNDRY, type LaundryStatus } from "./rules";
 
 type Actor = { id: string; role?: string | null };
@@ -72,7 +72,7 @@ export type MoveLaundryResult = { ok: true } | { ok: false; error: "notAllowed" 
  * guest. Open orders can be cancelled with a reason. The guest is told at every step.
  */
 export async function moveLaundry(actor: Actor, reference: string, to: LaundryStatus, input: { kg?: string; reason?: string } = {}): Promise<MoveLaundryResult> {
-  if (!isAdmin(actor)) return { ok: false, error: "notAllowed" };
+  if (!canStaff(actor, "laundry")) return { ok: false, error: "notAllowed" };
   const order = await db.laundryOrder.findUnique({ where: { reference }, select: { id: true, status: true, pricePerKg: true, guestId: true, listing: { select: { title: true } } } });
   if (!order) return { ok: false, error: "notFound" };
   const cancelling = to === "CANCELLED";
@@ -123,7 +123,7 @@ export type ConfirmLaundryResult = { ok: true } | { ok: false; error: "notAllowe
  * commission (the place's category rate) and the place's share are written to the ledger, once.
  */
 export async function confirmLaundryPayment(actor: Actor, reference: string, transactionId?: string, now: Date = new Date()): Promise<ConfirmLaundryResult> {
-  if (!isAdmin(actor)) return { ok: false, error: "notAllowed" };
+  if (!canStaff(actor, "laundry")) return { ok: false, error: "notAllowed" };
   const order = await db.laundryOrder.findUnique({
     where: { reference },
     select: { id: true, status: true, amount: true, paidAt: true, paymentClaim: true, guestId: true, bookingId: true, listing: { select: { hostId: true, title: true, type: true } } },
@@ -182,7 +182,7 @@ export function placesLaundry() {
 
 /** Staff turn laundry on (free or a price per kg) or off for a place. Logged. */
 export async function setPlaceLaundry(actor: Actor, listingId: string, pricePerKg: number | null): Promise<boolean> {
-  if (!isAdmin(actor)) return false;
+  if (!canStaff(actor, "laundry")) return false;
   if (pricePerKg !== null && (!Number.isInteger(pricePerKg) || pricePerKg < 0 || pricePerKg > 100_000)) return false;
   return db.$transaction(async (tx) => {
     const { count } = await tx.listing.updateMany({ where: { id: listingId }, data: { laundryPricePerKg: pricePerKg } });

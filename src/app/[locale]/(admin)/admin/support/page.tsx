@@ -5,13 +5,13 @@ import { ModerationView } from "@/features/admin/views/ModerationView";
 import { SupportView } from "@/features/admin/views/SupportView";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
-import { requireAdmin } from "@/lib/permissions";
+import { requireStaff } from "@/lib/permissions";
 
 type Props = { searchParams: Promise<{ tab?: string; status?: string; show?: string }> };
 
 /** Support and reviews on one page: help requests in one tab, guests' questions and feedback in the other. */
 export default async function SupportAndReviewsPage({ searchParams }: Props) {
-  await requireAdmin("/admin/support");
+  await requireStaff("support", "/admin/support");
   const params = await searchParams;
   const reviews = params.tab === "reviews";
   const [t, counts] = await Promise.all([getTranslations("Admin"), attentionCounts()]);

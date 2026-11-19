@@ -136,6 +136,7 @@ export function userForStaff(id: string) {
       status: true,
       emailVerified: true,
       locale: true,
+      staffAreas: true,
       createdAt: true,
       referredBy: { select: { id: true, name: true } },
       _count: { select: { referrals: true } },

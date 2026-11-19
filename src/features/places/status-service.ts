@@ -3,7 +3,7 @@ import { audit } from "@/features/audit/service";
 import { checkMove, type ListingMove } from "@/features/listings/lifecycle";
 import { notify, notifyAdmins } from "@/features/notifications/service";
 import { db } from "@/lib/db";
-import { isAdmin } from "@/lib/roles";
+import { canStaff } from "@/lib/roles";
 
 export type Actor = { id: string; role?: string | null };
 export type MoveResult = { ok: true } | { ok: false; error: "notFound" | "notAllowed" | "wrongStatus" | "reasonNeeded" | "payoutMissing" | "noPrices" };
@@ -24,7 +24,7 @@ export async function moveListing(actor: Actor, listingId: string, move: Listing
       select: { status: true, hostId: true, title: true, operator: true, publishedAt: true, _count: { select: { rates: true } } },
     });
     if (!listing) return { ok: false, error: "notFound" } as const;
-    const check = checkMove(move, listing.status, { isStaff: isAdmin(actor), isOwner: listing.hostId === actor.id }, why);
+    const check = checkMove(move, listing.status, { isStaff: canStaff(actor, "listings"), isOwner: listing.hostId === actor.id }, why);
     if (!check.ok) return check;
     if (GOES_LIVE.includes(move)) {
       if (listing._count.rates === 0) return { ok: false, error: "noPrices" } as const;

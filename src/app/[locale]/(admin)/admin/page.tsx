@@ -9,6 +9,7 @@ import { formatStayDates } from "@/features/bookings/format";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { requireAdmin } from "@/lib/permissions";
+import { canStaff, isStaffArea, type StaffArea } from "@/lib/roles";
 import { RenewalPopup } from "@/features/places/components/RenewalPopup";
 import { contractsEnding } from "@/features/places/status-service";
 
@@ -29,10 +30,13 @@ function Delta({ kpi, label, fresh }: { kpi: Kpi; label: string; fresh: string }
   );
 }
 
-export default async function AdminDashboardPage() {
+export default async function AdminDashboardPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const user = await requireAdmin("/admin");
-  const [t, tRooms, locale, stats, ending, desk, badges, foodOrders] = await Promise.all([
+  const denied = (await searchParams).denied;
+  const may = (area: StaffArea) => canStaff(user, area);
+  const [t, tAreas, tRooms, locale, stats, ending, desk, badges, foodOrders] = await Promise.all([
     getTranslations("Admin.dashboard"),
+    getTranslations("Admin.areas"),
     getTranslations("Rooms"),
     getLocale(),
     dashboardStats(),
@@ -45,39 +49,52 @@ export default async function AdminDashboardPage() {
   const compact = new Intl.NumberFormat(locale, { notation: "compact", maximumFractionDigits: 1 });
   const vsLast = t("vsLastMonth");
 
+  // Money figures only for staff who handle money.
   const tiles = [
     { label: t("kpi.bookings"), value: compact.format(stats.kpis.bookings.value), kpi: stats.kpis.bookings },
-    { label: t("kpi.paid"), value: `RWF ${compact.format(stats.kpis.paid.value)}`, kpi: stats.kpis.paid },
-    { label: t("kpi.platform"), value: `RWF ${compact.format(stats.kpis.platform.value)}`, kpi: stats.kpis.platform },
+    ...(may("money")
+      ? [
+          { label: t("kpi.paid"), value: `RWF ${compact.format(stats.kpis.paid.value)}`, kpi: stats.kpis.paid },
+          { label: t("kpi.platform"), value: `RWF ${compact.format(stats.kpis.platform.value)}`, kpi: stats.kpis.platform },
+        ]
+      : []),
     { label: t("kpi.newUsers"), value: compact.format(stats.kpis.newUsers.value), kpi: stats.kpis.newUsers },
   ];
   const { laundry, messages: chats } = badges;
-  const attention = [
-    { label: t("attention.food"), count: foodOrders, href: "/admin/orders" },
-    { label: t("attention.laundry"), count: laundry, href: "/admin/laundry" },
-    { label: t("attention.messages"), count: chats, href: "/admin/messages?show=waiting" },
-    { label: t("attention.listings"), count: badges.listings, href: "/admin/listings?status=PENDING_REVIEW" },
-    { label: t("attention.moderation"), count: badges.moderation, href: "/admin/support?tab=reviews" },
-    { label: t("attention.tickets"), count: badges.tickets, href: "/admin/support" },
-    { label: t("attention.payments"), count: badges.payments, href: "/admin/money" },
-    { label: t("attention.rewards"), count: badges.rewards, href: "/admin/money" },
-    { label: t("attention.requests"), count: badges.requests + badges.refunds, href: "/admin/bookings" },
-    { label: t("attention.contracts"), count: ending.length, href: "/admin/listings?status=ending" },
+  const attention: { label: string; count: number; href: string; area: StaffArea }[] = [
+    { label: t("attention.food"), count: foodOrders, href: "/admin/orders", area: "food" },
+    { label: t("attention.laundry"), count: laundry, href: "/admin/laundry", area: "laundry" },
+    { label: t("attention.messages"), count: chats, href: "/admin/messages?show=waiting", area: "messages" },
+    { label: t("attention.listings"), count: badges.listings, href: "/admin/listings?status=PENDING_REVIEW", area: "listings" },
+    { label: t("attention.moderation"), count: badges.moderation, href: "/admin/support?tab=reviews", area: "support" },
+    { label: t("attention.tickets"), count: badges.tickets, href: "/admin/support", area: "support" },
+    { label: t("attention.payments"), count: badges.payments, href: "/admin/money", area: "money" },
+    { label: t("attention.rewards"), count: badges.rewards, href: "/admin/money", area: "money" },
+    { label: t("attention.requests"), count: badges.requests + badges.refunds, href: "/admin/bookings", area: "bookings" },
+    { label: t("attention.contracts"), count: ending.length, href: "/admin/listings?status=ending", area: "listings" },
   ];
-  const waiting = attention.filter((a) => a.count > 0);
+  const waiting = attention.filter((a) => a.count > 0 && may(a.area));
 
   return (
     <div className="admin-overview flex flex-col gap-6">
-      <RenewalPopup
-        places={ending.map((l) => ({ id: l.id, title: l.title, contractEnd: l.contractEnd!.toISOString(), owner: l.host.name }))}
-      />
+      {may("listings") && (
+        <RenewalPopup
+          places={ending.map((l) => ({ id: l.id, title: l.title, contractEnd: l.contractEnd!.toISOString(), owner: l.host.name }))}
+        />
+      )}
+      {/* Sent here from a page this staff member wasn't given. */}
+      {isStaffArea(denied) && (
+        <p role="status" className="rounded-2xl bg-amber-50 px-4 py-3 text-[14px] text-amber-900 ring-1 ring-amber-200">
+          {t("denied", { area: tAreas(denied) })}
+        </p>
+      )}
       <div>
         <p className="text-[22px] leading-8 font-bold tracking-[-0.02em] text-ink">{t("title")}</p>
         <p className="text-[14px] text-muted">{t("subtitle", { listings: stats.liveListings })}</p>
       </div>
 
       {/* This month at a glance */}
-      <section aria-label={t("thisMonth")} className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <section aria-label={t("thisMonth")} className={cn("grid grid-cols-2 gap-3", tiles.length === 4 ? "lg:grid-cols-4" : "lg:max-w-2xl")}>
         {tiles.map((tile) => (
           <div key={tile.label} className={cn(panel, "flex flex-col gap-1 p-3 md:gap-1.5 md:p-4")}>
             <span className="text-[12px] text-muted md:text-[13px]">{tile.label}</span>
@@ -114,6 +131,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* The front desk, below the rest: each group folded like "Finished (11)", opened with a tap. */}
+      {may("bookings") && (
       <section aria-label={t("desk.title")} className="flex flex-col gap-2.5">
         <h2 className="text-[15px] font-semibold text-ink">{t("desk.title")}</h2>
         {(
@@ -141,6 +159,7 @@ export default async function AdminDashboardPage() {
           </details>
         ))}
       </section>
+      )}
     </div>
   );
 }

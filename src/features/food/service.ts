@@ -6,7 +6,7 @@ import { notify, notifyAdmins } from "@/features/notifications/service";
 import { readSettings } from "@/features/settings/service";
 import { todayISO } from "@/features/search/date-range";
 import { db } from "@/lib/db";
-import { isAdmin } from "@/lib/roles";
+import { canStaff } from "@/lib/roles";
 import { distanceKm, nextOrderSteps, priceCart, type OrderActor, type OrderStatus } from "./rules";
 import { menuItemInput, orderInput, restaurantInput, type MenuItemInput, type OrderInput, type RestaurantInput } from "./validation";
 
@@ -25,7 +25,7 @@ const ALLOWED: Record<RestaurantRole, readonly RestaurantAction[]> = {
 export const canRestaurant = (role: RestaurantRole | null, action: RestaurantAction) => role !== null && ALLOWED[role].includes(action);
 
 export async function restaurantRole(actor: Actor, restaurantId: string): Promise<RestaurantRole | null> {
-  if (isAdmin(actor)) return "staff";
+  if (canStaff(actor, "food")) return "staff";
   const r = await db.restaurant.findUnique({ where: { id: restaurantId }, select: { ownerId: true, team: { where: { userId: actor.id }, select: { role: true } } } });
   if (!r) return null;
   if (r.ownerId === actor.id) return "owner";
@@ -47,7 +47,7 @@ export type SaveRestaurantResult = { ok: true; id: string } | { ok: false; error
  */
 export async function canAddRestaurant(actor: Actor): Promise<boolean> {
   // Kitchens are set up by VIIPA for the places they serve.
-  return isAdmin(actor);
+  return canStaff(actor, "food");
 }
 
 /** Owners or staff create a restaurant (a draft until staff publish it); its owner, managers or staff edit it. */
@@ -58,11 +58,11 @@ export async function saveRestaurant(actor: Actor, id: string | null, raw: Resta
   const data = parsed.data;
   if (data.listingId) {
     const listing = await db.listing.findUnique({ where: { id: data.listingId }, select: { hostId: true } });
-    if (!listing || (!isAdmin(actor) && listing.hostId !== (ownerId ?? actor.id))) data.listingId = null;
+    if (!listing || (!canStaff(actor, "food") && listing.hostId !== (ownerId ?? actor.id))) data.listingId = null;
   }
   if (id === null) {
     if (!(await canAddRestaurant(actor))) return { ok: false, error: "notAllowed" };
-    const owner = isAdmin(actor) && ownerId ? ownerId : actor.id;
+    const owner = canStaff(actor, "food") && ownerId ? ownerId : actor.id;
     const created = await db.restaurant.create({ data: { ...data, ownerId: owner } });
     await audit(db, { actorId: actor.id, action: "restaurant.create", entityType: "restaurant", entityId: created.id });
     return { ok: true, id: created.id };
@@ -75,7 +75,7 @@ export async function saveRestaurant(actor: Actor, id: string | null, raw: Resta
 
 /** Staff publish, hide (with a reason the owner sees) or show a restaurant again. */
 export async function setRestaurantStatus(actor: Actor, id: string, status: "PUBLISHED" | "HIDDEN", reason = ""): Promise<boolean> {
-  if (!isAdmin(actor)) return false;
+  if (!canStaff(actor, "food")) return false;
   const why = reason.trim().slice(0, 500);
   if (status === "HIDDEN" && !why) return false;
   const r = await db.restaurant.findUnique({ where: { id }, select: { status: true, ownerId: true, name: true, _count: { select: { menu: true } } } });
@@ -461,7 +461,7 @@ export type ConfirmOrderResult = { ok: true } | { ok: false; error: "notAllowed"
  * share go to the ledger once; the kitchen is told it can start.
  */
 export async function confirmOrderPayment(actor: Actor, reference: string, transactionId?: string, now: Date = new Date()): Promise<ConfirmOrderResult> {
-  if (!isAdmin(actor)) return { ok: false, error: "notAllowed" };
+  if (!canStaff(actor, "food")) return { ok: false, error: "notAllowed" };
   const order = await db.foodOrder.findUnique({
     where: { reference },
     select: { id: true, total: true, status: true, paidAt: true, paymentClaim: true, customerId: true, bookingId: true, restaurant: { select: { id: true, name: true, ownerId: true, team: { where: { role: { in: ["MANAGER", "STAFF"] } }, select: { userId: true } } } } },
@@ -518,7 +518,7 @@ export function allOrders(take = 150) {
 
 /** Staff delete a restaurant that never had an order (with its menu and team); one with orders can only be hidden. */
 export async function deleteRestaurant(actor: Actor, id: string): Promise<{ ok: true } | { ok: false; error: "notAllowed" | "hasOrders" | "notFound" }> {
-  if (!isAdmin(actor)) return { ok: false, error: "notAllowed" };
+  if (!canStaff(actor, "food")) return { ok: false, error: "notAllowed" };
   const r = await db.restaurant.findUnique({ where: { id }, select: { name: true, _count: { select: { orders: true } } } });
   if (!r) return { ok: false, error: "notFound" };
   if (r._count.orders > 0) return { ok: false, error: "hasOrders" };
@@ -531,7 +531,7 @@ export async function deleteRestaurant(actor: Actor, id: string): Promise<{ ok: 
 
 /** Staff delete a cancelled order that was never paid (e.g. a test); paid orders stay for the accounts. */
 export async function deleteFoodOrder(actor: Actor, reference: string): Promise<boolean> {
-  if (!isAdmin(actor)) return false;
+  if (!canStaff(actor, "food")) return false;
   return db.$transaction(async (tx) => {
     const { count } = await tx.foodOrder.deleteMany({ where: { reference, status: "CANCELLED", paidAt: null } });
     if (count === 1) await audit(tx, { actorId: actor.id, action: "order.delete", entityType: "order", entityId: reference });

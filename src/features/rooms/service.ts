@@ -3,7 +3,7 @@ import type { Prisma } from "@/generated/prisma/client";
 import { audit } from "@/features/audit/service";
 import { db } from "@/lib/db";
 import { OWNER_EDITABLE } from "@/features/listings/lifecycle";
-import { isAdmin } from "@/lib/roles";
+import { canStaff } from "@/lib/roles";
 import { roomInput, roomUnitInput, ROOM_STATUSES, unitDetailsMap, type RoomInput, type RoomStatus, type RoomUnitInput } from "./validation";
 
 type Actor = { id: string; role?: string | null };
@@ -14,9 +14,9 @@ async function managed(tx: Prisma.TransactionClient, actor: Actor, listingId: st
     where: { id: listingId, status: { not: "ARCHIVED" } },
     select: { id: true, hostId: true, status: true, title: true, team: { where: { userId: actor.id, role: "MANAGER" }, select: { id: true } } },
   });
-  if (!listing || (listing.hostId !== actor.id && listing.team.length === 0 && !isAdmin(actor))) return null;
+  if (!listing || (listing.hostId !== actor.id && listing.team.length === 0 && !canStaff(actor, "listings"))) return null;
   // Owners change rooms only until the place is sent for review; staff any time.
-  if (!isAdmin(actor) && !OWNER_EDITABLE.includes(listing.status)) return null;
+  if (!canStaff(actor, "listings") && !OWNER_EDITABLE.includes(listing.status)) return null;
   return listing;
 }
 

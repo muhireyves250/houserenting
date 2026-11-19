@@ -42,6 +42,8 @@ export const auth = betterAuth({
       locale: { type: "string", required: false, defaultValue: "en", input: true },
       role: { type: "string", required: false, defaultValue: "USER", input: false },
       isHost: { type: "boolean", required: false, defaultValue: false, input: false },
+      // What a staff member may manage (see canStaff); never set by the person themselves.
+      staffAreas: { type: "string[]", required: false, defaultValue: [], input: false },
     },
   },
   emailAndPassword: {

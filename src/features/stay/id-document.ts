@@ -3,7 +3,7 @@ import { DOCUMENT_MAX_BYTES, sniffType } from "@/features/places/documents-servi
 import { audit } from "@/features/audit/service";
 import { db } from "@/lib/db";
 import { canOn } from "@/features/places/access";
-import { isAdmin } from "@/lib/roles";
+import { canStaff } from "@/lib/roles";
 
 type Actor = { id: string; role?: string | null };
 
@@ -28,6 +28,6 @@ export async function readGuestId(actor: Actor, reference: string) {
   if (!b?.guestDocument) return null;
   const allowed = b.guestId === actor.id || (await canOn(actor, b.listingId, "guestId"));
   if (!allowed) return null;
-  if (isAdmin(actor)) await audit(db, { actorId: actor.id, action: "booking.guestIdView", entityType: "booking", entityId: reference });
+  if (canStaff(actor, "bookings")) await audit(db, { actorId: actor.id, action: "booking.guestIdView", entityType: "booking", entityId: reference });
   return b.guestDocument;
 }

@@ -4,13 +4,13 @@ import { PageTabs, StickyTabs } from "@/features/admin/components/kit";
 import { ActivityLogView } from "@/features/admin/views/ActivityLogView";
 import { SettingsView } from "@/features/admin/views/SettingsView";
 import { UsersView } from "@/features/admin/views/UsersView";
-import { requireAdmin } from "@/lib/permissions";
+import { requireStaff } from "@/lib/permissions";
 
 type Props = { searchParams: Promise<{ tab?: string; type?: string; page?: string; filter?: string; q?: string }> };
 
 /** Settings, users and the activity log (who changed what), as three tabs. */
 export default async function SettingsPage({ searchParams }: Props) {
-  await requireAdmin("/admin/settings");
+  await requireStaff("settings", "/admin/settings");
   const params = await searchParams;
   const tab = params.tab === "log" || params.tab === "users" ? params.tab : "settings";
   const t = await getTranslations("Admin");

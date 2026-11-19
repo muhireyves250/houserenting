@@ -5,7 +5,7 @@ import { newReference } from "@/features/bookings/reference";
 import { notify, notifyAdmins } from "@/features/notifications/service";
 import { todayISO } from "@/features/search/date-range";
 import { db } from "@/lib/db";
-import { isAdmin } from "@/lib/roles";
+import { canStaff } from "@/lib/roles";
 import { z } from "zod";
 import { isPromoterCode } from "./cookie";
 import { promoterRewardFor, REPEAT_GUEST_DAYS } from "./rules";
@@ -50,7 +50,7 @@ export async function savePromoter(userId: string, raw: PromoterInput): Promise<
 }
 
 export async function setPromoterStatus(actor: Actor, promoterId: string, status: "ACTIVE" | "SUSPENDED", reason = "", now: Date = new Date()): Promise<boolean> {
-  if (!isAdmin(actor)) return false;
+  if (!canStaff(actor, "promotions")) return false;
   const why = reason.trim().slice(0, 300);
   if (status === "SUSPENDED" && !why) return false;
   const p = await db.promoter.findUnique({ where: { id: promoterId }, select: { status: true, userId: true } });
@@ -101,7 +101,7 @@ export async function maybePromoterReward(tx: Prisma.TransactionClient, bookingI
 
 /** Staff approve or void a reward; approved ones are paid out separately (and written to the ledger). */
 export async function decidePromoterReward(actor: Actor, rewardId: string, approve: boolean, now: Date = new Date()): Promise<boolean> {
-  if (!isAdmin(actor)) return false;
+  if (!canStaff(actor, "promotions")) return false;
   return db.$transaction(async (tx) => {
     const r = await tx.promoterReward.findFirst({ where: { id: rewardId, status: "PENDING" }, select: { promoter: { select: { userId: true } }, amount: true } });
     if (!r) return false;
@@ -113,7 +113,7 @@ export async function decidePromoterReward(actor: Actor, rewardId: string, appro
 }
 
 export async function markPromoterRewardPaid(actor: Actor, rewardId: string, now: Date = new Date()): Promise<boolean> {
-  if (!isAdmin(actor)) return false;
+  if (!canStaff(actor, "promotions")) return false;
   return db.$transaction(async (tx) => {
     const r = await tx.promoterReward.findFirst({ where: { id: rewardId, status: "APPROVED", paidAt: null }, select: { amount: true, bookingId: true, promoter: { select: { userId: true } } } });
     if (!r) return false;
@@ -167,7 +167,7 @@ export type StaffPromoterResult = { ok: true } | { ok: false; error: "notAllowed
 
 /** Staff add a promoter for someone with an account (by email): active straight away, and told. */
 export async function staffAddPromoter(actor: Actor, email: string, raw: PromoterInput): Promise<StaffPromoterResult> {
-  if (!isAdmin(actor)) return { ok: false, error: "notAllowed" };
+  if (!canStaff(actor, "promotions")) return { ok: false, error: "notAllowed" };
   const parsed = promoterInput.safeParse(raw);
   if (!parsed.success) return { ok: false, errors: errorsOf(parsed.error.issues) };
   const user = await db.user.findUnique({ where: { email: email.trim().toLowerCase() }, select: { id: true, promoter: { select: { id: true } } } });
@@ -190,7 +190,7 @@ export async function staffAddPromoter(actor: Actor, email: string, raw: Promote
 
 /** Staff change a promoter's details (where they promote, where rewards are paid). Logged. */
 export async function staffEditPromoter(actor: Actor, promoterId: string, raw: PromoterInput): Promise<StaffPromoterResult> {
-  if (!isAdmin(actor)) return { ok: false, error: "notAllowed" };
+  if (!canStaff(actor, "promotions")) return { ok: false, error: "notAllowed" };
   const parsed = promoterInput.safeParse(raw);
   if (!parsed.success) return { ok: false, errors: errorsOf(parsed.error.issues) };
   const { count } = await db.promoter.updateMany({ where: { id: promoterId }, data: parsed.data });
@@ -201,7 +201,7 @@ export async function staffEditPromoter(actor: Actor, promoterId: string, raw: P
 
 /** Staff delete a promoter who has no rewards (their history stays otherwise: suspend instead). */
 export async function deletePromoter(actor: Actor, promoterId: string): Promise<StaffPromoterResult> {
-  if (!isAdmin(actor)) return { ok: false, error: "notAllowed" };
+  if (!canStaff(actor, "promotions")) return { ok: false, error: "notAllowed" };
   const p = await db.promoter.findUnique({ where: { id: promoterId }, select: { code: true, _count: { select: { rewards: true } } } });
   if (!p) return { ok: false, error: "notFound" };
   if (p._count.rewards > 0) return { ok: false, error: "hasRewards" };

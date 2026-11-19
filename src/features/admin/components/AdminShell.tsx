@@ -21,6 +21,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { LogoMark, LogoWordmark } from "@/components/ui/Logo";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
+import type { StaffArea } from "@/lib/roles";
 
 type Key = "orders" | "laundry" | "messages" | "reports" | "overview" | "listings" | "bookings" | "requests" | "restaurants" | "promoters" | "money" | "promotions" | "moderation" | "support" | "users" | "settings" | "audit" | "account" | "notifications";
 
@@ -83,6 +84,19 @@ const EXTRA: { key: Key; href: string; icon: LucideIcon }[] = [
   { key: "notifications", href: "/admin/notifications", icon: Bell },
 ];
 
+/** The staff area each page belongs to (Overview, account and notices are for all staff). */
+const AREA_OF: Partial<Record<Key, StaffArea>> = {
+  listings: "listings",
+  bookings: "bookings",
+  messages: "messages",
+  orders: "food",
+  laundry: "laundry",
+  support: "support",
+  money: "money",
+  promotions: "promotions",
+  settings: "settings",
+};
+
 const isOn = (pathname: string, href: string) => (href === "/admin" ? pathname === "/admin" : pathname === href || pathname.startsWith(`${href}/`));
 
 /**
@@ -91,12 +105,15 @@ const isOn = (pathname: string, href: string) => (href === "/admin" ? pathname =
  */
 export function AdminShell({
   user,
+  areas,
   counts,
   unread,
   languageSwitcher,
   children,
 }: {
   user: { name: string; email: string };
+  /** What this staff member may manage: the sidebar and bottom bar show only these. */
+  areas: readonly StaffArea[];
   counts: Partial<Record<Key, number>>;
   /** Unread notifications, for the bell. */
   unread: number;
@@ -108,6 +125,10 @@ export function AdminShell({
   const tAdmin = useTranslations("Admin");
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const allowed = (key: Key) => {
+    const area = AREA_OF[key];
+    return !area || areas.includes(area);
+  };
   const current = [...GROUPS.flatMap((g) => g.items), ...EXTRA].find((i) => isOn(pathname, i.href)) ?? GROUPS[0]!.items[0]!;
 
   const sidebar = (
@@ -123,7 +144,7 @@ export function AdminShell({
       <nav aria-label={t("label")} className="flex-1 overflow-y-auto px-3 pt-3 pb-4">
         {/* One plain list (no groups). */}
         <ul className="mt-1 flex flex-col gap-0.5">
-          {NAV.map(({ key, href, icon: Icon }) => {
+          {NAV.filter((i) => allowed(i.key)).map(({ key, href, icon: Icon }) => {
             const on = isOn(pathname, href);
             const count = counts[key] ?? 0;
             return (
@@ -237,7 +258,7 @@ export function AdminShell({
       {!/^\/admin\/messages\/[^/]+/.test(pathname) && (
         <nav aria-label={t("label")} className="fixed inset-x-0 bottom-0 z-40 px-3 pb-[calc(6px+env(safe-area-inset-bottom))] lg:hidden" data-print-hide>
           <ul className="mx-auto flex w-full max-w-md items-center rounded-full bg-surface/95 p-1.5 shadow-[0_14px_36px_-12px_rgba(0,40,100,0.45)] ring-1 ring-line backdrop-blur-xl">
-            {BOTTOM.map(({ key, href, icon: Icon }) => {
+            {BOTTOM.filter((i) => allowed(i.key)).map(({ key, href, icon: Icon }) => {
               const on = href === "/admin" ? pathname === "/admin" : isOn(pathname, href);
               const count = counts[key] ?? 0;
               return (

@@ -6,7 +6,7 @@ import { isBookingReference } from "@/features/bookings/reference";
 import { staffMoveBooking } from "@/features/bookings/service";
 import { canOn } from "@/features/places/access";
 import { db } from "@/lib/db";
-import { isAdmin } from "@/lib/roles";
+import { canStaff } from "@/lib/roles";
 import { getCurrentUser } from "@/lib/session";
 import { STAY_REQUEST_KINDS } from "./rules";
 import {
@@ -80,7 +80,7 @@ export async function decideStayRequestAction(requestId: string, approve: boolea
 
 export async function settleRefundAction(reference: string, outcome: "REFUNDED" | "DECLINED", note: string): Promise<{ ok: boolean }> {
   const user = await getCurrentUser();
-  if (!user || !isAdmin(user) || !isBookingReference(reference) || !["REFUNDED", "DECLINED"].includes(outcome)) return { ok: false };
+  if (!user || !canStaff(user, "bookings") || !isBookingReference(reference) || !["REFUNDED", "DECLINED"].includes(outcome)) return { ok: false };
   const ok = await settleRefund(user.id, reference, outcome, typeof note === "string" ? note : "");
   if (ok) revalidatePath("/[locale]/admin", "layout");
   return { ok };
@@ -90,7 +90,7 @@ export async function settleRefundAction(reference: string, outcome: "REFUNDED" 
 async function frontDesk(reference: string) {
   const user = await getCurrentUser();
   if (!user || !isBookingReference(reference)) return null;
-  if (isAdmin(user)) return user;
+  if (canStaff(user, "bookings")) return user;
   const booking = await db.booking.findUnique({ where: { reference }, select: { listingId: true } });
   return booking && (await canOn(user, booking.listingId, "checkIn")) ? user : null;
 }

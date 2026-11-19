@@ -8,7 +8,7 @@ import { laundryOwed, type LaundryStatus } from "@/features/laundry/rules";
 import { placesLaundry, staffLaundry } from "@/features/laundry/service";
 import { Link } from "@/i18n/navigation";
 import { formatRWF } from "@/lib/format";
-import { requireAdmin } from "@/lib/permissions";
+import { requireStaff } from "@/lib/permissions";
 
 const TONE: Record<LaundryStatus, string> = {
   REQUESTED: "bg-amber-100 text-amber-900",
@@ -23,7 +23,7 @@ const TONE: Record<LaundryStatus, string> = {
  * place's laundry price are folded away.
  */
 export default async function AdminLaundryPage() {
-  await requireAdmin("/admin/laundry");
+  await requireStaff("laundry", "/admin/laundry");
   const [t, locale, rows, places] = await Promise.all([getTranslations("Laundry"), getLocale(), staffLaundry(), placesLaundry()]);
   const toCollect = rows.filter((o) => o.status === "REQUESTED");
   const washing = rows.filter((o) => o.status === "PICKED_UP");

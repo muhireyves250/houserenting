@@ -12,13 +12,13 @@ import { Link } from "@/i18n/navigation";
 import { db } from "@/lib/db";
 import { dynamicMessage } from "@/lib/dynamic-message";
 import { formatRWF } from "@/lib/format";
-import { requireAdmin } from "@/lib/permissions";
+import { requireStaff } from "@/lib/permissions";
 
 type Props = { params: Promise<{ id: string }> };
 
 export default async function AdminRestaurantPage({ params }: Props) {
   const { id } = await params;
-  await requireAdmin(`/admin/restaurants/${id}`);
+  await requireStaff("food", `/admin/restaurants/${id}`);
   const r = await restaurantForTeam(id);
   if (!r) notFound();
   const [t, tFood, locale, orders, places, history] = await Promise.all([

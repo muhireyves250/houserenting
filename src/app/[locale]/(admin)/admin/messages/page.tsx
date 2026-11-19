@@ -6,13 +6,13 @@ import { Chip, FillScreen, ScrollArea, StatTiles, Toolbar } from "@/features/adm
 import { listConversations } from "@/features/chats/service";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
-import { requireAdmin } from "@/lib/permissions";
+import { requireStaff } from "@/lib/permissions";
 
 type Props = { searchParams: Promise<{ show?: string }> };
 
 /** Staff inbox: every client conversation (clients talk to VIIPA, never directly to owners). Waiting ones first. */
 export default async function AdminMessagesPage({ searchParams }: Props) {
-  const user = await requireAdmin("/admin/messages");
+  const user = await requireStaff("messages", "/admin/messages");
   const waitingOnly = (await searchParams).show === "waiting";
   const [t, tAdmin, locale, chats] = await Promise.all([getTranslations("Chats"), getTranslations("Admin"), getLocale(), listConversations(user)]);
   const time = new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Kigali" });

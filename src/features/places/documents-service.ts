@@ -1,7 +1,7 @@
 import "server-only";
 import { audit } from "@/features/audit/service";
 import { db } from "@/lib/db";
-import { isAdmin } from "@/lib/roles";
+import { canStaff } from "@/lib/roles";
 import type { Actor } from "./status-service";
 
 export const DOCUMENT_KINDS = ["OWNER_ID", "OWNERSHIP_PROOF", "MANAGEMENT_AUTHORIZATION", "OTHER"] as const;
@@ -21,7 +21,7 @@ export function sniffType(bytes: Uint8Array): (typeof DOCUMENT_TYPES)[number] | 
 
 async function owns(actor: Actor, listingId: string) {
   const listing = await db.listing.findUnique({ where: { id: listingId }, select: { hostId: true } });
-  return Boolean(listing && (listing.hostId === actor.id || isAdmin(actor)));
+  return Boolean(listing && (listing.hostId === actor.id || canStaff(actor, "listings")));
 }
 
 export type UploadResult = { ok: true; id: string } | { ok: false; error: "notAllowed" | "tooLarge" | "badType" | "invalid" };
@@ -48,14 +48,14 @@ export function listingDocuments(listingId: string) {
 /** A document for its listing's owner or staff only; every staff view is logged. */
 export async function readDocument(actor: Actor, documentId: string) {
   const doc = await db.listingDocument.findUnique({ where: { id: documentId }, include: { listing: { select: { hostId: true } } } });
-  if (!doc || (doc.listing.hostId !== actor.id && !isAdmin(actor))) return null;
-  if (isAdmin(actor)) await audit(db, { actorId: actor.id, action: "document.view", entityType: "listing", entityId: doc.listingId, data: { document: doc.id } });
+  if (!doc || (doc.listing.hostId !== actor.id && !canStaff(actor, "listings"))) return null;
+  if (canStaff(actor, "listings")) await audit(db, { actorId: actor.id, action: "document.view", entityType: "listing", entityId: doc.listingId, data: { document: doc.id } });
   return doc;
 }
 
 export async function deleteDocument(actor: Actor, documentId: string): Promise<boolean> {
   const doc = await db.listingDocument.findUnique({ where: { id: documentId }, select: { listingId: true, listing: { select: { hostId: true } } } });
-  if (!doc || (doc.listing.hostId !== actor.id && !isAdmin(actor))) return false;
+  if (!doc || (doc.listing.hostId !== actor.id && !canStaff(actor, "listings"))) return false;
   await db.$transaction(async (tx) => {
     await tx.listingDocument.delete({ where: { id: documentId } });
     await audit(tx, { actorId: actor.id, action: "document.delete", entityType: "listing", entityId: doc.listingId, data: { document: documentId } });

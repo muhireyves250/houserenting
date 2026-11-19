@@ -7,7 +7,7 @@ import { logger } from "@/lib/logger";
 import { db } from "@/lib/db";
 import { OWNER_EDITABLE } from "@/features/listings/lifecycle";
 import { canOn } from "@/features/places/access";
-import { isAdmin } from "@/lib/roles";
+import { canStaff } from "@/lib/roles";
 import type { SessionUser } from "@/lib/auth";
 import { getCurrentUser } from "@/lib/session";
 import { addPhoto, archiveListing, getHostListing, removePhoto, saveListing, submitForReview, type SaveResult } from "./service";
@@ -43,7 +43,7 @@ async function ownerFor(user: SessionUser, listingId: string): Promise<string> {
   if (!(await canOn(user, listingId, "edit"))) return user.id;
   const listing = await db.listing.findUnique({ where: { id: listingId }, select: { hostId: true, status: true } });
   // Owners change photos only until the place is sent for review; staff any time.
-  if (!listing || (!isAdmin(user) && !OWNER_EDITABLE.includes(listing.status))) return "";
+  if (!listing || (!canStaff(user, "listings") && !OWNER_EDITABLE.includes(listing.status))) return "";
   return listing.hostId;
 }
 
@@ -57,7 +57,7 @@ export async function adminSaveListingAction(
   ownerId: string | null,
 ): Promise<SaveResult | { ok: false; error: "auth" | "failed" }> {
   const user = await getCurrentUser();
-  if (!user || !isAdmin(user)) return { ok: false, error: "auth" };
+  if (!user || !canStaff(user, "listings")) return { ok: false, error: "auth" };
   if (listingId !== null && !id.safeParse(listingId).success) return { ok: false, error: "notFound" };
   try {
     const hostId =

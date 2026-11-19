@@ -17,7 +17,7 @@ import { formatKigaliDateTime } from "@/features/bookings/format";
 import { HostStatus } from "@/features/hosting/components/HostStatus";
 import { Link } from "@/i18n/navigation";
 import { formatRWF } from "@/lib/format";
-import { requireAdmin } from "@/lib/permissions";
+import { requireStaff } from "@/lib/permissions";
 import { RoomStatusSelect } from "@/features/admin/components/RoomStatusSelect";
 import { PageIntro, Panel, Table, td } from "@/features/admin/components/ui";
 import { listingBookings } from "@/features/admin/queries";
@@ -31,7 +31,7 @@ const card = "rounded-3xl bg-surface p-5 shadow-[0_10px_30px_-14px_rgba(16,24,40
 
 export default async function AdminListingPage({ params }: Props) {
   const { id } = await params;
-  await requireAdmin(`/admin/listings/${id}`);
+  await requireStaff("listings", `/admin/listings/${id}`);
   const listing = await listingForReview(id);
   if (!listing) notFound();
   const [t, tHost, tType, tFacility, tListings, locale, history, rooms, bookings, tBookings, tRooms] = await Promise.all([

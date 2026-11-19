@@ -1,7 +1,7 @@
 import "server-only";
 import { notify, notifyAdmins } from "@/features/notifications/service";
 import { db } from "@/lib/db";
-import { isAdmin } from "@/lib/roles";
+import { canStaff } from "@/lib/roles";
 
 export const MESSAGE_MAX = 2000;
 
@@ -32,7 +32,7 @@ const TEAM = { id: "viipa", name: "VIIPA", image: null } as const;
 
 /** A client's own conversations, or (for staff) every client conversation; newest first. */
 export async function listConversations(actor: Actor) {
-  const staff = isAdmin(actor);
+  const staff = canStaff(actor, "messages");
   const rows = await db.conversation.findMany({
     where: staff ? {} : { guestId: actor.id },
     orderBy: { lastMessageAt: "desc" },
@@ -74,7 +74,7 @@ export async function unreadChats(actor: Actor): Promise<number> {
 
 /** A conversation for its client or for staff (null for anyone else); opening it marks it read. */
 export async function openConversation(actor: Actor, id: string, now: Date = new Date()) {
-  const staff = isAdmin(actor);
+  const staff = canStaff(actor, "messages");
   const c = await db.conversation.findFirst({
     where: { id, ...(staff ? {} : { guestId: actor.id }) },
     select: {
@@ -100,7 +100,7 @@ export async function openConversation(actor: Actor, id: string, now: Date = new
 export async function sendMessage(actor: Actor, conversationId: string, text: string, now: Date = new Date()): Promise<boolean> {
   const body = text.trim();
   if (body.length < 1 || body.length > MESSAGE_MAX) return false;
-  const staff = isAdmin(actor);
+  const staff = canStaff(actor, "messages");
   return db.$transaction(async (tx) => {
     const c = await tx.conversation.findFirst({
       where: { id: conversationId, ...(staff ? {} : { guestId: actor.id }) },

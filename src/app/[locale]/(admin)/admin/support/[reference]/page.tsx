@@ -7,14 +7,14 @@ import { isTicketReference } from "@/features/bookings/reference";
 import { ReplyBox } from "@/features/support/components/ReplyBox";
 import { TicketThread } from "@/features/support/components/TicketThread";
 import { staffTicket } from "@/features/support/service";
-import { requireAdmin } from "@/lib/permissions";
+import { requireStaff } from "@/lib/permissions";
 import { dynamicMessage } from "@/lib/dynamic-message";
 
 type Props = { params: Promise<{ reference: string }> };
 
 export default async function AdminTicketPage({ params }: Props) {
   const { reference } = await params;
-  await requireAdmin(`/admin/support/${reference}`);
+  await requireStaff("support", `/admin/support/${reference}`);
   if (!isTicketReference(reference)) notFound();
   const ticket = await staffTicket(reference);
   if (!ticket) notFound();

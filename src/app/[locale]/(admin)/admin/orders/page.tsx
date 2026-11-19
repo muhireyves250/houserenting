@@ -3,13 +3,13 @@ import { getTranslations } from "next-intl/server";
 import { PageTabs } from "@/features/admin/components/kit";
 import { FoodOrdersView } from "@/features/admin/views/FoodOrdersView";
 import { RestaurantsView } from "@/features/admin/views/RestaurantsView";
-import { requireAdmin } from "@/lib/permissions";
+import { requireStaff } from "@/lib/permissions";
 
 type Props = { searchParams: Promise<{ tab?: string; status?: string }> };
 
 /** Food on one page: guests' orders in one tab, the restaurants (and their menus) in the other. */
 export default async function FoodPage({ searchParams }: Props) {
-  await requireAdmin("/admin/orders");
+  await requireStaff("food", "/admin/orders");
   const params = await searchParams;
   const restaurants = params.tab === "restaurants";
   const t = await getTranslations("Admin");

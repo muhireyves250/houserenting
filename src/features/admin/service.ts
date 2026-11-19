@@ -2,6 +2,7 @@ import "server-only";
 import { audit } from "@/features/audit/service";
 import { moveListing } from "@/features/places/status-service";
 import { db } from "@/lib/db";
+import { STAFF_AREAS } from "@/lib/roles";
 
 export function pendingListings() {
   return db.listing.findMany({
@@ -69,8 +70,27 @@ export async function setUserRole(adminId: string, userId: string, role: "USER" 
   return db.$transaction(async (tx) => {
     const user = await tx.user.findUnique({ where: { id: userId }, select: { role: true } });
     if (!user || user.role === role) return false;
-    await tx.user.update({ where: { id: userId }, data: { role } });
+    // Customers carry no staff areas; a new admin starts with none until they are ticked.
+    await tx.user.update({ where: { id: userId }, data: { role, ...(role === "USER" ? { staffAreas: [] } : {}) } });
     await audit(tx, { actorId: adminId, action: "user.role", entityType: "user", entityId: userId, data: { from: user.role, to: role } });
+    return true;
+  });
+}
+
+/**
+ * What an admin may manage (super admins always manage everything). Only those allowed to manage staff may
+ * change it, never their own, and only on admins. Unknown areas are dropped.
+ */
+export async function setStaffAreas(adminId: string, userId: string, raw: readonly unknown[]): Promise<boolean> {
+  if (adminId === userId) return false;
+  const areas = STAFF_AREAS.filter((area) => raw.includes(area));
+  const actor = await db.user.findUnique({ where: { id: adminId }, select: { id: true, role: true } });
+  if (!actor || !(await canManageStaff(actor))) return false;
+  return db.$transaction(async (tx) => {
+    const user = await tx.user.findUnique({ where: { id: userId }, select: { role: true, staffAreas: true } });
+    if (!user || user.role !== "ADMIN") return false;
+    await tx.user.update({ where: { id: userId }, data: { staffAreas: areas } });
+    await audit(tx, { actorId: adminId, action: "user.areas", entityType: "user", entityId: userId, data: { from: user.staffAreas, to: areas } });
     return true;
   });
 }

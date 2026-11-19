@@ -5,13 +5,14 @@ import { audit } from "@/features/audit/service";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { readFilter, reportCsv } from "@/features/reports/service";
-import { isAdmin } from "@/lib/roles";
+import { canStaff } from "@/lib/roles";
 
 /** Staff-only CSV downloads: bookings (with the table's filters), payments, ledger. Each export is logged. */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ kind: string }> }) {
   const session = await auth.api.getSession({ headers: await headers() });
-  if (!session || !isAdmin(session.user)) return NextResponse.json({ error: "forbidden" }, { status: 403 });
   const { kind } = await params;
+  // Bookings export for booking staff; payments, ledger and reports for money staff.
+  if (!session || !canStaff(session.user, kind === "bookings" ? "bookings" : "money")) return NextResponse.json({ error: "forbidden" }, { status: 403 });
   const search = request.nextUrl.searchParams;
   const status = BOOKING_STATUSES.includes(search.get("status") as BookingStatusFilter) ? (search.get("status") as BookingStatusFilter) : undefined;
   const csv =

@@ -12,7 +12,7 @@ import { roomLabel } from "@/features/rooms/links";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { db } from "@/lib/db";
-import { requireAdmin } from "@/lib/permissions";
+import { requireStaff } from "@/lib/permissions";
 
 type Props = { params: Promise<{ id: string }> };
 const iso = (d: Date) => d.toISOString().slice(0, 10);
@@ -23,7 +23,7 @@ const iso = (d: Date) => d.toISOString().slice(0, 10);
  */
 export default async function AdminConversationPage({ params }: Props) {
   const { id } = await params;
-  const user = await requireAdmin(`/admin/messages/${id}`);
+  const user = await requireStaff("messages", `/admin/messages/${id}`);
   const chat = await openConversation(user, id);
   if (!chat) notFound();
   const [t, tAdmin, tBookings, tRooms, locale, guest] = await Promise.all([

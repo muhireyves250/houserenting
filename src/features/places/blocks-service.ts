@@ -1,7 +1,7 @@
 import "server-only";
 import { audit } from "@/features/audit/service";
 import { db } from "@/lib/db";
-import { isAdmin } from "@/lib/roles";
+import { canStaff } from "@/lib/roles";
 import { canOn } from "./access";
 import type { Actor } from "./status-service";
 
@@ -47,7 +47,7 @@ export async function createBlock(
       },
     });
     // Only staff see bookings: owners just learn the dates are blocked.
-    return { ok: true, overlapping: isAdmin(actor) ? overlapping : 0 } as const;
+    return { ok: true, overlapping: canStaff(actor, "listings") ? overlapping : 0 } as const;
   });
 }
 

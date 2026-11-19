@@ -29,6 +29,9 @@ model User {
   phone            String?
   locale           String             @default("en")
   role             Role               @default(USER)
+  /// What an ADMIN may manage (listings, bookings, messages, food, laundry, support, money, promotions, settings).
+  /// SUPER_ADMIN manages everything whatever is here; customers have none.
+  staffAreas       String[]           @default([])
   isHost           Boolean            @default(false)
   status           UserStatus         @default(ACTIVE)
   createdAt        DateTime           @default(now())

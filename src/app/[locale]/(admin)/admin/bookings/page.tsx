@@ -11,13 +11,13 @@ import { formatStayDates } from "@/features/bookings/format";
 import { GuestRequests } from "@/features/stay/components/GuestRequests";
 import { Link } from "@/i18n/navigation";
 import { formatRWF } from "@/lib/format";
-import { requireAdmin } from "@/lib/permissions";
+import { requireStaff } from "@/lib/permissions";
 
 type Props = { searchParams: Promise<{ status?: string; q?: string; page?: string }> };
 const iso = (d: Date) => d.toISOString().slice(0, 10);
 
 export default async function AdminBookingsPage({ searchParams }: Props) {
-  await requireAdmin("/admin/bookings");
+  await requireStaff("bookings", "/admin/bookings");
   const params = await searchParams;
   const status = BOOKING_STATUSES.includes(params.status as BookingStatusFilter) ? (params.status as BookingStatusFilter) : undefined;
   const q = (params.q ?? "").slice(0, 100);

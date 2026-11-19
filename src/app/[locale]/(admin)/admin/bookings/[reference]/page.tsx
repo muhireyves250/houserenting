@@ -13,7 +13,7 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { dynamicMessage } from "@/lib/dynamic-message";
 import { formatRWF } from "@/lib/format";
-import { requireAdmin } from "@/lib/permissions";
+import { requireStaff } from "@/lib/permissions";
 import { DecideRequest, NoShowButton, SettleRefund } from "@/features/stay/components/StaffStayPanels";
 import { priceChangeFor } from "@/features/stay/rules";
 import { ConfirmPayment } from "@/features/payments/components/ManualPayment";
@@ -23,7 +23,7 @@ const iso = (d: Date) => d.toISOString().slice(0, 10);
 
 export default async function AdminBookingPage({ params }: Props) {
   const { reference } = await params;
-  await requireAdmin(`/admin/bookings/${reference}`);
+  await requireStaff("bookings", `/admin/bookings/${reference}`);
   if (!isBookingReference(reference)) notFound();
   const b = await bookingForStaff(reference);
   if (!b) notFound();

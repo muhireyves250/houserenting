@@ -1043,7 +1043,8 @@
         "overdue": "Bari bakwiye kuba baragiye",
         "none": "Ntawe.",
         "nobody": "Nta muntu uza cyangwa ugenda uyu munsi."
-      }
+      },
+      "denied": "Nta burenganzira ufite kuri {area}. Saba umuyobozi mukuru niba ubukeneye."
     },
     "bookingsIntro": "Ibyabitswe byose: shakisha nimero, umushyitsi cyangwa ahantu, toranya uko bihagaze, fungura kimwe urebe byose.",
     "exportCsv": "Kuramo CSV",
@@ -1171,7 +1172,23 @@
       "reports": "Raporo",
       "receipt": "Inyemezabwishyu",
       "users": "Abakoresha"
-    }
+    },
+    "areas": {
+      "listings": "Amacumbi",
+      "bookings": "Ibyumba byafashwe n’ibyifuzo by’abakiliya",
+      "messages": "Ubutumwa",
+      "food": "Ibyo kurya byatumijwe na resitora",
+      "laundry": "Kumesa",
+      "support": "Ubufasha n’ibitekerezo",
+      "money": "Amafaranga, raporo n’inyemezabwishyu",
+      "promotions": "Kode za promosiyo n’abamamaza",
+      "settings": "Igenamiterere, abakoresha n’ibyakozwe"
+    },
+    "areasIntro": "Hitamo ibyo uyu muyobozi ashobora gucunga. Azabona izi paji gusa muri menu ye.",
+    "areasSave": "Bika uburenganzira",
+    "areasSaved": "Byabitswe.",
+    "areasFailed": "Ntibyabitswe. Ongera ugerageze.",
+    "superAdminAll": "Abayobozi bakuru bacunga byose."
   },
   "Questions": {
     "title": "Ibibazo n'ibisubizo",

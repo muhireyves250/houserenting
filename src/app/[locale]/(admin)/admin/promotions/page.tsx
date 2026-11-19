@@ -3,13 +3,13 @@ import { getTranslations } from "next-intl/server";
 import { PageTabs, StickyTabs } from "@/features/admin/components/kit";
 import { PromotersView } from "@/features/admin/views/PromotersView";
 import { PromotionsView } from "@/features/admin/views/PromotionsView";
-import { requireAdmin } from "@/lib/permissions";
+import { requireStaff } from "@/lib/permissions";
 
 type Props = { searchParams: Promise<{ tab?: string }> };
 
 /** Promotions on one page: promo codes in one tab, promoters and their rewards in the other. */
 export default async function PromotionsPage({ searchParams }: Props) {
-  await requireAdmin("/admin/promotions");
+  await requireStaff("promotions", "/admin/promotions");
   const promoters = (await searchParams).tab === "promoters";
   const t = await getTranslations("Admin");
   const tabs = (

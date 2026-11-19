@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { LISTING_MOVES, type ListingMove } from "@/features/listings/lifecycle";
 import { db } from "@/lib/db";
-import { isAdmin } from "@/lib/roles";
+import { canStaff } from "@/lib/roles";
 import { getCurrentUser } from "@/lib/session";
 import { BLOCK_KINDS, createBlock, endBlock, type BlockKind, type BlockResult } from "./blocks-service";
 import { deleteDocument } from "./documents-service";
@@ -26,7 +26,7 @@ export async function moveListingAction(listingId: string, move: ListingMove, re
 
 export async function updatePlaceAdminAction(listingId: string, input: { contractStart: string | null; contractEnd: string | null; featured: boolean; operator: "OWNER" | "VIIPA"; keepVisible?: boolean }) {
   const user = await getCurrentUser();
-  if (!user || !isAdmin(user) || !id.safeParse(listingId).success || (input.operator !== "OWNER" && input.operator !== "VIIPA")) return { ok: false };
+  if (!user || !canStaff(user, "listings") || !id.safeParse(listingId).success || (input.operator !== "OWNER" && input.operator !== "VIIPA")) return { ok: false };
   const result = await updatePlaceAdmin(user.id, listingId, { ...input, featured: input.featured === true, keepVisible: input.keepVisible === true });
   if (result.ok) refresh();
   return result;
@@ -69,7 +69,7 @@ export async function savePayoutAction(input: PayoutInput) {
 
 export async function verifyPayoutAction(userId: string): Promise<{ ok: boolean }> {
   const user = await getCurrentUser();
-  if (!user || !isAdmin(user) || !id.safeParse(userId).success) return { ok: false };
+  if (!user || !canStaff(user, "listings") || !id.safeParse(userId).success) return { ok: false };
   const ok = await verifyPayoutAccount(user.id, userId);
   if (ok) refresh();
   return { ok };
@@ -86,7 +86,7 @@ export async function deleteDocumentAction(documentId: string): Promise<{ ok: bo
 /** Staff list owners by email when creating a place for someone. */
 export async function findOwnerAction(email: string): Promise<{ id: string; name: string } | null> {
   const user = await getCurrentUser();
-  if (!user || !isAdmin(user) || typeof email !== "string" || email.length > 200) return null;
+  if (!user || !canStaff(user, "listings") || typeof email !== "string" || email.length > 200) return null;
   return db.user.findUnique({ where: { email: email.trim().toLowerCase() }, select: { id: true, name: true } });
 }
 

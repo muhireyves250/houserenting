@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { isAdmin } from "@/lib/roles";
+import { canStaff } from "@/lib/roles";
 import { getCurrentUser } from "@/lib/session";
 import { ORDER_STATUSES, type OrderStatus } from "./rules";
 import {
@@ -38,7 +38,7 @@ export async function saveRestaurantAction(restaurantId: string | null, input: R
   if (restaurantId !== null && !id.safeParse(restaurantId).success) return { ok: false, error: "notAllowed" };
   // Staff can create a restaurant for an owner's account.
   let ownerId: string | undefined;
-  if (restaurantId === null && ownerEmail && isAdmin(user)) {
+  if (restaurantId === null && ownerEmail && canStaff(user, "food")) {
     const owner = await db.user.findUnique({ where: { email: ownerEmail.trim().toLowerCase() }, select: { id: true } });
     if (!owner) return { ok: false, errors: { ownerEmail: "noAccount" } };
     ownerId = owner.id;

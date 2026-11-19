@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Avatar } from "@/components/ui/Avatar";
 import { RoleToggle } from "@/features/admin/components/RoleToggle";
+import { StaffAreasForm } from "@/features/admin/components/StaffAreasForm";
 import { UserStatusForm } from "@/features/admin/components/StaffForms";
 import { Facts, PageIntro, Panel, Table, td } from "@/features/admin/components/ui";
 import { userForStaff } from "@/features/admin/queries";
@@ -14,7 +15,7 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { dynamicMessage } from "@/lib/dynamic-message";
 import { formatRWF } from "@/lib/format";
-import { requireAdmin } from "@/lib/permissions";
+import { requireStaff } from "@/lib/permissions";
 import { canManageStaff } from "@/features/admin/service";
 
 type Props = { params: Promise<{ id: string }> };
@@ -22,7 +23,7 @@ const iso = (d: Date) => d.toISOString().slice(0, 10);
 
 export default async function AdminUserPage({ params }: Props) {
   const { id } = await params;
-  const admin = await requireAdmin(`/admin/users/${id}`);
+  const admin = await requireStaff("settings", `/admin/users/${id}`);
   const user = await userForStaff(id);
   if (!user) notFound();
   const [t, tBookings, tHost, tSupport, locale, history] = await Promise.all([
@@ -120,6 +121,13 @@ export default async function AdminUserPage({ params }: Props) {
               <span className="text-[13px] text-muted">{t(`roleName.${user.role}`)}</span>
               <RoleToggle userId={user.id} role={user.role} self={self} canManage={manageStaff} />
             </div>
+            {/* What this admin may manage (super admins manage everything; customers nothing). */}
+            {user.role === "ADMIN" && !self && (
+              <div className="mt-4 border-t border-line pt-4">
+                <StaffAreasForm userId={user.id} initial={user.staffAreas} canManage={manageStaff} />
+              </div>
+            )}
+            {user.role === "SUPER_ADMIN" && <p className="mt-3 text-[13px] text-muted">{t("superAdminAll")}</p>}
           </Panel>
           {!self && (
             <Panel title={user.status === "SUSPENDED" ? t("reactivate") : t("suspend")}>

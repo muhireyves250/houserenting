@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { AdminShell } from "@/features/admin/components/AdminShell";
 import { adminBadges } from "@/features/admin/stats";
 import { requireAdmin } from "@/lib/permissions";
+import { staffAreasOf } from "@/lib/roles";
 import { Suspense } from "react";
 import { LocaleSwitcher } from "@/components/shell/LocaleSwitcher";
 
@@ -17,6 +18,7 @@ export default async function AdminLayout({ children, modal }: { children: React
   return (
     <AdminShell
       user={{ name: user.name, email: user.email }}
+      areas={staffAreasOf(user)}
       counts={{ listings: counts.listings, support: counts.tickets + counts.moderation, money: counts.payments + counts.rewards, bookings: counts.requests + counts.refunds, messages: counts.messages, laundry: counts.laundry, orders: counts.orders }}
       unread={unread}
       languageSwitcher={

@@ -5,13 +5,13 @@ import { MoneyView } from "@/features/admin/views/MoneyView";
 import { ReportsView } from "@/features/admin/views/ReportsView";
 import { ReceiptForm } from "@/features/receipt/components/ReceiptForm";
 import { getReceiptDetails } from "@/features/receipt/service";
-import { requireAdmin } from "@/lib/permissions";
+import { requireStaff } from "@/lib/permissions";
 
 type Props = { searchParams: Promise<Record<string, string | undefined>> };
 
 /** Money in one place: payouts and payments, reports, and what guests' receipts show. */
 export default async function MoneyAndReportsPage({ searchParams }: Props) {
-  await requireAdmin("/admin/money");
+  await requireStaff("money", "/admin/money");
   const params = await searchParams;
   const tab = params.tab === "reports" || params.tab === "receipt" ? params.tab : "money";
   const t = await getTranslations("Admin");

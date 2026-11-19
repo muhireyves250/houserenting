@@ -1,10 +1,10 @@
 import { getTranslations } from "next-intl/server";
 import { PageIntro } from "@/features/admin/components/ui";
 import { EMPTY_RESTAURANT, RestaurantForm } from "@/features/food/components/RestaurantForm";
-import { requireAdmin } from "@/lib/permissions";
+import { requireStaff } from "@/lib/permissions";
 
 export default async function AdminNewRestaurantPage() {
-  await requireAdmin("/admin/restaurants/new");
+  await requireStaff("food", "/admin/restaurants/new");
   const t = await getTranslations("Food");
   return (
     <div className="flex max-w-3xl flex-col gap-4">

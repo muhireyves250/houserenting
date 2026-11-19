@@ -2,7 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { audit } from "@/features/audit/service";
 import { db } from "@/lib/db";
-import { isAdmin } from "@/lib/roles";
+import { canStaff } from "@/lib/roles";
 import { receiptInput, type ReceiptDetails, type ReceiptInput } from "./validation";
 
 /** The business details printed on guests' receipts (empty fields are left off). */
@@ -25,7 +25,7 @@ export type SaveReceiptResult = { ok: true } | { ok: false; errors: Record<strin
 
 /** Staff change what receipts show. Logged. */
 export async function saveReceiptDetails(actor: { id: string; role?: string | null }, raw: ReceiptInput): Promise<SaveReceiptResult> {
-  if (!isAdmin(actor)) return { ok: false, error: "notAllowed" };
+  if (!canStaff(actor, "money")) return { ok: false, error: "notAllowed" };
   const parsed = receiptInput.safeParse(raw);
   if (!parsed.success) {
     const errors: Record<string, string> = {};

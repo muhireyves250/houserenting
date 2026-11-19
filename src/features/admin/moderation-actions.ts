@@ -6,18 +6,18 @@ import { isBookingReference } from "@/features/bookings/reference";
 import { staffMoveBooking } from "@/features/bookings/service";
 import { hidePublishedQuestion, moderateQuestion } from "@/features/questions/service";
 import { hidePublishedReview, moderateReview } from "@/features/reviews/service";
-import { isAdmin } from "@/lib/roles";
+import { canStaff, type StaffArea } from "@/lib/roles";
 import { getCurrentUser } from "@/lib/session";
 
 const id = z.string().min(1).max(64);
 
-async function staff() {
+async function staff(area: StaffArea) {
   const user = await getCurrentUser();
-  return user && isAdmin(user) ? user : null;
+  return user && canStaff(user, area) ? user : null;
 }
 
 export async function moderateQuestionAction(questionId: string, publish: boolean): Promise<{ ok: boolean }> {
-  const admin = await staff();
+  const admin = await staff("support");
   if (!admin || !id.safeParse(questionId).success) return { ok: false };
   const ok = await moderateQuestion(admin.id, questionId, publish === true);
   if (ok) revalidatePath("/[locale]", "layout");
@@ -25,7 +25,7 @@ export async function moderateQuestionAction(questionId: string, publish: boolea
 }
 
 export async function moderateReviewAction(reviewId: string, publish: boolean): Promise<{ ok: boolean }> {
-  const admin = await staff();
+  const admin = await staff("support");
   if (!admin || !id.safeParse(reviewId).success) return { ok: false };
   const ok = await moderateReview(admin.id, reviewId, publish === true);
   if (ok) revalidatePath("/[locale]", "layout");
@@ -33,7 +33,7 @@ export async function moderateReviewAction(reviewId: string, publish: boolean): 
 }
 
 export async function moveBookingAction(reference: string, to: "CHECKED_IN" | "COMPLETED"): Promise<{ ok: boolean }> {
-  const admin = await staff();
+  const admin = await staff("bookings");
   if (!admin || typeof reference !== "string" || !isBookingReference(reference) || (to !== "CHECKED_IN" && to !== "COMPLETED")) return { ok: false };
   const ok = await staffMoveBooking(admin.id, reference, to);
   // Bookings, the overview's front desk and the menu counts all change.
@@ -42,7 +42,7 @@ export async function moveBookingAction(reference: string, to: "CHECKED_IN" | "C
 }
 
 export async function staffCancelBookingAction(reference: string, reason: string): Promise<{ ok: boolean }> {
-  const admin = await staff();
+  const admin = await staff("bookings");
   if (!admin || typeof reference !== "string" || !isBookingReference(reference) || typeof reason !== "string" || reason.length > 300) return { ok: false };
   const { staffCancelUnpaid } = await import("./queries");
   const ok = await staffCancelUnpaid(admin.id, reference, reason);
@@ -51,7 +51,7 @@ export async function staffCancelBookingAction(reference: string, reason: string
 }
 
 export async function setUserStatusAction(userId: string, status: "ACTIVE" | "SUSPENDED", reason: string): Promise<{ ok: boolean }> {
-  const admin = await staff();
+  const admin = await staff("settings");
   if (!admin || !id.safeParse(userId).success || (status !== "ACTIVE" && status !== "SUSPENDED") || typeof reason !== "string" || reason.length > 300) return { ok: false };
   const { setUserStatus } = await import("./queries");
   const ok = await setUserStatus(admin.id, userId, status, reason);
@@ -61,7 +61,7 @@ export async function setUserStatusAction(userId: string, status: "ACTIVE" | "SU
 
 /** Take published feedback or a published question down again. */
 export async function hidePublishedAction(kind: "question" | "review", itemId: string): Promise<{ ok: boolean }> {
-  const admin = await staff();
+  const admin = await staff("support");
   if (!admin || !id.safeParse(itemId).success || (kind !== "question" && kind !== "review")) return { ok: false };
   const ok = kind === "review" ? await hidePublishedReview(admin.id, itemId) : await hidePublishedQuestion(admin.id, itemId);
   if (ok) revalidatePath("/[locale]", "layout");

@@ -13,14 +13,14 @@ import { RoomsEditor } from "@/features/rooms/components/RoomsEditor";
 import { listingRooms } from "@/features/rooms/service";
 import { uploadsEnabled } from "@/lib/cloudinary";
 import { db } from "@/lib/db";
-import { requireAdmin } from "@/lib/permissions";
+import { requireStaff } from "@/lib/permissions";
 
 type Props = { params: Promise<{ id: string }> };
 
 /** Staff edit any place directly; changes apply without going back to review. */
 export default async function AdminEditListingPage({ params }: Props) {
   const { id } = await params;
-  await requireAdmin(`/admin/listings/${id}/edit`);
+  await requireStaff("listings", `/admin/listings/${id}/edit`);
   const owner = await db.listing.findUnique({ where: { id }, select: { hostId: true } });
   const listing = owner && (await getHostListing(owner.hostId, id));
   if (!listing) notFound();

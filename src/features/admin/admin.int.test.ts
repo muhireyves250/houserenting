@@ -6,6 +6,8 @@ import { resetDb } from "@/test/db";
 import { unreadChats } from "@/features/chats/service";
 import { laundryToHandle } from "@/features/laundry/service";
 import { unreadCount } from "@/features/notifications/service";
+import { moveLaundry } from "@/features/laundry/service";
+import { setStaffAreas, setUserRole } from "./service";
 import { adminBadges, attentionCounts, dashboardStats } from "./stats";
 import { bookingsCsv, searchBookings, setUserStatus, staffCancelUnpaid } from "./queries";
 
@@ -133,5 +135,39 @@ describe("overview numbers", () => {
     expect(stats.kpis.bookings).toEqual({ value: 0, previous: 0 });
     expect(stats.liveListings).toBe(1);
     expect(stats.bookingsPerDay).toHaveLength(30);
+  });
+});
+
+describe("staff areas", () => {
+  it("super admins give admins areas; the session carries them; services follow them", async () => {
+    await db.user.update({ where: { id: "admin" }, data: { role: "SUPER_ADMIN" } });
+    await auth.api.signUpEmail({ body: { name: "Lin", email: "lin@example.com", password: "Long-enough-pass-1" } });
+    const lin = await db.user.findUniqueOrThrow({ where: { email: "lin@example.com" } });
+
+    // Only admins carry areas, and only a super admin sets them (never their own).
+    expect(await setStaffAreas("admin", lin.id, ["laundry"])).toBe(false);
+    expect(await setUserRole("admin", lin.id, "ADMIN")).toBe(true);
+    expect((await db.user.findUniqueOrThrow({ where: { id: lin.id } })).staffAreas).toEqual([]);
+    expect(await setStaffAreas("admin", lin.id, ["laundry", "nonsense", "food"])).toBe(true);
+    expect((await db.user.findUniqueOrThrow({ where: { id: lin.id } })).staffAreas).toEqual(["food", "laundry"]);
+    expect(await setStaffAreas(lin.id, "admin", ["laundry"])).toBe(false);
+    expect(await setStaffAreas("admin", "admin", [])).toBe(false);
+
+    await db.user.update({ where: { id: lin.id }, data: { emailVerified: true } });
+    // The signed-in session knows the areas, so every check sees them.
+    const { headers } = await auth.api.signInEmail({ body: { email: "lin@example.com", password: "Long-enough-pass-1" }, returnHeaders: true });
+    const cookie = headers.get("set-cookie")!.split(";")[0]!;
+    const session = await auth.api.getSession({ headers: new Headers({ cookie }) });
+    expect(session?.user.staffAreas).toEqual(["food", "laundry"]);
+
+    // An admin without laundry can't move laundry orders (the check runs before the order is even looked up).
+    const noLaundry = { id: lin.id, role: "ADMIN", staffAreas: ["food"] };
+    expect(await moveLaundry(noLaundry, "LD-ABC234", "PICKED_UP")).toEqual({ ok: false, error: "notAllowed" });
+    const withLaundry = { ...noLaundry, staffAreas: ["laundry"] };
+    expect(await moveLaundry(withLaundry, "LD-ABC234", "PICKED_UP")).toEqual({ ok: false, error: "notFound" });
+
+    // Back to customer: areas are cleared.
+    expect(await setUserRole("admin", lin.id, "USER")).toBe(true);
+    expect((await db.user.findUniqueOrThrow({ where: { id: lin.id } })).staffAreas).toEqual([]);
   });
 });

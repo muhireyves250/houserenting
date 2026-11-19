@@ -2,7 +2,7 @@ import "server-only";
 import { audit } from "@/features/audit/service";
 import { notify, notifyAdmins } from "@/features/notifications/service";
 import { db } from "@/lib/db";
-import { isAdmin } from "@/lib/roles";
+import { canStaff } from "@/lib/roles";
 
 export const QUESTION_MAX = 500;
 const MAX_WAITING_PER_LISTING = 3;
@@ -35,7 +35,7 @@ export async function answerQuestion(actor: { id: string; role?: string | null }
       select: { listing: { select: { hostId: true, title: true } } },
     });
     // VIIPA answers guests' questions (staff stand between guests and owners).
-    if (!q || !isAdmin(actor)) return false;
+    if (!q || !canStaff(actor, "support")) return false;
     await tx.listingQuestion.update({ where: { id: questionId }, data: { answer, answeredById: actor.id, answeredAt: new Date() } });
     await audit(tx, { actorId: actor.id, action: "question.answer", entityType: "question", entityId: questionId });
     await notifyAdmins(tx, "questionToCheck", { title: q.listing.title }, "/admin/support?tab=reviews");

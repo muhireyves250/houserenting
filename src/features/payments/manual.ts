@@ -1,7 +1,7 @@
 import "server-only";
 import { audit } from "@/features/audit/service";
 import { notify, notifyAdmins } from "@/features/notifications/service";
-import { isAdmin } from "@/lib/roles";
+import { canStaff } from "@/lib/roles";
 import { db } from "@/lib/db";
 import { handlePaymentCallback, type CallbackOutcome } from "./service";
 
@@ -47,7 +47,7 @@ export async function confirmPaymentByHand(actor: Actor, reference: string, inpu
   const booking = await db.booking.findUnique({ where: { reference }, select: { listingId: true, currency: true, total: true } });
   if (!booking) return { ok: false, error: "notFound" };
   // VIIPA confirms payments (staff stand between guests and owners).
-  if (!isAdmin(actor)) return { ok: false, error: "notAllowed" };
+  if (!canStaff(actor, "bookings")) return { ok: false, error: "notAllowed" };
   const tx = input.transactionId.trim();
   if (!TX.test(tx)) return { ok: false, error: "transaction" };
   // By hand, the amount must be exactly the booking's total (a different amount is a question for staff, not a confirmation).
@@ -64,7 +64,7 @@ export async function rejectPaymentClaim(actor: Actor, reference: string, reason
   const why = reason.trim().slice(0, 300);
   if (!why) return false;
   const booking = await db.booking.findUnique({ where: { reference }, select: { id: true, listingId: true, guestId: true, listing: { select: { title: true } } } });
-  if (!booking || !isAdmin(actor)) return false;
+  if (!booking || !canStaff(actor, "bookings")) return false;
   return db.$transaction(async (t) => {
     const { count } = await t.payment.updateMany({ where: { bookingId: booking.id, status: "PENDING", provider: "manual" }, data: { status: "FAILED" } });
     if (count === 0) return false;

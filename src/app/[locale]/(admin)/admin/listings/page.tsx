@@ -8,7 +8,7 @@ import { movesFrom } from "@/features/listings/lifecycle";
 import { PlaceRowActions } from "@/features/places/components/PlaceRowActions";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
-import { requireAdmin } from "@/lib/permissions";
+import { requireStaff } from "@/lib/permissions";
 import { contractsEnding } from "@/features/places/status-service";
 import { db } from "@/lib/db";
 
@@ -17,7 +17,7 @@ type Status = (typeof STATUSES)[number];
 type Props = { searchParams: Promise<{ status?: string }> };
 
 export default async function AdminListingsPage({ searchParams }: Props) {
-  await requireAdmin("/admin/listings");
+  await requireStaff("listings", "/admin/listings");
   const raw = (await searchParams).status;
   // With no filter chosen: what waits for review, or everything when nothing does.
   const endingSoon = raw === "ending";

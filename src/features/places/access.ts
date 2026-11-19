@@ -1,6 +1,6 @@
 import "server-only";
 import { db } from "@/lib/db";
-import { isAdmin } from "@/lib/roles";
+import { canStaff, type StaffArea } from "@/lib/roles";
 
 /** Someone's part in running a place. Staff can do everything; owners everything on their own places. */
 export type PlaceRole = "staff" | "owner" | "manager" | "receptionist";
@@ -20,8 +20,8 @@ export function can(role: PlaceRole | null, action: PlaceAction): boolean {
 }
 
 /** The actor's role on one place, or null when they have none. */
-export async function placeRole(actor: { id: string; role?: string | null }, listingId: string): Promise<PlaceRole | null> {
-  if (isAdmin(actor)) return "staff";
+export async function placeRole(actor: { id: string; role?: string | null; staffAreas?: readonly string[] | null }, listingId: string): Promise<PlaceRole | null> {
+  if (canStaff(actor, "listings")) return "staff";
   const listing = await db.listing.findUnique({
     where: { id: listingId },
     select: { hostId: true, team: { where: { userId: actor.id }, select: { role: true } } },
@@ -32,7 +32,24 @@ export async function placeRole(actor: { id: string; role?: string | null }, lis
   return member === "MANAGER" ? "manager" : member === "RECEPTIONIST" ? "receptionist" : null;
 }
 
-export async function canOn(actor: { id: string; role?: string | null }, listingId: string, action: PlaceAction): Promise<boolean> {
+/** Which part of the dashboard a staff member needs for each action on a place. */
+const STAFF_AREA: Record<PlaceAction, StaffArea> = {
+  edit: "listings",
+  status: "listings",
+  blocks: "listings",
+  rooms: "listings",
+  documents: "listings",
+  team: "listings",
+  money: "money",
+  bookings: "bookings",
+  checkIn: "bookings",
+  requests: "bookings",
+  guestId: "bookings",
+};
+
+export async function canOn(actor: { id: string; role?: string | null; staffAreas?: readonly string[] | null }, listingId: string, action: PlaceAction): Promise<boolean> {
+  // Staff given the matching area can do it on every place.
+  if (canStaff(actor, STAFF_AREA[action])) return true;
   return can(await placeRole(actor, listingId), action);
 }
 
