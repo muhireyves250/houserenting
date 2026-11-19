@@ -8,8 +8,14 @@ export async function OrderProgress({ status, fulfilment, payFirst = null }: { s
   const t = await getTranslations("Food");
   type Step = OrderStatus | "PAID";
   // Pay-first orders: "Paid" comes right after ordering, and the kitchen waits for it.
-  const steps: Step[] = ["PLACED", ...(payFirst ? (["PAID"] as const) : []), "ACCEPTED", "PREPARING", "READY", ...(fulfilment === "DELIVERY" ? (["OUT_FOR_DELIVERY"] as const) : []), "DELIVERED"];
-  const at = payFirst && status === "PLACED" ? (payFirst.paid ? 2 : 1) : steps.indexOf(status);
+  // Room orders (run by VIIPA): ordered → paid → confirmed → sent → received.
+  const steps: Step[] =
+    fulfilment === "TO_STAY"
+      ? ["PLACED", ...(payFirst ? (["PAID"] as const) : []), "ACCEPTED", "OUT_FOR_DELIVERY", "DELIVERED"]
+      : ["PLACED", ...(payFirst ? (["PAID"] as const) : []), "ACCEPTED", "PREPARING", "READY", ...(fulfilment === "DELIVERY" ? (["OUT_FOR_DELIVERY"] as const) : []), "DELIVERED"];
+  // Older room orders may sit at a kitchen step: show them as confirmed.
+  const shown: Step = fulfilment === "TO_STAY" && (status === "PREPARING" || status === "READY") ? "ACCEPTED" : status;
+  const at = payFirst && status === "PLACED" ? (payFirst.paid ? 2 : 1) : steps.indexOf(shown);
   return (
     <ol className="grid gap-0" style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}>
       {steps.map((step, i) => {

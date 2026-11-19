@@ -6,6 +6,7 @@ import { PageContainer } from "@/components/ui/PageContainer";
 import { formatKigaliDateTime } from "@/features/bookings/format";
 import { AutoRefresh } from "@/features/food/components/AutoRefresh";
 import { CancelOrder } from "@/features/food/components/CancelOrder";
+import { ConfirmReceived } from "@/features/food/components/ConfirmReceived";
 import { OrderAgain } from "@/features/food/components/OrderAgain";
 import { OrderPayment } from "@/features/food/components/OrderPayment";
 import { OrderProgress } from "@/features/food/components/OrderProgress";
@@ -109,6 +110,13 @@ export default async function OrderPage({ params }: Props) {
               <OrderAgain restaurantId={order.restaurant.id} items={order.items} />
               <RemoveOrder reference={order.reference} backToList />
             </div>
+          </div>
+        )}
+
+        {/* Sent to the guest's stay: they say when it reached them. */}
+        {order.status === "OUT_FOR_DELIVERY" && order.fulfilment === "TO_STAY" && (
+          <div className="mt-4">
+            <ConfirmReceived reference={order.reference} />
           </div>
         )}
 

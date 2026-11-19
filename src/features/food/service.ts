@@ -1,4 +1,5 @@
 import "server-only";
+import type { Prisma } from "@/generated/prisma/client";
 import { audit } from "@/features/audit/service";
 import { newReference } from "@/features/bookings/reference";
 import { notify, notifyAdmins } from "@/features/notifications/service";
@@ -233,7 +234,7 @@ async function currentStay(customerId: string, reference: string | null, now: Da
   const today = new Date(`${todayISO(now)}T00:00:00Z`);
   return db.booking.findFirst({
     where: { reference, guestId: customerId, status: { in: ["CONFIRMED", "CHECKED_IN"] }, checkIn: { lte: today }, checkOut: { gte: today } },
-    select: { id: true, reference: true, listingId: true, room: { select: { name: true } }, listing: { select: { title: true, lat: true, lng: true } } },
+    select: { id: true, reference: true, listingId: true, roomNumber: true, room: { select: { name: true } }, listing: { select: { title: true, lat: true, lng: true } } },
   });
 }
 
@@ -262,7 +263,7 @@ export async function placeOrder(customerId: string, raw: OrderInput, now: Date 
   if (!stay) return { ok: false, error: "noStay" };
   if ((await kitchenForPlace(stay.listingId))?.id !== r.id) return { ok: false, error: "tooFar" };
   bookingId = stay.id;
-  address = [stay.listing.title, stay.room?.name, stay.reference].filter(Boolean).join(" · ");
+  address = [stay.listing.title, [stay.room?.name, stay.roomNumber].filter(Boolean).join(" "), stay.reference].filter(Boolean).join(" · ");
 
   for (let attempt = 0; attempt < 3; attempt++) {
     const reference = newReference("OR");
@@ -291,6 +292,8 @@ export async function placeOrder(customerId: string, raw: OrderInput, now: Date 
         for (const userId of new Set([r.ownerId, ...r.team.map((m) => m.userId)])) {
           await notify(tx, userId, "orderPlaced", { reference, title: r.name, total: order.total }, `/host/restaurants/${r.id}`);
         }
+        // VIIPA staff see every new order (it waits for the guest's payment).
+        await notifyAdmins(tx, "orderNew", { reference, title: address ?? r.name, total: order.total }, "/admin/orders");
       });
       return { ok: true, reference };
     } catch (error) {
@@ -302,7 +305,7 @@ export async function placeOrder(customerId: string, raw: OrderInput, now: Date 
 
 /** Moves an order one step (kitchen, courier or customer, each only their own steps). Every step is kept. */
 export async function moveOrder(actor: Actor, reference: string, to: OrderStatus, note = ""): Promise<boolean> {
-  const order = await db.foodOrder.findUnique({ where: { reference }, select: { id: true, status: true, fulfilment: true, customerId: true, restaurantId: true, courierId: true, paymentMethod: true, paidAt: true, total: true, restaurant: { select: { name: true } } } });
+  const order = await db.foodOrder.findUnique({ where: { reference }, select: { id: true, status: true, fulfilment: true, customerId: true, restaurantId: true, courierId: true, paymentMethod: true, paidAt: true, total: true, bookingId: true, address: true, restaurant: { select: { name: true } } } });
   if (!order) return false;
   const role = await restaurantRole(actor, order.restaurantId);
   const actors: OrderActor[] = [];
@@ -314,7 +317,9 @@ export async function moveOrder(actor: Actor, reference: string, to: OrderStatus
   // Pay-first orders: the kitchen only starts once VIIPA has confirmed the payment.
   if (to === "ACCEPTED" && order.paymentMethod === "PAY_FIRST" && order.total > 0 && !order.paidAt) return false;
   // Once out, only the courier who took it (or the kitchen/staff) marks it delivered.
-  if (to === "DELIVERED" && order.status === "OUT_FOR_DELIVERY" && !actors.includes("kitchen") && order.courierId && order.courierId !== actor.id) return false;
+  // (The guest confirming their own room order is always fine.)
+  const guestConfirms = order.fulfilment === "TO_STAY" && actors.includes("customer");
+  if (to === "DELIVERED" && order.status === "OUT_FOR_DELIVERY" && !actors.includes("kitchen") && !guestConfirms && order.courierId && order.courierId !== actor.id) return false;
   const why = note.trim().slice(0, 300);
   if (to === "CANCELLED" && actors.includes("kitchen") && !actors.includes("customer") && !why) return false;
   return db.$transaction(async (tx) => {
@@ -324,9 +329,49 @@ export async function moveOrder(actor: Actor, reference: string, to: OrderStatus
     });
     if (count !== 1) return false;
     await tx.orderEvent.create({ data: { orderId: order.id, from: order.status, to, actorId: actor.id, note: why || null } });
-    if (order.customerId !== actor.id) await notify(tx, order.customerId, "orderStatus", { reference, title: order.restaurant.name, status: to }, "/orders");
+    if (order.customerId !== actor.id) await notify(tx, order.customerId, "orderStatus", { reference, title: order.restaurant.name, status: to }, `/orders/${reference}`);
+    // Sent to a stay: the place's owner (and its managers) are told, to hand it to the guest's room.
+    if (to === "OUT_FOR_DELIVERY" && order.fulfilment === "TO_STAY" && order.bookingId) await notifyPlaceOfOrder(tx, order.bookingId, reference);
+    // The guest says they got it: staff are told the order is done.
+    if (to === "DELIVERED" && order.customerId === actor.id) await notifyAdmins(tx, "orderReceived", { reference, title: order.address ?? order.restaurant.name }, "/admin/orders");
     return true;
   });
+}
+
+/** Tells the owner and managers of the place a guest stays at that the guest's food order is on its way there. */
+async function notifyPlaceOfOrder(tx: Prisma.TransactionClient, bookingId: string, reference: string) {
+  const booking = await tx.booking.findUnique({
+    where: { id: bookingId },
+    select: { roomNumber: true, room: { select: { name: true } }, guest: { select: { name: true } }, listing: { select: { title: true, hostId: true, team: { where: { role: "MANAGER" }, select: { userId: true } } } } },
+  });
+  if (!booking) return;
+  const where = [booking.listing.title, [booking.room?.name, booking.roomNumber].filter(Boolean).join(" ")].filter(Boolean).join(" · ");
+  for (const userId of new Set([booking.listing.hostId, ...booking.listing.team.map((m) => m.userId)])) {
+    await notify(tx, userId, "orderSentToStay", { reference, name: booking.guest.name, where }, "/host/orders");
+  }
+}
+
+/** Orders shown to a place's owner: confirmed ones and on, read only. */
+export const HOST_ORDER_STATUSES = ["ACCEPTED", "PREPARING", "READY", "OUT_FOR_DELIVERY", "DELIVERED"] as const;
+
+/**
+ * Food orders of guests staying at the places this person owns or manages (last 30 days), newest first: the
+ * order number, the guest, their room and what's in it, so whoever receives it at the place can hand it over.
+ */
+export async function ordersForHost(userId: string, now: Date = new Date()) {
+  const bookings = await db.booking.findMany({
+    where: { checkOut: { gte: new Date(now.getTime() - 30 * 86_400_000) }, listing: { OR: [{ hostId: userId }, { team: { some: { userId, role: "MANAGER" } } }] } },
+    select: { id: true, reference: true, roomNumber: true, room: { select: { name: true } }, guest: { select: { name: true, phone: true } }, listing: { select: { id: true, title: true } } },
+  });
+  if (bookings.length === 0) return [];
+  const byId = new Map(bookings.map((b) => [b.id, b]));
+  const orders = await db.foodOrder.findMany({
+    where: { bookingId: { in: [...byId.keys()] }, status: { in: [...HOST_ORDER_STATUSES] } },
+    orderBy: { createdAt: "desc" },
+    take: 200,
+    select: { reference: true, status: true, createdAt: true, bookingId: true, note: true, items: { select: { name: true, quantity: true } }, events: { where: { to: "OUT_FOR_DELIVERY" }, select: { createdAt: true }, take: 1 } },
+  });
+  return orders.map(({ bookingId, events, ...o }) => ({ ...o, sentAt: events[0]?.createdAt ?? null, stay: byId.get(bookingId!)! }));
 }
 
 /** One of the customer's orders with its steps, for the tracking page. */
@@ -438,7 +483,12 @@ export async function confirmOrderPayment(actor: Actor, reference: string, trans
       ].filter((e) => e.amount > 0),
     });
     await audit(t, { actorId: actor.id, action: "order.paid", entityType: "order", entityId: reference, data: { amount: order.total, commission, providerReference: tx } });
-    await notify(t, order.customerId, "orderStatus", { reference, title: order.restaurant.name, status: "PAID" }, `/orders/${reference}`);
+    // Paid means confirmed: the order moves on and the guest is told it's confirmed.
+    if (order.status === "PLACED") {
+      await t.foodOrder.update({ where: { id: order.id }, data: { status: "ACCEPTED" } });
+      await t.orderEvent.create({ data: { orderId: order.id, from: "PLACED", to: "ACCEPTED", actorId: actor.id } });
+    }
+    await notify(t, order.customerId, "orderStatus", { reference, title: order.restaurant.name, status: order.status === "PLACED" ? "ACCEPTED" : "PAID" }, `/orders/${reference}`);
     for (const userId of new Set([order.restaurant.ownerId, ...order.restaurant.team.map((m) => m.userId)])) {
       await notify(t, userId, "orderPlaced", { reference, title: order.restaurant.name, total: order.total }, `/host/restaurants/${order.restaurant.id}`);
     }

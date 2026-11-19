@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { db } from "@/lib/db";
 import { resetDb } from "@/test/db";
-import { addRestaurantMember, claimOrderPayment, confirmOrderPayment, hideMyOrder, myOrders, kitchenForPlace, moveOrder, ordersLive, placeOrder, saveMenuItem, saveRestaurant, setRestaurantStatus } from "./service";
+import { addRestaurantMember, claimOrderPayment, confirmOrderPayment, hideMyOrder, myOrders, kitchenForPlace, moveOrder, ordersForHost, ordersLive, placeOrder, saveMenuItem, saveRestaurant, setRestaurantStatus } from "./service";
 
 const admin = { id: "admin", role: "ADMIN" };
 const NOW = new Date("2026-11-03T08:00:00Z");
@@ -106,9 +106,22 @@ describe("food from the kitchen of the guest's stay", () => {
     const ledger = await db.ledgerEntry.findMany({ where: { note: `food ${placed.reference}` } });
     expect(ledger.find((e) => e.kind === "GUEST_PAYMENT")?.amount).toBe(6000);
     expect(ledger.reduce((sum, e) => sum + (e.kind === "COMMISSION" || e.kind === "HOST_PAYABLE" ? e.amount : 0), 0)).toBe(6000);
-    for (const step of ["ACCEPTED", "PREPARING", "READY", "DELIVERED"] as const) expect(await moveOrder({ id: "cook" }, placed.reference, step)).toBe(true);
-    expect(await db.notification.count({ where: { userId: "guest", kind: "orderStatus" } })).toBe(5); // paid + 4 steps
-  });
+    // Paid = confirmed: the guest is told; VIIPA was told of the new order.
+    expect((await db.foodOrder.findUniqueOrThrow({ where: { reference: placed.reference } })).status).toBe("ACCEPTED");
+    expect(await db.notification.count({ where: { userId: "admin", kind: "orderNew" } })).toBe(1);
+    // Staff mark it sent: the guest and the place's owner are told (the owner sees it, read only).
+    expect(await moveOrder({ id: "guest" }, placed.reference, "OUT_FOR_DELIVERY")).toBe(false);
+    expect(await moveOrder({ id: "owner" }, placed.reference, "OUT_FOR_DELIVERY")).toBe(false);
+    expect(await moveOrder(admin, placed.reference, "OUT_FOR_DELIVERY")).toBe(true);
+    expect(await db.notification.findFirst({ where: { userId: "owner", kind: "orderSentToStay" }, select: { data: true } })).toMatchObject({ data: { reference: placed.reference, name: "Guest", where: "Lake house" } });
+    const seen = await ordersForHost("owner", NOW);
+    expect(seen.map((o) => [o.reference, o.status, o.stay.reference])).toEqual([[placed.reference, "OUT_FOR_DELIVERY", "SR-FOOD23"]]);
+    expect(await ordersForHost("cook", NOW)).toEqual([]);
+    // The guest confirms they got it; staff are told.
+    expect(await moveOrder({ id: "guest" }, placed.reference, "DELIVERED")).toBe(true);
+    expect(await db.notification.count({ where: { userId: "admin", kind: "orderReceived" } })).toBe(1);
+    expect(await db.notification.count({ where: { userId: "guest", kind: "orderStatus" } })).toBe(2); // confirmed + sent
+  }, 180_000);
 
   it("refuses orders when the kitchen is paused or below its minimum; guests cancel before acceptance", async () => {
     const id = await liveKitchen();

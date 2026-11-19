@@ -10,6 +10,7 @@ import { Link } from "@/i18n/navigation";
 import { requireUser } from "@/lib/session";
 import { db } from "@/lib/db";
 import { hostEarnings } from "@/features/ledger/service";
+import { ordersForHost } from "@/features/food/service";
 import { formatRWF } from "@/lib/format";
 import { getLocale } from "next-intl/server";
 
@@ -29,6 +30,7 @@ export default async function HostPage() {
     db.restaurantMember.count({ where: { userId: user.id } }),
     db.placeMember.findMany({ where: { userId: user.id, role: "MANAGER", listing: { status: { not: "ARCHIVED" } } }, select: { role: true, listing: { select: { id: true, title: true, city: true } } } }),
   ]);
+  const sentToPlaces = listings.length > 0 ? (await ordersForHost(user.id)).filter((o) => o.status === "OUT_FOR_DELIVERY").length : 0;
   const hasMoney = earnings.earned + earnings.upcoming + earnings.paidOut > 0;
 
   return (
@@ -72,6 +74,19 @@ export default async function HostPage() {
             ))}
           </ul>
         </section>
+      )}
+      {listings.length > 0 && (
+        <Link
+          href="/host/orders"
+          className="mb-3 flex items-center justify-between gap-3 rounded-2xl bg-surface px-4 py-3 text-[14px] font-semibold text-ink ring-1 ring-line transition-colors hover:ring-primary"
+        >
+          <span className="inline-flex items-center gap-2">
+            {t("foodOrdersLink")}
+            {/* Orders on their way to the owner's places right now. */}
+            {sentToPlaces > 0 && <span className="rounded-full bg-primary px-2 py-0.5 text-[12px] font-bold text-white tabular-nums">{sentToPlaces}</span>}
+          </span>
+          <ChevronRight className="size-4 text-ink/50" aria-hidden="true" />
+        </Link>
       )}
       {listings.length > 0 && (
         <Link

@@ -759,7 +759,8 @@
       "UPLOAD_ONLINE": "Upload online before arrival",
       "AT_CHECK_IN": "Show at check-in"
     },
-    "payoutLink": "Payout details: where you get paid"
+    "payoutLink": "Payout details: where you get paid",
+    "foodOrdersLink": "Food orders for your guests"
   },
   "Admin": {
     "title": "Admin",
@@ -1197,7 +1198,10 @@
       "promoterStatus": "Your promoter account is now: {statusLabel}. {reason}",
       "paymentClaim": "A guest says they paid for {reference} at {title}. Please confirm it.",
       "paymentNotReceived": "Your payment for {reference} at {title} wasn't found: {reason}",
-      "orderPaymentClaim": "Order {reference} at {title} ({total} RWF): the guest says they paid. Check and confirm."
+      "orderPaymentClaim": "Order {reference} at {title} ({total} RWF): the guest says they paid. Check and confirm.",
+      "orderNew": "New food order {reference} — {title} ({total} RWF). It waits for payment.",
+      "orderSentToStay": "Food order {reference} for {name} was sent to {where}. When it arrives, check the number and take it to them.",
+      "orderReceived": "Order {reference} was received by the guest ({title})."
     }
   },
   "Rooms": {
@@ -1767,20 +1771,20 @@
     },
     "status": {
       "PLACED": "Placed",
-      "ACCEPTED": "Accepted",
+      "ACCEPTED": "Confirmed",
       "PREPARING": "Preparing",
       "READY": "Ready",
-      "OUT_FOR_DELIVERY": "On the way",
-      "DELIVERED": "Delivered",
+      "OUT_FOR_DELIVERY": "Sent",
+      "DELIVERED": "Received",
       "CANCELLED": "Cancelled",
       "PAID": "Paid"
     },
     "step": {
-      "ACCEPTED": "Accept",
+      "ACCEPTED": "Confirm",
       "PREPARING": "Start preparing",
       "READY": "Mark ready",
-      "OUT_FOR_DELIVERY": "Out for delivery",
-      "DELIVERED": "Handed over"
+      "OUT_FOR_DELIVERY": "Mark as sent",
+      "DELIVERED": "Mark received"
     },
     "restaurantStatus": {
       "DRAFT": "Draft",
@@ -1945,10 +1949,10 @@
     "orderTitle": "Order {reference}",
     "statusTitle": {
       "PLACED": "Order sent to the kitchen",
-      "ACCEPTED": "The kitchen accepted your order",
+      "ACCEPTED": "Your order is confirmed",
       "PREPARING": "Your food is being prepared",
       "READY": "Your order is ready",
-      "OUT_FOR_DELIVERY": "Your order is on its way",
+      "OUT_FOR_DELIVERY": "Your order was sent to you",
       "DELIVERED": "Enjoy your meal!",
       "CANCELLED": "Order cancelled"
     },
@@ -2033,7 +2037,7 @@
     },
     "staffPay": {
       "title": "Food orders waiting for payment",
-      "intro": "Guests pay before the kitchen starts. Confirm the mobile money payment; the commission and the kitchen's share go to Money.",
+      "intro": "Guests pay first. Confirming the mobile money payment also confirms the order; the commission and the restaurant's share go to Money.",
       "empty": "No orders waiting for payment.",
       "claimed": "Guest paid with {reference}",
       "notClaimed": "Not paid yet",
@@ -2051,10 +2055,22 @@
     "cancelledNoReason": "This order was cancelled.",
     "payOnDeliveryOld": "Paid when you received it.",
     "staffOrders": {
-      "intro": "Every guest's food order, from payment to their room. Confirm payments, then move each order on until it's delivered.",
+      "intro": "Every guest's food order. Confirm the payment (that confirms the order and tells the guest), get the food from the restaurant, then mark it sent: the guest and the owner of the place are told. The guest confirms when they get it.",
       "open": "Orders in progress",
       "noOpen": "No orders in progress.",
       "done": "Finished orders"
+    },
+    "gotIt": "I got my order",
+    "gotItHint": "Tap when the food reaches you.",
+    "hostOrders": {
+      "title": "Food orders",
+      "intro": "Food your guests ordered through VIIPA. When an order arrives at your place, check its number here and take it to the guest's room.",
+      "empty": "No food orders for your guests yet.",
+      "onTheWay": "On its way — take it to the room",
+      "guest": "Guest",
+      "room": "Room",
+      "sentAt": "Sent {time}",
+      "readOnly": "VIIPA runs these orders; you only hand them over."
     }
   },
   "Promoters": {

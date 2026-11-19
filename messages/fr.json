@@ -759,7 +759,8 @@
       "UPLOAD_ONLINE": "À envoyer en ligne avant l'arrivée",
       "AT_CHECK_IN": "À présenter à l'arrivée"
     },
-    "payoutLink": "Coordonnées de paiement : où vous êtes payé"
+    "payoutLink": "Coordonnées de paiement : où vous êtes payé",
+    "foodOrdersLink": "Commandes de repas de vos clients"
   },
   "Admin": {
     "title": "Administration",
@@ -1197,7 +1198,10 @@
       "promoterStatus": "Votre compte promoteur est maintenant : {statusLabel}. {reason}",
       "paymentClaim": "Un voyageur dit avoir payé {reference} à {title}. Merci de confirmer.",
       "paymentNotReceived": "Votre paiement pour {reference} à {title} n'a pas été trouvé : {reason}",
-      "orderPaymentClaim": "Commande {reference} à {title} ({total} RWF) : le voyageur dit avoir payé. Vérifiez et confirmez."
+      "orderPaymentClaim": "Commande {reference} à {title} ({total} RWF) : le voyageur dit avoir payé. Vérifiez et confirmez.",
+      "orderNew": "Nouvelle commande {reference} — {title} ({total} RWF). En attente de paiement.",
+      "orderSentToStay": "La commande {reference} de {name} a été envoyée à {where}. À son arrivée, vérifiez le numéro et apportez-la.",
+      "orderReceived": "La commande {reference} a été reçue par le client ({title})."
     }
   },
   "Rooms": {
@@ -1767,20 +1771,20 @@
     },
     "status": {
       "PLACED": "Passée",
-      "ACCEPTED": "Acceptée",
+      "ACCEPTED": "Confirmée",
       "PREPARING": "En préparation",
       "READY": "Prête",
-      "OUT_FOR_DELIVERY": "En route",
-      "DELIVERED": "Livrée",
+      "OUT_FOR_DELIVERY": "Envoyée",
+      "DELIVERED": "Reçue",
       "CANCELLED": "Annulée",
       "PAID": "Payée"
     },
     "step": {
-      "ACCEPTED": "Accepter",
+      "ACCEPTED": "Confirmer",
       "PREPARING": "Commencer",
       "READY": "Marquer prête",
-      "OUT_FOR_DELIVERY": "En livraison",
-      "DELIVERED": "Remise"
+      "OUT_FOR_DELIVERY": "Marquer envoyée",
+      "DELIVERED": "Marquer reçue"
     },
     "restaurantStatus": {
       "DRAFT": "Brouillon",
@@ -1945,10 +1949,10 @@
     "orderTitle": "Commande {reference}",
     "statusTitle": {
       "PLACED": "Commande envoyée à la cuisine",
-      "ACCEPTED": "La cuisine a accepté votre commande",
+      "ACCEPTED": "Votre commande est confirmée",
       "PREPARING": "Votre repas est en préparation",
       "READY": "Votre commande est prête",
-      "OUT_FOR_DELIVERY": "Votre commande est en route",
+      "OUT_FOR_DELIVERY": "Votre commande vous a été envoyée",
       "DELIVERED": "Bon appétit !",
       "CANCELLED": "Commande annulée"
     },
@@ -2033,7 +2037,7 @@
     },
     "staffPay": {
       "title": "Commandes en attente de paiement",
-      "intro": "Les voyageurs paient avant que la cuisine commence. Confirmez le paiement mobile money ; la commission et la part de la cuisine vont dans Argent.",
+      "intro": "Les clients paient d'abord. Confirmer le paiement mobile money confirme aussi la commande ; la commission et la part du restaurant vont dans Argent.",
       "empty": "Aucune commande en attente de paiement.",
       "claimed": "Le voyageur a payé avec {reference}",
       "notClaimed": "Pas encore payée",
@@ -2051,10 +2055,22 @@
     "cancelledNoReason": "Cette commande a été annulée.",
     "payOnDeliveryOld": "Payée à la réception.",
     "staffOrders": {
-      "intro": "Toutes les commandes des voyageurs, du paiement à la chambre. Confirmez les paiements, puis faites avancer chaque commande jusqu'à la livraison.",
+      "intro": "Toutes les commandes de repas. Confirmez le paiement (cela confirme la commande et prévient le client), récupérez le repas auprès du restaurant, puis marquez-la envoyée : le client et le propriétaire du lieu sont prévenus. Le client confirme quand il la reçoit.",
       "open": "Commandes en cours",
       "noOpen": "Aucune commande en cours.",
       "done": "Commandes terminées"
+    },
+    "gotIt": "J'ai reçu ma commande",
+    "gotItHint": "Touchez quand le repas vous parvient.",
+    "hostOrders": {
+      "title": "Commandes de repas",
+      "intro": "Les repas commandés par vos clients via VIIPA. Quand une commande arrive chez vous, vérifiez son numéro ici et apportez-la dans la chambre du client.",
+      "empty": "Aucune commande de repas pour vos clients pour l'instant.",
+      "onTheWay": "En route — à apporter dans la chambre",
+      "guest": "Client",
+      "room": "Chambre",
+      "sentAt": "Envoyée {time}",
+      "readOnly": "VIIPA gère ces commandes ; vous les remettez seulement."
     }
   },
   "Promoters": {

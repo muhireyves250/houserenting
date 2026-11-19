@@ -759,7 +759,8 @@
       "UPLOAD_ONLINE": "Yoherezwa kuri murandasi mbere yo kuhagera",
       "AT_CHECK_IN": "Yerekanwa ugeze"
     },
-    "payoutLink": "Aho wishyurirwa"
+    "payoutLink": "Aho wishyurirwa",
+    "foodOrdersLink": "Ibiryo abakiriya bawe batumije"
   },
   "Admin": {
     "title": "Ubuyobozi",
@@ -1197,7 +1198,10 @@
       "promoterStatus": "Konti yawe y'umwamamaza ubu ni: {statusLabel}. {reason}",
       "paymentClaim": "Umushyitsi avuga ko yishyuye {reference} kuri {title}. Byemeze.",
       "paymentNotReceived": "Kwishyura kwawe kwa {reference} kuri {title} ntikwabonetse: {reason}",
-      "orderPaymentClaim": "Ibyatumijwe {reference} kuri {title} ({total} RWF): umushyitsi avuga ko yishyuye. Genzura wemeze."
+      "orderPaymentClaim": "Ibyatumijwe {reference} kuri {title} ({total} RWF): umushyitsi avuga ko yishyuye. Genzura wemeze.",
+      "orderNew": "Ibyatumijwe bishya {reference} — {title} ({total} RWF). Bitegereje kwishyurwa.",
+      "orderSentToStay": "Ibyo {name} yatumije {reference} byoherejwe kuri {where}. Nibigera, reba nimero ubimushyikirize.",
+      "orderReceived": "Ibyatumijwe {reference} byakiriwe n'umukiriya ({title})."
     }
   },
   "Rooms": {
@@ -1767,20 +1771,20 @@
     },
     "status": {
       "PLACED": "Yatumijwe",
-      "ACCEPTED": "Yemewe",
+      "ACCEPTED": "Byemejwe",
       "PREPARING": "Irimo gutegurwa",
       "READY": "Yiteguye",
-      "OUT_FOR_DELIVERY": "Iri mu nzira",
-      "DELIVERED": "Yagejejwe",
+      "OUT_FOR_DELIVERY": "Byoherejwe",
+      "DELIVERED": "Byakiriwe",
       "CANCELLED": "Yahagaritswe",
       "PAID": "Byishyuwe"
     },
     "step": {
-      "ACCEPTED": "Emera",
+      "ACCEPTED": "Emeza",
       "PREPARING": "Tangira gutegura",
       "READY": "Yiteguye",
-      "OUT_FOR_DELIVERY": "Iri mu nzira",
-      "DELIVERED": "Yatanzwe"
+      "OUT_FOR_DELIVERY": "Byoherejwe",
+      "DELIVERED": "Byakiriwe"
     },
     "restaurantStatus": {
       "DRAFT": "Umushinga",
@@ -1945,10 +1949,10 @@
     "orderTitle": "Ibyatumijwe {reference}",
     "statusTitle": {
       "PLACED": "Ibyo watumije byoherejwe ku gikoni",
-      "ACCEPTED": "Igikoni cyemeye ibyo watumije",
+      "ACCEPTED": "Ibyo watumije byemejwe",
       "PREPARING": "Ibiryo byawe birimo gutegurwa",
       "READY": "Ibyo watumije byiteguye",
-      "OUT_FOR_DELIVERY": "Ibyo watumije biri mu nzira",
+      "OUT_FOR_DELIVERY": "Ibyo watumije byakoherejwe",
       "DELIVERED": "Murye neza!",
       "CANCELLED": "Byahagaritswe"
     },
@@ -2033,7 +2037,7 @@
     },
     "staffPay": {
       "title": "Ibyatumijwe bitegereje kwishyurwa",
-      "intro": "Abashyitsi bishyura mbere y'uko igikoni gitangira. Emeza ubwishyu bwa mobile money; komisiyo n'umugabane w'igikoni bijya muri Amafaranga.",
+      "intro": "Abakiriya bishyura mbere. Kwemeza ubwishyu bwa mobile money byemeza n'ibyatumijwe; komisiyo n'umugabane wa resitora bijya muri Amafaranga.",
       "empty": "Nta byatumijwe bitegereje kwishyurwa.",
       "claimed": "Umushyitsi yishyuye na {reference}",
       "notClaimed": "Ntibirishyurwa",
@@ -2051,10 +2055,22 @@
     "cancelledNoReason": "Ibyo watumije byahagaritswe.",
     "payOnDeliveryOld": "Byishyuwe ubyakiriye.",
     "staffOrders": {
-      "intro": "Ibyo abashyitsi bose batumije, kuva ku kwishyura kugeza mu cyumba. Emeza ubwishyu, hanyuma ukomeze buri gikorwa kugeza bigezeyo.",
+      "intro": "Ibiryo byose abakiriya batumije. Emeza ubwishyu (byemeza ibyatumijwe kandi bimenyesha umukiriya), fata ibiryo kuri resitora, hanyuma ubishyire ku 'byoherejwe': umukiriya na nyir'inzu barabimenyeshwa. Umukiriya yemeza igihe abibonye.",
       "open": "Ibiri gukorwa",
       "noOpen": "Nta biri gukorwa.",
       "done": "Ibyarangiye"
+    },
+    "gotIt": "Nabonye ibyo natumije",
+    "gotItHint": "Kanda igihe ibiryo bikugezeho.",
+    "hostOrders": {
+      "title": "Ibiryo byatumijwe",
+      "intro": "Ibiryo abakiriya bawe batumije binyuze kuri VIIPA. Iyo bigeze iwawe, reba nimero yabyo hano ubijyane mu cyumba cy'umukiriya.",
+      "empty": "Nta biryo abakiriya bawe baratumiza.",
+      "onTheWay": "Biri mu nzira — bijyane mu cyumba",
+      "guest": "Umukiriya",
+      "room": "Icyumba",
+      "sentAt": "Byoherejwe {time}",
+      "readOnly": "VIIPA ni yo icunga ibi byatumijwe; wowe ubishyikiriza gusa."
     }
   },
   "Promoters": {

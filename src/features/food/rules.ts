@@ -11,10 +11,26 @@ const KITCHEN: Partial<Record<OrderStatus, OrderStatus[]>> = {
 };
 
 /**
+ * Room orders (food brought to the guest's stay), run by VIIPA staff: confirmed once paid → sent to the place →
+ * the guest says they got it (staff can also close it).
+ */
+const TO_STAY_KITCHEN: Partial<Record<OrderStatus, OrderStatus[]>> = {
+  PLACED: ["ACCEPTED", "CANCELLED"],
+  ACCEPTED: ["OUT_FOR_DELIVERY", "CANCELLED"],
+  PREPARING: ["OUT_FOR_DELIVERY"],
+  READY: ["OUT_FOR_DELIVERY"],
+  OUT_FOR_DELIVERY: ["DELIVERED"],
+};
+
+/**
  * The order's next steps for this person. Pickups and room orders are handed over by the kitchen (READY → DELIVERED);
  * deliveries go out with a courier. Customers can only cancel before the restaurant accepts.
  */
 export function nextOrderSteps(status: OrderStatus, fulfilment: Fulfilment, actor: OrderActor): OrderStatus[] {
+  if (fulfilment === "TO_STAY") {
+    if (actor === "customer") return status === "PLACED" ? ["CANCELLED"] : status === "OUT_FOR_DELIVERY" ? ["DELIVERED"] : [];
+    return actor === "kitchen" ? (TO_STAY_KITCHEN[status] ?? []) : [];
+  }
   if (actor === "customer") return status === "PLACED" ? ["CANCELLED"] : [];
   if (actor === "kitchen") {
     if (status === "READY") return fulfilment === "DELIVERY" ? ["OUT_FOR_DELIVERY"] : ["DELIVERED"];
