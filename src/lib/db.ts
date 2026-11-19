@@ -15,8 +15,11 @@ export function isConnectionLost(error: unknown): boolean {
 }
 
 function createClient(): PrismaClient {
-  const connectionString = process.env.DATABASE_URL;
-  if (!connectionString) throw new Error("DATABASE_URL is not set");
+  const url = process.env.DATABASE_URL;
+  if (!url) throw new Error("DATABASE_URL is not set");
+  // "require" already means full certificate checks in pg today; say so, so the driver doesn't warn (and a future
+  // pg, where "require" gets weaker, keeps checking the certificate).
+  const connectionString = url.replace(/([?&])sslmode=(prefer|require|verify-ca)(?=&|$)/, "$1sslmode=verify-full");
   const client = new PrismaClient({
     adapter: new PrismaPg({
       connectionString,

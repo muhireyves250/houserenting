@@ -38,7 +38,6 @@ const GROUPS: { label: "operate" | "money" | "people" | "system"; items: { key: 
       { key: "listings", href: "/admin/listings", icon: Home },
       { key: "bookings", href: "/admin/bookings", icon: CalendarCheck },
       { key: "messages", href: "/admin/messages", icon: MessageSquare },
-      { key: "requests", href: "/admin/requests", icon: ClipboardList },
       { key: "restaurants", href: "/admin/restaurants", icon: UtensilsCrossed },
       { key: "orders", href: "/admin/orders", icon: ShoppingBag },
       { key: "laundry", href: "/admin/laundry", icon: Shirt },

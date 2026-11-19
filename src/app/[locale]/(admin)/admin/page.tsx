@@ -58,7 +58,7 @@ export default async function AdminDashboardPage() {
     { label: t("attention.tickets"), count: stats.attention.tickets, href: "/admin/support" },
     { label: t("attention.payments"), count: stats.attention.payments, href: "/admin/money" },
     { label: t("attention.rewards"), count: stats.attention.rewards, href: "/admin/money" },
-    { label: t("attention.requests"), count: stats.attention.requests + stats.attention.refunds, href: "/admin/requests" },
+    { label: t("attention.requests"), count: stats.attention.requests + stats.attention.refunds, href: "/admin/bookings" },
     { label: t("attention.contracts"), count: ending.length, href: "/admin/listings?status=ending" },
   ];
   const waiting = attention.filter((a) => a.count > 0);

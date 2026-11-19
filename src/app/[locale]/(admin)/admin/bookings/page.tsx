@@ -3,6 +3,7 @@ import { ExportLink, FilterTabs, PageIntro, Pagination, Panel, SearchBox, Table,
 import { BOOKING_STATUSES, searchBookings, type BookingStatusFilter } from "@/features/admin/queries";
 import { StatusBadge } from "@/features/bookings/components/StatusBadge";
 import { formatKigaliDateTime, formatStayDates } from "@/features/bookings/format";
+import { GuestRequests } from "@/features/stay/components/GuestRequests";
 import { Link } from "@/i18n/navigation";
 import { formatRWF } from "@/lib/format";
 import { requireAdmin } from "@/lib/permissions";
@@ -31,6 +32,8 @@ export default async function AdminBookingsPage({ searchParams }: Props) {
   return (
     <div>
       <PageIntro description={t("bookingsIntro")} actions={<ExportLink href={exportHref} label={t("exportCsv")} />} />
+      {/* What guests asked to change, and refunds to send: answered first. */}
+      <GuestRequests />
       <div className="mb-4 flex flex-col gap-3">
         <SearchBox value={q} placeholder={t("searchBookings")} keep={{ status }} />
         <FilterTabs
