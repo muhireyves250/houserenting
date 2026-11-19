@@ -21,7 +21,8 @@ export type ListingMove =
   | "resume"
   | "suspend"
   | "reinstate"
-  | "archive";
+  | "archive"
+  | "restore";
 
 type Rule = { from: readonly ListingStatus[]; to: ListingStatus; who: "staff" | "owner" | "either"; reason: boolean };
 
@@ -43,6 +44,8 @@ export const LISTING_MOVES: Record<ListingMove, Rule> = {
   suspend: { from: ["PUBLISHED", "HIDDEN", "PAUSED"], to: "SUSPENDED", who: "staff", reason: true },
   reinstate: { from: ["SUSPENDED"], to: "PUBLISHED", who: "staff", reason: false },
   archive: { from: ["DRAFT", "PENDING_REVIEW", "PUBLISHED", "REJECTED", "CHANGES_REQUESTED", "HIDDEN", "PAUSED", "SUSPENDED"], to: "ARCHIVED", who: "staff", reason: false },
+  // An archived place comes back hidden: staff check it, then show it again.
+  restore: { from: ["ARCHIVED"], to: "HIDDEN", who: "staff", reason: false },
 };
 
 /** Statuses in which the owner may still change their place: before review, or when VIIPA sent it back. */

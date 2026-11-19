@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { unitDetailsMap } from "@/features/rooms/validation";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import { redirect } from "@/i18n/navigation";
 import { PageIntro } from "@/features/admin/components/ui";
 import { ListingForm } from "@/features/hosting/components/ListingForm";
 import { ListingPhotosEditor } from "@/features/hosting/components/ListingPhotosEditor";
@@ -21,7 +22,9 @@ export default async function AdminEditListingPage({ params }: Props) {
   await requireAdmin(`/admin/listings/${id}/edit`);
   const owner = await db.listing.findUnique({ where: { id }, select: { hostId: true } });
   const listing = owner && (await getHostListing(owner.hostId, id));
-  if (!listing || listing.status === "ARCHIVED") notFound();
+  if (!listing) notFound();
+  // Archived places aren't edited: their page offers Restore.
+  if (listing.status === "ARCHIVED") redirect({ href: `/admin/listings/${id}`, locale: await getLocale() });
   const [tPlaces, rooms] = await Promise.all([getTranslations("Places"), listingRooms(id)]);
   return (
     <div className="flex max-w-3xl flex-col gap-4">

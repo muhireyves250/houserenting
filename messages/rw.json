@@ -847,7 +847,8 @@
         "suspend": "Yahagaritswe by'agateganyo",
         "reinstate": "Yagaruwe",
         "adminSettings": "Amasezerano cyangwa igaragara byahinduwe",
-        "autoHide": "Yahishwe kubera abatayikunze"
+        "autoHide": "Yahishwe kubera abatayikunze",
+        "restore": "Hagaruwe"
       },
       "user": {
         "role": "Uruhare rwahinduwe",
@@ -1454,7 +1455,8 @@
       "resume": "Komeza gufata imyanya",
       "suspend": "Hagarika by'agateganyo",
       "reinstate": "Garura",
-      "archive": "Bika mu bubiko"
+      "archive": "Bika mu bubiko",
+      "restore": "Garura"
     },
     "moveError": {
       "notFound": "Iyi nzu ntikibaho.",
@@ -1586,7 +1588,10 @@
     "helpingTitle": "Inzu ufasha gucunga",
     "restaurantsLink": "Resitora zawe",
     "managedByViipa": "VIIPA ni yo icunga iyi nzu ubu. Ushobora gukomeza gufunga iminsi no kuvugurura inyandiko zawe.",
-    "askForChange": "Saba impinduka"
+    "askForChange": "Saba impinduka",
+    "confirmMove": {
+      "archive": "Ushaka kubika aha hantu? Abakiriya ntibazongera kuhabona cyangwa kuhakodesha. Uzashobora kuhagarura nyuma."
+    }
   },
   "MyStay": {
     "title": "Aho ncumbitse",

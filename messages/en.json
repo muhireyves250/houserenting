@@ -847,7 +847,8 @@
         "suspend": "Suspended",
         "reinstate": "Reinstated",
         "adminSettings": "Agreement or visibility changed",
-        "autoHide": "Hidden after dislikes"
+        "autoHide": "Hidden after dislikes",
+        "restore": "Restored"
       },
       "user": {
         "role": "Role changed",
@@ -1454,7 +1455,8 @@
       "resume": "Resume bookings",
       "suspend": "Suspend",
       "reinstate": "Reinstate",
-      "archive": "Archive"
+      "archive": "Archive",
+      "restore": "Restore"
     },
     "moveError": {
       "notFound": "This place no longer exists.",
@@ -1586,7 +1588,10 @@
     "helpingTitle": "Places you help run",
     "restaurantsLink": "Your restaurants",
     "managedByViipa": "VIIPA manages this place now. You can still mark dates as unavailable and update your papers.",
-    "askForChange": "Ask for a change"
+    "askForChange": "Ask for a change",
+    "confirmMove": {
+      "archive": "Archive this place? Guests won't see or book it. You can restore it later."
+    }
   },
   "MyStay": {
     "title": "My stay",

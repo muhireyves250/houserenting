@@ -8,6 +8,8 @@ import { cn } from "@/lib/cn";
 import { moveListingAction } from "../actions";
 
 const DANGER: ListingMove[] = ["reject", "hide", "suspend", "archive", "requestChanges"];
+/** Moves that ask "are you sure?" first even without a reason (hard to notice and undo). */
+const CONFIRM: ListingMove[] = ["archive"];
 
 /** The status buttons a person may use on a listing; moves the owner must be told about ask for a reason first. */
 export function StatusActions({ listingId, moves }: { listingId: string; moves: ListingMove[] }) {
@@ -38,7 +40,7 @@ export function StatusActions({ listingId, moves }: { listingId: string; moves: 
             key={move}
             type="button"
             disabled={pending}
-            onClick={() => (LISTING_MOVES[move].reason ? setChosen(chosen === move ? null : move) : run(move))}
+            onClick={() => (LISTING_MOVES[move].reason || CONFIRM.includes(move) ? setChosen(chosen === move ? null : move) : run(move))}
             className={cn(
               "rounded-full px-4 py-2 text-[13px] font-semibold transition-colors disabled:opacity-50",
               DANGER.includes(move)
@@ -52,13 +54,17 @@ export function StatusActions({ listingId, moves }: { listingId: string; moves: 
       </div>
       {chosen && (
         <div className="flex flex-col gap-2 rounded-xl border border-line p-3 motion-safe:animate-pop-in">
-          <label className="flex flex-col gap-0.5">
-            <span className="text-xs font-semibold text-muted">{t("reasonForOwner")}</span>
-            <textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={2} maxLength={500} className="w-full resize-y bg-transparent text-[14px] text-ink outline-none" />
-          </label>
+          {LISTING_MOVES[chosen].reason ? (
+            <label className="flex flex-col gap-0.5">
+              <span className="text-xs font-semibold text-muted">{t("reasonForOwner")}</span>
+              <textarea value={reason} onChange={(e) => setReason(e.target.value)} rows={2} maxLength={500} className="w-full resize-y bg-transparent text-[14px] text-ink outline-none" />
+            </label>
+          ) : (
+            <p className="text-[14px] text-ink">{t(`confirmMove.${chosen as "archive"}`)}</p>
+          )}
           <button
             type="button"
-            disabled={pending || !reason.trim()}
+            disabled={pending || (LISTING_MOVES[chosen].reason && !reason.trim())}
             onClick={() => run(chosen)}
             className="self-end rounded-full bg-danger px-4 py-2 text-[13px] font-semibold text-white disabled:opacity-50"
           >

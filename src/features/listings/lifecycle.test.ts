@@ -28,6 +28,7 @@ describe("listing lifecycle", () => {
     expect(movesFrom("PUBLISHED", owner)).toEqual([]);
     expect(movesFrom("DRAFT", owner)).toEqual(["submit"]);
     expect(movesFrom("PENDING_REVIEW", staff)).toEqual(["approve", "requestChanges", "reject", "archive"]);
-    expect(movesFrom("ARCHIVED", staff)).toEqual([]);
+    expect(movesFrom("ARCHIVED", staff)).toEqual(["restore"]);
+    expect(movesFrom("ARCHIVED", owner)).toEqual([]);
   });
 });

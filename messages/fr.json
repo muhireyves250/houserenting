@@ -847,7 +847,8 @@
         "suspend": "Suspendu",
         "reinstate": "Rétabli",
         "adminSettings": "Contrat ou visibilité modifiés",
-        "autoHide": "Masqué après des « je n'aime pas »"
+        "autoHide": "Masqué après des « je n'aime pas »",
+        "restore": "Restauré"
       },
       "user": {
         "role": "Rôle modifié",
@@ -1454,7 +1455,8 @@
       "resume": "Reprendre les réservations",
       "suspend": "Suspendre",
       "reinstate": "Rétablir",
-      "archive": "Archiver"
+      "archive": "Archiver",
+      "restore": "Restaurer"
     },
     "moveError": {
       "notFound": "Ce logement n'existe plus.",
@@ -1586,7 +1588,10 @@
     "helpingTitle": "Logements que vous aidez à gérer",
     "restaurantsLink": "Vos restaurants",
     "managedByViipa": "VIIPA gère désormais ce logement. Vous pouvez toujours bloquer des dates et mettre à jour vos documents.",
-    "askForChange": "Demander une modification"
+    "askForChange": "Demander une modification",
+    "confirmMove": {
+      "archive": "Archiver ce lieu ? Les clients ne le verront plus et ne pourront plus le réserver. Vous pourrez le restaurer plus tard."
+    }
   },
   "MyStay": {
     "title": "Mon séjour",
