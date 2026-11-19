@@ -80,7 +80,7 @@ export function PromoToggle({ id, active }: { id: string; active: boolean }) {
           router.refresh();
         })
       }
-      className="rounded-lg bg-canvas px-3.5 py-1.5 text-[13px] font-semibold text-ink hover:bg-line/70 disabled:opacity-50"
+      className={active ? "shrink-0 rounded-full border border-line px-3.5 py-1.5 text-[13px] font-semibold text-ink hover:border-danger hover:text-danger disabled:opacity-50" : "shrink-0 rounded-full bg-primary px-3.5 py-1.5 text-[13px] font-semibold text-white hover:bg-primary-hover disabled:opacity-50"}
     >
       {active ? t("disable") : t("enable")}
     </button>

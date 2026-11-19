@@ -707,3 +707,25 @@ html:has(.admin-overview)::-webkit-scrollbar {
 .admin-cards details[open] > summary:not(.list-none)::before {
   transform: rotate(90deg);
 }
+
+/* A staff tab is loading: the page under the tabs fades a little and a thin blue bar runs along the top. */
+html[data-tab-loading] .admin-cards nav[aria-busy="true"] ~ *,
+html[data-tab-loading] .admin-cards :has(> nav[aria-busy="true"]) ~ * {
+  opacity: 0.55;
+  pointer-events: none;
+  transition: opacity 150ms ease;
+}
+.tab-loading-bar {
+  background: linear-gradient(90deg, transparent, var(--color-primary), transparent);
+  background-size: 50% 100%;
+  background-repeat: no-repeat;
+  animation: tab-loading 900ms ease-in-out infinite;
+}
+@keyframes tab-loading {
+  from {
+    background-position: -50% 0;
+  }
+  to {
+    background-position: 150% 0;
+  }
+}

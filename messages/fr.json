@@ -1188,7 +1188,8 @@
     "areasSave": "Enregistrer l'accès",
     "areasSaved": "Enregistré.",
     "areasFailed": "Échec de l'enregistrement. Réessayez.",
-    "superAdminAll": "Les super admins gèrent tout."
+    "superAdminAll": "Les super admins gèrent tout.",
+    "clientDetails": "Infos du client"
   },
   "Questions": {
     "title": "Questions et réponses",
@@ -1526,7 +1527,21 @@
     "until": "jusqu'au {date}",
     "disable": "Désactiver",
     "enable": "Activer",
-    "newCode": "Nouveau code promo"
+    "newCode": "Nouveau code promo",
+    "fundingShort": {
+      "PLATFORM": "VIIPA paie",
+      "HOST": "Le propriétaire paie"
+    },
+    "state": {
+      "active": "Actif",
+      "off": "Désactivé",
+      "expired": "Terminé",
+      "usedUp": "Épuisé",
+      "scheduled": "Commence plus tard"
+    },
+    "offLabel": "{value} de réduction",
+    "codesCount": "{count, plural, one {# code} other {# codes}} · {active} actifs",
+    "startsOn": "à partir du {date}"
   },
   "Referrals": {
     "title": "Inviter des amis",

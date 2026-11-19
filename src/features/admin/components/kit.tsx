@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
+import { SlidingTabs } from "./SlidingTabs";
 
 /** An admin card: white, rounded, a hairline ring. */
 export const adminCard = "flex min-w-0 flex-col gap-3 rounded-2xl bg-surface p-4 ring-1 ring-line";
@@ -90,30 +91,9 @@ export type PageTab = {
   count?: number;
 };
 
-/** Tabs at the top of a page that brings two (or three) staff pages together. */
+/** Tabs at the top of a page that brings two (or three) staff pages together (sliding, like login / sign-up). */
 export function PageTabs({ items, label }: { items: PageTab[]; label: string }) {
-  return (
-    <nav aria-label={label} className="flex shrink-0 gap-1.5 rounded-2xl bg-surface p-1.5 ring-1 ring-line">
-      {items.map(({ key, label: name, short, icon: Icon, href, on, count }) => (
-        <Link
-          key={key}
-          href={href}
-          aria-current={on ? "page" : undefined}
-          className={cn(
-            "flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-xl px-2 py-2.5 text-[13px] font-semibold transition-colors sm:gap-2 sm:px-3 sm:text-[14px]",
-            on ? "bg-primary text-white" : "text-ink/75 hover:bg-canvas hover:text-ink",
-          )}
-        >
-          <Icon className="size-4 shrink-0" aria-hidden="true" />
-          <span className={cn("truncate", short && "sm:hidden")}>{short ?? name}</span>
-          {short && <span className="hidden truncate sm:inline">{name}</span>}
-          {count !== undefined && count > 0 && (
-            <span className={cn("rounded-full px-1.5 text-[11px] font-bold tabular-nums", on ? "bg-white/25 text-white" : "bg-primary/10 text-primary")}>{count}</span>
-          )}
-        </Link>
-      ))}
-    </nav>
-  );
+  return <SlidingTabs label={label} items={items.map(({ icon: Icon, ...item }) => ({ ...item, icon: <Icon aria-hidden="true" /> }))} />;
 }
 
 /** Page tabs that stay in place under the top bar while the page below them scrolls. */

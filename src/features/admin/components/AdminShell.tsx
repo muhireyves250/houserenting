@@ -125,6 +125,8 @@ export function AdminShell({
   const tAdmin = useTranslations("Admin");
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  // An open conversation uses the whole phone screen (its answer box sits at the bottom), so no bottom bar there.
+  const bottomBar = !/^\/admin\/messages\/[^/]+/.test(pathname);
   const allowed = (key: Key) => {
     const area = AREA_OF[key];
     return !area || areas.includes(area);
@@ -251,11 +253,11 @@ export function AdminShell({
           </Link>
         </header>
         {/* Phones: room under the page for the bottom bar. */}
-        <main className="admin-cards px-7 py-6 pb-24 md:px-20 md:py-8 lg:pb-8">{children}</main>
+        <main className={cn("admin-cards px-7 py-6 md:px-20 md:py-8 lg:pb-8", bottomBar ? "pb-24" : "pb-6")}>{children}</main>
       </div>
 
       {/* Phones and tablets: the main admin pages one tap away, and Menu for everything else. */}
-      {!/^\/admin\/messages\/[^/]+/.test(pathname) && (
+      {bottomBar && (
         <nav aria-label={t("label")} className="fixed inset-x-0 bottom-0 z-40 px-3 pb-[calc(6px+env(safe-area-inset-bottom))] lg:hidden" data-print-hide>
           <ul className="mx-auto flex w-full max-w-md items-center rounded-full bg-surface/95 p-1.5 shadow-[0_14px_36px_-12px_rgba(0,40,100,0.45)] ring-1 ring-line backdrop-blur-xl">
             {BOTTOM.filter((i) => allowed(i.key)).map(({ key, href, icon: Icon }) => {

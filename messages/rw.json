@@ -1188,7 +1188,8 @@
     "areasSave": "Bika uburenganzira",
     "areasSaved": "Byabitswe.",
     "areasFailed": "Ntibyabitswe. Ongera ugerageze.",
-    "superAdminAll": "Abayobozi bakuru bacunga byose."
+    "superAdminAll": "Abayobozi bakuru bacunga byose.",
+    "clientDetails": "Amakuru y’umukiliya"
   },
   "Questions": {
     "title": "Ibibazo n'ibisubizo",
@@ -1526,7 +1527,21 @@
     "until": "kugeza {date}",
     "disable": "Funga",
     "enable": "Fungura",
-    "newCode": "Kode nshya ya promosiyo"
+    "newCode": "Kode nshya ya promosiyo",
+    "fundingShort": {
+      "PLATFORM": "VIIPA irishyura",
+      "HOST": "Nyir’inzu arishyura"
+    },
+    "state": {
+      "active": "Irakora",
+      "off": "Yahagaritswe",
+      "expired": "Yarangiye",
+      "usedUp": "Yashize",
+      "scheduled": "Izatangira nyuma"
+    },
+    "offLabel": "{value} zigabanyijwe",
+    "codesCount": "{count, plural, one {Kode #} other {Kode #}} · {active} zikora",
+    "startsOn": "guhera {date}"
   },
   "Referrals": {
     "title": "Tumira inshuti",

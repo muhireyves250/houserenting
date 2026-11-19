@@ -1188,7 +1188,8 @@
     "areasSave": "Save access",
     "areasSaved": "Saved.",
     "areasFailed": "Couldn't save. Try again.",
-    "superAdminAll": "Super admins manage everything."
+    "superAdminAll": "Super admins manage everything.",
+    "clientDetails": "Client details"
   },
   "Questions": {
     "title": "Questions and answers",
@@ -1526,7 +1527,21 @@
     "until": "until {date}",
     "disable": "Turn off",
     "enable": "Turn on",
-    "newCode": "New promo code"
+    "newCode": "New promo code",
+    "fundingShort": {
+      "PLATFORM": "VIIPA pays",
+      "HOST": "Owner pays"
+    },
+    "state": {
+      "active": "Active",
+      "off": "Off",
+      "expired": "Ended",
+      "usedUp": "Used up",
+      "scheduled": "Starts later"
+    },
+    "offLabel": "{value} off",
+    "codesCount": "{count, plural, one {# code} other {# codes}} · {active} active",
+    "startsOn": "from {date}"
   },
   "Referrals": {
     "title": "Invite friends",
