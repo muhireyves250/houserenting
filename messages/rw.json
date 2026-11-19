@@ -1437,7 +1437,9 @@
     "listIntro": "Ubutumwa bwawe n'itsinda rya VIIPA.",
     "team": "Itsinda rya VIIPA",
     "staffIntro": "Ibiganiro byose by'abakiriya. Abakiriya bandikira VIIPA; ba nyir'inzu ntibabibona. Ibitarasubizwa mbere.",
-    "staffInbox": "Ubutumwa"
+    "staffInbox": "Ubutumwa",
+    "waitingReply": "Bitegereje igisubizo",
+    "allConversations": "Ibiganiro byose"
   },
   "Places": {
     "statusTitle": "Uko bihagaze",

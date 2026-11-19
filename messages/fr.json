@@ -1437,7 +1437,9 @@
     "listIntro": "Vos messages avec l'équipe VIIPA.",
     "team": "Équipe VIIPA",
     "staffIntro": "Toutes les conversations des clients. Les clients écrivent à VIIPA ; les propriétaires ne les voient pas. Les non répondues d'abord.",
-    "staffInbox": "Messages"
+    "staffInbox": "Messages",
+    "waitingReply": "En attente de réponse",
+    "allConversations": "Toutes les conversations"
   },
   "Places": {
     "statusTitle": "Statut",

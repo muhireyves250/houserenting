@@ -1437,7 +1437,9 @@
     "listIntro": "Your messages with the VIIPA team.",
     "team": "VIIPA team",
     "staffIntro": "Every client conversation. Clients write to VIIPA; owners don't see these. Unanswered first.",
-    "staffInbox": "Messages"
+    "staffInbox": "Messages",
+    "waitingReply": "Waiting for reply",
+    "allConversations": "All conversations"
   },
   "Places": {
     "statusTitle": "Status",
