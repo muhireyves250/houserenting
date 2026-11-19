@@ -1454,7 +1454,8 @@
       "PROMO_DISCOUNT": "Réduction promo",
       "SETTLEMENT": "Versement au propriétaire",
       "REFERRAL_REWARD": "Récompense de parrainage",
-      "REFUND": "Remboursement"
+      "REFUND": "Remboursement",
+      "PROMOTER_REWARD": "Récompense promoteur"
     },
     "intro": "Paiements des voyageurs, montants dus et versés aux propriétaires, et le grand livre complet. Les exports s'ouvrent dans tout tableur.",
     "exportBookings": "Réservations CSV",
@@ -1462,7 +1463,25 @@
     "exportLedger": "Grand livre CSV",
     "paymentsTitle": "Paiements",
     "provider": "Prestataire",
-    "transaction": "Transaction"
+    "transaction": "Transaction",
+    "connectedShort": "Les paiements arrivent seuls",
+    "manualShort": "Paiements confirmés à la main (aucun prestataire connecté)",
+    "tiles": {
+      "due": "Dû aux propriétaires",
+      "upcoming": "Dû après les séjours",
+      "paidOut": "Payé aux propriétaires",
+      "deposits": "Cautions détenues"
+    },
+    "byHand": "à la main",
+    "forStay": "séjour",
+    "forFood": "repas {ref}",
+    "forLaundry": "lessive {ref}",
+    "payStatus": {
+      "SUCCEEDED": "Payé",
+      "PENDING": "En attente",
+      "FAILED": "Échoué",
+      "REFUNDED": "Remboursé"
+    }
   },
   "Promotions": {
     "new": "Nouveau code promo",

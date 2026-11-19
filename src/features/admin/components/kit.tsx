@@ -14,13 +14,13 @@ export function Chip({ tone = "bg-canvas text-ink", children }: { tone?: string;
 export type Tile = { label: string; count: number; href?: string | { pathname: string; query?: Record<string, string> }; tone?: string; on?: boolean };
 
 /** Big numbers across the top of a page: what waits, at a glance. Each can filter or jump to its part. */
-export function StatTiles({ items }: { items: Tile[] }) {
+export function StatTiles({ items, format }: { items: Tile[]; /** Shows each number differently (e.g. as money). */ format?: (n: number) => string }) {
   return (
     <div className={cn("grid gap-3", items.length >= 4 ? "grid-cols-2 md:grid-cols-4" : items.length === 2 ? "grid-cols-2 md:max-w-xl" : "grid-cols-3")}>
       {items.map((item) => {
         const body = (
           <>
-            <span className={cn("block text-[26px] leading-8 font-bold tabular-nums", item.count > 0 ? (item.tone ?? "text-ink") : "text-muted")}>{item.count}</span>
+            <span className={cn("block font-bold tabular-nums", format ? "text-[19px] leading-7 md:text-[22px]" : "text-[26px] leading-8", item.count > 0 ? (item.tone ?? "text-ink") : "text-muted")}>{format ? format(item.count) : item.count}</span>
             <span className="text-[13px] font-semibold text-ink">{item.label}</span>
           </>
         );

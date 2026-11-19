@@ -1454,7 +1454,8 @@
       "PROMO_DISCOUNT": "Promo discount",
       "SETTLEMENT": "Payout to owner",
       "REFERRAL_REWARD": "Referral reward",
-      "REFUND": "Refund"
+      "REFUND": "Refund",
+      "PROMOTER_REWARD": "Promoter reward"
     },
     "intro": "Guest payments, what owners are owed and paid, and the full ledger. Exports open in any spreadsheet.",
     "exportBookings": "Bookings CSV",
@@ -1462,7 +1463,25 @@
     "exportLedger": "Ledger CSV",
     "paymentsTitle": "Payments",
     "provider": "Provider",
-    "transaction": "Transaction"
+    "transaction": "Transaction",
+    "connectedShort": "Payments arrive on their own",
+    "manualShort": "Payments are confirmed by hand (no provider connected yet)",
+    "tiles": {
+      "due": "Owed to owners now",
+      "upcoming": "Owed after stays end",
+      "paidOut": "Paid to owners",
+      "deposits": "Deposits held"
+    },
+    "byHand": "by hand",
+    "forStay": "stay",
+    "forFood": "food order {ref}",
+    "forLaundry": "laundry {ref}",
+    "payStatus": {
+      "SUCCEEDED": "Paid",
+      "PENDING": "Waiting",
+      "FAILED": "Failed",
+      "REFUNDED": "Refunded"
+    }
   },
   "Promotions": {
     "new": "New promo code",

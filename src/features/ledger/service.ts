@@ -89,6 +89,6 @@ export function recentLedger(take = 100) {
   return db.ledgerEntry.findMany({
     orderBy: { createdAt: "desc" },
     take,
-    select: { id: true, kind: true, amount: true, createdAt: true, booking: { select: { reference: true } }, settlement: { select: { reference: true } } },
+    select: { id: true, kind: true, amount: true, note: true, createdAt: true, booking: { select: { reference: true } }, settlement: { select: { reference: true } } },
   });
 }

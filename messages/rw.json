@@ -1454,7 +1454,8 @@
       "PROMO_DISCOUNT": "Igabanywa",
       "SETTLEMENT": "Kwishyura nyir'inzu",
       "REFERRAL_REWARD": "Igihembo cy'ubutumire",
-      "REFUND": "Gusubiza"
+      "REFUND": "Gusubiza",
+      "PROMOTER_REWARD": "Igihembo cy'umumamaza"
     },
     "intro": "Ubwishyu bw'abashyitsi, ibyo ba nyir'inzu bagomba n'ibyo bishyuwe, n'igitabo cyose. Raporo zifunguka muri spreadsheet iyo ari yo yose.",
     "exportBookings": "Ibyabitswe CSV",
@@ -1462,7 +1463,25 @@
     "exportLedger": "Igitabo CSV",
     "paymentsTitle": "Ubwishyu",
     "provider": "Utanga serivisi",
-    "transaction": "Igikorwa"
+    "transaction": "Igikorwa",
+    "connectedShort": "Ubwishyu buza bwonyine",
+    "manualShort": "Ubwishyu bwemezwa n'intoki (nta serivisi yo kwishyura irahuzwa)",
+    "tiles": {
+      "due": "Ibyo ba nyir'amazu bagomba guhabwa ubu",
+      "upcoming": "Ibizatangwa nyuma y'ubukode",
+      "paidOut": "Ibyahawe ba nyir'amazu",
+      "deposits": "Ingwate zibitswe"
+    },
+    "byHand": "n'intoki",
+    "forStay": "ubukode",
+    "forFood": "ibiryo {ref}",
+    "forLaundry": "kumesa {ref}",
+    "payStatus": {
+      "SUCCEEDED": "Byishyuwe",
+      "PENDING": "Bitegereje",
+      "FAILED": "Byanze",
+      "REFUNDED": "Byasubijwe"
+    }
   },
   "Promotions": {
     "new": "Kode nshya y'igabanywa",
