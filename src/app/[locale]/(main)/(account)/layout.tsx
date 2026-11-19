@@ -15,7 +15,7 @@ export default async function AccountLayout({ children }: { children: ReactNode 
   return (
     <div className="lg:mx-auto lg:grid lg:max-w-7xl lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-10 lg:px-6 lg:py-10">
       <AccountNav user={{ name: user.name, email: user.email, image }} unread={unread} />
-      <div className="account-page min-w-0">{children}</div>
+      <div className="account-page admin-cards min-w-0">{children}</div>
     </div>
   );
 }

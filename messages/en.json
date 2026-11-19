@@ -1396,6 +1396,16 @@
       "orderNew": "New food order {reference} — {title} ({total} RWF). It waits for payment.",
       "orderSentToStay": "Food order {reference} for {name} was sent to {where}. When it arrives, check the number and take it to them.",
       "orderReceived": "Order {reference} was received by the guest ({title})."
+    },
+    "filterLabel": "Show notifications",
+    "filter": {
+      "all": "All",
+      "bookings": "Bookings",
+      "food": "Food",
+      "laundry": "Laundry",
+      "messages": "Messages",
+      "help": "Help",
+      "other": "Other"
     }
   },
   "Rooms": {

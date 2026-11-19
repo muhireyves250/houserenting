@@ -1396,6 +1396,16 @@
       "orderNew": "Ibyatumijwe bishya {reference} — {title} ({total} RWF). Bitegereje kwishyurwa.",
       "orderSentToStay": "Ibyo {name} yatumije {reference} byoherejwe kuri {where}. Nibigera, reba nimero ubimushyikirize.",
       "orderReceived": "Ibyatumijwe {reference} byakiriwe n'umukiriya ({title})."
+    },
+    "filterLabel": "Erekana imenyesha",
+    "filter": {
+      "all": "Byose",
+      "bookings": "Ibyumba",
+      "food": "Ibiryo",
+      "laundry": "Kumesa",
+      "messages": "Ubutumwa",
+      "help": "Ubufasha",
+      "other": "Ibindi"
     }
   },
   "Rooms": {

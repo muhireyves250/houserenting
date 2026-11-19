@@ -33,11 +33,17 @@ export default async function ProfilePage() {
 
       {/* Computers: who you are, beside your details (the other pages are in the account menu on the left). */}
       <div className="grid gap-5 max-md:hidden lg:grid-cols-[300px_minmax(0,1fr)] lg:items-start">
-        <section className={`${card} flex flex-col items-center px-6 py-8 text-center`}>
-          <ProfilePhoto name={profile.name} image={photo} />
-          <p className="mt-4 text-2xl leading-8 font-bold tracking-[-0.02em] text-ink">{firstName}</p>
-          <p className="text-sm text-muted">{role}</p>
-        </section>
+        <div className="flex flex-col gap-5">
+          <section className={`${card} flex flex-col items-center px-6 py-8 text-center`}>
+            <ProfilePhoto name={profile.name} image={photo} />
+            <p className="mt-4 text-2xl leading-8 font-bold tracking-[-0.02em] text-ink">{firstName}</p>
+            <p className="text-sm text-muted">{role}</p>
+          </section>
+          {/* Computers: installing the app sits in its own card under the photo. */}
+          <div className={`${card} hidden px-5 py-1 lg:block lg:empty:hidden`}>
+            <InstallApp variant="row" />
+          </div>
+        </div>
         <section className={`${card} hidden p-6 lg:block`}>
           <h2 className="mb-4 text-[17px] font-bold text-ink">{t("personalInfo")}</h2>
           <ProfileForm profile={{ ...profile, locale: toAppLocale(profile.locale) }} />
@@ -45,7 +51,7 @@ export default async function ProfilePage() {
       </div>
 
       {/* Settings list */}
-      <ul className="mt-2 divide-y divide-line/70 md:mt-6 lg:mt-4">
+      <ul className="mt-2 divide-y divide-line/70 md:mt-6 lg:hidden">
         <li className="lg:hidden">
           <Link href="/profile/personal" className={row}>
             <UserRound className="size-6" strokeWidth={1.6} aria-hidden="true" />

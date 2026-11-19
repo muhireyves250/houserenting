@@ -1396,6 +1396,16 @@
       "orderNew": "Nouvelle commande {reference} — {title} ({total} RWF). En attente de paiement.",
       "orderSentToStay": "La commande {reference} de {name} a été envoyée à {where}. À son arrivée, vérifiez le numéro et apportez-la.",
       "orderReceived": "La commande {reference} a été reçue par le client ({title})."
+    },
+    "filterLabel": "Afficher les notifications",
+    "filter": {
+      "all": "Toutes",
+      "bookings": "Réservations",
+      "food": "Repas",
+      "laundry": "Blanchisserie",
+      "messages": "Messages",
+      "help": "Aide",
+      "other": "Autres"
     }
   },
   "Rooms": {
