@@ -62,7 +62,7 @@ export const td = "px-4 py-3 align-middle";
 export function FilterTabs({ items }: { items: { label: string; href: string | { pathname: string; query: Record<string, string> }; on: boolean; count?: number }[] }) {
   return (
     // Phones: one row to swipe sideways (keeps the list tall); computers: wraps.
-    <div className="flex gap-2 overflow-x-auto [scrollbar-width:none] max-md:-mx-4 max-md:px-4 md:flex-wrap [&::-webkit-scrollbar]:hidden">
+    <div className="flex gap-2 overflow-x-auto [scrollbar-width:none] max-md:-mx-5 max-md:px-5 md:flex-wrap [&::-webkit-scrollbar]:hidden">
       {items.map((item) => (
         <Link
           key={item.label}
