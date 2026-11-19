@@ -1,6 +1,6 @@
 import { House, MessageCircleQuestion, Star, User } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
-import { adminCard, Group, StatTiles } from "@/features/admin/components/kit";
+import { FillScreen, Group, ScrollArea, StatTiles, Toolbar, adminCard } from "@/features/admin/components/kit";
 import { ModerateButtons } from "@/features/admin/components/StaffButtons";
 import { formatKigaliDateTime } from "@/features/bookings/format";
 import { AnswerQuestion } from "@/features/questions/components/AnswerQuestion";
@@ -42,14 +42,17 @@ export default async function ModerationPage({ searchParams }: Props) {
     </div>
   );
   return (
-    <div className="flex flex-col gap-8">
-      <StatTiles
-        items={[
-          { label: t("questions"), count: questions.length, href: { pathname: "/admin/moderation" }, on: !showPublished, tone: "text-primary" },
-          { label: t("feedback"), count: reviews.length, href: { pathname: "/admin/moderation" }, on: !showPublished, tone: "text-primary" },
-          { label: t("moderation.published"), count: doneQuestions.length + doneReviews.length, href: { pathname: "/admin/moderation", query: { show: "published" } }, on: showPublished, tone: "text-emerald-700" },
-        ]}
-      />
+    <FillScreen>
+      <Toolbar>
+        <StatTiles
+          items={[
+            { label: t("questions"), count: questions.length, href: { pathname: "/admin/moderation" }, on: !showPublished, tone: "text-primary" },
+            { label: t("feedback"), count: reviews.length, href: { pathname: "/admin/moderation" }, on: !showPublished, tone: "text-primary" },
+            { label: t("moderation.published"), count: doneQuestions.length + doneReviews.length, href: { pathname: "/admin/moderation", query: { show: "published" } }, on: showPublished, tone: "text-emerald-700" },
+          ]}
+        />
+      </Toolbar>
+      <ScrollArea className="flex flex-col gap-8">
       {/* Published ones are kept: they show on the places, and can be taken down. */}
       {showPublished ? (
         <Group title={t("moderation.published")} count={doneQuestions.length + doneReviews.length} empty={t("moderation.publishedEmpty")}>
@@ -130,6 +133,7 @@ export default async function ModerationPage({ searchParams }: Props) {
       </Group>
         </>
       )}
-    </div>
+      </ScrollArea>
+    </FillScreen>
   );
 }

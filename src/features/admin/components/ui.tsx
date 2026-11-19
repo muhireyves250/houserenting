@@ -61,13 +61,14 @@ export const td = "px-4 py-3 align-middle";
 /** Filter chips that are links (shareable URLs, work without JavaScript). */
 export function FilterTabs({ items }: { items: { label: string; href: string | { pathname: string; query: Record<string, string> }; on: boolean; count?: number }[] }) {
   return (
-    <div className="flex flex-wrap gap-2">
+    // Phones: one row to swipe sideways (keeps the list tall); computers: wraps.
+    <div className="flex gap-2 overflow-x-auto [scrollbar-width:none] max-md:-mx-4 max-md:px-4 md:flex-wrap [&::-webkit-scrollbar]:hidden">
       {items.map((item) => (
         <Link
           key={item.label}
           href={item.href}
           className={cn(
-            "inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[13px] transition-colors",
+            "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[13px] whitespace-nowrap transition-colors",
             item.on ? "border-primary bg-primary font-semibold text-white" : "border-line bg-surface text-ink hover:border-primary/60",
           )}
         >

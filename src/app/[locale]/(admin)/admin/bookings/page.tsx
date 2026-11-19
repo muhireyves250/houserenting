@@ -1,6 +1,7 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import { CheckInOut } from "@/features/admin/components/StaffButtons";
-import { ExportLink, FilterTabs, PageIntro, Pagination, SearchBox } from "@/features/admin/components/ui";
+import { FillScreen, ScrollArea, Toolbar } from "@/features/admin/components/kit";
+import { ExportLink, FilterTabs, Pagination, SearchBox } from "@/features/admin/components/ui";
 import { roomLabel } from "@/features/rooms/links";
 import { todayISO } from "@/features/search/date-range";
 import { NoShowButton } from "@/features/stay/components/StaffStayPanels";
@@ -36,11 +37,10 @@ export default async function AdminBookingsPage({ searchParams }: Props) {
   const exportHref = `/api/v1/admin/export/bookings?${new URLSearchParams(query({}))}`;
 
   return (
-    <div>
-      <PageIntro actions={<ExportLink href={exportHref} label={t("exportCsv")} />} />
-      {/* What guests asked to change, and refunds to send: answered first. */}
-      <GuestRequests />
-      <div className="mb-4 flex flex-col gap-3">
+    <FillScreen>
+      {/* Search and filters with Export on one row; requests and bookings scroll below. */}
+      <Toolbar actions={<ExportLink href={exportHref} label={t("exportCsv")} />}>
+      <div className="flex flex-col gap-3">
         <SearchBox value={q} placeholder={t("searchBookings")} keep={{ status }} />
         <FilterTabs
           items={[
@@ -54,6 +54,10 @@ export default async function AdminBookingsPage({ searchParams }: Props) {
           ]}
         />
       </div>
+      </Toolbar>
+      <ScrollArea>
+      {/* What guests asked to change, and refunds to send: answered first. */}
+      <GuestRequests />
       {/* One card per booking, with the quick steps that apply now (the rest is on its page). */}
       {result.rows.length === 0 ? (
         <p className="rounded-2xl bg-surface py-12 text-center text-[14px] text-muted ring-1 ring-line">{t("nothingHere")}</p>
@@ -108,6 +112,7 @@ export default async function AdminBookingsPage({ searchParams }: Props) {
         label={(p, n) => t("pageOf", { page: p, pages: n })}
         hrefFor={(p) => `/admin/bookings?${new URLSearchParams(query({ page: String(p) }))}`}
       />
-    </div>
+      </ScrollArea>
+    </FillScreen>
   );
 }

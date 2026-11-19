@@ -2,7 +2,7 @@ import { House, MessageSquare } from "lucide-react";
 import Image from "next/image";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Avatar } from "@/components/ui/Avatar";
-import { Chip, StatTiles } from "@/features/admin/components/kit";
+import { Chip, FillScreen, ScrollArea, StatTiles, Toolbar } from "@/features/admin/components/kit";
 import { listConversations } from "@/features/chats/service";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
@@ -19,13 +19,16 @@ export default async function AdminMessagesPage({ searchParams }: Props) {
   const waiting = chats.filter((c) => c.unread);
   const sorted = waitingOnly ? waiting : [...waiting, ...chats.filter((c) => !c.unread)];
   return (
-    <div className="flex flex-col gap-5">
-      <StatTiles
-        items={[
-          { label: t("waitingReply"), count: waiting.length, href: { pathname: "/admin/messages", query: { show: "waiting" } }, on: waitingOnly, tone: "text-primary" },
-          { label: t("allConversations"), count: chats.length, href: { pathname: "/admin/messages" }, on: !waitingOnly },
-        ]}
-      />
+    <FillScreen>
+      <Toolbar>
+        <StatTiles
+          items={[
+            { label: t("waitingReply"), count: waiting.length, href: { pathname: "/admin/messages", query: { show: "waiting" } }, on: waitingOnly, tone: "text-primary" },
+            { label: t("allConversations"), count: chats.length, href: { pathname: "/admin/messages" }, on: !waitingOnly },
+          ]}
+        />
+      </Toolbar>
+      <ScrollArea className="flex flex-col gap-5">
       {sorted.length === 0 ? (
         <div className="flex flex-col items-center gap-2 rounded-2xl bg-surface py-14 text-center ring-1 ring-line">
           <MessageSquare className="size-8 text-line-strong" aria-hidden="true" />
@@ -63,6 +66,7 @@ export default async function AdminMessagesPage({ searchParams }: Props) {
           ))}
         </ul>
       )}
-    </div>
+      </ScrollArea>
+    </FillScreen>
   );
 }

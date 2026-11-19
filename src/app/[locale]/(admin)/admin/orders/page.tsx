@@ -1,4 +1,5 @@
 import { BedDouble, Phone, Store } from "lucide-react";
+import { FillScreen, ScrollArea, Toolbar } from "@/features/admin/components/kit";
 import { getLocale, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 import { formatKigaliDateTime } from "@/features/bookings/format";
@@ -55,22 +56,25 @@ export default async function AdminOrdersPage() {
   const none = <p className="rounded-2xl bg-surface py-6 text-center text-[14px] text-muted ring-1 ring-line">{t("staffOrders.nothing")}</p>;
 
   return (
-    <div className="flex flex-col gap-8">
-      {/* Where things stand, at a glance. */}
-      <nav className="grid grid-cols-3 gap-3">
-        {(
-          [
-            ["to-pay", t("staffOrders.toPay"), awaiting.length, "text-amber-700"],
-            ["to-send", t("staffOrders.toSend"), toSend.length, "text-primary"],
-            ["sent", t("staffOrders.sent"), sent.length, "text-emerald-700"],
-          ] as const
-        ).map(([id, label, n, tone]) => (
-          <a key={id} href={`#${id}`} className="rounded-2xl bg-surface px-4 py-3 ring-1 ring-line transition-colors hover:ring-primary">
-            <span className={cn("block text-[26px] leading-8 font-bold tabular-nums", n > 0 ? tone : "text-muted")}>{n}</span>
-            <span className="text-[13px] font-semibold text-ink">{label}</span>
-          </a>
-        ))}
-      </nav>
+    <FillScreen>
+      <Toolbar>
+        {/* Where things stand, at a glance. */}
+        <nav className="grid grid-cols-3 gap-3">
+          {(
+            [
+              ["to-pay", t("staffOrders.toPay"), awaiting.length, "text-amber-700"],
+              ["to-send", t("staffOrders.toSend"), toSend.length, "text-primary"],
+              ["sent", t("staffOrders.sent"), sent.length, "text-emerald-700"],
+            ] as const
+          ).map(([id, label, n, tone]) => (
+            <a key={id} href={`#${id}`} className="rounded-2xl bg-surface px-4 py-3 ring-1 ring-line transition-colors hover:ring-primary">
+              <span className={cn("block text-[26px] leading-8 font-bold tabular-nums", n > 0 ? tone : "text-muted")}>{n}</span>
+              <span className="text-[13px] font-semibold text-ink">{label}</span>
+            </a>
+          ))}
+        </nav>
+      </Toolbar>
+      <ScrollArea className="flex flex-col gap-8">
 
       <Group id="to-pay" title={t("staffOrders.toPay")} count={awaiting.length} tone="bg-amber-100 text-amber-900">
         {awaiting.length === 0 ? (
@@ -144,6 +148,7 @@ export default async function AdminOrdersPage() {
           </div>
         </details>
       )}
-    </div>
+      </ScrollArea>
+    </FillScreen>
   );
 }

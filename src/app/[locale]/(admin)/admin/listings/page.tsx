@@ -2,6 +2,7 @@ import { House, Plus } from "lucide-react";
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { allListings } from "@/features/admin/stats";
+import { FillScreen, ScrollArea, Toolbar } from "@/features/admin/components/kit";
 import { HostStatus } from "@/features/hosting/components/HostStatus";
 import { movesFrom } from "@/features/listings/lifecycle";
 import { PlaceRowActions } from "@/features/places/components/PlaceRowActions";
@@ -49,30 +50,35 @@ export default async function AdminListingsPage({ searchParams }: Props) {
   ] as Filter[]).filter((f) => f.count > 0 || f.value === (endingSoon ? "ending" : (status ?? "all")));
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="flex justify-end">
-        <Link href="/admin/listings/new" className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-[14px] font-semibold text-white hover:bg-primary-hover">
-          <Plus className="size-4" aria-hidden="true" />
-          {tPlaces("addPlace")}
-        </Link>
-      </div>
-      <div className="flex flex-wrap gap-2">
-        {filters.map((f) => {
-          const on = (endingSoon ? "ending" : (status ?? "all")) === f.value;
-          return (
-            <Link
-              key={f.value}
-              href={{ pathname: "/admin/listings", query: { status: f.value } }}
-              className={cn(
-                "rounded-full border px-3.5 py-1.5 text-[13px] transition-colors",
-                on ? "border-primary bg-primary font-semibold text-white" : "border-line bg-surface text-ink hover:border-primary/60",
-              )}
-            >
-              {f.label} <span className={cn("tabular-nums", on ? "text-white/80" : "text-muted")}>{f.count}</span>
-            </Link>
-          );
-        })}
-      </div>
+    <FillScreen>
+      {/* Filters and Add a place on one row; the list scrolls below. */}
+      <Toolbar
+        actions={
+          <Link href="/admin/listings/new" className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-[14px] font-semibold text-white hover:bg-primary-hover">
+            <Plus className="size-4" aria-hidden="true" />
+            {tPlaces("addPlace")}
+          </Link>
+        }
+      >
+        <div className="flex flex-wrap gap-2">
+          {filters.map((f) => {
+            const on = (endingSoon ? "ending" : (status ?? "all")) === f.value;
+            return (
+              <Link
+                key={f.value}
+                href={{ pathname: "/admin/listings", query: { status: f.value } }}
+                className={cn(
+                  "rounded-full border px-3.5 py-1.5 text-[13px] transition-colors",
+                  on ? "border-primary bg-primary font-semibold text-white" : "border-line bg-surface text-ink hover:border-primary/60",
+                )}
+              >
+                {f.label} <span className={cn("tabular-nums", on ? "text-white/80" : "text-muted")}>{f.count}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </Toolbar>
+      <ScrollArea>
       <div className="overflow-hidden rounded-2xl border border-line bg-surface">
         {listings.length === 0 ? (
           <p className="py-12 text-center text-[15px] text-muted">{t("nothingHere")}</p>
@@ -100,6 +106,7 @@ export default async function AdminListingsPage({ searchParams }: Props) {
           </ul>
         )}
       </div>
-    </div>
+      </ScrollArea>
+    </FillScreen>
   );
 }

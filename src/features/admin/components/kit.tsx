@@ -56,3 +56,24 @@ export function Group({ id, title, count, children, empty }: { id?: string; titl
     </section>
   );
 }
+
+/** A staff list page that fills the screen: its top row stays put and its list scrolls (see ScrollArea). */
+export function FillScreen({ children, className }: { children: ReactNode; className?: string }) {
+  return <div className={cn("admin-fill flex flex-col gap-4", className)}>{children}</div>;
+}
+
+/** The top row of a list page: filters or counters on the left, the page's button on the right, same top line. */
+export function Toolbar({ children, actions }: { children: ReactNode; actions?: ReactNode }) {
+  return (
+    // Phones: the button on its own line on top, the filters/counters full width below.
+    <div className="flex shrink-0 items-start justify-between gap-3 max-sm:flex-col-reverse max-sm:items-stretch">
+      <div className="min-w-0 flex-1">{children}</div>
+      {actions && <div className="flex shrink-0 flex-wrap items-center gap-2 max-sm:justify-end">{actions}</div>}
+    </div>
+  );
+}
+
+/** The scrolling part of a list page (a little inner padding so card shadows aren't cut off). */
+export function ScrollArea({ children, className }: { children: ReactNode; className?: string }) {
+  return <div className={cn("-mx-1 min-h-0 flex-1 overflow-y-auto overscroll-contain px-1 pt-1 pb-3", className)}>{children}</div>;
+}

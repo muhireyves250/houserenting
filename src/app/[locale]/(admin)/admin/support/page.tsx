@@ -1,6 +1,6 @@
 import { ArrowRight, User } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
-import { adminCard, Chip, StatTiles } from "@/features/admin/components/kit";
+import { Chip, FillScreen, ScrollArea, StatTiles, Toolbar, adminCard } from "@/features/admin/components/kit";
 import { TicketStatusSelect } from "@/features/admin/components/StaffButtons";
 import { formatKigaliDateTime } from "@/features/bookings/format";
 import { TicketStatusBadge } from "@/features/support/components/TicketStatusBadge";
@@ -26,17 +26,20 @@ export default async function AdminSupportPage({ searchParams }: Props) {
   ]);
   const count = (s: TicketStatus) => counts.find((c) => c.status === s)?._count._all ?? 0;
   return (
-    <div className="flex flex-col gap-5">
-      <StatTiles
-        items={STATUSES.map((s) => ({
-          label: t(`status.${s}`),
-          count: count(s),
-          // "Open" also lists those in progress (everything still to handle).
-          href: s === "OPEN" ? { pathname: "/admin/support" } : { pathname: "/admin/support", query: { status: s } },
-          on: s === "OPEN" ? !status : status === s,
-          tone: s === "OPEN" ? "text-amber-700" : s === "IN_PROGRESS" ? "text-primary" : "text-emerald-700",
-        }))}
-      />
+    <FillScreen>
+      <Toolbar>
+        <StatTiles
+          items={STATUSES.map((s) => ({
+            label: t(`status.${s}`),
+            count: count(s),
+            // "Open" also lists those in progress (everything still to handle).
+            href: s === "OPEN" ? { pathname: "/admin/support" } : { pathname: "/admin/support", query: { status: s } },
+            on: s === "OPEN" ? !status : status === s,
+            tone: s === "OPEN" ? "text-amber-700" : s === "IN_PROGRESS" ? "text-primary" : "text-emerald-700",
+          }))}
+        />
+      </Toolbar>
+      <ScrollArea className="flex flex-col gap-5">
       {tickets.length === 0 ? (
         <p className="rounded-2xl bg-surface py-10 text-center text-[14px] text-muted ring-1 ring-line">{tAdmin("nothingHere")}</p>
       ) : (
@@ -66,6 +69,7 @@ export default async function AdminSupportPage({ searchParams }: Props) {
           ))}
         </ul>
       )}
-    </div>
+      </ScrollArea>
+    </FillScreen>
   );
 }

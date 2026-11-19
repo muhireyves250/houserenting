@@ -1,6 +1,7 @@
+import { FillScreen, ScrollArea, Toolbar } from "@/features/admin/components/kit";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Avatar } from "@/components/ui/Avatar";
-import { FilterTabs, PageIntro, Pagination, Panel, SearchBox, Table, td } from "@/features/admin/components/ui";
+import { FilterTabs, Pagination, Panel, SearchBox, Table, td } from "@/features/admin/components/ui";
 import { searchUsers, type UserFilter } from "@/features/admin/queries";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
@@ -22,14 +23,17 @@ export default async function AdminUsersPage({ searchParams }: Props) {
   const badge = "rounded-full px-2 py-0.5 text-[11px] font-semibold";
 
   return (
-    <div>
-      <PageIntro description={t("usersIntro", { count: result.total })} />
-      <div className="mb-4 flex flex-col gap-3">
+    <FillScreen>
+      {/* Search and filters on one row with the member count; the table scrolls below. */}
+      <Toolbar actions={<span className="text-[13px] text-muted">{t("usersIntro", { count: result.total })}</span>}>
+      <div className="flex flex-col gap-3">
         <SearchBox value={q} placeholder={t("searchUsers")} keep={{ filter: filter === "all" ? undefined : filter }} />
         <FilterTabs
           items={FILTERS.map((f) => ({ label: t(`userFilter.${f}`), href: { pathname: "/admin/users", query: query({ filter: f === "all" ? undefined : f }) }, on: filter === f }))}
         />
       </div>
+      </Toolbar>
+      <ScrollArea>
       <Panel flush>
         <Table
           head={[t("col.name"), t("col.role"), t("col.activity"), t("col.joined"), t("col.status")]}
@@ -68,6 +72,7 @@ export default async function AdminUsersPage({ searchParams }: Props) {
           hrefFor={(p) => `/admin/users?${new URLSearchParams(query({ page: String(p) }))}`}
         />
       </Panel>
-    </div>
+      </ScrollArea>
+    </FillScreen>
   );
 }

@@ -1,6 +1,6 @@
 import { BedDouble, Phone, Scale } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
-import { adminCard, Chip, Group, StatTiles } from "@/features/admin/components/kit";
+import { Chip, FillScreen, Group, ScrollArea, StatTiles, Toolbar, adminCard } from "@/features/admin/components/kit";
 import { formatKigaliDateTime } from "@/features/bookings/format";
 import { LaundryStaffActions } from "@/features/laundry/components/LaundryStaffActions";
 import { PlaceLaundrySetting } from "@/features/laundry/components/PlaceLaundrySetting";
@@ -91,15 +91,18 @@ export default async function AdminLaundryPage() {
   const nothing = t("admin.groups.nothing");
 
   return (
-    <div className="flex flex-col gap-8">
-      <StatTiles
-        items={[
-          { label: t("admin.groups.toCollect"), count: toCollect.length, href: "#to-collect", tone: "text-amber-700" },
-          { label: t("admin.groups.washing"), count: washing.length, href: "#washing", tone: "text-primary" },
-          { label: t("admin.groups.toReturn"), count: toReturn.length, href: "#to-return", tone: "text-primary" },
-          { label: t("admin.groups.toPay"), count: toPay.length, href: "#to-pay", tone: "text-emerald-700" },
-        ]}
-      />
+    <FillScreen>
+      <Toolbar>
+        <StatTiles
+          items={[
+            { label: t("admin.groups.toCollect"), count: toCollect.length, href: "#to-collect", tone: "text-amber-700" },
+            { label: t("admin.groups.washing"), count: washing.length, href: "#washing", tone: "text-primary" },
+            { label: t("admin.groups.toReturn"), count: toReturn.length, href: "#to-return", tone: "text-primary" },
+            { label: t("admin.groups.toPay"), count: toPay.length, href: "#to-pay", tone: "text-emerald-700" },
+          ]}
+        />
+      </Toolbar>
+      <ScrollArea className="flex flex-col gap-8">
       {/* Only the steps that have laundry in them. */}
       {toCollect.length + washing.length + toReturn.length + toPay.length === 0 && (
         <p className="rounded-2xl bg-surface py-8 text-center text-[14px] text-muted ring-1 ring-line">{t("admin.groups.allClear")}</p>
@@ -163,6 +166,7 @@ export default async function AdminLaundryPage() {
           ))}
         </ul>
       </details>
-    </div>
+      </ScrollArea>
+    </FillScreen>
   );
 }
