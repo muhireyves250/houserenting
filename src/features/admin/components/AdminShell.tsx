@@ -230,7 +230,7 @@ export function AdminShell({
           </Link>
         </header>
         {/* Phones: room under the page for the bottom bar. */}
-        <main className="admin-cards px-7 py-6 pb-28 md:px-20 md:py-8 lg:pb-8">{children}</main>
+        <main className="admin-cards px-7 py-6 pb-24 md:px-20 md:py-8 lg:pb-8">{children}</main>
       </div>
 
       {/* Phones and tablets: the main admin pages one tap away, and Menu for everything else. */}

@@ -647,12 +647,12 @@ svg {
 /* Staff list pages fill the screen exactly: the top row stays, the list scrolls inside its own box.
    Screen height minus the top bar (64px) and the page's padding (phones/tablets keep room for the bottom bar). */
 .admin-fill {
-  height: calc(100dvh - 64px - 24px - 112px);
+  height: calc(100dvh - 64px - 24px - 96px);
   min-height: 24rem;
 }
 @media (min-width: 768px) {
   .admin-fill {
-    height: calc(100dvh - 64px - 32px - 112px);
+    height: calc(100dvh - 64px - 32px - 96px);
   }
 }
 @media (min-width: 1024px) {
