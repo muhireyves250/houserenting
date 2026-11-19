@@ -7,7 +7,7 @@ import { PLACE_TYPES } from "@/features/search/params";
 import { formatRWF } from "@/lib/format";
 
 type Props = { searchParams: Promise<Record<string, string | undefined>> };
-const input = "rounded-xl border border-line-strong bg-surface px-3 py-2 text-[14px] text-ink";
+const input = "w-full rounded-xl border border-line-strong bg-surface px-3 py-2 text-[14px] text-ink sm:w-auto";
 
 /** Money and activity reports by place, owner, category and date, with Excel export and print-to-PDF. */
 export async function ReportsView({ searchParams }: { searchParams: Props["searchParams"] }) {
@@ -29,22 +29,57 @@ export async function ReportsView({ searchParams }: { searchParams: Props["searc
   const typeLabel = (key: string) => ((PLACE_TYPES as readonly string[]).includes(key) ? tType(key as (typeof PLACE_TYPES)[number]) : key);
 
   const moneyTable = (rows: (Money & { key: string; label: string })[], label: (r: { key: string; label: string }) => string) => (
-    <Table
-      head={[t("col.what"), t("col.bookings"), t("col.nights"), t("col.gross"), t("col.platform"), t("col.owners"), t("col.refunds")]}
-      empty={rows.length === 0 ? <p className="py-6 text-center text-[14px] text-muted">{tAdmin("nothingHere")}</p> : null}
-    >
-      {rows.map((r) => (
-        <tr key={r.key}>
-          <td className={td}>{label(r)}</td>
-          <td className={`${td} tabular-nums`}>{r.bookings}</td>
-          <td className={`${td} tabular-nums`}>{r.nights}</td>
-          <td className={`${td} tabular-nums`}>{rwf(r.gross)}</td>
-          <td className={`${td} tabular-nums`}>{rwf(r.platform)}</td>
-          <td className={`${td} tabular-nums`}>{rwf(r.hostPayout)}</td>
-          <td className={`${td} tabular-nums`}>{rwf(r.refunds)}</td>
-        </tr>
-      ))}
-    </Table>
+    <>
+      {/* Phones: one small card per line, with the figures in three columns. */}
+      <div className="md:hidden print:hidden">
+        {rows.length === 0 ? (
+          <p className="py-6 text-center text-[14px] text-muted">{tAdmin("nothingHere")}</p>
+        ) : (
+          <ul className="divide-y divide-line">
+            {rows.map((r) => (
+              <li key={r.key} className="px-4 py-3">
+                <p className="text-[14px] font-semibold text-ink">{label(r)}</p>
+                <dl className="mt-2 grid grid-cols-3 gap-x-3 gap-y-2 text-[12px]">
+                  {(
+                    [
+                      [t("col.bookings"), String(r.bookings)],
+                      [t("col.nights"), String(r.nights)],
+                      [t("col.gross"), rwf(r.gross)],
+                      [t("col.platform"), rwf(r.platform)],
+                      [t("col.owners"), rwf(r.hostPayout)],
+                      [t("col.refunds"), rwf(r.refunds)],
+                    ] as const
+                  ).map(([name, value]) => (
+                    <div key={name} className="min-w-0">
+                      <dt className="text-[11px] leading-4 text-muted">{name}</dt>
+                      <dd className="font-semibold text-ink tabular-nums">{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+      <div className="max-md:hidden print:block">
+        <Table
+          head={[t("col.what"), t("col.bookings"), t("col.nights"), t("col.gross"), t("col.platform"), t("col.owners"), t("col.refunds")]}
+          empty={rows.length === 0 ? <p className="py-6 text-center text-[14px] text-muted">{tAdmin("nothingHere")}</p> : null}
+        >
+          {rows.map((r) => (
+            <tr key={r.key}>
+              <td className={td}>{label(r)}</td>
+              <td className={`${td} tabular-nums`}>{r.bookings}</td>
+              <td className={`${td} tabular-nums`}>{r.nights}</td>
+              <td className={`${td} tabular-nums`}>{rwf(r.gross)}</td>
+              <td className={`${td} tabular-nums`}>{rwf(r.platform)}</td>
+              <td className={`${td} tabular-nums`}>{rwf(r.hostPayout)}</td>
+              <td className={`${td} tabular-nums`}>{rwf(r.refunds)}</td>
+            </tr>
+          ))}
+        </Table>
+      </div>
+    </>
   );
 
   return (
@@ -58,18 +93,18 @@ export async function ReportsView({ searchParams }: { searchParams: Props["searc
           </>
         }
       />
-      <form data-print-hide className="flex flex-wrap items-end gap-3 rounded-2xl border border-line bg-surface p-4">
+      <form data-print-hide className="grid grid-cols-2 gap-3 rounded-2xl border border-line bg-surface p-4 sm:flex sm:flex-wrap sm:items-end">
         {/* Stay on the Reports tab when the filters are applied. */}
         <input type="hidden" name="tab" value="reports" />
-        <label className="flex flex-col gap-1 text-xs font-semibold text-muted">
+        <label className="flex min-w-0 flex-col gap-1 text-xs font-semibold text-muted">
           {t("from")}
           <input type="date" name="from" defaultValue={f.from} className={input} />
         </label>
-        <label className="flex flex-col gap-1 text-xs font-semibold text-muted">
+        <label className="flex min-w-0 flex-col gap-1 text-xs font-semibold text-muted">
           {t("to")}
           <input type="date" name="to" defaultValue={f.to} className={input} />
         </label>
-        <label className="flex flex-col gap-1 text-xs font-semibold text-muted">
+        <label className="flex min-w-0 flex-col gap-1 text-xs font-semibold text-muted">
           {t("view")}
           <select name="by" defaultValue={f.by} className={input}>
             {(["day", "week", "month", "year"] as const).map((g) => (
@@ -79,7 +114,7 @@ export async function ReportsView({ searchParams }: { searchParams: Props["searc
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-xs font-semibold text-muted">
+        <label className="flex min-w-0 flex-col gap-1 text-xs font-semibold text-muted">
           {t("category")}
           <select name="type" defaultValue={f.type ?? ""} className={input}>
             <option value="">{t("allCategories")}</option>
@@ -90,9 +125,9 @@ export async function ReportsView({ searchParams }: { searchParams: Props["searc
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-xs font-semibold text-muted">
+        <label className="flex min-w-0 flex-col gap-1 text-xs font-semibold text-muted">
           {t("place")}
-          <select name="place" defaultValue={f.listingId ?? ""} className={`${input} max-w-[220px]`}>
+          <select name="place" defaultValue={f.listingId ?? ""} className={`${input} sm:max-w-[220px]`}>
             <option value="">{t("allPlaces")}</option>
             {places.map((p) => (
               <option key={p.id} value={p.id}>
@@ -101,9 +136,9 @@ export async function ReportsView({ searchParams }: { searchParams: Props["searc
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-xs font-semibold text-muted">
+        <label className="flex min-w-0 flex-col gap-1 text-xs font-semibold text-muted">
           {t("owner")}
-          <select name="owner" defaultValue={f.ownerId ?? ""} className={`${input} max-w-[200px]`}>
+          <select name="owner" defaultValue={f.ownerId ?? ""} className={`${input} sm:max-w-[200px]`}>
             <option value="">{t("allOwners")}</option>
             {owners.map((o) => (
               <option key={o.id} value={o.id}>
@@ -112,7 +147,7 @@ export async function ReportsView({ searchParams }: { searchParams: Props["searc
             ))}
           </select>
         </label>
-        <button type="submit" className="rounded-full bg-primary px-5 py-2 text-[14px] font-semibold text-white hover:bg-primary-hover">
+        <button type="submit" className="col-span-2 rounded-full bg-primary px-5 py-2.5 sm:py-2 text-[14px] font-semibold text-white hover:bg-primary-hover">
           {t("show")}
         </button>
       </form>

@@ -1,6 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
+  "regions": [
+    "cle1"
+  ],
   "crons": [
     {
       "path": "/api/v1/jobs/expire-holds",

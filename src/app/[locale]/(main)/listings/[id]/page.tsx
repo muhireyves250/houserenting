@@ -440,7 +440,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
           <Section title={t("talkToUs")}>
             <div className="flex flex-col gap-6 md:flex-row md:items-center md:gap-12">
               <div className="flex w-full max-w-sm flex-col gap-2 rounded-3xl bg-surface px-7 py-7 shadow-[0_12px_36px_-14px_rgba(16,24,40,0.35)]">
-                <LogoWordmark className="h-[22px] self-start" />
+                <LogoWordmark className="h-[18px] self-start" />
                 <p className="text-[15px] text-muted">{t("talkToUsBody")}</p>
               </div>
               <MessageHostButton

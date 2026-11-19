@@ -3,6 +3,10 @@ import { createBooking } from "@/features/bookings/service";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { resetDb } from "@/test/db";
+import { unreadChats } from "@/features/chats/service";
+import { laundryToHandle } from "@/features/laundry/service";
+import { unreadCount } from "@/features/notifications/service";
+import { adminBadges, attentionCounts, dashboardStats } from "./stats";
 import { bookingsCsv, searchBookings, setUserStatus, staffCancelUnpaid } from "./queries";
 
 const NOW = new Date("2026-10-15T08:00:00Z");
@@ -81,5 +85,53 @@ describe("staff tools", () => {
     await expect(auth.api.signInEmail({ body: { email: "sue@example.com", password: "Long-enough-pass-1" } })).resolves.toBeTruthy();
     const log = await db.auditLog.findMany({ where: { entityId: sue.id }, orderBy: { createdAt: "asc" } });
     expect(log.map((l) => l.action)).toEqual(["user.suspend", "user.reactivate"]);
+  });
+});
+
+describe("staff sidebar numbers", () => {
+  it("one query gives the same counts as the separate ones", async () => {
+    await db.notification.createMany({ data: [{ userId: "admin", kind: "x", data: {} }, { userId: "admin", kind: "x", data: {}, readAt: NOW }, { userId: "g1", kind: "x", data: {} }] });
+    await db.supportTicket.create({ data: { reference: "HL-ABC234", userId: "g1", category: "OTHER", subject: "Help" } });
+    // Waiting for staff: the guest wrote last. Answered: staff wrote last. Read: staff read after the guest wrote.
+    const waiting = await db.conversation.create({ data: { listingId: "flat", guestId: "g1", hostId: "host" } });
+    await db.message.create({ data: { conversationId: waiting.id, senderId: "g1", body: "Hello" } });
+    await db.user.create({ data: { id: "g2", name: "Ann", email: "ann@example.com" } });
+    const answered = await db.conversation.create({ data: { listingId: "flat", guestId: "g2", hostId: "host" } });
+    await db.message.create({ data: { conversationId: answered.id, senderId: "g2", body: "Hi", createdAt: new Date("2026-10-01T08:00:00Z") } });
+    await db.message.create({ data: { conversationId: answered.id, senderId: "admin", body: "Hello", createdAt: new Date("2026-10-01T09:00:00Z") } });
+    await db.user.create({ data: { id: "g3", name: "Bo", email: "bo@example.com" } });
+    const read = await db.conversation.create({ data: { listingId: "flat", guestId: "g3", hostId: "host", hostReadAt: new Date("2026-10-02T00:00:00Z") } });
+    await db.message.create({ data: { conversationId: read.id, senderId: "g3", body: "Hi", createdAt: new Date("2026-10-01T08:00:00Z") } });
+
+    const admin = { id: "admin", role: "ADMIN" as const };
+    const [badges, counts, unread, chats, laundry] = await Promise.all([adminBadges("admin"), attentionCounts(), unreadCount("admin"), unreadChats(admin), laundryToHandle()]);
+    expect(badges).toMatchObject({ ...counts, unread, messages: chats, laundry, orders: 0 });
+    expect(badges.unread).toBe(1);
+    expect(badges.tickets).toBe(1);
+    expect(badges.messages).toBe(1);
+  });
+});
+
+describe("overview numbers", () => {
+  it("counts this month against last month", async () => {
+    const now = new Date("2026-10-15T08:00:00Z");
+    await db.ledgerEntry.createMany({
+      data: [
+        { kind: "GUEST_PAYMENT", amount: 100000, createdAt: new Date("2026-10-05T08:00:00Z") },
+        { kind: "GUEST_PAYMENT", amount: 40000, createdAt: new Date("2026-09-20T08:00:00Z") },
+        { kind: "COMMISSION", amount: 9000, createdAt: new Date("2026-10-05T08:00:00Z") },
+        { kind: "GUEST_FEE", amount: 3000, createdAt: new Date("2026-10-06T08:00:00Z") },
+        { kind: "HOST_PAYABLE", amount: 70000, createdAt: new Date("2026-10-06T08:00:00Z") },
+      ],
+    });
+    await db.user.updateMany({ data: { createdAt: new Date("2026-10-02T08:00:00Z") } });
+    await db.user.update({ where: { id: "g1" }, data: { createdAt: new Date("2026-09-02T08:00:00Z") } });
+    const stats = await dashboardStats(now);
+    expect(stats.kpis.paid).toEqual({ value: 100000, previous: 40000 });
+    expect(stats.kpis.platform).toEqual({ value: 12000, previous: 0 });
+    expect(stats.kpis.newUsers).toEqual({ value: 2, previous: 1 });
+    expect(stats.kpis.bookings).toEqual({ value: 0, previous: 0 });
+    expect(stats.liveListings).toBe(1);
+    expect(stats.bookingsPerDay).toHaveLength(30);
   });
 });

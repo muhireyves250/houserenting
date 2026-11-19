@@ -1,3 +1,4 @@
+import { Plus } from "lucide-react";
 import type { ReactNode } from "react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { FillScreen } from "@/features/admin/components/kit";
@@ -13,9 +14,14 @@ export async function PromotionsView({ tabs }: { tabs: ReactNode }) {
     <FillScreen>
       {tabs}
       {/* Computers: the new-code form beside the list, each scrolling in its own box. Phones: the form folds away. */}
-      <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-[400px_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)]">
-        <details className="group shrink-0 rounded-2xl bg-surface ring-1 ring-line lg:hidden">
-          <summary className="cursor-pointer px-4 py-3 text-[15px] font-semibold text-primary">+ {t("newCode")}</summary>
+      <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)] gap-4 lg:grid-cols-[400px_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)]">
+        <details className="group no-scrollbar max-h-[70dvh] shrink-0 overflow-y-auto rounded-2xl bg-surface ring-1 ring-line lg:hidden">
+          <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-[15px] font-semibold text-primary [&::-webkit-details-marker]:hidden">
+            <span className="flex size-7 items-center justify-center rounded-full bg-primary text-white">
+              <Plus className="size-4 transition-transform group-open:rotate-45" aria-hidden="true" />
+            </span>
+            {t("newCode")}
+          </summary>
           <div className="border-t border-line p-3">
             <PromoForm />
           </div>

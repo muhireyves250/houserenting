@@ -57,7 +57,7 @@ export function OnboardingCarousel({ onFinish }: { onFinish: () => void }) {
         <div key={slide.title} className="flex flex-col items-center gap-3">
           <h1 className="welcome-rise text-[28px] leading-tight font-bold tracking-[-0.03em] text-primary">
             {/* The first slide is the name itself: shown as the logo's lettering. */}
-            {slide.title === "slide1" ? <LogoWordmark className="h-[30px]" priority /> : t(slide.title)}
+            {slide.title === "slide1" ? <LogoWordmark className="h-6" priority /> : t(slide.title)}
           </h1>
           <p className="welcome-rise max-w-xs text-[16px] leading-6 text-muted [animation-delay:120ms]">{t(slide.body)}</p>
         </div>

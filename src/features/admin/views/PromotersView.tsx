@@ -17,6 +17,8 @@ export async function PromotersView() {
   const empty = <p className="py-8 text-center text-[14px] text-muted">{t("nothingHere")}</p>;
   return (
     <div className="flex flex-col gap-5">
+      {/* Rewards only when some wait to be handled. */}
+      {rewards.length > 0 && (
       <Panel title={tP("rewardsTitle")} flush>
         <Table head={[tP("promoter"), t("col.reference"), t("col.total"), tP("payTo"), ""]} empty={rewards.length === 0 ? empty : null}>
           {rewards.map((r) => (
@@ -41,6 +43,7 @@ export async function PromotersView() {
           ))}
         </Table>
       </Panel>
+      )}
       {/* Each promoter as a card: what they bring, where rewards go, and every action in one place. */}
       <section className="flex flex-col gap-3">
         <h2 className="flex items-center gap-2 text-[17px] font-bold text-ink">

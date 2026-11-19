@@ -1,5 +1,6 @@
 import "server-only";
 import type { ListingStatus } from "@/generated/prisma/client";
+import { cache } from "react";
 import { db } from "@/lib/db";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -24,32 +25,23 @@ export async function dashboardStats(now: Date = new Date()) {
   const firstDay = kigaliDay(new Date(now.getTime() - 29 * DAY_MS));
   const fromDay = new Date(`${firstDay}T00:00:00+02:00`);
 
-  const inMonth = (from: Date, to: Date) => ({ gte: from, lt: to });
-  const [
-    bookingsNow,
-    bookingsPrev,
-    paidNow,
-    paidPrev,
-    commissionNow,
-    commissionPrev,
-    usersNow,
-    usersPrev,
-    liveListings,
-    recentBookings,
-    attention,
-  ] = await Promise.all([
-    db.booking.count({ where: { createdAt: inMonth(thisMonth, now) } }),
-    db.booking.count({ where: { createdAt: inMonth(lastMonth, thisMonth) } }),
-    db.ledgerEntry.aggregate({ where: { kind: "GUEST_PAYMENT", createdAt: inMonth(thisMonth, now) }, _sum: { amount: true } }),
-    db.ledgerEntry.aggregate({ where: { kind: "GUEST_PAYMENT", createdAt: inMonth(lastMonth, thisMonth) }, _sum: { amount: true } }),
-    db.ledgerEntry.aggregate({ where: { kind: { in: ["COMMISSION", "GUEST_FEE"] }, createdAt: inMonth(thisMonth, now) }, _sum: { amount: true } }),
-    db.ledgerEntry.aggregate({ where: { kind: { in: ["COMMISSION", "GUEST_FEE"] }, createdAt: inMonth(lastMonth, thisMonth) }, _sum: { amount: true } }),
-    db.user.count({ where: { createdAt: inMonth(thisMonth, now) } }),
-    db.user.count({ where: { createdAt: inMonth(lastMonth, thisMonth) } }),
-    db.listing.count({ where: { status: "PUBLISHED" } }),
+  // The month-on-month numbers in one trip to the database; the last 30 days of bookings beside it.
+  const [[k], recentBookings] = await Promise.all([
+    db.$queryRaw<Record<string, bigint | null>[]>`
+      SELECT
+        (SELECT count(*) FROM "booking" WHERE "createdAt" >= ${thisMonth} AND "createdAt" < ${now}) AS "bookingsNow",
+        (SELECT count(*) FROM "booking" WHERE "createdAt" >= ${lastMonth} AND "createdAt" < ${thisMonth}) AS "bookingsPrev",
+        (SELECT sum("amount") FROM "ledgerEntry" WHERE "kind" = 'GUEST_PAYMENT' AND "createdAt" >= ${thisMonth} AND "createdAt" < ${now}) AS "paidNow",
+        (SELECT sum("amount") FROM "ledgerEntry" WHERE "kind" = 'GUEST_PAYMENT' AND "createdAt" >= ${lastMonth} AND "createdAt" < ${thisMonth}) AS "paidPrev",
+        (SELECT sum("amount") FROM "ledgerEntry" WHERE "kind" IN ('COMMISSION', 'GUEST_FEE') AND "createdAt" >= ${thisMonth} AND "createdAt" < ${now}) AS "platformNow",
+        (SELECT sum("amount") FROM "ledgerEntry" WHERE "kind" IN ('COMMISSION', 'GUEST_FEE') AND "createdAt" >= ${lastMonth} AND "createdAt" < ${thisMonth}) AS "platformPrev",
+        (SELECT count(*) FROM "user" WHERE "createdAt" >= ${thisMonth} AND "createdAt" < ${now}) AS "usersNow",
+        (SELECT count(*) FROM "user" WHERE "createdAt" >= ${lastMonth} AND "createdAt" < ${thisMonth}) AS "usersPrev",
+        (SELECT count(*) FROM "listing" WHERE "status" = 'PUBLISHED') AS "liveListings"
+    `,
     db.booking.findMany({ where: { createdAt: { gte: fromDay } }, select: { createdAt: true, status: true } }),
-    attentionCounts(),
   ]);
+  const n = (key: string) => Number(k?.[key] ?? 0);
 
   // Bookings made per day (Kigali days), every day present even when zero.
   const perDay = new Map<string, number>();
@@ -61,14 +53,13 @@ export async function dashboardStats(now: Date = new Date()) {
 
   return {
     kpis: {
-      bookings: { value: bookingsNow, previous: bookingsPrev } satisfies Kpi,
-      paid: { value: paidNow._sum.amount ?? 0, previous: paidPrev._sum.amount ?? 0 } satisfies Kpi,
-      platform: { value: commissionNow._sum.amount ?? 0, previous: commissionPrev._sum.amount ?? 0 } satisfies Kpi,
-      newUsers: { value: usersNow, previous: usersPrev } satisfies Kpi,
+      bookings: { value: n("bookingsNow"), previous: n("bookingsPrev") } satisfies Kpi,
+      paid: { value: n("paidNow"), previous: n("paidPrev") } satisfies Kpi,
+      platform: { value: n("platformNow"), previous: n("platformPrev") } satisfies Kpi,
+      newUsers: { value: n("usersNow"), previous: n("usersPrev") } satisfies Kpi,
     },
-    liveListings,
+    liveListings: n("liveListings"),
     bookingsPerDay: [...perDay.entries()].map(([day, count]) => ({ day, count })),
-    attention,
   };
 }
 
@@ -150,3 +141,51 @@ export async function frontDesk(now: Date = new Date()) {
   return { arriving, leaving, overdue };
 }
 export type DeskBooking = Awaited<ReturnType<typeof frontDesk>>["arriving"][number];
+
+/**
+ * Every number the staff sidebar and bell show, in one trip to the database (they are read on every staff page,
+ * so this keeps pages quick). Same rules as attentionCounts, unreadCount, unreadChats, laundryToHandle and the
+ * food orders waiting for staff. Shared by the layout and the page within one request.
+ */
+export const adminBadges = cache(async (staffId: string) => {
+  const [row] = await db.$queryRaw<Record<string, bigint>[]>`
+    SELECT
+      (SELECT count(*) FROM "listing" WHERE "status" = 'PENDING_REVIEW') AS listings,
+      (SELECT count(*) FROM "listingQuestion" WHERE "status" = 'PENDING')
+        + (SELECT count(*) FROM "review" WHERE "status" = 'PENDING') AS moderation,
+      (SELECT count(*) FROM "supportTicket" WHERE "status" IN ('OPEN', 'IN_PROGRESS')) AS tickets,
+      (SELECT count(*) FROM "paymentEvent" WHERE "outcome" IN ('amountMismatch', 'datesTaken', 'notPending', 'unknownBooking')) AS payments,
+      (SELECT count(*) FROM "referralReward" WHERE "status" = 'PENDING') AS rewards,
+      (SELECT count(*) FROM "stayRequest" WHERE "status" = 'PENDING') AS requests,
+      (SELECT count(*) FROM "booking" WHERE "refundStatus" = 'PENDING') AS refunds,
+      (SELECT count(*) FROM "notification" WHERE "userId" = ${staffId} AND "readAt" IS NULL) AS unread,
+      (SELECT count(*) FROM "laundryOrder"
+        WHERE "status" IN ('REQUESTED', 'PICKED_UP', 'WASHED')
+           OR ("paymentClaim" IS NOT NULL AND "paidAt" IS NULL AND "status" <> 'CANCELLED')) AS laundry,
+      (SELECT count(*) FROM "foodOrder"
+        WHERE ("paymentMethod" = 'PAY_FIRST' AND "paidAt" IS NULL AND "status" = 'PLACED' AND "paymentClaim" IS NOT NULL)
+           OR "status" IN ('ACCEPTED', 'PREPARING', 'READY', 'OUT_FOR_DELIVERY')
+           OR ("status" = 'PLACED' AND ("paymentMethod" = 'ON_DELIVERY' OR "paidAt" IS NOT NULL))) AS orders,
+      (SELECT count(*) FROM (
+        SELECT c."guestId", c."hostReadAt", last."senderId", last."createdAt"
+        FROM (SELECT * FROM "conversation" ORDER BY "lastMessageAt" DESC LIMIT 200) c
+        CROSS JOIN LATERAL (
+          SELECT m."senderId", m."createdAt" FROM "message" m WHERE m."conversationId" = c."id" ORDER BY m."createdAt" DESC LIMIT 1
+        ) last
+      ) chats WHERE chats."senderId" = chats."guestId" AND (chats."hostReadAt" IS NULL OR chats."hostReadAt" < chats."createdAt")) AS messages
+  `;
+  const n = (key: string) => Number(row?.[key] ?? 0);
+  return {
+    listings: n("listings"),
+    moderation: n("moderation"),
+    tickets: n("tickets"),
+    payments: n("payments"),
+    rewards: n("rewards"),
+    requests: n("requests"),
+    refunds: n("refunds"),
+    unread: n("unread"),
+    laundry: n("laundry"),
+    orders: n("orders"),
+    messages: n("messages"),
+  };
+});

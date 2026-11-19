@@ -61,7 +61,8 @@ export async function MoneyView({ searchParams }: { searchParams: Props["searchP
       {/* Downloads, and how payments come in. */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className={cn("rounded-full px-3 py-1 text-[12px] font-semibold", connected ? "bg-emerald-50 text-emerald-800" : "bg-amber-50 text-amber-900")}>{connected ? t("connectedShort") : t("manualShort")}</p>
-        <div className="flex flex-wrap gap-2">
+        {/* Phones: the three downloads side by side on one line. */}
+        <div className="grid w-full grid-cols-3 gap-2 sm:flex sm:w-auto sm:flex-wrap">
           {(
             [
               ["/api/v1/admin/export/bookings", t("exportBookings")],
@@ -69,8 +70,8 @@ export async function MoneyView({ searchParams }: { searchParams: Props["searchP
               ["/api/v1/admin/export/ledger", t("exportLedger")],
             ] as const
           ).map(([href, label]) => (
-            <a key={href} href={href} className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3.5 py-1.5 text-[13px] font-semibold text-ink hover:border-primary">
-              <Download className="size-3.5" aria-hidden="true" />
+            <a key={href} href={href} className="inline-flex min-w-0 items-center justify-center gap-1.5 rounded-full border border-line bg-surface px-2 py-2 text-[12px] font-semibold whitespace-nowrap text-ink hover:border-primary sm:px-3.5 sm:py-1.5 sm:text-[13px]">
+              <Download className="size-3.5 shrink-0 max-sm:hidden" aria-hidden="true" />
               {label}
             </a>
           ))}
@@ -185,7 +186,7 @@ export async function MoneyView({ searchParams }: { searchParams: Props["searchP
 
       {/* Every money movement, one line per payment, folded. */}
       <details className="rounded-2xl bg-surface px-4 ring-1 ring-line">
-        <summary className="flex cursor-pointer items-center gap-2 py-3.5 text-[15px] font-semibold text-ink">
+        <summary className="flex cursor-pointer list-none items-center gap-2 [&::-webkit-details-marker]:hidden py-3.5 text-[15px] font-semibold text-ink">
           <Receipt className="size-4 text-primary" aria-hidden="true" />
           {t("ledger")} <span className="text-muted tabular-nums">({groups.length})</span>
         </summary>

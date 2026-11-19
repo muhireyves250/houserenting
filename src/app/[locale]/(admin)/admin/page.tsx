@@ -2,9 +2,7 @@ import { ArrowDownRight, ArrowUpRight, Minus, Phone } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { BookingsChart } from "@/features/admin/components/BookingsChart";
 import { CheckInOut } from "@/features/admin/components/StaffButtons";
-import { dashboardStats, frontDesk, type DeskBooking, type Kpi } from "@/features/admin/stats";
-import { unreadChats } from "@/features/chats/service";
-import { laundryToHandle } from "@/features/laundry/service";
+import { adminBadges, dashboardStats, frontDesk, type DeskBooking, type Kpi } from "@/features/admin/stats";
 import { roomLabel } from "@/features/rooms/links";
 import { db } from "@/lib/db";
 import { formatStayDates } from "@/features/bookings/format";
@@ -33,15 +31,14 @@ function Delta({ kpi, label, fresh }: { kpi: Kpi; label: string; fresh: string }
 
 export default async function AdminDashboardPage() {
   const user = await requireAdmin("/admin");
-  const [t, tRooms, locale, stats, ending, desk, laundry, chats, foodOrders] = await Promise.all([
+  const [t, tRooms, locale, stats, ending, desk, badges, foodOrders] = await Promise.all([
     getTranslations("Admin.dashboard"),
     getTranslations("Rooms"),
     getLocale(),
     dashboardStats(),
     contractsEnding(),
     frontDesk(),
-    laundryToHandle(),
-    unreadChats(user),
+    adminBadges(user.id),
     // Food orders waiting for staff: a payment to check, or one to send.
     db.foodOrder.count({ where: { OR: [{ status: "PLACED", paymentClaim: { not: null }, paidAt: null }, { status: { in: ["ACCEPTED", "PREPARING", "READY"] } }] } }),
   ]);
@@ -54,16 +51,17 @@ export default async function AdminDashboardPage() {
     { label: t("kpi.platform"), value: `RWF ${compact.format(stats.kpis.platform.value)}`, kpi: stats.kpis.platform },
     { label: t("kpi.newUsers"), value: compact.format(stats.kpis.newUsers.value), kpi: stats.kpis.newUsers },
   ];
+  const { laundry, messages: chats } = badges;
   const attention = [
     { label: t("attention.food"), count: foodOrders, href: "/admin/orders" },
     { label: t("attention.laundry"), count: laundry, href: "/admin/laundry" },
     { label: t("attention.messages"), count: chats, href: "/admin/messages?show=waiting" },
-    { label: t("attention.listings"), count: stats.attention.listings, href: "/admin/listings?status=PENDING_REVIEW" },
-    { label: t("attention.moderation"), count: stats.attention.moderation, href: "/admin/support?tab=reviews" },
-    { label: t("attention.tickets"), count: stats.attention.tickets, href: "/admin/support" },
-    { label: t("attention.payments"), count: stats.attention.payments, href: "/admin/money" },
-    { label: t("attention.rewards"), count: stats.attention.rewards, href: "/admin/money" },
-    { label: t("attention.requests"), count: stats.attention.requests + stats.attention.refunds, href: "/admin/bookings" },
+    { label: t("attention.listings"), count: badges.listings, href: "/admin/listings?status=PENDING_REVIEW" },
+    { label: t("attention.moderation"), count: badges.moderation, href: "/admin/support?tab=reviews" },
+    { label: t("attention.tickets"), count: badges.tickets, href: "/admin/support" },
+    { label: t("attention.payments"), count: badges.payments, href: "/admin/money" },
+    { label: t("attention.rewards"), count: badges.rewards, href: "/admin/money" },
+    { label: t("attention.requests"), count: badges.requests + badges.refunds, href: "/admin/bookings" },
     { label: t("attention.contracts"), count: ending.length, href: "/admin/listings?status=ending" },
   ];
   const waiting = attention.filter((a) => a.count > 0);

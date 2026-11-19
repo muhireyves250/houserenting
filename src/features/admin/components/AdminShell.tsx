@@ -116,7 +116,7 @@ export function AdminShell({
       <Link href="/admin" className="flex items-center gap-3 border-b border-line/60 px-5 py-4">
         <LogoMark className="h-7" />
         <span className="flex flex-col gap-1 leading-tight">
-          <LogoWordmark className="h-[15px]" priority />
+          <LogoWordmark className="h-3" priority />
           <span className="text-xs font-semibold tracking-wide text-primary uppercase">{tAdmin("console")}</span>
         </span>
       </Link>

@@ -4,7 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 
 /** An admin card: white, rounded, a hairline ring. */
-export const adminCard = "flex flex-col gap-3 rounded-2xl bg-surface p-4 ring-1 ring-line";
+export const adminCard = "flex min-w-0 flex-col gap-3 rounded-2xl bg-surface p-4 ring-1 ring-line";
 
 /** Small coloured label (status, kind, count). */
 export function Chip({ tone = "bg-canvas text-ink", children }: { tone?: string; children: ReactNode }) {
@@ -16,15 +16,15 @@ export type Tile = { label: string; count: number; href?: string | { pathname: s
 /** Big numbers across the top of a page: what waits, at a glance. Each can filter or jump to its part. */
 export function StatTiles({ items, format }: { items: Tile[]; /** Shows each number differently (e.g. as money). */ format?: (n: number) => string }) {
   return (
-    <div className={cn("grid gap-3", items.length >= 4 ? "grid-cols-2 md:grid-cols-4" : items.length === 2 ? "grid-cols-2 md:max-w-xl" : "grid-cols-3")}>
+    <div className={cn("grid gap-3", items.length >= 4 ? (format ? "grid-cols-2 md:grid-cols-4" : "grid-cols-4 gap-2 md:gap-3") : items.length === 2 ? "grid-cols-2 md:max-w-xl" : "grid-cols-3")}>
       {items.map((item) => {
         const body = (
           <>
-            <span className={cn("block font-bold tabular-nums", format ? "text-[19px] leading-7 md:text-[22px]" : "text-[26px] leading-8", item.count > 0 ? (item.tone ?? "text-ink") : "text-muted")}>{format ? format(item.count) : item.count}</span>
-            <span className="text-[13px] font-semibold text-ink">{item.label}</span>
+            <span className={cn("block font-bold tabular-nums", format ? "text-[19px] leading-7 md:text-[22px]" : "text-[21px] leading-7 md:text-[26px] md:leading-8", item.count > 0 ? (item.tone ?? "text-ink") : "text-muted")}>{format ? format(item.count) : item.count}</span>
+            <span className="block text-[12px] leading-4 font-semibold text-ink md:text-[13px] md:leading-5">{item.label}</span>
           </>
         );
-        const cls = cn("rounded-2xl bg-surface px-4 py-3 ring-1 transition-colors", item.on ? "ring-2 ring-primary" : "ring-line hover:ring-primary/60");
+        const cls = cn("min-w-0 rounded-2xl bg-surface px-3 py-2.5 ring-1 md:px-4 md:py-3 transition-colors", item.on ? "ring-2 ring-primary" : "ring-line hover:ring-primary/60");
         return item.href ? (
           typeof item.href === "string" && item.href.startsWith("#") ? (
             <a key={item.label} href={item.href} className={cls}>

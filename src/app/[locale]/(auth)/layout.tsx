@@ -15,7 +15,7 @@ export default async function AuthLayout({ children }: { children: ReactNode }) 
           <span className="rounded-xl bg-white px-2 py-1.5 shadow-sm">
             <LogoMark className="h-7" />
           </span>
-          <LogoWordmark className="h-5 brightness-0 invert" />
+          <LogoWordmark className="h-4 brightness-0 invert" />
         </Link>
         <p className="text-sm text-primary-soft">Kigali · Musanze · Rubavu · Huye</p>
       </aside>

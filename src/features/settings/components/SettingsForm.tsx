@@ -194,7 +194,8 @@ export function SettingsForm({ initial, envHoldMinutes }: { initial: SettingsInp
           ))}
         </div>
       </Card>
-      <div className="flex items-center justify-end gap-4">
+      {/* Save stays in reach while scrolling the long form (above the phone bottom bar). */}
+      <div className="sticky bottom-[calc(96px+env(safe-area-inset-bottom))] z-10 flex items-center justify-end gap-4 rounded-2xl bg-surface/95 p-3 shadow-[0_10px_30px_-12px_rgba(0,40,100,0.35)] ring-1 ring-line backdrop-blur-md lg:bottom-4">
         {saved && (
           <span role="status" className="inline-flex items-center gap-1.5 text-[13px] text-emerald-700">
             <Check className="size-4" aria-hidden="true" />

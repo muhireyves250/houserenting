@@ -81,7 +81,7 @@ export function SiteFooter({ signedIn, year = new Date().getFullYear() }: { sign
         <div className="grid gap-12 py-12 md:grid-cols-[1.5fr_1fr_1fr_1fr] md:py-14">
           <div className="flex flex-col gap-4">
             <Link href="/" className="w-fit rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
-              <Logo withWordmark tile markClassName="h-7" wordmarkClassName="h-5 brightness-0 invert" />
+              <Logo withWordmark tile markClassName="h-7" wordmarkClassName="h-4 brightness-0 invert" />
             </Link>
             <InstallApp />
             <p className="inline-flex items-center gap-2 text-sm text-white/75">
