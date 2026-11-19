@@ -1,7 +1,5 @@
 import { BadgeCheck, Clock } from "lucide-react";
 import { getTranslations } from "next-intl/server";
-import { HostTabs } from "@/features/hosting/components/HostTabs";
-import { PageContainer } from "@/components/ui/PageContainer";
 import { Card } from "@/features/hosting/components/fields";
 import { PayoutForm } from "@/features/places/components/PayoutForm";
 import { payoutAccountOf } from "@/features/places/payout-service";
@@ -17,11 +15,7 @@ export default async function PayoutPage() {
   const user = await requireUser("/host/payout");
   const [t, account] = await Promise.all([getTranslations("Places"), payoutAccountOf(user.id)]);
   return (
-    <PageContainer className="max-w-xl py-6 max-md:pt-2 md:py-10">
-      <div className="mb-5">
-        <HostTabs on="payout" />
-      </div>
-      <h1 className="mb-2 text-[26px] leading-8 font-bold tracking-[-0.03em] text-ink md:text-[32px] md:leading-10">{t("payoutTitle")}</h1>
+    <div className="mx-auto max-w-xl">
       <p className="mb-5 text-[15px] text-muted">{t("payoutIntro")}</p>
       {account && (
         <p
@@ -40,6 +34,6 @@ export default async function PayoutPage() {
           initial={account && { method: account.method, accountName: account.accountName, accountNumber: account.accountNumber, bankName: account.bankName }}
         />
       </Card>
-    </PageContainer>
+    </div>
   );
 }

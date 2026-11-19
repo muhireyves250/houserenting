@@ -803,7 +803,33 @@
       "placeUpcoming": "{count, plural, =0 {no stays coming} one {# stay coming} other {# stays coming}}",
       "edit": "Edit",
       "recentPayouts": "Recent payouts",
-      "vipaHandles": "VIIPA handles bookings, guests and payments for you. You see your places and your money here."
+      "vipaHandles": "VIIPA handles bookings, guests and payments for you. You see your places and your money here.",
+      "placesCount": "{count, plural, one {# place} other {# places}}"
+    },
+    "shell": {
+      "console": "Owner",
+      "label": "Owner dashboard",
+      "nav": {
+        "overview": "Overview",
+        "places": "Your places",
+        "orders": "Food orders",
+        "payout": "Payouts",
+        "restaurants": "Kitchens"
+      },
+      "short": {
+        "overview": "Overview",
+        "places": "Places",
+        "orders": "Food",
+        "payout": "Payouts",
+        "restaurants": "Kitchens",
+        "menu": "Menu"
+      },
+      "backToSite": "Back to VIIPA",
+      "openMenu": "Open menu",
+      "closeMenu": "Close menu",
+      "notifications": "Notifications",
+      "notificationsUnread": "Notifications, {count} unread",
+      "profile": "Your profile"
     }
   },
   "Admin": {

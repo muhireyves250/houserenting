@@ -2,7 +2,6 @@ import { ChevronLeft, ExternalLink, ShieldCheck } from "lucide-react";
 import { unitDetailsMap } from "@/features/rooms/validation";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { PageContainer } from "@/components/ui/PageContainer";
 import { HostStatus } from "@/features/hosting/components/HostStatus";
 import { ListingActions } from "@/features/hosting/components/ListingActions";
 import { ListingForm } from "@/features/hosting/components/ListingForm";
@@ -55,13 +54,13 @@ export default async function EditListingPage({ params }: Props) {
   const payoutNeeded = owner && listing.operator === "OWNER" && !payout?.verifiedAt;
 
   return (
-    <PageContainer className="max-w-3xl py-6 md:py-10">
+    <div className="mx-auto max-w-3xl">
       <Link href="/host" className="mb-3 inline-flex items-center gap-1 text-sm text-muted transition-colors hover:text-ink">
         <ChevronLeft className="size-4" aria-hidden="true" />
         {t("title")}
       </Link>
       <div className="mb-6 flex flex-wrap items-center gap-3">
-        <h1 className="text-[26px] leading-8 font-bold tracking-[-0.03em] text-ink md:text-[32px] md:leading-10">{listing.title}</h1>
+        <h2 className="text-[22px] leading-7 font-bold tracking-[-0.03em] text-ink md:text-[24px] md:leading-8">{listing.title}</h2>
         <HostStatus status={listing.status} label={t(`status.${listing.status}`)} />
         {listing.status === "PUBLISHED" && (
           <Link href={`/listings/${listing.id}`} className="inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline">
@@ -123,6 +122,6 @@ export default async function EditListingPage({ params }: Props) {
           </>
         )}
       </div>
-    </PageContainer>
+    </div>
   );
 }

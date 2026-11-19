@@ -1,12 +1,7 @@
-import { PageHero } from "@/components/shell/PageHero";
-import { ArrowRight, BadgeCheck, BedDouble, CalendarClock, ChevronRight, Clock, House, KeyRound, Pencil, Plus, UtensilsCrossed, Wallet } from "lucide-react";
-import Image from "next/image";
+import { ArrowRight, BadgeCheck, BedDouble, CalendarClock, ChevronRight, Clock, House, KeyRound, Plus, UtensilsCrossed, Wallet } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { PageContainer } from "@/components/ui/PageContainer";
 import { ordersForHost } from "@/features/food/service";
-import { HostStatus } from "@/features/hosting/components/HostStatus";
-import { HostTabs } from "@/features/hosting/components/HostTabs";
 import { hostDashboard, hostListings } from "@/features/hosting/service";
 import { hostEarnings } from "@/features/ledger/service";
 import { payoutAccountOf } from "@/features/places/payout-service";
@@ -26,18 +21,15 @@ const card = "rounded-3xl bg-surface p-5 shadow-[0_10px_30px_-14px_rgba(16,24,40
  */
 export default async function HostPage() {
   const user = await requireUser("/host");
-  const [t, tHost, tType, tPlaces, listings, earnings, dash, payout, locale, restaurantRoles, helping] = await Promise.all([
+  const [t, tHost, tPlaces, listings, earnings, dash, payout, locale, helping] = await Promise.all([
     getTranslations("Host.dash"),
     getTranslations("Host"),
-    getTranslations("ListingType"),
     getTranslations("Places"),
     hostListings(user.id),
     hostEarnings(user.id),
     hostDashboard(user.id),
     payoutAccountOf(user.id),
     getLocale(),
-    // Kitchen teams VIIPA set up (owners don't add restaurants themselves).
-    db.restaurantMember.count({ where: { userId: user.id } }),
     db.placeMember.findMany({ where: { userId: user.id, role: "MANAGER", listing: { status: { not: "ARCHIVED" } } }, select: { role: true, listing: { select: { id: true, title: true, city: true } } } }),
   ]);
   const onTheWay = listings.length > 0 ? (await ordersForHost(user.id)).filter((o) => o.status === "OUT_FOR_DELIVERY").length : 0;
@@ -48,14 +40,13 @@ export default async function HostPage() {
 
   const header = (
     <>
-      <PageHero title={t("hello", { name: firstName })} icon={House} />
-      <div className="mb-5 flex items-end justify-between gap-4">
-        <div className="max-md:hidden">
-          <h1 className="text-[28px] leading-9 font-bold tracking-[-0.03em] text-ink md:text-[32px] md:leading-10">{t("hello", { name: firstName })}</h1>
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h2 className="text-[24px] leading-8 font-bold tracking-[-0.03em] text-ink md:text-[28px] md:leading-9">{t("hello", { name: firstName })}</h2>
           <p className="text-[15px] text-muted">{t("intro")}</p>
         </div>
         {listings.length > 0 && (
-          <Link href="/host/listings/new" className={cn(newButton, "max-md:ml-auto")}>
+          <Link href="/host/listings/new" className={newButton}>
             <Plus className="size-4" aria-hidden="true" />
             {tHost("newListing")}
           </Link>
@@ -66,7 +57,7 @@ export default async function HostPage() {
 
   if (listings.length === 0 && helping.length === 0) {
     return (
-      <PageContainer className="max-w-5xl py-6 max-md:pt-0 md:py-10">
+      <div className="mx-auto max-w-6xl">
         {header}
         <EmptyState
           icon={<House />}
@@ -79,7 +70,7 @@ export default async function HostPage() {
             </Link>
           }
         />
-      </PageContainer>
+      </div>
     );
   }
 
@@ -91,11 +82,8 @@ export default async function HostPage() {
   ];
 
   return (
-    <PageContainer className="max-w-5xl py-6 max-md:pt-0 md:py-10">
+    <div className="mx-auto max-w-6xl">
       {header}
-      <div className="mb-6">
-        <HostTabs on="overview" kitchens={restaurantRoles > 0} />
-      </div>
 
       {/* At a glance */}
       <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -149,6 +137,18 @@ export default async function HostPage() {
         </section>
 
         <div className="flex flex-col gap-5">
+          {/* All the owner's places. */}
+          <Link href="/host/places" className={cn(card, "group flex items-center gap-3 p-4 transition-shadow hover:shadow-[0_14px_36px_-14px_rgba(0,64,160,0.45)]")}>
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary-soft text-primary">
+              <House className="size-5" aria-hidden="true" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[14px] font-semibold text-ink">{t("placesTitle")}</span>
+              <span className="block text-[12.5px] text-muted">{t("placesCount", { count: listings.length })}</span>
+            </span>
+            <ChevronRight className="size-5 text-ink/40 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+          </Link>
+
           {/* Where the money goes. */}
           <Link href="/host/payout" className={cn(card, "group flex items-center gap-3 p-4 transition-shadow hover:shadow-[0_14px_36px_-14px_rgba(0,64,160,0.45)]")}>
             <span className={cn("flex size-11 shrink-0 items-center justify-center rounded-2xl", payout?.verifiedAt ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-800")}>
@@ -190,52 +190,6 @@ export default async function HostPage() {
         </div>
       </div>
 
-      {/* Each place */}
-      {listings.length > 0 && (
-        <section className="mt-8">
-          <h2 className="mb-3 text-[19px] font-bold text-ink">{t("placesTitle")}</h2>
-          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
-            {listings.map((listing) => {
-              const nights = dash.nightsByPlace.get(listing.id) ?? 0;
-              const coming = dash.upcomingByPlace.get(listing.id) ?? 0;
-              return (
-                <li key={listing.id}>
-                  <Link href={`/host/listings/${listing.id}`} className={cn(card, "group flex h-full overflow-hidden p-0 transition-shadow hover:shadow-[0_16px_40px_-16px_rgba(0,64,160,0.5)] max-sm:rounded-2xl sm:flex-col")}>
-                    {/* Phones: a compact row (photo on the left); larger screens: a card with the photo on top. */}
-                    <span className="relative block w-28 shrink-0 bg-primary-soft sm:aspect-[16/10] sm:w-auto">
-                      {listing.photos[0] ? (
-                        <Image src={listing.photos[0].url} alt="" fill sizes="(min-width: 1024px) 320px, (min-width: 640px) 50vw, 100vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
-                      ) : (
-                        <House className="absolute inset-0 m-auto size-8 text-primary" aria-hidden="true" />
-                      )}
-                      <HostStatus status={listing.status} label={tHost(`status.${listing.status}`)} className="absolute top-2 left-2 shadow-sm sm:top-3 sm:left-3" />
-                    </span>
-                    <span className="flex min-w-0 flex-1 flex-col gap-1 p-3 sm:p-4">
-                      <span className="line-clamp-1 text-[15px] font-semibold text-ink">{listing.title}</span>
-                      <span className="truncate text-[13px] text-muted">
-                        {tType(listing.type)} · {listing.district}, {listing.city}
-                      </span>
-                      {(listing.status === "REJECTED" || listing.status === "CHANGES_REQUESTED") && listing.rejectionReason && (
-                        <span className="text-xs font-medium text-red-800">{tHost("needsChanges", { reason: listing.rejectionReason })}</span>
-                      )}
-                      <span className="mt-auto flex items-center justify-between gap-2 pt-2 text-[12px] sm:border-t sm:border-line sm:pt-3 sm:text-[12.5px]">
-                        <span className="text-ink/80">
-                          <b className="font-semibold text-ink">{t("placeNights", { nights })}</b> · {t("placeUpcoming", { count: coming })}
-                        </span>
-                        <span className="inline-flex shrink-0 items-center gap-1 font-semibold text-primary">
-                          <Pencil className="size-3.5" aria-hidden="true" />
-                          {t("edit")}
-                        </span>
-                      </span>
-                    </span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-      )}
-
       {/* Places this person helps run for someone else. */}
       {helping.length > 0 && (
         <section className="mt-8">
@@ -257,6 +211,6 @@ export default async function HostPage() {
           </ul>
         </section>
       )}
-    </PageContainer>
+    </div>
   );
 }

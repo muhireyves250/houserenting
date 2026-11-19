@@ -803,7 +803,33 @@
       "placeUpcoming": "{count, plural, =0 {nta bazaza} one {# uzaza} other {# bazaza}}",
       "edit": "Hindura",
       "recentPayouts": "Ubwishyu buheruka",
-      "vipaHandles": "VIIPA ikwitaho ibyumba byafashwe, abashyitsi n’ubwishyu. Hano ubona amacumbi yawe n’amafaranga yawe."
+      "vipaHandles": "VIIPA ikwitaho ibyumba byafashwe, abashyitsi n’ubwishyu. Hano ubona amacumbi yawe n’amafaranga yawe.",
+      "placesCount": "{count, plural, one {Icumbi #} other {Amacumbi #}}"
+    },
+    "shell": {
+      "console": "Nyir’inzu",
+      "label": "Ikibaho cya nyir’inzu",
+      "nav": {
+        "overview": "Incamake",
+        "places": "Amacumbi yawe",
+        "orders": "Ibyo kurya",
+        "payout": "Kwishyurwa",
+        "restaurants": "Igikoni"
+      },
+      "short": {
+        "overview": "Incamake",
+        "places": "Amacumbi",
+        "orders": "Ibiryo",
+        "payout": "Kwishyurwa",
+        "restaurants": "Igikoni",
+        "menu": "Menu"
+      },
+      "backToSite": "Subira kuri VIIPA",
+      "openMenu": "Fungura menu",
+      "closeMenu": "Funga menu",
+      "notifications": "Imenyesha",
+      "notificationsUnread": "Imenyesha, {count} bitarasomwa",
+      "profile": "Umwirondoro wawe"
     }
   },
   "Admin": {

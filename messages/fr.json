@@ -803,7 +803,33 @@
       "placeUpcoming": "{count, plural, =0 {aucun séjour à venir} one {# séjour à venir} other {# séjours à venir}}",
       "edit": "Modifier",
       "recentPayouts": "Derniers paiements",
-      "vipaHandles": "VIIPA gère pour vous les réservations, les clients et les paiements. Ici, vous voyez vos logements et votre argent."
+      "vipaHandles": "VIIPA gère pour vous les réservations, les clients et les paiements. Ici, vous voyez vos logements et votre argent.",
+      "placesCount": "{count, plural, one {# logement} other {# logements}}"
+    },
+    "shell": {
+      "console": "Propriétaire",
+      "label": "Tableau de bord propriétaire",
+      "nav": {
+        "overview": "Aperçu",
+        "places": "Vos logements",
+        "orders": "Commandes repas",
+        "payout": "Paiements",
+        "restaurants": "Cuisines"
+      },
+      "short": {
+        "overview": "Aperçu",
+        "places": "Logements",
+        "orders": "Repas",
+        "payout": "Paiements",
+        "restaurants": "Cuisines",
+        "menu": "Menu"
+      },
+      "backToSite": "Retour à VIIPA",
+      "openMenu": "Ouvrir le menu",
+      "closeMenu": "Fermer le menu",
+      "notifications": "Notifications",
+      "notificationsUnread": "Notifications, {count} non lues",
+      "profile": "Votre profil"
     }
   },
   "Admin": {

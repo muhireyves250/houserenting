@@ -1,7 +1,6 @@
 import { ChevronLeft, ChevronRight, Plus, UtensilsCrossed } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { PageContainer } from "@/components/ui/PageContainer";
 import { canAddRestaurant, restaurantsRunBy } from "@/features/food/service";
 import { Link } from "@/i18n/navigation";
 import { requireUser } from "@/lib/session";
@@ -22,13 +21,13 @@ export default async function HostRestaurantsPage() {
     </Link>
   );
   return (
-    <PageContainer className="max-w-3xl py-6 md:py-10">
+    <div className="mx-auto max-w-3xl">
       <Link href="/host" className="mb-3 inline-flex items-center gap-1 text-sm text-muted transition-colors hover:text-ink">
         <ChevronLeft className="size-4" aria-hidden="true" />
         {t("backToHosting")}
       </Link>
       <div className="mb-6 flex items-center justify-between gap-4">
-        <h1 className="text-[26px] leading-8 font-bold tracking-[-0.03em] text-ink md:text-[32px] md:leading-10">{t("yourRestaurants")}</h1>
+        <h2 className="text-[22px] leading-7 font-bold tracking-[-0.03em] text-ink md:text-[24px] md:leading-8">{t("yourRestaurants")}</h2>
         {list.length > 0 && canAdd && add}
       </div>
       {list.length === 0 ? (
@@ -64,6 +63,6 @@ export default async function HostRestaurantsPage() {
           ))}
         </ul>
       )}
-    </PageContainer>
+    </div>
   );
 }

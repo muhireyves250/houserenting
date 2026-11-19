@@ -1,7 +1,6 @@
 import { ChevronLeft } from "lucide-react";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { PageContainer } from "@/components/ui/PageContainer";
 import { AutoRefresh } from "@/features/food/components/AutoRefresh";
 import { MenuEditor } from "@/features/food/components/MenuEditor";
 import { OrdersBoard, type BoardOrder } from "@/features/food/components/OrdersBoard";
@@ -51,13 +50,13 @@ export default async function HostRestaurantPage({ params }: Props) {
   const done = board.filter((o) => !open.includes(o)).slice(0, 20);
 
   return (
-    <PageContainer className="max-w-3xl py-6 md:py-10">
+    <div className="mx-auto max-w-3xl">
       <Link href="/host/restaurants" className="mb-3 inline-flex items-center gap-1 text-sm text-muted transition-colors hover:text-ink">
         <ChevronLeft className="size-4" aria-hidden="true" />
         {t("yourRestaurants")}
       </Link>
       <div className="mb-2 flex flex-wrap items-center gap-3">
-        <h1 className="text-[26px] leading-8 font-bold tracking-[-0.03em] text-ink md:text-[32px] md:leading-10">{r.name}</h1>
+        <h2 className="text-[22px] leading-7 font-bold tracking-[-0.03em] text-ink md:text-[24px] md:leading-8">{r.name}</h2>
         <span className="rounded-full bg-canvas px-3 py-1 text-xs font-semibold text-ink">{t(`restaurantStatus.${r.status}`)}</span>
         {canRestaurant(role, "pause") && <PauseToggle restaurantId={r.id} paused={r.paused} />}
       </div>
@@ -111,6 +110,6 @@ export default async function HostRestaurantPage({ params }: Props) {
           </Card>
         )}
       </div>
-    </PageContainer>
+    </div>
   );
 }
