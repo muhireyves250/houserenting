@@ -643,3 +643,18 @@ svg {
     height: calc(100dvh - 64px - 32px - 32px);
   }
 }
+
+/* Inside a staff window: things that stick to the page's top bar or bottom menu stick to the window's edges. */
+.admin-modal .sticky:not([class*="bottom-"]) {
+  top: 0 !important;
+}
+.admin-modal .sticky[class*="bottom-"] {
+  bottom: 12px !important;
+}
+/* Lists that scroll inside a fixed box show no scrollbar (still scroll by wheel, touch and keyboard). */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

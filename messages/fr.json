@@ -1144,7 +1144,8 @@
       "hide": "Masquer",
       "hideQuestion": "Retirer ceci ? Il ne s'affichera plus sur le lieu.",
       "publishedEmpty": "Rien de publié pour l'instant."
-    }
+    },
+    "closeWindow": "Fermer"
   },
   "Questions": {
     "title": "Questions et réponses",

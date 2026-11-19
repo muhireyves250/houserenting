@@ -4,7 +4,7 @@ import { PrismaClient } from "@/generated/prisma/client";
 const globalForDb = globalThis as unknown as { db?: PrismaClient };
 
 /** Errors that mean the connection was closed under us (Neon closes idle ones and suspends when quiet). */
-const CONNECTION_LOST = /server has closed the connection|connection terminated|connection is closed|terminating connection|ECONNRESET|Client has encountered a connection error/i;
+const CONNECTION_LOST = /server has closed the connection|connection terminated|connection is closed|terminating connection|ECONNRESET|Client has encountered a connection error|can't reach database server|ETIMEDOUT/i;
 
 /** Reads are safe to run again; writes never are (they could be saved twice). */
 const READS = new Set(["findFirst", "findFirstOrThrow", "findUnique", "findUniqueOrThrow", "findMany", "count", "aggregate", "groupBy"]);
@@ -40,6 +40,8 @@ function createClient(): PrismaClient {
             return await query(args);
           } catch (error) {
             if (!READS.has(operation) || !isConnectionLost(error)) throw error;
+            // A moment for the network (or a sleeping database waking up), then once more.
+            await new Promise((resolve) => setTimeout(resolve, 600));
             return query(args);
           }
         },

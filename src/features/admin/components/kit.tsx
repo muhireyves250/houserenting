@@ -75,5 +75,5 @@ export function Toolbar({ children, actions }: { children: ReactNode; actions?: 
 
 /** The scrolling part of a list page (a little inner padding so card shadows aren't cut off). */
 export function ScrollArea({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn("-mx-1 min-h-0 flex-1 overflow-y-auto overscroll-contain px-1 pt-1 pb-3", className)}>{children}</div>;
+  return <div className={cn("no-scrollbar -mx-1 min-h-0 flex-1 overflow-y-auto overscroll-contain px-1 pt-1 pb-3", className)}>{children}</div>;
 }

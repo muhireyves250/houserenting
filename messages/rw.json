@@ -1144,7 +1144,8 @@
       "hide": "Hisha",
       "hideQuestion": "Ukureho iki? Ntikizongera kugaragara ku hantu.",
       "publishedEmpty": "Nta kintu cyatangajwe."
-    }
+    },
+    "closeWindow": "Funga"
   },
   "Questions": {
     "title": "Ibibazo n'ibisubizo",

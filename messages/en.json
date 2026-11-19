@@ -1144,7 +1144,8 @@
       "hide": "Hide",
       "hideQuestion": "Take this down? It stops showing on the place.",
       "publishedEmpty": "Nothing published yet."
-    }
+    },
+    "closeWindow": "Close"
   },
   "Questions": {
     "title": "Questions and answers",

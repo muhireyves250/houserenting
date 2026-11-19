@@ -13,7 +13,7 @@ import { unreadChats } from "@/features/chats/service";
 export const metadata: Metadata = { title: "Admin", robots: { index: false, follow: false } };
 
 /** Staff area, outside the public site's header and tabs: every page under it is checked for the admin role on the server. */
-export default async function AdminLayout({ children }: { children: ReactNode }) {
+export default async function AdminLayout({ children, modal }: { children: ReactNode; modal: ReactNode }) {
   const user = await requireAdmin("/admin");
   const [counts, unread, chats, laundry, foodPayments] = await Promise.all([attentionCounts(), unreadCount(user.id), unreadChats(user), laundryToHandle(), db.foodOrder.count({ where: { OR: [{ paymentMethod: "PAY_FIRST", paidAt: null, status: "PLACED", paymentClaim: { not: null } }, { status: { in: ["ACCEPTED", "PREPARING", "READY", "OUT_FOR_DELIVERY"] } }, { status: "PLACED", OR: [{ paymentMethod: "ON_DELIVERY" }, { paidAt: { not: null } }] }] } })]);
   return (
@@ -28,6 +28,8 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       }
     >
       {children}
+      {/* Add/edit windows opened from a staff page (intercepted routes). */}
+      {modal}
     </AdminShell>
   );
 }

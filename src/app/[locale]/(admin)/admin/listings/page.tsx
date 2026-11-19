@@ -2,7 +2,7 @@ import { House, Plus } from "lucide-react";
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { allListings } from "@/features/admin/stats";
-import { FillScreen, ScrollArea, Toolbar } from "@/features/admin/components/kit";
+import { FillScreen, Toolbar } from "@/features/admin/components/kit";
 import { HostStatus } from "@/features/hosting/components/HostStatus";
 import { movesFrom } from "@/features/listings/lifecycle";
 import { PlaceRowActions } from "@/features/places/components/PlaceRowActions";
@@ -78,8 +78,8 @@ export default async function AdminListingsPage({ searchParams }: Props) {
           })}
         </div>
       </Toolbar>
-      <ScrollArea>
-      <div className="overflow-hidden rounded-2xl border border-line bg-surface">
+      {/* The card stays put; its rows scroll inside (no scrollbar shown). */}
+      <div className="no-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain rounded-2xl border border-line bg-surface">
         {listings.length === 0 ? (
           <p className="py-12 text-center text-[15px] text-muted">{t("nothingHere")}</p>
         ) : (
@@ -106,7 +106,6 @@ export default async function AdminListingsPage({ searchParams }: Props) {
           </ul>
         )}
       </div>
-      </ScrollArea>
     </FillScreen>
   );
 }

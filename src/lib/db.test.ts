@@ -9,6 +9,7 @@ describe("isConnectionLost", () => {
     const { isConnectionLost } = await import("./db");
     expect(isConnectionLost(new Error("Invalid `db.session.findFirst()` invocation: Server has closed the connection."))).toBe(true);
     expect(isConnectionLost(new Error("Connection terminated unexpectedly"))).toBe(true);
+    expect(isConnectionLost(new Error("Can't reach database server at ep-example.neon.tech"))).toBe(true);
     expect(isConnectionLost(new Error("Unique constraint failed on the fields: (`reference`)"))).toBe(false);
   });
 });
