@@ -9,6 +9,12 @@ describe("landingAfterLogin", () => {
     expect(landingAfterLogin("/admin/users", "ADMIN")).toBe("/admin/users");
   });
 
+  it("sends house owners to their dashboard, unless they were heading somewhere", () => {
+    expect(landingAfterLogin("/", "USER", true)).toBe("/host");
+    expect(landingAfterLogin("/bookings/SR-ABCDEF", "USER", true)).toBe("/bookings/SR-ABCDEF");
+    expect(landingAfterLogin("/", "ADMIN", true)).toBe("/admin");
+  });
+
   it("sends everyone else where they were heading", () => {
     expect(landingAfterLogin("/", "USER")).toBe("/");
     expect(landingAfterLogin("/profile", undefined)).toBe("/profile");

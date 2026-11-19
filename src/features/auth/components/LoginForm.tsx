@@ -62,7 +62,7 @@ export function LoginForm({
     }
     const user = result.data?.user;
     if (user?.name && user.email) rememberAccount({ name: user.name, email: user.email });
-    const destination = landingAfterLogin(safeNextPath(next), (user as { role?: string } | undefined)?.role);
+    const destination = landingAfterLogin(safeNextPath(next), (user as { role?: string } | undefined)?.role, Boolean((user as { isHost?: boolean } | undefined)?.isHost));
     if (onSuccess) return onSuccess(destination);
     router.push(destination);
   }

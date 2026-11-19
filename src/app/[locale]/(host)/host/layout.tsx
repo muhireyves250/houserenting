@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
+import { LocaleSwitcher } from "@/components/shell/LocaleSwitcher";
 import { getLocale } from "next-intl/server";
 import { ordersForHost } from "@/features/food/service";
 import { HostShell } from "@/features/hosting/components/HostShell";
@@ -12,7 +13,7 @@ import { requireUser } from "@/lib/session";
 export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 /** The house owner's dashboard: its own frame (sidebar, top bar, phone bottom bar), outside the public site's header. */
-export default async function HostLayout({ children }: { children: ReactNode }) {
+export default async function HostLayout({ children, modal }: { children: ReactNode; modal: ReactNode }) {
   const user = await requireUser("/host");
   // Staff use the admin dashboard.
   if (isAdmin(user)) redirect({ href: "/admin", locale: await getLocale() });
@@ -22,8 +23,20 @@ export default async function HostLayout({ children }: { children: ReactNode }) 
     ordersForHost(user.id),
   ]);
   return (
-    <HostShell user={{ name: user.name, email: user.email }} kitchens={kitchens > 0} unread={unread} counts={{ orders: orders.filter((o) => o.status === "OUT_FOR_DELIVERY").length }}>
+    <HostShell
+      user={{ name: user.name, email: user.email }}
+      kitchens={kitchens > 0}
+      unread={unread}
+      counts={{ orders: orders.filter((o) => o.status === "OUT_FOR_DELIVERY").length }}
+      languageSwitcher={
+        <Suspense>
+          <LocaleSwitcher compact />
+        </Suspense>
+      }
+    >
       {children}
+      {/* Account and notices open as a panel over the current page. */}
+      {modal}
     </HostShell>
   );
 }

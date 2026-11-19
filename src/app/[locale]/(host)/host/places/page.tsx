@@ -1,73 +1,100 @@
 import { House, Pencil, Plus } from "lucide-react";
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
-import { EmptyState } from "@/components/ui/EmptyState";
+import { FillScreen, Toolbar } from "@/features/admin/components/kit";
 import { HostStatus } from "@/features/hosting/components/HostStatus";
 import { hostDashboard, hostListings } from "@/features/hosting/service";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { requireUser } from "@/lib/session";
 
-const newButton =
-  "inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-[#0a6fe0] px-5 py-2.5 text-[15px] font-semibold text-white shadow-[0_10px_24px_-10px_rgba(0,87,184,0.8)] transition-[filter,transform] duration-300 hover:brightness-110 active:scale-[0.97]";
-const card = "rounded-3xl bg-surface p-5 shadow-[0_10px_30px_-14px_rgba(16,24,40,0.3)] ring-1 ring-black/[0.04] max-md:ring-line";
+type Props = { searchParams: Promise<{ status?: string }> };
 
-/** The owner's places: each with its photo, status and how booked it is this month; open one to edit it. */
-export default async function HostPlacesPage() {
+/** The owner's places, like the staff list: filters and "List a place" on one row, the places scrolling below. */
+export default async function HostPlacesPage({ searchParams }: Props) {
   const user = await requireUser("/host/places");
-  const [t, tHost, tType, listings, dash] = await Promise.all([getTranslations("Host.dash"), getTranslations("Host"), getTranslations("ListingType"), hostListings(user.id), hostDashboard(user.id)]);
+  const raw = (await searchParams).status;
+  const [t, tHost, tType, all, dash] = await Promise.all([getTranslations("Host.dash"), getTranslations("Host"), getTranslations("ListingType"), hostListings(user.id), hostDashboard(user.id)]);
+  // Only the filters that have places (with how many).
+  const statuses = [...new Set(all.map((l) => l.status))];
+  const status = statuses.includes(raw as (typeof statuses)[number]) ? raw : undefined;
+  const listings = status ? all.filter((l) => l.status === status) : all;
+  const filters = [{ value: undefined, label: tHost("allPlaces"), count: all.length }, ...statuses.map((s) => ({ value: s, label: tHost(`status.${s}`), count: all.filter((l) => l.status === s).length }))];
+
   return (
-    <div className="mx-auto max-w-6xl">
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <p className="text-[14px] text-muted">{t("placesCount", { count: listings.length })}</p>
-        <Link href="/host/listings/new" className={newButton}>
-          <Plus className="size-4" aria-hidden="true" />
-          {tHost("newListing")}
-        </Link>
-      </div>
-      {listings.length === 0 ? (
-        <EmptyState icon={<House />} title={tHost("emptyTitle")} body={tHost("emptyBody")} />
-      ) : (
-    <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
-      {listings.map((listing) => {
-        const nights = dash.nightsByPlace.get(listing.id) ?? 0;
-        const coming = dash.upcomingByPlace.get(listing.id) ?? 0;
-        return (
-          <li key={listing.id}>
-            <Link href={`/host/listings/${listing.id}`} className={cn(card, "group flex h-full overflow-hidden p-0 transition-shadow hover:shadow-[0_16px_40px_-16px_rgba(0,64,160,0.5)] max-sm:rounded-2xl sm:flex-col")}>
-              {/* Phones: a compact row (photo on the left); larger screens: a card with the photo on top. */}
-              <span className="relative block w-28 shrink-0 bg-primary-soft sm:aspect-[16/10] sm:w-auto">
-                {listing.photos[0] ? (
-                  <Image src={listing.photos[0].url} alt="" fill sizes="(min-width: 1024px) 320px, (min-width: 640px) 50vw, 100vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
-                ) : (
-                  <House className="absolute inset-0 m-auto size-8 text-primary" aria-hidden="true" />
-                )}
-                <HostStatus status={listing.status} label={tHost(`status.${listing.status}`)} className="absolute top-2 left-2 shadow-sm sm:top-3 sm:left-3" />
-              </span>
-              <span className="flex min-w-0 flex-1 flex-col gap-1 p-3 sm:p-4">
-                <span className="line-clamp-1 text-[15px] font-semibold text-ink">{listing.title}</span>
-                <span className="truncate text-[13px] text-muted">
-                  {tType(listing.type)} · {listing.district}, {listing.city}
-                </span>
-                {(listing.status === "REJECTED" || listing.status === "CHANGES_REQUESTED") && listing.rejectionReason && (
-                  <span className="text-xs font-medium text-red-800">{tHost("needsChanges", { reason: listing.rejectionReason })}</span>
-                )}
-                <span className="mt-auto flex items-center justify-between gap-2 pt-2 text-[12px] sm:border-t sm:border-line sm:pt-3 sm:text-[12.5px]">
-                  <span className="text-ink/80">
-                    <b className="font-semibold text-ink">{t("placeNights", { nights })}</b> · {t("placeUpcoming", { count: coming })}
-                  </span>
-                  <span className="inline-flex shrink-0 items-center gap-1 font-semibold text-primary">
+    <FillScreen>
+      <Toolbar
+        actions={
+          <Link href="/host/listings/new" className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-[14px] font-semibold text-white hover:bg-primary-hover">
+            <Plus className="size-4" aria-hidden="true" />
+            {tHost("newListing")}
+          </Link>
+        }
+      >
+        <div className="flex flex-wrap gap-2">
+          {filters.map((f) => {
+            const on = f.value === status;
+            return (
+              <Link
+                key={f.value ?? "all"}
+                href={f.value ? { pathname: "/host/places", query: { status: f.value } } : "/host/places"}
+                prefetch
+                className={cn("rounded-full border px-3.5 py-1.5 text-[13px] transition-colors", on ? "border-primary bg-primary font-semibold text-white" : "border-line bg-surface text-ink hover:border-primary/60")}
+              >
+                {f.label} <span className={cn("tabular-nums", on ? "text-white/80" : "text-muted")}>{f.count}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </Toolbar>
+      {/* The card stays put; its rows scroll inside (no scrollbar shown). */}
+      <div className="no-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain rounded-2xl border border-line bg-surface">
+        {listings.length === 0 ? (
+          <div className="flex flex-col items-center gap-2 py-14 text-center">
+            <House className="size-8 text-line-strong" aria-hidden="true" />
+            <p className="text-[15px] font-semibold text-ink">{tHost("emptyTitle")}</p>
+            <p className="max-w-sm text-[13px] text-muted">{tHost("emptyBody")}</p>
+          </div>
+        ) : (
+          <ul className="divide-y divide-line">
+            {listings.map((listing) => {
+              const nights = dash.nightsByPlace.get(listing.id) ?? 0;
+              const coming = dash.upcomingByPlace.get(listing.id) ?? 0;
+              return (
+                <li key={listing.id} className="flex flex-col gap-2 px-4 py-3 transition-colors hover:bg-canvas/60 sm:flex-row sm:items-center sm:gap-3">
+                  <Link href={`/host/listings/${listing.id}`} className="flex min-w-0 flex-1 items-center gap-4">
+                    <span className="relative flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primary-soft text-primary">
+                      {listing.photos[0] ? <Image src={listing.photos[0].url} alt="" fill sizes="56px" className="object-cover" /> : <House className="size-5" aria-hidden="true" />}
+                    </span>
+                    <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                      <span className="flex items-center gap-2">
+                        <span className="truncate text-[15px] font-semibold text-ink">{listing.title}</span>
+                        <HostStatus status={listing.status} label={tHost(`status.${listing.status}`)} />
+                      </span>
+                      <span className="truncate text-[13px] text-muted">
+                        {tType(listing.type)} · {listing.district === listing.city ? listing.city : `${listing.district}, ${listing.city}`}
+                      </span>
+                      <span className="truncate text-[12.5px] text-ink/80">
+                        <b className="font-semibold text-ink">{t("placeNights", { nights })}</b> · {t("placeUpcoming", { count: coming })}
+                      </span>
+                      {(listing.status === "REJECTED" || listing.status === "CHANGES_REQUESTED") && listing.rejectionReason && (
+                        <span className="text-xs font-medium text-red-800">{tHost("needsChanges", { reason: listing.rejectionReason })}</span>
+                      )}
+                    </span>
+                  </Link>
+                  <Link
+                    href={`/host/listings/${listing.id}`}
+                    className="inline-flex shrink-0 items-center gap-1.5 self-start rounded-full border border-line px-3.5 py-1.5 text-[13px] font-semibold text-ink hover:border-primary hover:text-primary sm:self-center"
+                  >
                     <Pencil className="size-3.5" aria-hidden="true" />
                     {t("edit")}
-                  </span>
-                </span>
-              </span>
-            </Link>
-          </li>
-        );
-      })}
-    </ul>
-      )}
-    </div>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+    </FillScreen>
   );
 }

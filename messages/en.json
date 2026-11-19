@@ -804,7 +804,18 @@
       "edit": "Edit",
       "recentPayouts": "Recent payouts",
       "vipaHandles": "VIIPA handles bookings, guests and payments for you. You see your places and your money here.",
-      "placesCount": "{count, plural, one {# place} other {# places}}"
+      "placesCount": "{count, plural, one {# place} other {# places}}",
+      "needsAttention": "Needs attention",
+      "allClear": "All clear. Nothing is waiting.",
+      "attention": {
+        "payout": "Add your payout account",
+        "payoutWaiting": "Payout account being checked",
+        "food": "Food on its way",
+        "fix": "Places to fix",
+        "drafts": "Drafts to finish",
+        "due": "Owed to you"
+      },
+      "noPayouts": "No payouts yet."
     },
     "shell": {
       "console": "Owner",
@@ -814,7 +825,9 @@
         "places": "Your places",
         "orders": "Food orders",
         "payout": "Payouts",
-        "restaurants": "Kitchens"
+        "restaurants": "Kitchens",
+        "account": "Your account",
+        "notifications": "Notifications"
       },
       "short": {
         "overview": "Overview",
@@ -829,8 +842,12 @@
       "closeMenu": "Close menu",
       "notifications": "Notifications",
       "notificationsUnread": "Notifications, {count} unread",
-      "profile": "Your profile"
-    }
+      "profile": "Your profile",
+      "account": "Your account",
+      "accountIntro": "Your details and language.",
+      "notificationsIntro": "News about your places, payouts and the food sent to your guests."
+    },
+    "allPlaces": "All"
   },
   "Admin": {
     "title": "Admin",
@@ -2293,7 +2310,8 @@
       "guest": "Guest",
       "room": "Room",
       "sentAt": "Sent {time}",
-      "readOnly": "VIIPA runs these orders; you only hand them over."
+      "readOnly": "VIIPA runs these orders; you only hand them over.",
+      "all": "All orders"
     },
     "adminList": {
       "edit": "Edit",

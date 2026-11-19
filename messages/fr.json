@@ -804,7 +804,18 @@
       "edit": "Modifier",
       "recentPayouts": "Derniers paiements",
       "vipaHandles": "VIIPA gère pour vous les réservations, les clients et les paiements. Ici, vous voyez vos logements et votre argent.",
-      "placesCount": "{count, plural, one {# logement} other {# logements}}"
+      "placesCount": "{count, plural, one {# logement} other {# logements}}",
+      "needsAttention": "À traiter",
+      "allClear": "Tout est en ordre. Rien n’attend.",
+      "attention": {
+        "payout": "Ajoutez votre compte de paiement",
+        "payoutWaiting": "Compte de paiement en vérification",
+        "food": "Repas en route",
+        "fix": "Logements à corriger",
+        "drafts": "Brouillons à terminer",
+        "due": "Dû à vous"
+      },
+      "noPayouts": "Aucun paiement pour l’instant."
     },
     "shell": {
       "console": "Propriétaire",
@@ -814,7 +825,9 @@
         "places": "Vos logements",
         "orders": "Commandes repas",
         "payout": "Paiements",
-        "restaurants": "Cuisines"
+        "restaurants": "Cuisines",
+        "account": "Votre compte",
+        "notifications": "Notifications"
       },
       "short": {
         "overview": "Aperçu",
@@ -829,8 +842,12 @@
       "closeMenu": "Fermer le menu",
       "notifications": "Notifications",
       "notificationsUnread": "Notifications, {count} non lues",
-      "profile": "Votre profil"
-    }
+      "profile": "Votre profil",
+      "account": "Votre compte",
+      "accountIntro": "Vos coordonnées et votre langue.",
+      "notificationsIntro": "Les nouvelles de vos logements, paiements et repas envoyés à vos clients."
+    },
+    "allPlaces": "Tous"
   },
   "Admin": {
     "title": "Administration",
@@ -2293,7 +2310,8 @@
       "guest": "Client",
       "room": "Chambre",
       "sentAt": "Envoyée {time}",
-      "readOnly": "VIIPA gère ces commandes ; vous les remettez seulement."
+      "readOnly": "VIIPA gère ces commandes ; vous les remettez seulement.",
+      "all": "Toutes les commandes"
     },
     "adminList": {
       "edit": "Modifier",
