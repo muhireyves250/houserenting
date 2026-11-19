@@ -767,6 +767,43 @@
       "amenitiesHint": "Pour le lodge dans son ensemble. Les équipements des chambres (TV, cuisine…) se règlent sur chaque catégorie de chambre ci-dessous.",
       "rulesTitle": "Règles de réservation",
       "rulesHint": "Comment les chambres se réservent : à la nuit ou à la journée, heures d'arrivée et de départ, séjour le plus court et le plus long. Chaque catégorie de chambre a son propre prix (ci-dessous)."
+    },
+    "dash": {
+      "hello": "Bonjour, {name}",
+      "intro": "Vos logements, vos clients et votre argent en un coup d'œil.",
+      "tabs": {
+        "overview": "Aperçu",
+        "orders": "Commandes repas",
+        "payout": "Paiements",
+        "restaurants": "Cuisines",
+        "ordersShort": "Repas"
+      },
+      "tiles": {
+        "live": "Logements en ligne",
+        "staying": "Séjours en cours",
+        "arriving": "Arrivées cette semaine",
+        "nights": "Nuits réservées ce mois"
+      },
+      "earningsTitle": "Revenus",
+      "earningsNote": "Ce que vous gagnez sur les séjours, après la commission de VIIPA.",
+      "chartTitle": "6 derniers mois",
+      "due": "Dû maintenant",
+      "upcoming": "Après les séjours en cours",
+      "paidOut": "Déjà payé",
+      "payoutSet": "Compte de paiement enregistré",
+      "payoutVerified": "Vérifié par VIIPA",
+      "payoutWaiting": "En attente de vérification par VIIPA",
+      "payoutMissing": "Indiquez où envoyer votre argent",
+      "payoutAction": "Coordonnées de paiement",
+      "ordersTitle": "Repas pour vos clients",
+      "ordersOnWay": "{count, plural, =0 {Rien en route} one {# commande en route} other {# commandes en route}}",
+      "ordersAll": "Toutes les commandes",
+      "placesTitle": "Vos logements",
+      "placeNights": "{nights, plural, =0 {Aucune nuit ce mois} one {# nuit ce mois} other {# nuits ce mois}}",
+      "placeUpcoming": "{count, plural, =0 {aucun séjour à venir} one {# séjour à venir} other {# séjours à venir}}",
+      "edit": "Modifier",
+      "recentPayouts": "Derniers paiements",
+      "vipaHandles": "VIIPA gère pour vous les réservations, les clients et les paiements. Ici, vous voyez vos logements et votre argent."
     }
   },
   "Admin": {

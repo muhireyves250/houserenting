@@ -767,6 +767,43 @@
       "amenitiesHint": "For the lodge as a whole. In-room amenities (TV, kitchen…) are set on each room category below.",
       "rulesTitle": "Booking rules",
       "rulesHint": "How rooms can be booked: by the night or the day, check-in and check-out times, shortest and longest stay. Each room category has its own price (below)."
+    },
+    "dash": {
+      "hello": "Hello, {name}",
+      "intro": "Your places, guests and money at a glance.",
+      "tabs": {
+        "overview": "Overview",
+        "orders": "Food orders",
+        "payout": "Payouts",
+        "restaurants": "Kitchens",
+        "ordersShort": "Food"
+      },
+      "tiles": {
+        "live": "Places live",
+        "staying": "Staying now",
+        "arriving": "Arriving this week",
+        "nights": "Nights booked this month"
+      },
+      "earningsTitle": "Earnings",
+      "earningsNote": "What you earn from stays, after VIIPA's commission.",
+      "chartTitle": "Last 6 months",
+      "due": "Owed to you now",
+      "upcoming": "After current stays end",
+      "paidOut": "Paid to you",
+      "payoutSet": "Payout account set",
+      "payoutVerified": "Verified by VIIPA",
+      "payoutWaiting": "Waiting for VIIPA to check",
+      "payoutMissing": "Add where we send your money",
+      "payoutAction": "Payout details",
+      "ordersTitle": "Food for your guests",
+      "ordersOnWay": "{count, plural, =0 {Nothing on its way} one {# order on its way} other {# orders on their way}}",
+      "ordersAll": "All orders",
+      "placesTitle": "Your places",
+      "placeNights": "{nights, plural, =0 {No nights this month} one {# night this month} other {# nights this month}}",
+      "placeUpcoming": "{count, plural, =0 {no stays coming} one {# stay coming} other {# stays coming}}",
+      "edit": "Edit",
+      "recentPayouts": "Recent payouts",
+      "vipaHandles": "VIIPA handles bookings, guests and payments for you. You see your places and your money here."
     }
   },
   "Admin": {

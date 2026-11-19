@@ -767,6 +767,43 @@
       "amenitiesHint": "Ibya lodge yose. Ibiri mu byumba (TV, igikoni…) bishyirwa kuri buri bwoko bw'icyumba hepfo.",
       "rulesTitle": "Amabwiriza yo gukodesha",
       "rulesHint": "Uko ibyumba bikodeshwa: ku ijoro cyangwa ku munsi, amasaha yo kwinjira no gusohoka, igihe gito n'ikirekire. Buri bwoko bw'icyumba bufite igiciro cyabwo (hepfo)."
+    },
+    "dash": {
+      "hello": "Muraho, {name}",
+      "intro": "Amacumbi yawe, abashyitsi n’amafaranga byose hamwe.",
+      "tabs": {
+        "overview": "Incamake",
+        "orders": "Ibyo kurya",
+        "payout": "Kwishyurwa",
+        "restaurants": "Igikoni",
+        "ordersShort": "Ibiryo"
+      },
+      "tiles": {
+        "live": "Amacumbi akora",
+        "staying": "Abacumbitse ubu",
+        "arriving": "Abaza iki cyumweru",
+        "nights": "Amajoro yafashwe uku kwezi"
+      },
+      "earningsTitle": "Ayo winjiza",
+      "earningsNote": "Ayo winjiza ku macumbi, nyuma ya komisiyo ya VIIPA.",
+      "chartTitle": "Amezi 6 ashize",
+      "due": "Ugomba kwishyurwa ubu",
+      "upcoming": "Nyuma y’uko abacumbitse bagenda",
+      "paidOut": "Wishyuwe",
+      "payoutSet": "Konti yo kwishyurirwaho irahari",
+      "payoutVerified": "Yemejwe na VIIPA",
+      "payoutWaiting": "Itegereje kugenzurwa na VIIPA",
+      "payoutMissing": "Shyiramo aho twohereza amafaranga yawe",
+      "payoutAction": "Aho wishyurirwa",
+      "ordersTitle": "Ibyo kurya by’abashyitsi bawe",
+      "ordersOnWay": "{count, plural, =0 {Nta biri mu nzira} one {# biri mu nzira} other {# biri mu nzira}}",
+      "ordersAll": "Byose",
+      "placesTitle": "Amacumbi yawe",
+      "placeNights": "{nights, plural, =0 {Nta joro uku kwezi} one {Ijoro # uku kwezi} other {Amajoro # uku kwezi}}",
+      "placeUpcoming": "{count, plural, =0 {nta bazaza} one {# uzaza} other {# bazaza}}",
+      "edit": "Hindura",
+      "recentPayouts": "Ubwishyu buheruka",
+      "vipaHandles": "VIIPA ikwitaho ibyumba byafashwe, abashyitsi n’ubwishyu. Hano ubona amacumbi yawe n’amafaranga yawe."
     }
   },
   "Admin": {

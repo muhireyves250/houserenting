@@ -1,173 +1,262 @@
 import { PageHero } from "@/components/shell/PageHero";
-import { ChevronRight, House, Plus } from "lucide-react";
+import { ArrowRight, BadgeCheck, BedDouble, CalendarClock, ChevronRight, Clock, House, KeyRound, Pencil, Plus, UtensilsCrossed, Wallet } from "lucide-react";
 import Image from "next/image";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageContainer } from "@/components/ui/PageContainer";
-import { HostStatus } from "@/features/hosting/components/HostStatus";
-import { hostListings } from "@/features/hosting/service";
-import { Link } from "@/i18n/navigation";
-import { requireUser } from "@/lib/session";
-import { db } from "@/lib/db";
-import { hostEarnings } from "@/features/ledger/service";
 import { ordersForHost } from "@/features/food/service";
+import { HostStatus } from "@/features/hosting/components/HostStatus";
+import { HostTabs } from "@/features/hosting/components/HostTabs";
+import { hostDashboard, hostListings } from "@/features/hosting/service";
+import { hostEarnings } from "@/features/ledger/service";
+import { payoutAccountOf } from "@/features/places/payout-service";
+import { Link } from "@/i18n/navigation";
+import { cn } from "@/lib/cn";
+import { db } from "@/lib/db";
 import { formatRWF } from "@/lib/format";
-import { getLocale } from "next-intl/server";
+import { requireUser } from "@/lib/session";
 
 const newButton =
   "inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-[#0a6fe0] px-5 py-2.5 text-[15px] font-semibold text-white shadow-[0_10px_24px_-10px_rgba(0,87,184,0.8)] transition-[filter,transform] duration-300 hover:brightness-110 active:scale-[0.97]";
+const card = "rounded-3xl bg-surface p-5 shadow-[0_10px_30px_-14px_rgba(16,24,40,0.3)] ring-1 ring-black/[0.04] max-md:ring-line";
 
+/**
+ * The owner's dashboard: their own places only. How busy the places are, what they earn and when they're paid,
+ * food on its way to their guests, and each place. Bookings, guests and payments are VIIPA's, so no guest details.
+ */
 export default async function HostPage() {
   const user = await requireUser("/host");
-  const [t, tType, tPlaces, listings, earnings, locale, restaurantRoles, helping] = await Promise.all([
+  const [t, tHost, tType, tPlaces, listings, earnings, dash, payout, locale, restaurantRoles, helping] = await Promise.all([
+    getTranslations("Host.dash"),
     getTranslations("Host"),
     getTranslations("ListingType"),
     getTranslations("Places"),
     hostListings(user.id),
     hostEarnings(user.id),
+    hostDashboard(user.id),
+    payoutAccountOf(user.id),
     getLocale(),
     // Kitchen teams VIIPA set up (owners don't add restaurants themselves).
     db.restaurantMember.count({ where: { userId: user.id } }),
     db.placeMember.findMany({ where: { userId: user.id, role: "MANAGER", listing: { status: { not: "ARCHIVED" } } }, select: { role: true, listing: { select: { id: true, title: true, city: true } } } }),
   ]);
-  const sentToPlaces = listings.length > 0 ? (await ordersForHost(user.id)).filter((o) => o.status === "OUT_FOR_DELIVERY").length : 0;
-  const hasMoney = earnings.earned + earnings.upcoming + earnings.paidOut > 0;
+  const onTheWay = listings.length > 0 ? (await ordersForHost(user.id)).filter((o) => o.status === "OUT_FOR_DELIVERY").length : 0;
+  const rwf = (n: number) => formatRWF(n, locale);
+  const month = new Intl.DateTimeFormat(locale, { month: "short", timeZone: "UTC" });
+  const peak = Math.max(1, ...dash.months.map((m) => m.amount));
+  const firstName = user.name.split(" ")[0] ?? user.name;
 
-  return (
-    <PageContainer className="max-w-3xl py-6 md:py-10 max-md:pt-0">
-      <PageHero title={t("title")} icon={House} />
-      <div className="mb-6 flex items-center justify-between gap-4 max-md:justify-end">
-        <h1 className="max-md:hidden text-[26px] leading-8 font-bold tracking-[-0.03em] text-ink md:text-[32px] md:leading-10">{t("title")}</h1>
+  const header = (
+    <>
+      <PageHero title={t("hello", { name: firstName })} icon={House} />
+      <div className="mb-5 flex items-end justify-between gap-4">
+        <div className="max-md:hidden">
+          <h1 className="text-[28px] leading-9 font-bold tracking-[-0.03em] text-ink md:text-[32px] md:leading-10">{t("hello", { name: firstName })}</h1>
+          <p className="text-[15px] text-muted">{t("intro")}</p>
+        </div>
         {listings.length > 0 && (
-          <Link href="/host/listings/new" className={newButton}>
+          <Link href="/host/listings/new" className={cn(newButton, "max-md:ml-auto")}>
             <Plus className="size-4" aria-hidden="true" />
-            {t("newListing")}
+            {tHost("newListing")}
           </Link>
         )}
       </div>
+    </>
+  );
 
-      {restaurantRoles > 0 && (
-        <Link
-          href="/host/restaurants"
-          className="mb-3 flex items-center justify-between gap-3 rounded-2xl bg-surface px-4 py-3 text-[14px] font-semibold text-ink ring-1 ring-line transition-colors hover:ring-primary"
-        >
-          {tPlaces("restaurantsLink")}
-          <ChevronRight className="size-4 text-ink/50" aria-hidden="true" />
-        </Link>
+  if (listings.length === 0 && helping.length === 0) {
+    return (
+      <PageContainer className="max-w-5xl py-6 max-md:pt-0 md:py-10">
+        {header}
+        <EmptyState
+          icon={<House />}
+          title={tHost("emptyTitle")}
+          body={tHost("emptyBody")}
+          action={
+            <Link href="/host/listings/new" className={newButton}>
+              <Plus className="size-4" aria-hidden="true" />
+              {tHost("newListing")}
+            </Link>
+          }
+        />
+      </PageContainer>
+    );
+  }
+
+  const tiles = [
+    { icon: House, label: t("tiles.live"), value: listings.filter((l) => l.status === "PUBLISHED").length },
+    { icon: KeyRound, label: t("tiles.staying"), value: dash.stayingNow },
+    { icon: CalendarClock, label: t("tiles.arriving"), value: dash.arriving },
+    { icon: BedDouble, label: t("tiles.nights"), value: dash.nightsThisMonth },
+  ];
+
+  return (
+    <PageContainer className="max-w-5xl py-6 max-md:pt-0 md:py-10">
+      {header}
+      <div className="mb-6">
+        <HostTabs on="overview" kitchens={restaurantRoles > 0} />
+      </div>
+
+      {/* At a glance */}
+      <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        {tiles.map(({ icon: Icon, label, value }) => (
+          <div key={label} className={cn(card, "flex flex-col gap-2 p-4")}>
+            <span className="flex size-9 items-center justify-center rounded-xl bg-primary-soft text-primary">
+              <Icon className="size-[18px]" aria-hidden="true" />
+            </span>
+            <span className="text-[26px] leading-8 font-bold tracking-[-0.02em] text-ink tabular-nums">{value}</span>
+            <span className="text-[13px] leading-4 font-medium text-muted">{label}</span>
+          </div>
+        ))}
+      </section>
+
+      <div className="mt-5 grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
+        {/* Earnings with the last six months. */}
+        <section className={card}>
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <div>
+              <h2 className="text-[17px] font-bold text-ink">{t("earningsTitle")}</h2>
+              <p className="text-[13px] text-muted">{t("earningsNote")}</p>
+            </div>
+          </div>
+          <dl className="mt-4 grid grid-cols-3 gap-2">
+            {(
+              [
+                ["due", earnings.due, "text-primary"],
+                ["upcoming", earnings.upcoming, "text-ink"],
+                ["paidOut", earnings.paidOut, "text-emerald-700"],
+              ] as const
+            ).map(([key, value, tone]) => (
+              <div key={key} className="rounded-2xl bg-canvas px-3 py-2.5">
+                <dt className="text-[11.5px] leading-4 font-medium text-muted">{t(key)}</dt>
+                <dd className={cn("mt-1 text-[15px] font-bold tabular-nums md:text-[17px]", tone)}>{rwf(value)}</dd>
+              </div>
+            ))}
+          </dl>
+          <p className="mt-5 mb-2 text-[12px] font-semibold text-muted">{t("chartTitle")}</p>
+          <ul className="flex h-36 items-end gap-2" aria-label={t("chartTitle")}>
+            {dash.months.map((m) => (
+              <li key={m.month} className="flex h-full flex-1 flex-col items-center justify-end gap-1.5">
+                <span className="text-[10.5px] font-semibold text-ink/70 tabular-nums">{m.amount > 0 ? new Intl.NumberFormat(locale, { notation: "compact" }).format(m.amount) : ""}</span>
+                <span
+                  className={cn("w-full max-w-12 rounded-t-lg", m.amount > 0 ? "bg-gradient-to-t from-primary to-[#3d8cf0]" : "bg-canvas")}
+                  style={{ height: `${Math.max(4, Math.round((m.amount / peak) * 100))}%` }}
+                />
+                <span className="text-[11px] text-muted">{month.format(new Date(`${m.month}-01T00:00:00Z`))}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <div className="flex flex-col gap-5">
+          {/* Where the money goes. */}
+          <Link href="/host/payout" className={cn(card, "group flex items-center gap-3 p-4 transition-shadow hover:shadow-[0_14px_36px_-14px_rgba(0,64,160,0.45)]")}>
+            <span className={cn("flex size-11 shrink-0 items-center justify-center rounded-2xl", payout?.verifiedAt ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-800")}>
+              {payout?.verifiedAt ? <BadgeCheck className="size-5" aria-hidden="true" /> : payout ? <Clock className="size-5" aria-hidden="true" /> : <Wallet className="size-5" aria-hidden="true" />}
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[14px] font-semibold text-ink">{payout ? t("payoutSet") : t("payoutMissing")}</span>
+              <span className="block text-[12.5px] text-muted">{payout ? (payout.verifiedAt ? t("payoutVerified") : t("payoutWaiting")) : t("payoutAction")}</span>
+            </span>
+            <ChevronRight className="size-5 text-ink/40 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+          </Link>
+
+          {/* Food on its way to the owner's guests. */}
+          <Link href="/host/orders" className={cn(card, "group flex items-center gap-3 p-4 transition-shadow hover:shadow-[0_14px_36px_-14px_rgba(0,64,160,0.45)]")}>
+            <span className={cn("flex size-11 shrink-0 items-center justify-center rounded-2xl", onTheWay > 0 ? "bg-primary text-white" : "bg-primary-soft text-primary")}>
+              <UtensilsCrossed className="size-5" aria-hidden="true" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[14px] font-semibold text-ink">{t("ordersTitle")}</span>
+              <span className={cn("block text-[12.5px]", onTheWay > 0 ? "font-semibold text-primary" : "text-muted")}>{t("ordersOnWay", { count: onTheWay })}</span>
+            </span>
+            <ChevronRight className="size-5 text-ink/40 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+          </Link>
+
+          {earnings.payouts.length > 0 && (
+            <section className={cn(card, "p-4")}>
+              <h2 className="mb-2 text-[14px] font-semibold text-ink">{t("recentPayouts")}</h2>
+              <ul className="flex flex-col divide-y divide-line text-[13px]">
+                {earnings.payouts.slice(0, 4).map((p) => (
+                  <li key={p.reference} className="flex items-center justify-between gap-2 py-2">
+                    <span className="font-mono text-ink/80">{p.reference}</span>
+                    <span className="font-semibold text-ink tabular-nums">{rwf(p.amount)}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+          <p className="rounded-2xl bg-primary-soft/60 px-4 py-3 text-[12.5px] leading-5 text-ink/80">{t("vipaHandles")}</p>
+        </div>
+      </div>
+
+      {/* Each place */}
+      {listings.length > 0 && (
+        <section className="mt-8">
+          <h2 className="mb-3 text-[19px] font-bold text-ink">{t("placesTitle")}</h2>
+          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
+            {listings.map((listing) => {
+              const nights = dash.nightsByPlace.get(listing.id) ?? 0;
+              const coming = dash.upcomingByPlace.get(listing.id) ?? 0;
+              return (
+                <li key={listing.id}>
+                  <Link href={`/host/listings/${listing.id}`} className={cn(card, "group flex h-full overflow-hidden p-0 transition-shadow hover:shadow-[0_16px_40px_-16px_rgba(0,64,160,0.5)] max-sm:rounded-2xl sm:flex-col")}>
+                    {/* Phones: a compact row (photo on the left); larger screens: a card with the photo on top. */}
+                    <span className="relative block w-28 shrink-0 bg-primary-soft sm:aspect-[16/10] sm:w-auto">
+                      {listing.photos[0] ? (
+                        <Image src={listing.photos[0].url} alt="" fill sizes="(min-width: 1024px) 320px, (min-width: 640px) 50vw, 100vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
+                      ) : (
+                        <House className="absolute inset-0 m-auto size-8 text-primary" aria-hidden="true" />
+                      )}
+                      <HostStatus status={listing.status} label={tHost(`status.${listing.status}`)} className="absolute top-2 left-2 shadow-sm sm:top-3 sm:left-3" />
+                    </span>
+                    <span className="flex min-w-0 flex-1 flex-col gap-1 p-3 sm:p-4">
+                      <span className="line-clamp-1 text-[15px] font-semibold text-ink">{listing.title}</span>
+                      <span className="truncate text-[13px] text-muted">
+                        {tType(listing.type)} · {listing.district}, {listing.city}
+                      </span>
+                      {(listing.status === "REJECTED" || listing.status === "CHANGES_REQUESTED") && listing.rejectionReason && (
+                        <span className="text-xs font-medium text-red-800">{tHost("needsChanges", { reason: listing.rejectionReason })}</span>
+                      )}
+                      <span className="mt-auto flex items-center justify-between gap-2 pt-2 text-[12px] sm:border-t sm:border-line sm:pt-3 sm:text-[12.5px]">
+                        <span className="text-ink/80">
+                          <b className="font-semibold text-ink">{t("placeNights", { nights })}</b> · {t("placeUpcoming", { count: coming })}
+                        </span>
+                        <span className="inline-flex shrink-0 items-center gap-1 font-semibold text-primary">
+                          <Pencil className="size-3.5" aria-hidden="true" />
+                          {t("edit")}
+                        </span>
+                      </span>
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
       )}
+
+      {/* Places this person helps run for someone else. */}
       {helping.length > 0 && (
-        <section className="mb-5">
-          <h2 className="mb-2 text-[15px] font-semibold text-ink">{tPlaces("helpingTitle")}</h2>
-          <ul className="flex flex-col divide-y divide-line rounded-2xl bg-surface ring-1 ring-line">
+        <section className="mt-8">
+          <h2 className="mb-3 text-[17px] font-bold text-ink">{tPlaces("helpingTitle")}</h2>
+          <ul className="flex flex-col divide-y divide-line rounded-3xl bg-surface ring-1 ring-line">
             {helping.map((h) => (
               <li key={h.listing.id}>
-                <Link href={`/host/listings/${h.listing.id}`} className="flex items-center justify-between gap-3 px-4 py-3">
+                <Link href={`/host/listings/${h.listing.id}`} className="flex items-center justify-between gap-3 px-5 py-3.5 hover:bg-canvas/60">
                   <span>
                     <span className="block text-[14px] font-semibold text-ink">{h.listing.title}</span>
                     <span className="block text-xs text-muted">
                       {tPlaces(`teamRole.${h.role}`)} · {h.listing.city}
                     </span>
                   </span>
-                  <ChevronRight className="size-4 text-ink/50" aria-hidden="true" />
+                  <ArrowRight className="size-4 text-ink/50" aria-hidden="true" />
                 </Link>
               </li>
             ))}
           </ul>
         </section>
       )}
-      {listings.length > 0 && (
-        <Link
-          href="/host/orders"
-          className="mb-3 flex items-center justify-between gap-3 rounded-2xl bg-surface px-4 py-3 text-[14px] font-semibold text-ink ring-1 ring-line transition-colors hover:ring-primary"
-        >
-          <span className="inline-flex items-center gap-2">
-            {t("foodOrdersLink")}
-            {/* Orders on their way to the owner's places right now. */}
-            {sentToPlaces > 0 && <span className="rounded-full bg-primary px-2 py-0.5 text-[12px] font-bold text-white tabular-nums">{sentToPlaces}</span>}
-          </span>
-          <ChevronRight className="size-4 text-ink/50" aria-hidden="true" />
-        </Link>
-      )}
-      {listings.length > 0 && (
-        <Link
-          href="/host/payout"
-          className="mb-4 flex items-center justify-between gap-3 rounded-2xl bg-surface px-4 py-3 text-[14px] font-semibold text-ink ring-1 ring-line transition-colors hover:ring-primary"
-        >
-          {t("payoutLink")}
-          <ChevronRight className="size-4 text-ink/50" aria-hidden="true" />
-        </Link>
-      )}
-
-      {listings.length === 0 ? (
-        <EmptyState
-          icon={<House />}
-          title={t("emptyTitle")}
-          body={t("emptyBody")}
-          action={
-            <Link href="/host/listings/new" className={newButton}>
-              <Plus className="size-4" aria-hidden="true" />
-              {t("newListing")}
-            </Link>
-          }
-        />
-      ) : (
-        <ul className="flex flex-col gap-3">
-          {listings.map((listing) => (
-            <li key={listing.id}>
-              <Link
-                href={`/host/listings/${listing.id}`}
-                className="flex items-center gap-4 rounded-3xl bg-surface p-3 shadow-[0_10px_30px_-14px_rgba(16,24,40,0.3)] ring-1 ring-black/[0.04] transition-transform duration-300 active:scale-[0.98] max-md:ring-line"
-              >
-                <span className="relative flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-primary-soft text-primary">
-                  {listing.photos[0] ? <Image src={listing.photos[0].url} alt="" fill sizes="80px" className="object-cover" /> : <House className="size-7" aria-hidden="true" />}
-                </span>
-                <span className="flex min-w-0 flex-1 flex-col gap-1">
-                  <HostStatus status={listing.status} label={t(`status.${listing.status}`)} className="self-start" />
-                  <span className="truncate text-[15px] font-semibold text-ink">{listing.title}</span>
-                  <span className="truncate text-[13px] text-muted">
-                    {tType(listing.type)} · {listing.district}, {listing.city}
-                  </span>
-                  {(listing.status === "REJECTED" || listing.status === "CHANGES_REQUESTED") && listing.rejectionReason && (
-                    <span className="text-xs font-medium text-red-800">{t("needsChanges", { reason: listing.rejectionReason })}</span>
-                  )}
-                </span>
-                <ChevronRight className="size-5 shrink-0 text-ink/50" aria-hidden="true" />
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {hasMoney && (
-        <section className="mt-10">
-          <h2 className="mb-3 text-lg font-bold text-ink">{t("earnings")}</h2>
-          <ul className="grid grid-cols-3 gap-3">
-            {(
-              [
-                ["due", earnings.due],
-                ["upcoming", earnings.upcoming],
-                ["paidOut", earnings.paidOut],
-              ] as const
-            ).map(([key, value]) => (
-              <li key={key} className="rounded-3xl bg-surface p-4 shadow-[0_10px_30px_-14px_rgba(16,24,40,0.3)] ring-1 ring-black/[0.04] max-md:ring-line">
-                <p className="text-lg font-bold text-ink tabular-nums">{formatRWF(value, locale)}</p>
-                <p className="text-[13px] text-muted">{t(`earningsLabel.${key}`)}</p>
-              </li>
-            ))}
-          </ul>
-          {earnings.payouts.length > 0 && (
-            <ul className="mt-3 flex flex-col gap-1 text-[13px] text-ink/80 tabular-nums">
-              {earnings.payouts.map((p) => (
-                <li key={p.reference}>
-                  {p.reference} · {formatRWF(p.amount, locale)}
-                  {p.method && ` · ${p.method}`}
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-      )}
-
     </PageContainer>
   );
 }

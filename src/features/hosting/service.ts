@@ -112,3 +112,53 @@ export async function removePhoto(hostId: string, listingId: string, photoId: st
   const { count } = await db.listingPhoto.deleteMany({ where: { id: photoId, listingId, listing: { hostId } } });
   return count === 1;
 }
+
+const STAYING = ["CONFIRMED", "CHECKED_IN", "COMPLETED"] as const;
+const DAY_MS = 86_400_000;
+/** A Kigali calendar day (UTC+2) as YYYY-MM-DD. */
+const kigaliDay = (at: Date) => new Date(at.getTime() + 2 * 3_600_000).toISOString().slice(0, 10);
+
+/**
+ * The owner's dashboard numbers, for their own places only (no guest details: guests deal with VIIPA):
+ * who is staying now, who arrives this week, nights booked this month per place, and earnings per month.
+ */
+export async function hostDashboard(hostId: string, now: Date = new Date()) {
+  const today = kigaliDay(now);
+  const day = (d: string) => new Date(`${d}T00:00:00Z`);
+  const monthStart = `${today.slice(0, 7)}-01`;
+  const nextMonth = new Date(day(monthStart));
+  nextMonth.setUTCMonth(nextMonth.getUTCMonth() + 1);
+  const sixMonthsAgo = new Date(day(monthStart));
+  sixMonthsAgo.setUTCMonth(sixMonthsAgo.getUTCMonth() - 5);
+  const inAWeek = new Date(day(today).getTime() + 7 * DAY_MS);
+
+  const mine = { listing: { hostId }, status: { in: [...STAYING] } };
+  const [stayingNow, arriving, thisMonth, upcoming, history] = await Promise.all([
+    db.booking.count({ where: { listing: { hostId }, OR: [{ status: "CHECKED_IN" }, { status: "CONFIRMED", checkIn: { lte: day(today) }, checkOut: { gt: day(today) } }] } }),
+    db.booking.count({ where: { listing: { hostId }, status: "CONFIRMED", checkIn: { gt: day(today), lte: inAWeek } } }),
+    db.booking.groupBy({ by: ["listingId"], where: { ...mine, checkIn: { gte: day(monthStart), lt: nextMonth } }, _sum: { nights: true } }),
+    db.booking.groupBy({ by: ["listingId"], where: { listing: { hostId }, status: "CONFIRMED", checkIn: { gte: day(today) } }, _count: true }),
+    db.booking.findMany({ where: { ...mine, checkIn: { gte: sixMonthsAgo, lt: nextMonth } }, select: { checkIn: true, hostPayout: true } }),
+  ]);
+
+  // Earnings per month of stay, the last six months (every month present, even empty ones).
+  const months: { month: string; amount: number }[] = [];
+  for (let i = 0; i < 6; i++) {
+    const m = new Date(sixMonthsAgo);
+    m.setUTCMonth(m.getUTCMonth() + i);
+    months.push({ month: m.toISOString().slice(0, 7), amount: 0 });
+  }
+  for (const b of history) {
+    const row = months.find((m) => m.month === b.checkIn.toISOString().slice(0, 7));
+    if (row) row.amount += b.hostPayout;
+  }
+
+  return {
+    stayingNow,
+    arriving,
+    nightsThisMonth: thisMonth.reduce((sum, r) => sum + (r._sum.nights ?? 0), 0),
+    nightsByPlace: new Map(thisMonth.map((r) => [r.listingId, r._sum.nights ?? 0])),
+    upcomingByPlace: new Map(upcoming.map((r) => [r.listingId, r._count])),
+    months,
+  };
+}

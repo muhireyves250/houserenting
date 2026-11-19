@@ -2,6 +2,7 @@ import { BedDouble, Bike, UtensilsCrossed } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { PageHero } from "@/components/shell/PageHero";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { HostTabs } from "@/features/hosting/components/HostTabs";
 import { PageContainer } from "@/components/ui/PageContainer";
 import { formatKigaliDateTime } from "@/features/bookings/format";
 import { ordersForHost } from "@/features/food/service";
@@ -25,6 +26,9 @@ export default async function HostOrdersPage() {
       <PageHero title={t("hostOrders.title")} icon={UtensilsCrossed} />
       <h1 className="mb-2 text-[26px] leading-8 font-bold tracking-[-0.03em] text-ink max-md:hidden md:text-[32px] md:leading-10">{t("hostOrders.title")}</h1>
       <p className="mb-5 text-[14px] text-muted">{t("hostOrders.intro")}</p>
+      <div className="mb-5">
+        <HostTabs on="orders" />
+      </div>
       {orders.length === 0 ? (
         <EmptyState icon={<UtensilsCrossed />} title={t("hostOrders.empty")} body={t("hostOrders.readOnly")} />
       ) : (

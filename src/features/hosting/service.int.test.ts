@@ -4,7 +4,7 @@ import { getPublishedListing } from "@/features/listings/service";
 import { db } from "@/lib/db";
 import { resetDb } from "@/test/db";
 import { validListing } from "./fixtures";
-import { addPhoto, archiveListing, getHostListing, saveListing, submitForReview } from "./service";
+import { addPhoto, archiveListing, getHostListing, hostDashboard, saveListing, submitForReview } from "./service";
 
 const CLOUD = "https://res.cloudinary.com/demo/";
 
@@ -111,5 +111,48 @@ describe("roles", () => {
     expect(await setUserRole("admin", "admin", "USER")).toBe(false);
     expect(await setUserRole("admin", "other", "ADMIN")).toBe(true);
     expect(await db.auditLog.findFirst({ where: { entityId: "other" } })).toMatchObject({ action: "user.role", data: { from: "USER", to: "ADMIN" } });
+  });
+});
+
+describe("owner dashboard", () => {
+  it("counts only the owner's own places: staying now, arriving this week, nights this month, earnings per month", async () => {
+    const mine = await created();
+    const theirs = (await saveListing("other", null, validListing)) as { ok: true; id: string };
+    const stay = (ref: string, listingId: string, status: "CONFIRMED" | "CHECKED_IN" | "COMPLETED" | "CANCELLED", from: string, to: string, nights: number, hostPayout: number) =>
+      db.booking.create({
+        data: {
+          reference: ref,
+          listingId,
+          guestId: "other",
+          status,
+          checkIn: new Date(`${from}T00:00:00Z`),
+          checkOut: new Date(`${to}T00:00:00Z`),
+          startAt: new Date(`${from}T12:00:00Z`),
+          endAt: new Date(`${to}T09:00:00Z`),
+          nights,
+          guests: 1,
+          nightlyPrice: 10000,
+          total: nights * 10000,
+          hostPayout,
+          policySnapshot: {},
+        },
+      });
+    await stay("SR-HAA234", mine, "CHECKED_IN", "2026-11-18", "2026-11-21", 3, 27000); // staying now
+    await stay("SR-HAB234", mine, "CONFIRMED", "2026-11-23", "2026-11-25", 2, 18000); // arriving this week
+    await stay("SR-HAC234", mine, "CONFIRMED", "2026-12-10", "2026-12-12", 2, 18000); // later
+    await stay("SR-HAD234", mine, "COMPLETED", "2026-09-02", "2026-09-04", 2, 20000); // earlier month
+    await stay("SR-HAE234", mine, "CANCELLED", "2026-11-19", "2026-11-20", 1, 9000); // never counts
+    await stay("SR-HAF234", theirs.id, "CHECKED_IN", "2026-11-18", "2026-11-21", 3, 27000); // someone else's place
+
+    const dash = await hostDashboard("host", new Date("2026-11-20T08:00:00Z"));
+    expect(dash.stayingNow).toBe(1);
+    expect(dash.arriving).toBe(1);
+    expect(dash.nightsThisMonth).toBe(5);
+    expect(dash.nightsByPlace.get(mine)).toBe(5);
+    expect(dash.nightsByPlace.has(theirs.id)).toBe(false);
+    expect(dash.upcomingByPlace.get(mine)).toBe(2);
+    expect(dash.months.map((m) => m.month)).toEqual(["2026-06", "2026-07", "2026-08", "2026-09", "2026-10", "2026-11"]);
+    expect(dash.months.find((m) => m.month === "2026-11")?.amount).toBe(45000);
+    expect(dash.months.find((m) => m.month === "2026-09")?.amount).toBe(20000);
   });
 });
