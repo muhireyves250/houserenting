@@ -795,7 +795,14 @@
       "reports": "Reports",
       "messages": "Messages",
       "laundry": "Laundry",
-      "orders": "Food orders"
+      "orders": "Food orders",
+      "short": {
+        "overview": "Overview",
+        "bookings": "Bookings",
+        "orders": "Food",
+        "messages": "Messages",
+        "menu": "Menu"
+      }
     },
     "count": {
       "listings": "Listings to review",
@@ -1024,7 +1031,8 @@
         "arriving": "Arriving",
         "leaving": "Leaving today",
         "overdue": "Should have left",
-        "none": "No one."
+        "none": "No one.",
+        "nobody": "Nobody arriving or leaving today."
       }
     },
     "bookingsIntro": "Every booking: search by reference, guest or place, filter by status, open one for the full record.",

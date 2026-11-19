@@ -58,20 +58,24 @@ export async function RoomBookingView({ listingId, roomId, number: asked }: { li
   const photos = photosOfRoom(room, number, listing.photos.map((p) => p.url))
     .slice(0, 12)
     .map((url, i) => ({ id: `photo-${i}`, url }));
-  // The place's rules for each way of booking (hours, check-in…), with this room's own prices.
-  const rates = listing.rates
-    .filter((r) => room.rates.some((rr) => rr.unit === r.unit))
+  // Every way this room has a price for (hourly, daily, nightly…) can be booked; the place's rules for it (hours,
+  // check-in, shortest/longest) apply when set, otherwise sensible defaults.
+  const DEFAULT_RULES = { minUnits: 1, maxUnits: null, checkInTime: "14:00", checkOutTime: "11:00", dayStartTime: "08:00", dayEndTime: "20:00" };
+  const rates = [...room.rates]
     .sort((a, b) => UNIT_ORDER.indexOf(a.unit) - UNIT_ORDER.indexOf(b.unit))
-    .map(({ unit, minUnits, maxUnits, checkInTime, checkOutTime, dayStartTime, dayEndTime }) => ({
-      unit,
-      price: room.rates.find((r) => r.unit === unit)!.price,
-      minUnits,
-      maxUnits,
-      checkInTime,
-      checkOutTime,
-      dayStartTime,
-      dayEndTime,
-    }));
+    .map(({ unit, price }) => {
+      const rule = listing.rates.find((r) => r.unit === unit);
+      return {
+        unit,
+        price,
+        minUnits: rule?.minUnits ?? DEFAULT_RULES.minUnits,
+        maxUnits: rule?.maxUnits ?? DEFAULT_RULES.maxUnits,
+        checkInTime: rule?.checkInTime ?? DEFAULT_RULES.checkInTime,
+        checkOutTime: rule?.checkOutTime ?? DEFAULT_RULES.checkOutTime,
+        dayStartTime: rule?.dayStartTime ?? DEFAULT_RULES.dayStartTime,
+        dayEndTime: rule?.dayEndTime ?? DEFAULT_RULES.dayEndTime,
+      };
+    });
   const publicRoom = {
     id: room.id,
     name: room.name,

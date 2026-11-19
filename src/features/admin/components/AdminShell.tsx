@@ -65,6 +65,14 @@ const GROUPS: { label: "operate" | "money" | "people" | "system"; items: { key: 
 ];
 
 /** Pages reached from the top bar (not listed in the sidebar), so the top bar can name them. */
+/** The phone bottom bar: the pages staff open most. */
+const BOTTOM: { key: "overview" | "bookings" | "orders" | "messages"; href: string; icon: LucideIcon }[] = [
+  { key: "overview", href: "/admin", icon: LayoutDashboard },
+  { key: "bookings", href: "/admin/bookings", icon: CalendarCheck },
+  { key: "orders", href: "/admin/orders", icon: ShoppingBag },
+  { key: "messages", href: "/admin/messages", icon: MessageSquare },
+];
+
 const EXTRA: { key: Key; href: string; icon: LucideIcon }[] = [
   { key: "account", href: "/admin/account", icon: UserRound },
   { key: "notifications", href: "/admin/notifications", icon: Bell },
@@ -215,8 +223,44 @@ export function AdminShell({
             <Avatar name={user.name} className="size-9 text-sm" />
           </Link>
         </header>
-        <main className="mx-auto max-w-6xl px-4 py-6 md:px-8 md:py-8">{children}</main>
+        {/* Phones: room under the page for the bottom bar. */}
+        <main className="mx-auto max-w-6xl px-4 py-6 pb-28 md:px-8 md:py-8 lg:pb-8">{children}</main>
       </div>
+
+      {/* Phones and tablets: the main admin pages one tap away, and Menu for everything else. */}
+      {!/^\/admin\/messages\/[^/]+/.test(pathname) && (
+        <nav aria-label={t("label")} className="fixed inset-x-0 bottom-0 z-40 px-3 pb-[calc(6px+env(safe-area-inset-bottom))] lg:hidden" data-print-hide>
+          <ul className="mx-auto flex w-full max-w-md items-center rounded-full bg-surface/95 p-1.5 shadow-[0_14px_36px_-12px_rgba(0,40,100,0.45)] ring-1 ring-line backdrop-blur-xl">
+            {BOTTOM.map(({ key, href, icon: Icon }) => {
+              const on = href === "/admin" ? pathname === "/admin" : isOn(pathname, href);
+              const count = counts[key] ?? 0;
+              return (
+                <li key={key} className="min-w-0 flex-1">
+                  <Link
+                    href={href}
+                    aria-current={on ? "page" : undefined}
+                    className={cn("relative flex h-14 flex-col items-center justify-center gap-0.5 rounded-full transition-colors", on ? "bg-primary text-white" : "text-primary")}
+                  >
+                    <Icon className="size-[21px]" strokeWidth={2} aria-hidden="true" />
+                    <span className={cn("max-w-full truncate px-1 text-[10.5px] leading-tight", on ? "font-semibold" : "font-medium")}>{t(`short.${key}`)}</span>
+                    {count > 0 && (
+                      <span className="absolute top-1 right-[calc(50%-20px)] flex min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[10px] leading-4 font-bold text-white ring-2 ring-surface" aria-label={tAdmin("waiting", { count })}>
+                        {count > 99 ? "99+" : count}
+                      </span>
+                    )}
+                  </Link>
+                </li>
+              );
+            })}
+            <li className="min-w-0 flex-1">
+              <button type="button" onClick={() => setOpen(true)} aria-expanded={open} className="flex h-14 w-full flex-col items-center justify-center gap-0.5 rounded-full text-primary">
+                <Menu className="size-[21px]" strokeWidth={2} aria-hidden="true" />
+                <span className="text-[10.5px] leading-tight font-medium">{t("short.menu")}</span>
+              </button>
+            </li>
+          </ul>
+        </nav>
+      )}
     </div>
   );
 }

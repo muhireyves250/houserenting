@@ -90,6 +90,9 @@ export default async function AdminDashboardPage() {
       {/* Today at the front desk: who arrives, who leaves, who should have left. */}
       <section aria-label={t("desk.title")} className="flex flex-col gap-3">
         <h2 className="text-[17px] font-bold text-ink">{t("desk.title")}</h2>
+        {desk.arriving.length + desk.leaving.length + desk.overdue.length === 0 && (
+          <p className={cn(panel, "px-4 py-3 text-[14px] text-muted lg:hidden")}>{t("desk.nobody")}</p>
+        )}
         <div className="grid grid-cols-[minmax(0,1fr)] gap-3 lg:grid-cols-3">
           {(
             [
@@ -98,7 +101,8 @@ export default async function AdminDashboardPage() {
               ["overdue", desk.overdue, "COMPLETED", "bg-red-50 text-red-700"],
             ] as const
           ).map(([key, list, to, tone]) => (
-            <div key={key} className={cn(panel, "flex flex-col p-4")}>
+            // Phones: only the groups that have someone, to keep the page short.
+            <div key={key} className={cn(panel, "flex flex-col p-4", list.length === 0 && "max-lg:hidden")}>
               <h3 className="mb-3 flex items-center gap-2 text-[15px] font-semibold text-ink">
                 {t(`desk.${key}`)}
                 <span className={cn("rounded-full px-2 py-0.5 text-[12px] font-bold tabular-nums", list.length > 0 ? tone : "bg-canvas text-muted")}>{list.length}</span>
@@ -120,16 +124,17 @@ export default async function AdminDashboardPage() {
       {/* This month at a glance */}
       <section aria-label={t("thisMonth")} className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {tiles.map((tile) => (
-          <div key={tile.label} className={cn(panel, "flex flex-col gap-1.5 p-4")}>
-            <span className="text-[13px] text-muted">{tile.label}</span>
-            <span className="text-[26px] leading-8 font-semibold tracking-[-0.02em] text-ink">{tile.value}</span>
+          <div key={tile.label} className={cn(panel, "flex flex-col gap-1 p-3 md:gap-1.5 md:p-4")}>
+            <span className="text-[12px] text-muted md:text-[13px]">{tile.label}</span>
+            <span className="text-[20px] leading-7 font-semibold tracking-[-0.02em] text-ink md:text-[26px] md:leading-8">{tile.value}</span>
             <Delta kpi={tile.kpi} label={vsLast} fresh={t("newThisMonth")} />
           </div>
         ))}
       </section>
 
       <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <section className={cn(panel, "p-5")}>
+        {/* The chart needs room: computers and tablets only. */}
+        <section className={cn(panel, "p-5 max-md:hidden")}>
           <BookingsChart days={stats.bookingsPerDay} />
         </section>
 
@@ -166,7 +171,7 @@ export default async function AdminDashboardPage() {
           {bookings.length === 0 ? (
             <p className="px-5 pb-6 text-[14px] text-muted">{tAdmin("nothingHere")}</p>
           ) : (
-            <ul className="divide-y divide-line border-t border-line">
+            <ul className="divide-y divide-line border-t border-line max-md:[&>li:nth-child(n+5)]:hidden">
               {bookings.map((b) => (
                 <li key={b.reference} className="flex items-center gap-3 px-5 py-3">
                   <span className="min-w-0 flex-1">
@@ -197,7 +202,7 @@ export default async function AdminDashboardPage() {
           {activity.length === 0 ? (
             <p className="px-5 pb-6 text-[14px] text-muted">{tAdmin("noAudit")}</p>
           ) : (
-            <ol className="divide-y divide-line border-t border-line">
+            <ol className="divide-y divide-line border-t border-line max-md:[&>li:nth-child(n+5)]:hidden">
               {activity.map((entry) => (
                 <li key={entry.id} className="flex items-start justify-between gap-3 px-5 py-3">
                   <span className="min-w-0 text-[14px] text-ink">

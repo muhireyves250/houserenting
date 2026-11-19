@@ -795,7 +795,14 @@
       "reports": "Raporo",
       "messages": "Ubutumwa",
       "laundry": "Kumesa imyenda",
-      "orders": "Ibyatumijwe (ibiryo)"
+      "orders": "Ibyatumijwe (ibiryo)",
+      "short": {
+        "overview": "Ahabanza",
+        "bookings": "Ubukode",
+        "orders": "Ibiryo",
+        "messages": "Ubutumwa",
+        "menu": "Ibindi"
+      }
     },
     "count": {
       "listings": "Ahantu ho kugenzura",
@@ -1024,7 +1031,8 @@
         "arriving": "Abaza",
         "leaving": "Abagenda uyu munsi",
         "overdue": "Bari bakwiye kuba baragiye",
-        "none": "Ntawe."
+        "none": "Ntawe.",
+        "nobody": "Nta muntu uza cyangwa ugenda uyu munsi."
       }
     },
     "bookingsIntro": "Ibyabitswe byose: shakisha nimero, umushyitsi cyangwa ahantu, toranya uko bihagaze, fungura kimwe urebe byose.",

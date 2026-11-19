@@ -458,11 +458,11 @@ export function ListingForm({
       </Card>
 
       {/* Save bar: stays in reach while scrolling the long form. */}
-      {/* Above the app's bottom menu for owners; staff pages have none, so it sits at the very bottom. */}
+      {/* Above the bottom menu on phones (owners' and staff's). */}
       <div
         className={cn(
           "sticky z-20 flex items-center justify-between gap-4 rounded-2xl border border-line bg-surface/95 px-4 py-3 shadow-[0_10px_30px_-12px_rgba(16,24,40,0.35)] backdrop-blur md:bottom-4",
-          staff ? "bottom-[calc(12px+env(safe-area-inset-bottom))]" : "bottom-[calc(82px+env(safe-area-inset-bottom))]",
+          "bottom-[calc(82px+env(safe-area-inset-bottom))]",
         )}
       >
         <p role="status" className={cn("text-[13px]", status === "saved" ? "text-emerald-700" : status === "idle" ? "text-muted" : "font-medium text-danger")}>

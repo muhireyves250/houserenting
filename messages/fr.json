@@ -795,7 +795,14 @@
       "reports": "Rapports",
       "messages": "Messages",
       "laundry": "Blanchisserie",
-      "orders": "Commandes repas"
+      "orders": "Commandes repas",
+      "short": {
+        "overview": "Accueil",
+        "bookings": "Réservations",
+        "orders": "Repas",
+        "messages": "Messages",
+        "menu": "Menu"
+      }
     },
     "count": {
       "listings": "Annonces à vérifier",
@@ -1024,7 +1031,8 @@
         "arriving": "Arrivées",
         "leaving": "Départs du jour",
         "overdue": "Auraient dû partir",
-        "none": "Personne."
+        "none": "Personne.",
+        "nobody": "Personne n'arrive ni ne part aujourd'hui."
       }
     },
     "bookingsIntro": "Toutes les réservations : recherchez par référence, voyageur ou logement, filtrez par statut, ouvrez-en une pour le dossier complet.",
