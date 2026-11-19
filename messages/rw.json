@@ -98,7 +98,9 @@
     "typing": "Kigali · Musanze · Rubavu · Huye · Karongi · lodge hafi y'ibirunga · icyumba cy'umunsi",
     "tryWord": "Gerageza",
     "bookedDay": "Byafashwe",
-    "freeDay": "Biri ubusa"
+    "freeDay": "Biri ubusa",
+    "placeByName": "Inzu",
+    "districtsAndPlaces": "Uturere n'amazu"
   },
   "Search": {
     "anywhere": "Ahantu hose mu Rwanda",
@@ -872,11 +874,13 @@
       "question": {
         "answer": "Ikibazo cyasubijwe",
         "publish": "Ikibazo cyashyizweho",
-        "reject": "Ikibazo cyanzwe"
+        "reject": "Ikibazo cyanzwe",
+        "hide": "Ikibazo cyakuweho"
       },
       "review": {
         "publish": "Igitekerezo cyashyizweho",
-        "reject": "Igitekerezo cyanzwe"
+        "reject": "Igitekerezo cyanzwe",
+        "hide": "Igitekerezo cyakuweho"
       },
       "ticket": {
         "open": "Ubusabe bwafunguwe",
@@ -1130,7 +1134,14 @@
     },
     "superAdminOnly": "Umuyobozi mukuru wenyine ni we uhindura uburenganzira bw'abakozi.",
     "openToAnswer": "Fungura",
-    "aboutPlace": "Ibyerekeye aha hantu"
+    "aboutPlace": "Ibyerekeye aha hantu",
+    "moderation": {
+      "published": "Byatangajwe",
+      "toCheck": "Byo kugenzura",
+      "hide": "Hisha",
+      "hideQuestion": "Ukureho iki? Ntikizongera kugaragara ku hantu.",
+      "publishedEmpty": "Nta kintu cyatangajwe."
+    }
   },
   "Questions": {
     "title": "Ibibazo n'ibisubizo",

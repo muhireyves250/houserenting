@@ -98,7 +98,9 @@
     "typing": "Kigali · Musanze · Rubavu · Huye · Karongi · un lodge près des volcans · une chambre pour la journée",
     "tryWord": "Essayez",
     "bookedDay": "Réservé",
-    "freeDay": "Libre"
+    "freeDay": "Libre",
+    "placeByName": "Logement",
+    "districtsAndPlaces": "Districts et logements"
   },
   "Search": {
     "anywhere": "Partout au Rwanda",
@@ -872,11 +874,13 @@
       "question": {
         "answer": "Réponse à une question",
         "publish": "Question publiée",
-        "reject": "Question refusée"
+        "reject": "Question refusée",
+        "hide": "Question retirée"
       },
       "review": {
         "publish": "Avis publié",
-        "reject": "Avis refusé"
+        "reject": "Avis refusé",
+        "hide": "Avis retiré"
       },
       "ticket": {
         "open": "Demande ouverte",
@@ -1130,7 +1134,14 @@
     },
     "superAdminOnly": "Seul un super admin peut modifier les accès de l'équipe.",
     "openToAnswer": "Ouvrir",
-    "aboutPlace": "À propos du lieu"
+    "aboutPlace": "À propos du lieu",
+    "moderation": {
+      "published": "Publiés",
+      "toCheck": "À vérifier",
+      "hide": "Masquer",
+      "hideQuestion": "Retirer ceci ? Il ne s'affichera plus sur le lieu.",
+      "publishedEmpty": "Rien de publié pour l'instant."
+    }
   },
   "Questions": {
     "title": "Questions et réponses",

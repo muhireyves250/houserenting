@@ -84,7 +84,8 @@ export function searchListings(query: SearchQuery, limit = SEARCH_LIMIT, now: Da
   return db.listing.findMany({ where, select: CARD_SELECT, orderBy: [{ publishedAt: "desc" }, { id: "asc" }], take: limit });
 }
 
-export type LocationSuggestion = { district: string; city: string; count: number; photo: string | null };
+/** A district to search, or (kind "place") a place found by its name: `district` is then the name to search. */
+export type LocationSuggestion = { district: string; city: string; count: number; photo: string | null; kind?: "place" };
 
 /**
  * Every district with published places (most places first), optionally filtered by typed text (district or town),
@@ -114,7 +115,19 @@ export async function suggestLocations(text: string, limit = 50): Promise<Locati
   for (const listing of newest) {
     if (!first.has(listing.district)) first.set(listing.district, { city: listing.city, photo: listing.photos[0]?.url ?? null });
   }
-  return groups.map((g) => ({ district: g.district, city: first.get(g.district)?.city ?? g.district, count: g._count._all, photo: first.get(g.district)?.photo ?? null }));
+  const districts = groups.map((g) => ({ district: g.district, city: first.get(g.district)?.city ?? g.district, count: g._count._all, photo: first.get(g.district)?.photo ?? null }));
+  if (!q) return districts;
+  // Places whose name matches what's typed (e.g. "Volcano"), after the districts.
+  const places = await db.listing.findMany({
+    where: { status: "PUBLISHED", title: { contains: escapeLike(q), mode: "insensitive" } },
+    orderBy: [{ ratingCount: "desc" }, { title: "asc" }],
+    take: 6,
+    select: { title: true, district: true, city: true, photos: { orderBy: { position: "asc" }, take: 1, select: { url: true } } },
+  });
+  return [
+    ...districts,
+    ...places.map((l) => ({ kind: "place" as const, district: l.title, city: l.district === l.city ? l.city : `${l.district}, ${l.city}`, count: 1, photo: l.photos[0]?.url ?? null })),
+  ];
 }
 
 export function featuredListings(limit = 6): Promise<ListingCardData[]> {

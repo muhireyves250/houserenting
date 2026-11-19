@@ -91,3 +91,22 @@ export function pendingQuestions() {
     },
   });
 }
+
+/** Staff: the latest published questions and answers. */
+export function recentPublishedQuestions(take = 40) {
+  return db.listingQuestion.findMany({
+    where: { status: "PUBLISHED" },
+    orderBy: { createdAt: "desc" },
+    take,
+    select: { id: true, question: true, answer: true, createdAt: true, asker: { select: { name: true } }, listing: { select: { id: true, title: true } } },
+  });
+}
+
+/** Staff take a published question down again. */
+export async function hidePublishedQuestion(adminId: string, questionId: string): Promise<boolean> {
+  return db.$transaction(async (tx) => {
+    const { count } = await tx.listingQuestion.updateMany({ where: { id: questionId, status: "PUBLISHED" }, data: { status: "REJECTED" } });
+    if (count === 1) await audit(tx, { actorId: adminId, action: "question.hide", entityType: "question", entityId: questionId });
+    return count === 1;
+  });
+}

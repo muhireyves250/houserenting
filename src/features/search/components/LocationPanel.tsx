@@ -6,7 +6,8 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/cn";
 
-export type Suggestion = { district: string; city: string; count: number; photo?: string | null };
+/** A district, or (kind "place") a place found by its name; picking either searches its `district` text. */
+export type Suggestion = { district: string; city: string; count: number; photo?: string | null; kind?: "place" };
 
 export const optionId = (listboxId: string, index: number) => `${listboxId}-option-${index}`;
 
@@ -53,7 +54,7 @@ export function LocationPanel({
 
   return (
     <div className="flex flex-col gap-2">
-      <p className="px-2 text-[13px] font-semibold text-muted">{t("districts")}</p>
+      <p className="px-2 text-[13px] font-semibold text-muted">{text.trim() ? t("districtsAndPlaces") : t("districts")}</p>
       {empty && <p className="px-2 py-4 text-sm text-muted">{t("noMatches", { text: text.trim() })}</p>}
       {/* Always rendered so the combobox's aria-controls resolves even when there are no matches. */}
       <ul id={id} role="listbox" aria-label={t("districts")} className="flex flex-col gap-0.5 md:max-h-[min(60vh,30rem)] md:overflow-y-auto md:overscroll-contain">
@@ -61,7 +62,7 @@ export function LocationPanel({
           const active = index === activeIndex;
           return (
             <li
-              key={s.district}
+              key={`${s.kind ?? "district"}-${s.district}`}
               id={optionId(id, index)}
               role="option"
               aria-selected={active}
@@ -78,11 +79,20 @@ export function LocationPanel({
               <span className="relative flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primary-soft text-primary shadow-sm">
                 <CityThumb photo={s.photo} />
               </span>
-              <span className="flex flex-1 flex-col">
-                <span className="text-[15px] font-semibold text-ink">{s.district}</span>
-                <span className="text-[13px] text-ink/70">{s.city.toLowerCase() === s.district.toLowerCase() ? t("country") : `${s.city}, ${t("country")}`}</span>
-                <span className="text-sm text-muted">{t("places", { count: s.count })}</span>
-              </span>
+              {s.kind === "place" ? (
+                // A place by its name: name, where it is, and a "Place" label.
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <span className="truncate text-[15px] font-semibold text-ink">{s.district}</span>
+                  <span className="truncate text-[13px] text-ink/70">{`${s.city}, ${t("country")}`}</span>
+                  <span className="text-[12px] font-semibold text-primary">{t("placeByName")}</span>
+                </span>
+              ) : (
+                <span className="flex flex-1 flex-col">
+                  <span className="text-[15px] font-semibold text-ink">{s.district}</span>
+                  <span className="text-[13px] text-ink/70">{s.city.toLowerCase() === s.district.toLowerCase() ? t("country") : `${s.city}, ${t("country")}`}</span>
+                  <span className="text-sm text-muted">{t("places", { count: s.count })}</span>
+                </span>
+              )}
               <ChevronRight
                 className={cn(
                   "size-4 -translate-x-1 text-primary opacity-0 transition-[opacity,transform] duration-200",

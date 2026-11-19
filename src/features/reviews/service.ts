@@ -69,3 +69,25 @@ export function pendingReviews() {
     select: { id: true, rating: true, comment: true, createdAt: true, author: { select: { name: true } }, listing: { select: { id: true, title: true } } },
   });
 }
+
+/** Staff: the latest published feedback (kept, and shown on the places). */
+export function recentPublishedReviews(take = 40) {
+  return db.review.findMany({
+    where: { status: "PUBLISHED" },
+    orderBy: { createdAt: "desc" },
+    take,
+    select: { id: true, rating: true, comment: true, createdAt: true, author: { select: { name: true } }, listing: { select: { id: true, title: true } } },
+  });
+}
+
+/** Staff take published feedback down again (the place's rating is worked out again). */
+export async function hidePublishedReview(adminId: string, reviewId: string): Promise<boolean> {
+  return db.$transaction(async (tx) => {
+    const review = await tx.review.findFirst({ where: { id: reviewId, status: "PUBLISHED" }, select: { listingId: true } });
+    if (!review) return false;
+    await tx.review.update({ where: { id: reviewId }, data: { status: "REJECTED" } });
+    await refreshRating(tx, review.listingId);
+    await audit(tx, { actorId: adminId, action: "review.hide", entityType: "review", entityId: reviewId });
+    return true;
+  });
+}

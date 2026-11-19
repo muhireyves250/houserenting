@@ -401,8 +401,9 @@ export default async function ListingPage({ params, searchParams }: Props) {
         </div>
 
         {/* Guest feedback (published after staff check it) */}
-        {/* A lodge page keeps to its rooms, where it is and things to know. */}
-        {!lodge && reviews.length > 0 && (
+        {/* A lodge page keeps to its rooms, reviews, where it is and things to know. */}
+        {/* Published guest feedback shows on every place, lodges too. */}
+        {reviews.length > 0 && (
           <Section title={tReviews("title", { count: listing.ratingCount, rating: listing.ratingAvg.toFixed(2) })} id="reviews">
             <ul className="grid gap-8 md:grid-cols-2">
               {reviews.map((review) => (

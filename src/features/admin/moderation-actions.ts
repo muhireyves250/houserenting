@@ -4,8 +4,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { isBookingReference } from "@/features/bookings/reference";
 import { staffMoveBooking } from "@/features/bookings/service";
-import { moderateQuestion } from "@/features/questions/service";
-import { moderateReview } from "@/features/reviews/service";
+import { hidePublishedQuestion, moderateQuestion } from "@/features/questions/service";
+import { hidePublishedReview, moderateReview } from "@/features/reviews/service";
 import { isAdmin } from "@/lib/roles";
 import { getCurrentUser } from "@/lib/session";
 
@@ -56,5 +56,14 @@ export async function setUserStatusAction(userId: string, status: "ACTIVE" | "SU
   const { setUserStatus } = await import("./queries");
   const ok = await setUserStatus(admin.id, userId, status, reason);
   if (ok) revalidatePath("/[locale]/admin/users", "layout");
+  return { ok };
+}
+
+/** Take published feedback or a published question down again. */
+export async function hidePublishedAction(kind: "question" | "review", itemId: string): Promise<{ ok: boolean }> {
+  const admin = await staff();
+  if (!admin || !id.safeParse(itemId).success || (kind !== "question" && kind !== "review")) return { ok: false };
+  const ok = kind === "review" ? await hidePublishedReview(admin.id, itemId) : await hidePublishedQuestion(admin.id, itemId);
+  if (ok) revalidatePath("/[locale]", "layout");
   return { ok };
 }
