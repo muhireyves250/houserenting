@@ -1591,7 +1591,8 @@
     "askForChange": "Demander une modification",
     "confirmMove": {
       "archive": "Archiver ce lieu ? Les clients ne le verront plus et ne pourront plus le réserver. Vous pourrez le restaurer plus tard."
-    }
+    },
+    "editShort": "Modifier"
   },
   "MyStay": {
     "title": "Mon séjour",
@@ -2064,7 +2065,9 @@
       "toPay": "À payer",
       "toSend": "À envoyer",
       "sent": "Envoyées",
-      "nothing": "Rien ici."
+      "nothing": "Rien ici.",
+      "delete": "Supprimer",
+      "deleteQuestion": "Supprimer cette commande ?"
     },
     "gotIt": "J'ai reçu ma commande",
     "gotItHint": "Touchez quand le repas vous parvient.",
@@ -2077,6 +2080,13 @@
       "room": "Chambre",
       "sentAt": "Envoyée {time}",
       "readOnly": "VIIPA gère ces commandes ; vous les remettez seulement."
+    },
+    "adminList": {
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "deleteQuestion": "Supprimer ce restaurant et son menu ?",
+      "hasOrders": "Il a des commandes : il ne peut pas être supprimé. Masquez-le plutôt.",
+      "orders": "{count, plural, one {# commande} other {# commandes}}"
     }
   },
   "Promoters": {
@@ -2299,7 +2309,17 @@
       },
       "placesTitle": "Blanchisserie par logement",
       "savePrice": "Enregistrer",
-      "saved": "Enregistré"
+      "saved": "Enregistré",
+      "groups": {
+        "toCollect": "À récupérer",
+        "washing": "Au lavage",
+        "toReturn": "À rapporter",
+        "toPay": "En attente de paiement",
+        "done": "Terminées",
+        "nothing": "Rien ici.",
+        "offering": "{count, plural, =0 {aucun ne la propose} one {# lieu la propose} other {# lieux la proposent}}",
+        "allClear": "Aucune lessive en attente."
+      }
     },
     "placeLabel": "Blanchisserie pour les voyageurs",
     "placeOff": "Non proposée",

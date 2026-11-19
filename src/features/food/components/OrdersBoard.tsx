@@ -6,7 +6,8 @@ import { useState, useTransition, type ReactNode } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { formatRWF } from "@/lib/format";
-import { moveOrderAction } from "../actions";
+import { ConfirmAction } from "@/features/admin/components/ConfirmAction";
+import { deleteFoodOrderAction, moveOrderAction } from "../actions";
 import type { Fulfilment, OrderStatus } from "../rules";
 
 export type BoardOrder = {
@@ -25,6 +26,8 @@ export type BoardOrder = {
   items: { name: string; quantity: number }[];
   /** Steps this person may take now. */
   steps: OrderStatus[];
+  /** Whether money was received (paid orders are never deleted). */
+  paid?: boolean;
 };
 
 export const ORDER_TONE: Record<OrderStatus, string> = {
@@ -50,7 +53,7 @@ function Line({ icon, children }: { icon: ReactNode; children: ReactNode }) {
  * Orders as cards: number, status and total on top; who, where and from which kitchen; the dishes; the next
  * steps. `compact` shows finished orders as one-line rows.
  */
-export function OrdersBoard({ orders, compact = false }: { orders: BoardOrder[]; compact?: boolean }) {
+export function OrdersBoard({ orders, compact = false, staffDelete = false }: { orders: BoardOrder[]; compact?: boolean; /** Staff may delete cancelled, unpaid orders. */ staffDelete?: boolean }) {
   const t = useTranslations("Food");
   const locale = useLocale();
   const router = useRouter();
@@ -81,6 +84,9 @@ export function OrdersBoard({ orders, compact = false }: { orders: BoardOrder[];
             <span className="text-muted">{time.format(o.createdAt)}</span>
             <span className={cn("rounded-full px-2 py-0.5 text-[11px] font-bold", ORDER_TONE[o.status])}>{t(`status.${o.status}`)}</span>
             <span className="w-20 text-right font-semibold text-ink tabular-nums">{formatRWF(o.total, locale)}</span>
+            {staffDelete && o.status === "CANCELLED" && o.paid === false && (
+              <ConfirmAction label={t("staffOrders.delete")} question={t("staffOrders.deleteQuestion")} action={deleteFoodOrderAction.bind(null, o.reference)} />
+            )}
           </li>
         ))}
       </ul>

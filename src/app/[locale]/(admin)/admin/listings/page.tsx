@@ -1,9 +1,10 @@
-import { ChevronRight, House, Plus } from "lucide-react";
+import { House, Plus } from "lucide-react";
 import Image from "next/image";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 import { allListings } from "@/features/admin/stats";
-import { formatKigaliDateTime } from "@/features/bookings/format";
 import { HostStatus } from "@/features/hosting/components/HostStatus";
+import { movesFrom } from "@/features/listings/lifecycle";
+import { PlaceRowActions } from "@/features/places/components/PlaceRowActions";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { requireAdmin } from "@/lib/permissions";
@@ -30,12 +31,11 @@ export default async function AdminListingsPage({ searchParams }: Props) {
     status = undefined;
     listings = await allListings();
   }
-  const [t, tHost, tType, tPlaces, locale] = await Promise.all([
+  const [t, tHost, tType, tPlaces] = await Promise.all([
     getTranslations("Admin"),
     getTranslations("Host"),
     getTranslations("ListingType"),
     getTranslations("Places"),
-    getLocale(),
   ]);
   // Only the filters that have places (with how many), so the row stays short.
   const [counts, ending] = await Promise.all([db.listing.groupBy({ by: ["status"], _count: { _all: true } }), contractsEnding()]);
@@ -79,22 +79,22 @@ export default async function AdminListingsPage({ searchParams }: Props) {
         ) : (
           <ul className="divide-y divide-line">
             {listings.map((listing) => (
-              <li key={listing.id}>
-                <Link href={`/admin/listings/${listing.id}`} className="flex items-center gap-4 px-4 py-3 transition-colors hover:bg-canvas">
+              <li key={listing.id} className="flex flex-col gap-2 px-4 py-3 transition-colors hover:bg-canvas/60 sm:flex-row sm:items-center sm:gap-3">
+                <Link href={`/admin/listings/${listing.id}`} className="flex min-w-0 flex-1 items-center gap-4">
                   <span className="relative flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primary-soft text-primary">
                     {listing.photos[0] ? <Image src={listing.photos[0].url} alt="" fill sizes="56px" className="object-cover" /> : <House className="size-5" aria-hidden="true" />}
                   </span>
                   <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                    <span className="truncate text-[15px] font-semibold text-ink">{listing.title}</span>
-                    <span className="truncate text-[13px] text-muted">
-                      {tType(listing.type)} · {listing.district === listing.city ? listing.city : `${listing.district}, ${listing.city}`}
+                    <span className="flex items-center gap-2">
+                      <span className="truncate text-[15px] font-semibold text-ink">{listing.title}</span>
+                      <HostStatus status={listing.status} label={tHost(`status.${listing.status}`)} />
                     </span>
-                    <span className="truncate text-[12px] text-muted/80">{listing.host.name}</span>
+                    <span className="truncate text-[13px] text-muted">
+                      {tType(listing.type)} · {listing.district === listing.city ? listing.city : `${listing.district}, ${listing.city}`} · {listing.host.name}
+                    </span>
                   </span>
-                  <span className="hidden text-xs text-muted md:block">{formatKigaliDateTime(locale, listing.updatedAt)}</span>
-                  <HostStatus status={listing.status} label={tHost(`status.${listing.status}`)} />
-                  <ChevronRight className="size-5 shrink-0 text-ink/40" aria-hidden="true" />
                 </Link>
+                <PlaceRowActions listingId={listing.id} moves={movesFrom(listing.status, { isStaff: true, isOwner: false })} editable={listing.status !== "ARCHIVED"} />
               </li>
             ))}
           </ul>

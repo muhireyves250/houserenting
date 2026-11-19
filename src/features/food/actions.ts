@@ -9,6 +9,8 @@ import { ORDER_STATUSES, type OrderStatus } from "./rules";
 import {
   claimOrderPayment,
   confirmOrderPayment,
+  deleteFoodOrder,
+  deleteRestaurant,
   hideMyOrder,
   type ClaimOrderResult,
   type ConfirmOrderResult,
@@ -134,4 +136,20 @@ export async function confirmOrderPaymentAction(reference: string, transactionId
   const result = await confirmOrderPayment(user, reference, String(transactionId ?? "") || undefined);
   refresh();
   return result;
+}
+
+export async function deleteRestaurantAction(restaurantId: string): Promise<{ ok: boolean; error?: string }> {
+  const user = await getCurrentUser();
+  if (!user || !id.safeParse(restaurantId).success) return { ok: false };
+  const result = await deleteRestaurant(user, restaurantId);
+  if (result.ok) refresh();
+  return result.ok ? { ok: true } : { ok: false, error: result.error };
+}
+
+export async function deleteFoodOrderAction(reference: string): Promise<{ ok: boolean }> {
+  const user = await getCurrentUser();
+  if (!user || !z.string().min(1).max(40).safeParse(reference).success) return { ok: false };
+  const ok = await deleteFoodOrder(user, reference);
+  if (ok) refresh();
+  return { ok };
 }

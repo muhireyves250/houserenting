@@ -515,3 +515,26 @@ export function allOrders(take = 150) {
     include: { items: true, customer: { select: { name: true } }, restaurant: { select: { name: true } } },
   });
 }
+
+/** Staff delete a restaurant that never had an order (with its menu and team); one with orders can only be hidden. */
+export async function deleteRestaurant(actor: Actor, id: string): Promise<{ ok: true } | { ok: false; error: "notAllowed" | "hasOrders" | "notFound" }> {
+  if (!isAdmin(actor)) return { ok: false, error: "notAllowed" };
+  const r = await db.restaurant.findUnique({ where: { id }, select: { name: true, _count: { select: { orders: true } } } });
+  if (!r) return { ok: false, error: "notFound" };
+  if (r._count.orders > 0) return { ok: false, error: "hasOrders" };
+  await db.$transaction(async (tx) => {
+    await tx.restaurant.delete({ where: { id } });
+    await audit(tx, { actorId: actor.id, action: "restaurant.delete", entityType: "restaurant", entityId: id, data: { name: r.name } });
+  });
+  return { ok: true };
+}
+
+/** Staff delete a cancelled order that was never paid (e.g. a test); paid orders stay for the accounts. */
+export async function deleteFoodOrder(actor: Actor, reference: string): Promise<boolean> {
+  if (!isAdmin(actor)) return false;
+  return db.$transaction(async (tx) => {
+    const { count } = await tx.foodOrder.deleteMany({ where: { reference, status: "CANCELLED", paidAt: null } });
+    if (count === 1) await audit(tx, { actorId: actor.id, action: "order.delete", entityType: "order", entityId: reference });
+    return count === 1;
+  });
+}

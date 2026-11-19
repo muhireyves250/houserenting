@@ -1,61 +1,71 @@
-import { ChevronRight } from "lucide-react";
+import { ArrowRight, User } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
+import { adminCard, Chip, StatTiles } from "@/features/admin/components/kit";
+import { TicketStatusSelect } from "@/features/admin/components/StaffButtons";
 import { formatKigaliDateTime } from "@/features/bookings/format";
 import { TicketStatusBadge } from "@/features/support/components/TicketStatusBadge";
 import { staffTickets, type TicketStatus } from "@/features/support/service";
 import { Link } from "@/i18n/navigation";
-import { cn } from "@/lib/cn";
+import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/permissions";
-import { PageIntro } from "@/features/admin/components/ui";
 
 type Props = { searchParams: Promise<{ status?: string }> };
-const FILTERS: (TicketStatus | "active")[] = ["active", "RESOLVED", "CLOSED"];
+const STATUSES = ["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"] as const;
 
+/** Help requests from guests and owners: counts by status on top, one card each with its status and Open. */
 export default async function AdminSupportPage({ searchParams }: Props) {
   await requireAdmin("/admin/support");
   const raw = (await searchParams).status;
-  const status = raw === "RESOLVED" || raw === "CLOSED" ? raw : undefined;
-  const [t, tAdmin, locale, tickets] = await Promise.all([getTranslations("Support"), getTranslations("Admin"), getLocale(), staffTickets(status)]);
+  const status = STATUSES.find((s) => s === raw) as TicketStatus | undefined;
+  const [t, tAdmin, locale, tickets, counts] = await Promise.all([
+    getTranslations("Support"),
+    getTranslations("Admin"),
+    getLocale(),
+    staffTickets(status),
+    db.supportTicket.groupBy({ by: ["status"], _count: { _all: true } }),
+  ]);
+  const count = (s: TicketStatus) => counts.find((c) => c.status === s)?._count._all ?? 0;
   return (
-    <div className="flex flex-col gap-4">
-      <PageIntro description={tAdmin("supportIntro")} />
-      <div className="flex gap-2">
-        {FILTERS.map((f) => {
-          const active = (status ?? "active") === f;
-          return (
-            <Link
-              key={f}
-              href={f === "active" ? "/admin/support" : { pathname: "/admin/support", query: { status: f } }}
-              className={cn("rounded-full border px-3.5 py-1.5 text-[13px]", active ? "border-primary bg-primary/[0.08] font-semibold text-primary" : "border-line text-ink")}
-            >
-              {f === "active" ? tAdmin("activeTickets") : t(`status.${f}`)}
-            </Link>
-          );
-        })}
-      </div>
-      {tickets.length === 0 && <p className="py-8 text-center text-[15px] text-muted">{tAdmin("nothingHere")}</p>}
-      <ul className="flex flex-col gap-3">
-        {tickets.map((ticket) => (
-          <li key={ticket.reference}>
-            <Link
-              href={`/admin/support/${ticket.reference}`}
-              className="flex items-center gap-4 rounded-3xl bg-surface p-4 shadow-[0_10px_30px_-14px_rgba(16,24,40,0.3)] ring-1 ring-black/[0.04] max-md:ring-line"
-            >
-              <span className="flex min-w-0 flex-1 flex-col gap-1">
-                <span className="flex items-center gap-2">
-                  <TicketStatusBadge status={ticket.status} label={t(`status.${ticket.status}`)} />
-                  <span className="text-xs font-semibold text-ink/80">{t(`categories.${ticket.category}`)}</span>
-                </span>
-                <span className="truncate text-[15px] font-semibold text-ink">{ticket.subject}</span>
-                <span className="truncate text-[13px] text-muted">
-                  {ticket.user.name} · {ticket.reference} · {formatKigaliDateTime(locale, ticket.updatedAt)}
-                </span>
+    <div className="flex flex-col gap-5">
+      <StatTiles
+        items={STATUSES.map((s) => ({
+          label: t(`status.${s}`),
+          count: count(s),
+          // "Open" also lists those in progress (everything still to handle).
+          href: s === "OPEN" ? { pathname: "/admin/support" } : { pathname: "/admin/support", query: { status: s } },
+          on: s === "OPEN" ? !status : status === s,
+          tone: s === "OPEN" ? "text-amber-700" : s === "IN_PROGRESS" ? "text-primary" : "text-emerald-700",
+        }))}
+      />
+      {tickets.length === 0 ? (
+        <p className="rounded-2xl bg-surface py-10 text-center text-[14px] text-muted ring-1 ring-line">{tAdmin("nothingHere")}</p>
+      ) : (
+        <ul className="grid gap-3 lg:grid-cols-2">
+          {tickets.map((ticket) => (
+            <li key={ticket.reference} className={adminCard}>
+              <div className="flex flex-wrap items-center gap-2">
+                <TicketStatusBadge status={ticket.status} label={t(`status.${ticket.status}`)} />
+                <Chip>{t(`categories.${ticket.category}`)}</Chip>
+                <span className="ml-auto text-[12px] text-muted">{formatKigaliDateTime(locale, ticket.updatedAt)}</span>
+              </div>
+              <Link href={`/admin/support/${ticket.reference}`} className="text-[16px] font-bold text-ink hover:text-primary">
+                {ticket.subject}
+              </Link>
+              <span className="flex items-center gap-2 text-[13px] text-muted">
+                <User className="size-4 shrink-0 text-primary" aria-hidden="true" />
+                {ticket.user.name} · <span className="font-mono">{ticket.reference}</span>
               </span>
-              <ChevronRight className="size-5 shrink-0 text-ink/50" aria-hidden="true" />
-            </Link>
-          </li>
-        ))}
-      </ul>
+              <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3">
+                <TicketStatusSelect reference={ticket.reference} status={ticket.status} />
+                <Link href={`/admin/support/${ticket.reference}`} className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-[13px] font-semibold text-white hover:bg-primary-hover">
+                  {tAdmin("openToAnswer")}
+                  <ArrowRight className="size-4" aria-hidden="true" />
+                </Link>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

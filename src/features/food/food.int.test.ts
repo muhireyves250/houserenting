@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { db } from "@/lib/db";
 import { resetDb } from "@/test/db";
-import { addRestaurantMember, claimOrderPayment, confirmOrderPayment, hideMyOrder, myOrders, kitchenForPlace, moveOrder, ordersForHost, ordersLive, placeOrder, saveMenuItem, saveRestaurant, setRestaurantStatus } from "./service";
+import { addRestaurantMember, claimOrderPayment, confirmOrderPayment, deleteFoodOrder, deleteRestaurant, hideMyOrder, myOrders, kitchenForPlace, moveOrder, ordersForHost, ordersLive, placeOrder, saveMenuItem, saveRestaurant, setRestaurantStatus } from "./service";
 
 const admin = { id: "admin", role: "ADMIN" };
 const NOW = new Date("2026-11-03T08:00:00Z");
@@ -134,9 +134,17 @@ describe("food from the kitchen of the guest's stay", () => {
     expect(await hideMyOrder("someone", placed.reference)).toBe(false);
     expect(await hideMyOrder("guest", placed.reference)).toBe(true);
     expect((await myOrders("guest")).some((o) => o.reference === placed.reference)).toBe(false);
+    // Staff can delete a cancelled, unpaid order (never someone else; never a restaurant that has orders).
+    expect(await deleteRestaurant(admin, id)).toEqual({ ok: false, error: "hasOrders" });
+    expect(await deleteFoodOrder({ id: "guest" }, placed.reference)).toBe(false);
+    expect(await deleteFoodOrder(admin, placed.reference)).toBe(true);
+    expect(await deleteRestaurant({ id: "owner" }, id)).toEqual({ ok: false, error: "notAllowed" });
     await db.restaurant.update({ where: { id }, data: { minOrder: 10_000 } });
     expect(await order(id, dish.id)).toEqual({ ok: false, error: "minOrder" });
     await db.restaurant.update({ where: { id }, data: { paused: true } });
     expect(await order(id, dish.id)).toEqual({ ok: false, error: "closed" });
+    // With no orders left, the restaurant (and its menu) can be deleted.
+    expect(await deleteRestaurant(admin, id)).toEqual({ ok: true });
+    expect(await db.menuItem.count({ where: { restaurantId: id } })).toBe(0);
   });
 });

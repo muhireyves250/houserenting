@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { formatKigaliDateTime } from "@/features/bookings/format";
 import { ConfirmOrderPayment } from "@/features/food/components/ConfirmOrderPayment";
 import { OrdersBoard, type BoardOrder } from "@/features/food/components/OrdersBoard";
+import { StaffDeclineOrder } from "@/features/food/components/StaffDeclineOrder";
 import { nextOrderSteps } from "@/features/food/rules";
 import { allOrders, ordersAwaitingPayment } from "@/features/food/service";
 import { cn } from "@/lib/cn";
@@ -41,6 +42,7 @@ export default async function AdminOrdersPage() {
       phone: o.phone,
       address: o.address,
       kitchen: o.restaurant.name,
+      paid: o.paidAt !== null,
       note: o.note,
       total: o.total,
       createdAt: o.createdAt,
@@ -117,6 +119,7 @@ export default async function AdminOrdersPage() {
                   <span className="text-[16px] font-bold text-ink tabular-nums">{formatRWF(o.total, locale)}</span>
                 </div>
                 <ConfirmOrderPayment reference={o.reference} claimed={o.paymentClaim} />
+                <StaffDeclineOrder reference={o.reference} />
               </li>
             ))}
           </ul>
@@ -137,7 +140,7 @@ export default async function AdminOrdersPage() {
             {t("staffOrders.done")} <span className="text-muted tabular-nums">({done.length})</span>
           </summary>
           <div className="border-t border-line pb-2">
-            <OrdersBoard orders={done} compact />
+            <OrdersBoard orders={done} compact staffDelete />
           </div>
         </details>
       )}

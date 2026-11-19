@@ -28,9 +28,11 @@ export function PauseToggle({ restaurantId, paused }: { restaurantId: string; pa
 }
 
 /** Staff: publish, or hide with a reason the owner sees. */
-export function RestaurantStatusActions({ restaurantId, status }: { restaurantId: string; status: "DRAFT" | "PUBLISHED" | "HIDDEN" }) {
+export function RestaurantStatusActions({ restaurantId, status, compact = false }: { restaurantId: string; status: "DRAFT" | "PUBLISHED" | "HIDDEN"; compact?: boolean }) {
   const t = useTranslations("Food");
   const router = useRouter();
+  // Compact (in lists): "Hide" first, then the reason box.
+  const [asking, setAsking] = useState(!compact);
   const [reason, setReason] = useState("");
   const [failed, setFailed] = useState(false);
   const [pending, start] = useTransition();
@@ -48,6 +50,10 @@ export function RestaurantStatusActions({ restaurantId, status }: { restaurantId
       {status !== "PUBLISHED" ? (
         <button type="button" disabled={pending} onClick={() => run("PUBLISHED")} className="self-start rounded-full bg-primary px-4 py-2 text-[13px] font-semibold text-white disabled:opacity-50">
           {status === "HIDDEN" ? t("showAgain") : t("publish")}
+        </button>
+      ) : !asking ? (
+        <button type="button" onClick={() => setAsking(true)} className="self-start rounded-full border border-line px-4 py-2 text-[13px] font-semibold text-danger hover:border-danger">
+          {t("hide")}
         </button>
       ) : (
         <>

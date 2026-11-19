@@ -1,8 +1,12 @@
 import { getLocale, getTranslations } from "next-intl/server";
-import { ExportLink, FilterTabs, PageIntro, Pagination, Panel, SearchBox, Table, td } from "@/features/admin/components/ui";
+import { CheckInOut } from "@/features/admin/components/StaffButtons";
+import { ExportLink, FilterTabs, PageIntro, Pagination, SearchBox } from "@/features/admin/components/ui";
+import { roomLabel } from "@/features/rooms/links";
+import { todayISO } from "@/features/search/date-range";
+import { NoShowButton } from "@/features/stay/components/StaffStayPanels";
 import { BOOKING_STATUSES, searchBookings, type BookingStatusFilter } from "@/features/admin/queries";
 import { StatusBadge } from "@/features/bookings/components/StatusBadge";
-import { formatKigaliDateTime, formatStayDates } from "@/features/bookings/format";
+import { formatStayDates } from "@/features/bookings/format";
 import { GuestRequests } from "@/features/stay/components/GuestRequests";
 import { Link } from "@/i18n/navigation";
 import { formatRWF } from "@/lib/format";
@@ -17,10 +21,12 @@ export default async function AdminBookingsPage({ searchParams }: Props) {
   const status = BOOKING_STATUSES.includes(params.status as BookingStatusFilter) ? (params.status as BookingStatusFilter) : undefined;
   const q = (params.q ?? "").slice(0, 100);
   const page = Math.max(1, Number(params.page) || 1);
-  const [t, tBookings, tListings, locale, result] = await Promise.all([
+  const today = todayISO();
+  const [t, tBookings, tListings, tRooms, locale, result] = await Promise.all([
     getTranslations("Admin"),
     getTranslations("Bookings"),
     getTranslations("Listings"),
+    getTranslations("Rooms"),
     getLocale(),
     searchBookings({ status, q, page }),
   ]);
@@ -31,7 +37,7 @@ export default async function AdminBookingsPage({ searchParams }: Props) {
 
   return (
     <div>
-      <PageIntro description={t("bookingsIntro")} actions={<ExportLink href={exportHref} label={t("exportCsv")} />} />
+      <PageIntro actions={<ExportLink href={exportHref} label={t("exportCsv")} />} />
       {/* What guests asked to change, and refunds to send: answered first. */}
       <GuestRequests />
       <div className="mb-4 flex flex-col gap-3">
@@ -48,50 +54,60 @@ export default async function AdminBookingsPage({ searchParams }: Props) {
           ]}
         />
       </div>
-      <Panel flush>
-        <Table
-          head={[t("col.reference"), t("col.place"), t("col.guest"), t("col.when"), t("col.total"), t("col.status")]}
-          empty={result.rows.length === 0 ? <p className="py-12 text-center text-[14px] text-muted">{t("nothingHere")}</p> : null}
-        >
-          {result.rows.map((b) => (
-            <tr key={b.reference} className="transition-colors hover:bg-canvas/70">
-              <td className={td}>
-                <Link href={`/admin/bookings/${b.reference}`} className="font-mono text-[13px] font-semibold text-primary hover:underline">
-                  {b.reference}
-                </Link>
-                <span className="block text-xs text-muted">{formatKigaliDateTime(locale, b.createdAt)}</span>
-              </td>
-              <td className={td}>
-                <span className="block max-w-[220px] truncate font-medium text-ink">{b.listing.title}</span>
-                {b.room && <span className="block text-xs text-muted">{b.room.name}</span>}
-              </td>
-              <td className={td}>
-                <Link href={`/admin/users/${b.guest.id}`} className="block max-w-[180px] truncate text-ink hover:text-primary">
-                  {b.guest.name}
-                </Link>
-                <span className="block max-w-[180px] truncate text-xs text-muted">{b.guest.email}</span>
-              </td>
-              <td className={`${td} whitespace-nowrap`}>
-                {formatStayDates(locale, iso(b.checkIn), iso(b.checkOut))}
-                <span className="block text-xs text-muted">{tListings(`unitCount.${b.unit}`, { count: b.quantity })}</span>
-              </td>
-              <td className={`${td} whitespace-nowrap tabular-nums`}>
-                {formatRWF(b.total, locale)}
-                <span className="block text-xs text-muted">{t("ownerShort", { amount: formatRWF(b.hostPayout, locale) })}</span>
-              </td>
-              <td className={td}>
-                <StatusBadge status={b.status} label={tBookings(`status.${b.status}`)} />
-              </td>
-            </tr>
-          ))}
-        </Table>
-        <Pagination
-          page={page}
-          pages={result.pages}
-          label={(p, n) => t("pageOf", { page: p, pages: n })}
-          hrefFor={(p) => `/admin/bookings?${new URLSearchParams(query({ page: String(p) }))}`}
-        />
-      </Panel>
+      {/* One card per booking, with the quick steps that apply now (the rest is on its page). */}
+      {result.rows.length === 0 ? (
+        <p className="rounded-2xl bg-surface py-12 text-center text-[14px] text-muted ring-1 ring-line">{t("nothingHere")}</p>
+      ) : (
+        <ul className="flex flex-col gap-2.5">
+          {result.rows.map((b) => {
+            const started = iso(b.checkIn) <= today;
+            return (
+              <li key={b.reference} className="grid gap-x-5 gap-y-2 rounded-2xl bg-surface p-4 ring-1 ring-line md:grid-cols-[150px_minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1fr)_auto] md:items-center">
+                <div className="flex items-center justify-between gap-2 md:flex-col md:items-start">
+                  <Link href={`/admin/bookings/${b.reference}`} className="font-mono text-[14px] font-bold text-primary hover:underline">
+                    {b.reference}
+                  </Link>
+                  <StatusBadge status={b.status} label={tBookings(`status.${b.status}`)} />
+                </div>
+                <div className="min-w-0 text-[14px]">
+                  <span className="block truncate font-semibold text-ink">{b.listing.title}</span>
+                  {b.room && (
+                    <span className="block truncate text-[12px] text-muted">
+                      {[b.room.name, b.roomNumber && roomLabel(b.roomNumber, (number) => tRooms("roomNumber", { number }))].filter(Boolean).join(" · ")}
+                    </span>
+                  )}
+                </div>
+                <div className="min-w-0 text-[14px]">
+                  <Link href={`/admin/users/${b.guest.id}`} className="block truncate text-ink hover:text-primary">
+                    {b.guest.name}
+                  </Link>
+                  <span className="block truncate text-[12px] text-muted">
+                    {formatStayDates(locale, iso(b.checkIn), iso(b.checkOut))} · {tListings(`unitCount.${b.unit}`, { count: b.quantity })}
+                  </span>
+                </div>
+                <div className="text-[14px] tabular-nums">
+                  <span className="block font-bold text-ink">{formatRWF(b.total, locale)}</span>
+                  <span className="block text-[12px] text-muted">{t("ownerShort", { amount: formatRWF(b.hostPayout, locale) })}</span>
+                </div>
+                <div className="flex flex-wrap items-center gap-2 md:justify-end">
+                  {b.status === "CONFIRMED" && started && <CheckInOut reference={b.reference} to="CHECKED_IN" />}
+                  {b.status === "CHECKED_IN" && <CheckInOut reference={b.reference} to="COMPLETED" />}
+                  {b.status === "CONFIRMED" && iso(b.checkIn) < today && <NoShowButton reference={b.reference} />}
+                  <Link href={`/admin/bookings/${b.reference}`} className="rounded-lg border border-line px-3.5 py-1.5 text-[13px] font-semibold text-ink hover:border-primary">
+                    {t("openToAnswer")}
+                  </Link>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+      <Pagination
+        page={page}
+        pages={result.pages}
+        label={(p, n) => t("pageOf", { page: p, pages: n })}
+        hrefFor={(p) => `/admin/bookings?${new URLSearchParams(query({ page: String(p) }))}`}
+      />
     </div>
   );
 }

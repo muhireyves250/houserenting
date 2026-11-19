@@ -1591,7 +1591,8 @@
     "askForChange": "Saba impinduka",
     "confirmMove": {
       "archive": "Ushaka kubika aha hantu? Abakiriya ntibazongera kuhabona cyangwa kuhakodesha. Uzashobora kuhagarura nyuma."
-    }
+    },
+    "editShort": "Hindura"
   },
   "MyStay": {
     "title": "Aho ncumbitse",
@@ -2064,7 +2065,9 @@
       "toPay": "Bitarishyurwa",
       "toSend": "Byo kohereza",
       "sent": "Byoherejwe",
-      "nothing": "Nta kintu."
+      "nothing": "Nta kintu.",
+      "delete": "Siba",
+      "deleteQuestion": "Usibe ibi byatumijwe?"
     },
     "gotIt": "Nabonye ibyo natumije",
     "gotItHint": "Kanda igihe ibiryo bikugezeho.",
@@ -2077,6 +2080,13 @@
       "room": "Icyumba",
       "sentAt": "Byoherejwe {time}",
       "readOnly": "VIIPA ni yo icunga ibi byatumijwe; wowe ubishyikiriza gusa."
+    },
+    "adminList": {
+      "edit": "Hindura",
+      "delete": "Siba",
+      "deleteQuestion": "Usibe iyi resitora n'ibiryo byayo?",
+      "hasOrders": "Ifite ibyatumijwe, ntishobora gusibwa. Yihishe aho kuyisiba.",
+      "orders": "{count, plural, one {ibyatumijwe #} other {ibyatumijwe #}}"
     }
   },
   "Promoters": {
@@ -2299,7 +2309,17 @@
       },
       "placesTitle": "Kumesa kuri buri hantu",
       "savePrice": "Bika",
-      "saved": "Byabitswe"
+      "saved": "Byabitswe",
+      "groups": {
+        "toCollect": "Byo gufata",
+        "washing": "Birimo kumeswa",
+        "toReturn": "Byo gusubiza",
+        "toPay": "Bitegereje kwishyurwa",
+        "done": "Byarangiye",
+        "nothing": "Nta kintu.",
+        "offering": "{count, plural, =0 {nta hantu hayitanga} one {ahantu # harayitanga} other {ahantu # harayitanga}}",
+        "allClear": "Nta myenda itegereje."
+      }
     },
     "placeLabel": "Kumesa imyenda y'abashyitsi",
     "placeOff": "Ntibihari",

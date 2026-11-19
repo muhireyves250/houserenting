@@ -38,6 +38,7 @@ const BOOKING_ROW = {
   commission: true,
   hostPayout: true,
   createdAt: true,
+  roomNumber: true,
   room: { select: { name: true } },
   guest: { select: { id: true, name: true, email: true } },
   listing: { select: { id: true, title: true } },

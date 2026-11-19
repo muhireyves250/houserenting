@@ -1591,7 +1591,8 @@
     "askForChange": "Ask for a change",
     "confirmMove": {
       "archive": "Archive this place? Guests won't see or book it. You can restore it later."
-    }
+    },
+    "editShort": "Edit"
   },
   "MyStay": {
     "title": "My stay",
@@ -2064,7 +2065,9 @@
       "toPay": "To pay",
       "toSend": "To send",
       "sent": "Sent",
-      "nothing": "Nothing here."
+      "nothing": "Nothing here.",
+      "delete": "Delete",
+      "deleteQuestion": "Delete this order?"
     },
     "gotIt": "I got my order",
     "gotItHint": "Tap when the food reaches you.",
@@ -2077,6 +2080,13 @@
       "room": "Room",
       "sentAt": "Sent {time}",
       "readOnly": "VIIPA runs these orders; you only hand them over."
+    },
+    "adminList": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "deleteQuestion": "Delete this restaurant and its menu?",
+      "hasOrders": "It has orders, so it can't be deleted. Hide it instead.",
+      "orders": "{count, plural, one {# order} other {# orders}}"
     }
   },
   "Promoters": {
@@ -2299,7 +2309,17 @@
       },
       "placesTitle": "Laundry at each place",
       "savePrice": "Save",
-      "saved": "Saved"
+      "saved": "Saved",
+      "groups": {
+        "toCollect": "To collect",
+        "washing": "Washing",
+        "toReturn": "To return",
+        "toPay": "Waiting for payment",
+        "done": "Finished",
+        "nothing": "Nothing here.",
+        "offering": "{count, plural, =0 {none offer it} one {# place offers it} other {# places offer it}}",
+        "allClear": "No laundry waiting."
+      }
     },
     "placeLabel": "Laundry for guests",
     "placeOff": "Not offered",
