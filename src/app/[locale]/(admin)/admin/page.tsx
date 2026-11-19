@@ -95,8 +95,8 @@ export default async function AdminDashboardPage() {
           <BookingsChart days={stats.bookingsPerDay} barsClass="h-44 md:h-56" />
         </section>
 
-        {/* Needs attention */}
-        <section className={cn(panel, "flex flex-col p-5")}>
+        {/* Needs attention (phones: only when something waits — "All clear" would just take space). */}
+        <section className={cn(panel, "flex flex-col p-5", waiting.length === 0 && "max-md:hidden")}>
           <h2 className="mb-3 text-[15px] font-semibold text-ink">{t("needsAttention")}</h2>
           {waiting.length === 0 ? (
             <p className="flex flex-1 items-center justify-center py-8 text-center text-[14px] text-muted">{t("allClear")}</p>
