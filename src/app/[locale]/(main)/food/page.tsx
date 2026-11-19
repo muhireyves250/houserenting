@@ -74,28 +74,35 @@ export default async function FoodPage() {
   const phone = (await db.user.findUnique({ where: { id: user.id }, select: { phone: true } }))?.phone ?? null;
   const room = [current.listing.title, current.room?.name].filter(Boolean).join(" · ");
 
+  // The same look as the menu without a stay: intro, one box saying where it goes, then the menu (with ordering).
   return (
-    <PageContainer className="max-w-6xl pt-5 pb-10 max-md:pt-0 md:py-10">
+    <PageContainer className="max-w-4xl pt-5 pb-10 max-md:pt-0 md:py-10">
       {title}
-      <div className="mt-2 mb-5 flex flex-wrap gap-2">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-surface px-3 py-1.5 text-[13px] font-medium text-ink ring-1 ring-line">
-          <BedDouble className="size-4 text-primary" aria-hidden="true" />
-          {t("deliveredTo", { place: room })}
+      <p className="mt-1 text-[14px] text-muted md:text-[15px]">{t("menuIntro")}</p>
+      <div className="mt-4 flex items-center gap-3 rounded-2xl bg-surface p-3 pr-4 ring-1 ring-line">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
+          <BedDouble className="size-5" aria-hidden="true" />
         </span>
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-surface px-3 py-1.5 text-[13px] font-medium text-ink ring-1 ring-line">
-          <Clock className="size-4 text-primary" aria-hidden="true" />
-          {t("readyIn", { minutes: kitchen.prepMinutes })}
+        <span className="min-w-0 flex-1 text-[13px] leading-[18px]">
+          <b className="block text-[14px] font-semibold text-ink">{t("deliveredTo", { place: room })}</b>
+          <span className="inline-flex items-center gap-1 text-muted">
+            <Clock className="size-3.5" aria-hidden="true" />
+            {t("readyIn", { minutes: kitchen.prepMinutes })}
+          </span>
         </span>
-        {kitchen.paused && <span className="rounded-full bg-amber-100 px-3 py-1.5 text-[13px] font-semibold text-amber-900">{t("kitchenClosed")}</span>}
+        {kitchen.paused && <span className="shrink-0 rounded-full bg-amber-100 px-3 py-1.5 text-[12px] font-semibold text-amber-900">{t("kitchenClosed")}</span>}
       </div>
-      <MenuCart
-        restaurant={{ id: kitchen.id, pickup: false, delivery: false, deliveryFee: 0, paused: kitchen.paused, atYourStay: true, prepMinutes: kitchen.prepMinutes, minOrder: kitchen.minOrder }}
-        menu={kitchen.menu}
-        signedIn
-        stay={{ reference: current.reference, label: room, free: true }}
-        defaultPhone={phone}
-        checkoutPath="/food"
-      />
+      <div className="mt-4">
+        <MenuCart
+          restaurant={{ id: kitchen.id, pickup: false, delivery: false, deliveryFee: 0, paused: kitchen.paused, atYourStay: true, prepMinutes: kitchen.prepMinutes, minOrder: kitchen.minOrder }}
+          menu={kitchen.menu}
+          signedIn
+          stay={{ reference: current.reference, label: room, free: true }}
+          defaultPhone={phone}
+          checkoutPath="/food"
+          single
+        />
+      </div>
     </PageContainer>
   );
 }

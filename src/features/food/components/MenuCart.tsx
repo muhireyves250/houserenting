@@ -42,6 +42,7 @@ export function MenuCart({
   defaultPhone,
   checkoutPath,
   browseOnly = false,
+  single = false,
 }: {
   restaurant: Restaurant;
   menu: Dish[];
@@ -53,6 +54,8 @@ export function MenuCart({
   checkoutPath?: string;
   /** Just the menu to read (ordering isn't open to this guest yet): no buttons, no order panel. */
   browseOnly?: boolean;
+  /** One column on every screen (the menu page's look): the order opens from the bar at the bottom, never beside. */
+  single?: boolean;
 }) {
   const t = useTranslations("Food");
   const locale = useLocale();
@@ -130,7 +133,7 @@ export function MenuCart({
   );
 
   return (
-    <div className={cn("grid gap-6 lg:gap-10", !browseOnly && "md:grid-cols-[minmax(0,1fr)_360px]")}>
+    <div className={cn("grid gap-6 lg:gap-10", !browseOnly && !single && "md:grid-cols-[minmax(0,1fr)_360px]")}>
       <div className="min-w-0">
         {/* Search and section tabs stay at the top while scrolling the menu. */}
         <div className="sticky top-0 z-20 -mx-4 bg-canvas/95 px-4 pt-2 pb-3 backdrop-blur-md md:top-[73px] md:mx-0 md:px-0">
@@ -168,7 +171,7 @@ export function MenuCart({
           <p className="py-10 text-center text-[15px] text-muted">{t("noMatch", { query })}</p>
         ) : (
           // Phones: room at the bottom so the floating order bar never hides the last dishes.
-          <div className={cn("flex flex-col gap-9 pt-3", browseOnly ? "pb-10" : "pb-36 md:pb-0")}>
+          <div className={cn("flex flex-col gap-9 pt-3", browseOnly ? "pb-10" : single ? "pb-36" : "pb-36 md:pb-0")}>
             {picks.length > 0 && !query.trim() && (
               <section aria-labelledby="menu-picks">
                 <h2 id="menu-picks" className="mb-3 text-[19px] font-bold tracking-[-0.01em] text-ink">
@@ -211,14 +214,17 @@ export function MenuCart({
       </div>
 
       {/* Computers: the order beside the menu. */}
-      {!browseOnly && <aside className="hidden md:sticky md:top-24 md:block md:self-start">{checkout}</aside>}
+      {!browseOnly && !single && <aside className="hidden md:sticky md:top-24 md:block md:self-start">{checkout}</aside>}
 
       {/* Phones: a bar that opens the order as a sheet. */}
       {count > 0 && !browseOnly && (
         <button
           type="button"
           onClick={() => setSheet(true)}
-          className="fixed inset-x-4 bottom-[calc(88px+env(safe-area-inset-bottom))] z-30 flex items-center justify-between rounded-full bg-primary px-5 py-3.5 text-[15px] font-semibold text-white shadow-[0_14px_32px_-10px_rgba(0,60,140,0.7)] md:hidden"
+          className={cn(
+            "fixed inset-x-4 bottom-[calc(88px+env(safe-area-inset-bottom))] z-30 flex items-center justify-between rounded-full bg-primary px-5 py-3.5 text-[15px] font-semibold text-white shadow-[0_14px_32px_-10px_rgba(0,60,140,0.7)]",
+            single ? "md:inset-x-auto md:bottom-8 md:left-1/2 md:w-[min(560px,calc(100%-2rem))] md:-translate-x-1/2" : "md:hidden",
+          )}
         >
           <span className="inline-flex items-center gap-2">
             <span className="flex size-6 items-center justify-center rounded-full bg-white/20 text-[13px] tabular-nums">{count}</span>
@@ -228,7 +234,7 @@ export function MenuCart({
         </button>
       )}
       {sheet && (
-        <Modal title={t("yourOrderTitle")} closeLabel={t("close")} onClose={() => setSheet(false)} className="md:hidden">
+        <Modal title={t("yourOrderTitle")} closeLabel={t("close")} onClose={() => setSheet(false)} className={single ? undefined : "md:hidden"}>
           {checkout}
         </Modal>
       )}
