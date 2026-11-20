@@ -2543,7 +2543,18 @@
     "promoCodesHint": "Partagez-les : les clients qui réservent avec un de vos codes comptent pour vous.",
     "promoCodesLabel": "Codes promo :",
     "noPromoCodes": "aucun",
-    "givePromoCode": "Donner un code promo"
+    "givePromoCode": "Donner un code promo",
+    "rateLine": "Vous gagnez {reward} pour chaque séjour apporté, une fois le séjour terminé.",
+    "noRateYet": "VIIPA n’a pas encore fixé la récompense. Vos réservations sont comptées ; vous gagnerez dès qu’elle sera fixée.",
+    "coming": "À venir",
+    "yourBookings": "Réservations apportées",
+    "earnState": {
+      "coming": "à la fin du séjour",
+      "waiting": "en attente d’approbation",
+      "paid": "payée",
+      "void": "non payée",
+      "none": "pas de récompense"
+    }
   },
   "Reports": {
     "intro": "Argent et activité par date de séjour. Les séjours payés et non présentés comptent ; les séjours annulés seulement pour leurs remboursements. Les cautions sont retenues, pas des revenus.",

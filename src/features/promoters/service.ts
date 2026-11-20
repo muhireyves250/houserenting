@@ -138,17 +138,25 @@ export async function promoterDashboard(userId: string, now: Date = new Date()) 
   const p = await db.promoter.findUnique({ where: { userId } });
   if (!p) return null;
   const since = new Date(now.getTime() - 30 * 86_400_000);
-  const [visits30, bookings, rewards, promoCodes] = await Promise.all([
+  const [visits30, bookings, rewards, promoCodes, recent] = await Promise.all([
     db.promoterVisit.count({ where: { promoterId: p.id, createdAt: { gte: since } } }),
     db.booking.count({ where: { promoterId: p.id, status: { in: ["CONFIRMED", "CHECKED_IN", "COMPLETED"] } } }),
     db.promoterReward.findMany({ where: { promoterId: p.id }, orderBy: { createdAt: "desc" }, take: 50, select: { id: true, amount: true, status: true, paidAt: true, createdAt: true } }),
     // Promo codes VIIPA gave them to share (still on).
     db.promoCode.findMany({ where: { promoterId: p.id, active: true }, orderBy: { createdAt: "desc" }, select: { code: true, percentOff: true, amountOff: true, endsAt: true } }),
+    // The bookings they brought (place, dates, status and their reward), newest first; no guest details.
+    db.booking.findMany({
+      where: { promoterId: p.id, status: { in: ["CONFIRMED", "CHECKED_IN", "COMPLETED"] } },
+      orderBy: { createdAt: "desc" },
+      take: 30,
+      select: { reference: true, status: true, checkIn: true, checkOut: true, subtotal: true, listing: { select: { title: true } }, promoCode: { select: { code: true } }, promoterReward: { select: { amount: true, status: true, paidAt: true } } },
+    }),
   ]);
   const sum = (f: (r: (typeof rewards)[number]) => boolean) => rewards.filter(f).reduce((a, r) => a + r.amount, 0);
   return {
     promoter: p,
     promoCodes,
+    recent,
     visits30,
     bookings,
     rewards,

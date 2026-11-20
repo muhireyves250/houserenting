@@ -2543,7 +2543,18 @@
     "promoCodesHint": "Share these: guests who book with one of your codes count as yours.",
     "promoCodesLabel": "Promo codes:",
     "noPromoCodes": "none yet",
-    "givePromoCode": "Give a promo code"
+    "givePromoCode": "Give a promo code",
+    "rateLine": "You earn {reward} for each stay you bring, once the guest’s stay is finished.",
+    "noRateYet": "VIIPA hasn’t set the promoter reward yet. Your bookings are counted; you’ll earn once it’s set.",
+    "coming": "Coming",
+    "yourBookings": "Bookings you brought",
+    "earnState": {
+      "coming": "when the stay ends",
+      "waiting": "waiting for approval",
+      "paid": "paid",
+      "void": "not paid",
+      "none": "no reward"
+    }
   },
   "Reports": {
     "intro": "Money and activity by stay date. Paid stays and no-shows count; cancelled stays only for their refunds. Deposits are held, not revenue.",

@@ -2543,7 +2543,18 @@
     "promoCodesHint": "Zisangize: abakiliya bafata icumbi bakoresheje kode yawe babarwa nk’abawe.",
     "promoCodesLabel": "Kode za promosiyo:",
     "noPromoCodes": "nta na imwe",
-    "givePromoCode": "Muhe kode ya promosiyo"
+    "givePromoCode": "Muhe kode ya promosiyo",
+    "rateLine": "Uhabwa {reward} kuri buri cumbi uzanye, igihe umushyitsi arangije kubamo.",
+    "noRateYet": "VIIPA ntirashyiraho igihembo cy’abamamaza. Ibyo uzanye birabarwa; uzahembwa nikimara gushyirwaho.",
+    "coming": "Biraza",
+    "yourBookings": "Ibyo wazanye",
+    "earnState": {
+      "coming": "kubamo nikurangira",
+      "waiting": "bitegereje kwemezwa",
+      "paid": "byishyuwe",
+      "void": "ntibizishyurwa",
+      "none": "nta gihembo"
+    }
   },
   "Reports": {
     "intro": "Amafaranga n'ibikorwa bikurikije itariki y'icumbi. Amacumbi yishyuwe n'abataje arabarwa; ayahagaritswe abarwa gusa ku mafaranga yasubijwe. Ingwate zirabikwa, si inyungu.",

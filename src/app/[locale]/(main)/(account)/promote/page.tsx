@@ -12,6 +12,8 @@ import { getSettings } from "@/features/settings/service";
 import { Link } from "@/i18n/navigation";
 import { getEnv } from "@/lib/env";
 import { formatRWF } from "@/lib/format";
+import { formatStayDates } from "@/features/bookings/format";
+import { cn } from "@/lib/cn";
 import { requireUser } from "@/lib/session";
 
 export async function generateMetadata() {
@@ -24,11 +26,15 @@ export default async function PromotePage() {
   const user = await requireUser("/promote");
   const [t, locale, data, settings] = await Promise.all([getTranslations("Promoters"), getLocale(), promoterDashboard(user.id), getSettings()]);
   const reward = settings.promoterRewardFixed ? formatRWF(settings.promoterRewardFixed, locale) : settings.promoterRewardBps ? `${settings.promoterRewardBps / 100}%` : null;
+  // What a stay will earn them once finished (a fixed amount, or a share of the stay price).
+  const expected = (subtotal: number) => settings.promoterRewardFixed ?? (settings.promoterRewardBps ? Math.round((subtotal * settings.promoterRewardBps) / 10_000) : 0);
   const link = data ? `${getEnv().BETTER_AUTH_URL.replace(/\/$/, "")}/api/v1/p/${data.promoter.code}` : null;
   // Invite friends (referral rewards) lives here too, next to promoting.
   const referral = settings.referralEnabled
     ? { code: await ensureReferralCode(user.id), summary: await referralSummary(user.id), reward: settings.referralRewardAmount }
     : null;
+  // Money still to come: their confirmed stays that haven't finished yet.
+  const coming = (data?.recent ?? []).filter((b) => !b.promoterReward && b.status !== "COMPLETED").reduce((n, b) => n + expected(b.subtotal), 0);
   const qr = link && data?.promoter.status === "ACTIVE" ? await QRCode.toString(link, { type: "svg", margin: 1, color: { dark: "#0b1b33", light: "#ffffff" } }) : null;
   // Any client can invite friends: their invite link as a QR code to scan too.
   // Invite links open the sign-up straight away (the code is remembered for 30 days).
@@ -103,10 +109,17 @@ export default async function PromotePage() {
               <p className="mt-3 text-[13px] text-muted">{t("promoCodesHint")}</p>
             </Card>
           )}
-          <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {/* What they earn per stay, or that VIIPA hasn't set it yet. */}
+          {data.promoter.status === "ACTIVE" && (
+            <p className={cn("rounded-2xl px-5 py-3.5 text-[14px]", reward ? "bg-emerald-50 text-emerald-900" : "bg-amber-50 text-amber-900")}>
+              {reward ? t("rateLine", { reward }) : t("noRateYet")}
+            </p>
+          )}
+          <section className="grid grid-cols-2 gap-3 sm:grid-cols-5">
             {[
               { label: t("visits30"), value: String(data.visits30) },
               { label: t("bookings"), value: String(data.bookings) },
+              { label: t("coming"), value: formatRWF(coming, locale) },
               { label: t("pending"), value: formatRWF(data.pending + data.approved, locale) },
               { label: t("paid"), value: formatRWF(data.paid, locale) },
             ].map((s) => (
@@ -116,6 +129,32 @@ export default async function PromotePage() {
               </div>
             ))}
           </section>
+          {/* The bookings they brought and what each earns them. */}
+          {data.recent.length > 0 && (
+            <Card title={t("yourBookings")}>
+              <ul className="flex flex-col divide-y divide-line">
+                {data.recent.map((b) => {
+                  const earns = b.promoterReward?.amount ?? expected(b.subtotal);
+                  const state = b.promoterReward ? (b.promoterReward.paidAt ? "paid" : b.promoterReward.status === "VOID" ? "void" : "waiting") : b.status === "COMPLETED" ? "none" : "coming";
+                  return (
+                    <li key={b.reference} className="flex items-center justify-between gap-3 py-3">
+                      <span className="min-w-0">
+                        <span className="block truncate text-[14px] font-semibold text-ink">{b.listing.title}</span>
+                        <span className="block text-[12px] text-muted">
+                          {formatStayDates(locale, b.checkIn.toISOString().slice(0, 10), b.checkOut.toISOString().slice(0, 10))}
+                          {b.promoCode && ` · ${b.promoCode.code}`}
+                        </span>
+                      </span>
+                      <span className="shrink-0 text-right">
+                        <span className="block text-[14px] font-bold text-ink tabular-nums">{earns > 0 ? formatRWF(earns, locale) : "—"}</span>
+                        <span className={cn("block text-[11.5px] font-semibold", state === "paid" ? "text-emerald-700" : state === "void" ? "text-red-700" : "text-muted")}>{t(`earnState.${state}`)}</span>
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </Card>
+          )}
           <Card title={t("payoutTitle")}>
             <PromoterForm
               applying={false}
