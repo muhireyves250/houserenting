@@ -11,6 +11,8 @@ datasource db {
 /// Roles inside a place (manager, receptionist) are PlaceMember rows; restaurant roles are RestaurantMember rows.
 enum Role {
   USER
+  /// Staff for chosen services only (staffAreas): laundry, food, bookings…
+  MANAGER
   ADMIN
   SUPER_ADMIN
 }
@@ -29,8 +31,8 @@ model User {
   phone            String?
   locale           String             @default("en")
   role             Role               @default(USER)
-  /// What an ADMIN may manage (listings, bookings, messages, food, laundry, support, money, promotions, settings).
-  /// SUPER_ADMIN manages everything whatever is here; customers have none.
+  /// What a MANAGER may manage (listings, bookings, messages, food, laundry, support, money, promotions, settings).
+  /// ADMIN and SUPER_ADMIN manage everything whatever is here; customers have none.
   staffAreas       String[]           @default([])
   isHost           Boolean            @default(false)
   status           UserStatus         @default(ACTIVE)

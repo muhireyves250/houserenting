@@ -5,7 +5,7 @@ import { useTransition } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { setUserRoleAction } from "../actions";
 
-type Role = "USER" | "ADMIN" | "SUPER_ADMIN";
+import type { AppRole as Role } from "@/lib/roles";
 
 /** Customer, VIIPA admin or super admin. Shown only to staff allowed to manage staff. */
 export function RoleToggle({ userId, role, self, canManage }: { userId: string; role: string; self: boolean; canManage: boolean }) {
@@ -28,6 +28,7 @@ export function RoleToggle({ userId, role, self, canManage }: { userId: string; 
       className="rounded-lg border border-line bg-surface px-3 py-1.5 text-[13px] font-semibold text-ink disabled:opacity-50"
     >
       <option value="USER">{t("roleName.USER")}</option>
+      <option value="MANAGER">{t("roleName.MANAGER")}</option>
       <option value="ADMIN">{t("roleName.ADMIN")}</option>
       <option value="SUPER_ADMIN">{t("roleName.SUPER_ADMIN")}</option>
     </select>

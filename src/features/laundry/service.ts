@@ -42,7 +42,7 @@ export async function requestLaundry(guestId: string, bookingReference: string, 
   const today = new Date(`${todayISO(now)}T00:00:00Z`);
   const booking = await db.booking.findFirst({
     where: { reference: bookingReference, guestId, status: { in: ["CONFIRMED", "CHECKED_IN"] }, checkIn: { lte: today }, checkOut: { gte: today } },
-    select: { id: true, reference: true, listingId: true, room: { select: { name: true } }, listing: { select: { title: true, laundryPricePerKg: true } } },
+    select: { id: true, reference: true, listingId: true, roomNumber: true, room: { select: { name: true } }, listing: { select: { title: true, laundryPricePerKg: true } } },
   });
   if (!booking) return { ok: false, error: "noStay" };
   const price = booking.listing.laundryPricePerKg;
@@ -54,7 +54,7 @@ export async function requestLaundry(guestId: string, bookingReference: string, 
       data: { reference, bookingId: booking.id, listingId: booking.listingId, guestId, pricePerKg: price, note: note.trim().slice(0, 300) || null },
     });
     await audit(tx, { actorId: guestId, action: "laundry.request", entityType: "booking", entityId: booking.reference, data: { laundry: reference } });
-    const place = [booking.listing.title, booking.room?.name].filter(Boolean).join(" · ");
+    const place = [booking.listing.title, booking.room?.name, booking.roomNumber && `#${booking.roomNumber}`].filter(Boolean).join(" · ");
     await notifyAdmins(tx, "laundryRequested", { reference, title: place }, "/admin/laundry");
   });
   return { ok: true, reference };
@@ -102,7 +102,8 @@ export async function moveLaundry(actor: Actor, reference: string, to: LaundrySt
     data.cancelReason = reason;
   }
   const team = to === "ACCEPTED" ? await placeTeam(order.listingId, order.listing.hostId) : [];
-  const room = [order.booking.room?.name, order.booking.roomNumber].filter(Boolean).join(" ") || order.listing.title;
+  // Where to collect it: the room (type and number), or the whole place.
+  const room = [order.booking.room?.name, order.booking.roomNumber && `#${order.booking.roomNumber}`].filter(Boolean).join(" · ") || order.listing.title;
   const moved = await db.$transaction(async (tx) => {
     // Only from the status we read, so two people can't move the same order twice.
     const { count } = await tx.laundryOrder.updateMany({ where: { id: order.id, status: order.status }, data });
@@ -215,7 +216,7 @@ export function staffLaundry(take = 100) {
     select: {
       ...LAUNDRY_SELECT,
       paidReference: true,
-      booking: { select: { reference: true, room: { select: { name: true } }, guest: { select: { name: true, phone: true } } } },
+      booking: { select: { reference: true, roomNumber: true, room: { select: { name: true } }, guest: { select: { name: true, phone: true } } } },
       listing: { select: { title: true } },
     },
   });

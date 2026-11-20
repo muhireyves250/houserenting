@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { canStaff, type StaffArea } from "@/lib/roles";
+import { canStaff, ROLES, type AppRole, type StaffArea } from "@/lib/roles";
 import { getLocale } from "next-intl/server";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
@@ -36,9 +36,9 @@ export async function unpublishListingAction(listingId: string, why: string): Pr
   return { ok };
 }
 
-export async function setUserRoleAction(userId: string, role: "USER" | "ADMIN" | "SUPER_ADMIN"): Promise<{ ok: boolean }> {
+export async function setUserRoleAction(userId: string, role: AppRole): Promise<{ ok: boolean }> {
   const admin = await staff("settings");
-  if (!admin || !id.safeParse(userId).success || !["USER", "ADMIN", "SUPER_ADMIN"].includes(role)) return { ok: false };
+  if (!admin || !id.safeParse(userId).success || !(ROLES as readonly string[]).includes(role)) return { ok: false };
   const ok = await setUserRole(admin.id, userId, role);
   if (ok) revalidatePath("/[locale]/admin/users", "page");
   return { ok };

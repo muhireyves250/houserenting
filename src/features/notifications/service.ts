@@ -1,6 +1,7 @@
 import "server-only";
 import type { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
+import type { StaffArea } from "@/lib/roles";
 
 type Client = Prisma.TransactionClient | typeof db;
 
@@ -66,9 +67,25 @@ export async function notify(
   await client.notification.create({ data: { userId, kind, data, href } });
 }
 
-/** Tells every admin (e.g. a listing waits for review). */
+/** The service a staff notice is about, so managers only get notices for the services they handle. */
+export function noticeArea(kind: NotificationKind): StaffArea {
+  if (kind.startsWith("laundry")) return "laundry";
+  if (kind.startsWith("order") || kind.startsWith("restaurant")) return "food";
+  if (kind === "newMessage") return "messages";
+  if (/^(ticket|question|review)/.test(kind)) return "support";
+  if (/^(listing|contract|team)/.test(kind)) return "listings";
+  if (kind.startsWith("promoter")) return "promotions";
+  if (kind.startsWith("reward") || kind === "paymentProblem" || kind === "payoutRecorded") return "money";
+  return "bookings";
+}
+
+/** Tells VIIPA staff (e.g. a listing waits for review): every admin, and the managers who handle that service. */
 export async function notifyAdmins(client: Client, kind: NotificationKind, data: Record<string, string | number>, href: string | null) {
-  const admins = await client.user.findMany({ where: { role: { in: ["ADMIN", "SUPER_ADMIN"] } }, select: { id: true } });
+  const area = noticeArea(kind);
+  const admins = await client.user.findMany({
+    where: { OR: [{ role: { in: ["ADMIN", "SUPER_ADMIN"] } }, { role: "MANAGER", staffAreas: { has: area } }] },
+    select: { id: true },
+  });
   if (admins.length === 0) return;
   await client.notification.createMany({ data: admins.map((a) => ({ userId: a.id, kind, data, href })) });
 }

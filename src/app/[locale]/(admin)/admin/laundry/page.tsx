@@ -8,6 +8,7 @@ import { laundryOwed, type LaundryStatus } from "@/features/laundry/rules";
 import { placesLaundry, staffLaundry } from "@/features/laundry/service";
 import { Link } from "@/i18n/navigation";
 import { formatRWF } from "@/lib/format";
+import { roomLabel } from "@/features/rooms/links";
 import { requireStaff } from "@/lib/permissions";
 
 const TONE: Record<LaundryStatus, string> = {
@@ -26,7 +27,7 @@ const TONE: Record<LaundryStatus, string> = {
  */
 export default async function AdminLaundryPage() {
   await requireStaff("laundry", "/admin/laundry");
-  const [t, locale, rows, places] = await Promise.all([getTranslations("Laundry"), getLocale(), staffLaundry(), placesLaundry()]);
+  const [t, tRooms, locale, rows, places] = await Promise.all([getTranslations("Laundry"), getTranslations("Rooms"), getLocale(), staffLaundry(), placesLaundry()]);
   const toCollect = rows.filter((o) => o.status === "REQUESTED");
   const washing = rows.filter((o) => o.status === "ACCEPTED" || o.status === "PICKED_UP" || o.status === "WASHED");
   const toReturn = rows.filter((o) => o.status === "RETURNED");
@@ -60,8 +61,9 @@ export default async function AdminLaundryPage() {
           <span className="flex items-start gap-2">
             <BedDouble className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
             <span>
-              {o.listing.title}
-              {o.booking.room && ` · ${o.booking.room.name}`} ·{" "}
+              {/* The room to collect from (type and number), or the whole place. */}
+              <b className="font-semibold">{[o.booking.room?.name, o.booking.roomNumber && roomLabel(o.booking.roomNumber, (number) => tRooms("roomNumber", { number }))].filter(Boolean).join(" · ") || o.listing.title}</b>
+              {(o.booking.room || o.booking.roomNumber) && ` · ${o.listing.title}`} ·{" "}
               <Link href={`/admin/bookings/${o.booking.reference}`} className="font-mono text-primary hover:underline">
                 {o.booking.reference}
               </Link>

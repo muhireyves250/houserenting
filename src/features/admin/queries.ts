@@ -103,7 +103,7 @@ export type UserFilter = "all" | "staff" | "hosts" | "suspended";
 
 function userWhere(filter: UserFilter, q?: string): Prisma.UserWhereInput {
   const where: Prisma.UserWhereInput =
-    filter === "staff" ? { role: { in: ["ADMIN" as const, "SUPER_ADMIN" as const] } } : filter === "hosts" ? { isHost: true } : filter === "suspended" ? { status: "SUSPENDED" } : {};
+    filter === "staff" ? { role: { in: ["MANAGER" as const, "ADMIN" as const, "SUPER_ADMIN" as const] } } : filter === "hosts" ? { isHost: true } : filter === "suspended" ? { status: "SUSPENDED" } : {};
   const query = q?.trim();
   if (query) where.OR = [{ name: like(query) }, { email: like(query) }, { phone: { contains: query } }];
   return where;

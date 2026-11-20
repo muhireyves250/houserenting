@@ -7,6 +7,7 @@ import { unreadChats } from "@/features/chats/service";
 import { laundryToHandle } from "@/features/laundry/service";
 import { unreadCount } from "@/features/notifications/service";
 import { moveLaundry } from "@/features/laundry/service";
+import { notifyAdmins } from "@/features/notifications/service";
 import { deleteUser, sendPasswordReset, setStaffAreas, setUserRole } from "./service";
 import { adminBadges, attentionCounts, dashboardStats } from "./stats";
 import { bookingsCsv, searchBookings, setUserStatus, staffCancelUnpaid } from "./queries";
@@ -139,14 +140,14 @@ describe("overview numbers", () => {
 });
 
 describe("staff areas", () => {
-  it("super admins give admins areas; the session carries them; services follow them", async () => {
+  it("super admins give managers services; the session carries them; services and notices follow them", async () => {
     await db.user.update({ where: { id: "admin" }, data: { role: "SUPER_ADMIN" } });
     await auth.api.signUpEmail({ body: { name: "Lin", email: "lin@example.com", password: "Long-enough-pass-1" } });
     const lin = await db.user.findUniqueOrThrow({ where: { email: "lin@example.com" } });
 
-    // Only admins carry areas, and only a super admin sets them (never their own).
+    // Only managers carry services, and only a super admin sets them (never their own).
     expect(await setStaffAreas("admin", lin.id, ["laundry"])).toBe(false);
-    expect(await setUserRole("admin", lin.id, "ADMIN")).toBe(true);
+    expect(await setUserRole("admin", lin.id, "MANAGER")).toBe(true);
     expect((await db.user.findUniqueOrThrow({ where: { id: lin.id } })).staffAreas).toEqual([]);
     expect(await setStaffAreas("admin", lin.id, ["laundry", "nonsense", "food"])).toBe(true);
     expect((await db.user.findUniqueOrThrow({ where: { id: lin.id } })).staffAreas).toEqual(["food", "laundry"]);
@@ -161,10 +162,17 @@ describe("staff areas", () => {
     expect(session?.user.staffAreas).toEqual(["food", "laundry"]);
 
     // An admin without laundry can't move laundry orders (the check runs before the order is even looked up).
-    const noLaundry = { id: lin.id, role: "ADMIN", staffAreas: ["food"] };
+    const noLaundry = { id: lin.id, role: "MANAGER", staffAreas: ["food"] };
     expect(await moveLaundry(noLaundry, "LD-ABC234", "PICKED_UP")).toEqual({ ok: false, error: "notAllowed" });
     const withLaundry = { ...noLaundry, staffAreas: ["laundry"] };
     expect(await moveLaundry(withLaundry, "LD-ABC234", "PICKED_UP")).toEqual({ ok: false, error: "notFound" });
+
+    // Staff notices: a food manager gets food notices, not laundry ones; admins get both.
+    expect(await setStaffAreas("admin", lin.id, ["food"])).toBe(true);
+    await notifyAdmins(db, "orderNew", { reference: "OR-ABC234" }, null);
+    await notifyAdmins(db, "laundryRequested", { reference: "LD-ABC234" }, null);
+    expect((await db.notification.findMany({ where: { userId: lin.id }, select: { kind: true } })).map((n) => n.kind)).toEqual(["orderNew"]);
+    expect(await db.notification.count({ where: { userId: "admin", kind: { in: ["orderNew", "laundryRequested"] } } })).toBe(2);
 
     // Back to customer: areas are cleared.
     expect(await setUserRole("admin", lin.id, "USER")).toBe(true);

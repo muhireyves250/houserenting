@@ -1234,7 +1234,8 @@
     "roleName": {
       "USER": "Umukiriya",
       "ADMIN": "Umuyobozi wa VIIPA",
-      "SUPER_ADMIN": "Umuyobozi mukuru"
+      "SUPER_ADMIN": "Umuyobozi mukuru",
+      "MANAGER": "Umucungamari"
     },
     "superAdminOnly": "Umuyobozi mukuru wenyine ni we uhindura uburenganzira bw'abakozi.",
     "openToAnswer": "Fungura",
@@ -1281,7 +1282,7 @@
       "promotions": "Kode za promosiyo n’abamamaza",
       "settings": "Igenamiterere, abakoresha n’ibyakozwe"
     },
-    "areasIntro": "Hitamo ibyo uyu muyobozi ashobora gucunga. Azabona izi paji gusa muri menu ye.",
+    "areasIntro": "Hitamo serivisi uyu mucungamari acunga (imwe cyangwa nyinshi). Azabona izo gusa muri menu kandi ahabwe imenyesha ryazo gusa.",
     "areasSave": "Bika uburenganzira",
     "areasSaved": "Byabitswe.",
     "areasFailed": "Ntibyabitswe. Ongera ugerageze.",
@@ -1328,7 +1329,8 @@
       "loading": "Biraza…",
       "none": "Nta muntu wabonetse.",
       "clear": "Hitamo undi"
-    }
+    },
+    "adminAll": "Abayobozi ba VIIPA bacunga byose. Hitamo Umucungamari kugira ngo umuhe serivisi zimwe gusa."
   },
   "Questions": {
     "title": "Ibibazo n'ibisubizo",

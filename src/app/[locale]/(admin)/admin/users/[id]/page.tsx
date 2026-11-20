@@ -121,13 +121,13 @@ export default async function AdminUserPage({ params }: Props) {
               <span className="text-[13px] text-muted">{t(`roleName.${user.role}`)}</span>
               <RoleToggle userId={user.id} role={user.role} self={self} canManage={manageStaff} />
             </div>
-            {/* What this admin may manage (super admins manage everything; customers nothing). */}
-            {user.role === "ADMIN" && !self && (
+            {/* Which services this manager handles (admins and super admins manage everything; customers nothing). */}
+            {user.role === "MANAGER" && !self && (
               <div className="mt-4 border-t border-line pt-4">
                 <StaffAreasForm userId={user.id} initial={user.staffAreas} canManage={manageStaff} />
               </div>
             )}
-            {user.role === "SUPER_ADMIN" && <p className="mt-3 text-[13px] text-muted">{t("superAdminAll")}</p>}
+            {(user.role === "SUPER_ADMIN" || user.role === "ADMIN") && <p className="mt-3 text-[13px] text-muted">{t(user.role === "ADMIN" ? "adminAll" : "superAdminAll")}</p>}
           </Panel>
           {/* Password reset, suspend or reactivate, delete: each asks first. */}
           {!self && (

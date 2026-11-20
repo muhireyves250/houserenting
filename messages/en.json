@@ -1234,7 +1234,8 @@
     "roleName": {
       "USER": "Customer",
       "ADMIN": "VIIPA admin",
-      "SUPER_ADMIN": "Super admin"
+      "SUPER_ADMIN": "Super admin",
+      "MANAGER": "Manager"
     },
     "superAdminOnly": "Only a super admin can change staff access.",
     "openToAnswer": "Open",
@@ -1281,7 +1282,7 @@
       "promotions": "Promo codes and promoters",
       "settings": "Settings, users and activity log"
     },
-    "areasIntro": "Tick what this admin may manage. They only see these pages in their menu.",
+    "areasIntro": "Tick the services this manager handles (one or several). They only see these in their menu and only get notices about them.",
     "areasSave": "Save access",
     "areasSaved": "Saved.",
     "areasFailed": "Couldn't save. Try again.",
@@ -1328,7 +1329,8 @@
       "loading": "Loading…",
       "none": "Nobody found.",
       "clear": "Choose someone else"
-    }
+    },
+    "adminAll": "VIIPA admins manage everything. Choose Manager to give someone only some services."
   },
   "Questions": {
     "title": "Questions and answers",

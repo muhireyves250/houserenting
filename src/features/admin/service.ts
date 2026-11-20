@@ -3,7 +3,7 @@ import { audit } from "@/features/audit/service";
 import { moveListing } from "@/features/places/status-service";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { STAFF_AREAS } from "@/lib/roles";
+import { STAFF_AREAS, type AppRole } from "@/lib/roles";
 
 export function pendingListings() {
   return db.listing.findMany({
@@ -64,23 +64,23 @@ export async function canManageStaff(actor: { id: string; role?: string | null }
  * Grants or removes staff access (VIIPA admin or super admin). Only those allowed to manage staff may do it,
  * and nobody changes their own role (no accidental lock-out).
  */
-export async function setUserRole(adminId: string, userId: string, role: "USER" | "ADMIN" | "SUPER_ADMIN"): Promise<boolean> {
+export async function setUserRole(adminId: string, userId: string, role: AppRole): Promise<boolean> {
   if (adminId === userId) return false;
   const actor = await db.user.findUnique({ where: { id: adminId }, select: { id: true, role: true } });
   if (!actor || !(await canManageStaff(actor))) return false;
   return db.$transaction(async (tx) => {
     const user = await tx.user.findUnique({ where: { id: userId }, select: { role: true } });
     if (!user || user.role === role) return false;
-    // Customers carry no staff areas; a new admin starts with none until they are ticked.
-    await tx.user.update({ where: { id: userId }, data: { role, ...(role === "USER" ? { staffAreas: [] } : {}) } });
+    // Only managers carry areas: a new manager starts with none until they are ticked; others have none.
+    await tx.user.update({ where: { id: userId }, data: { role, ...(role !== "MANAGER" ? { staffAreas: [] } : {}) } });
     await audit(tx, { actorId: adminId, action: "user.role", entityType: "user", entityId: userId, data: { from: user.role, to: role } });
     return true;
   });
 }
 
 /**
- * What an admin may manage (super admins always manage everything). Only those allowed to manage staff may
- * change it, never their own, and only on admins. Unknown areas are dropped.
+ * Which services a manager may manage (admins and super admins manage everything). Only those allowed to manage
+ * staff may change it, never their own, and only on managers. Unknown areas are dropped.
  */
 export async function setStaffAreas(adminId: string, userId: string, raw: readonly unknown[]): Promise<boolean> {
   if (adminId === userId) return false;
@@ -89,7 +89,7 @@ export async function setStaffAreas(adminId: string, userId: string, raw: readon
   if (!actor || !(await canManageStaff(actor))) return false;
   return db.$transaction(async (tx) => {
     const user = await tx.user.findUnique({ where: { id: userId }, select: { role: true, staffAreas: true } });
-    if (!user || user.role !== "ADMIN") return false;
+    if (!user || user.role !== "MANAGER") return false;
     await tx.user.update({ where: { id: userId }, data: { staffAreas: areas } });
     await audit(tx, { actorId: adminId, action: "user.areas", entityType: "user", entityId: userId, data: { from: user.staffAreas, to: areas } });
     return true;

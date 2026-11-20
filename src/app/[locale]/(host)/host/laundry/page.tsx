@@ -6,6 +6,7 @@ import { LaundryStaffActions } from "@/features/laundry/components/LaundryStaffA
 import type { LaundryStatus } from "@/features/laundry/rules";
 import { placeLaundry } from "@/features/laundry/service";
 import { formatRWF } from "@/lib/format";
+import { roomLabel } from "@/features/rooms/links";
 import { requireUser } from "@/lib/session";
 
 const TONE: Partial<Record<LaundryStatus, string>> = {
@@ -22,7 +23,7 @@ const TONE: Partial<Record<LaundryStatus, string>> = {
  */
 export default async function HostLaundryPage() {
   const user = await requireUser("/host/laundry");
-  const [t, locale, rows] = await Promise.all([getTranslations("Laundry"), getLocale(), placeLaundry(user.id)]);
+  const [t, tRooms, locale, rows] = await Promise.all([getTranslations("Laundry"), getTranslations("Rooms"), getLocale(), placeLaundry(user.id)]);
   const toCollect = rows.filter((o) => o.status === "ACCEPTED");
   const washing = rows.filter((o) => o.status === "PICKED_UP");
   const toReturn = rows.filter((o) => o.status === "WASHED");
@@ -31,7 +32,7 @@ export default async function HostLaundryPage() {
 
   const card = (o: (typeof rows)[number]) => {
     const kg = o.weightGrams !== null ? (o.weightGrams / 1000).toLocaleString(locale, { maximumFractionDigits: 2 }) : null;
-    const room = [o.booking.room?.name, o.booking.roomNumber].filter(Boolean).join(" · ");
+    const room = [o.booking.room?.name, o.booking.roomNumber && roomLabel(o.booking.roomNumber, (number) => tRooms("roomNumber", { number }))].filter(Boolean).join(" · ");
     return (
       <li key={o.reference} className={adminCard}>
         <div className="flex items-center justify-between gap-2">

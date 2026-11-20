@@ -1,6 +1,10 @@
-/** Platform roles: customers and owners (USER), VIIPA staff (ADMIN), and staff who also manage staff (SUPER_ADMIN). */
-export type AppRole = "USER" | "ADMIN" | "SUPER_ADMIN";
-export const STAFF_ROLES = ["ADMIN", "SUPER_ADMIN"] as const;
+/**
+ * Platform roles: customers and owners (USER); managers, VIIPA staff for the services they were given (MANAGER);
+ * VIIPA admins, who manage everything (ADMIN); and those who also manage staff (SUPER_ADMIN).
+ */
+export type AppRole = "USER" | "MANAGER" | "ADMIN" | "SUPER_ADMIN";
+export const STAFF_ROLES = ["MANAGER", "ADMIN", "SUPER_ADMIN"] as const;
+export const ROLES = ["USER", "MANAGER", "ADMIN", "SUPER_ADMIN"] as const;
 
 /** The parts of the dashboard a staff member can be given, one per sidebar page. */
 export const STAFF_AREAS = ["listings", "bookings", "messages", "food", "laundry", "support", "money", "promotions", "settings"] as const;
@@ -9,9 +13,9 @@ export const isStaffArea = (value: unknown): value is StaffArea => typeof value 
 
 type Person = { role?: string | null; staffAreas?: readonly string[] | null } | null | undefined;
 
-/** VIIPA staff (any area). */
+/** VIIPA staff of any kind (managers included): they use the dashboard. */
 export function isAdmin(user: Person): boolean {
-  return user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
+  return user?.role === "MANAGER" || user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";
 }
 
 export function isSuperAdmin(user: Person): boolean {
@@ -19,13 +23,13 @@ export function isSuperAdmin(user: Person): boolean {
 }
 
 /**
- * Staff allowed to manage this part of the dashboard: super admins always; admins when given the area. Signed-in
- * people always carry their areas (from the session); a staff actor built inside the server without any (trusted
- * internal code, e.g. a scheduled job) counts as full staff.
+ * Staff allowed to manage this part of the dashboard: admins and super admins always; managers when given the area.
+ * Signed-in people always carry their areas (from the session); a manager built inside the server without any
+ * (trusted internal code) counts as full staff.
  */
 export function canStaff(user: Person, area: StaffArea): boolean {
   if (!isAdmin(user)) return false;
-  if (user?.role === "SUPER_ADMIN" || user?.staffAreas == null) return true;
+  if (user?.role !== "MANAGER" || user?.staffAreas == null) return true;
   return user.staffAreas.includes(area);
 }
 

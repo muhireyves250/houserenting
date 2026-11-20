@@ -4,7 +4,7 @@
  * where they were heading. `next` is a locale-less path.
  */
 export function landingAfterLogin(next: string, role: string | null | undefined, isHost = false): string {
-  if (role === "ADMIN" || role === "SUPER_ADMIN") return next === "/admin" || next.startsWith("/admin/") ? next : "/admin";
+  if (role === "MANAGER" || role === "ADMIN" || role === "SUPER_ADMIN") return next === "/admin" || next.startsWith("/admin/") ? next : "/admin";
   if (isHost) return next === "/host" || next.startsWith("/host/") ? next : "/host";
   return next;
 }

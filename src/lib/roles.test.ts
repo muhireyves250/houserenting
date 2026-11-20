@@ -6,8 +6,9 @@ describe("staff areas", () => {
     expect(staffAreasOf({ role: "SUPER_ADMIN", staffAreas: [] })).toEqual([...STAFF_AREAS]);
   });
 
-  it("admins manage only the areas they were given", () => {
-    const laundry = { role: "ADMIN", staffAreas: ["laundry", "food"] };
+  it("managers manage only the services they were given; admins manage everything", () => {
+    expect(canStaff({ role: "ADMIN", staffAreas: [] }, "money")).toBe(true);
+    const laundry = { role: "MANAGER", staffAreas: ["laundry", "food"] };
     expect(canStaff(laundry, "laundry")).toBe(true);
     expect(canStaff(laundry, "food")).toBe(true);
     expect(canStaff(laundry, "bookings")).toBe(false);
@@ -16,8 +17,8 @@ describe("staff areas", () => {
     expect(isAdmin(laundry)).toBe(true);
   });
 
-  it("an admin with no areas sees only the overview", () => {
-    expect(staffAreasOf({ role: "ADMIN", staffAreas: [] })).toEqual([]);
+  it("a manager with no services sees only the overview", () => {
+    expect(staffAreasOf({ role: "MANAGER", staffAreas: [] })).toEqual([]);
   });
 
   it("customers and hosts never manage anything, whatever is stored", () => {
@@ -26,6 +27,6 @@ describe("staff areas", () => {
   });
 
   it("staff built inside the server without areas count as full staff", () => {
-    expect(canStaff({ role: "ADMIN" }, "money")).toBe(true);
+    expect(canStaff({ role: "MANAGER" }, "money")).toBe(true);
   });
 });

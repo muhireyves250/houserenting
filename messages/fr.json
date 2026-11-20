@@ -1234,7 +1234,8 @@
     "roleName": {
       "USER": "Client",
       "ADMIN": "Admin VIIPA",
-      "SUPER_ADMIN": "Super admin"
+      "SUPER_ADMIN": "Super admin",
+      "MANAGER": "Gestionnaire"
     },
     "superAdminOnly": "Seul un super admin peut modifier les accès de l'équipe.",
     "openToAnswer": "Ouvrir",
@@ -1281,7 +1282,7 @@
       "promotions": "Codes promo et promoteurs",
       "settings": "Paramètres, utilisateurs et journal"
     },
-    "areasIntro": "Cochez ce que cet admin peut gérer. Il ne voit que ces pages dans son menu.",
+    "areasIntro": "Cochez les services que ce gestionnaire gère (un ou plusieurs). Il ne voit que ceux-ci dans son menu et ne reçoit que leurs notifications.",
     "areasSave": "Enregistrer l'accès",
     "areasSaved": "Enregistré.",
     "areasFailed": "Échec de l'enregistrement. Réessayez.",
@@ -1328,7 +1329,8 @@
       "loading": "Chargement…",
       "none": "Personne trouvée.",
       "clear": "Choisir quelqu’un d’autre"
-    }
+    },
+    "adminAll": "Les admins VIIPA gèrent tout. Choisissez Gestionnaire pour ne donner que certains services."
   },
   "Questions": {
     "title": "Questions et réponses",

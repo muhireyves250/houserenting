@@ -80,6 +80,8 @@ const BOTTOM: { key: "overview" | "bookings" | "orders" | "messages"; href: stri
 ];
 
 const EXTRA: { key: Key; href: string; icon: LucideIcon }[] = [
+  // A person's page belongs to Settings → Users.
+  { key: "settings", href: "/admin/users", icon: Settings },
   { key: "account", href: "/admin/account", icon: UserRound },
   { key: "notifications", href: "/admin/notifications", icon: Bell },
 ];
