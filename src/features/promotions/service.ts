@@ -18,7 +18,10 @@ export const promoInput = z
     fundedBy: z.enum(["PLATFORM", "HOST"]),
     /** Optional: the promoter this code is for (staff codes have none). */
     promoterId: z.string().min(1).max(64).nullable().optional(),
+    /** The promoter's share of each booking with this code, in % (e.g. 5 or 7.5). */
+    promoterPercent: z.number().min(0).max(50).nullable().optional(),
   })
+  .refine((p) => !p.promoterId || (p.promoterPercent ?? 0) > 0, { path: ["promoterPercent"], message: "needsShare" })
   .refine((p) => p.percentOff !== null || p.amountOff !== null, { path: ["percentOff"], message: "needsDiscount" })
   .refine((p) => !p.startsAt || !p.endsAt || p.endsAt > p.startsAt, { path: ["endsAt"], message: "endBeforeStart" });
 
@@ -38,7 +41,10 @@ export async function createPromo(adminId: string, raw: PromoInput): Promise<{ o
   }
   try {
     await db.$transaction(async (tx) => {
-      const promo = await tx.promoCode.create({ data: { ...parsed.data, promoterId: parsed.data.promoterId ?? null, createdById: adminId } });
+      const { promoterPercent, ...fields } = parsed.data;
+      const promo = await tx.promoCode.create({
+        data: { ...fields, promoterId: fields.promoterId ?? null, promoterBps: fields.promoterId && promoterPercent ? Math.round(promoterPercent * 100) : null, createdById: adminId },
+      });
       await audit(tx, { actorId: adminId, action: "promo.create", entityType: "promo", entityId: promo.id, data: { code: promo.code } });
     });
   } catch (error) {

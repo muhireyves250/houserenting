@@ -34,7 +34,9 @@ export default async function PromotePage() {
     ? { code: await ensureReferralCode(user.id), summary: await referralSummary(user.id), reward: settings.referralRewardAmount }
     : null;
   // Money still to come: their confirmed stays that haven't finished yet.
-  const coming = (data?.recent ?? []).filter((b) => !b.promoterReward && b.status !== "COMPLETED").reduce((n, b) => n + expected(b.subtotal), 0);
+  const earnsFor = (b: NonNullable<typeof data>["recent"][number]) =>
+    b.promoCode?.promoterId === data?.promoter.id && b.promoCode?.promoterBps ? Math.round((b.subtotal * b.promoCode.promoterBps) / 10_000) : expected(b.subtotal);
+  const coming = (data?.recent ?? []).filter((b) => !b.promoterReward && b.status !== "COMPLETED").reduce((n, b) => n + earnsFor(b), 0);
   const qr = link && data?.promoter.status === "ACTIVE" ? await QRCode.toString(link, { type: "svg", margin: 1, color: { dark: "#0b1b33", light: "#ffffff" } }) : null;
   // Any client can invite friends: their invite link as a QR code to scan too.
   // Invite links open the sign-up straight away (the code is remembered for 30 days).
@@ -100,8 +102,9 @@ export default async function PromotePage() {
                 {data.promoCodes.map((c) => (
                   <li key={c.code} className="flex items-center justify-between gap-3 rounded-xl bg-canvas px-4 py-3">
                     <span className="rounded-lg border-2 border-dashed border-primary/40 bg-primary/[0.06] px-3 py-1 font-mono text-[15px] font-bold text-primary">{c.code}</span>
-                    <span className="text-[13px] font-semibold text-ink">
+                    <span className="text-right text-[13px] font-semibold text-ink">
                       {c.percentOff ? `${c.percentOff}%` : formatRWF(c.amountOff ?? 0, locale)} {t("off")}
+                      {c.promoterBps ? <span className="block text-[12px] font-semibold text-emerald-700">{t("youEarnShare", { percent: c.promoterBps / 100 })}</span> : null}
                     </span>
                   </li>
                 ))}
@@ -134,7 +137,8 @@ export default async function PromotePage() {
             <Card title={t("yourBookings")}>
               <ul className="flex flex-col divide-y divide-line">
                 {data.recent.map((b) => {
-                  const earns = b.promoterReward?.amount ?? expected(b.subtotal);
+                  // Through their own promo code: the share set on it; otherwise the programme's reward.
+                  const earns = b.promoterReward?.amount ?? (b.promoCode?.promoterId === data.promoter.id && b.promoCode.promoterBps ? Math.round((b.subtotal * b.promoCode.promoterBps) / 10_000) : expected(b.subtotal));
                   const state = b.promoterReward ? (b.promoterReward.paidAt ? "paid" : b.promoterReward.status === "VOID" ? "void" : "waiting") : b.status === "COMPLETED" ? "none" : "coming";
                   return (
                     <li key={b.reference} className="flex items-center justify-between gap-3 py-3">

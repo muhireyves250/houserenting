@@ -95,13 +95,24 @@ export async function attributeBooking(reference: string, guestId: string, code:
  */
 export async function maybePromoterReward(tx: Prisma.TransactionClient, bookingId: string, now: Date = new Date()): Promise<void> {
   const config = await tx.platformConfig.findUnique({ where: { id: 1 }, select: { promoterEnabled: true, promoterRewardFixed: true, promoterRewardBps: true } });
-  if (!config?.promoterEnabled) return;
-  const b = await tx.booking.findUnique({ where: { id: bookingId }, select: { guestId: true, subtotal: true, promoterId: true, promoter: { select: { status: true, userId: true } } } });
+  const b = await tx.booking.findUnique({
+    where: { id: bookingId },
+    select: { guestId: true, subtotal: true, promoterId: true, promoter: { select: { status: true, userId: true } }, promoCode: { select: { promoterId: true, promoterBps: true } } },
+  });
   if (!b?.promoterId || !b.promoter || b.promoter.status !== "ACTIVE" || b.promoter.userId === b.guestId) return;
-  const since = new Date(now.getTime() - REPEAT_GUEST_DAYS * 86_400_000);
-  const recent = await tx.promoterReward.count({ where: { promoterId: b.promoterId, guestId: b.guestId, createdAt: { gte: since } } });
-  if (recent > 0) return;
-  const amount = promoterRewardFor(config, b.subtotal);
+  // Their own promo code was used: they earn the share set on that code, for every such booking.
+  const viaCode = b.promoCode?.promoterId === b.promoterId && (b.promoCode.promoterBps ?? 0) > 0;
+  let amount: number;
+  if (viaCode) {
+    amount = Math.round((b.subtotal * b.promoCode!.promoterBps!) / 10_000);
+  } else {
+    // Brought by their QR link: the programme's reward from Settings, once per guest per 30 days.
+    if (!config?.promoterEnabled) return;
+    const since = new Date(now.getTime() - REPEAT_GUEST_DAYS * 86_400_000);
+    const recent = await tx.promoterReward.count({ where: { promoterId: b.promoterId, guestId: b.guestId, createdAt: { gte: since } } });
+    if (recent > 0) return;
+    amount = promoterRewardFor(config, b.subtotal);
+  }
   if (amount <= 0) return;
   await tx.promoterReward.create({ data: { promoterId: b.promoterId, bookingId, guestId: b.guestId, amount } });
   await notifyAdmins(tx, "rewardToCheck", {}, "/admin/promoters");
@@ -143,13 +154,13 @@ export async function promoterDashboard(userId: string, now: Date = new Date()) 
     db.booking.count({ where: { promoterId: p.id, status: { in: ["CONFIRMED", "CHECKED_IN", "COMPLETED"] } } }),
     db.promoterReward.findMany({ where: { promoterId: p.id }, orderBy: { createdAt: "desc" }, take: 50, select: { id: true, amount: true, status: true, paidAt: true, createdAt: true } }),
     // Promo codes VIIPA gave them to share (still on).
-    db.promoCode.findMany({ where: { promoterId: p.id, active: true }, orderBy: { createdAt: "desc" }, select: { code: true, percentOff: true, amountOff: true, endsAt: true } }),
+    db.promoCode.findMany({ where: { promoterId: p.id, active: true }, orderBy: { createdAt: "desc" }, select: { code: true, percentOff: true, amountOff: true, endsAt: true, promoterBps: true } }),
     // The bookings they brought (place, dates, status and their reward), newest first; no guest details.
     db.booking.findMany({
       where: { promoterId: p.id, status: { in: ["CONFIRMED", "CHECKED_IN", "COMPLETED"] } },
       orderBy: { createdAt: "desc" },
       take: 30,
-      select: { reference: true, status: true, checkIn: true, checkOut: true, subtotal: true, listing: { select: { title: true } }, promoCode: { select: { code: true } }, promoterReward: { select: { amount: true, status: true, paidAt: true } } },
+      select: { reference: true, status: true, checkIn: true, checkOut: true, subtotal: true, listing: { select: { title: true } }, promoCode: { select: { code: true, promoterId: true, promoterBps: true } }, promoterReward: { select: { amount: true, status: true, paidAt: true } } },
     }),
   ]);
   const sum = (f: (r: (typeof rewards)[number]) => boolean) => rewards.filter(f).reduce((a, r) => a + r.amount, 0);

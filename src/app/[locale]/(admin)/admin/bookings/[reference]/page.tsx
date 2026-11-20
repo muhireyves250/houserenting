@@ -42,7 +42,10 @@ export default async function AdminBookingPage({ params }: Props) {
   ]);
   const rwf = (n: number) => formatRWF(n, locale);
   // What the promoter will earn when the stay finishes (from Settings: a fixed amount or a share of the stay).
-  const promoterReward = settings.promoterRewardFixed ?? (settings.promoterRewardBps ? Math.round((b.subtotal * settings.promoterRewardBps) / 10_000) : 0);
+  const promoterReward =
+    b.promoCode?.promoterId && b.promoCode.promoterId === b.promoterId && b.promoCode.promoterBps
+      ? Math.round((b.subtotal * b.promoCode.promoterBps) / 10_000)
+      : (settings.promoterRewardFixed ?? (settings.promoterRewardBps ? Math.round((b.subtotal * settings.promoterRewardBps) / 10_000) : 0));
   const time = new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Kigali" });
 
   const roomText = b.room ? [b.room.name, b.roomNumber && roomLabel(b.roomNumber, (number) => tRooms("roomNumber", { number }))].filter(Boolean).join(" · ") : null;

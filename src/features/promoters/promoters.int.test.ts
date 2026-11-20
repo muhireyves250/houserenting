@@ -100,11 +100,14 @@ describe("staff manage promoters", () => {
   it("a promo code given to a promoter credits bookings that use it (no QR visit needed), and shows on their page", async () => {
     expect(await staffAddPromoter(admin, "pro@example.com", { payoutMethod: "MOBILE_MONEY", payoutName: "Pro", payoutNumber: "0788000000" })).toEqual({ ok: true });
     const p = await db.promoter.findUniqueOrThrow({ where: { userId: "pro" } });
-    const promo = await db.promoCode.create({ data: { code: "PRO10", percentOff: 10, createdById: "admin", promoterId: p.id } });
+    const promo = await db.promoCode.create({ data: { code: "PRO10", percentOff: 10, createdById: "admin", promoterId: p.id, promoterBps: 1000 } });
     const ref = await stay("guest", "2026-10-10");
     await db.booking.update({ where: { reference: ref }, data: { promoCodeId: promo.id } });
     await attributeBooking(ref, "guest", undefined);
     expect((await db.booking.findUniqueOrThrow({ where: { reference: ref } })).promoterId).toBe(p.id);
     expect((await promoterDashboard("pro"))?.promoCodes.map((c) => c.code)).toEqual(["PRO10"]);
+    // When the stay finishes they earn the code's share (10% of 100,000), not the programme's 5%.
+    expect(await staffMoveBooking("admin", ref, "COMPLETED", new Date("2026-10-11T10:00:00Z"))).toBe(true);
+    expect((await db.promoterReward.findFirstOrThrow({ where: { promoterId: p.id } })).amount).toBe(10_000);
   });
 });

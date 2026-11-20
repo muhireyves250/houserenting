@@ -12,11 +12,11 @@ const num = (v: string) => (v.trim() === "" ? null : Number(v));
 export function PromoForm({ promoters = [], initialPromoter }: { promoters?: { id: string; name: string; code: string }[]; initialPromoter?: string }) {
   const t = useTranslations("Promotions");
   const router = useRouter();
-  const [form, setForm] = useState({ code: "", description: "", percentOff: "", amountOff: "", minSubtotal: "", startsAt: "", endsAt: "", maxUses: "", fundedBy: "PLATFORM", promoterId: promoters.some((p) => p.id === initialPromoter) ? initialPromoter! : "" });
+  const [form, setForm] = useState({ code: "", description: "", percentOff: "", amountOff: "", minSubtotal: "", startsAt: "", endsAt: "", maxUses: "", fundedBy: "PLATFORM", promoterId: promoters.some((p) => p.id === initialPromoter) ? initialPromoter! : "", promoterPercent: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [pending, start] = useTransition();
   const set = (key: keyof typeof form, value: string) => setForm((f) => ({ ...f, [key]: value }));
-  const err = (key: string) => (errors[key] ? t(`error.${errors[key] === "taken" ? "taken" : errors[key] === "needsDiscount" ? "needsDiscount" : "field"}`) : undefined);
+  const err = (key: string) => (errors[key] ? t(`error.${errors[key] === "taken" ? "taken" : errors[key] === "needsDiscount" ? "needsDiscount" : errors[key] === "needsShare" ? "needsShare" : "field"}`) : undefined);
 
   return (
     <Card title={t("new")}>
@@ -43,6 +43,20 @@ export function PromoForm({ promoters = [], initialPromoter }: { promoters?: { i
             ))}
           </SelectField>
         )}
+        {/* The promoter's share of every booking that uses this code. */}
+        {form.promoterId && (
+          <Field
+            label={t("promoterPercent")}
+            className="sm:col-span-2"
+            type="number"
+            min={0.5}
+            max={50}
+            step={0.5}
+            value={form.promoterPercent}
+            onChange={(e) => set("promoterPercent", e.target.value)}
+            error={err("promoterPercent")}
+          />
+        )}
         <AreaField label={t("description")} className="sm:col-span-2" rows={2} maxLength={200} value={form.description} onChange={(e) => set("description", e.target.value)} />
       </div>
       <div className="mt-4 flex justify-end">
@@ -62,10 +76,11 @@ export function PromoForm({ promoters = [], initialPromoter }: { promoters?: { i
                 endsAt: form.endsAt ? new Date(`${form.endsAt}T23:59:59+02:00`) : null,
                 fundedBy: form.fundedBy as "PLATFORM" | "HOST",
                 promoterId: form.promoterId || null,
+                promoterPercent: form.promoterId && form.promoterPercent ? Number(form.promoterPercent) : null,
               });
               if (result.ok) {
                 setErrors({});
-                setForm({ code: "", description: "", percentOff: "", amountOff: "", minSubtotal: "", startsAt: "", endsAt: "", maxUses: "", fundedBy: "PLATFORM", promoterId: "" });
+                setForm({ code: "", description: "", percentOff: "", amountOff: "", minSubtotal: "", startsAt: "", endsAt: "", maxUses: "", fundedBy: "PLATFORM", promoterId: "", promoterPercent: "" });
                 router.refresh();
               } else setErrors(result.errors);
             })

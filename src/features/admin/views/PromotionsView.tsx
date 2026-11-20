@@ -81,7 +81,7 @@ export async function PromotionsView({ tabs, forPromoter }: { tabs: ReactNode; f
                       <span className="mt-1 flex flex-wrap gap-1.5">
                         <Chip tone={STATE_TONE[state]}>{t(`state.${state}`)}</Chip>
                         <Chip>{t(`fundingShort.${p.fundedBy}`)}</Chip>
-                        {p.promoter && <Chip tone="bg-primary/10 text-primary">{t("promoterOf", { name: p.promoter.user.name })}</Chip>}
+                        {p.promoter && <Chip tone="bg-primary/10 text-primary">{t("promoterOf", { name: p.promoter.user.name })}{p.promoterBps ? ` · ${p.promoterBps / 100}%` : ""}</Chip>}
                       </span>
                     </span>
                     <span className="flex shrink-0 flex-col items-end gap-1.5">

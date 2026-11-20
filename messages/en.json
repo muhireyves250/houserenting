@@ -1731,7 +1731,8 @@
     "error": {
       "taken": "That code already exists.",
       "needsDiscount": "Set a percent or an amount off.",
-      "field": "Check this value."
+      "field": "Check this value.",
+      "needsShare": "Give the promoter’s share, e.g. 5"
     },
     "none": "No promo codes yet.",
     "uses": "{used} of {max} used",
@@ -1758,7 +1759,8 @@
     "deleteUsed": "This code was used: turn it off instead.",
     "forPromoter": "Give it to a promoter (optional)",
     "noPromoter": "No promoter (VIIPA’s own code)",
-    "promoterOf": "For {name}"
+    "promoterOf": "For {name}",
+    "promoterPercent": "Promoter’s share of each booking (%)"
   },
   "Referrals": {
     "title": "Invite friends",
@@ -2554,7 +2556,8 @@
       "paid": "paid",
       "void": "not paid",
       "none": "no reward"
-    }
+    },
+    "youEarnShare": "you earn {percent}% of each booking"
   },
   "Reports": {
     "intro": "Money and activity by stay date. Paid stays and no-shows count; cancelled stays only for their refunds. Deposits are held, not revenue.",

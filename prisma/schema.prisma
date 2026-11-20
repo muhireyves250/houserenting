@@ -776,6 +776,8 @@ model PromoCode {
   bookings    Booking[]
   /// Optional: the promoter this code was given to (bookings using it count as theirs).
   promoterId  String?
+  /// The promoter's share of the stay price for each booking with this code, in basis points (500 = 5%).
+  promoterBps Int?
   promoter    Promoter?    @relation(fields: [promoterId], references: [id], onDelete: SetNull)
 
   @@index([promoterId])

@@ -1731,7 +1731,8 @@
     "error": {
       "taken": "Iyo kode isanzwe ihari.",
       "needsDiscount": "Shyiraho ijanisha cyangwa amafaranga.",
-      "field": "Reba iyi mibare."
+      "field": "Reba iyi mibare.",
+      "needsShare": "Andika umugabane w’umwamamaza, urugero 5"
     },
     "none": "Nta kode irashyirwaho.",
     "uses": "{used} kuri {max}",
@@ -1758,7 +1759,8 @@
     "deleteUsed": "Iyi kode yarakoreshejwe: yihagarike aho kuyisiba.",
     "forPromoter": "Yihe umwamamaza (si ngombwa)",
     "noPromoter": "Nta mwamamaza (kode ya VIIPA)",
-    "promoterOf": "Ya {name}"
+    "promoterOf": "Ya {name}",
+    "promoterPercent": "Umugabane w’umwamamaza kuri buri cumbi (%)"
   },
   "Referrals": {
     "title": "Tumira inshuti",
@@ -2554,7 +2556,8 @@
       "paid": "byishyuwe",
       "void": "ntibizishyurwa",
       "none": "nta gihembo"
-    }
+    },
+    "youEarnShare": "uhabwa {percent}% kuri buri cumbi"
   },
   "Reports": {
     "intro": "Amafaranga n'ibikorwa bikurikije itariki y'icumbi. Amacumbi yishyuwe n'abataje arabarwa; ayahagaritswe abarwa gusa ku mafaranga yasubijwe. Ingwate zirabikwa, si inyungu.",

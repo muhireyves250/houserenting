@@ -1731,7 +1731,8 @@
     "error": {
       "taken": "Ce code existe déjà.",
       "needsDiscount": "Indiquez un pourcentage ou un montant.",
-      "field": "Vérifiez cette valeur."
+      "field": "Vérifiez cette valeur.",
+      "needsShare": "Indiquez la part du promoteur, ex. 5"
     },
     "none": "Aucun code promo.",
     "uses": "{used} sur {max} utilisés",
@@ -1758,7 +1759,8 @@
     "deleteUsed": "Ce code a été utilisé : désactivez-le plutôt.",
     "forPromoter": "Le donner à un promoteur (facultatif)",
     "noPromoter": "Aucun promoteur (code de VIIPA)",
-    "promoterOf": "Pour {name}"
+    "promoterOf": "Pour {name}",
+    "promoterPercent": "Part du promoteur par réservation (%)"
   },
   "Referrals": {
     "title": "Inviter des amis",
@@ -2554,7 +2556,8 @@
       "paid": "payée",
       "void": "non payée",
       "none": "pas de récompense"
-    }
+    },
+    "youEarnShare": "vous gagnez {percent} % de chaque réservation"
   },
   "Reports": {
     "intro": "Argent et activité par date de séjour. Les séjours payés et non présentés comptent ; les séjours annulés seulement pour leurs remboursements. Les cautions sont retenues, pas des revenus.",
