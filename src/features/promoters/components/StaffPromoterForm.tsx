@@ -1,5 +1,6 @@
 "use client";
 
+import { PersonPicker } from "@/features/admin/components/PersonPicker";
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { AreaField, Field, SelectField } from "@/features/hosting/components/fields";
@@ -29,7 +30,8 @@ export function StaffPromoterForm({ promoterId, initial, onDone }: { promoterId?
     });
   return (
     <div className="flex flex-col gap-3 rounded-xl bg-canvas p-3">
-      {!promoterId && <Field label={t("staffEmail")} type="email" value={email} maxLength={200} placeholder="name@example.com" onChange={(e) => setEmail(e.target.value)} />}
+      {/* Choose the person from everyone with an account (search by name or email). */}
+      {!promoterId && <PersonPicker label={t("staffEmail")} onChange={setEmail} />}
       <AreaField label={t("about")} rows={2} maxLength={500} value={form.about ?? ""} onChange={(e) => set("about", e.target.value)} />
       <div className="grid gap-3 sm:grid-cols-2">
         <SelectField label={t("payoutMethod")} value={form.payoutMethod} onChange={(e) => set("payoutMethod", e.target.value as PromoterInput["payoutMethod"])}>

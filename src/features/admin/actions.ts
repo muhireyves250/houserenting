@@ -3,8 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { canStaff, type StaffArea } from "@/lib/roles";
+import { getLocale } from "next-intl/server";
+import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
-import { reviewListing, setStaffAreas, setUserRole, unpublishListing } from "./service";
+import { deleteUser, reviewListing, sendPasswordReset, setStaffAreas, setUserRole, unpublishListing, type AccountActionResult } from "./service";
 
 const id = z.string().min(1).max(64);
 const reason = z.string().max(500);
@@ -49,4 +51,38 @@ export async function setStaffAreasAction(userId: string, areas: string[]): Prom
   const ok = await setStaffAreas(admin.id, userId, areas);
   if (ok) revalidatePath("/[locale]/admin", "layout");
   return { ok };
+}
+
+/** Email the person a link to choose a new password. */
+export async function sendPasswordResetAction(userId: string): Promise<AccountActionResult> {
+  const admin = await staff("settings");
+  if (!admin) return { ok: false, error: "notAllowed" };
+  if (!id.safeParse(userId).success) return { ok: false, error: "notFound" };
+  return sendPasswordReset(admin.id, userId, `/${await getLocale()}/reset-password`);
+}
+
+/** Delete an account without history (others are suspended instead). */
+export async function deleteUserAction(userId: string): Promise<AccountActionResult> {
+  const admin = await staff("settings");
+  if (!admin) return { ok: false, error: "notAllowed" };
+  if (!id.safeParse(userId).success) return { ok: false, error: "notFound" };
+  const result = await deleteUser(admin.id, userId);
+  if (result.ok) revalidatePath("/[locale]/admin", "layout");
+  return result;
+}
+
+/** People to pick from (name or email), e.g. when adding a promoter: newest first, at most 20. */
+export async function findPeopleAction(q: string): Promise<{ id: string; name: string; email: string }[]> {
+  const admin = (await staff("promotions")) ?? (await staff("settings"));
+  if (!admin) return [];
+  const query = String(q ?? "").trim().slice(0, 80);
+  return db.user.findMany({
+    where: {
+      role: "USER",
+      ...(query ? { OR: [{ name: { contains: query, mode: "insensitive" } }, { email: { contains: query, mode: "insensitive" } }] } : {}),
+    },
+    orderBy: { createdAt: "desc" },
+    take: 20,
+    select: { id: true, name: true, email: true },
+  });
 }

@@ -6,11 +6,14 @@ import { FilterTabs, Pagination, Panel, SearchBox, Table, td } from "@/features/
 import { searchUsers, type UserFilter } from "@/features/admin/queries";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
+import { UserActions } from "@/features/admin/components/UserActions";
+import { getCurrentUser } from "@/lib/session";
 
 type Props = { searchParams: Promise<{ filter?: string; q?: string; page?: string }> };
 const FILTERS: UserFilter[] = ["all", "staff", "hosts", "suspended"];
 
 export async function UsersView({ searchParams, tabs }: { searchParams: Props["searchParams"]; tabs?: ReactNode }) {
+  const me = await getCurrentUser();
   const params = await searchParams;
   const filter = FILTERS.includes(params.filter as UserFilter) ? (params.filter as UserFilter) : "all";
   const q = (params.q ?? "").slice(0, 100);
@@ -36,7 +39,7 @@ export async function UsersView({ searchParams, tabs }: { searchParams: Props["s
       <ScrollArea>
       <Panel flush>
         <Table
-          head={[t("col.name"), t("col.role"), t("col.activity"), t("col.joined"), t("col.status")]}
+          head={[t("col.name"), t("col.role"), t("col.activity"), t("col.joined"), t("col.status"), t("col.actions")]}
           empty={result.rows.length === 0 ? <p className="py-12 text-center text-[14px] text-muted">{t("nothingHere")}</p> : null}
         >
           {result.rows.map((u) => (
@@ -61,6 +64,10 @@ export async function UsersView({ searchParams, tabs }: { searchParams: Props["s
               <td className={`${td} text-[13px] whitespace-nowrap text-muted`}>{date.format(u.createdAt)}</td>
               <td className={td}>
                 <span className={cn(badge, u.status === "SUSPENDED" ? "bg-red-50 text-red-800" : "bg-emerald-50 text-emerald-800")}>{t(`userStatus.${u.status}`)}</span>
+              </td>
+              {/* Role and permissions, password reset, suspend, delete. */}
+              <td className={`${td} text-right`}>
+                <UserActions user={{ id: u.id, name: u.name, status: u.status }} self={u.id === me?.id} />
               </td>
             </tr>
           ))}

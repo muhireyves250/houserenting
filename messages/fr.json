@@ -1160,7 +1160,8 @@
       "phone": "Téléphone",
       "action": "Action",
       "by": "Par",
-      "record": "Élément"
+      "record": "Élément",
+      "actions": "Actions"
     },
     "ownerShort": "propriétaire {amount}",
     "pageOf": "Page {page} sur {pages}",
@@ -1285,7 +1286,49 @@
     "areasSaved": "Enregistré.",
     "areasFailed": "Échec de l'enregistrement. Réessayez.",
     "superAdminAll": "Les super admins gèrent tout.",
-    "clientDetails": "Infos du client"
+    "clientDetails": "Infos du client",
+    "userActions": {
+      "menu": "Actions pour {name}",
+      "manage": "Rôle et autorisations",
+      "reset": "Réinitialiser le mot de passe",
+      "suspend": "Suspendre",
+      "reactivate": "Réactiver",
+      "delete": "Supprimer le compte",
+      "you": "Vous",
+      "cancel": "Annuler",
+      "close": "Fermer",
+      "reason": "Pourquoi ? (la personne ne le verra pas)",
+      "resetTitle": "Réinitialiser le mot de passe de {name} ?",
+      "resetBody": "Nous lui envoyons un lien pour choisir un nouveau mot de passe. Personne ne voit ni ne choisit son mot de passe.",
+      "resetConfirm": "Envoyer le lien",
+      "resetSent": "Lien envoyé.",
+      "suspendTitle": "Suspendre {name} ?",
+      "suspendBody": "La personne est déconnectée partout et ne peut plus se connecter jusqu’à sa réactivation.",
+      "suspendConfirm": "Suspendre",
+      "suspended": "Compte suspendu.",
+      "reactivateTitle": "Réactiver {name} ?",
+      "reactivateBody": "La personne peut à nouveau se connecter.",
+      "reactivateConfirm": "Réactiver",
+      "reactivated": "Compte réactivé.",
+      "deleteTitle": "Supprimer le compte de {name} ?",
+      "deleteBody": "C’est définitif. Les comptes avec réservations, logements, commandes ou paiements ne peuvent pas être supprimés : suspendez-les.",
+      "deleteConfirm": "Supprimer",
+      "deleted": "Compte supprimé.",
+      "error": {
+        "notAllowed": "Réservé au personnel qui gère le personnel.",
+        "notFound": "Ce compte n’existe plus.",
+        "self": "Impossible sur votre propre compte.",
+        "hasHistory": "Ce compte a des réservations, logements ou commandes : suspendez-le.",
+        "failed": "Échec. Réessayez."
+      },
+      "title": "Compte"
+    },
+    "picker": {
+      "placeholder": "Chercher par nom ou e-mail",
+      "loading": "Chargement…",
+      "none": "Personne trouvée.",
+      "clear": "Choisir quelqu’un d’autre"
+    }
   },
   "Questions": {
     "title": "Questions et réponses",
@@ -2409,7 +2452,7 @@
     "edit": "Modifier",
     "delete": "Supprimer",
     "deleteQuestion": "Supprimer ce promoteur ?",
-    "staffEmail": "E-mail de son compte",
+    "staffEmail": "Personne (parmi tous les comptes)",
     "addPromoter": "Ajouter un promoteur",
     "saveChanges": "Enregistrer",
     "staffError": {

@@ -1160,7 +1160,8 @@
       "phone": "Telefoni",
       "action": "Igikorwa",
       "by": "Na",
-      "record": "Icyo bijyanye"
+      "record": "Icyo bijyanye",
+      "actions": "Ibikorwa"
     },
     "ownerShort": "nyir'inzu {amount}",
     "pageOf": "Urupapuro {page} kuri {pages}",
@@ -1285,7 +1286,49 @@
     "areasSaved": "Byabitswe.",
     "areasFailed": "Ntibyabitswe. Ongera ugerageze.",
     "superAdminAll": "Abayobozi bakuru bacunga byose.",
-    "clientDetails": "Amakuru y’umukiliya"
+    "clientDetails": "Amakuru y’umukiliya",
+    "userActions": {
+      "menu": "Ibikorwa kuri {name}",
+      "manage": "Uruhare n’uburenganzira",
+      "reset": "Ohereza guhindura ijambobanga",
+      "suspend": "Hagarika",
+      "reactivate": "Subizaho",
+      "delete": "Siba konti",
+      "you": "Wowe",
+      "cancel": "Reka",
+      "close": "Funga",
+      "reason": "Kubera iki? (ntazabibona)",
+      "resetTitle": "Guhindura ijambobanga rya {name}?",
+      "resetBody": "Tumwoherereza umurongo wo guhitamo ijambobanga rishya. Nta wundi ubona cyangwa uhitamo ijambobanga rye.",
+      "resetConfirm": "Ohereza umurongo",
+      "resetSent": "Umurongo woherejwe.",
+      "suspendTitle": "Guhagarika {name}?",
+      "suspendBody": "Asohorwa ahantu hose kandi ntashobora kwinjira kugeza umusubijeho.",
+      "suspendConfirm": "Hagarika",
+      "suspended": "Konti yahagaritswe.",
+      "reactivateTitle": "Gusubizaho {name}?",
+      "reactivateBody": "Arashobora kongera kwinjira.",
+      "reactivateConfirm": "Subizaho",
+      "reactivated": "Konti yasubijweho.",
+      "deleteTitle": "Gusiba konti ya {name}?",
+      "deleteBody": "Ntibisubirwamo. Konti zifite ibyumba byafashwe, amacumbi, ibyatumijwe cyangwa ubwishyu ntizisibwa: zihagarike.",
+      "deleteConfirm": "Siba",
+      "deleted": "Konti yasibwe.",
+      "error": {
+        "notAllowed": "Ni ab’abakozi bacunga abakozi gusa.",
+        "notFound": "Iyi konti ntikiriho.",
+        "self": "Ntibishoboka kuri konti yawe.",
+        "hasHistory": "Iyi konti ifite amateka: yihagarike.",
+        "failed": "Ntibyakunze. Ongera ugerageze."
+      },
+      "title": "Konti"
+    },
+    "picker": {
+      "placeholder": "Shakisha izina cyangwa imeli",
+      "loading": "Biraza…",
+      "none": "Nta muntu wabonetse.",
+      "clear": "Hitamo undi"
+    }
   },
   "Questions": {
     "title": "Ibibazo n'ibisubizo",
@@ -2409,7 +2452,7 @@
     "edit": "Hindura",
     "delete": "Siba",
     "deleteQuestion": "Usibe uyu mumamaza?",
-    "staffEmail": "Imeyili ya konti ye",
+    "staffEmail": "Umuntu (hitamo mu bafite konti)",
     "addPromoter": "Ongeramo umumamaza",
     "saveChanges": "Bika impinduka",
     "staffError": {

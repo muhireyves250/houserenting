@@ -3,7 +3,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { Avatar } from "@/components/ui/Avatar";
 import { RoleToggle } from "@/features/admin/components/RoleToggle";
 import { StaffAreasForm } from "@/features/admin/components/StaffAreasForm";
-import { UserStatusForm } from "@/features/admin/components/StaffForms";
+import { UserActions } from "@/features/admin/components/UserActions";
 import { Facts, PageIntro, Panel, Table, td } from "@/features/admin/components/ui";
 import { userForStaff } from "@/features/admin/queries";
 import { recentAudit } from "@/features/audit/service";
@@ -129,9 +129,10 @@ export default async function AdminUserPage({ params }: Props) {
             )}
             {user.role === "SUPER_ADMIN" && <p className="mt-3 text-[13px] text-muted">{t("superAdminAll")}</p>}
           </Panel>
+          {/* Password reset, suspend or reactivate, delete: each asks first. */}
           {!self && (
-            <Panel title={user.status === "SUSPENDED" ? t("reactivate") : t("suspend")}>
-              <UserStatusForm userId={user.id} status={user.status} />
+            <Panel title={t("userActions.title")}>
+              <UserActions inline self={self} user={{ id: user.id, name: user.name, status: user.status }} />
             </Panel>
           )}
           <Panel title={t("history")} flush>

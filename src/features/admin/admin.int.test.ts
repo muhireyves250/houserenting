@@ -7,7 +7,7 @@ import { unreadChats } from "@/features/chats/service";
 import { laundryToHandle } from "@/features/laundry/service";
 import { unreadCount } from "@/features/notifications/service";
 import { moveLaundry } from "@/features/laundry/service";
-import { setStaffAreas, setUserRole } from "./service";
+import { deleteUser, sendPasswordReset, setStaffAreas, setUserRole } from "./service";
 import { adminBadges, attentionCounts, dashboardStats } from "./stats";
 import { bookingsCsv, searchBookings, setUserStatus, staffCancelUnpaid } from "./queries";
 
@@ -169,5 +169,27 @@ describe("staff areas", () => {
     // Back to customer: areas are cleared.
     expect(await setUserRole("admin", lin.id, "USER")).toBe(true);
     expect((await db.user.findUniqueOrThrow({ where: { id: lin.id } })).staffAreas).toEqual([]);
+  });
+});
+
+describe("managing accounts", () => {
+  it("deletes only accounts without history, never your own; sends reset links; only staff who manage staff", async () => {
+    await db.user.update({ where: { id: "admin" }, data: { role: "SUPER_ADMIN" } });
+    await db.user.create({ data: { id: "empty", name: "New", email: "new@example.com" } });
+    await db.user.create({ data: { id: "helper", name: "Helper", email: "helper@example.com", role: "ADMIN", staffAreas: ["settings"] } });
+    await createBooking({ guestId: "g1", listingId: "flat", checkIn: "2026-10-20", checkOut: "2026-10-22", guests: 1, payment: pay }, NOW);
+
+    expect(await deleteUser("admin", "admin")).toEqual({ ok: false, error: "self" });
+    expect(await deleteUser("admin", "g1")).toEqual({ ok: false, error: "hasHistory" });
+    expect(await deleteUser("admin", "host")).toEqual({ ok: false, error: "hasHistory" }); // owns a place
+    expect(await deleteUser("helper", "empty")).toEqual({ ok: false, error: "notAllowed" });
+    expect(await deleteUser("admin", "empty")).toEqual({ ok: true });
+    expect(await db.user.findUnique({ where: { id: "empty" } })).toBeNull();
+    expect(await db.auditLog.count({ where: { action: "user.delete", entityId: "empty" } })).toBe(1);
+
+    expect(await sendPasswordReset("helper", "g1", "/en/reset-password")).toEqual({ ok: false, error: "notAllowed" });
+    expect(await sendPasswordReset("admin", "admin", "/en/reset-password")).toEqual({ ok: false, error: "self" });
+    expect(await sendPasswordReset("admin", "g1", "/en/reset-password")).toEqual({ ok: true });
+    expect(await db.auditLog.count({ where: { action: "user.passwordReset", entityId: "g1" } })).toBe(1);
   });
 });

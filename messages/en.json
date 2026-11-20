@@ -1160,7 +1160,8 @@
       "phone": "Phone",
       "action": "Action",
       "by": "By",
-      "record": "Record"
+      "record": "Record",
+      "actions": "Actions"
     },
     "ownerShort": "owner {amount}",
     "pageOf": "Page {page} of {pages}",
@@ -1285,7 +1286,49 @@
     "areasSaved": "Saved.",
     "areasFailed": "Couldn't save. Try again.",
     "superAdminAll": "Super admins manage everything.",
-    "clientDetails": "Client details"
+    "clientDetails": "Client details",
+    "userActions": {
+      "menu": "Actions for {name}",
+      "manage": "Role and permissions",
+      "reset": "Send password reset",
+      "suspend": "Suspend",
+      "reactivate": "Reactivate",
+      "delete": "Delete account",
+      "you": "You",
+      "cancel": "Cancel",
+      "close": "Close",
+      "reason": "Why? (they won’t see this)",
+      "resetTitle": "Reset {name}’s password?",
+      "resetBody": "We email them a link to choose a new password. Nobody sees or sets their password for them.",
+      "resetConfirm": "Send the link",
+      "resetSent": "Reset link sent.",
+      "suspendTitle": "Suspend {name}?",
+      "suspendBody": "They are signed out everywhere and can’t sign in until you reactivate them.",
+      "suspendConfirm": "Suspend",
+      "suspended": "Account suspended.",
+      "reactivateTitle": "Reactivate {name}?",
+      "reactivateBody": "They can sign in again.",
+      "reactivateConfirm": "Reactivate",
+      "reactivated": "Account reactivated.",
+      "deleteTitle": "Delete {name}’s account?",
+      "deleteBody": "This can’t be undone. Accounts with bookings, places, orders or payouts can’t be deleted: suspend them instead.",
+      "deleteConfirm": "Delete",
+      "deleted": "Account deleted.",
+      "error": {
+        "notAllowed": "Only staff who manage staff can do this.",
+        "notFound": "This account no longer exists.",
+        "self": "You can’t do this to your own account.",
+        "hasHistory": "This account has bookings, places or orders: suspend it instead.",
+        "failed": "That didn’t work. Try again."
+      },
+      "title": "Account"
+    },
+    "picker": {
+      "placeholder": "Search by name or email",
+      "loading": "Loading…",
+      "none": "Nobody found.",
+      "clear": "Choose someone else"
+    }
   },
   "Questions": {
     "title": "Questions and answers",
@@ -2409,7 +2452,7 @@
     "edit": "Edit",
     "delete": "Delete",
     "deleteQuestion": "Delete this promoter?",
-    "staffEmail": "Their account email",
+    "staffEmail": "Person (pick from everyone with an account)",
     "addPromoter": "Add a promoter",
     "saveChanges": "Save changes",
     "staffError": {

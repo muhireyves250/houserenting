@@ -1,6 +1,7 @@
 import "server-only";
 import { audit } from "@/features/audit/service";
 import { moveListing } from "@/features/places/status-service";
+import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { STAFF_AREAS } from "@/lib/roles";
 
@@ -93,6 +94,62 @@ export async function setStaffAreas(adminId: string, userId: string, raw: readon
     await audit(tx, { actorId: adminId, action: "user.areas", entityType: "user", entityId: userId, data: { from: user.staffAreas, to: areas } });
     return true;
   });
+}
+
+/** Account actions (password reset, delete) are for those who manage staff. */
+async function mayManage(adminId: string) {
+  const actor = await db.user.findUnique({ where: { id: adminId }, select: { id: true, role: true } });
+  return Boolean(actor && (await canManageStaff(actor)));
+}
+
+export type AccountActionResult = { ok: true } | { ok: false; error: "notAllowed" | "notFound" | "self" | "hasHistory" | "failed" };
+
+/**
+ * Sends the person a link to choose a new password (nobody sees or sets their password). Only those who manage staff
+ * may do it; logged.
+ */
+export async function sendPasswordReset(adminId: string, userId: string, redirectTo: string): Promise<AccountActionResult> {
+  if (adminId === userId) return { ok: false, error: "self" };
+  const user = await db.user.findUnique({ where: { id: userId }, select: { email: true, role: true } });
+  if (!user) return { ok: false, error: "notFound" };
+  if (!(await mayManage(adminId))) return { ok: false, error: "notAllowed" };
+  try {
+    await auth.api.requestPasswordReset({ body: { email: user.email, redirectTo } });
+  } catch {
+    return { ok: false, error: "failed" };
+  }
+  await audit(db, { actorId: adminId, action: "user.passwordReset", entityType: "user", entityId: userId });
+  return { ok: true };
+}
+
+/**
+ * Deletes an account that has no history (no bookings, places, food or laundry orders, payouts). Accounts with a
+ * history are suspended instead, so records stay whole. Never yourself; only those who manage staff; logged.
+ */
+export async function deleteUser(adminId: string, userId: string): Promise<AccountActionResult> {
+  if (adminId === userId) return { ok: false, error: "self" };
+  const user = await db.user.findUnique({
+    where: { id: userId },
+    select: { email: true, role: true, _count: { select: { bookings: true, listings: true } } },
+  });
+  if (!user) return { ok: false, error: "notFound" };
+  if (!(await mayManage(adminId))) return { ok: false, error: "notAllowed" };
+  const [food, laundry, payouts] = await Promise.all([
+    db.foodOrder.count({ where: { customerId: userId } }),
+    db.laundryOrder.count({ where: { guestId: userId } }),
+    db.settlement.count({ where: { hostId: userId } }),
+  ]);
+  if (user._count.bookings + user._count.listings + food + laundry + payouts > 0) return { ok: false, error: "hasHistory" };
+  try {
+    await db.$transaction(async (tx) => {
+      await audit(tx, { actorId: adminId, action: "user.delete", entityType: "user", entityId: userId, data: { email: user.email } });
+      await tx.user.delete({ where: { id: userId } });
+    });
+  } catch {
+    // Something still points at this account: keep it (suspend it instead).
+    return { ok: false, error: "hasHistory" };
+  }
+  return { ok: true };
 }
 
 export async function dashboardCounts() {
