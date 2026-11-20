@@ -6,6 +6,8 @@ import { Pagination } from "@/features/admin/components/ui";
 import { allPayments } from "@/features/admin/queries";
 import { formatKigaliDateTime } from "@/features/bookings/format";
 import { ownerBalances, recentLedger } from "@/features/ledger/service";
+import { placeCommissions } from "@/features/places/commission";
+import { CommissionInput } from "@/features/places/components/CommissionInput";
 import { paymentsToReview } from "@/features/payments/service";
 import { pendingRewards } from "@/features/referrals/service";
 import { Link } from "@/i18n/navigation";
@@ -40,6 +42,8 @@ export async function MoneyView({ searchParams }: { searchParams: Props["searchP
     allPayments(page),
   ]);
   const connected = Boolean(getEnv().PAYMENT_WEBHOOK_SECRET);
+  // Each owner's places and VIIPA's commission on each (editable here).
+  const commissions = await placeCommissions(balances.map((b) => b.hostId));
   const rwf = (n: number) => formatRWF(n, locale);
   const sum = (k: "due" | "upcoming" | "paidOut" | "depositsHeld") => balances.reduce((n, b) => n + b[k], 0);
 
@@ -117,6 +121,27 @@ export async function MoneyView({ searchParams }: { searchParams: Props["searchP
                   ))}
                 </dl>
                 <PayoutForm hostId={b.hostId} due={b.due} />
+                {/* VIIPA's commission, place by place (in %; empty uses the category's rate). */}
+                {commissions.some((c) => c.hostId === b.hostId) && (
+                  <details className="group rounded-xl bg-canvas px-3 py-2">
+                    <summary className="cursor-pointer text-[13px] font-semibold text-ink">{t("commission.title")}</summary>
+                    <ul className="mt-2 flex flex-col divide-y divide-line">
+                      {commissions
+                        .filter((c) => c.hostId === b.hostId)
+                        .map((c) => (
+                          <li key={c.id} className="flex items-center justify-between gap-3 py-2">
+                            <span className="min-w-0">
+                              <span className="block truncate text-[13px] font-medium text-ink">{c.title}</span>
+                              <span className="block text-[11.5px] text-muted">
+                                {c.own ? t("commission.own", { percent: c.percent }) : t("commission.category", { percent: c.defaultPercent })}
+                              </span>
+                            </span>
+                            <CommissionInput listingId={c.id} value={c.own ? c.percent : null} placeholder={c.defaultPercent} />
+                          </li>
+                        ))}
+                    </ul>
+                  </details>
+                )}
               </li>
             ))}
           </ul>

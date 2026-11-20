@@ -831,7 +831,8 @@
         "due": "Dû à vous",
         "laundry": "Linge à traiter"
       },
-      "noPayouts": "Aucun paiement pour l’instant."
+      "noPayouts": "Aucun paiement pour l’instant.",
+      "commissionLine": "VIIPA {commission} % · vous gardez {keep} %"
     },
     "shell": {
       "console": "Propriétaire",
@@ -1655,6 +1656,15 @@
       "PENDING": "En attente",
       "FAILED": "Échoué",
       "REFUNDED": "Remboursé"
+    },
+    "commission": {
+      "title": "Commission par logement",
+      "label": "Commission (%)",
+      "save": "Enregistrer",
+      "saved": "Enregistré",
+      "error": "0–50 %",
+      "own": "Ce logement : {percent} %",
+      "category": "Taux de la catégorie : {percent} %"
     }
   },
   "Promotions": {

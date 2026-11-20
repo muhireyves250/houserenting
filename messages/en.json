@@ -831,7 +831,8 @@
         "due": "Owed to you",
         "laundry": "Laundry to handle"
       },
-      "noPayouts": "No payouts yet."
+      "noPayouts": "No payouts yet.",
+      "commissionLine": "VIIPA {commission}% · you keep {keep}%"
     },
     "shell": {
       "console": "Owner",
@@ -1655,6 +1656,15 @@
       "PENDING": "Waiting",
       "FAILED": "Failed",
       "REFUNDED": "Refunded"
+    },
+    "commission": {
+      "title": "Commission by place",
+      "label": "Commission (%)",
+      "save": "Save",
+      "saved": "Saved",
+      "error": "0–50%",
+      "own": "This place: {percent}%",
+      "category": "Category rate: {percent}%"
     }
   },
   "Promotions": {

@@ -16,6 +16,7 @@ const HOST_LIST_SELECT = {
   city: true,
   district: true,
   rejectionReason: true,
+  commissionBps: true,
   updatedAt: true,
   photos: { select: { url: true }, orderBy: { position: "asc" as const }, take: 1 },
 };

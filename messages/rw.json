@@ -831,7 +831,8 @@
         "due": "Ugomba kwishyurwa",
         "laundry": "Imyenda yo kwitaho"
       },
-      "noPayouts": "Nta bwishyu buraba."
+      "noPayouts": "Nta bwishyu buraba.",
+      "commissionLine": "VIIPA {commission}% · usigarana {keep}%"
     },
     "shell": {
       "console": "Nyir’inzu",
@@ -1655,6 +1656,15 @@
       "PENDING": "Bitegereje",
       "FAILED": "Byanze",
       "REFUNDED": "Byasubijwe"
+    },
+    "commission": {
+      "title": "Komisiyo kuri buri cumbi",
+      "label": "Komisiyo (%)",
+      "save": "Bika",
+      "saved": "Byabitswe",
+      "error": "0–50%",
+      "own": "Iri cumbi: {percent}%",
+      "category": "Igipimo cy’ubwoko: {percent}%"
     }
   },
   "Promotions": {

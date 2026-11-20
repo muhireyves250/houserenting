@@ -59,3 +59,13 @@ describe("feesFor", () => {
     expect(priceBreakdown(100_000, feesFor({ ...settings, feeModel: "INCLUDED" }, "APARTMENT")).total).toBe(100_000);
   });
 });
+
+describe("commission per place", () => {
+  it("uses the place's own rate first, then its category's, then the platform's", () => {
+    const settings = { commissionBps: 1000, guestFeeBps: 500, commissionByType: { LODGE: 1200 } };
+    expect(feesFor(settings, "LODGE", 800).commissionBps).toBe(800);
+    expect(feesFor(settings, "LODGE", 0).commissionBps).toBe(0);
+    expect(feesFor(settings, "LODGE", null).commissionBps).toBe(1200);
+    expect(feesFor(settings, "APARTMENT").commissionBps).toBe(1000);
+  });
+});

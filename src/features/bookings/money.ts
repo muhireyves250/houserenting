@@ -5,14 +5,19 @@ export type FeeConfig = { commissionBps: number | null; guestFeeBps: number | nu
  * The fees for one booking: the commission for the place's category (or the default), and the guest fee only when
  * fees are added on top. With fees included, guests pay the listed price and the platform's share comes out of it.
  */
+/**
+ * The fees for a place: its own commission when VIIPA set one for it, else its category's rate, else the platform's.
+ */
 export function feesFor(
   settings: { commissionBps: number | null; guestFeeBps: number | null; feeModel?: FeeModel; commissionByType?: Record<string, number> | null },
   placeType: string,
+  placeCommissionBps?: number | null,
 ): FeeConfig {
   const model = settings.feeModel ?? "ADD_ON";
   const byType = settings.commissionByType?.[placeType];
   return {
-    commissionBps: typeof byType === "number" && byType >= 0 ? byType : settings.commissionBps,
+    commissionBps:
+      typeof placeCommissionBps === "number" && placeCommissionBps >= 0 ? placeCommissionBps : typeof byType === "number" && byType >= 0 ? byType : settings.commissionBps,
     guestFeeBps: model === "INCLUDED" ? null : settings.guestFeeBps,
     model,
   };

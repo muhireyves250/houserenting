@@ -10,6 +10,7 @@ import { BLOCK_KINDS, createBlock, endBlock, type BlockKind, type BlockResult } 
 import { deleteDocument } from "./documents-service";
 import { savePayoutAccount, verifyPayoutAccount, type PayoutInput } from "./payout-service";
 import { deletePlace, moveListing, updatePlaceAdmin, type DeletePlaceResult, type MoveResult } from "./status-service";
+import { setPlaceCommission } from "./commission";
 import { addTeamMember, removeTeamMember, type TeamResult, type TeamRole } from "./team-service";
 
 const id = z.string().min(1).max(64);
@@ -115,4 +116,13 @@ export async function deletePlaceAction(listingId: string): Promise<DeletePlaceR
   const result = await deletePlace(user, listingId);
   if (result.ok) refresh();
   return result;
+}
+
+/** VIIPA's commission on one place, in % (empty: the category's rate). */
+export async function setPlaceCommissionAction(listingId: string, percent: number | null): Promise<{ ok: boolean }> {
+  const user = await getCurrentUser();
+  if (!user || !id.safeParse(listingId).success) return { ok: false };
+  const ok = await setPlaceCommission(user, listingId, percent === null ? null : Number(percent));
+  if (ok) refresh();
+  return { ok };
 }

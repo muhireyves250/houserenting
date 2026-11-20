@@ -145,6 +145,7 @@ export async function createRentalBooking(request: RentalRequest, now: Date = ne
     select: {
       title: true,
       type: true,
+      commissionBps: true,
       hostId: true,
       maxGuests: true,
       discountPercent: true,
@@ -222,7 +223,7 @@ export async function createRentalBooking(request: RentalRequest, now: Date = ne
   const monthRent = unit === "MONTH" ? unitPrice : unit === "YEAR" ? Math.round(unitPrice / 12) : 0;
   const deposit = long && settings.monthlyDepositPercent ? Math.round((monthRent * settings.monthlyDepositPercent) / 100) : 0;
   // Category commission and fee model in force now; kept on the booking (policySnapshot.fees).
-  const fees = feesFor(settings, listing.type);
+  const fees = feesFor(settings, listing.type, listing.commissionBps);
   let promo: Extract<PromoCheck, { ok: true }> | null = null;
   if (request.promoCode) {
     const checked = await checkPromo(db, request.promoCode, unitPrice * paidUnits, now);

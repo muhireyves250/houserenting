@@ -7,6 +7,8 @@ import { hostDashboard, hostListings } from "@/features/hosting/service";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { requireUser } from "@/lib/session";
+import { feesFor } from "@/features/bookings/money";
+import { getSettings } from "@/features/settings/service";
 
 type Props = { searchParams: Promise<{ status?: string }> };
 
@@ -14,7 +16,9 @@ type Props = { searchParams: Promise<{ status?: string }> };
 export default async function HostPlacesPage({ searchParams }: Props) {
   const user = await requireUser("/host/places");
   const raw = (await searchParams).status;
-  const [t, tHost, tType, all, dash] = await Promise.all([getTranslations("Host.dash"), getTranslations("Host"), getTranslations("ListingType"), hostListings(user.id), hostDashboard(user.id)]);
+  const [t, tHost, tType, all, dash, settings] = await Promise.all([getTranslations("Host.dash"), getTranslations("Host"), getTranslations("ListingType"), hostListings(user.id), hostDashboard(user.id), getSettings()]);
+  // VIIPA's commission on each place (its own rate, or its category's): what the owner keeps of each booking.
+  const commissionOf = (l: { type: string; commissionBps: number | null }) => (feesFor(settings, l.type, l.commissionBps).commissionBps ?? 0) / 100;
   // Only the filters that have places (with how many).
   const statuses = [...new Set(all.map((l) => l.status))];
   const status = statuses.includes(raw as (typeof statuses)[number]) ? raw : undefined;
@@ -77,6 +81,7 @@ export default async function HostPlacesPage({ searchParams }: Props) {
                       <span className="truncate text-[12.5px] text-ink/80">
                         <b className="font-semibold text-ink">{t("placeNights", { nights })}</b> · {t("placeUpcoming", { count: coming })}
                       </span>
+                      <span className="truncate text-[12px] font-medium text-emerald-700">{t("commissionLine", { commission: commissionOf(listing), keep: 100 - commissionOf(listing) })}</span>
                       {(listing.status === "REJECTED" || listing.status === "CHANGES_REQUESTED") && listing.rejectionReason && (
                         <span className="text-xs font-medium text-red-800">{tHost("needsChanges", { reason: listing.rejectionReason })}</span>
                       )}

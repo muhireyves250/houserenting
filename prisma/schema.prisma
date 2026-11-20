@@ -273,6 +273,8 @@ model Listing {
   laundryPricePerKg Int?
   laundryOrders     LaundryOrder[]
 
+  /// VIIPA's commission on this place in basis points (800 = 8%); empty = the category's rate from settings.
+  commissionBps     Int?
   @@index([status, city])
   @@index([hostId])
   @@map("listing")

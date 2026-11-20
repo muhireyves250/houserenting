@@ -182,13 +182,13 @@ export async function confirmLaundryPayment(actor: Actor, reference: string, tra
   if (!canStaff(actor, "laundry")) return { ok: false, error: "notAllowed" };
   const order = await db.laundryOrder.findUnique({
     where: { reference },
-    select: { id: true, status: true, amount: true, paidAt: true, paymentClaim: true, guestId: true, bookingId: true, listing: { select: { hostId: true, title: true, type: true } } },
+    select: { id: true, status: true, amount: true, paidAt: true, paymentClaim: true, guestId: true, bookingId: true, listing: { select: { hostId: true, title: true, type: true, commissionBps: true } } },
   });
   if (!order || order.paidAt || !order.amount || order.amount <= 0 || !PRICED_LAUNDRY.includes(order.status)) return { ok: false, error: "notFound" };
   const tx = (transactionId ?? order.paymentClaim ?? "").trim();
   if (!TX.test(tx)) return { ok: false, error: "transaction" };
   if (await db.laundryOrder.findUnique({ where: { paidReference: tx }, select: { id: true } })) return { ok: false, error: "used" };
-  const { commission, placeShare } = laundrySplit(order.amount, feesFor(await readSettings(), order.listing.type).commissionBps);
+  const { commission, placeShare } = laundrySplit(order.amount, feesFor(await readSettings(), order.listing.type, order.listing.commissionBps).commissionBps);
   const amount = order.amount;
   const done = await db.$transaction(async (t) => {
     const { count } = await t.laundryOrder.updateMany({ where: { id: order.id, paidAt: null }, data: { paidAt: now, paidReference: tx } });
