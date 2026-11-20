@@ -17,6 +17,8 @@ import { featuredListings, highlightedListings } from "@/features/listings/servi
 import { ordersLive } from "@/features/food/service";
 import { HERO_SEARCH_ID, SearchBar } from "@/features/search/components/SearchBar";
 import { getCurrentUser } from "@/lib/session";
+import { db } from "@/lib/db";
+import { todayISO } from "@/features/search/date-range";
 
 // Modern villa (Unsplash, free license), served at up to 3840px for sharp large/retina screens.
 const HERO_PHOTO = "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=3840&q=90";
@@ -47,7 +49,13 @@ export async function HomeContent({ type = null, kind = null }: { type?: PlaceTy
   const shows = (listing: { type: string }) => (type ? listing.type === type : kind ? (KIND_TYPES[kind] as readonly string[]).includes(listing.type) : true);
   const picks = highlighted.filter(shows);
   const sections = buildHomeSections(pool.filter(shows));
-  const saved = user ? await savedListingIds(user.id, [...pool, ...highlighted].map((l) => l.id)) : new Set<string>();
+  const [saved, hasStay] = user
+    ? await Promise.all([
+        savedListingIds(user.id, [...pool, ...highlighted].map((l) => l.id)),
+        // A paid stay that hasn't ended: only then can they order food to their room.
+        food ? db.booking.count({ where: { guestId: user.id, status: { in: ["CONFIRMED", "CHECKED_IN"] }, checkOut: { gte: new Date(`${todayISO()}T00:00:00Z`) } } }).then((n) => n > 0) : false,
+      ])
+    : [new Set<string>(), false];
   return (
     <>
       {/* md:-mt-[73px] (72px header + 1px border) tucks the hero under the transparent sticky header; the extra top padding keeps content clear of it. */}
@@ -98,8 +106,8 @@ export async function HomeContent({ type = null, kind = null }: { type?: PlaceTy
       <PageContainer className="pt-3 empty:hidden md:hidden">
         <InstallApp variant="banner" />
       </PageContainer>
-      {food && (
-        // Always on the home page (any category): the menu, cooked at the guest's stay.
+      {food && hasStay && (
+        // Only for guests with a paid stay under way or coming (any category): the menu, cooked at their stay.
         <PageContainer className="pt-4 md:pt-10">
             <Link
               href="/food"
@@ -140,7 +148,8 @@ export async function HomeContent({ type = null, kind = null }: { type?: PlaceTy
               ))}
             </HomeRow>
           )}
-          {!type && <RecentlyViewedRow />}
+          {/* The plain home page only: not once Lodges, Apartments or a category is chosen. */}
+          {!type && !kind && <RecentlyViewedRow />}
           {sections.map((section) => {
             const { title, subtitle } = ROWS[section.key];
             return (
