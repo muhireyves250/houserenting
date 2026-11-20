@@ -16,6 +16,8 @@ export const promoInput = z
     endsAt: z.coerce.date().nullable(),
     maxUses: z.number().int().min(1).nullable(),
     fundedBy: z.enum(["PLATFORM", "HOST"]),
+    /** Optional: the promoter this code is for (staff codes have none). */
+    promoterId: z.string().min(1).max(64).nullable().optional(),
   })
   .refine((p) => p.percentOff !== null || p.amountOff !== null, { path: ["percentOff"], message: "needsDiscount" })
   .refine((p) => !p.startsAt || !p.endsAt || p.endsAt > p.startsAt, { path: ["endsAt"], message: "endBeforeStart" });
@@ -29,9 +31,14 @@ export async function createPromo(adminId: string, raw: PromoInput): Promise<{ o
     for (const issue of parsed.error.issues) errors[issue.path.join(".") || "form"] ??= issue.message;
     return { ok: false, errors };
   }
+  // A promoter must exist and be active to get a code.
+  if (parsed.data.promoterId) {
+    const promoter = await db.promoter.findUnique({ where: { id: parsed.data.promoterId }, select: { status: true } });
+    if (!promoter || promoter.status !== "ACTIVE") return { ok: false, errors: { promoterId: "field" } };
+  }
   try {
     await db.$transaction(async (tx) => {
-      const promo = await tx.promoCode.create({ data: { ...parsed.data, createdById: adminId } });
+      const promo = await tx.promoCode.create({ data: { ...parsed.data, promoterId: parsed.data.promoterId ?? null, createdById: adminId } });
       await audit(tx, { actorId: adminId, action: "promo.create", entityType: "promo", entityId: promo.id, data: { code: promo.code } });
     });
   } catch (error) {
@@ -62,7 +69,7 @@ export async function deletePromo(adminId: string, id: string): Promise<{ ok: tr
 }
 
 export function listPromos() {
-  return db.promoCode.findMany({ orderBy: { createdAt: "desc" }, take: 100 });
+  return db.promoCode.findMany({ orderBy: { createdAt: "desc" }, take: 100, include: { promoter: { select: { code: true, user: { select: { name: true } } } } } });
 }
 
 export type PromoCheck =

@@ -1700,7 +1700,10 @@
     "startsOn": "guhera {date}",
     "delete": "Siba",
     "deleteQuestion": "Gusiba kode {code}? Ntibisubirwamo.",
-    "deleteUsed": "Iyi kode yarakoreshejwe: yihagarike aho kuyisiba."
+    "deleteUsed": "Iyi kode yarakoreshejwe: yihagarike aho kuyisiba.",
+    "forPromoter": "Yihe umwamamaza (si ngombwa)",
+    "noPromoter": "Nta mwamamaza (kode ya VIIPA)",
+    "promoterOf": "Ya {name}"
   },
   "Referrals": {
     "title": "Tumira inshuti",
@@ -2476,7 +2479,12 @@
       "notAllowed": "Ntushobora gukora ibi."
     },
     "visitsN": "{count, plural, one {gusura #} other {gusura #}}",
-    "bookingsN": "{count, plural, one {ubukode #} other {ubukode #}}"
+    "bookingsN": "{count, plural, one {ubukode #} other {ubukode #}}",
+    "inviteQrTitle": "Sikana wiyandikishe",
+    "inviteQrHint": "Inshuti zawe zisikana ibi ngo ziyandikishe ku butumire bwawe.",
+    "yourPromoCodes": "Kode zawe za promosiyo",
+    "off": "zigabanyijwe",
+    "promoCodesHint": "Zisangize: abakiliya bafata icumbi bakoresheje kode yawe babarwa nk’abawe."
   },
   "Reports": {
     "intro": "Amafaranga n'ibikorwa bikurikije itariki y'icumbi. Amacumbi yishyuwe n'abataje arabarwa; ayahagaritswe abarwa gusa ku mafaranga yasubijwe. Ingwate zirabikwa, si inyungu.",

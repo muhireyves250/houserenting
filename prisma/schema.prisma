@@ -772,7 +772,11 @@ model PromoCode {
   createdById String
   createdAt   DateTime     @default(now())
   bookings    Booking[]
+  /// Optional: the promoter this code was given to (bookings using it count as theirs).
+  promoterId  String?
+  promoter    Promoter?    @relation(fields: [promoterId], references: [id], onDelete: SetNull)
 
+  @@index([promoterId])
   @@map("promoCode")
 }
 
@@ -1201,6 +1205,8 @@ model Promoter {
   visits       PromoterVisit[]
   rewards      PromoterReward[]
   bookings     Booking[]
+  /// Promo codes VIIPA gave this promoter to share.
+  promoCodes   PromoCode[]
 
   @@map("promoter")
 }

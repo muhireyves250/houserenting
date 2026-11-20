@@ -4,6 +4,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { Chip, FillScreen } from "@/features/admin/components/kit";
 import { PromoForm, PromoToggle } from "@/features/admin/components/PromoForm";
 import { listPromos } from "@/features/promotions/service";
+import { allPromoters } from "@/features/promoters/service";
 import { ConfirmAction } from "@/features/admin/components/ConfirmAction";
 import { deletePromoAction } from "@/features/admin/money-actions";
 import { formatRWF } from "@/lib/format";
@@ -20,7 +21,9 @@ const STATE_TONE: Record<State, string> = {
 
 /** Promo codes: the new-code form beside the list; each code a card with what it gives, who pays and how far it's used. */
 export async function PromotionsView({ tabs }: { tabs: ReactNode }) {
-  const [t, locale, promos] = await Promise.all([getTranslations("Promotions"), getLocale(), listPromos()]);
+  const [t, locale, promos, promoterRows] = await Promise.all([getTranslations("Promotions"), getLocale(), listPromos(), allPromoters()]);
+  // Active promoters a new code can be given to (optional).
+  const promoters = promoterRows.filter((p) => p.status === "ACTIVE").map((p) => ({ id: p.id, name: p.user.name, code: p.code }));
   const date = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeZone: "Africa/Kigali" });
   const now = new Date();
   const stateOf = (p: (typeof promos)[number]): State =>
@@ -40,11 +43,11 @@ export async function PromotionsView({ tabs }: { tabs: ReactNode }) {
             {t("newCode")}
           </summary>
           <div className="border-t border-line p-3">
-            <PromoForm />
+            <PromoForm promoters={promoters} />
           </div>
         </details>
         <div className="no-scrollbar hidden min-h-0 overflow-y-auto lg:block">
-          <PromoForm />
+          <PromoForm promoters={promoters} />
         </div>
 
         <section className="flex min-h-0 flex-col gap-3">
@@ -78,6 +81,7 @@ export async function PromotionsView({ tabs }: { tabs: ReactNode }) {
                       <span className="mt-1 flex flex-wrap gap-1.5">
                         <Chip tone={STATE_TONE[state]}>{t(`state.${state}`)}</Chip>
                         <Chip>{t(`fundingShort.${p.fundedBy}`)}</Chip>
+                        {p.promoter && <Chip tone="bg-primary/10 text-primary">{t("promoterOf", { name: p.promoter.user.name })}</Chip>}
                       </span>
                     </span>
                     <span className="flex shrink-0 flex-col items-end gap-1.5">

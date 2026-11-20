@@ -73,12 +73,20 @@ export async function recordVisit(code: string, visitor: string, now: Date = new
   return true;
 }
 
-/** Links a new booking to the promoter from the visitor's QR cookie: an active promoter, never the guest themselves. */
+/**
+ * Links a new booking to a promoter: the one whose promo code the guest used, else the one whose QR link they
+ * opened (cookie). Only an active promoter, never the guest themselves.
+ */
 export async function attributeBooking(reference: string, guestId: string, code: string | undefined): Promise<void> {
-  if (!code || !isPromoterCode(code)) return;
-  const p = await db.promoter.findUnique({ where: { code }, select: { id: true, userId: true, status: true } });
-  if (!p || p.status !== "ACTIVE" || p.userId === guestId) return;
-  await db.booking.updateMany({ where: { reference, guestId, promoterId: null }, data: { promoterId: p.id } });
+  const counts = (p: { userId: string; status: string } | null | undefined) => Boolean(p && p.status === "ACTIVE" && p.userId !== guestId);
+  const booking = await db.booking.findFirst({ where: { reference, guestId }, select: { promoCode: { select: { promoter: { select: { id: true, userId: true, status: true } } } } } });
+  const fromCode = booking?.promoCode?.promoter;
+  let promoterId = counts(fromCode) ? fromCode!.id : null;
+  if (!promoterId && code && isPromoterCode(code)) {
+    const p = await db.promoter.findUnique({ where: { code }, select: { id: true, userId: true, status: true } });
+    if (counts(p)) promoterId = p!.id;
+  }
+  if (promoterId) await db.booking.updateMany({ where: { reference, guestId, promoterId: null }, data: { promoterId } });
 }
 
 /**
@@ -130,14 +138,17 @@ export async function promoterDashboard(userId: string, now: Date = new Date()) 
   const p = await db.promoter.findUnique({ where: { userId } });
   if (!p) return null;
   const since = new Date(now.getTime() - 30 * 86_400_000);
-  const [visits30, bookings, rewards] = await Promise.all([
+  const [visits30, bookings, rewards, promoCodes] = await Promise.all([
     db.promoterVisit.count({ where: { promoterId: p.id, createdAt: { gte: since } } }),
     db.booking.count({ where: { promoterId: p.id, status: { in: ["CONFIRMED", "CHECKED_IN", "COMPLETED"] } } }),
     db.promoterReward.findMany({ where: { promoterId: p.id }, orderBy: { createdAt: "desc" }, take: 50, select: { id: true, amount: true, status: true, paidAt: true, createdAt: true } }),
+    // Promo codes VIIPA gave them to share (still on).
+    db.promoCode.findMany({ where: { promoterId: p.id, active: true }, orderBy: { createdAt: "desc" }, select: { code: true, percentOff: true, amountOff: true, endsAt: true } }),
   ]);
   const sum = (f: (r: (typeof rewards)[number]) => boolean) => rewards.filter(f).reduce((a, r) => a + r.amount, 0);
   return {
     promoter: p,
+    promoCodes,
     visits30,
     bookings,
     rewards,

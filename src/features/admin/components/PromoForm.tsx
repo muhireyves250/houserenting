@@ -9,10 +9,10 @@ import { createPromoAction, setPromoActiveAction } from "../money-actions";
 
 const num = (v: string) => (v.trim() === "" ? null : Number(v));
 
-export function PromoForm() {
+export function PromoForm({ promoters = [] }: { promoters?: { id: string; name: string; code: string }[] }) {
   const t = useTranslations("Promotions");
   const router = useRouter();
-  const [form, setForm] = useState({ code: "", description: "", percentOff: "", amountOff: "", minSubtotal: "", startsAt: "", endsAt: "", maxUses: "", fundedBy: "PLATFORM" });
+  const [form, setForm] = useState({ code: "", description: "", percentOff: "", amountOff: "", minSubtotal: "", startsAt: "", endsAt: "", maxUses: "", fundedBy: "PLATFORM", promoterId: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [pending, start] = useTransition();
   const set = (key: keyof typeof form, value: string) => setForm((f) => ({ ...f, [key]: value }));
@@ -32,6 +32,17 @@ export function PromoForm() {
         <Field label={t("maxUses")} type="number" min={1} value={form.maxUses} onChange={(e) => set("maxUses", e.target.value)} error={err("maxUses")} />
         <Field label={t("startsAt")} type="date" value={form.startsAt} onChange={(e) => set("startsAt", e.target.value)} error={err("startsAt")} />
         <Field label={t("endsAt")} type="date" value={form.endsAt} onChange={(e) => set("endsAt", e.target.value)} error={err("endsAt")} />
+        {/* Optional: give the code to a promoter (bookings with it count as theirs); otherwise it's VIIPA's own. */}
+        {promoters.length > 0 && (
+          <SelectField label={t("forPromoter")} className="sm:col-span-2" value={form.promoterId} onChange={(e) => set("promoterId", e.target.value)}>
+            <option value="">{t("noPromoter")}</option>
+            {promoters.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name} · {p.code}
+              </option>
+            ))}
+          </SelectField>
+        )}
         <AreaField label={t("description")} className="sm:col-span-2" rows={2} maxLength={200} value={form.description} onChange={(e) => set("description", e.target.value)} />
       </div>
       <div className="mt-4 flex justify-end">
@@ -50,10 +61,11 @@ export function PromoForm() {
                 startsAt: form.startsAt ? new Date(`${form.startsAt}T00:00:00+02:00`) : null,
                 endsAt: form.endsAt ? new Date(`${form.endsAt}T23:59:59+02:00`) : null,
                 fundedBy: form.fundedBy as "PLATFORM" | "HOST",
+                promoterId: form.promoterId || null,
               });
               if (result.ok) {
                 setErrors({});
-                setForm({ code: "", description: "", percentOff: "", amountOff: "", minSubtotal: "", startsAt: "", endsAt: "", maxUses: "", fundedBy: "PLATFORM" });
+                setForm({ code: "", description: "", percentOff: "", amountOff: "", minSubtotal: "", startsAt: "", endsAt: "", maxUses: "", fundedBy: "PLATFORM", promoterId: "" });
                 router.refresh();
               } else setErrors(result.errors);
             })

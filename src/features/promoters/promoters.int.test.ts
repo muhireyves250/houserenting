@@ -96,4 +96,15 @@ describe("staff manage promoters", () => {
     expect(await deletePromoter(admin, p.id)).toEqual({ ok: true });
     expect(await db.promoter.count({ where: { id: p.id } })).toBe(0);
   });
+
+  it("a promo code given to a promoter credits bookings that use it (no QR visit needed), and shows on their page", async () => {
+    expect(await staffAddPromoter(admin, "pro@example.com", { payoutMethod: "MOBILE_MONEY", payoutName: "Pro", payoutNumber: "0788000000" })).toEqual({ ok: true });
+    const p = await db.promoter.findUniqueOrThrow({ where: { userId: "pro" } });
+    const promo = await db.promoCode.create({ data: { code: "PRO10", percentOff: 10, createdById: "admin", promoterId: p.id } });
+    const ref = await stay("guest", "2026-10-10");
+    await db.booking.update({ where: { reference: ref }, data: { promoCodeId: promo.id } });
+    await attributeBooking(ref, "guest", undefined);
+    expect((await db.booking.findUniqueOrThrow({ where: { reference: ref } })).promoterId).toBe(p.id);
+    expect((await promoterDashboard("pro"))?.promoCodes.map((c) => c.code)).toEqual(["PRO10"]);
+  });
 });

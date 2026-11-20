@@ -1700,7 +1700,10 @@
     "startsOn": "à partir du {date}",
     "delete": "Supprimer",
     "deleteQuestion": "Supprimer le code {code} ? C’est irréversible.",
-    "deleteUsed": "Ce code a été utilisé : désactivez-le plutôt."
+    "deleteUsed": "Ce code a été utilisé : désactivez-le plutôt.",
+    "forPromoter": "Le donner à un promoteur (facultatif)",
+    "noPromoter": "Aucun promoteur (code de VIIPA)",
+    "promoterOf": "Pour {name}"
   },
   "Referrals": {
     "title": "Inviter des amis",
@@ -2476,7 +2479,12 @@
       "notAllowed": "Vous ne pouvez pas faire cela."
     },
     "visitsN": "{count, plural, one {# visite} other {# visites}}",
-    "bookingsN": "{count, plural, one {# réservation} other {# réservations}}"
+    "bookingsN": "{count, plural, one {# réservation} other {# réservations}}",
+    "inviteQrTitle": "Scanner pour s’inscrire",
+    "inviteQrHint": "Vos amis scannent ceci pour s’inscrire avec votre invitation.",
+    "yourPromoCodes": "Vos codes promo",
+    "off": "de réduction",
+    "promoCodesHint": "Partagez-les : les clients qui réservent avec un de vos codes comptent pour vous."
   },
   "Reports": {
     "intro": "Argent et activité par date de séjour. Les séjours payés et non présentés comptent ; les séjours annulés seulement pour leurs remboursements. Les cautions sont retenues, pas des revenus.",

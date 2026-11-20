@@ -30,6 +30,9 @@ export default async function PromotePage() {
     ? { code: await ensureReferralCode(user.id), summary: await referralSummary(user.id), reward: settings.referralRewardAmount }
     : null;
   const qr = link && data?.promoter.status === "ACTIVE" ? await QRCode.toString(link, { type: "svg", margin: 1, color: { dark: "#0b1b33", light: "#ffffff" } }) : null;
+  // Any client can invite friends: their invite link as a QR code to scan too.
+  const inviteLink = referral ? `${getEnv().BETTER_AUTH_URL.replace(/\/$/, "")}/?ref=${referral.code}` : null;
+  const inviteQr = inviteLink ? await QRCode.toString(inviteLink, { type: "svg", margin: 1, color: { dark: "#0b1b33", light: "#ffffff" } }) : null;
 
   return (
     <PageContainer className="max-w-2xl py-6 md:py-10 max-md:pt-0">
@@ -48,6 +51,16 @@ export default async function PromotePage() {
             earned={referral.summary.approved}
             reward={referral.reward}
           />
+          {inviteQr && (
+            <div className="mt-3 flex items-center gap-4 rounded-2xl bg-surface p-4 ring-1 ring-line">
+              <div className="size-32 shrink-0 rounded-xl bg-white p-1.5 ring-1 ring-line [&_svg]:size-full" dangerouslySetInnerHTML={{ __html: inviteQr }} />
+              <div className="flex min-w-0 flex-col gap-1">
+                <p className="text-[15px] font-semibold text-ink">{t("inviteQrTitle")}</p>
+                <p className="text-[13px] text-muted">{t("inviteQrHint")}</p>
+                <p className="font-mono text-[13px] font-semibold text-primary">{referral.code}</p>
+              </div>
+            </div>
+          )}
         </div>
       )}
       <p className="mb-5 text-[15px] text-muted">{settings.promoterEnabled ? (reward ? t("introReward", { reward }) : t("intro")) : t("notOpen")}</p>
@@ -71,6 +84,22 @@ export default async function PromotePage() {
                   <p className="text-[13px] text-muted">{t("codeHint")}</p>
                 </div>
               </div>
+            </Card>
+          )}
+          {/* Promo codes VIIPA gave this promoter: guests who use one count as theirs. */}
+          {data.promoter.status === "ACTIVE" && data.promoCodes.length > 0 && (
+            <Card title={t("yourPromoCodes")}>
+              <ul className="flex flex-col gap-2">
+                {data.promoCodes.map((c) => (
+                  <li key={c.code} className="flex items-center justify-between gap-3 rounded-xl bg-canvas px-4 py-3">
+                    <span className="rounded-lg border-2 border-dashed border-primary/40 bg-primary/[0.06] px-3 py-1 font-mono text-[15px] font-bold text-primary">{c.code}</span>
+                    <span className="text-[13px] font-semibold text-ink">
+                      {c.percentOff ? `${c.percentOff}%` : formatRWF(c.amountOff ?? 0, locale)} {t("off")}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-3 text-[13px] text-muted">{t("promoCodesHint")}</p>
             </Card>
           )}
           <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">

@@ -1700,7 +1700,10 @@
     "startsOn": "from {date}",
     "delete": "Delete",
     "deleteQuestion": "Delete the code {code}? This can’t be undone.",
-    "deleteUsed": "This code was used: turn it off instead."
+    "deleteUsed": "This code was used: turn it off instead.",
+    "forPromoter": "Give it to a promoter (optional)",
+    "noPromoter": "No promoter (VIIPA’s own code)",
+    "promoterOf": "For {name}"
   },
   "Referrals": {
     "title": "Invite friends",
@@ -2476,7 +2479,12 @@
       "notAllowed": "You can't do this."
     },
     "visitsN": "{count, plural, one {# visit} other {# visits}}",
-    "bookingsN": "{count, plural, one {# booking} other {# bookings}}"
+    "bookingsN": "{count, plural, one {# booking} other {# bookings}}",
+    "inviteQrTitle": "Scan to join",
+    "inviteQrHint": "Friends scan this to sign up with your invite.",
+    "yourPromoCodes": "Your promo codes",
+    "off": "off",
+    "promoCodesHint": "Share these: guests who book with one of your codes count as yours."
   },
   "Reports": {
     "intro": "Money and activity by stay date. Paid stays and no-shows count; cancelled stays only for their refunds. Deposits are held, not revenue.",
