@@ -90,10 +90,13 @@ export async function attributeBooking(reference: string, guestId: string, code:
 }
 
 /**
- * When a stay the promoter brought finishes: one reward (configurable) waits for staff approval.
- * No reward for their own stays, for suspended promoters, or for the same guest twice within 30 days.
+ * When a guest pays for a booking the promoter brought: one reward waits for staff approval (the share on their
+ * promo code, or the programme's reward for QR-link guests). No reward for their own stays, for suspended promoters,
+ * or (QR links) for the same guest twice within 30 days. A refunded cancellation withdraws it.
  */
 export async function maybePromoterReward(tx: Prisma.TransactionClient, bookingId: string, now: Date = new Date()): Promise<void> {
+  // One reward per booking (made when the guest pays; finishing the stay later doesn't add another).
+  if (await tx.promoterReward.findUnique({ where: { bookingId }, select: { id: true } })) return;
   const config = await tx.platformConfig.findUnique({ where: { id: 1 }, select: { promoterEnabled: true, promoterRewardFixed: true, promoterRewardBps: true } });
   const b = await tx.booking.findUnique({
     where: { id: bookingId },
@@ -244,4 +247,9 @@ export async function deletePromoter(actor: Actor, promoterId: string): Promise<
     await audit(tx, { actorId: actor.id, action: "promoter.delete", entityType: "promoter", entityId: promoterId, data: { code: p.code } });
   });
   return { ok: true };
+}
+
+/** A paid booking was cancelled and refunded: its promoter reward is withdrawn (unless already paid out). */
+export async function voidPromoterReward(tx: Prisma.TransactionClient, bookingId: string): Promise<void> {
+  await tx.promoterReward.updateMany({ where: { bookingId, paidAt: null, status: { not: "VOID" } }, data: { status: "VOID" } });
 }

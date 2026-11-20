@@ -8,6 +8,7 @@ import { createTicket } from "@/features/support/service";
 import { db } from "@/lib/db";
 import { canOn } from "@/features/places/access";
 import { checkRequest, daysBetween, priceChangeFor, shouldAutoHide, type RequestInput, type RequestProblem } from "./rules";
+import { voidPromoterReward } from "@/features/promoters/service";
 
 type Actor = { id: string; role?: string | null };
 const DAY_MS = 86_400_000;
@@ -180,6 +181,8 @@ export async function decideStayRequest(
         } else if (request.kind === "CANCEL") {
           if (!canTransition(b.status, "CANCELLED")) return { ok: false, error: "invalid" } as const;
           await tx.booking.update({ where: { id: b.id }, data: { status: "CANCELLED", refundStatus: "PENDING", refundAmount: refund ?? b.total } });
+          // Refunded: the promoter's reward for it is withdrawn.
+          await voidPromoterReward(tx, b.id);
           await tx.bookingEvent.create({ data: { bookingId: b.id, fromStatus: b.status, toStatus: "CANCELLED", actorId: actor.id, reason: `cancellation request: ${request.reason}` } });
         }
       }

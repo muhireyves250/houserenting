@@ -1708,7 +1708,7 @@
         "PAID": "paid",
         "VOID": "declined"
       },
-      "rewardLater": "{amount} once the stay is finished",
+      "rewardLater": "{amount} once the guest has paid",
       "rewardNone": "None: no promoter reward is set (Settings → Promoters)"
     }
   },
@@ -2493,8 +2493,8 @@
   "Promoters": {
     "title": "Promote and earn",
     "back": "Profile",
-    "intro": "Share your own QR code. When guests you bring finish a paid stay, you earn a reward.",
-    "introReward": "Share your own QR code. When guests you bring finish a paid stay, you earn {reward} per stay.",
+    "intro": "Share your own QR code. When guests you bring pay for a booking, you earn a reward.",
+    "introReward": "Share your own QR code. When guests you bring pay for a booking, you earn {reward}.",
     "notOpen": "The promoter programme isn't open yet.",
     "applyTitle": "Become a promoter",
     "about": "Where will you promote?",
@@ -2520,7 +2520,7 @@
     "pending": "Waiting",
     "paid": "Paid",
     "payoutTitle": "Where rewards are paid",
-    "rules": "Rewards are checked by our team. Your own stays, cancelled or unpaid bookings, and the same guest twice within 30 days don't count.",
+    "rules": "Rewards are checked by our team. Your own stays and unpaid bookings don’t count; a refunded cancellation takes the reward back.",
     "adminIntro": "Approve or suspend promoters, and approve and pay their rewards. Reward amounts are set in Settings.",
     "rewardsTitle": "Rewards to handle",
     "promotersTitle": "Promoters",
@@ -2565,16 +2565,16 @@
     "inviteQrHint": "Friends scan this to sign up with your invite.",
     "yourPromoCodes": "Your promo codes",
     "off": "off",
-    "promoCodesHint": "Share these: guests who book with one of your codes count as yours.",
+    "promoCodesHint": "Share these: guests who book with one of your codes count as yours, and you earn as soon as they pay.",
     "promoCodesLabel": "Promo codes:",
     "noPromoCodes": "none yet",
     "givePromoCode": "Give a promo code",
-    "rateLine": "You earn {reward} for each stay you bring, once the guest’s stay is finished.",
+    "rateLine": "You earn {reward} for each booking you bring, as soon as the guest pays.",
     "noRateYet": "VIIPA hasn’t set the promoter reward yet. Your bookings are counted; you’ll earn once it’s set.",
     "coming": "Coming",
     "yourBookings": "Bookings you brought",
     "earnState": {
-      "coming": "when the stay ends",
+      "coming": "when the guest pays",
       "waiting": "waiting for approval",
       "paid": "paid",
       "void": "not paid",

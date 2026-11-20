@@ -1708,7 +1708,7 @@
         "PAID": "cyishyuwe",
         "VOID": "cyanzwe"
       },
-      "rewardLater": "{amount} igihe kubamo kurangiye",
+      "rewardLater": "{amount} umukiliya amaze kwishyura",
       "rewardNone": "Nta na kimwe: nta gihembo cyashyizweho (Igenamiterere → Abamamaza)"
     }
   },
@@ -2493,8 +2493,8 @@
   "Promoters": {
     "title": "Kwamamaza no kwinjiza",
     "back": "Umwirondoro",
-    "intro": "Sangiza QR code yawe. Abashyitsi uzanye nibarangiza icumbi ryishyuwe, uhabwa igihembo.",
-    "introReward": "Sangiza QR code yawe. Abashyitsi uzanye nibarangiza icumbi ryishyuwe, uhabwa {reward} kuri buri cumbi.",
+    "intro": "Sangiza QR code yawe. Abakiliya uzanye nibishyura icyumba, uhabwa igihembo.",
+    "introReward": "Sangiza QR code yawe. Abakiliya uzanye nibishyura icyumba, uhabwa {reward}.",
     "notOpen": "Gahunda y'abamamaza ntirafungurwa.",
     "applyTitle": "Ba umwamamaza",
     "about": "Uzamamariza he?",
@@ -2520,7 +2520,7 @@
     "pending": "Bitegereje",
     "paid": "Byishyuwe",
     "payoutTitle": "Aho wishyurirwa ibihembo",
-    "rules": "Ibihembo bigenzurwa n'itsinda ryacu. Amacumbi yawe bwite, amafatwa yahagaritswe cyangwa atishyuwe, n'umushyitsi umwe kabiri mu minsi 30 ntibibarwa.",
+    "rules": "Ibihembo bigenzurwa n’ikipe yacu. Ibyawe bwite n’ibitishyuwe ntibibarwa; iyo byasubijwe amafaranga igihembo kirakurwaho.",
     "adminIntro": "Emeza cyangwa uhagarike abamamaza, wemeze kandi wishyure ibihembo byabo. Amafaranga y'ibihembo ashyirwaho muri Igenamiterere.",
     "rewardsTitle": "Ibihembo byo gukemura",
     "promotersTitle": "Abamamaza",
@@ -2565,16 +2565,16 @@
     "inviteQrHint": "Inshuti zawe zisikana ibi ngo ziyandikishe ku butumire bwawe.",
     "yourPromoCodes": "Kode zawe za promosiyo",
     "off": "zigabanyijwe",
-    "promoCodesHint": "Zisangize: abakiliya bafata icumbi bakoresheje kode yawe babarwa nk’abawe.",
+    "promoCodesHint": "Zisangize: abakiliya bafata icyumba bakoresheje kode yawe babarwa nk’abawe, ugahembwa bakimara kwishyura.",
     "promoCodesLabel": "Kode za promosiyo:",
     "noPromoCodes": "nta na imwe",
     "givePromoCode": "Muhe kode ya promosiyo",
-    "rateLine": "Uhabwa {reward} kuri buri cumbi uzanye, igihe umushyitsi arangije kubamo.",
+    "rateLine": "Uhabwa {reward} kuri buri cyumba uzanye, ako kanya umukiliya yishyuye.",
     "noRateYet": "VIIPA ntirashyiraho igihembo cy’abamamaza. Ibyo uzanye birabarwa; uzahembwa nikimara gushyirwaho.",
     "coming": "Biraza",
     "yourBookings": "Ibyo wazanye",
     "earnState": {
-      "coming": "kubamo nikurangira",
+      "coming": "umukiliya niyishyura",
       "waiting": "bitegereje kwemezwa",
       "paid": "byishyuwe",
       "void": "ntibizishyurwa",

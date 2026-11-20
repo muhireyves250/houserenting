@@ -1708,7 +1708,7 @@
         "PAID": "payée",
         "VOID": "refusée"
       },
-      "rewardLater": "{amount} une fois le séjour terminé",
+      "rewardLater": "{amount} une fois que le client a payé",
       "rewardNone": "Aucune : pas de récompense définie (Paramètres → Promoteurs)"
     }
   },
@@ -2493,8 +2493,8 @@
   "Promoters": {
     "title": "Promouvoir et gagner",
     "back": "Profil",
-    "intro": "Partagez votre propre code QR. Quand les voyageurs que vous amenez terminent un séjour payé, vous gagnez une récompense.",
-    "introReward": "Partagez votre propre code QR. Quand les voyageurs que vous amenez terminent un séjour payé, vous gagnez {reward} par séjour.",
+    "intro": "Partagez votre QR code. Quand les clients que vous amenez paient une réservation, vous gagnez une récompense.",
+    "introReward": "Partagez votre QR code. Quand les clients que vous amenez paient une réservation, vous gagnez {reward}.",
     "notOpen": "Le programme de promoteurs n'est pas encore ouvert.",
     "applyTitle": "Devenir promoteur",
     "about": "Où ferez-vous la promotion ?",
@@ -2520,7 +2520,7 @@
     "pending": "En attente",
     "paid": "Payé",
     "payoutTitle": "Où recevoir vos récompenses",
-    "rules": "Les récompenses sont vérifiées par notre équipe. Vos propres séjours, les réservations annulées ou impayées, et le même voyageur deux fois en 30 jours ne comptent pas.",
+    "rules": "Les récompenses sont vérifiées par notre équipe. Vos propres séjours et les réservations impayées ne comptent pas ; une annulation remboursée retire la récompense.",
     "adminIntro": "Validez ou suspendez les promoteurs, et validez et payez leurs récompenses. Les montants se règlent dans Paramètres.",
     "rewardsTitle": "Récompenses à traiter",
     "promotersTitle": "Promoteurs",
@@ -2565,16 +2565,16 @@
     "inviteQrHint": "Vos amis scannent ceci pour s’inscrire avec votre invitation.",
     "yourPromoCodes": "Vos codes promo",
     "off": "de réduction",
-    "promoCodesHint": "Partagez-les : les clients qui réservent avec un de vos codes comptent pour vous.",
+    "promoCodesHint": "Partagez-les : les clients qui réservent avec un de vos codes comptent pour vous, et vous gagnez dès qu’ils paient.",
     "promoCodesLabel": "Codes promo :",
     "noPromoCodes": "aucun",
     "givePromoCode": "Donner un code promo",
-    "rateLine": "Vous gagnez {reward} pour chaque séjour apporté, une fois le séjour terminé.",
+    "rateLine": "Vous gagnez {reward} pour chaque réservation apportée, dès que le client paie.",
     "noRateYet": "VIIPA n’a pas encore fixé la récompense. Vos réservations sont comptées ; vous gagnerez dès qu’elle sera fixée.",
     "coming": "À venir",
     "yourBookings": "Réservations apportées",
     "earnState": {
-      "coming": "à la fin du séjour",
+      "coming": "quand le client paie",
       "waiting": "en attente d’approbation",
       "paid": "payée",
       "void": "non payée",

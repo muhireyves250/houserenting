@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { Prisma } from "@/generated/prisma/client";
 import { audit } from "@/features/audit/service";
 import { db } from "@/lib/db";
+import { maybePromoterReward } from "@/features/promoters/service";
 import { normalizeCode, promoDiscount } from "./discount";
 
 export const promoInput = z
@@ -71,6 +72,11 @@ export async function setPromoShare(adminId: string, id: string, percent: number
   await db.$transaction(async (tx) => {
     await tx.promoCode.update({ where: { id }, data: { promoterBps: bps } });
     await audit(tx, { actorId: adminId, action: "promo.share", entityType: "promo", entityId: id, data: { from: promo.promoterBps, to: bps } });
+    // Bookings with this code that guests already paid earn the promoter their share now.
+    if (bps) {
+      const paid = await tx.booking.findMany({ where: { promoCodeId: id, promoterId: promo.promoterId, status: { in: ["CONFIRMED", "CHECKED_IN", "COMPLETED"] }, promoterReward: null }, select: { id: true } });
+      for (const b of paid) await maybePromoterReward(tx, b.id);
+    }
   });
   return true;
 }

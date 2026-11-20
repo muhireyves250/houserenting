@@ -5,6 +5,7 @@ import { audit } from "@/features/audit/service";
 import { notify, notifyAdmins } from "@/features/notifications/service";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
+import { maybePromoterReward } from "@/features/promoters/service";
 
 /**
  * The callback body every provider is mapped to (MTN MoMo, Airtel Money or a gateway each get a small adapter that
@@ -122,6 +123,8 @@ async function apply(tx: Prisma.TransactionClient, event: CallbackBody, actorId:
   }
 
   await tx.booking.update({ where: { id: booking.id }, data: { status: "CONFIRMED", holdExpiresAt: null } });
+  // The promoter who brought this guest earns their reward as soon as the guest has paid.
+  await maybePromoterReward(tx, booking.id);
   await tx.bookingEvent.create({
     data: {
       bookingId: booking.id,
