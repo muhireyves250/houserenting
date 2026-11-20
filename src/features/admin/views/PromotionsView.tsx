@@ -4,6 +4,8 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { Chip, FillScreen } from "@/features/admin/components/kit";
 import { PromoForm, PromoToggle } from "@/features/admin/components/PromoForm";
 import { listPromos } from "@/features/promotions/service";
+import { ConfirmAction } from "@/features/admin/components/ConfirmAction";
+import { deletePromoAction } from "@/features/admin/money-actions";
 import { formatRWF } from "@/lib/format";
 import { cn } from "@/lib/cn";
 
@@ -78,7 +80,13 @@ export async function PromotionsView({ tabs }: { tabs: ReactNode }) {
                         <Chip>{t(`fundingShort.${p.fundedBy}`)}</Chip>
                       </span>
                     </span>
-                    <PromoToggle id={p.id} active={p.active} />
+                    <span className="flex shrink-0 flex-col items-end gap-1.5">
+                      <PromoToggle id={p.id} active={p.active} />
+                      {/* Never used: it can be deleted (used codes stay on record). */}
+                      {p.usedCount === 0 && (
+                        <ConfirmAction label={t("delete")} question={t("deleteQuestion", { code: p.code })} action={deletePromoAction.bind(null, p.id)} errors={{ used: t("deleteUsed") }} />
+                      )}
+                    </span>
                   </div>
 
                   {/* How far it's used. */}

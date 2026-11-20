@@ -7,7 +7,7 @@ import { savedListingIds } from "@/features/favorites/service";
 import { CompactListingCard } from "@/features/home/components/CompactListingCard";
 import { HomeRow } from "@/features/home/components/HomeRow";
 import { buildHomeSections, type HomeSectionKey } from "@/features/home/sections";
-import type { PlaceType } from "@/features/search/params";
+import { KIND_TYPES, type PlaceKind, type PlaceType } from "@/features/search/params";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PendingArea, RowsSkeleton } from "@/components/ui/Skeletons";
 import { House, UtensilsCrossed, ChevronRight } from "lucide-react";
@@ -33,7 +33,7 @@ const ROWS = {
 } as const satisfies Record<HomeSectionKey, { title: string; subtitle: string }>;
 
 /** Home page body: hero search and rows of homes by destination. Also the backdrop for direct /login, /signup visits. */
-export async function HomeContent({ type = null }: { type?: PlaceType | null }) {
+export async function HomeContent({ type = null, kind = null }: { type?: PlaceType | null; kind?: PlaceKind | null }) {
   const [t, tListings, tFood, pool, highlighted, user, food] = await Promise.all([
     getTranslations("Home"),
     getTranslations("Listings"),
@@ -43,9 +43,10 @@ export async function HomeContent({ type = null }: { type?: PlaceType | null }) 
     getCurrentUser(),
     ordersLive(),
   ]);
-  const picks = type ? highlighted.filter((listing) => listing.type === type) : highlighted;
-  // Category chips (phones) filter the rows right here, without leaving the page.
-  const sections = buildHomeSections(type ? pool.filter((listing) => listing.type === type) : pool);
+  // Both lodges and apartments, until the search switch (computers) or a category chip (phones) narrows the rows.
+  const shows = (listing: { type: string }) => (type ? listing.type === type : kind ? (KIND_TYPES[kind] as readonly string[]).includes(listing.type) : true);
+  const picks = highlighted.filter(shows);
+  const sections = buildHomeSections(pool.filter(shows));
   const saved = user ? await savedListingIds(user.id, [...pool, ...highlighted].map((l) => l.id)) : new Set<string>();
   return (
     <>
@@ -83,7 +84,7 @@ export async function HomeContent({ type = null }: { type?: PlaceType | null }) 
           />
         </div>
         <PageContainer className="relative flex flex-col gap-8 md:items-center md:pt-44 md:pb-28">
-          <SearchBar id={HERO_SEARCH_ID} />
+          <SearchBar id={HERO_SEARCH_ID} onHome homeKind={kind} />
         </PageContainer>
       </section>
       <PendingArea
@@ -131,7 +132,7 @@ export async function HomeContent({ type = null }: { type?: PlaceType | null }) 
       )}
       {sections.length > 0 && (
         // Keyed by category: switching chips fades the new rows in.
-        <PageContainer key={type ?? "all"} className="flex flex-col gap-9 pt-4 pb-8 motion-safe:animate-pop-in md:gap-12 md:py-14">
+        <PageContainer key={type ?? kind ?? "all"} className="flex flex-col gap-9 pt-4 pb-8 motion-safe:animate-pop-in md:gap-12 md:py-14">
           {picks.length > 0 && (
             <HomeRow title={tListings("rowHighlighted")} subtitle={tListings("rowHighlightedSub")}>
               {picks.map((listing) => (

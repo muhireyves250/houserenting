@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { recordSettlement, type SettlementResult } from "@/features/ledger/service";
-import { createPromo, setPromoActive, type PromoInput } from "@/features/promotions/service";
+import { createPromo, deletePromo, setPromoActive, type PromoInput } from "@/features/promotions/service";
 import { decideReward } from "@/features/referrals/service";
 import { canStaff, type StaffArea } from "@/lib/roles";
 import { getCurrentUser } from "@/lib/session";
@@ -46,4 +46,13 @@ export async function setPromoActiveAction(promoId: string, active: boolean): Pr
   const ok = await setPromoActive(admin.id, promoId, active === true);
   if (ok) revalidatePath("/[locale]/admin/promotions", "page");
   return { ok };
+}
+
+/** Delete a promo code nobody has used. */
+export async function deletePromoAction(promoId: string): Promise<{ ok: boolean; error?: string }> {
+  const admin = await staff("promotions");
+  if (!admin || !id.safeParse(promoId).success) return { ok: false, error: "notFound" };
+  const result = await deletePromo(admin.id, promoId);
+  if (result.ok) revalidatePath("/[locale]/admin/promotions", "page");
+  return result;
 }

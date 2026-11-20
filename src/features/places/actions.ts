@@ -9,7 +9,7 @@ import { getCurrentUser } from "@/lib/session";
 import { BLOCK_KINDS, createBlock, endBlock, type BlockKind, type BlockResult } from "./blocks-service";
 import { deleteDocument } from "./documents-service";
 import { savePayoutAccount, verifyPayoutAccount, type PayoutInput } from "./payout-service";
-import { moveListing, updatePlaceAdmin, type MoveResult } from "./status-service";
+import { deletePlace, moveListing, updatePlaceAdmin, type DeletePlaceResult, type MoveResult } from "./status-service";
 import { addTeamMember, removeTeamMember, type TeamResult, type TeamRole } from "./team-service";
 
 const id = z.string().min(1).max(64);
@@ -105,4 +105,14 @@ export async function removeTeamMemberAction(memberId: string): Promise<{ ok: bo
   const ok = await removeTeamMember(user, memberId);
   if (ok) refresh();
   return { ok };
+}
+
+/** Staff delete a place that was never booked (others are archived). */
+export async function deletePlaceAction(listingId: string): Promise<DeletePlaceResult> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, error: "notAllowed" };
+  if (!id.safeParse(listingId).success) return { ok: false, error: "notFound" };
+  const result = await deletePlace(user, listingId);
+  if (result.ok) refresh();
+  return result;
 }

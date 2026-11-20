@@ -7,6 +7,8 @@ import { unreadChats } from "@/features/chats/service";
 import { laundryToHandle } from "@/features/laundry/service";
 import { unreadCount } from "@/features/notifications/service";
 import { moveLaundry } from "@/features/laundry/service";
+import { deletePlace } from "@/features/places/status-service";
+import { deletePromo } from "@/features/promotions/service";
 import { notifyAdmins } from "@/features/notifications/service";
 import { deleteUser, sendPasswordReset, setStaffAreas, setUserRole } from "./service";
 import { adminBadges, attentionCounts, dashboardStats } from "./stats";
@@ -199,5 +201,24 @@ describe("managing accounts", () => {
     expect(await sendPasswordReset("admin", "admin", "/en/reset-password")).toEqual({ ok: false, error: "self" });
     expect(await sendPasswordReset("admin", "g1", "/en/reset-password")).toEqual({ ok: true });
     expect(await db.auditLog.count({ where: { action: "user.passwordReset", entityId: "g1" } })).toBe(1);
+  });
+});
+
+describe("deleting places and promo codes", () => {
+  it("deletes only what was never used; booked places and used codes stay", async () => {
+    const admin = { id: "admin", role: "ADMIN" };
+    await db.listing.create({ data: { id: "spare", hostId: "host", title: "Spare flat", description: "x", type: "APARTMENT", status: "DRAFT", addressLine: "KG 2", district: "Gasabo", city: "Kigali", lat: -1.95, lng: 30.06, sizeM2: 40, rooms: 1, bedrooms: 1, bathrooms: 1, maxGuests: 2 } });
+    await createBooking({ guestId: "g1", listingId: "flat", checkIn: "2026-10-20", checkOut: "2026-10-22", guests: 1, payment: pay }, NOW);
+    expect(await deletePlace({ id: "host" }, "spare")).toEqual({ ok: false, error: "notAllowed" });
+    expect(await deletePlace(admin, "flat")).toEqual({ ok: false, error: "hasBookings" });
+    expect(await deletePlace(admin, "spare")).toEqual({ ok: true });
+    expect(await db.listing.findUnique({ where: { id: "spare" } })).toBeNull();
+
+    const promo = await db.promoCode.create({ data: { code: "FRESH10", percentOff: 10, createdById: "admin" } });
+    await db.promoCode.update({ where: { id: promo.id }, data: { usedCount: 1 } });
+    expect(await deletePromo("admin", promo.id)).toEqual({ ok: false, error: "used" });
+    await db.promoCode.update({ where: { id: promo.id }, data: { usedCount: 0 } });
+    expect(await deletePromo("admin", promo.id)).toEqual({ ok: true });
+    expect(await db.promoCode.count()).toBe(0);
   });
 });

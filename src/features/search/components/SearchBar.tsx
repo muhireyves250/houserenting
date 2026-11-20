@@ -7,7 +7,7 @@ import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from 
 import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
 import { todayISO, type DateRange } from "@/features/search/date-range";
 import { totalGuests, type GuestCounts } from "@/features/search/guests";
-import { buildSearchQuery, type SearchMode } from "@/features/search/params";
+import { KIND_TYPES, type PlaceKind, buildSearchQuery } from "@/features/search/params";
 import { useSearchState, type SearchPanel } from "@/features/search/search-store";
 import { useSearchSummaries } from "@/features/search/use-search-summaries";
 import { useRouter } from "@/i18n/navigation";
@@ -41,7 +41,13 @@ export function SearchBar({
   initialOpen = null,
   onClose,
   blurPage = true,
+  onHome = false,
+  homeKind = null,
 }: {
+  /** The home page's search: the switch also narrows the home rows to lodges or apartments. */
+  onHome?: boolean;
+  /** The kind the home rows show (null: both, until the switch is used). */
+  homeKind?: PlaceKind | null;
   today?: string;
   id?: string;
   /** Panel to open on mount (used by the header search). */
@@ -60,8 +66,12 @@ export function SearchBar({
 
   // Entered values live in a shared store so the hero and header searches stay in sync.
   const [search, setSearch] = useSearchState();
+  // The home page says which kind its rows show: the switch starts there.
+  useEffect(() => {
+    if (homeKind && homeKind !== search.kind) setSearch({ kind: homeKind });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only when the page's kind changes
+  }, [homeKind]);
   const { mode, location, range, flex, guests } = search;
-  const setMode = (value: SearchMode) => setSearch({ mode: value });
   const setLocation = (value: string) => setSearch({ location: value });
   const setRange = (value: DateRange) => setSearch({ range: value });
   const setFlex = (value: number) => setSearch({ flex: value });
@@ -155,14 +165,18 @@ export function SearchBar({
     close();
     router.push({
       pathname: "/search",
-      query: buildSearchQuery(mode, {
+      query: {
+        ...buildSearchQuery(mode, {
         location,
         checkIn: range.checkIn,
         checkOut: range.checkOut,
         guests: people,
         pets: guests.pets,
         flex: range.checkIn ? flex : 0,
-      }),
+        }),
+        // Only the kind of place chosen with the switch.
+        type: KIND_TYPES[search.kind].join(","),
+      },
     });
   }
 
@@ -235,14 +249,16 @@ export function SearchBar({
       )}
       <SegmentedTabs
         label={t("modeLabel")}
-        value={mode}
+        value={search.kind}
         onChange={(value) => {
-          setMode(value);
+          setSearch({ kind: value, mode: "short" });
           setOpen(null);
+          // On the home page the rows follow the switch: lodges only, or apartments only.
+          if (onHome) router.replace({ pathname: "/", query: { kind: value } }, { scroll: false });
         }}
         options={[
-          { value: "short", label: t("short") },
-          { value: "long", label: t("long") },
+          { value: "LODGE", label: t("lodge") },
+          { value: "APARTMENT", label: t("apartment") },
         ]}
         // Pro edge matching the search bar: blue hairline, frosted halo, soft floating shadow.
         className="relative border border-primary/80 shadow-[0_12px_32px_-14px_rgba(0,30,80,0.55)] ring-[5px] ring-white/20 md:max-w-md md:self-center"

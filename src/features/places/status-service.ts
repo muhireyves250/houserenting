@@ -112,3 +112,26 @@ export async function remindContractsEnding(now: Date = new Date()): Promise<num
   }
   return ending.length;
 }
+
+export type DeletePlaceResult = { ok: true } | { ok: false; error: "notAllowed" | "notFound" | "hasBookings" };
+
+/**
+ * Staff delete a place that was never booked (and has no laundry or food tied to it): its photos, prices, rooms and
+ * calendar go with it. Places with bookings are archived instead, so guests' records stay whole. Logged.
+ */
+export async function deletePlace(actor: { id: string; role?: string | null; staffAreas?: readonly string[] | null }, listingId: string): Promise<DeletePlaceResult> {
+  if (!canStaff(actor, "listings")) return { ok: false, error: "notAllowed" };
+  const listing = await db.listing.findUnique({ where: { id: listingId }, select: { title: true, hostId: true, _count: { select: { bookings: true } } } });
+  if (!listing) return { ok: false, error: "notFound" };
+  if (listing._count.bookings > 0) return { ok: false, error: "hasBookings" };
+  try {
+    await db.$transaction(async (tx) => {
+      await audit(tx, { actorId: actor.id, action: "listing.delete", entityType: "listing", entityId: listingId, data: { title: listing.title, hostId: listing.hostId } });
+      await tx.listing.delete({ where: { id: listingId } });
+    });
+  } catch {
+    // Something still points at it (orders, laundry…): archive it instead.
+    return { ok: false, error: "hasBookings" };
+  }
+  return { ok: true };
+}

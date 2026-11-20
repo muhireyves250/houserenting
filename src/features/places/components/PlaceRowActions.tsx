@@ -6,6 +6,8 @@ import { useState } from "react";
 import type { ListingMove } from "@/features/listings/lifecycle";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
+import { ConfirmAction } from "@/features/admin/components/ConfirmAction";
+import { deletePlaceAction } from "../actions";
 import { StatusActions } from "./StatusActions";
 
 /** A place's row in the staff list: Edit, and its status buttons one tap away (opened under the row). */
@@ -34,8 +36,17 @@ export function PlaceRowActions({ listingId, moves, editable }: { listingId: str
         )}
       </div>
       {open && (
-        <div className="w-full max-w-md rounded-xl bg-canvas p-3">
+        <div className="flex w-full max-w-md flex-col gap-3 rounded-xl bg-canvas p-3">
           <StatusActions listingId={listingId} moves={moves} />
+          {/* Never booked: it can be deleted for good (otherwise archive it). */}
+          <div className="flex justify-end border-t border-line pt-3">
+            <ConfirmAction
+              label={t("deletePlace")}
+              question={t("deletePlaceQuestion")}
+              action={deletePlaceAction.bind(null, listingId)}
+              errors={{ hasBookings: t("deleteHasBookings"), notAllowed: t("deleteNotAllowed") }}
+            />
+          </div>
         </div>
       )}
     </div>

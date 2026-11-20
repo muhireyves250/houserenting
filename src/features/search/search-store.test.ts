@@ -7,7 +7,7 @@ describe("search store", () => {
 
   it("starts empty in short-term mode", () => {
     const { result } = renderHook(() => useSearchState());
-    expect(result.current[0]).toEqual({ mode: "short", location: "", range: {}, flex: 0, guests: { adults: 0, children: 0, pets: 0 }, openRequest: null });
+    expect(result.current[0]).toEqual({ mode: "short", kind: "LODGE", location: "", range: {}, flex: 0, guests: { adults: 0, children: 0, pets: 0 }, openRequest: null });
   });
 
   it("shares updates between every component that uses it", () => {

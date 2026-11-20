@@ -5,7 +5,6 @@ import { Search, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { SegmentedTabs } from "@/components/ui/SegmentedTabs";
 import { todayISO } from "@/features/search/date-range";
 import { totalGuests } from "@/features/search/guests";
 import { buildSearchQuery } from "@/features/search/params";
@@ -140,14 +139,16 @@ function SearchSheet({
     onClose();
     router.push({
       pathname: "/search",
-      query: buildSearchQuery(mode, {
+      query: {
+        ...buildSearchQuery(mode, {
         location,
         checkIn: range.checkIn,
         checkOut: range.checkOut,
         guests: totalGuests(guests),
         pets: guests.pets,
         flex: range.checkIn ? flex : 0,
-      }),
+        }),
+      },
     });
   }
 
@@ -189,19 +190,7 @@ function SearchSheet({
         {t("startSearch")}
       </h2>
       <div className="flex items-center gap-3 px-4 pt-4 pb-3">
-        <SegmentedTabs
-          label={t("modeLabel")}
-          value={mode}
-          onChange={(value) => {
-            setSearch({ mode: value });
-            setStep("where");
-          }}
-          options={[
-            { value: "short", label: t("short") },
-            { value: "long", label: t("long") },
-          ]}
-          className="flex-1 border border-line bg-surface"
-        />
+        <p aria-hidden="true" className="flex-1 text-[17px] font-bold text-ink">{t("startSearch")}</p>
         <button
           type="button"
           aria-label={t("closeSearch")}

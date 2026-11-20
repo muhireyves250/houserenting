@@ -3,13 +3,18 @@
 import { useSyncExternalStore } from "react";
 import type { DateRange } from "./date-range";
 import type { GuestCounts } from "./guests";
-import type { SearchMode } from "./params";
+import type { PlaceKind, SearchMode } from "./params";
+
+/** The search switch: lodges or apartments. */
+export type SearchKind = PlaceKind;
 
 export type SearchPanel = "where" | "when" | "who";
 
 /** What the user has entered so far; shared by the hero search and the header search. */
 export type SearchState = {
   mode: SearchMode;
+  /** The kind of place the guest is looking for (the Lodge / Apartment switch). */
+  kind: SearchKind;
   location: string;
   range: DateRange;
   flex: number;
@@ -20,6 +25,7 @@ export type SearchState = {
 
 const INITIAL: SearchState = {
   mode: "short",
+  kind: "LODGE",
   location: "",
   range: {},
   flex: 0,

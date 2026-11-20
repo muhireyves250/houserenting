@@ -1,5 +1,6 @@
 import "server-only";
 import type { ListingStatus } from "@/generated/prisma/client";
+import type { PlaceType } from "@/features/search/params";
 import { cache } from "react";
 import { db } from "@/lib/db";
 
@@ -95,9 +96,9 @@ export function latestBookings(take = 6) {
   });
 }
 
-export function allListings(status?: ListingStatus) {
+export function allListings(status?: ListingStatus, type?: PlaceType) {
   return db.listing.findMany({
-    where: status ? { status } : { status: { not: "ARCHIVED" } },
+    where: { ...(status ? { status } : { status: { not: "ARCHIVED" as const } }), ...(type ? { type } : {}) },
     orderBy: { updatedAt: "desc" },
     take: 200,
     select: {

@@ -112,7 +112,9 @@
     "bookedDay": "Booked",
     "freeDay": "Free",
     "placeByName": "Place",
-    "districtsAndPlaces": "Districts and places"
+    "districtsAndPlaces": "Districts and places",
+    "lodge": "Lodges",
+    "apartment": "Apartments"
   },
   "Search": {
     "anywhere": "Anywhere in Rwanda",
@@ -1695,7 +1697,10 @@
     },
     "offLabel": "{value} off",
     "codesCount": "{count, plural, one {# code} other {# codes}} · {active} active",
-    "startsOn": "from {date}"
+    "startsOn": "from {date}",
+    "delete": "Delete",
+    "deleteQuestion": "Delete the code {code}? This can’t be undone.",
+    "deleteUsed": "This code was used: turn it off instead."
   },
   "Referrals": {
     "title": "Invite friends",
@@ -1897,7 +1902,13 @@
       "archive": "Archive this place? Guests won't see or book it. You can restore it later."
     },
     "editShort": "Edit",
-    "jumpTo": "Jump to"
+    "jumpTo": "Jump to",
+    "allCategories": "All categories",
+    "deletePlace": "Delete this place",
+    "deletePlaceQuestion": "Delete this place for good? Its photos, prices and rooms go too. This can’t be undone.",
+    "deleteHasBookings": "This place has bookings or orders: archive it instead.",
+    "deleteNotAllowed": "Only staff who manage places can delete them.",
+    "archivedFilter": "Archived"
   },
   "MyStay": {
     "title": "My stay",

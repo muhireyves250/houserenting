@@ -112,7 +112,9 @@
     "bookedDay": "Réservé",
     "freeDay": "Libre",
     "placeByName": "Logement",
-    "districtsAndPlaces": "Districts et logements"
+    "districtsAndPlaces": "Districts et logements",
+    "lodge": "Lodges",
+    "apartment": "Appartements"
   },
   "Search": {
     "anywhere": "Partout au Rwanda",
@@ -1695,7 +1697,10 @@
     },
     "offLabel": "{value} de réduction",
     "codesCount": "{count, plural, one {# code} other {# codes}} · {active} actifs",
-    "startsOn": "à partir du {date}"
+    "startsOn": "à partir du {date}",
+    "delete": "Supprimer",
+    "deleteQuestion": "Supprimer le code {code} ? C’est irréversible.",
+    "deleteUsed": "Ce code a été utilisé : désactivez-le plutôt."
   },
   "Referrals": {
     "title": "Inviter des amis",
@@ -1897,7 +1902,13 @@
       "archive": "Archiver ce lieu ? Les clients ne le verront plus et ne pourront plus le réserver. Vous pourrez le restaurer plus tard."
     },
     "editShort": "Modifier",
-    "jumpTo": "Aller à"
+    "jumpTo": "Aller à",
+    "allCategories": "Toutes catégories",
+    "deletePlace": "Supprimer ce logement",
+    "deletePlaceQuestion": "Supprimer définitivement ce logement ? Ses photos, prix et chambres aussi. C’est irréversible.",
+    "deleteHasBookings": "Ce logement a des réservations ou commandes : archivez-le plutôt.",
+    "deleteNotAllowed": "Réservé au personnel qui gère les logements.",
+    "archivedFilter": "Archivés"
   },
   "MyStay": {
     "title": "Mon séjour",

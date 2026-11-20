@@ -1,5 +1,5 @@
 import type { ListingCardData } from "@/features/listings/service";
-import { PLACE_TYPES, type PlaceType, type SearchMode } from "@/features/search/params";
+import { kindOf, type PlaceKind, PLACE_TYPES, type PlaceType, type SearchMode } from "@/features/search/params";
 
 export type HomeSectionKey = "kigali" | "volcanoes" | "kivu" | "long";
 
@@ -37,4 +37,9 @@ export function isGuestFavorite({ ratingAvg, ratingCount }: { ratingAvg: number;
 export function homeTypeFilter(value: string | string[] | undefined): PlaceType | null {
   const first = Array.isArray(value) ? value[0] : value;
   return (PLACE_TYPES as readonly string[]).includes(first ?? "") ? (first as PlaceType) : null;
+}
+
+/** The kind of place the home rows show once the guest uses the search switch; both until then (null). */
+export function homeKind(value: string | string[] | undefined): PlaceKind | null {
+  return kindOf(Array.isArray(value) ? value[0] : value);
 }

@@ -49,6 +49,18 @@ export async function setPromoActive(adminId: string, id: string, active: boolea
   });
 }
 
+/** Deletes a promo code nobody has used (used ones stay on record: turn them off instead). Logged. */
+export async function deletePromo(adminId: string, id: string): Promise<{ ok: true } | { ok: false; error: "notFound" | "used" }> {
+  const promo = await db.promoCode.findUnique({ where: { id }, select: { code: true, usedCount: true, _count: { select: { bookings: true } } } });
+  if (!promo) return { ok: false, error: "notFound" };
+  if (promo.usedCount > 0 || promo._count.bookings > 0) return { ok: false, error: "used" };
+  await db.$transaction(async (tx) => {
+    await audit(tx, { actorId: adminId, action: "promo.delete", entityType: "promo", entityId: id, data: { code: promo.code } });
+    await tx.promoCode.delete({ where: { id } });
+  });
+  return { ok: true };
+}
+
 export function listPromos() {
   return db.promoCode.findMany({ orderBy: { createdAt: "desc" }, take: 100 });
 }

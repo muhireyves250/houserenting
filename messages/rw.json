@@ -112,7 +112,9 @@
     "bookedDay": "Byafashwe",
     "freeDay": "Biri ubusa",
     "placeByName": "Inzu",
-    "districtsAndPlaces": "Uturere n'amazu"
+    "districtsAndPlaces": "Uturere n'amazu",
+    "lodge": "Amacumbi (Lodge)",
+    "apartment": "Amazu (Apartment)"
   },
   "Search": {
     "anywhere": "Ahantu hose mu Rwanda",
@@ -1695,7 +1697,10 @@
     },
     "offLabel": "{value} zigabanyijwe",
     "codesCount": "{count, plural, one {Kode #} other {Kode #}} · {active} zikora",
-    "startsOn": "guhera {date}"
+    "startsOn": "guhera {date}",
+    "delete": "Siba",
+    "deleteQuestion": "Gusiba kode {code}? Ntibisubirwamo.",
+    "deleteUsed": "Iyi kode yarakoreshejwe: yihagarike aho kuyisiba."
   },
   "Referrals": {
     "title": "Tumira inshuti",
@@ -1897,7 +1902,13 @@
       "archive": "Ushaka kubika aha hantu? Abakiriya ntibazongera kuhabona cyangwa kuhakodesha. Uzashobora kuhagarura nyuma."
     },
     "editShort": "Hindura",
-    "jumpTo": "Jya kuri"
+    "jumpTo": "Jya kuri",
+    "allCategories": "Ubwoko bwose",
+    "deletePlace": "Siba iri cumbi",
+    "deletePlaceQuestion": "Gusiba burundu iri cumbi? Amafoto, ibiciro n’ibyumba byaryo nabyo biragenda. Ntibisubirwamo.",
+    "deleteHasBookings": "Iri cumbi rifite ibyafashwe cyangwa ibyatumijwe: ribike (archive) aho kurisiba.",
+    "deleteNotAllowed": "Ni ab’abakozi bacunga amacumbi gusa.",
+    "archivedFilter": "Byabitswe"
   },
   "MyStay": {
     "title": "Aho ncumbitse",
