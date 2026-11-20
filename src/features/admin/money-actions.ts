@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { recordSettlement, type SettlementResult } from "@/features/ledger/service";
-import { createPromo, deletePromo, setPromoActive, type PromoInput } from "@/features/promotions/service";
+import { createPromo, deletePromo, setPromoActive, setPromoShare, type PromoInput } from "@/features/promotions/service";
 import { decideReward } from "@/features/referrals/service";
 import { canStaff, type StaffArea } from "@/lib/roles";
 import { getCurrentUser } from "@/lib/session";
@@ -55,4 +55,13 @@ export async function deletePromoAction(promoId: string): Promise<{ ok: boolean;
   const result = await deletePromo(admin.id, promoId);
   if (result.ok) revalidatePath("/[locale]/admin/promotions", "page");
   return result;
+}
+
+/** The promoter's share (%) on a promo code given to them. */
+export async function setPromoShareAction(promoId: string, percent: number | null): Promise<{ ok: boolean }> {
+  const admin = await staff("promotions");
+  if (!admin || !id.safeParse(promoId).success) return { ok: false };
+  const ok = await setPromoShare(admin.id, promoId, percent === null ? null : Number(percent));
+  if (ok) revalidatePath("/[locale]", "layout");
+  return { ok };
 }

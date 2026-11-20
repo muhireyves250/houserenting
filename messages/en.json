@@ -1760,7 +1760,30 @@
     "forPromoter": "Give it to a promoter (optional)",
     "noPromoter": "No promoter (VIIPA’s own code)",
     "promoterOf": "For {name}",
-    "promoterPercent": "Promoter’s share of each booking (%)"
+    "promoterPercent": "Promoter’s share of each booking (%)",
+    "backToCodes": "Promo codes",
+    "owner": "Owner",
+    "shareLine": "earns {percent}% per booking",
+    "viipaCode": "VIIPA’s own code",
+    "stats": {
+      "clients": "Clients",
+      "discounts": "Discounts given",
+      "coming": "Promoter: coming",
+      "earned": "Promoter: earned"
+    },
+    "bookingsWithCode": "Bookings with this code ({count})",
+    "noBookingsYet": "Nobody has used this code yet.",
+    "col": {
+      "client": "Client",
+      "stay": "Booking",
+      "paid": "Paid",
+      "discount": "Discount",
+      "reward": "Promoter’s reward",
+      "status": "Status"
+    },
+    "open": "See who used it",
+    "saveShare": "Save",
+    "noShareYet": "No share set: the promoter earns nothing from this code yet."
   },
   "Referrals": {
     "title": "Invite friends",

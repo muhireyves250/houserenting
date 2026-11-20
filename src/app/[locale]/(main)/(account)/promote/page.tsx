@@ -113,7 +113,8 @@ export default async function PromotePage() {
             </Card>
           )}
           {/* What they earn per stay, or that VIIPA hasn't set it yet. */}
-          {data.promoter.status === "ACTIVE" && (
+          {/* Their codes with a share already tell them what they earn; otherwise the programme's rate (or that none is set). */}
+          {data.promoter.status === "ACTIVE" && !data.promoCodes.some((c) => c.promoterBps) && (
             <p className={cn("rounded-2xl px-5 py-3.5 text-[14px]", reward ? "bg-emerald-50 text-emerald-900" : "bg-amber-50 text-amber-900")}>
               {reward ? t("rateLine", { reward }) : t("noRateYet")}
             </p>

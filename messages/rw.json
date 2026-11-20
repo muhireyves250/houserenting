@@ -1760,7 +1760,30 @@
     "forPromoter": "Yihe umwamamaza (si ngombwa)",
     "noPromoter": "Nta mwamamaza (kode ya VIIPA)",
     "promoterOf": "Ya {name}",
-    "promoterPercent": "Umugabane w’umwamamaza kuri buri cumbi (%)"
+    "promoterPercent": "Umugabane w’umwamamaza kuri buri cumbi (%)",
+    "backToCodes": "Kode za promosiyo",
+    "owner": "Nyirayo",
+    "shareLine": "ahabwa {percent}% kuri buri cumbi",
+    "viipaCode": "Kode ya VIIPA",
+    "stats": {
+      "clients": "Abakiliya",
+      "discounts": "Ibyagabanyijwe",
+      "coming": "Umwamamaza: biraza",
+      "earned": "Umwamamaza: yahembwe"
+    },
+    "bookingsWithCode": "Ibyafashwe hakoreshejwe iyi kode ({count})",
+    "noBookingsYet": "Nta muntu urakoresha iyi kode.",
+    "col": {
+      "client": "Umukiliya",
+      "stay": "Icyafashwe",
+      "paid": "Yishyuye",
+      "discount": "Igabanywa",
+      "reward": "Igihembo cy’umwamamaza",
+      "status": "Uko bimeze"
+    },
+    "open": "Reba abayikoresheje",
+    "saveShare": "Bika",
+    "noShareYet": "Nta mugabane washyizweho: umwamamaza nta cyo arabona kuri iyi kode."
   },
   "Referrals": {
     "title": "Tumira inshuti",

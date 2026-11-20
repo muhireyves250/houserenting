@@ -62,6 +62,19 @@ export async function setPromoActive(adminId: string, id: string, active: boolea
   });
 }
 
+/** Sets (or clears) the promoter's share, in %, on a promo code given to a promoter. Logged. */
+export async function setPromoShare(adminId: string, id: string, percent: number | null): Promise<boolean> {
+  if (percent !== null && (!Number.isFinite(percent) || percent < 0 || percent > 50)) return false;
+  const promo = await db.promoCode.findUnique({ where: { id }, select: { promoterId: true, promoterBps: true } });
+  if (!promo?.promoterId) return false;
+  const bps = percent === null ? null : Math.round(percent * 100);
+  await db.$transaction(async (tx) => {
+    await tx.promoCode.update({ where: { id }, data: { promoterBps: bps } });
+    await audit(tx, { actorId: adminId, action: "promo.share", entityType: "promo", entityId: id, data: { from: promo.promoterBps, to: bps } });
+  });
+  return true;
+}
+
 /** Deletes a promo code nobody has used (used ones stay on record: turn them off instead). Logged. */
 export async function deletePromo(adminId: string, id: string): Promise<{ ok: true } | { ok: false; error: "notFound" | "used" }> {
   const promo = await db.promoCode.findUnique({ where: { id }, select: { code: true, usedCount: true, _count: { select: { bookings: true } } } });

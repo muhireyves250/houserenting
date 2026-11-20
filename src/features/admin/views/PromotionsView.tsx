@@ -9,6 +9,7 @@ import { ConfirmAction } from "@/features/admin/components/ConfirmAction";
 import { deletePromoAction } from "@/features/admin/money-actions";
 import { formatRWF } from "@/lib/format";
 import { cn } from "@/lib/cn";
+import { Link } from "@/i18n/navigation";
 
 type State = "active" | "off" | "expired" | "usedUp" | "scheduled";
 const STATE_TONE: Record<State, string> = {
@@ -111,6 +112,10 @@ export async function PromotionsView({ tabs, forPromoter }: { tabs: ReactNode; f
                     )}
                   </div>
                   {p.description && <p className="rounded-xl bg-canvas px-3 py-2 text-[13px] text-ink/80">{p.description}</p>}
+                  {/* Who owns it, every client who booked with it, and the rewards. */}
+                  <Link href={`/admin/promotions/codes/${p.id}`} className="self-start text-[13px] font-semibold text-primary hover:underline">
+                    {t("open")} →
+                  </Link>
                 </li>
               );
             })}

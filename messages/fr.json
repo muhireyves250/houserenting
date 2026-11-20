@@ -1760,7 +1760,30 @@
     "forPromoter": "Le donner à un promoteur (facultatif)",
     "noPromoter": "Aucun promoteur (code de VIIPA)",
     "promoterOf": "Pour {name}",
-    "promoterPercent": "Part du promoteur par réservation (%)"
+    "promoterPercent": "Part du promoteur par réservation (%)",
+    "backToCodes": "Codes promo",
+    "owner": "Propriétaire",
+    "shareLine": "gagne {percent} % par réservation",
+    "viipaCode": "Code de VIIPA",
+    "stats": {
+      "clients": "Clients",
+      "discounts": "Réductions accordées",
+      "coming": "Promoteur : à venir",
+      "earned": "Promoteur : gagné"
+    },
+    "bookingsWithCode": "Réservations avec ce code ({count})",
+    "noBookingsYet": "Personne n’a encore utilisé ce code.",
+    "col": {
+      "client": "Client",
+      "stay": "Réservation",
+      "paid": "Payé",
+      "discount": "Réduction",
+      "reward": "Récompense du promoteur",
+      "status": "Statut"
+    },
+    "open": "Voir qui l’a utilisé",
+    "saveShare": "Enregistrer",
+    "noShareYet": "Aucune part : le promoteur ne gagne encore rien avec ce code."
   },
   "Referrals": {
     "title": "Inviter des amis",
