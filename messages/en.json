@@ -977,12 +977,14 @@
         "answer": "Question answered",
         "publish": "Question published",
         "reject": "Question rejected",
-        "hide": "Question taken down"
+        "hide": "Question taken down",
+        "delete": "Question deleted"
       },
       "review": {
         "publish": "Feedback published",
         "reject": "Feedback rejected",
-        "hide": "Feedback taken down"
+        "hide": "Feedback taken down",
+        "delete": "Feedback deleted"
       },
       "ticket": {
         "open": "Request opened",
@@ -1248,7 +1250,9 @@
       "toCheck": "To check",
       "hide": "Hide",
       "hideQuestion": "Take this down? It stops showing on the place.",
-      "publishedEmpty": "Nothing published yet."
+      "publishedEmpty": "Nothing published yet.",
+      "delete": "Delete",
+      "deleteQuestion": "Delete this for good? It can’t be undone."
     },
     "closeWindow": "Close",
     "supportTabs": {
@@ -1333,7 +1337,36 @@
       "none": "Nobody found.",
       "clear": "Choose someone else"
     },
-    "adminAll": "VIIPA admins manage everything. Choose Manager to give someone only some services."
+    "adminAll": "VIIPA admins manage everything. Choose Manager to give someone only some services.",
+    "userPage": {
+      "spent": "Paid so far",
+      "bookings": "Bookings",
+      "orders": "Food orders",
+      "favorites": "Saved places",
+      "payments": "Payments",
+      "receipt": "Receipt",
+      "food": "Food orders",
+      "laundry": "Laundry",
+      "reviews": "Reviews they wrote",
+      "promoter": "Promoter",
+      "promoterCode": "QR code",
+      "promoCodes": "Promo codes",
+      "brought": "Bookings brought",
+      "earned": "Earned",
+      "waiting": "Waiting",
+      "paidOut": "Paid out",
+      "share": "{percent}% share",
+      "noShare": "no share",
+      "referrals": "Invite friends",
+      "rewards": "Invite rewards",
+      "signIns": "Sign-ins",
+      "lastSeen": "Last active",
+      "noSignIns": "Never signed in.",
+      "payout": "Where they get paid",
+      "verified": "Verified",
+      "notVerified": "Not checked yet",
+      "openPromoters": "Open promoters →"
+    }
   },
   "Questions": {
     "title": "Questions and answers",

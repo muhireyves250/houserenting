@@ -5,13 +5,30 @@ import { notify } from "@/features/notifications/service";
 import { db } from "@/lib/db";
 
 export const PAGE_SIZE = 25;
-const pageOf = (page: number) => ({ skip: (Math.max(1, page) - 1) * PAGE_SIZE, take: PAGE_SIZE });
-const like = (q: string) => ({ contains: q.replace(/[\\%_]/g, (c) => `\\${c}`), mode: "insensitive" as const });
+const pageOf = (page: number) => ({
+  skip: (Math.max(1, page) - 1) * PAGE_SIZE,
+  take: PAGE_SIZE,
+});
+const like = (q: string) => ({
+  contains: q.replace(/[\\%_]/g, (c) => `\\${c}`),
+  mode: "insensitive" as const,
+});
 
-export const BOOKING_STATUSES = ["PENDING_PAYMENT", "CONFIRMED", "CHECKED_IN", "COMPLETED", "CANCELLED", "EXPIRED", "NO_SHOW"] as const;
+export const BOOKING_STATUSES = [
+  "PENDING_PAYMENT",
+  "CONFIRMED",
+  "CHECKED_IN",
+  "COMPLETED",
+  "CANCELLED",
+  "EXPIRED",
+  "NO_SHOW",
+] as const;
 export type BookingStatusFilter = (typeof BOOKING_STATUSES)[number];
 
-function bookingWhere(status?: BookingStatusFilter, q?: string): Prisma.BookingWhereInput {
+function bookingWhere(
+  status?: BookingStatusFilter,
+  q?: string,
+): Prisma.BookingWhereInput {
   const where: Prisma.BookingWhereInput = {};
   if (status) where.status = status;
   const query = q?.trim();
@@ -45,14 +62,38 @@ const BOOKING_ROW = {
 } satisfies Prisma.BookingSelect;
 
 /** Bookings for the staff table: filter by status, search reference / guest / place; newest first. */
-export async function searchBookings({ status, q, page = 1 }: { status?: BookingStatusFilter; q?: string; page?: number }) {
+export async function searchBookings({
+  status,
+  q,
+  page = 1,
+}: {
+  status?: BookingStatusFilter;
+  q?: string;
+  page?: number;
+}) {
   const where = bookingWhere(status, q);
   const [rows, total, counts] = await Promise.all([
-    db.booking.findMany({ where, orderBy: { createdAt: "desc" }, ...pageOf(page), select: BOOKING_ROW }),
+    db.booking.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      ...pageOf(page),
+      select: BOOKING_ROW,
+    }),
     db.booking.count({ where }),
-    db.booking.groupBy({ by: ["status"], where: bookingWhere(undefined, q), _count: true }),
+    db.booking.groupBy({
+      by: ["status"],
+      where: bookingWhere(undefined, q),
+      _count: true,
+    }),
   ]);
-  return { rows, total, pages: Math.max(1, Math.ceil(total / PAGE_SIZE)), counts: Object.fromEntries(counts.map((c) => [c.status, c._count])) as Partial<Record<BookingStatusFilter, number>> };
+  return {
+    rows,
+    total,
+    pages: Math.max(1, Math.ceil(total / PAGE_SIZE)),
+    counts: Object.fromEntries(
+      counts.map((c) => [c.status, c._count]),
+    ) as Partial<Record<BookingStatusFilter, number>>,
+  };
 }
 
 /** Everything about one booking, for staff. Identity details (long stays) only ever leave the database here. */
@@ -60,12 +101,29 @@ export function bookingForStaff(reference: string) {
   return db.booking.findUnique({
     where: { reference },
     include: {
-      listing: { select: { id: true, title: true, city: true, district: true, host: { select: { id: true, name: true, email: true, phone: true } } } },
+      listing: {
+        select: {
+          id: true,
+          title: true,
+          city: true,
+          district: true,
+          host: { select: { id: true, name: true, email: true, phone: true } },
+        },
+      },
       guest: { select: { id: true, name: true, email: true, phone: true } },
       room: { select: { name: true } },
-      promoCode: { select: { code: true, fundedBy: true, promoterId: true, promoterBps: true } },
+      promoCode: {
+        select: {
+          code: true,
+          fundedBy: true,
+          promoterId: true,
+          promoterBps: true,
+        },
+      },
       // Who brought the booking (their QR link or their promo code) and their reward for it.
-      promoter: { select: { code: true, user: { select: { id: true, name: true } } } },
+      promoter: {
+        select: { code: true, user: { select: { id: true, name: true } } },
+      },
       promoterReward: { select: { amount: true, status: true, paidAt: true } },
       identity: true,
       payments: { orderBy: { createdAt: "asc" } },
@@ -82,22 +140,60 @@ export function bookingForStaff(reference: string) {
 /** Names of the people who changed a booking (events keep only the actor's id). */
 export async function actorNames(ids: (string | null)[]) {
   const unique = [...new Set(ids.filter((id): id is string => Boolean(id)))];
-  const users = await db.user.findMany({ where: { id: { in: unique } }, select: { id: true, name: true } });
+  const users = await db.user.findMany({
+    where: { id: { in: unique } },
+    select: { id: true, name: true },
+  });
   return new Map(users.map((u) => [u.id, u.name]));
 }
 
 /** Staff release an unpaid hold (paid bookings follow the refund policy, not this). Logged with the reason. */
-export async function staffCancelUnpaid(staffId: string, reference: string, reason: string): Promise<boolean> {
+export async function staffCancelUnpaid(
+  staffId: string,
+  reference: string,
+  reason: string,
+): Promise<boolean> {
   const why = reason.trim().slice(0, 300);
   if (!why) return false;
   return db.$transaction(async (tx) => {
-    const booking = await tx.booking.findUnique({ where: { reference }, select: { id: true, status: true, guestId: true, listing: { select: { title: true } } } });
+    const booking = await tx.booking.findUnique({
+      where: { reference },
+      select: {
+        id: true,
+        status: true,
+        guestId: true,
+        listing: { select: { title: true } },
+      },
+    });
     if (!booking || booking.status !== "PENDING_PAYMENT") return false;
-    const { count } = await tx.booking.updateMany({ where: { id: booking.id, status: "PENDING_PAYMENT" }, data: { status: "CANCELLED" } });
+    const { count } = await tx.booking.updateMany({
+      where: { id: booking.id, status: "PENDING_PAYMENT" },
+      data: { status: "CANCELLED" },
+    });
     if (count !== 1) return false;
-    await tx.bookingEvent.create({ data: { bookingId: booking.id, fromStatus: "PENDING_PAYMENT", toStatus: "CANCELLED", actorId: staffId, reason: why } });
-    await audit(tx, { actorId: staffId, action: "booking.cancel", entityType: "booking", entityId: reference, data: { reason: why } });
-    await notify(tx, booking.guestId, "bookingCancelled", { title: booking.listing.title, reference }, `/bookings/${reference}`);
+    await tx.bookingEvent.create({
+      data: {
+        bookingId: booking.id,
+        fromStatus: "PENDING_PAYMENT",
+        toStatus: "CANCELLED",
+        actorId: staffId,
+        reason: why,
+      },
+    });
+    await audit(tx, {
+      actorId: staffId,
+      action: "booking.cancel",
+      entityType: "booking",
+      entityId: reference,
+      data: { reason: why },
+    });
+    await notify(
+      tx,
+      booking.guestId,
+      "bookingCancelled",
+      { title: booking.listing.title, reference },
+      `/bookings/${reference}`,
+    );
     return true;
   });
 }
@@ -106,20 +202,54 @@ export type UserFilter = "all" | "staff" | "hosts" | "suspended";
 
 function userWhere(filter: UserFilter, q?: string): Prisma.UserWhereInput {
   const where: Prisma.UserWhereInput =
-    filter === "staff" ? { role: { in: ["MANAGER" as const, "ADMIN" as const, "SUPER_ADMIN" as const] } } : filter === "hosts" ? { isHost: true } : filter === "suspended" ? { status: "SUSPENDED" } : {};
+    filter === "staff"
+      ? {
+          role: {
+            in: ["MANAGER" as const, "ADMIN" as const, "SUPER_ADMIN" as const],
+          },
+        }
+      : filter === "hosts"
+        ? { isHost: true }
+        : filter === "suspended"
+          ? { status: "SUSPENDED" }
+          : {};
   const query = q?.trim();
-  if (query) where.OR = [{ name: like(query) }, { email: like(query) }, { phone: { contains: query } }];
+  if (query)
+    where.OR = [
+      { name: like(query) },
+      { email: like(query) },
+      { phone: { contains: query } },
+    ];
   return where;
 }
 
-export async function searchUsers({ filter = "all", q, page = 1 }: { filter?: UserFilter; q?: string; page?: number }) {
+export async function searchUsers({
+  filter = "all",
+  q,
+  page = 1,
+}: {
+  filter?: UserFilter;
+  q?: string;
+  page?: number;
+}) {
   const where = userWhere(filter, q);
   const [rows, total] = await Promise.all([
     db.user.findMany({
       where,
       orderBy: { createdAt: "desc" },
       ...pageOf(page),
-      select: { id: true, name: true, email: true, phone: true, role: true, isHost: true, status: true, emailVerified: true, createdAt: true, _count: { select: { bookings: true, listings: true } } },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        role: true,
+        isHost: true,
+        status: true,
+        emailVerified: true,
+        createdAt: true,
+        _count: { select: { bookings: true, listings: true } },
+      },
     }),
     db.user.count({ where }),
   ]);
@@ -133,6 +263,7 @@ export function userForStaff(id: string) {
       id: true,
       name: true,
       email: true,
+      image: true,
       phone: true,
       role: true,
       isHost: true,
@@ -143,47 +274,111 @@ export function userForStaff(id: string) {
       createdAt: true,
       referredBy: { select: { id: true, name: true } },
       _count: { select: { referrals: true } },
-      bookings: { orderBy: { createdAt: "desc" }, take: 20, select: BOOKING_ROW },
-      listings: { orderBy: { updatedAt: "desc" }, take: 20, select: { id: true, title: true, status: true, city: true, type: true } },
-      tickets: { orderBy: { updatedAt: "desc" }, take: 10, select: { reference: true, subject: true, status: true, updatedAt: true } },
+      bookings: {
+        orderBy: { createdAt: "desc" },
+        take: 20,
+        select: BOOKING_ROW,
+      },
+      listings: {
+        orderBy: { updatedAt: "desc" },
+        take: 20,
+        select: { id: true, title: true, status: true, city: true, type: true },
+      },
+      tickets: {
+        orderBy: { updatedAt: "desc" },
+        take: 10,
+        select: {
+          reference: true,
+          subject: true,
+          status: true,
+          updatedAt: true,
+        },
+      },
     },
   });
 }
 
 /** Suspend (or reactivate) an account. A suspended person is signed out everywhere and can't sign in. Never yourself. */
-export async function setUserStatus(adminId: string, userId: string, status: "ACTIVE" | "SUSPENDED", reason: string): Promise<boolean> {
+export async function setUserStatus(
+  adminId: string,
+  userId: string,
+  status: "ACTIVE" | "SUSPENDED",
+  reason: string,
+): Promise<boolean> {
   const why = reason.trim().slice(0, 300);
   if (adminId === userId || (status === "SUSPENDED" && !why)) return false;
   return db.$transaction(async (tx) => {
-    const user = await tx.user.findUnique({ where: { id: userId }, select: { status: true } });
+    const user = await tx.user.findUnique({
+      where: { id: userId },
+      select: { status: true },
+    });
     if (!user || user.status === status) return false;
     await tx.user.update({ where: { id: userId }, data: { status } });
-    if (status === "SUSPENDED") await tx.session.deleteMany({ where: { userId } });
-    await audit(tx, { actorId: adminId, action: status === "SUSPENDED" ? "user.suspend" : "user.reactivate", entityType: "user", entityId: userId, data: why ? { reason: why } : undefined });
+    if (status === "SUSPENDED")
+      await tx.session.deleteMany({ where: { userId } });
+    await audit(tx, {
+      actorId: adminId,
+      action: status === "SUSPENDED" ? "user.suspend" : "user.reactivate",
+      entityType: "user",
+      entityId: userId,
+      data: why ? { reason: why } : undefined,
+    });
     return true;
   });
 }
 
 export function listingBookings(listingId: string) {
-  return db.booking.findMany({ where: { listingId }, orderBy: { createdAt: "desc" }, take: 20, select: BOOKING_ROW });
+  return db.booking.findMany({
+    where: { listingId },
+    orderBy: { createdAt: "desc" },
+    take: 20,
+    select: BOOKING_ROW,
+  });
 }
 
-export const PAYMENT_FILTERS = ["SUCCEEDED", "PENDING", "FAILED", "REFUNDED"] as const;
+export const PAYMENT_FILTERS = [
+  "SUCCEEDED",
+  "PENDING",
+  "FAILED",
+  "REFUNDED",
+] as const;
 export type PaymentFilter = (typeof PAYMENT_FILTERS)[number];
 
 /** Guests' payments, newest first: by status, and by booking reference, place or transaction. */
-export async function allPayments(page = 1, filter: { status?: PaymentFilter; q?: string } = {}) {
+export async function allPayments(
+  page = 1,
+  filter: { status?: PaymentFilter; q?: string } = {},
+) {
   const q = filter.q?.trim();
   const where: Prisma.PaymentWhereInput = {
     ...(filter.status ? { status: filter.status } : {}),
-    ...(q ? { OR: [{ providerReference: like(q) }, { booking: { reference: { contains: q.toUpperCase() } } }, { booking: { listing: { title: like(q) } } }] } : {}),
+    ...(q
+      ? {
+          OR: [
+            { providerReference: like(q) },
+            { booking: { reference: { contains: q.toUpperCase() } } },
+            { booking: { listing: { title: like(q) } } },
+          ],
+        }
+      : {}),
   };
   const [rows, total] = await Promise.all([
     db.payment.findMany({
       where,
       orderBy: { createdAt: "desc" },
       ...pageOf(page),
-      select: { id: true, provider: true, providerReference: true, amount: true, currency: true, status: true, createdAt: true, booking: { select: { reference: true, listing: { select: { title: true } } } } },
+      select: {
+        id: true,
+        provider: true,
+        providerReference: true,
+        amount: true,
+        currency: true,
+        status: true,
+        createdAt: true,
+        booking: {
+          select: { reference: true, listing: { select: { title: true } } },
+        },
+      },
     }),
     db.payment.count({ where }),
   ]);
@@ -193,17 +388,55 @@ export async function allPayments(page = 1, filter: { status?: PaymentFilter; q?
 // ---- CSV exports (operational reports) ----
 
 const cell = (value: unknown) => {
-  const text = value instanceof Date ? value.toISOString() : value === null || value === undefined ? "" : String(value);
+  const text =
+    value instanceof Date
+      ? value.toISOString()
+      : value === null || value === undefined
+        ? ""
+        : String(value);
   // Quote every cell; neutralise spreadsheet formulas.
   const safe = /^[=+\-@\t\r]/.test(text) ? `'${text}` : text;
   return `"${safe.replace(/"/g, '""')}"`;
 };
-export const toCsv = (header: string[], rows: unknown[][]) => [header, ...rows].map((r) => r.map(cell).join(",")).join("\r\n") + "\r\n";
+export const toCsv = (header: string[], rows: unknown[][]) =>
+  [header, ...rows].map((r) => r.map(cell).join(",")).join("\r\n") + "\r\n";
 
 export async function bookingsCsv(status?: BookingStatusFilter, q?: string) {
-  const rows = await db.booking.findMany({ where: bookingWhere(status, q), orderBy: { createdAt: "desc" }, take: 10_000, select: { ...BOOKING_ROW, subtotal: true, guestFee: true, discount: true, deposit: true, currency: true } });
+  const rows = await db.booking.findMany({
+    where: bookingWhere(status, q),
+    orderBy: { createdAt: "desc" },
+    take: 10_000,
+    select: {
+      ...BOOKING_ROW,
+      subtotal: true,
+      guestFee: true,
+      discount: true,
+      deposit: true,
+      currency: true,
+    },
+  });
   return toCsv(
-    ["reference", "status", "created", "place", "room", "guest", "guest_email", "unit", "quantity", "check_in", "check_out", "subtotal", "discount", "guest_fee", "deposit", "total", "commission", "owner_payout", "currency"],
+    [
+      "reference",
+      "status",
+      "created",
+      "place",
+      "room",
+      "guest",
+      "guest_email",
+      "unit",
+      "quantity",
+      "check_in",
+      "check_out",
+      "subtotal",
+      "discount",
+      "guest_fee",
+      "deposit",
+      "total",
+      "commission",
+      "owner_payout",
+      "currency",
+    ],
     rows.map((b) => [
       b.reference,
       b.status,
@@ -229,14 +462,220 @@ export async function bookingsCsv(status?: BookingStatusFilter, q?: string) {
 }
 
 export async function ledgerCsv() {
-  const rows = await db.ledgerEntry.findMany({ orderBy: { createdAt: "desc" }, take: 50_000, select: { createdAt: true, kind: true, amount: true, currency: true, hostId: true, note: true, booking: { select: { reference: true } }, settlement: { select: { reference: true } } } });
+  const rows = await db.ledgerEntry.findMany({
+    orderBy: { createdAt: "desc" },
+    take: 50_000,
+    select: {
+      createdAt: true,
+      kind: true,
+      amount: true,
+      currency: true,
+      hostId: true,
+      note: true,
+      booking: { select: { reference: true } },
+      settlement: { select: { reference: true } },
+    },
+  });
   return toCsv(
-    ["date", "kind", "amount", "currency", "booking", "payout", "owner_id", "note"],
-    rows.map((e) => [e.createdAt, e.kind, e.amount, e.currency, e.booking?.reference, e.settlement?.reference, e.hostId, e.note]),
+    [
+      "date",
+      "kind",
+      "amount",
+      "currency",
+      "booking",
+      "payout",
+      "owner_id",
+      "note",
+    ],
+    rows.map((e) => [
+      e.createdAt,
+      e.kind,
+      e.amount,
+      e.currency,
+      e.booking?.reference,
+      e.settlement?.reference,
+      e.hostId,
+      e.note,
+    ]),
   );
 }
 
 export async function paymentsCsv() {
-  const rows = await db.payment.findMany({ orderBy: { createdAt: "desc" }, take: 50_000, select: { createdAt: true, provider: true, providerReference: true, amount: true, currency: true, status: true, booking: { select: { reference: true } } } });
-  return toCsv(["date", "booking", "provider", "transaction", "amount", "currency", "status"], rows.map((p) => [p.createdAt, p.booking.reference, p.provider, p.providerReference, p.amount, p.currency, p.status]));
+  const rows = await db.payment.findMany({
+    orderBy: { createdAt: "desc" },
+    take: 50_000,
+    select: {
+      createdAt: true,
+      provider: true,
+      providerReference: true,
+      amount: true,
+      currency: true,
+      status: true,
+      booking: { select: { reference: true } },
+    },
+  });
+  return toCsv(
+    [
+      "date",
+      "booking",
+      "provider",
+      "transaction",
+      "amount",
+      "currency",
+      "status",
+    ],
+    rows.map((p) => [
+      p.createdAt,
+      p.booking.reference,
+      p.provider,
+      p.providerReference,
+      p.amount,
+      p.currency,
+      p.status,
+    ]),
+  );
+}
+
+/** Everything else about a person, for staff: what they paid, ordered, wrote, earned and when they last signed in. */
+export async function userActivityForStaff(id: string) {
+  const [
+    payments,
+    paid,
+    foodOrders,
+    laundry,
+    reviews,
+    promoter,
+    referralRewards,
+    referrals,
+    sessions,
+    payout,
+    counts,
+  ] = await Promise.all([
+    db.payment.findMany({
+      where: { booking: { guestId: id } },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+      select: {
+        id: true,
+        amount: true,
+        status: true,
+        provider: true,
+        createdAt: true,
+        booking: { select: { reference: true } },
+      },
+    }),
+    db.payment.aggregate({
+      where: { booking: { guestId: id }, status: "SUCCEEDED" },
+      _sum: { amount: true },
+    }),
+    db.foodOrder.findMany({
+      where: { customerId: id },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+      select: {
+        reference: true,
+        status: true,
+        total: true,
+        createdAt: true,
+        restaurant: { select: { name: true } },
+      },
+    }),
+    db.laundryOrder.findMany({
+      where: { guestId: id },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+      select: {
+        reference: true,
+        status: true,
+        amount: true,
+        createdAt: true,
+        listing: { select: { title: true } },
+      },
+    }),
+    db.review.findMany({
+      where: { authorId: id },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+      select: {
+        id: true,
+        rating: true,
+        comment: true,
+        status: true,
+        createdAt: true,
+        listing: { select: { title: true } },
+      },
+    }),
+    db.promoter.findUnique({
+      where: { userId: id },
+      select: {
+        id: true,
+        code: true,
+        status: true,
+        payoutMethod: true,
+        payoutNumber: true,
+        promoCodes: { select: { code: true, promoterBps: true } },
+        rewards: { select: { amount: true, status: true, paidAt: true } },
+        _count: { select: { bookings: true } },
+      },
+    }),
+    db.referralReward.findMany({
+      where: { referrerId: id },
+      select: { amount: true, status: true },
+    }),
+    db.user.findMany({
+      where: { referredById: id },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+      select: { id: true, name: true, createdAt: true },
+    }),
+    db.session.findMany({
+      where: { userId: id },
+      orderBy: { updatedAt: "desc" },
+      take: 5,
+      select: {
+        id: true,
+        updatedAt: true,
+        expiresAt: true,
+        userAgent: true,
+        ipAddress: true,
+      },
+    }),
+    db.payoutAccount.findUnique({
+      where: { userId: id },
+      select: {
+        method: true,
+        accountName: true,
+        accountNumber: true,
+        bankName: true,
+        verifiedAt: true,
+      },
+    }),
+    db.user.findUnique({
+      where: { id },
+      select: {
+        _count: {
+          select: {
+            favorites: true,
+            reviews: true,
+            foodOrders: true,
+            guestChats: true,
+            bookings: true,
+          },
+        },
+      },
+    }),
+  ]);
+  return {
+    payments,
+    paidTotal: paid._sum.amount ?? 0,
+    foodOrders,
+    laundry,
+    reviews,
+    promoter,
+    referralRewards,
+    referrals,
+    sessions,
+    payout,
+    counts: counts?._count,
+  };
 }

@@ -4,30 +4,73 @@ import { notify, notifyAdmins } from "@/features/notifications/service";
 import type { Prisma } from "@/generated/prisma/client";
 import { db } from "@/lib/db";
 
-export type ReviewResult = { ok: true } | { ok: false; error: "invalid" | "notAllowed" };
+export type ReviewResult =
+  { ok: true } | { ok: false; error: "invalid" | "notAllowed" };
 
 /** Feedback is for the guest of a stay that is under way (checked in) or finished, once per booking. */
-export async function canReview(userId: string, reference: string): Promise<boolean> {
-  const booking = await db.booking.findFirst({ where: { reference, guestId: userId, status: { in: ["CHECKED_IN", "COMPLETED"] }, review: null }, select: { id: true } });
+export async function canReview(
+  userId: string,
+  reference: string,
+): Promise<boolean> {
+  const booking = await db.booking.findFirst({
+    where: {
+      reference,
+      guestId: userId,
+      status: { in: ["CHECKED_IN", "COMPLETED"] },
+      review: null,
+    },
+    select: { id: true },
+  });
   return booking !== null;
 }
 
-export async function submitReview(userId: string, reference: string, rating: number, text: string): Promise<ReviewResult> {
+export async function submitReview(
+  userId: string,
+  reference: string,
+  rating: number,
+  text: string,
+): Promise<ReviewResult> {
   const comment = text.trim();
-  if (!Number.isInteger(rating) || rating < 1 || rating > 5 || comment.length < 10 || comment.length > 2000) return { ok: false, error: "invalid" };
+  if (
+    !Number.isInteger(rating) ||
+    rating < 1 ||
+    rating > 5 ||
+    comment.length < 10 ||
+    comment.length > 2000
+  )
+    return { ok: false, error: "invalid" };
   const booking = await db.booking.findFirst({
-    where: { reference, guestId: userId, status: { in: ["CHECKED_IN", "COMPLETED"] }, review: null },
+    where: {
+      reference,
+      guestId: userId,
+      status: { in: ["CHECKED_IN", "COMPLETED"] },
+      review: null,
+    },
     select: { id: true, listingId: true, listing: { select: { title: true } } },
   });
   if (!booking) return { ok: false, error: "notAllowed" };
   try {
     await db.$transaction(async (tx) => {
-      await tx.review.create({ data: { bookingId: booking.id, listingId: booking.listingId, authorId: userId, rating, comment } });
-      await notifyAdmins(tx, "reviewSubmitted", { title: booking.listing.title }, "/admin/support?tab=reviews");
+      await tx.review.create({
+        data: {
+          bookingId: booking.id,
+          listingId: booking.listingId,
+          authorId: userId,
+          rating,
+          comment,
+        },
+      });
+      await notifyAdmins(
+        tx,
+        "reviewSubmitted",
+        { title: booking.listing.title },
+        "/admin/support?tab=reviews",
+      );
     });
   } catch (error) {
     // A second submit for the same booking (double click) hits the one-review-per-booking rule.
-    if ((error as { code?: string }).code === "P2002") return { ok: false, error: "notAllowed" };
+    if ((error as { code?: string }).code === "P2002")
+      return { ok: false, error: "notAllowed" };
     throw error;
   }
   return { ok: true };
@@ -35,20 +78,52 @@ export async function submitReview(userId: string, reference: string, rating: nu
 
 /** Rating on the listing = average of published feedback only. */
 async function refreshRating(tx: Prisma.TransactionClient, listingId: string) {
-  const { _avg, _count } = await tx.review.aggregate({ where: { listingId, status: "PUBLISHED" }, _avg: { rating: true }, _count: true });
-  await tx.listing.update({ where: { id: listingId }, data: { ratingAvg: _avg.rating ?? 0, ratingCount: _count } });
+  const { _avg, _count } = await tx.review.aggregate({
+    where: { listingId, status: "PUBLISHED" },
+    _avg: { rating: true },
+    _count: true,
+  });
+  await tx.listing.update({
+    where: { id: listingId },
+    data: { ratingAvg: _avg.rating ?? 0, ratingCount: _count },
+  });
 }
 
-export async function moderateReview(adminId: string, reviewId: string, publish: boolean): Promise<boolean> {
+export async function moderateReview(
+  adminId: string,
+  reviewId: string,
+  publish: boolean,
+): Promise<boolean> {
   return db.$transaction(async (tx) => {
-    const review = await tx.review.findFirst({ where: { id: reviewId, status: "PENDING" }, select: { listingId: true, authorId: true, listing: { select: { title: true } } } });
+    const review = await tx.review.findFirst({
+      where: { id: reviewId, status: "PENDING" },
+      select: {
+        listingId: true,
+        authorId: true,
+        listing: { select: { title: true } },
+      },
+    });
     if (!review) return false;
-    await tx.review.update({ where: { id: reviewId }, data: { status: publish ? "PUBLISHED" : "REJECTED" } });
+    await tx.review.update({
+      where: { id: reviewId },
+      data: { status: publish ? "PUBLISHED" : "REJECTED" },
+    });
     if (publish) {
       await refreshRating(tx, review.listingId);
-      await notify(tx, review.authorId, "reviewPublished", { title: review.listing.title }, `/listings/${review.listingId}#reviews`);
+      await notify(
+        tx,
+        review.authorId,
+        "reviewPublished",
+        { title: review.listing.title },
+        `/listings/${review.listingId}#reviews`,
+      );
     }
-    await audit(tx, { actorId: adminId, action: publish ? "review.publish" : "review.reject", entityType: "review", entityId: reviewId });
+    await audit(tx, {
+      actorId: adminId,
+      action: publish ? "review.publish" : "review.reject",
+      entityType: "review",
+      entityId: reviewId,
+    });
     return true;
   });
 }
@@ -58,7 +133,13 @@ export function publishedReviews(listingId: string) {
     where: { listingId, status: "PUBLISHED" },
     orderBy: { createdAt: "desc" },
     take: 30,
-    select: { id: true, rating: true, comment: true, createdAt: true, author: { select: { name: true } } },
+    select: {
+      id: true,
+      rating: true,
+      comment: true,
+      createdAt: true,
+      author: { select: { name: true } },
+    },
   });
 }
 
@@ -66,7 +147,14 @@ export function pendingReviews() {
   return db.review.findMany({
     where: { status: "PENDING" },
     orderBy: { createdAt: "asc" },
-    select: { id: true, rating: true, comment: true, createdAt: true, author: { select: { name: true } }, listing: { select: { id: true, title: true } } },
+    select: {
+      id: true,
+      rating: true,
+      comment: true,
+      createdAt: true,
+      author: { select: { name: true } },
+      listing: { select: { id: true, title: true } },
+    },
   });
 }
 
@@ -76,18 +164,68 @@ export function recentPublishedReviews(take = 40) {
     where: { status: "PUBLISHED" },
     orderBy: { createdAt: "desc" },
     take,
-    select: { id: true, rating: true, comment: true, createdAt: true, author: { select: { name: true } }, listing: { select: { id: true, title: true } } },
+    select: {
+      id: true,
+      rating: true,
+      comment: true,
+      createdAt: true,
+      author: { select: { name: true } },
+      listing: { select: { id: true, title: true } },
+    },
   });
 }
 
 /** Staff take published feedback down again (the place's rating is worked out again). */
-export async function hidePublishedReview(adminId: string, reviewId: string): Promise<boolean> {
+export async function hidePublishedReview(
+  adminId: string,
+  reviewId: string,
+): Promise<boolean> {
   return db.$transaction(async (tx) => {
-    const review = await tx.review.findFirst({ where: { id: reviewId, status: "PUBLISHED" }, select: { listingId: true } });
+    const review = await tx.review.findFirst({
+      where: { id: reviewId, status: "PUBLISHED" },
+      select: { listingId: true },
+    });
     if (!review) return false;
-    await tx.review.update({ where: { id: reviewId }, data: { status: "REJECTED" } });
+    await tx.review.update({
+      where: { id: reviewId },
+      data: { status: "REJECTED" },
+    });
     await refreshRating(tx, review.listingId);
-    await audit(tx, { actorId: adminId, action: "review.hide", entityType: "review", entityId: reviewId });
+    await audit(tx, {
+      actorId: adminId,
+      action: "review.hide",
+      entityType: "review",
+      entityId: reviewId,
+    });
+    return true;
+  });
+}
+
+/** Staff delete feedback for good (spam, abuse). The place's rating is worked out again. Logged. */
+export async function deleteReview(
+  adminId: string,
+  reviewId: string,
+): Promise<boolean> {
+  return db.$transaction(async (tx) => {
+    const review = await tx.review.findUnique({
+      where: { id: reviewId },
+      select: { listingId: true, rating: true, comment: true, authorId: true },
+    });
+    if (!review) return false;
+    await tx.review.delete({ where: { id: reviewId } });
+    await refreshRating(tx, review.listingId);
+    await audit(tx, {
+      actorId: adminId,
+      action: "review.delete",
+      entityType: "review",
+      entityId: reviewId,
+      data: {
+        listingId: review.listingId,
+        authorId: review.authorId,
+        rating: review.rating,
+        comment: review.comment.slice(0, 300),
+      },
+    });
     return true;
   });
 }

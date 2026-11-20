@@ -4,8 +4,16 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { isBookingReference } from "@/features/bookings/reference";
 import { staffMoveBooking } from "@/features/bookings/service";
-import { hidePublishedQuestion, moderateQuestion } from "@/features/questions/service";
-import { hidePublishedReview, moderateReview } from "@/features/reviews/service";
+import {
+  deleteQuestion,
+  hidePublishedQuestion,
+  moderateQuestion,
+} from "@/features/questions/service";
+import {
+  deleteReview,
+  hidePublishedReview,
+  moderateReview,
+} from "@/features/reviews/service";
 import { canStaff, type StaffArea } from "@/lib/roles";
 import { getCurrentUser } from "@/lib/session";
 
@@ -16,7 +24,10 @@ async function staff(area: StaffArea) {
   return user && canStaff(user, area) ? user : null;
 }
 
-export async function moderateQuestionAction(questionId: string, publish: boolean): Promise<{ ok: boolean }> {
+export async function moderateQuestionAction(
+  questionId: string,
+  publish: boolean,
+): Promise<{ ok: boolean }> {
   const admin = await staff("support");
   if (!admin || !id.safeParse(questionId).success) return { ok: false };
   const ok = await moderateQuestion(admin.id, questionId, publish === true);
@@ -24,7 +35,10 @@ export async function moderateQuestionAction(questionId: string, publish: boolea
   return { ok };
 }
 
-export async function moderateReviewAction(reviewId: string, publish: boolean): Promise<{ ok: boolean }> {
+export async function moderateReviewAction(
+  reviewId: string,
+  publish: boolean,
+): Promise<{ ok: boolean }> {
   const admin = await staff("support");
   if (!admin || !id.safeParse(reviewId).success) return { ok: false };
   const ok = await moderateReview(admin.id, reviewId, publish === true);
@@ -32,27 +46,57 @@ export async function moderateReviewAction(reviewId: string, publish: boolean): 
   return { ok };
 }
 
-export async function moveBookingAction(reference: string, to: "CHECKED_IN" | "COMPLETED"): Promise<{ ok: boolean }> {
+export async function moveBookingAction(
+  reference: string,
+  to: "CHECKED_IN" | "COMPLETED",
+): Promise<{ ok: boolean }> {
   const admin = await staff("bookings");
-  if (!admin || typeof reference !== "string" || !isBookingReference(reference) || (to !== "CHECKED_IN" && to !== "COMPLETED")) return { ok: false };
+  if (
+    !admin ||
+    typeof reference !== "string" ||
+    !isBookingReference(reference) ||
+    (to !== "CHECKED_IN" && to !== "COMPLETED")
+  )
+    return { ok: false };
   const ok = await staffMoveBooking(admin.id, reference, to);
   // Bookings, the overview's front desk and the menu counts all change.
   if (ok) revalidatePath("/[locale]/admin", "layout");
   return { ok };
 }
 
-export async function staffCancelBookingAction(reference: string, reason: string): Promise<{ ok: boolean }> {
+export async function staffCancelBookingAction(
+  reference: string,
+  reason: string,
+): Promise<{ ok: boolean }> {
   const admin = await staff("bookings");
-  if (!admin || typeof reference !== "string" || !isBookingReference(reference) || typeof reason !== "string" || reason.length > 300) return { ok: false };
+  if (
+    !admin ||
+    typeof reference !== "string" ||
+    !isBookingReference(reference) ||
+    typeof reason !== "string" ||
+    reason.length > 300
+  )
+    return { ok: false };
   const { staffCancelUnpaid } = await import("./queries");
   const ok = await staffCancelUnpaid(admin.id, reference, reason);
   if (ok) revalidatePath("/[locale]/admin", "layout");
   return { ok };
 }
 
-export async function setUserStatusAction(userId: string, status: "ACTIVE" | "SUSPENDED", reason: string): Promise<{ ok: boolean }> {
+export async function setUserStatusAction(
+  userId: string,
+  status: "ACTIVE" | "SUSPENDED",
+  reason: string,
+): Promise<{ ok: boolean }> {
   const admin = await staff("settings");
-  if (!admin || !id.safeParse(userId).success || (status !== "ACTIVE" && status !== "SUSPENDED") || typeof reason !== "string" || reason.length > 300) return { ok: false };
+  if (
+    !admin ||
+    !id.safeParse(userId).success ||
+    (status !== "ACTIVE" && status !== "SUSPENDED") ||
+    typeof reason !== "string" ||
+    reason.length > 300
+  )
+    return { ok: false };
   const { setUserStatus } = await import("./queries");
   const ok = await setUserStatus(admin.id, userId, status, reason);
   if (ok) revalidatePath("/[locale]/admin/users", "layout");
@@ -60,10 +104,41 @@ export async function setUserStatusAction(userId: string, status: "ACTIVE" | "SU
 }
 
 /** Take published feedback or a published question down again. */
-export async function hidePublishedAction(kind: "question" | "review", itemId: string): Promise<{ ok: boolean }> {
+export async function hidePublishedAction(
+  kind: "question" | "review",
+  itemId: string,
+): Promise<{ ok: boolean }> {
   const admin = await staff("support");
-  if (!admin || !id.safeParse(itemId).success || (kind !== "question" && kind !== "review")) return { ok: false };
-  const ok = kind === "review" ? await hidePublishedReview(admin.id, itemId) : await hidePublishedQuestion(admin.id, itemId);
+  if (
+    !admin ||
+    !id.safeParse(itemId).success ||
+    (kind !== "question" && kind !== "review")
+  )
+    return { ok: false };
+  const ok =
+    kind === "review"
+      ? await hidePublishedReview(admin.id, itemId)
+      : await hidePublishedQuestion(admin.id, itemId);
+  if (ok) revalidatePath("/[locale]", "layout");
+  return { ok };
+}
+
+/** Delete feedback or a question for good, published or still waiting. */
+export async function deleteModeratedAction(
+  kind: "question" | "review",
+  itemId: string,
+): Promise<{ ok: boolean }> {
+  const admin = await staff("support");
+  if (
+    !admin ||
+    !id.safeParse(itemId).success ||
+    (kind !== "question" && kind !== "review")
+  )
+    return { ok: false };
+  const ok =
+    kind === "review"
+      ? await deleteReview(admin.id, itemId)
+      : await deleteQuestion(admin.id, itemId);
   if (ok) revalidatePath("/[locale]", "layout");
   return { ok };
 }

@@ -16,6 +16,7 @@ export function ConfirmAction({
   errors = {},
   danger = true,
   small = true,
+  then,
 }: {
   label: string;
   question: string;
@@ -24,6 +25,8 @@ export function ConfirmAction({
   errors?: Record<string, string>;
   danger?: boolean;
   small?: boolean;
+  /** Where to go once it's done (e.g. back to the list after deleting the item this page shows). */
+  then?: string;
 }) {
   const t = useTranslations("Admin");
   const router = useRouter();
@@ -33,7 +36,17 @@ export function ConfirmAction({
   const size = small ? "px-3.5 py-1.5 text-[13px]" : "px-4 py-2.5 text-[14px]";
   if (!asking)
     return (
-      <button type="button" onClick={() => setAsking(true)} className={cn("rounded-full border font-semibold transition-colors", size, danger ? "border-line text-danger hover:border-danger" : "border-line text-ink hover:border-primary")}>
+      <button
+        type="button"
+        onClick={() => setAsking(true)}
+        className={cn(
+          "rounded-full border font-semibold transition-colors",
+          size,
+          danger
+            ? "border-line text-danger hover:border-danger"
+            : "border-line text-ink hover:border-primary",
+        )}
+      >
         {label}
       </button>
     );
@@ -48,7 +61,8 @@ export function ConfirmAction({
             const result = await action();
             if (result.ok) {
               setAsking(false);
-              router.refresh();
+              if (then) router.replace(then);
+              else router.refresh();
             } else setError(errors[result.error ?? ""] ?? t("actionFailed"));
           })
         }
@@ -56,10 +70,17 @@ export function ConfirmAction({
       >
         {t("yes")}
       </button>
-      <button type="button" disabled={pending} onClick={() => (setAsking(false), setError(null))} className="rounded-full px-2 py-1 font-semibold text-ink hover:bg-white">
+      <button
+        type="button"
+        disabled={pending}
+        onClick={() => (setAsking(false), setError(null))}
+        className="rounded-full px-2 py-1 font-semibold text-ink hover:bg-white"
+      >
         {t("no")}
       </button>
-      {error && <span className="basis-full font-medium text-danger">{error}</span>}
+      {error && (
+        <span className="basis-full font-medium text-danger">{error}</span>
+      )}
     </span>
   );
 }

@@ -977,12 +977,14 @@
         "answer": "Réponse à une question",
         "publish": "Question publiée",
         "reject": "Question refusée",
-        "hide": "Question retirée"
+        "hide": "Question retirée",
+        "delete": "Question supprimée"
       },
       "review": {
         "publish": "Avis publié",
         "reject": "Avis refusé",
-        "hide": "Avis retiré"
+        "hide": "Avis retiré",
+        "delete": "Avis supprimé"
       },
       "ticket": {
         "open": "Demande ouverte",
@@ -1248,7 +1250,9 @@
       "toCheck": "À vérifier",
       "hide": "Masquer",
       "hideQuestion": "Retirer ceci ? Il ne s'affichera plus sur le lieu.",
-      "publishedEmpty": "Rien de publié pour l'instant."
+      "publishedEmpty": "Rien de publié pour l'instant.",
+      "delete": "Supprimer",
+      "deleteQuestion": "Supprimer définitivement ? C’est irréversible."
     },
     "closeWindow": "Fermer",
     "supportTabs": {
@@ -1333,7 +1337,36 @@
       "none": "Personne trouvée.",
       "clear": "Choisir quelqu’un d’autre"
     },
-    "adminAll": "Les admins VIIPA gèrent tout. Choisissez Gestionnaire pour ne donner que certains services."
+    "adminAll": "Les admins VIIPA gèrent tout. Choisissez Gestionnaire pour ne donner que certains services.",
+    "userPage": {
+      "spent": "Payé jusqu'ici",
+      "bookings": "Réservations",
+      "orders": "Commandes repas",
+      "favorites": "Logements enregistrés",
+      "payments": "Paiements",
+      "receipt": "Reçu",
+      "food": "Commandes repas",
+      "laundry": "Blanchisserie",
+      "reviews": "Avis écrits",
+      "promoter": "Promoteur",
+      "promoterCode": "Code QR",
+      "promoCodes": "Codes promo",
+      "brought": "Réservations apportées",
+      "earned": "Gagné",
+      "waiting": "En attente",
+      "paidOut": "Versé",
+      "share": "part de {percent} %",
+      "noShare": "pas de part",
+      "referrals": "Amis invités",
+      "rewards": "Récompenses d'invitation",
+      "signIns": "Connexions",
+      "lastSeen": "Dernière activité",
+      "noSignIns": "Jamais connecté.",
+      "payout": "Où il est payé",
+      "verified": "Vérifié",
+      "notVerified": "Pas encore vérifié",
+      "openPromoters": "Voir les promoteurs →"
+    }
   },
   "Questions": {
     "title": "Questions et réponses",

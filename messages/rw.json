@@ -977,12 +977,14 @@
         "answer": "Ikibazo cyasubijwe",
         "publish": "Ikibazo cyashyizweho",
         "reject": "Ikibazo cyanzwe",
-        "hide": "Ikibazo cyakuweho"
+        "hide": "Ikibazo cyakuweho",
+        "delete": "Ikibazo cyasibwe"
       },
       "review": {
         "publish": "Igitekerezo cyashyizweho",
         "reject": "Igitekerezo cyanzwe",
-        "hide": "Igitekerezo cyakuweho"
+        "hide": "Igitekerezo cyakuweho",
+        "delete": "Igitekerezo cyasibwe"
       },
       "ticket": {
         "open": "Ubusabe bwafunguwe",
@@ -1248,7 +1250,9 @@
       "toCheck": "Byo kugenzura",
       "hide": "Hisha",
       "hideQuestion": "Ukureho iki? Ntikizongera kugaragara ku hantu.",
-      "publishedEmpty": "Nta kintu cyatangajwe."
+      "publishedEmpty": "Nta kintu cyatangajwe.",
+      "delete": "Siba",
+      "deleteQuestion": "Gusiba burundu? Ntibisubirwaho."
     },
     "closeWindow": "Funga",
     "supportTabs": {
@@ -1333,7 +1337,36 @@
       "none": "Nta muntu wabonetse.",
       "clear": "Hitamo undi"
     },
-    "adminAll": "Abayobozi ba VIIPA bacunga byose. Hitamo Umucungamari kugira ngo umuhe serivisi zimwe gusa."
+    "adminAll": "Abayobozi ba VIIPA bacunga byose. Hitamo Umucungamari kugira ngo umuhe serivisi zimwe gusa.",
+    "userPage": {
+      "spent": "Amaze kwishyura",
+      "bookings": "Ibyumba yafashe",
+      "orders": "Ibiryo yatumije",
+      "favorites": "Aho yabitse",
+      "payments": "Ubwishyu",
+      "receipt": "Inyemezabwishyu",
+      "food": "Ibiryo yatumije",
+      "laundry": "Kumesa",
+      "reviews": "Ibitekerezo yanditse",
+      "promoter": "Umwamamaza",
+      "promoterCode": "Kode ya QR",
+      "promoCodes": "Kode za promo",
+      "brought": "Ibyo yazanye",
+      "earned": "Yabonye",
+      "waiting": "Bitegerejwe",
+      "paidOut": "Yishyuwe",
+      "share": "umugabane wa {percent}%",
+      "noShare": "nta mugabane",
+      "referrals": "Inshuti yatumiye",
+      "rewards": "Ibihembo byo gutumira",
+      "signIns": "Kwinjira",
+      "lastSeen": "Aheruka gukora",
+      "noSignIns": "Ntarigera yinjira.",
+      "payout": "Aho yishyurirwa",
+      "verified": "Byemejwe",
+      "notVerified": "Ntibiragenzurwa",
+      "openPromoters": "Reba abamamaza →"
+    }
   },
   "Questions": {
     "title": "Ibibazo n'ibisubizo",

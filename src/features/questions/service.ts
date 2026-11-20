@@ -7,26 +7,50 @@ import { canStaff } from "@/lib/roles";
 export const QUESTION_MAX = 500;
 const MAX_WAITING_PER_LISTING = 3;
 
-export type AskResult = { ok: true } | { ok: false; error: "invalid" | "notFound" | "ownListing" | "tooMany" };
+export type AskResult =
+  | { ok: true }
+  | { ok: false; error: "invalid" | "notFound" | "ownListing" | "tooMany" };
 
 /** A guest asks about a place. Nothing shows publicly until the host answers and staff publish it. */
-export async function askQuestion(userId: string, listingId: string, text: string): Promise<AskResult> {
+export async function askQuestion(
+  userId: string,
+  listingId: string,
+  text: string,
+): Promise<AskResult> {
   const question = text.trim();
-  if (question.length < 5 || question.length > QUESTION_MAX) return { ok: false, error: "invalid" };
-  const listing = await db.listing.findFirst({ where: { id: listingId, status: "PUBLISHED" }, select: { hostId: true, title: true } });
+  if (question.length < 5 || question.length > QUESTION_MAX)
+    return { ok: false, error: "invalid" };
+  const listing = await db.listing.findFirst({
+    where: { id: listingId, status: "PUBLISHED" },
+    select: { hostId: true, title: true },
+  });
   if (!listing) return { ok: false, error: "notFound" };
   if (listing.hostId === userId) return { ok: false, error: "ownListing" };
-  const waiting = await db.listingQuestion.count({ where: { askerId: userId, listingId, status: "PENDING" } });
-  if (waiting >= MAX_WAITING_PER_LISTING) return { ok: false, error: "tooMany" };
+  const waiting = await db.listingQuestion.count({
+    where: { askerId: userId, listingId, status: "PENDING" },
+  });
+  if (waiting >= MAX_WAITING_PER_LISTING)
+    return { ok: false, error: "tooMany" };
   await db.$transaction(async (tx) => {
-    await tx.listingQuestion.create({ data: { listingId, askerId: userId, question } });
-    await notifyAdmins(tx, "questionAsked", { title: listing.title }, "/admin/support?tab=reviews");
+    await tx.listingQuestion.create({
+      data: { listingId, askerId: userId, question },
+    });
+    await notifyAdmins(
+      tx,
+      "questionAsked",
+      { title: listing.title },
+      "/admin/support?tab=reviews",
+    );
   });
   return { ok: true };
 }
 
 /** The listing's host (or staff) writes the answer; staff still publish it. */
-export async function answerQuestion(actor: { id: string; role?: string | null }, questionId: string, text: string): Promise<boolean> {
+export async function answerQuestion(
+  actor: { id: string; role?: string | null },
+  questionId: string,
+  text: string,
+): Promise<boolean> {
   const answer = text.trim();
   if (answer.length < 1 || answer.length > 1000) return false;
   return db.$transaction(async (tx) => {
@@ -36,24 +60,61 @@ export async function answerQuestion(actor: { id: string; role?: string | null }
     });
     // VIIPA answers guests' questions (staff stand between guests and owners).
     if (!q || !canStaff(actor, "support")) return false;
-    await tx.listingQuestion.update({ where: { id: questionId }, data: { answer, answeredById: actor.id, answeredAt: new Date() } });
-    await audit(tx, { actorId: actor.id, action: "question.answer", entityType: "question", entityId: questionId });
-    await notifyAdmins(tx, "questionToCheck", { title: q.listing.title }, "/admin/support?tab=reviews");
+    await tx.listingQuestion.update({
+      where: { id: questionId },
+      data: { answer, answeredById: actor.id, answeredAt: new Date() },
+    });
+    await audit(tx, {
+      actorId: actor.id,
+      action: "question.answer",
+      entityType: "question",
+      entityId: questionId,
+    });
+    await notifyAdmins(
+      tx,
+      "questionToCheck",
+      { title: q.listing.title },
+      "/admin/support?tab=reviews",
+    );
     return true;
   });
 }
 
 /** Staff publish an answered question (the asker is told) or reject it. */
-export async function moderateQuestion(adminId: string, questionId: string, publish: boolean): Promise<boolean> {
+export async function moderateQuestion(
+  adminId: string,
+  questionId: string,
+  publish: boolean,
+): Promise<boolean> {
   return db.$transaction(async (tx) => {
     const q = await tx.listingQuestion.findFirst({
       where: { id: questionId, status: "PENDING" },
-      select: { answer: true, askerId: true, listingId: true, listing: { select: { title: true } } },
+      select: {
+        answer: true,
+        askerId: true,
+        listingId: true,
+        listing: { select: { title: true } },
+      },
     });
     if (!q || (publish && !q.answer)) return false;
-    await tx.listingQuestion.update({ where: { id: questionId }, data: { status: publish ? "PUBLISHED" : "REJECTED" } });
-    await audit(tx, { actorId: adminId, action: publish ? "question.publish" : "question.reject", entityType: "question", entityId: questionId });
-    if (publish) await notify(tx, q.askerId, "questionAnswered", { title: q.listing.title }, `/listings/${q.listingId}#questions`);
+    await tx.listingQuestion.update({
+      where: { id: questionId },
+      data: { status: publish ? "PUBLISHED" : "REJECTED" },
+    });
+    await audit(tx, {
+      actorId: adminId,
+      action: publish ? "question.publish" : "question.reject",
+      entityType: "question",
+      entityId: questionId,
+    });
+    if (publish)
+      await notify(
+        tx,
+        q.askerId,
+        "questionAnswered",
+        { title: q.listing.title },
+        `/listings/${q.listingId}#questions`,
+      );
     return true;
   });
 }
@@ -63,7 +124,13 @@ export function publishedQuestions(listingId: string) {
     where: { listingId, status: "PUBLISHED" },
     orderBy: { createdAt: "desc" },
     take: 50,
-    select: { id: true, question: true, answer: true, createdAt: true, answeredAt: true },
+    select: {
+      id: true,
+      question: true,
+      answer: true,
+      createdAt: true,
+      answeredAt: true,
+    },
   });
 }
 
@@ -72,7 +139,12 @@ export function hostQuestions(hostId: string) {
   return db.listingQuestion.findMany({
     where: { status: "PENDING", answer: null, listing: { hostId } },
     orderBy: { createdAt: "asc" },
-    select: { id: true, question: true, createdAt: true, listing: { select: { id: true, title: true } } },
+    select: {
+      id: true,
+      question: true,
+      createdAt: true,
+      listing: { select: { id: true, title: true } },
+    },
   });
 }
 
@@ -98,15 +170,57 @@ export function recentPublishedQuestions(take = 40) {
     where: { status: "PUBLISHED" },
     orderBy: { createdAt: "desc" },
     take,
-    select: { id: true, question: true, answer: true, createdAt: true, asker: { select: { name: true } }, listing: { select: { id: true, title: true } } },
+    select: {
+      id: true,
+      question: true,
+      answer: true,
+      createdAt: true,
+      asker: { select: { name: true } },
+      listing: { select: { id: true, title: true } },
+    },
   });
 }
 
 /** Staff take a published question down again. */
-export async function hidePublishedQuestion(adminId: string, questionId: string): Promise<boolean> {
+export async function hidePublishedQuestion(
+  adminId: string,
+  questionId: string,
+): Promise<boolean> {
   return db.$transaction(async (tx) => {
-    const { count } = await tx.listingQuestion.updateMany({ where: { id: questionId, status: "PUBLISHED" }, data: { status: "REJECTED" } });
-    if (count === 1) await audit(tx, { actorId: adminId, action: "question.hide", entityType: "question", entityId: questionId });
+    const { count } = await tx.listingQuestion.updateMany({
+      where: { id: questionId, status: "PUBLISHED" },
+      data: { status: "REJECTED" },
+    });
+    if (count === 1)
+      await audit(tx, {
+        actorId: adminId,
+        action: "question.hide",
+        entityType: "question",
+        entityId: questionId,
+      });
     return count === 1;
+  });
+}
+
+/** Staff delete a question for good (spam, abuse). Logged. */
+export async function deleteQuestion(
+  adminId: string,
+  questionId: string,
+): Promise<boolean> {
+  return db.$transaction(async (tx) => {
+    const q = await tx.listingQuestion.findUnique({
+      where: { id: questionId },
+      select: { listingId: true, question: true },
+    });
+    if (!q) return false;
+    await tx.listingQuestion.delete({ where: { id: questionId } });
+    await audit(tx, {
+      actorId: adminId,
+      action: "question.delete",
+      entityType: "question",
+      entityId: questionId,
+      data: { listingId: q.listingId, question: q.question.slice(0, 300) },
+    });
+    return true;
   });
 }
