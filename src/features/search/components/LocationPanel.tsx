@@ -57,7 +57,7 @@ export function LocationPanel({
       <p className="px-2 text-[13px] font-semibold text-muted">{text.trim() ? t("districtsAndPlaces") : t("districts")}</p>
       {empty && <p className="px-2 py-4 text-sm text-muted">{t("noMatches", { text: text.trim() })}</p>}
       {/* Always rendered so the combobox's aria-controls resolves even when there are no matches. */}
-      <ul id={id} role="listbox" aria-label={t("districts")} className="flex flex-col gap-0.5 md:max-h-[min(60vh,30rem)] md:overflow-y-auto md:overscroll-contain">
+      <ul id={id} role="listbox" aria-label={t("districts")} data-lenis-prevent className="flex flex-col gap-0.5 md:max-h-[min(60vh,30rem)] md:overflow-y-auto md:overscroll-contain">
         {suggestions?.map((s, index) => {
           const active = index === activeIndex;
           return (

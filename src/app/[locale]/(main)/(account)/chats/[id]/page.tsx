@@ -46,7 +46,7 @@ export default async function ConversationPage({ params }: Props) {
 
       {/* Messages */}
       {/* Computers: the messages scroll inside the box, the answer box stays at its foot. */}
-      <ol id="guest-chat" className="flex flex-1 flex-col gap-1.5 pt-4 lg:no-scrollbar lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain lg:bg-canvas/40 lg:px-5 lg:pb-4">
+      <ol id="guest-chat" data-lenis-prevent className="flex flex-1 flex-col gap-1.5 pt-4 lg:no-scrollbar lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain lg:bg-canvas/40 lg:px-5 lg:pb-4">
         {chat.messages.length === 0 && <li className="py-10 text-center text-[15px] text-muted">{t("startHint", { name: chat.other.name.split(" ")[0] ?? "" })}</li>}
         {chat.messages.map((m, i) => {
           const mine = m.mine;

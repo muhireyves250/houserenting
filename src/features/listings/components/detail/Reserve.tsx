@@ -179,7 +179,7 @@ export function ReserveDialog({
 
   // Portalled to <body>: the sticky booking card would otherwise trap this layer under later page sections.
   return createPortal(
-    <div className="fixed inset-0 z-[60] overflow-y-auto">
+    <div data-lenis-prevent className="fixed inset-0 z-[60] overflow-y-auto">
       <div aria-hidden="true" onClick={onClose} className="fixed inset-0 bg-[#00142e]/40 backdrop-blur-[8px] motion-safe:animate-[fade-in_300ms_ease-out]" />
       <div className="relative flex min-h-full items-start justify-center p-0 md:p-8">
         <div

@@ -352,7 +352,7 @@ function MorePanel({
       </div>
       <div>
         <p className="mb-2 text-sm font-semibold text-ink">{t("amenities")}</p>
-        <ul className="grid max-h-56 grid-cols-2 gap-1 overflow-y-auto">
+        <ul data-lenis-prevent className="grid max-h-56 grid-cols-2 gap-1 overflow-y-auto">
           {AMENITIES.map((a) => {
             const checked = amenities.includes(a);
             return (

@@ -28,7 +28,7 @@ export function AccountNav({ user, unread }: { user: { name: string; email: stri
             <span className="block truncate text-[12px] text-muted">{user.email}</span>
           </span>
         </Link>
-        <nav aria-label={t("accountMenu")} className="no-scrollbar min-h-0 flex-1 overflow-y-auto p-2">
+        <nav aria-label={t("accountMenu")} data-lenis-prevent className="no-scrollbar min-h-0 flex-1 overflow-y-auto p-2">
           <ul className="flex flex-col gap-0.5">
             {ACCOUNT_ITEMS.map(({ key, href, icon: Icon }) => {
               const on = isOn(pathname, href) && !(href === "/profile" && pathname !== "/profile" && pathname !== "/profile/personal");

@@ -470,7 +470,7 @@ function MobileSheet({
           <X className="size-5" aria-hidden="true" />
         </button>
       </div>
-      <div className="flex-1 overflow-y-auto px-4 py-5">{children}</div>
+      <div data-lenis-prevent className="flex-1 overflow-y-auto px-4 py-5">{children}</div>
       <div className="flex items-center justify-between border-t border-line px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
         <button type="button" onClick={onClear} className="text-sm font-medium text-muted underline">
           {clearLabel}

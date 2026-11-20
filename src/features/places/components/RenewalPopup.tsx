@@ -35,7 +35,7 @@ export function RenewalPopup({ places }: { places: { id: string; title: string; 
   return (
     <Modal title={t("renewalTitle")} closeLabel={t("close")} onClose={close}>
       <p className="-mt-2 mb-4 text-center text-[14px] text-muted">{t("renewalBody", { count: places.length })}</p>
-      <ul className="flex max-h-[50vh] flex-col gap-2 overflow-y-auto">
+      <ul data-lenis-prevent className="flex max-h-[50vh] flex-col gap-2 overflow-y-auto">
         {places.map((p) => (
           <li key={p.id}>
             <Link href={`/admin/listings/${p.id}`} onClick={close} className="flex flex-col rounded-xl border border-line px-3 py-2.5 hover:border-primary">
