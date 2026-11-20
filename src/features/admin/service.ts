@@ -3,7 +3,7 @@ import { audit } from "@/features/audit/service";
 import { moveListing } from "@/features/places/status-service";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { STAFF_AREAS, type AppRole } from "@/lib/roles";
+import { canStaff, STAFF_AREAS, type AppRole } from "@/lib/roles";
 
 export function pendingListings() {
   return db.listing.findMany({
@@ -160,4 +160,23 @@ export async function dashboardCounts() {
     db.supportTicket.count({ where: { status: { in: ["OPEN", "IN_PROGRESS"] } } }),
   ]);
   return { listings, questions, reviews, tickets };
+}
+
+export type HostAccessResult = { ok: true } | { ok: false; error: "notAllowed" | "notFound" | "hasPlaces" };
+
+/**
+ * Staff make someone a place owner (they then land on the owner dashboard instead of booking), or take it away.
+ * Not for oneself; not taken from someone who still owns places (archive or move them first). Logged.
+ */
+export async function setHostAccess(actor: { id: string; role?: string | null; staffAreas?: readonly string[] | null }, userId: string, isHost: boolean): Promise<HostAccessResult> {
+  if (actor.id === userId || !canStaff(actor, "settings")) return { ok: false, error: "notAllowed" };
+  return db.$transaction(async (tx) => {
+    const user = await tx.user.findUnique({ where: { id: userId }, select: { isHost: true, _count: { select: { listings: true } } } });
+    if (!user) return { ok: false, error: "notFound" } as const;
+    if (user.isHost === isHost) return { ok: true } as const;
+    if (!isHost && user._count.listings > 0) return { ok: false, error: "hasPlaces" } as const;
+    await tx.user.update({ where: { id: userId }, data: { isHost } });
+    await audit(tx, { actorId: actor.id, action: isHost ? "user.hostOn" : "user.hostOff", entityType: "user", entityId: userId });
+    return { ok: true } as const;
+  });
 }

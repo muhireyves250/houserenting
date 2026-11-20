@@ -86,3 +86,13 @@ export async function findPeopleAction(q: string): Promise<{ id: string; name: s
     select: { id: true, name: true, email: true },
   });
 }
+
+/** Make someone a place owner (host), or take it away. */
+export async function setHostAccessAction(userId: string, isHost: boolean): Promise<import("./service").HostAccessResult> {
+  const user = await getCurrentUser();
+  if (!user || !id.safeParse(userId).success || typeof isHost !== "boolean") return { ok: false, error: "notAllowed" };
+  const { setHostAccess } = await import("./service");
+  const result = await setHostAccess(user, userId, isHost);
+  if (result.ok) revalidatePath("/[locale]/admin/users", "layout");
+  return result;
+}

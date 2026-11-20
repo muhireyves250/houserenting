@@ -222,3 +222,20 @@ describe("deleting places and promo codes", () => {
     expect(await db.promoCode.count()).toBe(0);
   });
 });
+
+describe("making someone a place owner", () => {
+  it("staff turn it on and off; never for themselves; not off while they own places", async () => {
+    const { setHostAccess } = await import("./service");
+    const admin = { id: "admin", role: "ADMIN" };
+    expect(await setHostAccess({ id: "g1" }, "g1", true)).toEqual({ ok: false, error: "notAllowed" });
+    expect(await setHostAccess(admin, "admin", true)).toEqual({ ok: false, error: "notAllowed" });
+    expect(await setHostAccess(admin, "g1", true)).toEqual({ ok: true });
+    expect((await db.user.findUnique({ where: { id: "g1" } }))?.isHost).toBe(true);
+    expect(await setHostAccess(admin, "g1", false)).toEqual({ ok: true });
+    expect((await db.user.findUnique({ where: { id: "g1" } }))?.isHost).toBe(false);
+    // "host" owns the test place.
+    await db.user.update({ where: { id: "host" }, data: { isHost: true } });
+    expect(await setHostAccess(admin, "host", false)).toEqual({ ok: false, error: "hasPlaces" });
+    expect(await db.auditLog.count({ where: { action: { in: ["user.hostOn", "user.hostOff"] } } })).toBe(2);
+  });
+});

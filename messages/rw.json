@@ -971,7 +971,9 @@
         "role": "Uruhare rwahinduwe",
         "suspend": "Konti yahagaritswe",
         "reactivate": "Konti yongeye gufungurwa",
-        "photo": "Ifoto y'umwirondoro yahinduwe"
+        "photo": "Ifoto y'umwirondoro yahinduwe",
+        "hostOn": "Yagizwe nyir'inzu",
+        "hostOff": "Ntakiri nyir'inzu"
       },
       "question": {
         "answer": "Ikibazo cyasubijwe",
@@ -1369,6 +1371,14 @@
       "verified": "Byemejwe",
       "notVerified": "Ntibiragenzurwa",
       "openPromoters": "Reba abamamaza →"
+    },
+    "hostAccess": {
+      "label": "Nyir'inzu (host)",
+      "onHint": "Akoresha dashboard ya ba nyir'inzu; ntafata ibyumba.",
+      "offHint": "Umukiriya: afata ibyumba.",
+      "hasPlaces": "Aracyafite {count, plural, one {inzu #} other {inzu #}}: banza uzibike cyangwa uzimure.",
+      "failed": "Ntibyakunze — ongera ugerageze.",
+      "title": "Nyir'inzu"
     }
   },
   "Questions": {

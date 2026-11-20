@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Avatar } from "@/components/ui/Avatar";
+import { HostToggle } from "@/features/admin/components/HostToggle";
 import { RoleToggle } from "@/features/admin/components/RoleToggle";
 import { StaffAreasForm } from "@/features/admin/components/StaffAreasForm";
 import { UserActions } from "@/features/admin/components/UserActions";
@@ -543,6 +544,10 @@ export default async function AdminUserPage({ params }: Props) {
                 ))}
               </ul>
             )}
+          </Panel>
+          {/* Owner of places or customer: owners use the owner dashboard. */}
+          <Panel title={t("hostAccess.title")}>
+            {self ? <span className="text-xs text-muted">{t("you")}</span> : <HostToggle userId={user.id} isHost={user.isHost} places={user.listings.length} />}
           </Panel>
           <Panel title={t("staffAccess")}>
             <div className="flex items-center justify-between gap-3">

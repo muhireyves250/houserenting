@@ -971,7 +971,9 @@
         "role": "Rôle modifié",
         "suspend": "Compte suspendu",
         "reactivate": "Compte réactivé",
-        "photo": "Photo de profil modifiée"
+        "photo": "Photo de profil modifiée",
+        "hostOn": "Devenu propriétaire",
+        "hostOff": "N'est plus propriétaire"
       },
       "question": {
         "answer": "Réponse à une question",
@@ -1369,6 +1371,14 @@
       "verified": "Vérifié",
       "notVerified": "Pas encore vérifié",
       "openPromoters": "Voir les promoteurs →"
+    },
+    "hostAccess": {
+      "label": "Propriétaire (hôte)",
+      "onHint": "Utilise le tableau de bord propriétaire ; ne réserve pas.",
+      "offHint": "Un client : réserve des séjours.",
+      "hasPlaces": "Possède encore {count, plural, one {# logement} other {# logements}} : archivez-les ou transférez-les d'abord.",
+      "failed": "Échec — réessayez.",
+      "title": "Propriétaire"
     }
   },
   "Questions": {

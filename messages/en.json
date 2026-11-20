@@ -971,7 +971,9 @@
         "role": "Role changed",
         "suspend": "Account suspended",
         "reactivate": "Account reactivated",
-        "photo": "Profile photo changed"
+        "photo": "Profile photo changed",
+        "hostOn": "Made a place owner",
+        "hostOff": "No longer a place owner"
       },
       "question": {
         "answer": "Question answered",
@@ -1369,6 +1371,14 @@
       "verified": "Verified",
       "notVerified": "Not checked yet",
       "openPromoters": "Open promoters →"
+    },
+    "hostAccess": {
+      "label": "Place owner (host)",
+      "onHint": "Uses the owner dashboard; can't book stays.",
+      "offHint": "A customer: books stays.",
+      "hasPlaces": "They still own {count, plural, one {# place} other {# places}}: archive or move them first.",
+      "failed": "Couldn't change it — try again.",
+      "title": "Place owner"
     }
   },
   "Questions": {
