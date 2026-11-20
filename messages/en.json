@@ -1665,7 +1665,35 @@
       "error": "0–50%",
       "own": "This place: {percent}%",
       "category": "Category rate: {percent}%"
-    }
+    },
+    "filter": {
+      "all": "All",
+      "searchPayments": "Booking, place or transaction",
+      "ledger": {
+        "all": "Everything",
+        "stay": "Stays",
+        "food": "Food",
+        "laundry": "Laundry",
+        "payout": "Payouts"
+      }
+    },
+    "title": "Money",
+    "receipt": {
+      "title": "Payment receipt",
+      "download": "Download PDF",
+      "receiptNo": "Receipt no.",
+      "date": "Date",
+      "guest": "Paid by",
+      "booking": "Booking",
+      "place": "Place",
+      "stay": "Stay",
+      "method": "Paid with",
+      "transaction": "Transaction",
+      "status": "Status",
+      "amount": "Amount paid",
+      "open": "Receipt"
+    },
+    "report": "Report (Excel)"
   },
   "Promotions": {
     "new": "New promo code",

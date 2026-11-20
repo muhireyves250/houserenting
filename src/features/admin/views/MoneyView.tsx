@@ -6,6 +6,8 @@ import { Pagination } from "@/features/admin/components/ui";
 import { allPayments } from "@/features/admin/queries";
 import { formatKigaliDateTime } from "@/features/bookings/format";
 import { ownerBalances, recentLedger } from "@/features/ledger/service";
+import { PAYMENT_FILTERS, type PaymentFilter } from "@/features/admin/queries";
+import { FilterTabs, SearchBox } from "@/features/admin/components/ui";
 import { placeCommissions } from "@/features/places/commission";
 import { CommissionInput } from "@/features/places/components/CommissionInput";
 import { paymentsToReview } from "@/features/payments/service";
@@ -16,7 +18,7 @@ import { dynamicMessage } from "@/lib/dynamic-message";
 import { getEnv } from "@/lib/env";
 import { formatRWF } from "@/lib/format";
 
-type Props = { searchParams: Promise<{ page?: string }> };
+type Props = { searchParams: Promise<{ page?: string; pay?: string; pq?: string; ledger?: string }> };
 
 const PAY_TONE: Record<string, string> = {
   SUCCEEDED: "bg-emerald-100 text-emerald-800",
@@ -30,7 +32,14 @@ const PAY_TONE: Record<string, string> = {
  * needs a decision, the latest payments, and the ledger grouped one line per payment (folded).
  */
 export async function MoneyView({ searchParams }: { searchParams: Props["searchParams"] }) {
-  const page = Math.max(1, Number((await searchParams).page) || 1);
+  const params = await searchParams;
+  const page = Math.max(1, Number(params.page) || 1);
+  // Filters: payments by status and search; the ledger by what the money was for.
+  const payStatus = (PAYMENT_FILTERS as readonly string[]).includes(params.pay ?? "") ? (params.pay as PaymentFilter) : undefined;
+  const payQ = (params.pq ?? "").slice(0, 60);
+  const ledgerFor = ["stay", "food", "laundry", "payout"].includes(params.ledger ?? "") ? (params.ledger as "stay" | "food" | "laundry" | "payout") : undefined;
+  const moneyQuery = (extra: Record<string, string | undefined>) =>
+    Object.fromEntries(Object.entries({ pay: payStatus, pq: payQ || undefined, ledger: ledgerFor, ...extra }).filter(([, v]) => v)) as Record<string, string>;
   const [t, tAdmin, locale, balances, rewards, problems, ledger, payments] = await Promise.all([
     getTranslations("Money"),
     getTranslations("Admin"),
@@ -39,7 +48,7 @@ export async function MoneyView({ searchParams }: { searchParams: Props["searchP
     pendingRewards(),
     paymentsToReview(),
     recentLedger(150),
-    allPayments(page),
+    allPayments(page, { status: payStatus, q: payQ }),
   ]);
   const connected = Boolean(getEnv().PAYMENT_WEBHOOK_SECRET);
   // Each owner's places and VIIPA's commission on each (editable here).
@@ -58,6 +67,9 @@ export async function MoneyView({ searchParams }: { searchParams: Props["searchP
     if (last && last.key === key) last.lines.push({ kind: e.kind, amount: e.amount });
     else groups.push({ key, ref, what, at: e.createdAt, lines: [{ kind: e.kind, amount: e.amount }] });
   }
+  // What each group was for: a stay, food, laundry, or a payout to an owner.
+  const groupFor = (g: Group) => (g.what.startsWith("food ") ? "food" : g.what.startsWith("laundry ") ? "laundry" : g.ref.startsWith("SR-") ? "stay" : "payout");
+  const shownGroups = ledgerFor ? groups.filter((g) => groupFor(g) === ledgerFor) : groups;
   const whatLabel = (note: string) => (note.startsWith("food ") ? t("forFood", { ref: note.slice(5) }) : note.startsWith("laundry ") ? t("forLaundry", { ref: note.slice(8) }) : t("forStay"));
 
   return (
@@ -66,12 +78,13 @@ export async function MoneyView({ searchParams }: { searchParams: Props["searchP
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className={cn("rounded-full px-3 py-1 text-[12px] font-semibold", connected ? "bg-emerald-50 text-emerald-800" : "bg-amber-50 text-amber-900")}>{connected ? t("connectedShort") : t("manualShort")}</p>
         {/* Phones: the three downloads side by side on one line. */}
-        <div className="grid w-full grid-cols-3 gap-2 sm:flex sm:w-auto sm:flex-wrap">
+        <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap">
           {(
             [
               ["/api/v1/admin/export/bookings", t("exportBookings")],
               ["/api/v1/admin/export/payments", t("exportPayments")],
               ["/api/v1/admin/export/ledger", t("exportLedger")],
+              ["/api/v1/admin/export/report", t("report")],
             ] as const
           ).map(([href, label]) => (
             <a key={href} href={href} className="inline-flex min-w-0 items-center justify-center gap-1.5 rounded-full border border-line bg-surface px-2 py-2 text-[12px] font-semibold whitespace-nowrap text-ink hover:border-primary sm:px-3.5 sm:py-1.5 sm:text-[13px]">
@@ -186,7 +199,17 @@ export async function MoneyView({ searchParams }: { searchParams: Props["searchP
 
       {/* The latest payments from guests. */}
       <section className="flex flex-col gap-3">
-        <h2 className="text-[17px] font-bold text-ink">{t("paymentsTitle")}</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-[17px] font-bold text-ink">{t("paymentsTitle")}</h2>
+          <SearchBox name="pq" value={payQ} placeholder={t("filter.searchPayments")} keep={{ pay: payStatus, ledger: ledgerFor }} />
+        </div>
+        <FilterTabs
+          items={[undefined, ...PAYMENT_FILTERS].map((st) => ({
+            label: st ? t(`payStatus.${st}`) : t("filter.all"),
+            href: { pathname: "/admin/money", query: moneyQuery({ pay: st ?? "" }) },
+            on: st === payStatus,
+          }))}
+        />
         {payments.rows.length === 0 ? (
           <p className="rounded-2xl bg-surface py-6 text-center text-[14px] text-muted ring-1 ring-line">{t("nothing")}</p>
         ) : (
@@ -202,21 +225,36 @@ export async function MoneyView({ searchParams }: { searchParams: Props["searchP
                 <span className="text-[12px] text-muted">{formatKigaliDateTime(locale, pay.createdAt)}</span>
                 <span className="w-28 text-right text-[15px] font-bold text-ink tabular-nums">{rwf(pay.amount)}</span>
                 <Chip tone={PAY_TONE[pay.status] ?? "bg-canvas text-ink"}>{t(`payStatus.${pay.status as "SUCCEEDED"}`)}</Chip>
+                {/* This transaction's receipt, to download as PDF. */}
+                <Link href={`/admin/receipts/${pay.id}`} className="inline-flex items-center gap-1 rounded-full border border-line px-3 py-1 text-[12px] font-semibold text-ink hover:border-primary hover:text-primary">
+                  <Download className="size-3.5" aria-hidden="true" />
+                  {t("receipt.open")}
+                </Link>
               </li>
             ))}
           </ul>
         )}
-        <Pagination page={page} pages={payments.pages} label={(pg, n) => tAdmin("pageOf", { page: pg, pages: n })} hrefFor={(pg) => `/admin/money?page=${pg}`} />
+        <Pagination page={page} pages={payments.pages} label={(pg, n) => tAdmin("pageOf", { page: pg, pages: n })} hrefFor={(pg) => `/admin/money?${new URLSearchParams(moneyQuery({ page: String(pg) }))}`} />
       </section>
 
-      {/* Every money movement, one line per payment, folded. */}
-      <details className="rounded-2xl bg-surface px-4 ring-1 ring-line">
+      {/* Every money movement, one line per payment, folded (open when filtered). */}
+      <details open={Boolean(ledgerFor)} className="rounded-2xl bg-surface px-4 ring-1 ring-line">
         <summary className="flex cursor-pointer list-none items-center gap-2 [&::-webkit-details-marker]:hidden py-3.5 text-[15px] font-semibold text-ink">
           <Receipt className="size-4 text-primary" aria-hidden="true" />
-          {t("ledger")} <span className="text-muted tabular-nums">({groups.length})</span>
+          {t("ledger")} <span className="text-muted tabular-nums">({shownGroups.length})</span>
         </summary>
+        <div className="border-t border-line py-3">
+          <FilterTabs
+            items={([undefined, "stay", "food", "laundry", "payout"] as const).map((k) => ({
+              label: t(`filter.ledger.${k ?? "all"}`),
+              href: { pathname: "/admin/money", query: moneyQuery({ ledger: k ?? "" }) },
+              on: k === ledgerFor,
+            }))}
+          />
+        </div>
         <ol className="flex flex-col divide-y divide-line border-t border-line">
-          {groups.map((g) => (
+          {shownGroups.length === 0 && <li className="py-6 text-center text-[13px] text-muted">{t("nothing")}</li>}
+          {shownGroups.map((g) => (
             <li key={g.key} className="flex flex-col gap-1.5 py-3">
               <div className="flex flex-wrap items-center gap-2 text-[13px]">
                 <span className="font-mono font-bold text-ink">{g.ref}</span>

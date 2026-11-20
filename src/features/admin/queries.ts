@@ -165,14 +165,24 @@ export function listingBookings(listingId: string) {
   return db.booking.findMany({ where: { listingId }, orderBy: { createdAt: "desc" }, take: 20, select: BOOKING_ROW });
 }
 
-export async function allPayments(page = 1) {
+export const PAYMENT_FILTERS = ["SUCCEEDED", "PENDING", "FAILED", "REFUNDED"] as const;
+export type PaymentFilter = (typeof PAYMENT_FILTERS)[number];
+
+/** Guests' payments, newest first: by status, and by booking reference, place or transaction. */
+export async function allPayments(page = 1, filter: { status?: PaymentFilter; q?: string } = {}) {
+  const q = filter.q?.trim();
+  const where: Prisma.PaymentWhereInput = {
+    ...(filter.status ? { status: filter.status } : {}),
+    ...(q ? { OR: [{ providerReference: like(q) }, { booking: { reference: { contains: q.toUpperCase() } } }, { booking: { listing: { title: like(q) } } }] } : {}),
+  };
   const [rows, total] = await Promise.all([
     db.payment.findMany({
+      where,
       orderBy: { createdAt: "desc" },
       ...pageOf(page),
       select: { id: true, provider: true, providerReference: true, amount: true, currency: true, status: true, createdAt: true, booking: { select: { reference: true, listing: { select: { title: true } } } } },
     }),
-    db.payment.count(),
+    db.payment.count({ where }),
   ]);
   return { rows, total, pages: Math.max(1, Math.ceil(total / PAGE_SIZE)) };
 }

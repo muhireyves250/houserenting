@@ -1665,7 +1665,35 @@
       "error": "0–50 %",
       "own": "Ce logement : {percent} %",
       "category": "Taux de la catégorie : {percent} %"
-    }
+    },
+    "filter": {
+      "all": "Tous",
+      "searchPayments": "Réservation, logement ou transaction",
+      "ledger": {
+        "all": "Tout",
+        "stay": "Séjours",
+        "food": "Repas",
+        "laundry": "Blanchisserie",
+        "payout": "Paiements aux propriétaires"
+      }
+    },
+    "title": "Argent",
+    "receipt": {
+      "title": "Reçu de paiement",
+      "download": "Télécharger le PDF",
+      "receiptNo": "N° de reçu",
+      "date": "Date",
+      "guest": "Payé par",
+      "booking": "Réservation",
+      "place": "Logement",
+      "stay": "Séjour",
+      "method": "Payé par",
+      "transaction": "Transaction",
+      "status": "Statut",
+      "amount": "Montant payé",
+      "open": "Reçu"
+    },
+    "report": "Rapport (Excel)"
   },
   "Promotions": {
     "new": "Nouveau code promo",

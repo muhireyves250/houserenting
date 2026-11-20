@@ -1665,7 +1665,35 @@
       "error": "0–50%",
       "own": "Iri cumbi: {percent}%",
       "category": "Igipimo cy’ubwoko: {percent}%"
-    }
+    },
+    "filter": {
+      "all": "Byose",
+      "searchPayments": "Icyumba, icumbi cyangwa transaction",
+      "ledger": {
+        "all": "Byose",
+        "stay": "Amacumbi",
+        "food": "Ibiryo",
+        "laundry": "Kumesa",
+        "payout": "Ubwishyu bw’abafite amazu"
+      }
+    },
+    "title": "Amafaranga",
+    "receipt": {
+      "title": "Inyemezabwishyu",
+      "download": "Kuramo PDF",
+      "receiptNo": "Nimero",
+      "date": "Itariki",
+      "guest": "Yishyuwe na",
+      "booking": "Icyumba cyafashwe",
+      "place": "Icumbi",
+      "stay": "Igihe",
+      "method": "Uburyo",
+      "transaction": "Transaction",
+      "status": "Uko bimeze",
+      "amount": "Amafaranga yishyuwe",
+      "open": "Inyemezabwishyu"
+    },
+    "report": "Raporo (Excel)"
   },
   "Promotions": {
     "new": "Kode nshya y'igabanywa",
