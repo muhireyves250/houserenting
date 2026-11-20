@@ -3,7 +3,9 @@ import { feesFor, priceBreakdown } from "./money";
 
 describe("priceBreakdown", () => {
   it("with nothing configured, the guest pays the stay and the owner gets all of it", () => {
-    expect(priceBreakdown(135000, { commissionBps: null, guestFeeBps: null })).toEqual({
+    expect(
+      priceBreakdown(135000, { commissionBps: null, guestFeeBps: null }),
+    ).toEqual({
       subtotal: 135000,
       discount: 0,
       guestFee: 0,
@@ -15,7 +17,9 @@ describe("priceBreakdown", () => {
 
   it("adds the guest fee on top and takes commission out of the stay price, in whole francs", () => {
     // 5% guest fee, 12.5% commission.
-    expect(priceBreakdown(135001, { commissionBps: 1250, guestFeeBps: 500 })).toEqual({
+    expect(
+      priceBreakdown(135001, { commissionBps: 1250, guestFeeBps: 500 }),
+    ).toEqual({
       subtotal: 135001,
       discount: 0,
       guestFee: 6750,
@@ -27,42 +31,92 @@ describe("priceBreakdown", () => {
 
   it("always adds up: guest total = owner payout + platform share", () => {
     for (const subtotal of [100, 999, 45000, 1234567]) {
-      const b = priceBreakdown(subtotal, { commissionBps: 1000, guestFeeBps: 300 });
+      const b = priceBreakdown(subtotal, {
+        commissionBps: 1000,
+        guestFeeBps: 300,
+      });
       expect(b.total).toBe(b.hostPayout + b.commission + b.guestFee);
     }
   });
 
-  it("a discount the platform funds leaves the owner's payout untouched", () => {
-    const b = priceBreakdown(100000, { commissionBps: 1000, guestFeeBps: 500 }, { amount: 10000, fundedBy: "PLATFORM" });
-    expect(b).toEqual({ subtotal: 100000, discount: 10000, guestFee: 4500, total: 94500, commission: 10000, hostPayout: 90000 });
+  it("the owner gets the price less the commission and less the promo discount", () => {
+    const b = priceBreakdown(
+      100000,
+      { commissionBps: 1000, guestFeeBps: 500 },
+      { amount: 10000, fundedBy: "PLATFORM" },
+    );
+    expect(b).toEqual({
+      subtotal: 100000,
+      discount: 10000,
+      guestFee: 4500,
+      total: 94500,
+      commission: 10000,
+      hostPayout: 80000,
+    });
   });
 
-  it("a discount the owner funds comes out of the owner's payout", () => {
-    const b = priceBreakdown(100000, { commissionBps: 1000, guestFeeBps: null }, { amount: 10000, fundedBy: "HOST" });
-    expect(b).toEqual({ subtotal: 100000, discount: 10000, guestFee: 0, total: 90000, commission: 9000, hostPayout: 81000 });
+  it("the same whoever was marked as paying for the code", () => {
+    const b = priceBreakdown(
+      100000,
+      { commissionBps: 1000, guestFeeBps: null },
+      { amount: 10000, fundedBy: "HOST" },
+    );
+    expect(b).toEqual({
+      subtotal: 100000,
+      discount: 10000,
+      guestFee: 0,
+      total: 90000,
+      commission: 10000,
+      hostPayout: 80000,
+    });
   });
 
   it("never discounts below zero", () => {
-    expect(priceBreakdown(5000, { commissionBps: null, guestFeeBps: null }, { amount: 9000, fundedBy: "PLATFORM" })).toMatchObject({ discount: 5000, total: 0 });
+    expect(
+      priceBreakdown(
+        5000,
+        { commissionBps: null, guestFeeBps: null },
+        { amount: 9000, fundedBy: "PLATFORM" },
+      ),
+    ).toMatchObject({ discount: 5000, total: 0 });
   });
 });
 
 describe("feesFor", () => {
-  const settings = { commissionBps: 1000, guestFeeBps: 500, commissionByType: { LODGE: 1500 } };
+  const settings = {
+    commissionBps: 1000,
+    guestFeeBps: 500,
+    commissionByType: { LODGE: 1500 },
+  };
   it("uses the category's commission when set, else the default", () => {
     expect(feesFor(settings, "LODGE").commissionBps).toBe(1500);
     expect(feesFor(settings, "APARTMENT").commissionBps).toBe(1000);
   });
   it("adds the guest fee on top only in the add-on model", () => {
-    expect(feesFor(settings, "APARTMENT")).toEqual({ commissionBps: 1000, guestFeeBps: 500, model: "ADD_ON" });
-    expect(feesFor({ ...settings, feeModel: "INCLUDED" }, "APARTMENT")).toEqual({ commissionBps: 1000, guestFeeBps: null, model: "INCLUDED" });
-    expect(priceBreakdown(100_000, feesFor({ ...settings, feeModel: "INCLUDED" }, "APARTMENT")).total).toBe(100_000);
+    expect(feesFor(settings, "APARTMENT")).toEqual({
+      commissionBps: 1000,
+      guestFeeBps: 500,
+      model: "ADD_ON",
+    });
+    expect(feesFor({ ...settings, feeModel: "INCLUDED" }, "APARTMENT")).toEqual(
+      { commissionBps: 1000, guestFeeBps: null, model: "INCLUDED" },
+    );
+    expect(
+      priceBreakdown(
+        100_000,
+        feesFor({ ...settings, feeModel: "INCLUDED" }, "APARTMENT"),
+      ).total,
+    ).toBe(100_000);
   });
 });
 
 describe("commission per place", () => {
   it("uses the place's own rate first, then its category's, then the platform's", () => {
-    const settings = { commissionBps: 1000, guestFeeBps: 500, commissionByType: { LODGE: 1200 } };
+    const settings = {
+      commissionBps: 1000,
+      guestFeeBps: 500,
+      commissionByType: { LODGE: 1200 },
+    };
     expect(feesFor(settings, "LODGE", 800).commissionBps).toBe(800);
     expect(feesFor(settings, "LODGE", 0).commissionBps).toBe(0);
     expect(feesFor(settings, "LODGE", null).commissionBps).toBe(1200);

@@ -13,6 +13,7 @@ import {
 } from "@/features/admin/components/ui";
 import { userActivityForStaff, userForStaff } from "@/features/admin/queries";
 import { StatTiles } from "@/features/admin/components/kit";
+import { VerifyPayoutButton } from "@/features/places/components/AdminPlaceSettings";
 import { recentAudit } from "@/features/audit/service";
 import { StatusBadge } from "@/features/bookings/components/StatusBadge";
 import {
@@ -511,6 +512,12 @@ export default async function AdminUserPage({ params }: Props) {
                   },
                 ]}
               />
+              {/* Check the details (full number above), then verify them here. */}
+              {!more.payout.verifiedAt && (
+                <div className="mt-3 flex justify-end border-t border-line pt-3">
+                  <VerifyPayoutButton userId={user.id} />
+                </div>
+              )}
             </Panel>
           )}
           <Panel title={u("signIns")} flush>

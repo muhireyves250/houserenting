@@ -14,7 +14,10 @@ describe("noticeGroup", () => {
     expect(noticeGroup("newMessage")).toBe("messages");
     expect(noticeGroup("ticketStatus")).toBe("help");
     expect(noticeGroup("questionAnswered")).toBe("help");
-    expect(noticeGroup("promoterStatus")).toBe("other");
+    expect(noticeGroup("promoterStatus")).toBe("money");
+    expect(noticeGroup("payoutRecorded")).toBe("money");
+    expect(noticeGroup("newBooking")).toBe("bookings");
+    expect(noticeGroup("listingStatus")).toBe("places");
     expect(noticeGroup("somethingNew")).toBe("other");
   });
 });

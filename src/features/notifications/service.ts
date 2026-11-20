@@ -8,6 +8,7 @@ type Client = Prisma.TransactionClient | typeof db;
 /** Kinds of notice; each has its own wording in messages ("Notifications.kind.<kind>"). */
 export type NotificationKind =
   | "bookingHeld"
+  | "payoutToCheck"
   | "bookingCancelled"
   | "bookingExpired"
   | "listingApproved"
@@ -75,7 +76,7 @@ export function noticeArea(kind: NotificationKind): StaffArea {
   if (/^(ticket|question|review)/.test(kind)) return "support";
   if (/^(listing|contract|team)/.test(kind)) return "listings";
   if (kind.startsWith("promoter")) return "promotions";
-  if (kind.startsWith("reward") || kind === "paymentProblem" || kind === "payoutRecorded") return "money";
+  if (kind.startsWith("reward") || kind === "paymentProblem" || kind.startsWith("payout")) return "money";
   return "bookings";
 }
 

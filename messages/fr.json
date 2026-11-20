@@ -1092,6 +1092,9 @@
         "cancelled": "Lessive annulée",
         "paid": "Lessive payée",
         "paymentClaim": "Paiement lessive envoyé par le client"
+      },
+      "receipt": {
+        "sent": "Reçu envoyé au client"
       }
     },
     "money": "Le voyageur paie {total} · propriétaire {payout} · plateforme {commission}",
@@ -1483,7 +1486,8 @@
       "orderReceived": "La commande {reference} a été reçue par le client ({title}).",
       "laundryForHost": "Linge {reference} : à récupérer dans {room} à {title}.",
       "laundryReturned": "Le linge {reference} à {title} a été rapporté au client.",
-      "laundryReceived": "Linge {reference} à {title} : le client l’a récupéré."
+      "laundryReceived": "Linge {reference} à {title} : le client l’a récupéré.",
+      "payoutToCheck": "{name} a changé ses coordonnées de paiement. Vérifiez-les."
     },
     "filterLabel": "Afficher les notifications",
     "filter": {
@@ -1491,6 +1495,8 @@
       "bookings": "Réservations",
       "food": "Repas",
       "laundry": "Blanchisserie",
+      "places": "Logements",
+      "money": "Argent",
       "messages": "Messages",
       "help": "Aide",
       "other": "Autres"
@@ -1724,7 +1730,17 @@
       "transaction": "Transaction",
       "status": "Statut",
       "amount": "Montant payé",
-      "open": "Reçu"
+      "open": "Reçu",
+      "send": "Envoyer au client",
+      "sending": "Envoi…",
+      "sent": "Envoyé dans sa discussion",
+      "sendFailed": "Échec — réessayez",
+      "chatText": "Voici votre reçu pour la réservation {reference} ({amount} payés). Merci !",
+      "pdf": "Reçu (PDF)",
+      "pdfHint": "Touchez pour télécharger",
+      "allTitle": "Tous les reçus",
+      "allHint": "{count, plural, one {# reçu} other {# reçus}} : un pour chaque paiement reçu.",
+      "allSearch": "Réservation, client, lieu ou transaction"
     },
     "report": "Rapport (Excel)",
     "promo": {
@@ -1743,6 +1759,14 @@
       },
       "rewardLater": "{amount} une fois que le client a payé",
       "rewardNone": "Aucune : pas de récompense définie (Paramètres → Promoteurs)"
+    },
+    "payoutCheck": {
+      "title": "Coordonnées de paiement à vérifier",
+      "hint": "Coordonnées de paiement nouvelles ou modifiées. Vérifiez que le nom correspond au propriétaire (appel ou envoi de 100 RWF), puis validez-les.",
+      "method": "Payé par",
+      "name": "Nom sur le compte",
+      "number": "Numéro",
+      "checkFirst": "Vérifiez avant de valider"
     }
   },
   "Promotions": {
@@ -2613,7 +2637,15 @@
       "void": "non payée",
       "none": "pas de récompense"
     },
-    "youEarnShare": "vous gagnez {percent} % de chaque réservation"
+    "youEarnShare": "vous gagnez {percent} % de chaque réservation",
+    "shareQr": {
+      "share": "Partager",
+      "download": "Télécharger",
+      "copy": "Copier le lien",
+      "copied": "Copié",
+      "inviteText": "Rejoins-moi sur VIIPA — inscris-toi avec mon invitation :",
+      "promoText": "Trouvez votre séjour sur VIIPA :"
+    }
   },
   "Reports": {
     "intro": "Argent et activité par date de séjour. Les séjours payés et non présentés comptent ; les séjours annulés seulement pour leurs remboursements. Les cautions sont retenues, pas des revenus.",

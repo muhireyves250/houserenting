@@ -1092,6 +1092,9 @@
         "cancelled": "Laundry cancelled",
         "paid": "Laundry paid",
         "paymentClaim": "Laundry payment sent by guest"
+      },
+      "receipt": {
+        "sent": "Receipt sent to the client"
       }
     },
     "money": "Guest pays {total} · owner {payout} · platform {commission}",
@@ -1483,7 +1486,8 @@
       "orderReceived": "Order {reference} was received by the guest ({title}).",
       "laundryForHost": "Laundry {reference}: collect it from {room} at {title}.",
       "laundryReturned": "Laundry {reference} at {title} was brought back to the guest.",
-      "laundryReceived": "Laundry {reference} at {title}: the guest got it back."
+      "laundryReceived": "Laundry {reference} at {title}: the guest got it back.",
+      "payoutToCheck": "{name} changed where they get paid. Check and verify the details."
     },
     "filterLabel": "Show notifications",
     "filter": {
@@ -1491,6 +1495,8 @@
       "bookings": "Bookings",
       "food": "Food",
       "laundry": "Laundry",
+      "places": "Places",
+      "money": "Money",
       "messages": "Messages",
       "help": "Help",
       "other": "Other"
@@ -1724,7 +1730,17 @@
       "transaction": "Transaction",
       "status": "Status",
       "amount": "Amount paid",
-      "open": "Receipt"
+      "open": "Receipt",
+      "send": "Send to client",
+      "sending": "Sending…",
+      "sent": "Sent to their chat",
+      "sendFailed": "Couldn't send — try again",
+      "chatText": "Here is your receipt for booking {reference} ({amount} paid). Thank you!",
+      "pdf": "Receipt (PDF)",
+      "pdfHint": "Tap to download",
+      "allTitle": "All receipts",
+      "allHint": "{count, plural, one {# receipt} other {# receipts}}: one for every payment received.",
+      "allSearch": "Booking, client, place or transaction"
     },
     "report": "Report (Excel)",
     "promo": {
@@ -1743,6 +1759,14 @@
       },
       "rewardLater": "{amount} once the guest has paid",
       "rewardNone": "None: no promoter reward is set (Settings → Promoters)"
+    },
+    "payoutCheck": {
+      "title": "Payout details to check",
+      "hint": "New or changed owner payout details. Check the name matches the owner (e.g. call them or send 100 RWF), then mark them verified.",
+      "method": "Paid by",
+      "name": "Name on the account",
+      "number": "Number",
+      "checkFirst": "Check before verifying"
     }
   },
   "Promotions": {
@@ -2613,7 +2637,15 @@
       "void": "not paid",
       "none": "no reward"
     },
-    "youEarnShare": "you earn {percent}% of each booking"
+    "youEarnShare": "you earn {percent}% of each booking",
+    "shareQr": {
+      "share": "Share",
+      "download": "Download",
+      "copy": "Copy link",
+      "copied": "Copied",
+      "inviteText": "Join me on VIIPA — sign up with my invite:",
+      "promoText": "Find your stay on VIIPA:"
+    }
   },
   "Reports": {
     "intro": "Money and activity by stay date. Paid stays and no-shows count; cancelled stays only for their refunds. Deposits are held, not revenue.",

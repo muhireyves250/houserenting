@@ -85,7 +85,6 @@ export default async function PromoCodePage({ params }: Props) {
             })}
           </p>
           <p className="text-[13px] text-muted">
-            {t(`fundingShort.${promo.fundedBy}`)} ·{" "}
             {t("uses", { used: promo.usedCount, max: promo.maxUses ?? "∞" })}
           </p>
         </div>

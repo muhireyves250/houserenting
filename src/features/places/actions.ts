@@ -70,7 +70,7 @@ export async function savePayoutAction(input: PayoutInput) {
 
 export async function verifyPayoutAction(userId: string): Promise<{ ok: boolean }> {
   const user = await getCurrentUser();
-  if (!user || !canStaff(user, "listings") || !id.safeParse(userId).success) return { ok: false };
+  if (!user || !(canStaff(user, "money") || canStaff(user, "listings")) || !id.safeParse(userId).success) return { ok: false };
   const ok = await verifyPayoutAccount(user.id, userId);
   if (ok) refresh();
   return { ok };

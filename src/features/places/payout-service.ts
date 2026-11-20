@@ -1,6 +1,7 @@
 import "server-only";
 import { z } from "zod";
 import { audit } from "@/features/audit/service";
+import { notifyAdmins } from "@/features/notifications/service";
 import { db } from "@/lib/db";
 
 export const payoutInput = z
@@ -33,6 +34,9 @@ export async function savePayoutAccount(userId: string, raw: PayoutInput): Promi
   await db.$transaction(async (tx) => {
     await tx.payoutAccount.upsert({ where: { userId }, create: { userId, ...data }, update: data });
     await audit(tx, { actorId: userId, action: "payout.update", entityType: "user", entityId: userId, data: { method: data.method } });
+    // Staff check new details before money goes there.
+    const owner = await tx.user.findUnique({ where: { id: userId }, select: { name: true } });
+    await notifyAdmins(tx, "payoutToCheck", { name: owner?.name ?? "" }, "/admin/money#payout-checks");
   });
   return { ok: true };
 }

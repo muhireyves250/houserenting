@@ -118,7 +118,7 @@ describe("promo codes", () => {
   it("discount the stay, count uses, and stop at the limit", async () => {
     expect(await createPromo("admin", { code: " welcome ", percentOff: 10, amountOff: null, minSubtotal: null, startsAt: null, endsAt: null, maxUses: 1, fundedBy: "PLATFORM" })).toEqual({ ok: true });
     const b = await book("g1", { promoCode: "WELCOME" });
-    expect(b).toMatchObject({ subtotal: 100000, discount: 10000, total: 90000, hostPayout: 100000 });
+    expect(b).toMatchObject({ subtotal: 100000, discount: 10000, total: 90000, hostPayout: 90000 });
     expect(await createBooking({ guestId: "g2", listingId: "flat", checkIn: "2026-11-05", checkOut: "2026-11-06", guests: 1, payment: pay, promoCode: "welcome" }, NOW)).toEqual({
       ok: false,
       error: "promo",

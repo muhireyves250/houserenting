@@ -1092,6 +1092,9 @@
         "cancelled": "Kumesa byahagaritswe",
         "paid": "Kumesa byishyuwe",
         "paymentClaim": "Umukiriya yohereje ubwishyu bwo kumesa"
+      },
+      "receipt": {
+        "sent": "Inyemezabwishyu yoherejwe umukiriya"
       }
     },
     "money": "Umushyitsi yishyura {total} · nyir'inzu {payout} · urubuga {commission}",
@@ -1483,7 +1486,8 @@
       "orderReceived": "Ibyatumijwe {reference} byakiriwe n'umukiriya ({title}).",
       "laundryForHost": "Imyenda {reference}: yifate muri {room} kuri {title}.",
       "laundryReturned": "Imyenda {reference} kuri {title} yagaruwe ku mushyitsi.",
-      "laundryReceived": "Imyenda {reference} kuri {title}: umushyitsi yayibonye."
+      "laundryReceived": "Imyenda {reference} kuri {title}: umushyitsi yayibonye.",
+      "payoutToCheck": "{name} yahinduye aho yishyurirwa. Genzura wemeze amakuru."
     },
     "filterLabel": "Erekana imenyesha",
     "filter": {
@@ -1491,6 +1495,8 @@
       "bookings": "Ibyumba",
       "food": "Ibiryo",
       "laundry": "Kumesa",
+      "places": "Aho gucumbika",
+      "money": "Amafaranga",
       "messages": "Ubutumwa",
       "help": "Ubufasha",
       "other": "Ibindi"
@@ -1724,7 +1730,17 @@
       "transaction": "Transaction",
       "status": "Uko bimeze",
       "amount": "Amafaranga yishyuwe",
-      "open": "Inyemezabwishyu"
+      "open": "Inyemezabwishyu",
+      "send": "Yohereza umukiriya",
+      "sending": "Biri koherezwa…",
+      "sent": "Byoherejwe mu biganiro bye",
+      "sendFailed": "Ntibyakunze — ongera ugerageze",
+      "chatText": "Dore inyemezabwishyu yawe y'ifatwa {reference} ({amount} yishyuwe). Murakoze!",
+      "pdf": "Inyemezabwishyu (PDF)",
+      "pdfHint": "Kanda uyimanure",
+      "allTitle": "Inyemezabwishyu zose",
+      "allHint": "{count, plural, one {Inyemezabwishyu #} other {Inyemezabwishyu #}}: imwe kuri buri bwishyu bwakiriwe.",
+      "allSearch": "Ifatwa, umukiriya, aho ari cyangwa transaction"
     },
     "report": "Raporo (Excel)",
     "promo": {
@@ -1743,6 +1759,14 @@
       },
       "rewardLater": "{amount} umukiliya amaze kwishyura",
       "rewardNone": "Nta na kimwe: nta gihembo cyashyizweho (Igenamiterere → Abamamaza)"
+    },
+    "payoutCheck": {
+      "title": "Aho kwishyurirwa hagomba kugenzurwa",
+      "hint": "Amakuru mashya cyangwa yahinduwe y'aho ba nyir'inzu bishyurirwa. Reba ko izina rihuye na nyirayo (umuhamagare cyangwa wohereze 100 RWF), hanyuma wemeze.",
+      "method": "Uburyo",
+      "name": "Izina kuri konti",
+      "number": "Nimero",
+      "checkFirst": "Banza ugenzure"
     }
   },
   "Promotions": {
@@ -2613,7 +2637,15 @@
       "void": "ntibizishyurwa",
       "none": "nta gihembo"
     },
-    "youEarnShare": "uhabwa {percent}% kuri buri cumbi"
+    "youEarnShare": "uhabwa {percent}% kuri buri cumbi",
+    "shareQr": {
+      "share": "Sangiza",
+      "download": "Manura",
+      "copy": "Koporora link",
+      "copied": "Byakoporowe",
+      "inviteText": "Ngwino kuri VIIPA — iyandikishe ukoresheje ubutumire bwanjye:",
+      "promoText": "Shaka aho uzacumbika kuri VIIPA:"
+    }
   },
   "Reports": {
     "intro": "Amafaranga n'ibikorwa bikurikije itariki y'icumbi. Amacumbi yishyuwe n'abataje arabarwa; ayahagaritswe abarwa gusa ku mafaranga yasubijwe. Ingwate zirabikwa, si inyungu.",

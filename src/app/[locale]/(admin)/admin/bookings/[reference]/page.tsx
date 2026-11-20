@@ -6,7 +6,10 @@ import { Facts, PageIntro, Panel } from "@/features/admin/components/ui";
 import { roomLabel } from "@/features/rooms/links";
 import { actorNames, bookingForStaff } from "@/features/admin/queries";
 import { StatusBadge } from "@/features/bookings/components/StatusBadge";
-import { formatKigaliDateTime, formatStayDates } from "@/features/bookings/format";
+import {
+  formatKigaliDateTime,
+  formatStayDates,
+} from "@/features/bookings/format";
 import { isBookingReference } from "@/features/bookings/reference";
 import { todayISO } from "@/features/search/date-range";
 import { Link } from "@/i18n/navigation";
@@ -15,7 +18,11 @@ import { dynamicMessage } from "@/lib/dynamic-message";
 import { formatRWF } from "@/lib/format";
 import { requireStaff } from "@/lib/permissions";
 import { getSettings } from "@/features/settings/service";
-import { DecideRequest, NoShowButton, SettleRefund } from "@/features/stay/components/StaffStayPanels";
+import {
+  DecideRequest,
+  NoShowButton,
+  SettleRefund,
+} from "@/features/stay/components/StaffStayPanels";
 import { priceChangeFor } from "@/features/stay/rules";
 import { ConfirmPayment } from "@/features/payments/components/ManualPayment";
 
@@ -28,7 +35,18 @@ export default async function AdminBookingPage({ params }: Props) {
   if (!isBookingReference(reference)) notFound();
   const b = await bookingForStaff(reference);
   if (!b) notFound();
-  const [t, tBookings, tListings, tMoney, tStay, tPay, tRooms, locale, names, settings] = await Promise.all([
+  const [
+    t,
+    tBookings,
+    tListings,
+    tMoney,
+    tStay,
+    tPay,
+    tRooms,
+    locale,
+    names,
+    settings,
+  ] = await Promise.all([
     getTranslations("Admin"),
     getTranslations("Bookings"),
     getTranslations("Listings"),
@@ -43,12 +61,29 @@ export default async function AdminBookingPage({ params }: Props) {
   const rwf = (n: number) => formatRWF(n, locale);
   // What the promoter will earn when the stay finishes (from Settings: a fixed amount or a share of the stay).
   const promoterReward =
-    b.promoCode?.promoterId && b.promoCode.promoterId === b.promoterId && b.promoCode.promoterBps
+    b.promoCode?.promoterId &&
+    b.promoCode.promoterId === b.promoterId &&
+    b.promoCode.promoterBps
       ? Math.round((b.subtotal * b.promoCode.promoterBps) / 10_000)
-      : (settings.promoterRewardFixed ?? (settings.promoterRewardBps ? Math.round((b.subtotal * settings.promoterRewardBps) / 10_000) : 0));
-  const time = new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Kigali" });
+      : (settings.promoterRewardFixed ??
+        (settings.promoterRewardBps
+          ? Math.round((b.subtotal * settings.promoterRewardBps) / 10_000)
+          : 0));
+  const time = new Intl.DateTimeFormat(locale, {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Africa/Kigali",
+  });
 
-  const roomText = b.room ? [b.room.name, b.roomNumber && roomLabel(b.roomNumber, (number) => tRooms("roomNumber", { number }))].filter(Boolean).join(" · ") : null;
+  const roomText = b.room
+    ? [
+        b.room.name,
+        b.roomNumber &&
+          roomLabel(b.roomNumber, (number) => tRooms("roomNumber", { number })),
+      ]
+        .filter(Boolean)
+        .join(" · ")
+    : null;
   const fact = "flex min-w-0 flex-col gap-0.5";
   const factLabel = "text-[12px] font-semibold text-muted";
 
@@ -60,14 +95,28 @@ export default async function AdminBookingPage({ params }: Props) {
       <section className="flex flex-col gap-4 rounded-3xl bg-surface p-5 ring-1 ring-line">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <span className="flex flex-wrap items-center gap-2">
-            <span className="font-mono text-[20px] font-bold text-ink">{b.reference}</span>
-            <StatusBadge status={b.status} label={tBookings(`status.${b.status}`)} />
+            <span className="font-mono text-[20px] font-bold text-ink">
+              {b.reference}
+            </span>
+            <StatusBadge
+              status={b.status}
+              label={tBookings(`status.${b.status}`)}
+            />
           </span>
           <span className="flex flex-wrap items-center gap-2">
-            {b.status === "CONFIRMED" && iso(b.checkIn) <= todayISO() && <CheckInOut reference={b.reference} to="CHECKED_IN" />}
-            {b.status === "CHECKED_IN" && <CheckInOut reference={b.reference} to="COMPLETED" />}
-            {b.status === "CONFIRMED" && iso(b.checkIn) < todayISO() && <NoShowButton reference={b.reference} />}
-            <Link href={`/admin/listings/${b.listing.id}`} className="rounded-lg border border-line bg-surface px-3.5 py-1.5 text-[13px] font-semibold text-ink hover:border-primary">
+            {b.status === "CONFIRMED" && iso(b.checkIn) <= todayISO() && (
+              <CheckInOut reference={b.reference} to="CHECKED_IN" />
+            )}
+            {b.status === "CHECKED_IN" && (
+              <CheckInOut reference={b.reference} to="COMPLETED" />
+            )}
+            {b.status === "CONFIRMED" && iso(b.checkIn) < todayISO() && (
+              <NoShowButton reference={b.reference} />
+            )}
+            <Link
+              href={`/admin/listings/${b.listing.id}`}
+              className="rounded-lg border border-line bg-surface px-3.5 py-1.5 text-[13px] font-semibold text-ink hover:border-primary"
+            >
               {t("viewListing")}
             </Link>
           </span>
@@ -75,34 +124,54 @@ export default async function AdminBookingPage({ params }: Props) {
         <div className="grid grid-cols-2 gap-4 border-t border-line pt-4 md:grid-cols-4">
           <div className={fact}>
             <span className={factLabel}>{t("col.place")}</span>
-            <Link href={`/admin/listings/${b.listing.id}`} className="truncate text-[14px] font-semibold text-ink hover:text-primary">
+            <Link
+              href={`/admin/listings/${b.listing.id}`}
+              className="truncate text-[14px] font-semibold text-ink hover:text-primary"
+            >
               {b.listing.title}
             </Link>
-            {roomText && <span className="truncate text-[13px] text-muted">{roomText}</span>}
+            {roomText && (
+              <span className="truncate text-[13px] text-muted">
+                {roomText}
+              </span>
+            )}
           </div>
           <div className={fact}>
             <span className={factLabel}>{t("col.when")}</span>
-            <span className="text-[14px] font-semibold text-ink">{formatStayDates(locale, iso(b.checkIn), iso(b.checkOut))}</span>
+            <span className="text-[14px] font-semibold text-ink">
+              {formatStayDates(locale, iso(b.checkIn), iso(b.checkOut))}
+            </span>
             <span className="text-[13px] text-muted">
               {tListings(`unitCount.${b.unit}`, { count: b.quantity })}
-              {b.unit === "HOUR" && ` · ${time.formatRange(b.startAt, b.endAt)}`}
+              {b.unit === "HOUR" &&
+                ` · ${time.formatRange(b.startAt, b.endAt)}`}
             </span>
           </div>
           <div className={fact}>
             <span className={factLabel}>{t("guest")}</span>
-            <Link href={`/admin/users/${b.guest.id}`} className="truncate text-[14px] font-semibold text-ink hover:text-primary">
+            <Link
+              href={`/admin/users/${b.guest.id}`}
+              className="truncate text-[14px] font-semibold text-ink hover:text-primary"
+            >
               {b.guest.name}
             </Link>
             {b.guest.phone && (
-              <a href={`tel:${b.guest.phone}`} className="text-[13px] text-primary hover:underline">
+              <a
+                href={`tel:${b.guest.phone}`}
+                className="text-[13px] text-primary hover:underline"
+              >
                 {b.guest.phone}
               </a>
             )}
           </div>
           <div className={fact}>
             <span className={factLabel}>{t("guestPays")}</span>
-            <span className="text-[18px] font-bold text-ink tabular-nums">{rwf(b.total)}</span>
-            <span className="text-[13px] text-muted">{t("ownerShort", { amount: rwf(b.hostPayout) })}</span>
+            <span className="text-[18px] font-bold text-ink tabular-nums">
+              {rwf(b.total)}
+            </span>
+            <span className="text-[13px] text-muted">
+              {t("ownerShort", { amount: rwf(b.hostPayout) })}
+            </span>
           </div>
         </div>
       </section>
@@ -115,7 +184,11 @@ export default async function AdminBookingPage({ params }: Props) {
               <ConfirmPayment
                 reference={b.reference}
                 total={b.total}
-                claimed={b.payments.find((p) => p.status === "PENDING" && p.provider === "manual")?.providerReference ?? null}
+                claimed={
+                  b.payments.find(
+                    (p) => p.status === "PENDING" && p.provider === "manual",
+                  )?.providerReference ?? null
+                }
               />
             </Panel>
           )}
@@ -124,26 +197,68 @@ export default async function AdminBookingPage({ params }: Props) {
               <ul className="flex flex-col gap-3">
                 {b.requests.map((r) => {
                   const newOut = r.newCheckOut ? iso(r.newCheckOut) : null;
-                  const change = newOut ? priceChangeFor({ checkIn: iso(b.checkIn), checkOut: iso(b.checkOut), subtotal: b.subtotal }, newOut) : null;
+                  const change = newOut
+                    ? priceChangeFor(
+                        {
+                          checkIn: iso(b.checkIn),
+                          checkOut: iso(b.checkOut),
+                          subtotal: b.subtotal,
+                        },
+                        newOut,
+                      )
+                    : null;
                   return (
-                    <li key={r.id} className="rounded-xl border border-line p-3 text-[14px]">
+                    <li
+                      key={r.id}
+                      className="rounded-xl border border-line p-3 text-[14px]"
+                    >
                       <span className="flex items-center justify-between gap-2">
-                        <b className="font-semibold">{tStay(`kind.${r.kind}`)}</b>
-                        <span className="text-xs font-semibold text-muted">{tStay(`requestStatus.${r.status}`)}</span>
+                        <b className="font-semibold">
+                          {tStay(`kind.${r.kind}`)}
+                        </b>
+                        <span className="text-xs font-semibold text-muted">
+                          {tStay(`requestStatus.${r.status}`)}
+                        </span>
                       </span>
-                      {newOut && <span className="block text-[13px] text-ink">{tStay("until", { date: formatStayDates(locale, newOut, newOut) })}</span>}
-                      {r.transferTo && <span className="block text-[13px] text-ink">{tStay("transferToShort", { place: r.transferTo })}</span>}
-                      <span className="block text-[13px] text-muted">{r.reason}</span>
-                      {r.status === "PENDING" && change !== null && r.kind === "EXTEND" && (
-                        <span className="block text-[13px] font-semibold text-ink">{tStay("extraCost", { amount: rwf(change) })}</span>
+                      {newOut && (
+                        <span className="block text-[13px] text-ink">
+                          {tStay("until", {
+                            date: formatStayDates(locale, newOut, newOut),
+                          })}
+                        </span>
                       )}
-                      {r.response && <span className="block text-[13px] text-ink">{tStay("staffReply", { text: r.response })}</span>}
+                      {r.transferTo && (
+                        <span className="block text-[13px] text-ink">
+                          {tStay("transferToShort", { place: r.transferTo })}
+                        </span>
+                      )}
+                      <span className="block text-[13px] text-muted">
+                        {r.reason}
+                      </span>
+                      {r.status === "PENDING" &&
+                        change !== null &&
+                        r.kind === "EXTEND" && (
+                          <span className="block text-[13px] font-semibold text-ink">
+                            {tStay("extraCost", { amount: rwf(change) })}
+                          </span>
+                        )}
+                      {r.response && (
+                        <span className="block text-[13px] text-ink">
+                          {tStay("staffReply", { text: r.response })}
+                        </span>
+                      )}
                       {r.status === "PENDING" && (
                         <DecideRequest
                           requestId={r.id}
                           kind={r.kind}
                           total={b.total}
-                          suggestedRefund={r.kind === "CANCEL" ? b.total : r.kind === "SHORTEN" && change !== null ? -change : null}
+                          suggestedRefund={
+                            r.kind === "CANCEL"
+                              ? b.total
+                              : r.kind === "SHORTEN" && change !== null
+                                ? -change
+                                : null
+                          }
                         />
                       )}
                     </li>
@@ -155,9 +270,16 @@ export default async function AdminBookingPage({ params }: Props) {
           {b.refundStatus !== "NONE" && (
             <Panel title={tStay("refundTitle")}>
               {b.refundStatus === "PENDING" ? (
-                <SettleRefund reference={b.reference} amount={b.refundAmount ?? 0} />
+                <SettleRefund
+                  reference={b.reference}
+                  amount={b.refundAmount ?? 0}
+                />
               ) : (
-                <p className="text-[14px] text-ink">{tStay(`refund.${b.refundStatus}`, { amount: rwf(b.refundAmount ?? 0) })}</p>
+                <p className="text-[14px] text-ink">
+                  {tStay(`refund.${b.refundStatus}`, {
+                    amount: rwf(b.refundAmount ?? 0),
+                  })}
+                </p>
               )}
             </Panel>
           )}
@@ -169,39 +291,134 @@ export default async function AdminBookingPage({ params }: Props) {
           <Panel title={t("stay")}>
             <Facts
               rows={[
-                { label: t("col.place"), value: <Link href={`/admin/listings/${b.listing.id}`} className="text-primary hover:underline">{b.listing.title}</Link> },
-                ...(b.room ? [{ label: tBookings("room"), value: roomText ?? b.room.name }] : []),
-                { label: t("col.when"), value: formatStayDates(locale, iso(b.checkIn), iso(b.checkOut)) },
-                ...(b.unit === "HOUR" ? [{ label: tBookings("time"), value: time.formatRange(b.startAt, b.endAt) }] : []),
-                { label: t("length"), value: tListings(`unitCount.${b.unit}`, { count: b.quantity }) },
-                { label: tListings("guestsLabel"), value: tListings("statGuests", { count: b.guests }) },
-                { label: t("bookedAt"), value: formatKigaliDateTime(locale, b.createdAt) },
-                ...(b.holdExpiresAt && b.status === "PENDING_PAYMENT" ? [{ label: t("holdUntil"), value: formatKigaliDateTime(locale, b.holdExpiresAt) }] : []),
+                {
+                  label: t("col.place"),
+                  value: (
+                    <Link
+                      href={`/admin/listings/${b.listing.id}`}
+                      className="text-primary hover:underline"
+                    >
+                      {b.listing.title}
+                    </Link>
+                  ),
+                },
+                ...(b.room
+                  ? [
+                      {
+                        label: tBookings("room"),
+                        value: roomText ?? b.room.name,
+                      },
+                    ]
+                  : []),
+                {
+                  label: t("col.when"),
+                  value: formatStayDates(
+                    locale,
+                    iso(b.checkIn),
+                    iso(b.checkOut),
+                  ),
+                },
+                ...(b.unit === "HOUR"
+                  ? [
+                      {
+                        label: tBookings("time"),
+                        value: time.formatRange(b.startAt, b.endAt),
+                      },
+                    ]
+                  : []),
+                {
+                  label: t("length"),
+                  value: tListings(`unitCount.${b.unit}`, {
+                    count: b.quantity,
+                  }),
+                },
+                {
+                  label: tListings("guestsLabel"),
+                  value: tListings("statGuests", { count: b.guests }),
+                },
+                {
+                  label: t("bookedAt"),
+                  value: formatKigaliDateTime(locale, b.createdAt),
+                },
+                ...(b.holdExpiresAt && b.status === "PENDING_PAYMENT"
+                  ? [
+                      {
+                        label: t("holdUntil"),
+                        value: formatKigaliDateTime(locale, b.holdExpiresAt),
+                      },
+                    ]
+                  : []),
               ]}
             />
           </Panel>
           <Panel title={t("moneySplit")}>
             <Facts
               rows={[
-                { label: tListings(`unitTimes.${b.unit}`, { price: rwf(b.nightlyPrice), count: b.unit === "MONTH" ? (b.upfrontMonths ?? b.quantity) : b.quantity }), value: rwf(b.subtotal) },
-                ...(b.discount > 0 ? [{ label: tListings("promoLine", { code: b.promoCode?.code ?? "" }), value: `−${rwf(b.discount)}` }] : []),
-                // Who pays for the discount: VIIPA (the owner still gets the full price) or the owner.
-                ...(b.discount > 0 && b.promoCode ? [{ label: tMoney("promo.paidBy"), value: tMoney(`promo.funded.${b.promoCode.fundedBy}`) }] : []),
-                ...(b.guestFee > 0 ? [{ label: tBookings("serviceFee"), value: rwf(b.guestFee) }] : []),
-                ...(b.deposit > 0 ? [{ label: tListings("depositDue"), value: rwf(b.deposit) }] : []),
+                {
+                  label: tListings(`unitTimes.${b.unit}`, {
+                    price: rwf(b.nightlyPrice),
+                    count:
+                      b.unit === "MONTH"
+                        ? (b.upfrontMonths ?? b.quantity)
+                        : b.quantity,
+                  }),
+                  value: rwf(b.subtotal),
+                },
+                ...(b.discount > 0
+                  ? [
+                      {
+                        label: tListings("promoLine", {
+                          code: b.promoCode?.code ?? "",
+                        }),
+                        value: `−${rwf(b.discount)}`,
+                      },
+                    ]
+                  : []),
+                // Who paid for the discount, from the split itself (older bookings: VIIPA; now always the owner).
+                ...(b.discount > 0
+                  ? [
+                      {
+                        label: tMoney("promo.paidBy"),
+                        value: tMoney(
+                          `promo.funded.${b.hostPayout + b.commission < b.subtotal ? "HOST" : "PLATFORM"}`,
+                        ),
+                      },
+                    ]
+                  : []),
+                ...(b.guestFee > 0
+                  ? [{ label: tBookings("serviceFee"), value: rwf(b.guestFee) }]
+                  : []),
+                ...(b.deposit > 0
+                  ? [{ label: tListings("depositDue"), value: rwf(b.deposit) }]
+                  : []),
                 { label: t("guestPays"), value: <b>{rwf(b.total)}</b> },
                 { label: tMoney("kind.COMMISSION"), value: rwf(b.commission) },
-                { label: tMoney("kind.HOST_PAYABLE"), value: rwf(b.hostPayout) },
+                {
+                  label: tMoney("kind.HOST_PAYABLE"),
+                  value: rwf(b.hostPayout),
+                },
                 // The promoter who brought this booking and what they earn from it.
                 ...(b.promoter
                   ? [
-                      { label: tMoney("promo.promoter"), value: <Link href={`/admin/users/${b.promoter.user.id}`} className="font-semibold text-primary hover:underline">{b.promoter.user.name}</Link> },
+                      {
+                        label: tMoney("promo.promoter"),
+                        value: (
+                          <Link
+                            href={`/admin/users/${b.promoter.user.id}`}
+                            className="font-semibold text-primary hover:underline"
+                          >
+                            {b.promoter.user.name}
+                          </Link>
+                        ),
+                      },
                       {
                         label: tMoney("promo.reward"),
                         value: b.promoterReward
                           ? `${rwf(b.promoterReward.amount)} · ${tMoney(`promo.rewardStatus.${b.promoterReward.paidAt ? "PAID" : b.promoterReward.status}` as "promo.rewardStatus.PENDING")}`
                           : promoterReward > 0
-                            ? tMoney("promo.rewardLater", { amount: rwf(promoterReward) })
+                            ? tMoney("promo.rewardLater", {
+                                amount: rwf(promoterReward),
+                              })
                             : tMoney("promo.rewardNone"),
                       },
                     ]
@@ -210,47 +427,82 @@ export default async function AdminBookingPage({ params }: Props) {
             />
           </Panel>
           <details className="overflow-hidden rounded-2xl border border-line bg-surface">
-            <summary className="cursor-pointer px-5 py-3.5 text-[15px] font-semibold text-ink">{t("payments")} <span className="text-muted tabular-nums">({b.payments.length})</span></summary>
+            <summary className="cursor-pointer px-5 py-3.5 text-[15px] font-semibold text-ink">
+              {t("payments")}{" "}
+              <span className="text-muted tabular-nums">
+                ({b.payments.length})
+              </span>
+            </summary>
             <div className="border-t border-line">
-            {b.payments.length === 0 ? (
-              <p className="px-5 py-6 text-[14px] text-muted">{t("noPayments")}</p>
-            ) : (
-              <ul className="divide-y divide-line">
-                {b.payments.map((p) => (
-                  <li key={p.id} className="flex flex-wrap items-center justify-between gap-2 px-5 py-3 text-[14px]">
-                    <span>
-                      <span className="font-mono text-[13px]">{p.providerReference}</span>
-                      <span className="block text-xs text-muted">
-                        {p.provider} · {formatKigaliDateTime(locale, p.createdAt)}
+              {b.payments.length === 0 ? (
+                <p className="px-5 py-6 text-[14px] text-muted">
+                  {t("noPayments")}
+                </p>
+              ) : (
+                <ul className="divide-y divide-line">
+                  {b.payments.map((p) => (
+                    <li
+                      key={p.id}
+                      className="flex flex-wrap items-center justify-between gap-2 px-5 py-3 text-[14px]"
+                    >
+                      <span>
+                        <span className="font-mono text-[13px]">
+                          {p.providerReference}
+                        </span>
+                        <span className="block text-xs text-muted">
+                          {p.provider} ·{" "}
+                          {formatKigaliDateTime(locale, p.createdAt)}
+                        </span>
                       </span>
-                    </span>
-                    <span className="text-right tabular-nums">
-                      {rwf(p.amount)}
-                      <span className={cn("block text-xs font-semibold", p.status === "SUCCEEDED" ? "text-emerald-700" : "text-red-700")}>{p.status}</span>
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
+                      <span className="text-right tabular-nums">
+                        {rwf(p.amount)}
+                        <span
+                          className={cn(
+                            "block text-xs font-semibold",
+                            p.status === "SUCCEEDED"
+                              ? "text-emerald-700"
+                              : "text-red-700",
+                          )}
+                        >
+                          {p.status}
+                        </span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </details>
           <details className="overflow-hidden rounded-2xl border border-line bg-surface">
-            <summary className="cursor-pointer px-5 py-3.5 text-[15px] font-semibold text-ink">{tBookings("timeline")}</summary>
+            <summary className="cursor-pointer px-5 py-3.5 text-[15px] font-semibold text-ink">
+              {tBookings("timeline")}
+            </summary>
             <div className="border-t border-line">
-            <ol className="divide-y divide-line">
-              {b.events.map((e) => (
-                <li key={e.id} className="flex flex-wrap items-start justify-between gap-2 px-5 py-3 text-[14px]">
-                  <span>
-                    <b className="font-semibold">{dynamicMessage(tBookings, `event.${e.toStatus}`, e.toStatus)}</b>
-                    <span className="block text-xs text-muted">
-                      {(e.actorId && names.get(e.actorId)) ?? t("system")}
-                      {e.reason && ` · ${e.reason}`}
+              <ol className="divide-y divide-line">
+                {b.events.map((e) => (
+                  <li
+                    key={e.id}
+                    className="flex flex-wrap items-start justify-between gap-2 px-5 py-3 text-[14px]"
+                  >
+                    <span>
+                      <b className="font-semibold">
+                        {dynamicMessage(
+                          tBookings,
+                          `event.${e.toStatus}`,
+                          e.toStatus,
+                        )}
+                      </b>
+                      <span className="block text-xs text-muted">
+                        {(e.actorId && names.get(e.actorId)) ?? t("system")}
+                        {e.reason && ` · ${e.reason}`}
+                      </span>
                     </span>
-                  </span>
-                  <span className="text-xs text-muted">{formatKigaliDateTime(locale, e.createdAt)}</span>
-                </li>
-              ))}
-            </ol>
+                    <span className="text-xs text-muted">
+                      {formatKigaliDateTime(locale, e.createdAt)}
+                    </span>
+                  </li>
+                ))}
+              </ol>
             </div>
           </details>
         </div>
@@ -258,37 +510,89 @@ export default async function AdminBookingPage({ params }: Props) {
           <Panel title={t("guest")}>
             <Facts
               rows={[
-                { label: t("col.name"), value: <Link href={`/admin/users/${b.guest.id}`} className="text-primary hover:underline">{b.guest.name}</Link> },
-                { label: t("col.email"), value: <span className="break-all">{b.guest.email}</span> },
+                {
+                  label: t("col.name"),
+                  value: (
+                    <Link
+                      href={`/admin/users/${b.guest.id}`}
+                      className="text-primary hover:underline"
+                    >
+                      {b.guest.name}
+                    </Link>
+                  ),
+                },
+                {
+                  label: t("col.email"),
+                  value: <span className="break-all">{b.guest.email}</span>,
+                },
                 { label: t("col.phone"), value: b.guest.phone ?? "—" },
-                ...(b.payerPhone ? [{ label: t("payer"), value: `${b.paymentMethod?.toUpperCase() ?? ""} ${b.payerPhone}` }] : []),
+                ...(b.payerPhone
+                  ? [
+                      {
+                        label: t("payer"),
+                        value: `${b.paymentMethod?.toUpperCase() ?? ""} ${b.payerPhone}`,
+                      },
+                    ]
+                  : []),
               ]}
             />
           </Panel>
           {b.identity && (
             <Panel title={t("identity")}>
-              <Facts rows={[{ label: t("idNumber"), value: b.identity.idNumber }, { label: t("nationality"), value: b.identity.nationality ?? "—" }]} />
+              <Facts
+                rows={[
+                  { label: t("idNumber"), value: b.identity.idNumber },
+                  {
+                    label: t("nationality"),
+                    value: b.identity.nationality ?? "—",
+                  },
+                ]}
+              />
               <p className="mt-2 text-xs text-muted">{t("identityNote")}</p>
             </Panel>
           )}
           {b.guestDocument && (
             <Panel title={tStay("idTitle")}>
-              <a href={`/api/v1/bookings/${b.reference}/guest-id`} target="_blank" rel="noopener" className="text-[14px] font-semibold text-primary hover:underline">
+              <a
+                href={`/api/v1/bookings/${b.reference}/guest-id`}
+                target="_blank"
+                rel="noopener"
+                className="text-[14px] font-semibold text-primary hover:underline"
+              >
                 {b.guestDocument.filename}
               </a>
             </Panel>
           )}
           {b.feedback && (
             <Panel title={tStay("feedbackTitle")}>
-              <p className="text-[14px] font-semibold text-ink">{b.feedback.liked ? tStay("like") : tStay("dislike")}</p>
-              {b.feedback.comment && <p className="text-[13px] text-muted">{b.feedback.comment}</p>}
+              <p className="text-[14px] font-semibold text-ink">
+                {b.feedback.liked ? tStay("like") : tStay("dislike")}
+              </p>
+              {b.feedback.comment && (
+                <p className="text-[13px] text-muted">{b.feedback.comment}</p>
+              )}
             </Panel>
           )}
           <Panel title={t("host")}>
             <Facts
               rows={[
-                { label: t("col.name"), value: <Link href={`/admin/users/${b.listing.host.id}`} className="text-primary hover:underline">{b.listing.host.name}</Link> },
-                { label: t("col.email"), value: <span className="break-all">{b.listing.host.email}</span> },
+                {
+                  label: t("col.name"),
+                  value: (
+                    <Link
+                      href={`/admin/users/${b.listing.host.id}`}
+                      className="text-primary hover:underline"
+                    >
+                      {b.listing.host.name}
+                    </Link>
+                  ),
+                },
+                {
+                  label: t("col.email"),
+                  value: (
+                    <span className="break-all">{b.listing.host.email}</span>
+                  ),
+                },
                 { label: t("col.phone"), value: b.listing.host.phone ?? "—" },
               ]}
             />

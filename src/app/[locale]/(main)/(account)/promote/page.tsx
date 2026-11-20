@@ -3,6 +3,7 @@ import { ensureReferralCode, referralSummary } from "@/features/referrals/servic
 import { PageHero } from "@/components/shell/PageHero";
 import { ChevronLeft, Megaphone } from "lucide-react";
 import QRCode from "qrcode";
+import { ShareQr } from "@/features/promoters/components/ShareQr";
 import { getLocale, getTranslations } from "next-intl/server";
 import { PageContainer } from "@/components/ui/PageContainer";
 import { Card } from "@/features/hosting/components/fields";
@@ -67,6 +68,11 @@ export default async function PromotePage() {
                 <p className="text-[15px] font-semibold text-ink">{t("inviteQrTitle")}</p>
                 <p className="text-[13px] text-muted">{t("inviteQrHint")}</p>
                 <p className="font-mono text-[13px] font-semibold text-primary">{referral.code}</p>
+                {inviteLink && (
+                  <div className="mt-1">
+                    <ShareQr svg={inviteQr} link={inviteLink} text={t("shareQr.inviteText")} filename={`viipa-invite-${referral.code}`} />
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -91,6 +97,7 @@ export default async function PromotePage() {
                   <p className="font-mono text-[15px] font-semibold text-ink">{data.promoter.code}</p>
                   <p className="text-[13px] break-all text-muted">{link}</p>
                   <p className="text-[13px] text-muted">{t("codeHint")}</p>
+                  <ShareQr svg={qr} link={link} text={t("shareQr.promoText")} filename={`viipa-${data.promoter.code}`} />
                 </div>
               </div>
             </Card>

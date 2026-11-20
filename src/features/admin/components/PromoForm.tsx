@@ -3,38 +3,117 @@
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/Button";
-import { AreaField, Card, Field, SelectField } from "@/features/hosting/components/fields";
+import {
+  AreaField,
+  Card,
+  Field,
+  SelectField,
+} from "@/features/hosting/components/fields";
 import { useRouter } from "@/i18n/navigation";
 import { createPromoAction, setPromoActiveAction } from "../money-actions";
 
 const num = (v: string) => (v.trim() === "" ? null : Number(v));
 
-export function PromoForm({ promoters = [], initialPromoter }: { promoters?: { id: string; name: string; code: string }[]; initialPromoter?: string }) {
+export function PromoForm({
+  promoters = [],
+  initialPromoter,
+}: {
+  promoters?: { id: string; name: string; code: string }[];
+  initialPromoter?: string;
+}) {
   const t = useTranslations("Promotions");
   const router = useRouter();
-  const [form, setForm] = useState({ code: "", description: "", percentOff: "", amountOff: "", minSubtotal: "", startsAt: "", endsAt: "", maxUses: "", fundedBy: "PLATFORM", promoterId: promoters.some((p) => p.id === initialPromoter) ? initialPromoter! : "", promoterPercent: "" });
+  const [form, setForm] = useState({
+    code: "",
+    description: "",
+    percentOff: "",
+    amountOff: "",
+    minSubtotal: "",
+    startsAt: "",
+    endsAt: "",
+    maxUses: "",
+    fundedBy: "HOST",
+    promoterId: promoters.some((p) => p.id === initialPromoter)
+      ? initialPromoter!
+      : "",
+    promoterPercent: "",
+  });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [pending, start] = useTransition();
-  const set = (key: keyof typeof form, value: string) => setForm((f) => ({ ...f, [key]: value }));
-  const err = (key: string) => (errors[key] ? t(`error.${errors[key] === "taken" ? "taken" : errors[key] === "needsDiscount" ? "needsDiscount" : errors[key] === "needsShare" ? "needsShare" : "field"}`) : undefined);
+  const set = (key: keyof typeof form, value: string) =>
+    setForm((f) => ({ ...f, [key]: value }));
+  const err = (key: string) =>
+    errors[key]
+      ? t(
+          `error.${errors[key] === "taken" ? "taken" : errors[key] === "needsDiscount" ? "needsDiscount" : errors[key] === "needsShare" ? "needsShare" : "field"}`,
+        )
+      : undefined;
 
   return (
     <Card title={t("new")}>
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field label={t("code")} value={form.code} maxLength={30} onChange={(e) => set("code", e.target.value.toUpperCase())} error={err("code")} />
-        <SelectField label={t("fundedBy")} value={form.fundedBy} onChange={(e) => set("fundedBy", e.target.value)}>
-          <option value="PLATFORM">{t("funding.PLATFORM")}</option>
-          <option value="HOST">{t("funding.HOST")}</option>
-        </SelectField>
-        <Field label={t("percentOff")} type="number" min={1} max={100} value={form.percentOff} onChange={(e) => set("percentOff", e.target.value)} error={err("percentOff")} />
-        <Field label={t("amountOff")} type="number" min={1} value={form.amountOff} onChange={(e) => set("amountOff", e.target.value)} error={err("amountOff")} />
-        <Field label={t("minSubtotal")} type="number" min={1} value={form.minSubtotal} onChange={(e) => set("minSubtotal", e.target.value)} error={err("minSubtotal")} />
-        <Field label={t("maxUses")} type="number" min={1} value={form.maxUses} onChange={(e) => set("maxUses", e.target.value)} error={err("maxUses")} />
-        <Field label={t("startsAt")} type="date" value={form.startsAt} onChange={(e) => set("startsAt", e.target.value)} error={err("startsAt")} />
-        <Field label={t("endsAt")} type="date" value={form.endsAt} onChange={(e) => set("endsAt", e.target.value)} error={err("endsAt")} />
+        <Field
+          label={t("code")}
+          value={form.code}
+          maxLength={30}
+          onChange={(e) => set("code", e.target.value.toUpperCase())}
+          error={err("code")}
+        />
+        <Field
+          label={t("percentOff")}
+          type="number"
+          min={1}
+          max={100}
+          value={form.percentOff}
+          onChange={(e) => set("percentOff", e.target.value)}
+          error={err("percentOff")}
+        />
+        <Field
+          label={t("amountOff")}
+          type="number"
+          min={1}
+          value={form.amountOff}
+          onChange={(e) => set("amountOff", e.target.value)}
+          error={err("amountOff")}
+        />
+        <Field
+          label={t("minSubtotal")}
+          type="number"
+          min={1}
+          value={form.minSubtotal}
+          onChange={(e) => set("minSubtotal", e.target.value)}
+          error={err("minSubtotal")}
+        />
+        <Field
+          label={t("maxUses")}
+          type="number"
+          min={1}
+          value={form.maxUses}
+          onChange={(e) => set("maxUses", e.target.value)}
+          error={err("maxUses")}
+        />
+        <Field
+          label={t("startsAt")}
+          type="date"
+          value={form.startsAt}
+          onChange={(e) => set("startsAt", e.target.value)}
+          error={err("startsAt")}
+        />
+        <Field
+          label={t("endsAt")}
+          type="date"
+          value={form.endsAt}
+          onChange={(e) => set("endsAt", e.target.value)}
+          error={err("endsAt")}
+        />
         {/* Optional: give the code to a promoter (bookings with it count as theirs); otherwise it's VIIPA's own. */}
         {promoters.length > 0 && (
-          <SelectField label={t("forPromoter")} className="sm:col-span-2" value={form.promoterId} onChange={(e) => set("promoterId", e.target.value)}>
+          <SelectField
+            label={t("forPromoter")}
+            className="sm:col-span-2"
+            value={form.promoterId}
+            onChange={(e) => set("promoterId", e.target.value)}
+          >
             <option value="">{t("noPromoter")}</option>
             {promoters.map((p) => (
               <option key={p.id} value={p.id}>
@@ -57,7 +136,14 @@ export function PromoForm({ promoters = [], initialPromoter }: { promoters?: { i
             error={err("promoterPercent")}
           />
         )}
-        <AreaField label={t("description")} className="sm:col-span-2" rows={2} maxLength={200} value={form.description} onChange={(e) => set("description", e.target.value)} />
+        <AreaField
+          label={t("description")}
+          className="sm:col-span-2"
+          rows={2}
+          maxLength={200}
+          value={form.description}
+          onChange={(e) => set("description", e.target.value)}
+        />
       </div>
       <div className="mt-4 flex justify-end">
         <Button
@@ -72,15 +158,34 @@ export function PromoForm({ promoters = [], initialPromoter }: { promoters?: { i
                 amountOff: num(form.amountOff),
                 minSubtotal: num(form.minSubtotal),
                 maxUses: num(form.maxUses),
-                startsAt: form.startsAt ? new Date(`${form.startsAt}T00:00:00+02:00`) : null,
-                endsAt: form.endsAt ? new Date(`${form.endsAt}T23:59:59+02:00`) : null,
+                startsAt: form.startsAt
+                  ? new Date(`${form.startsAt}T00:00:00+02:00`)
+                  : null,
+                endsAt: form.endsAt
+                  ? new Date(`${form.endsAt}T23:59:59+02:00`)
+                  : null,
                 fundedBy: form.fundedBy as "PLATFORM" | "HOST",
                 promoterId: form.promoterId || null,
-                promoterPercent: form.promoterId && form.promoterPercent ? Number(form.promoterPercent) : null,
+                promoterPercent:
+                  form.promoterId && form.promoterPercent
+                    ? Number(form.promoterPercent)
+                    : null,
               });
               if (result.ok) {
                 setErrors({});
-                setForm({ code: "", description: "", percentOff: "", amountOff: "", minSubtotal: "", startsAt: "", endsAt: "", maxUses: "", fundedBy: "PLATFORM", promoterId: "", promoterPercent: "" });
+                setForm({
+                  code: "",
+                  description: "",
+                  percentOff: "",
+                  amountOff: "",
+                  minSubtotal: "",
+                  startsAt: "",
+                  endsAt: "",
+                  maxUses: "",
+                  fundedBy: "HOST",
+                  promoterId: "",
+                  promoterPercent: "",
+                });
                 router.refresh();
               } else setErrors(result.errors);
             })
@@ -107,7 +212,11 @@ export function PromoToggle({ id, active }: { id: string; active: boolean }) {
           router.refresh();
         })
       }
-      className={active ? "shrink-0 rounded-full border border-line px-3.5 py-1.5 text-[13px] font-semibold text-ink hover:border-danger hover:text-danger disabled:opacity-50" : "shrink-0 rounded-full bg-primary px-3.5 py-1.5 text-[13px] font-semibold text-white hover:bg-primary-hover disabled:opacity-50"}
+      className={
+        active
+          ? "shrink-0 rounded-full border border-line px-3.5 py-1.5 text-[13px] font-semibold text-ink hover:border-danger hover:text-danger disabled:opacity-50"
+          : "shrink-0 rounded-full bg-primary px-3.5 py-1.5 text-[13px] font-semibold text-white hover:bg-primary-hover disabled:opacity-50"
+      }
     >
       {active ? t("disable") : t("enable")}
     </button>
