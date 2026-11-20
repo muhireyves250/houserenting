@@ -1693,7 +1693,24 @@
       "amount": "Montant payé",
       "open": "Reçu"
     },
-    "report": "Rapport (Excel)"
+    "report": "Rapport (Excel)",
+    "promo": {
+      "paidBy": "Réduction payée par",
+      "funded": {
+        "PLATFORM": "VIIPA (le propriétaire reçoit le prix plein)",
+        "HOST": "Le propriétaire"
+      },
+      "promoter": "Promoteur",
+      "reward": "Récompense du promoteur",
+      "rewardStatus": {
+        "PENDING": "en attente d’approbation",
+        "APPROVED": "approuvée, à payer",
+        "PAID": "payée",
+        "VOID": "refusée"
+      },
+      "rewardLater": "{amount} une fois le séjour terminé",
+      "rewardNone": "Aucune : pas de récompense définie (Paramètres → Promoteurs)"
+    }
   },
   "Promotions": {
     "new": "Nouveau code promo",

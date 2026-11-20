@@ -14,6 +14,7 @@ import { cn } from "@/lib/cn";
 import { dynamicMessage } from "@/lib/dynamic-message";
 import { formatRWF } from "@/lib/format";
 import { requireStaff } from "@/lib/permissions";
+import { getSettings } from "@/features/settings/service";
 import { DecideRequest, NoShowButton, SettleRefund } from "@/features/stay/components/StaffStayPanels";
 import { priceChangeFor } from "@/features/stay/rules";
 import { ConfirmPayment } from "@/features/payments/components/ManualPayment";
@@ -27,7 +28,7 @@ export default async function AdminBookingPage({ params }: Props) {
   if (!isBookingReference(reference)) notFound();
   const b = await bookingForStaff(reference);
   if (!b) notFound();
-  const [t, tBookings, tListings, tMoney, tStay, tPay, tRooms, locale, names] = await Promise.all([
+  const [t, tBookings, tListings, tMoney, tStay, tPay, tRooms, locale, names, settings] = await Promise.all([
     getTranslations("Admin"),
     getTranslations("Bookings"),
     getTranslations("Listings"),
@@ -37,8 +38,11 @@ export default async function AdminBookingPage({ params }: Props) {
     getTranslations("Rooms"),
     getLocale(),
     actorNames(b.events.map((e) => e.actorId)),
+    getSettings(),
   ]);
   const rwf = (n: number) => formatRWF(n, locale);
+  // What the promoter will earn when the stay finishes (from Settings: a fixed amount or a share of the stay).
+  const promoterReward = settings.promoterRewardFixed ?? (settings.promoterRewardBps ? Math.round((b.subtotal * settings.promoterRewardBps) / 10_000) : 0);
   const time = new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Kigali" });
 
   const roomText = b.room ? [b.room.name, b.roomNumber && roomLabel(b.roomNumber, (number) => tRooms("roomNumber", { number }))].filter(Boolean).join(" · ") : null;
@@ -178,11 +182,27 @@ export default async function AdminBookingPage({ params }: Props) {
               rows={[
                 { label: tListings(`unitTimes.${b.unit}`, { price: rwf(b.nightlyPrice), count: b.unit === "MONTH" ? (b.upfrontMonths ?? b.quantity) : b.quantity }), value: rwf(b.subtotal) },
                 ...(b.discount > 0 ? [{ label: tListings("promoLine", { code: b.promoCode?.code ?? "" }), value: `−${rwf(b.discount)}` }] : []),
+                // Who pays for the discount: VIIPA (the owner still gets the full price) or the owner.
+                ...(b.discount > 0 && b.promoCode ? [{ label: tMoney("promo.paidBy"), value: tMoney(`promo.funded.${b.promoCode.fundedBy}`) }] : []),
                 ...(b.guestFee > 0 ? [{ label: tBookings("serviceFee"), value: rwf(b.guestFee) }] : []),
                 ...(b.deposit > 0 ? [{ label: tListings("depositDue"), value: rwf(b.deposit) }] : []),
                 { label: t("guestPays"), value: <b>{rwf(b.total)}</b> },
                 { label: tMoney("kind.COMMISSION"), value: rwf(b.commission) },
                 { label: tMoney("kind.HOST_PAYABLE"), value: rwf(b.hostPayout) },
+                // The promoter who brought this booking and what they earn from it.
+                ...(b.promoter
+                  ? [
+                      { label: tMoney("promo.promoter"), value: <Link href={`/admin/users/${b.promoter.user.id}`} className="font-semibold text-primary hover:underline">{b.promoter.user.name}</Link> },
+                      {
+                        label: tMoney("promo.reward"),
+                        value: b.promoterReward
+                          ? `${rwf(b.promoterReward.amount)} · ${tMoney(`promo.rewardStatus.${b.promoterReward.paidAt ? "PAID" : b.promoterReward.status}` as "promo.rewardStatus.PENDING")}`
+                          : promoterReward > 0
+                            ? tMoney("promo.rewardLater", { amount: rwf(promoterReward) })
+                            : tMoney("promo.rewardNone"),
+                      },
+                    ]
+                  : []),
               ]}
             />
           </Panel>

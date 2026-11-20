@@ -1693,7 +1693,24 @@
       "amount": "Amafaranga yishyuwe",
       "open": "Inyemezabwishyu"
     },
-    "report": "Raporo (Excel)"
+    "report": "Raporo (Excel)",
+    "promo": {
+      "paidBy": "Igabanywa ryishyurwa na",
+      "funded": {
+        "PLATFORM": "VIIPA (nyir’inzu abona igiciro cyose)",
+        "HOST": "Nyir’inzu"
+      },
+      "promoter": "Umwamamaza",
+      "reward": "Igihembo cy’umwamamaza",
+      "rewardStatus": {
+        "PENDING": "gitegereje kwemezwa",
+        "APPROVED": "cyemejwe, kigomba kwishyurwa",
+        "PAID": "cyishyuwe",
+        "VOID": "cyanzwe"
+      },
+      "rewardLater": "{amount} igihe kubamo kurangiye",
+      "rewardNone": "Nta na kimwe: nta gihembo cyashyizweho (Igenamiterere → Abamamaza)"
+    }
   },
   "Promotions": {
     "new": "Kode nshya y'igabanywa",

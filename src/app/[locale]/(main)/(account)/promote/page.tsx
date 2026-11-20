@@ -31,7 +31,8 @@ export default async function PromotePage() {
     : null;
   const qr = link && data?.promoter.status === "ACTIVE" ? await QRCode.toString(link, { type: "svg", margin: 1, color: { dark: "#0b1b33", light: "#ffffff" } }) : null;
   // Any client can invite friends: their invite link as a QR code to scan too.
-  const inviteLink = referral ? `${getEnv().BETTER_AUTH_URL.replace(/\/$/, "")}/?ref=${referral.code}` : null;
+  // Invite links open the sign-up straight away (the code is remembered for 30 days).
+  const inviteLink = referral ? `${getEnv().BETTER_AUTH_URL.replace(/\/$/, "")}/signup?ref=${referral.code}` : null;
   const inviteQr = inviteLink ? await QRCode.toString(inviteLink, { type: "svg", margin: 1, color: { dark: "#0b1b33", light: "#ffffff" } }) : null;
 
   return (
@@ -45,7 +46,7 @@ export default async function PromotePage() {
       {referral && (
         <div className="mb-6 [&>*:first-child]:mt-0">
           <InviteFriends
-            link={`${getEnv().BETTER_AUTH_URL}/?ref=${referral.code}`}
+            link={inviteLink ?? ""}
             code={referral.code}
             invited={referral.summary.invited}
             earned={referral.summary.approved}

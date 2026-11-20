@@ -64,6 +64,9 @@ export function bookingForStaff(reference: string) {
       guest: { select: { id: true, name: true, email: true, phone: true } },
       room: { select: { name: true } },
       promoCode: { select: { code: true, fundedBy: true } },
+      // Who brought the booking (their QR link or their promo code) and their reward for it.
+      promoter: { select: { code: true, user: { select: { id: true, name: true } } } },
+      promoterReward: { select: { amount: true, status: true, paidAt: true } },
       identity: true,
       payments: { orderBy: { createdAt: "asc" } },
       ledger: { orderBy: { createdAt: "asc" } },

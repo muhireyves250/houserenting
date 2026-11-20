@@ -1693,7 +1693,24 @@
       "amount": "Amount paid",
       "open": "Receipt"
     },
-    "report": "Report (Excel)"
+    "report": "Report (Excel)",
+    "promo": {
+      "paidBy": "Discount paid by",
+      "funded": {
+        "PLATFORM": "VIIPA (the owner gets the full price)",
+        "HOST": "The owner"
+      },
+      "promoter": "Promoter",
+      "reward": "Promoter’s reward",
+      "rewardStatus": {
+        "PENDING": "waiting for approval",
+        "APPROVED": "approved, to pay",
+        "PAID": "paid",
+        "VOID": "declined"
+      },
+      "rewardLater": "{amount} once the stay is finished",
+      "rewardNone": "None: no promoter reward is set (Settings → Promoters)"
+    }
   },
   "Promotions": {
     "new": "New promo code",
