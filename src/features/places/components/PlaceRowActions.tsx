@@ -11,7 +11,7 @@ import { deletePlaceAction } from "../actions";
 import { StatusActions } from "./StatusActions";
 
 /** A place's row in the staff list: Edit, and its status buttons one tap away (opened under the row). */
-export function PlaceRowActions({ listingId, moves, editable }: { listingId: string; moves: ListingMove[]; editable: boolean }) {
+export function PlaceRowActions({ listingId, moves, editable, deletable = false }: { listingId: string; moves: ListingMove[]; editable: boolean; /** Never booked: can be deleted. */ deletable?: boolean }) {
   const t = useTranslations("Places");
   const [open, setOpen] = useState(false);
   return (
@@ -22,6 +22,15 @@ export function PlaceRowActions({ listingId, moves, editable }: { listingId: str
             <Pencil className="size-3.5" aria-hidden="true" />
             {t("editShort")}
           </Link>
+        )}
+        {/* Never booked: delete it for good, right here (booked places are archived instead). */}
+        {deletable && (
+          <ConfirmAction
+            label={t("deleteShort")}
+            question={t("deletePlaceQuestion")}
+            action={deletePlaceAction.bind(null, listingId)}
+            errors={{ hasBookings: t("deleteHasBookings"), notAllowed: t("deleteNotAllowed") }}
+          />
         )}
         {moves.length > 0 && (
           <button
@@ -38,15 +47,6 @@ export function PlaceRowActions({ listingId, moves, editable }: { listingId: str
       {open && (
         <div className="flex w-full max-w-md flex-col gap-3 rounded-xl bg-canvas p-3">
           <StatusActions listingId={listingId} moves={moves} />
-          {/* Never booked: it can be deleted for good (otherwise archive it). */}
-          <div className="flex justify-end border-t border-line pt-3">
-            <ConfirmAction
-              label={t("deletePlace")}
-              question={t("deletePlaceQuestion")}
-              action={deletePlaceAction.bind(null, listingId)}
-              errors={{ hasBookings: t("deleteHasBookings"), notAllowed: t("deleteNotAllowed") }}
-            />
-          </div>
         </div>
       )}
     </div>

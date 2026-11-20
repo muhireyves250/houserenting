@@ -9,6 +9,7 @@ import { PromoterRewardButtons, PromoterStatusButtons } from "@/features/promote
 import { allPromoters, openPromoterRewards } from "@/features/promoters/service";
 import { maskAccount } from "@/features/places/payout-service";
 import { Link } from "@/i18n/navigation";
+import { cn } from "@/lib/cn";
 import { formatRWF } from "@/lib/format";
 
 /** Promoters (approve, suspend) and their rewards (approve, mark paid). Reward rules are in Settings. */
@@ -73,6 +74,21 @@ export async function PromotersView() {
                   <Chip>{tP("visitsN", { count: p._count.visits })}</Chip>
                   <Chip>{tP("bookingsN", { count: p._count.bookings })}</Chip>
                   <Chip>{formatKigaliDateTime(locale, p.createdAt)}</Chip>
+                </div>
+                {/* Their promo codes (bookings with them count as theirs), and a quick way to give one. */}
+                <div className="flex flex-wrap items-center gap-1.5 rounded-xl bg-canvas px-3 py-2">
+                  <span className="text-[12px] font-semibold text-muted">{tP("promoCodesLabel")}</span>
+                  {p.promoCodes.length === 0 && <span className="text-[12px] text-muted">{tP("noPromoCodes")}</span>}
+                  {p.promoCodes.map((c) => (
+                    <span key={c.id} className={cn("rounded-md border border-dashed px-2 py-0.5 font-mono text-[12px] font-bold", c.active ? "border-primary/40 text-primary" : "border-line-strong text-muted line-through")}>
+                      {c.code}
+                    </span>
+                  ))}
+                  {p.status === "ACTIVE" && (
+                    <Link href={{ pathname: "/admin/promotions", query: { for: p.id } }} className="ml-auto text-[12px] font-semibold text-primary hover:underline">
+                      + {tP("givePromoCode")}
+                    </Link>
+                  )}
                 </div>
                 {p.about && <p className="rounded-xl bg-canvas px-3 py-2 text-[13px] text-ink">{p.about}</p>}
                 {p.payoutNumber && (

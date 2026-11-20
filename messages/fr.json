@@ -1949,7 +1949,8 @@
     "deletePlaceQuestion": "Supprimer définitivement ce logement ? Ses photos, prix et chambres aussi. C’est irréversible.",
     "deleteHasBookings": "Ce logement a des réservations ou commandes : archivez-le plutôt.",
     "deleteNotAllowed": "Réservé au personnel qui gère les logements.",
-    "archivedFilter": "Archivés"
+    "archivedFilter": "Archivés",
+    "deleteShort": "Supprimer"
   },
   "MyStay": {
     "title": "Mon séjour",
@@ -2522,7 +2523,10 @@
     "inviteQrHint": "Vos amis scannent ceci pour s’inscrire avec votre invitation.",
     "yourPromoCodes": "Vos codes promo",
     "off": "de réduction",
-    "promoCodesHint": "Partagez-les : les clients qui réservent avec un de vos codes comptent pour vous."
+    "promoCodesHint": "Partagez-les : les clients qui réservent avec un de vos codes comptent pour vous.",
+    "promoCodesLabel": "Codes promo :",
+    "noPromoCodes": "aucun",
+    "givePromoCode": "Donner un code promo"
   },
   "Reports": {
     "intro": "Argent et activité par date de séjour. Les séjours payés et non présentés comptent ; les séjours annulés seulement pour leurs remboursements. Les cautions sont retenues, pas des revenus.",

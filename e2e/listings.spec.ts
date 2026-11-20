@@ -5,6 +5,8 @@ test("search Kigali short-term, open a listing and see its prices", async ({ pag
   await skipOnboarding(page);
   if (testInfo.project.name === "desktop") {
     await page.goto("/en");
+    // The place is an apartment: switch the search to Apartments first.
+    await page.getByRole("radio", { name: "Apartments" }).first().click();
     await page.getByRole("combobox", { name: "Where" }).first().fill("Kimihurura");
     await page.keyboard.press("Escape");
     await page.getByRole("button", { name: "Search", exact: true }).click();

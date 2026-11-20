@@ -20,7 +20,7 @@ const STATE_TONE: Record<State, string> = {
 };
 
 /** Promo codes: the new-code form beside the list; each code a card with what it gives, who pays and how far it's used. */
-export async function PromotionsView({ tabs }: { tabs: ReactNode }) {
+export async function PromotionsView({ tabs, forPromoter }: { tabs: ReactNode; forPromoter?: string }) {
   const [t, locale, promos, promoterRows] = await Promise.all([getTranslations("Promotions"), getLocale(), listPromos(), allPromoters()]);
   // Active promoters a new code can be given to (optional).
   const promoters = promoterRows.filter((p) => p.status === "ACTIVE").map((p) => ({ id: p.id, name: p.user.name, code: p.code }));
@@ -35,7 +35,7 @@ export async function PromotionsView({ tabs }: { tabs: ReactNode }) {
       {tabs}
       {/* Computers: the new-code form beside the list, each scrolling in its own box. Phones: the form folds away. */}
       <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)] gap-4 lg:grid-cols-[400px_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)]">
-        <details className="group no-scrollbar max-h-[70dvh] shrink-0 overflow-y-auto rounded-2xl bg-surface ring-1 ring-line lg:hidden">
+        <details open={Boolean(forPromoter)} className="group no-scrollbar max-h-[70dvh] shrink-0 overflow-y-auto rounded-2xl bg-surface ring-1 ring-line lg:hidden">
           <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-[15px] font-semibold text-primary [&::-webkit-details-marker]:hidden">
             <span className="flex size-7 items-center justify-center rounded-full bg-primary text-white">
               <Plus className="size-4 transition-transform group-open:rotate-45" aria-hidden="true" />
@@ -43,11 +43,11 @@ export async function PromotionsView({ tabs }: { tabs: ReactNode }) {
             {t("newCode")}
           </summary>
           <div className="border-t border-line p-3">
-            <PromoForm promoters={promoters} />
+            <PromoForm promoters={promoters} initialPromoter={forPromoter} />
           </div>
         </details>
         <div className="no-scrollbar hidden min-h-0 overflow-y-auto lg:block">
-          <PromoForm promoters={promoters} />
+          <PromoForm promoters={promoters} initialPromoter={forPromoter} />
         </div>
 
         <section className="flex min-h-0 flex-col gap-3">

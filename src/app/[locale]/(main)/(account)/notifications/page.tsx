@@ -42,7 +42,7 @@ export default async function NotificationsPage({ searchParams }: Props) {
       {/* Opening the page marks everything as read (after it has been shown as new once). */}
       {unread && <MarkRead />}
       {groups.length > 1 && (
-        <nav aria-label={t("filterLabel")} className="no-scrollbar -mx-4 mb-4 flex gap-2 overflow-x-auto px-4 md:mx-0 md:flex-wrap md:px-0">
+        <nav aria-label={t("filterLabel")} data-lenis-prevent className="no-scrollbar -mx-4 mb-4 flex gap-2 overflow-x-auto px-4 md:mx-0 md:flex-wrap md:px-0">
           {[{ g: null, count: items.length }, ...groups].map(({ g, count }) => {
             const on = g === show;
             return (

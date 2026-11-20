@@ -749,3 +749,21 @@ html[data-tab-loading] .admin-cards :has(> nav[aria-busy="true"]) ~ * {
     white-space: nowrap;
   }
 }
+
+/* Phones: a row of filter buttons is one line you swipe left and right (no wrapping, no scrollbar). */
+@media (max-width: 767px) {
+  .filter-row {
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin-inline: -1.75rem;
+    padding-inline: 1.75rem;
+  }
+  .filter-row::-webkit-scrollbar {
+    display: none;
+  }
+  .filter-row > * {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+}

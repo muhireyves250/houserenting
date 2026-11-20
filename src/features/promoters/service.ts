@@ -162,7 +162,11 @@ export function allPromoters() {
   return db.promoter.findMany({
     orderBy: [{ status: "asc" }, { createdAt: "desc" }],
     take: 300,
-    include: { user: { select: { id: true, name: true, email: true } }, _count: { select: { visits: true, bookings: true, rewards: true } } },
+    include: {
+      user: { select: { id: true, name: true, email: true } },
+      promoCodes: { orderBy: { createdAt: "desc" }, select: { id: true, code: true, active: true, percentOff: true, amountOff: true } },
+      _count: { select: { visits: true, bookings: true, rewards: true } },
+    },
   });
 }
 

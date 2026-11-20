@@ -1949,7 +1949,8 @@
     "deletePlaceQuestion": "Delete this place for good? Its photos, prices and rooms go too. This can’t be undone.",
     "deleteHasBookings": "This place has bookings or orders: archive it instead.",
     "deleteNotAllowed": "Only staff who manage places can delete them.",
-    "archivedFilter": "Archived"
+    "archivedFilter": "Archived",
+    "deleteShort": "Delete"
   },
   "MyStay": {
     "title": "My stay",
@@ -2522,7 +2523,10 @@
     "inviteQrHint": "Friends scan this to sign up with your invite.",
     "yourPromoCodes": "Your promo codes",
     "off": "off",
-    "promoCodesHint": "Share these: guests who book with one of your codes count as yours."
+    "promoCodesHint": "Share these: guests who book with one of your codes count as yours.",
+    "promoCodesLabel": "Promo codes:",
+    "noPromoCodes": "none yet",
+    "givePromoCode": "Give a promo code"
   },
   "Reports": {
     "intro": "Money and activity by stay date. Paid stays and no-shows count; cancelled stays only for their refunds. Deposits are held, not revenue.",

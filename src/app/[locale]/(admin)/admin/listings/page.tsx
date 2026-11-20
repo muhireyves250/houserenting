@@ -72,7 +72,7 @@ export default async function AdminListingsPage({ searchParams }: Props) {
           </Link>
         }
       >
-        <div className="flex flex-wrap gap-2">
+        <div data-lenis-prevent className="filter-row flex flex-wrap gap-2">
           {filters.map((f) => {
             const on = (endingSoon ? "ending" : (status ?? "all")) === f.value;
             return (
@@ -90,7 +90,7 @@ export default async function AdminListingsPage({ searchParams }: Props) {
           })}
         </div>
         {/* Category by category: lodges, apartments, houses… (only those that have places). */}
-        <div className="mt-2 flex flex-wrap gap-2">
+        <div data-lenis-prevent className="filter-row mt-2 flex flex-wrap gap-2">
           {[undefined, ...PLACE_TYPES.filter((t) => typeCount(t) > 0 || t === type)].map((t) => {
             const on = t === type;
             return (
@@ -131,7 +131,7 @@ export default async function AdminListingsPage({ searchParams }: Props) {
                     </span>
                   </span>
                 </Link>
-                <PlaceRowActions listingId={listing.id} moves={movesFrom(listing.status, { isStaff: true, isOwner: false })} editable={listing.status !== "ARCHIVED"} />
+                <PlaceRowActions listingId={listing.id} moves={movesFrom(listing.status, { isStaff: true, isOwner: false })} editable={listing.status !== "ARCHIVED"} deletable={listing._count.bookings === 0} />
               </li>
             ))}
           </ul>

@@ -5,12 +5,13 @@ import { PromotersView } from "@/features/admin/views/PromotersView";
 import { PromotionsView } from "@/features/admin/views/PromotionsView";
 import { requireStaff } from "@/lib/permissions";
 
-type Props = { searchParams: Promise<{ tab?: string }> };
+type Props = { searchParams: Promise<{ tab?: string; for?: string }> };
 
 /** Promotions on one page: promo codes in one tab, promoters and their rewards in the other. */
 export default async function PromotionsPage({ searchParams }: Props) {
   await requireStaff("promotions", "/admin/promotions");
-  const promoters = (await searchParams).tab === "promoters";
+  const params = await searchParams;
+  const promoters = params.tab === "promoters";
   const t = await getTranslations("Admin");
   const tabs = (
     <PageTabs
@@ -22,7 +23,8 @@ export default async function PromotionsPage({ searchParams }: Props) {
     />
   );
   // Promo codes fill the screen (form and list side by side); promoters are an ordinary page.
-  if (!promoters) return <PromotionsView tabs={tabs} />;
+  // "Give a promo code" from a promoter card opens the form with that promoter chosen.
+  if (!promoters) return <PromotionsView tabs={tabs} forPromoter={params.for} />;
   return (
     <div className="flex flex-col gap-5">
       <StickyTabs>{tabs}</StickyTabs>

@@ -1949,7 +1949,8 @@
     "deletePlaceQuestion": "Gusiba burundu iri cumbi? Amafoto, ibiciro n’ibyumba byaryo nabyo biragenda. Ntibisubirwamo.",
     "deleteHasBookings": "Iri cumbi rifite ibyafashwe cyangwa ibyatumijwe: ribike (archive) aho kurisiba.",
     "deleteNotAllowed": "Ni ab’abakozi bacunga amacumbi gusa.",
-    "archivedFilter": "Byabitswe"
+    "archivedFilter": "Byabitswe",
+    "deleteShort": "Siba"
   },
   "MyStay": {
     "title": "Aho ncumbitse",
@@ -2522,7 +2523,10 @@
     "inviteQrHint": "Inshuti zawe zisikana ibi ngo ziyandikishe ku butumire bwawe.",
     "yourPromoCodes": "Kode zawe za promosiyo",
     "off": "zigabanyijwe",
-    "promoCodesHint": "Zisangize: abakiliya bafata icumbi bakoresheje kode yawe babarwa nk’abawe."
+    "promoCodesHint": "Zisangize: abakiliya bafata icumbi bakoresheje kode yawe babarwa nk’abawe.",
+    "promoCodesLabel": "Kode za promosiyo:",
+    "noPromoCodes": "nta na imwe",
+    "givePromoCode": "Muhe kode ya promosiyo"
   },
   "Reports": {
     "intro": "Amafaranga n'ibikorwa bikurikije itariki y'icumbi. Amacumbi yishyuwe n'abataje arabarwa; ayahagaritswe abarwa gusa ku mafaranga yasubijwe. Ingwate zirabikwa, si inyungu.",

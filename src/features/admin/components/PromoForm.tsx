@@ -9,10 +9,10 @@ import { createPromoAction, setPromoActiveAction } from "../money-actions";
 
 const num = (v: string) => (v.trim() === "" ? null : Number(v));
 
-export function PromoForm({ promoters = [] }: { promoters?: { id: string; name: string; code: string }[] }) {
+export function PromoForm({ promoters = [], initialPromoter }: { promoters?: { id: string; name: string; code: string }[]; initialPromoter?: string }) {
   const t = useTranslations("Promotions");
   const router = useRouter();
-  const [form, setForm] = useState({ code: "", description: "", percentOff: "", amountOff: "", minSubtotal: "", startsAt: "", endsAt: "", maxUses: "", fundedBy: "PLATFORM", promoterId: "" });
+  const [form, setForm] = useState({ code: "", description: "", percentOff: "", amountOff: "", minSubtotal: "", startsAt: "", endsAt: "", maxUses: "", fundedBy: "PLATFORM", promoterId: promoters.some((p) => p.id === initialPromoter) ? initialPromoter! : "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [pending, start] = useTransition();
   const set = (key: keyof typeof form, value: string) => setForm((f) => ({ ...f, [key]: value }));

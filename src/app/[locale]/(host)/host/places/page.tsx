@@ -35,7 +35,7 @@ export default async function HostPlacesPage({ searchParams }: Props) {
           </Link>
         }
       >
-        <div className="flex flex-wrap gap-2">
+        <div data-lenis-prevent className="filter-row flex flex-wrap gap-2">
           {filters.map((f) => {
             const on = f.value === status;
             return (

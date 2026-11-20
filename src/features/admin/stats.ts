@@ -102,6 +102,7 @@ export function allListings(status?: ListingStatus, type?: PlaceType) {
     orderBy: { updatedAt: "desc" },
     take: 200,
     select: {
+      _count: { select: { bookings: true } },
       id: true,
       title: true,
       type: true,
