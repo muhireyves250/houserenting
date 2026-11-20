@@ -20,12 +20,10 @@
   --shadow-card: 0 1px 2px 0 rgb(16 24 40 / 0.05), 0 4px 14px -6px rgb(16 24 40 / 0.12);
   --shadow-card-hover: 0 2px 4px 0 rgb(16 24 40 / 0.06), 0 12px 28px -12px rgb(16 24 40 / 0.24);
   --font-sans: var(--font-brand), ui-sans-serif, system-ui, sans-serif;
-  /* Headings use the same face as body text (Geist), so the whole site reads as one typeface. */
+  /* Headings use the same face as body text (Figtree), so the whole site reads as one typeface. */
   --font-display: var(--font-brand), ui-sans-serif, system-ui, sans-serif;
-  /* Geist is slim: a slightly fuller regular weight, and a little air on small sizes, keep text crisp and readable. */
-  --font-weight-normal: 450;
-  --text-xs--letter-spacing: 0.012em;
-  --text-sm--letter-spacing: 0.006em;
+  /* Figtree is already full and open: its normal weight, and normal spacing on small sizes. */
+  --font-weight-normal: 400;
 
   --animate-pop-in: pop-in 500ms cubic-bezier(0.25, 0.8, 0.25, 1);
   --animate-sheet-up: sheet-up 280ms cubic-bezier(0.2, 0.8, 0.2, 1);

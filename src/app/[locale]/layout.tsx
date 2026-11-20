@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist } from "next/font/google";
+import { Figtree } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { PwaSetup } from "@/features/pwa/PwaSetup";
@@ -9,8 +9,9 @@ import { SmoothScroll } from "@/components/shell/SmoothScroll";
 import { routing } from "@/i18n/routing";
 import "../globals.css";
 
-// UI typeface: Geist (variable weights), clean and modern; latin-ext covers French accents.
-const brandSans = Geist({ subsets: ["latin", "latin-ext"], variable: "--font-brand", display: "swap" });
+// latin-ext covers French accents.
+// Figtree: a rounded, friendly sans (close to the look of the big travel sites), for the whole site and dashboards.
+const brandSans = Figtree({ subsets: ["latin", "latin-ext"], variable: "--font-brand", display: "swap" });
 
 export const viewport: Viewport = { themeColor: "#0057b8" };
 
