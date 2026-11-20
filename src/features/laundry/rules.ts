@@ -1,9 +1,23 @@
-export const LAUNDRY_STATUSES = ["REQUESTED", "PICKED_UP", "WASHED", "RETURNED", "CANCELLED"] as const;
+export const LAUNDRY_STATUSES = ["REQUESTED", "ACCEPTED", "PICKED_UP", "WASHED", "RETURNED", "RECEIVED", "CANCELLED"] as const;
 export type LaundryStatus = (typeof LAUNDRY_STATUSES)[number];
 
-/** The steps staff move a laundry order through, in order (any open order can also be cancelled). */
-export const NEXT_LAUNDRY_STEP: Partial<Record<LaundryStatus, LaundryStatus>> = { REQUESTED: "PICKED_UP", PICKED_UP: "WASHED", WASHED: "RETURNED" };
-export const OPEN_LAUNDRY: readonly LaundryStatus[] = ["REQUESTED", "PICKED_UP", "WASHED"];
+/**
+ * The steps of a laundry order, in order: the guest asks, VIIPA accepts, the place's owner collects it, washes and
+ * weighs it, and returns it, then the guest confirms they got it. Any open order can also be cancelled by staff.
+ */
+export const NEXT_LAUNDRY_STEP: Partial<Record<LaundryStatus, LaundryStatus>> = {
+  REQUESTED: "ACCEPTED",
+  ACCEPTED: "PICKED_UP",
+  PICKED_UP: "WASHED",
+  WASHED: "RETURNED",
+  RETURNED: "RECEIVED",
+};
+/** Still being handled (a guest can't ask again while one is open). */
+export const OPEN_LAUNDRY: readonly LaundryStatus[] = ["REQUESTED", "ACCEPTED", "PICKED_UP", "WASHED"];
+/** The steps the place's owner (or VIIPA) does once VIIPA has accepted. */
+export const PLACE_LAUNDRY_STEPS: readonly LaundryStatus[] = ["PICKED_UP", "WASHED", "RETURNED"];
+/** Washed and priced: payment can be claimed and confirmed from here on. */
+export const PRICED_LAUNDRY: readonly LaundryStatus[] = ["WASHED", "RETURNED", "RECEIVED"];
 
 /** Most a guest's laundry can weigh in one order (grams). */
 export const MAX_LAUNDRY_GRAMS = 50_000;

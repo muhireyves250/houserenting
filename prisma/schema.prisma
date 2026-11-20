@@ -1254,9 +1254,13 @@ model UserPhoto {
 /// Laundry steps: the guest asks, staff collect, wash and weigh (the price is set), and bring it back.
 enum LaundryStatus {
   REQUESTED
+  /// VIIPA accepted it; the place's owner now collects, washes and returns it.
+  ACCEPTED
   PICKED_UP
   WASHED
   RETURNED
+  /// The guest confirmed they got their clothes back.
+  RECEIVED
   CANCELLED
 }
 

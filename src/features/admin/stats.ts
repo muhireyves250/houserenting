@@ -160,7 +160,7 @@ export const adminBadges = cache(async (staffId: string) => {
       (SELECT count(*) FROM "booking" WHERE "refundStatus" = 'PENDING') AS refunds,
       (SELECT count(*) FROM "notification" WHERE "userId" = ${staffId} AND "readAt" IS NULL) AS unread,
       (SELECT count(*) FROM "laundryOrder"
-        WHERE "status" IN ('REQUESTED', 'PICKED_UP', 'WASHED')
+        WHERE "status" = 'REQUESTED'
            OR ("paymentClaim" IS NOT NULL AND "paidAt" IS NULL AND "status" <> 'CANCELLED')) AS laundry,
       (SELECT count(*) FROM "foodOrder"
         WHERE ("paymentMethod" = 'PAY_FIRST' AND "paidAt" IS NULL AND "status" = 'PLACED' AND "paymentClaim" IS NOT NULL)

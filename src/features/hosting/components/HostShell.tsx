@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, ChefHat, ClipboardList, House, LayoutDashboard, Menu, Settings, UtensilsCrossed, Wallet, X, type LucideIcon } from "lucide-react";
+import { Bell, ChefHat, Shirt, ClipboardList, House, LayoutDashboard, Menu, Settings, UtensilsCrossed, Wallet, X, type LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, type ReactNode } from "react";
 import { Avatar } from "@/components/ui/Avatar";
@@ -8,12 +8,13 @@ import { Logo } from "@/components/ui/Logo";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 
-type Key = "overview" | "places" | "orders" | "payout" | "restaurants" | "account" | "notifications";
+type Key = "overview" | "places" | "orders" | "laundry" | "payout" | "restaurants" | "account" | "notifications";
 
 const NAV: { key: Key; href: string; icon: LucideIcon }[] = [
   { key: "overview", href: "/host", icon: LayoutDashboard },
   { key: "places", href: "/host/places", icon: House },
   { key: "orders", href: "/host/orders", icon: UtensilsCrossed },
+  { key: "laundry", href: "/host/laundry", icon: Shirt },
   { key: "payout", href: "/host/payout", icon: Wallet },
   { key: "restaurants", href: "/host/restaurants", icon: ChefHat },
 ];
@@ -105,7 +106,8 @@ export function HostShell({
     </div>
   );
 
-  const bottom = nav.filter((i) => i.key !== "restaurants");
+  // Phones: the four pages used most (payouts and the rest are in Menu).
+  const bottom = nav.filter((i) => i.key !== "restaurants" && i.key !== "payout");
 
   return (
     <div className="min-h-dvh bg-canvas" data-lenis-prevent>

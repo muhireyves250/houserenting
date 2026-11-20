@@ -10,13 +10,19 @@ const input = "rounded-xl border border-line-strong bg-surface px-3 py-2 text-[1
 const primary = "rounded-full bg-primary px-4 py-2 text-[13px] font-semibold text-white hover:bg-primary-hover disabled:opacity-50";
 const quiet = "rounded-full px-3 py-2 text-[13px] font-semibold text-red-700 hover:bg-red-50 disabled:opacity-50";
 
-/** Staff: the next step for one laundry order (collected → weight → returned), cancel, and confirm payment. */
+/**
+ * The next step for one laundry order. Staff accept it (and can step in later, cancel or confirm payment); the place's
+ * owner (`forPlace`) collects it, enters the weight after washing, and brings it back.
+ */
 export function LaundryStaffActions({
   order,
+  forPlace = false,
 }: {
   order: { reference: string; status: LaundryStatus; amount: number | null; paidAt: Date | null; paymentClaim: string | null };
+  forPlace?: boolean;
 }) {
   const t = useTranslations("Laundry.admin");
+  const tHost = useTranslations("Laundry.host");
   const router = useRouter();
   const [kg, setKg] = useState("");
   const [tx, setTx] = useState(order.paymentClaim ?? "");
@@ -37,9 +43,14 @@ export function LaundryStaffActions({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap items-center gap-2">
-        {order.status === "REQUESTED" && (
+        {order.status === "REQUESTED" && !forPlace && (
+          <button type="button" disabled={pending} onClick={() => move("ACCEPTED")} className={primary}>
+            {t("accept")}
+          </button>
+        )}
+        {order.status === "ACCEPTED" && (
           <button type="button" disabled={pending} onClick={() => move("PICKED_UP")} className={primary}>
-            {t("pickedUp")}
+            {forPlace ? tHost("collect") : t("pickedUp")}
           </button>
         )}
         {order.status === "PICKED_UP" && (
@@ -52,10 +63,12 @@ export function LaundryStaffActions({
         )}
         {order.status === "WASHED" && (
           <button type="button" disabled={pending} onClick={() => move("RETURNED")} className={primary}>
-            {t("returned")}
+            {forPlace ? tHost("returned") : t("returned")}
           </button>
         )}
-        {OPEN_LAUNDRY.includes(order.status) && !cancelling && (
+        {order.status === "RETURNED" && <span className="text-[13px] text-muted">{forPlace ? tHost("waitingGuest") : t("waitingGuest")}</span>}
+        {order.status === "RECEIVED" && <span className="text-[13px] font-semibold text-emerald-700">{forPlace ? tHost("receivedByGuest") : t("doneGuest")}</span>}
+        {OPEN_LAUNDRY.includes(order.status) && !cancelling && !forPlace && (
           <button type="button" disabled={pending} onClick={() => setCancelling(true)} className={quiet}>
             {t("cancel")}
           </button>
@@ -71,7 +84,7 @@ export function LaundryStaffActions({
         </div>
       )}
 
-      {laundryOwed(order) && (
+      {laundryOwed(order) && !forPlace && (
         <div className="flex flex-wrap items-center gap-2">
           <input className={`${input} w-48`} placeholder={t("paidRef")} aria-label={t("paidRef")} value={tx} maxLength={60} onChange={(e) => setTx(e.target.value)} />
           <button type="button" disabled={pending || tx.trim().length < 4} onClick={() => run(() => confirmLaundryPaymentAction(order.reference, tx))} className={primary}>

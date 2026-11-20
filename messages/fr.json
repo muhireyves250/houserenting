@@ -826,7 +826,8 @@
         "food": "Repas en route",
         "fix": "Logements à corriger",
         "drafts": "Brouillons à terminer",
-        "due": "Dû à vous"
+        "due": "Dû à vous",
+        "laundry": "Linge à traiter"
       },
       "noPayouts": "Aucun paiement pour l’instant."
     },
@@ -840,7 +841,8 @@
         "payout": "Paiements",
         "restaurants": "Cuisines",
         "account": "Votre compte",
-        "notifications": "Notifications"
+        "notifications": "Notifications",
+        "laundry": "Blanchisserie"
       },
       "short": {
         "overview": "Aperçu",
@@ -848,7 +850,8 @@
         "orders": "Repas",
         "payout": "Paiements",
         "restaurants": "Cuisines",
-        "menu": "Menu"
+        "menu": "Menu",
+        "laundry": "Blanchisserie"
       },
       "backToSite": "Retour à VIIPA",
       "openMenu": "Ouvrir le menu",
@@ -1396,7 +1399,10 @@
       "orderPaymentClaim": "Commande {reference} à {title} ({total} RWF) : le voyageur dit avoir payé. Vérifiez et confirmez.",
       "orderNew": "Nouvelle commande {reference} — {title} ({total} RWF). En attente de paiement.",
       "orderSentToStay": "La commande {reference} de {name} a été envoyée à {where}. À son arrivée, vérifiez le numéro et apportez-la.",
-      "orderReceived": "La commande {reference} a été reçue par le client ({title})."
+      "orderReceived": "La commande {reference} a été reçue par le client ({title}).",
+      "laundryForHost": "Linge {reference} : à récupérer dans {room} à {title}.",
+      "laundryReturned": "Le linge {reference} à {title} a été rapporté au client.",
+      "laundryReceived": "Linge {reference} à {title} : le client l’a récupéré."
     },
     "filterLabel": "Afficher les notifications",
     "filter": {
@@ -2525,13 +2531,17 @@
       "PICKED_UP": "Récupéré, en lavage",
       "WASHED": "Lavé et pesé",
       "RETURNED": "De retour dans votre chambre",
-      "CANCELLED": "Annulé"
+      "CANCELLED": "Annulé",
+      "ACCEPTED": "Accepté, le logement viendra le chercher",
+      "RECEIVED": "Reçu"
     },
     "step": {
       "REQUESTED": "Demandé",
       "PICKED_UP": "Récupéré",
       "WASHED": "Lavé",
-      "RETURNED": "Rapporté"
+      "RETURNED": "Rapporté",
+      "ACCEPTED": "Accepté",
+      "RECEIVED": "Reçu"
     },
     "yourNote": "Votre note : {note}",
     "cancelledBecause": "Annulé : {reason}",
@@ -2593,8 +2603,15 @@
         "done": "Terminées",
         "nothing": "Rien ici.",
         "offering": "{count, plural, =0 {aucun ne la propose} one {# lieu la propose} other {# lieux la proposent}}",
-        "allClear": "Aucune lessive en attente."
-      }
+        "allClear": "Aucune lessive en attente.",
+        "toAccept": "À accepter",
+        "withPlace": "Chez le logement",
+        "withGuest": "Rendu au client"
+      },
+      "accept": "Accepter",
+      "waitingOwner": "Accepté : le logement vient la chercher",
+      "waitingGuest": "Rapporté : en attente de confirmation du client",
+      "doneGuest": "Le client l’a récupérée"
     },
     "placeLabel": "Blanchisserie pour les voyageurs",
     "placeOff": "Non proposée",
@@ -2608,7 +2625,25 @@
       "WASHED": "lavé et pesé, voyez le prix",
       "RETURNED": "rapporté dans votre chambre",
       "CANCELLED": "annulé",
-      "PAID": "paiement reçu, merci"
+      "PAID": "paiement reçu, merci",
+      "ACCEPTED": "acceptée, le logement viendra la chercher bientôt",
+      "RECEIVED": "reçue, merci"
+    },
+    "received": "J’ai récupéré mes vêtements",
+    "receivedNote": "Dites-nous quand vos vêtements sont de retour dans votre chambre.",
+    "host": {
+      "title": "Blanchisserie",
+      "intro": "Le linge des clients accepté par VIIPA dans vos logements : récupérez-le dans la chambre, lavez-le et pesez-le, puis rapportez-le.",
+      "empty": "Aucun linge à traiter.",
+      "todo": "À faire",
+      "done": "Terminé",
+      "room": "Chambre",
+      "guest": "Client",
+      "collect": "Récupéré",
+      "returned": "Rapporté",
+      "waitingGuest": "En attente de confirmation du client",
+      "receivedByGuest": "Le client l’a récupéré",
+      "guestNote": "Note du client : {note}"
     }
   },
   "Install": {

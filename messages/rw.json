@@ -826,7 +826,8 @@
         "food": "Ibiryo biri mu nzira",
         "fix": "Amacumbi akosorwa",
         "drafts": "Imishinga yo kurangiza",
-        "due": "Ugomba kwishyurwa"
+        "due": "Ugomba kwishyurwa",
+        "laundry": "Imyenda yo kwitaho"
       },
       "noPayouts": "Nta bwishyu buraba."
     },
@@ -840,7 +841,8 @@
         "payout": "Kwishyurwa",
         "restaurants": "Igikoni",
         "account": "Konti yawe",
-        "notifications": "Imenyesha"
+        "notifications": "Imenyesha",
+        "laundry": "Kumesa"
       },
       "short": {
         "overview": "Incamake",
@@ -848,7 +850,8 @@
         "orders": "Ibiryo",
         "payout": "Kwishyurwa",
         "restaurants": "Igikoni",
-        "menu": "Menu"
+        "menu": "Menu",
+        "laundry": "Kumesa"
       },
       "backToSite": "Subira kuri VIIPA",
       "openMenu": "Fungura menu",
@@ -1396,7 +1399,10 @@
       "orderPaymentClaim": "Ibyatumijwe {reference} kuri {title} ({total} RWF): umushyitsi avuga ko yishyuye. Genzura wemeze.",
       "orderNew": "Ibyatumijwe bishya {reference} — {title} ({total} RWF). Bitegereje kwishyurwa.",
       "orderSentToStay": "Ibyo {name} yatumije {reference} byoherejwe kuri {where}. Nibigera, reba nimero ubimushyikirize.",
-      "orderReceived": "Ibyatumijwe {reference} byakiriwe n'umukiriya ({title})."
+      "orderReceived": "Ibyatumijwe {reference} byakiriwe n'umukiriya ({title}).",
+      "laundryForHost": "Imyenda {reference}: yifate muri {room} kuri {title}.",
+      "laundryReturned": "Imyenda {reference} kuri {title} yagaruwe ku mushyitsi.",
+      "laundryReceived": "Imyenda {reference} kuri {title}: umushyitsi yayibonye."
     },
     "filterLabel": "Erekana imenyesha",
     "filter": {
@@ -2525,13 +2531,17 @@
       "PICKED_UP": "Yafashwe, iri kumeswa",
       "WASHED": "Yamaze kumeswa no gupimwa",
       "RETURNED": "Yagaruwe mu cyumba",
-      "CANCELLED": "Byahagaritswe"
+      "CANCELLED": "Byahagaritswe",
+      "ACCEPTED": "Byemejwe, icumbi rizaza kubitwara",
+      "RECEIVED": "Byakiriwe"
     },
     "step": {
       "REQUESTED": "Wasabye",
       "PICKED_UP": "Yafashwe",
       "WASHED": "Yameswe",
-      "RETURNED": "Yagaruwe"
+      "RETURNED": "Yagaruwe",
+      "ACCEPTED": "Byemejwe",
+      "RECEIVED": "Byakiriwe"
     },
     "yourNote": "Icyo wanditse: {note}",
     "cancelledBecause": "Byahagaritswe: {reason}",
@@ -2593,8 +2603,15 @@
         "done": "Byarangiye",
         "nothing": "Nta kintu.",
         "offering": "{count, plural, =0 {nta hantu hayitanga} one {ahantu # harayitanga} other {ahantu # harayitanga}}",
-        "allClear": "Nta myenda itegereje."
-      }
+        "allClear": "Nta myenda itegereje.",
+        "toAccept": "Ibyo kwemeza",
+        "withPlace": "Biri ku icumbi",
+        "withGuest": "Byasubijwe umushyitsi"
+      },
+      "accept": "Emeza",
+      "waitingOwner": "Byemejwe: icumbi rizabitwara",
+      "waitingGuest": "Byagaruwe: bitegereje ko umukiliya yemeza",
+      "doneGuest": "Umukiliya yabibonye"
     },
     "placeLabel": "Kumesa imyenda y'abashyitsi",
     "placeOff": "Ntibihari",
@@ -2608,7 +2625,25 @@
       "WASHED": "yamaze kumeswa no gupimwa, reba igiciro",
       "RETURNED": "yagaruwe mu cyumba cyawe",
       "CANCELLED": "byahagaritswe",
-      "PAID": "ubwishyu bwakiriwe, murakoze"
+      "PAID": "ubwishyu bwakiriwe, murakoze",
+      "ACCEPTED": "byemejwe, icumbi rizaza kubitwara vuba",
+      "RECEIVED": "byakiriwe, murakoze"
+    },
+    "received": "Nabonye imyenda yanjye",
+    "receivedNote": "Tubwire imyenda yawe nigaruka mu cyumba.",
+    "host": {
+      "title": "Kumesa",
+      "intro": "Imyenda y’abashyitsi VIIPA yemeje mu macumbi yawe: yifate mu cyumba, uyimese uyipime, hanyuma uyigarure.",
+      "empty": "Nta myenda yo kumesa.",
+      "todo": "Ibyo gukora",
+      "done": "Byarangiye",
+      "room": "Icyumba",
+      "guest": "Umushyitsi",
+      "collect": "Nayitwaye",
+      "returned": "Nayigaruye",
+      "waitingGuest": "Bitegereje ko umushyitsi yemeza",
+      "receivedByGuest": "Umushyitsi yayibonye",
+      "guestNote": "Icyo umushyitsi yanditse: {note}"
     }
   },
   "Install": {

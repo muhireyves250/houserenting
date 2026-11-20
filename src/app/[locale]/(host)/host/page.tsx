@@ -3,6 +3,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ordersForHost } from "@/features/food/service";
 import { hostDashboard, hostListings } from "@/features/hosting/service";
+import { placeLaundryToDo } from "@/features/laundry/service";
 import { hostEarnings } from "@/features/ledger/service";
 import { payoutAccountOf } from "@/features/places/payout-service";
 import { Link } from "@/i18n/navigation";
@@ -21,7 +22,7 @@ const addButton = "inline-flex items-center gap-2 rounded-full bg-primary px-4 p
  */
 export default async function HostPage() {
   const user = await requireUser("/host");
-  const [t, tHost, tPlaces, listings, earnings, dash, payout, locale, helping, orders] = await Promise.all([
+  const [t, tHost, tPlaces, listings, earnings, dash, payout, locale, helping, orders, laundry] = await Promise.all([
     getTranslations("Host.dash"),
     getTranslations("Host"),
     getTranslations("Places"),
@@ -32,6 +33,7 @@ export default async function HostPage() {
     getLocale(),
     db.placeMember.findMany({ where: { userId: user.id, role: "MANAGER", listing: { status: { not: "ARCHIVED" } } }, select: { role: true, listing: { select: { id: true, title: true, city: true } } } }),
     ordersForHost(user.id),
+    placeLaundryToDo(user.id),
   ]);
   const rwf = (n: number) => formatRWF(n, locale);
   const month = new Intl.DateTimeFormat(locale, { month: "short", timeZone: "UTC" });
@@ -74,6 +76,7 @@ export default async function HostPage() {
   const attention = [
     { label: t("attention.payout"), count: payout ? 0 : 1, href: "/host/payout", show: !payout },
     { label: t("attention.payoutWaiting"), count: 1, href: "/host/payout", show: Boolean(payout && !payout.verifiedAt) },
+    { label: t("attention.laundry"), count: laundry, href: "/host/laundry", show: laundry > 0 },
     { label: t("attention.food"), count: onTheWay, href: "/host/orders", show: onTheWay > 0 },
     { label: t("attention.fix"), count: toFix, href: "/host/places?status=CHANGES_REQUESTED", show: toFix > 0 },
     { label: t("attention.drafts"), count: drafts, href: "/host/places?status=DRAFT", show: drafts > 0 },

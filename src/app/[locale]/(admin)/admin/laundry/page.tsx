@@ -12,6 +12,8 @@ import { requireStaff } from "@/lib/permissions";
 
 const TONE: Record<LaundryStatus, string> = {
   REQUESTED: "bg-amber-100 text-amber-900",
+  ACCEPTED: "bg-primary/10 text-primary",
+  RECEIVED: "bg-emerald-100 text-emerald-800",
   PICKED_UP: "bg-primary/10 text-primary",
   WASHED: "bg-primary/10 text-primary",
   RETURNED: "bg-emerald-100 text-emerald-800",
@@ -19,17 +21,17 @@ const TONE: Record<LaundryStatus, string> = {
 };
 
 /**
- * Staff run guests' laundry in steps: to collect → washing (weigh it) → to return → paid. Finished ones and each
- * place's laundry price are folded away.
+ * Staff accept guests' laundry; the place's owner collects, washes and returns it; the guest confirms they got it.
+ * Staff see each step (and can step in), confirm payments; finished ones and each place's laundry price are folded.
  */
 export default async function AdminLaundryPage() {
   await requireStaff("laundry", "/admin/laundry");
   const [t, locale, rows, places] = await Promise.all([getTranslations("Laundry"), getLocale(), staffLaundry(), placesLaundry()]);
   const toCollect = rows.filter((o) => o.status === "REQUESTED");
-  const washing = rows.filter((o) => o.status === "PICKED_UP");
-  const toReturn = rows.filter((o) => o.status === "WASHED");
-  const toPay = rows.filter((o) => o.status === "RETURNED" && laundryOwed(o));
-  const done = rows.filter((o) => o.status === "CANCELLED" || (o.status === "RETURNED" && !laundryOwed(o))).slice(0, 40);
+  const washing = rows.filter((o) => o.status === "ACCEPTED" || o.status === "PICKED_UP" || o.status === "WASHED");
+  const toReturn = rows.filter((o) => o.status === "RETURNED");
+  const toPay = rows.filter((o) => o.status === "RECEIVED" && laundryOwed(o));
+  const done = rows.filter((o) => o.status === "CANCELLED" || (o.status === "RECEIVED" && !laundryOwed(o))).slice(0, 40);
   const offering = places.filter((p) => p.laundryPricePerKg !== null).length;
 
   const card = (o: (typeof rows)[number]) => {
@@ -95,9 +97,9 @@ export default async function AdminLaundryPage() {
       <Toolbar>
         <StatTiles
           items={[
-            { label: t("admin.groups.toCollect"), count: toCollect.length, href: "#to-collect", tone: "text-amber-700" },
-            { label: t("admin.groups.washing"), count: washing.length, href: "#washing", tone: "text-primary" },
-            { label: t("admin.groups.toReturn"), count: toReturn.length, href: "#to-return", tone: "text-primary" },
+            { label: t("admin.groups.toAccept"), count: toCollect.length, href: "#to-collect", tone: "text-amber-700" },
+            { label: t("admin.groups.withPlace"), count: washing.length, href: "#washing", tone: "text-primary" },
+            { label: t("admin.groups.withGuest"), count: toReturn.length, href: "#to-return", tone: "text-primary" },
             { label: t("admin.groups.toPay"), count: toPay.length, href: "#to-pay", tone: "text-emerald-700" },
           ]}
         />
@@ -108,17 +110,17 @@ export default async function AdminLaundryPage() {
         <p className="rounded-2xl bg-surface py-8 text-center text-[14px] text-muted ring-1 ring-line">{t("admin.groups.allClear")}</p>
       )}
       {toCollect.length > 0 && (
-        <Group id="to-collect" title={t("admin.groups.toCollect")} count={toCollect.length} empty={nothing}>
+        <Group id="to-collect" title={t("admin.groups.toAccept")} count={toCollect.length} empty={nothing}>
           {grid(toCollect)}
         </Group>
       )}
       {washing.length > 0 && (
-        <Group id="washing" title={t("admin.groups.washing")} count={washing.length} empty={nothing}>
+        <Group id="washing" title={t("admin.groups.withPlace")} count={washing.length} empty={nothing}>
           {grid(washing)}
         </Group>
       )}
       {toReturn.length > 0 && (
-        <Group id="to-return" title={t("admin.groups.toReturn")} count={toReturn.length} empty={nothing}>
+        <Group id="to-return" title={t("admin.groups.withGuest")} count={toReturn.length} empty={nothing}>
           {grid(toReturn)}
         </Group>
       )}

@@ -7,9 +7,10 @@ import { todayISO } from "@/features/search/date-range";
 import { readSettings } from "@/features/settings/service";
 import { db } from "@/lib/db";
 import { canStaff } from "@/lib/roles";
-import { gramsFromKg, laundryPrice, laundrySplit, NEXT_LAUNDRY_STEP, OPEN_LAUNDRY, type LaundryStatus } from "./rules";
+import { canOn } from "@/features/places/access";
+import { gramsFromKg, laundryPrice, laundrySplit, NEXT_LAUNDRY_STEP, OPEN_LAUNDRY, PLACE_LAUNDRY_STEPS, PRICED_LAUNDRY, type LaundryStatus } from "./rules";
 
-type Actor = { id: string; role?: string | null };
+type Actor = { id: string; role?: string | null; staffAreas?: readonly string[] | null };
 const TX = /^[A-Za-z0-9._\-/ ]{4,60}$/;
 
 export const LAUNDRY_SELECT = {
@@ -67,15 +68,26 @@ export async function cancelMyLaundry(guestId: string, reference: string): Promi
 
 export type MoveLaundryResult = { ok: true } | { ok: false; error: "notAllowed" | "notFound" | "weight" | "reason" };
 
+/** Who runs the place (owner and managers): they handle the laundry once VIIPA accepts it. */
+async function placeTeam(listingId: string, hostId: string) {
+  const managers = await db.placeMember.findMany({ where: { listingId, role: "MANAGER" }, select: { userId: true } });
+  return [...new Set([hostId, ...managers.map((m) => m.userId)])];
+}
+
 /**
- * Staff move an order one step: picked up → washed (with the weight, which sets the price) → returned to the
- * guest. Open orders can be cancelled with a reason. The guest is told at every step.
+ * One step of a laundry order. VIIPA staff accept a request (or cancel an open one, with a reason); then the place's
+ * owner (or a manager, or staff) collects it, washes it and enters the weight (which sets the price), and brings it
+ * back. The guest is told at every step; the place's team when VIIPA accepts; staff when it's brought back.
  */
 export async function moveLaundry(actor: Actor, reference: string, to: LaundryStatus, input: { kg?: string; reason?: string } = {}): Promise<MoveLaundryResult> {
-  if (!canStaff(actor, "laundry")) return { ok: false, error: "notAllowed" };
-  const order = await db.laundryOrder.findUnique({ where: { reference }, select: { id: true, status: true, pricePerKg: true, guestId: true, listing: { select: { title: true } } } });
-  if (!order) return { ok: false, error: "notFound" };
+  const order = await db.laundryOrder.findUnique({
+    where: { reference },
+    select: { id: true, status: true, pricePerKg: true, guestId: true, listingId: true, booking: { select: { roomNumber: true, room: { select: { name: true } } } }, listing: { select: { title: true, hostId: true } } },
+  });
+  if (!order) return { ok: false, error: canStaff(actor, "laundry") ? "notFound" : "notAllowed" };
   const cancelling = to === "CANCELLED";
+  const allowed = to === "ACCEPTED" || cancelling ? canStaff(actor, "laundry") : PLACE_LAUNDRY_STEPS.includes(to) ? await canOn(actor, order.listingId, "laundry") : false;
+  if (!allowed) return { ok: false, error: "notAllowed" };
   if (cancelling ? !OPEN_LAUNDRY.includes(order.status) : NEXT_LAUNDRY_STEP[order.status] !== to) return { ok: false, error: "notFound" };
   const data: { status: LaundryStatus; weightGrams?: number; amount?: number; cancelReason?: string } = { status: to };
   if (to === "WASHED") {
@@ -89,15 +101,58 @@ export async function moveLaundry(actor: Actor, reference: string, to: LaundrySt
     if (!reason) return { ok: false, error: "reason" };
     data.cancelReason = reason;
   }
+  const team = to === "ACCEPTED" ? await placeTeam(order.listingId, order.listing.hostId) : [];
+  const room = [order.booking.room?.name, order.booking.roomNumber].filter(Boolean).join(" ") || order.listing.title;
   const moved = await db.$transaction(async (tx) => {
-    // Only from the status we read, so two staff can't move the same order twice.
+    // Only from the status we read, so two people can't move the same order twice.
     const { count } = await tx.laundryOrder.updateMany({ where: { id: order.id, status: order.status }, data });
     if (count !== 1) return false;
     await audit(tx, { actorId: actor.id, action: `laundry.${to.toLowerCase()}`, entityType: "laundry", entityId: reference, data: { ...(data.weightGrams ? { grams: data.weightGrams, amount: data.amount } : {}), ...(data.cancelReason ? { reason: data.cancelReason } : {}) } });
     await notify(tx, order.guestId, "laundryUpdate", { reference, title: order.listing.title, statusLabel: to }, "/my-stay");
+    for (const userId of team) await notify(tx, userId, "laundryForHost", { reference, title: order.listing.title, room }, "/host/laundry");
+    if (to === "RETURNED") await notifyAdmins(tx, "laundryReturned", { reference, title: order.listing.title }, "/admin/laundry");
     return true;
   });
   return moved ? { ok: true } : { ok: false, error: "notFound" };
+}
+
+/** The guest confirms their clothes are back; VIIPA staff and the place's team are told. */
+export async function confirmLaundryReceived(guestId: string, reference: string): Promise<boolean> {
+  const order = await db.laundryOrder.findFirst({ where: { reference, guestId, status: "RETURNED" }, select: { id: true, listingId: true, listing: { select: { title: true, hostId: true } } } });
+  if (!order) return false;
+  const team = await placeTeam(order.listingId, order.listing.hostId);
+  return db.$transaction(async (tx) => {
+    const { count } = await tx.laundryOrder.updateMany({ where: { id: order.id, status: "RETURNED" }, data: { status: "RECEIVED" } });
+    if (count !== 1) return false;
+    await audit(tx, { actorId: guestId, action: "laundry.received", entityType: "laundry", entityId: reference });
+    await notifyAdmins(tx, "laundryReceived", { reference, title: order.listing.title }, "/admin/laundry");
+    for (const userId of team) await notify(tx, userId, "laundryReceived", { reference, title: order.listing.title }, "/host/laundry");
+    return true;
+  });
+}
+
+/** The place's team: laundry VIIPA accepted at the places they run (to do first, then the latest done). */
+export async function placeLaundry(userId: string, take = 60) {
+  const places = await db.listing.findMany({ where: { OR: [{ hostId: userId }, { team: { some: { userId, role: "MANAGER" } } }] }, select: { id: true } });
+  if (places.length === 0) return [];
+  return db.laundryOrder.findMany({
+    where: { listingId: { in: places.map((p) => p.id) }, status: { in: ["ACCEPTED", "PICKED_UP", "WASHED", "RETURNED", "RECEIVED"] } },
+    orderBy: { updatedAt: "desc" },
+    take,
+    select: {
+      ...LAUNDRY_SELECT,
+      updatedAt: true,
+      booking: { select: { reference: true, roomNumber: true, room: { select: { name: true } }, guest: { select: { name: true } } } },
+      listing: { select: { title: true } },
+    },
+  });
+}
+
+/** Laundry the place's team still has to collect, wash or return (their sidebar count). */
+export async function placeLaundryToDo(userId: string) {
+  return db.laundryOrder.count({
+    where: { status: { in: ["ACCEPTED", "PICKED_UP", "WASHED"] }, listing: { OR: [{ hostId: userId }, { team: { some: { userId, role: "MANAGER" } } }] } },
+  });
 }
 
 export type ClaimLaundryResult = { ok: true } | { ok: false; error: "notFound" | "transaction" };
@@ -106,7 +161,7 @@ export type ClaimLaundryResult = { ok: true } | { ok: false; error: "notFound" |
 export async function claimLaundryPayment(guestId: string, reference: string, transactionId: string): Promise<ClaimLaundryResult> {
   const tx = transactionId.trim();
   if (!TX.test(tx)) return { ok: false, error: "transaction" };
-  const order = await db.laundryOrder.findFirst({ where: { reference, guestId, status: { in: ["WASHED", "RETURNED"] }, amount: { gt: 0 }, paidAt: null }, select: { id: true, listing: { select: { title: true } } } });
+  const order = await db.laundryOrder.findFirst({ where: { reference, guestId, status: { in: [...PRICED_LAUNDRY] }, amount: { gt: 0 }, paidAt: null }, select: { id: true, listing: { select: { title: true } } } });
   if (!order) return { ok: false, error: "notFound" };
   await db.$transaction(async (t) => {
     await t.laundryOrder.update({ where: { id: order.id }, data: { paymentClaim: tx } });
@@ -128,7 +183,7 @@ export async function confirmLaundryPayment(actor: Actor, reference: string, tra
     where: { reference },
     select: { id: true, status: true, amount: true, paidAt: true, paymentClaim: true, guestId: true, bookingId: true, listing: { select: { hostId: true, title: true, type: true } } },
   });
-  if (!order || order.paidAt || !order.amount || order.amount <= 0 || !["WASHED", "RETURNED"].includes(order.status)) return { ok: false, error: "notFound" };
+  if (!order || order.paidAt || !order.amount || order.amount <= 0 || !PRICED_LAUNDRY.includes(order.status)) return { ok: false, error: "notFound" };
   const tx = (transactionId ?? order.paymentClaim ?? "").trim();
   if (!TX.test(tx)) return { ok: false, error: "transaction" };
   if (await db.laundryOrder.findUnique({ where: { paidReference: tx }, select: { id: true } })) return { ok: false, error: "used" };
@@ -166,9 +221,9 @@ export function staffLaundry(take = 100) {
   });
 }
 
-/** Open laundry orders and payments waiting for staff (sidebar count). */
+/** What waits for staff (sidebar count): requests to accept and payments to confirm. */
 export function laundryToHandle() {
-  return db.laundryOrder.count({ where: { OR: [{ status: { in: [...OPEN_LAUNDRY] } }, { paymentClaim: { not: null }, paidAt: null, status: { not: "CANCELLED" } }] } });
+  return db.laundryOrder.count({ where: { OR: [{ status: "REQUESTED" }, { paymentClaim: { not: null }, paidAt: null, status: { not: "CANCELLED" } }] } });
 }
 
 /** Staff: places and their laundry setting (null = not offered, 0 = free, otherwise RWF per kg). */

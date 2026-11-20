@@ -6,7 +6,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { formatRWF } from "@/lib/format";
-import { cancelMyLaundryAction, claimLaundryPaymentAction, requestLaundryAction } from "../actions";
+import { cancelMyLaundryAction, claimLaundryPaymentAction, confirmLaundryReceivedAction, requestLaundryAction } from "../actions";
 import { laundryOwed, OPEN_LAUNDRY, type LaundryStatus } from "../rules";
 
 export type GuestLaundry = {
@@ -22,9 +22,9 @@ export type GuestLaundry = {
 };
 
 const input = "w-full rounded-xl border border-line-strong bg-surface px-3 py-2.5 text-[15px] text-ink outline-none focus:border-primary";
-const STEPS = ["REQUESTED", "PICKED_UP", "WASHED", "RETURNED"] as const satisfies readonly LaundryStatus[];
+const STEPS = ["REQUESTED", "ACCEPTED", "PICKED_UP", "WASHED", "RETURNED", "RECEIVED"] as const satisfies readonly LaundryStatus[];
 
-/** My stay: ask for a laundry pickup, follow it (collected, washed and weighed, returned) and pay by weight. */
+/** My stay: ask for a laundry pickup, follow it (accepted, collected, washed and weighed, returned), say it is back, and pay by weight. */
 export function LaundryCard({ booking, pricePerKg, orders, instructions }: { booking: string; pricePerKg: number; orders: GuestLaundry[]; instructions: string | null }) {
   const t = useTranslations("Laundry");
   const locale = useLocale();
@@ -102,13 +102,13 @@ function LaundryRow({ order, instructions }: { order: GuestLaundry; instructions
         </div>
         {order.paidAt ? (
           <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[12px] font-bold text-emerald-800">{t("paid")}</span>
-        ) : order.amount === 0 && order.status !== "REQUESTED" && order.status !== "PICKED_UP" && !cancelled ? (
+        ) : order.amount === 0 && order.weightGrams !== null && !cancelled ? (
           <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[12px] font-bold text-emerald-800">{t("free")}</span>
         ) : null}
       </div>
 
       {!cancelled && (
-        <ol className="mt-3 grid grid-cols-4 gap-1" aria-label={t("progress")}>
+        <ol className="mt-3 grid grid-cols-6 gap-1" aria-label={t("progress")}>
           {STEPS.map((step, i) => (
             <li key={step} className="flex flex-col items-center gap-1 text-center">
               <span className={cn("flex size-6 items-center justify-center rounded-full text-[11px] font-bold", i <= at ? "bg-primary text-white" : "bg-line text-muted")}>
@@ -168,6 +168,26 @@ function LaundryRow({ order, instructions }: { order: GuestLaundry; instructions
             </button>
           </div>
         ))}
+
+      {/* Back in the room: the guest confirms, and VIIPA and the place are told. */}
+      {order.status === "RETURNED" && (
+        <div className="mt-3 flex flex-col gap-2 rounded-xl bg-surface p-3 ring-1 ring-line">
+          <p className="text-[13px] text-muted">{t("receivedNote")}</p>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() =>
+              start(async () => {
+                if (await confirmLaundryReceivedAction(order.reference)) router.refresh();
+              })
+            }
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-[15px] font-semibold text-white hover:bg-primary-hover disabled:opacity-50"
+          >
+            <Check className="size-4" aria-hidden="true" />
+            {t("received")}
+          </button>
+        </div>
+      )}
 
       {order.status === "REQUESTED" && (
         <button

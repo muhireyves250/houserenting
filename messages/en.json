@@ -826,7 +826,8 @@
         "food": "Food on its way",
         "fix": "Places to fix",
         "drafts": "Drafts to finish",
-        "due": "Owed to you"
+        "due": "Owed to you",
+        "laundry": "Laundry to handle"
       },
       "noPayouts": "No payouts yet."
     },
@@ -840,7 +841,8 @@
         "payout": "Payouts",
         "restaurants": "Kitchens",
         "account": "Your account",
-        "notifications": "Notifications"
+        "notifications": "Notifications",
+        "laundry": "Laundry"
       },
       "short": {
         "overview": "Overview",
@@ -848,7 +850,8 @@
         "orders": "Food",
         "payout": "Payouts",
         "restaurants": "Kitchens",
-        "menu": "Menu"
+        "menu": "Menu",
+        "laundry": "Laundry"
       },
       "backToSite": "Back to VIIPA",
       "openMenu": "Open menu",
@@ -1396,7 +1399,10 @@
       "orderPaymentClaim": "Order {reference} at {title} ({total} RWF): the guest says they paid. Check and confirm.",
       "orderNew": "New food order {reference} — {title} ({total} RWF). It waits for payment.",
       "orderSentToStay": "Food order {reference} for {name} was sent to {where}. When it arrives, check the number and take it to them.",
-      "orderReceived": "Order {reference} was received by the guest ({title})."
+      "orderReceived": "Order {reference} was received by the guest ({title}).",
+      "laundryForHost": "Laundry {reference}: collect it from {room} at {title}.",
+      "laundryReturned": "Laundry {reference} at {title} was brought back to the guest.",
+      "laundryReceived": "Laundry {reference} at {title}: the guest got it back."
     },
     "filterLabel": "Show notifications",
     "filter": {
@@ -2525,13 +2531,17 @@
       "PICKED_UP": "Collected, being washed",
       "WASHED": "Washed and weighed",
       "RETURNED": "Back in your room",
-      "CANCELLED": "Cancelled"
+      "CANCELLED": "Cancelled",
+      "ACCEPTED": "Accepted, the place will collect it",
+      "RECEIVED": "Received"
     },
     "step": {
       "REQUESTED": "Asked",
       "PICKED_UP": "Collected",
       "WASHED": "Washed",
-      "RETURNED": "Returned"
+      "RETURNED": "Returned",
+      "ACCEPTED": "Accepted",
+      "RECEIVED": "Received"
     },
     "yourNote": "Your note: {note}",
     "cancelledBecause": "Cancelled: {reason}",
@@ -2593,8 +2603,15 @@
         "done": "Finished",
         "nothing": "Nothing here.",
         "offering": "{count, plural, =0 {none offer it} one {# place offers it} other {# places offer it}}",
-        "allClear": "No laundry waiting."
-      }
+        "allClear": "No laundry waiting.",
+        "toAccept": "To accept",
+        "withPlace": "With the place",
+        "withGuest": "Back with the guest"
+      },
+      "accept": "Accept",
+      "waitingOwner": "Accepted: the place collects it",
+      "waitingGuest": "Returned: waiting for the guest to confirm",
+      "doneGuest": "The guest got it back"
     },
     "placeLabel": "Laundry for guests",
     "placeOff": "Not offered",
@@ -2608,7 +2625,25 @@
       "WASHED": "washed and weighed, see the price",
       "RETURNED": "brought back to your room",
       "CANCELLED": "cancelled",
-      "PAID": "payment received, thank you"
+      "PAID": "payment received, thank you",
+      "ACCEPTED": "accepted, the place will collect it soon",
+      "RECEIVED": "received, thank you"
+    },
+    "received": "I got my clothes back",
+    "receivedNote": "Tell us once your clothes are back in your room.",
+    "host": {
+      "title": "Laundry",
+      "intro": "Guests' laundry VIIPA accepted at your places: collect it from the room, wash and weigh it, then bring it back.",
+      "empty": "No laundry to handle.",
+      "todo": "To do",
+      "done": "Done",
+      "room": "Room",
+      "guest": "Guest",
+      "collect": "Collected it",
+      "returned": "Brought it back",
+      "waitingGuest": "Waiting for the guest to confirm",
+      "receivedByGuest": "The guest got it back",
+      "guestNote": "Guest's note: {note}"
     }
   },
   "Install": {

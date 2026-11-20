@@ -8,6 +8,7 @@ import {
   cancelMyLaundry,
   claimLaundryPayment,
   confirmLaundryPayment,
+  confirmLaundryReceived,
   moveLaundry,
   requestLaundry,
   setPlaceLaundry,
@@ -22,6 +23,16 @@ const ref = z.string().min(1).max(40);
 function refresh() {
   revalidatePath("/[locale]/my-stay", "page");
   revalidatePath("/[locale]/admin/laundry", "page");
+  revalidatePath("/[locale]/host", "layout");
+}
+
+/** The guest says their clothes are back. */
+export async function confirmLaundryReceivedAction(reference: string): Promise<boolean> {
+  const user = await getCurrentUser();
+  if (!user || !ref.safeParse(reference).success) return false;
+  const done = await confirmLaundryReceived(user.id, reference);
+  refresh();
+  return done;
 }
 
 export async function requestLaundryAction(bookingReference: string, note: string): Promise<RequestLaundryResult | { ok: false; error: "auth" }> {

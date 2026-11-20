@@ -4,14 +4,15 @@ import { canStaff, type StaffArea } from "@/lib/roles";
 
 /** Someone's part in running a place. Staff can do everything; owners everything on their own places. */
 export type PlaceRole = "staff" | "owner" | "manager" | "receptionist";
-export type PlaceAction = "edit" | "status" | "blocks" | "rooms" | "documents" | "team" | "money" | "bookings" | "checkIn" | "requests" | "guestId";
+export type PlaceAction = "edit" | "status" | "blocks" | "rooms" | "documents" | "team" | "money" | "bookings" | "checkIn" | "requests" | "guestId" | "laundry";
 
 const ALLOWED: Record<PlaceRole, readonly PlaceAction[]> = {
-  staff: ["edit", "status", "blocks", "rooms", "documents", "team", "money", "bookings", "checkIn", "requests", "guestId"],
+  staff: ["edit", "status", "blocks", "rooms", "documents", "team", "money", "bookings", "checkIn", "requests", "guestId", "laundry"],
   // Owners add places (editing until sent for review), block dates, upload papers and see their earnings.
   // Bookings, guests and the front desk are VIIPA's alone.
-  owner: ["edit", "blocks", "rooms", "documents", "money"],
-  manager: ["edit", "blocks", "rooms"],
+  // Once VIIPA accepts a guest's laundry, the place's owner (or manager) collects, washes and returns it.
+  owner: ["edit", "blocks", "rooms", "documents", "money", "laundry"],
+  manager: ["edit", "blocks", "rooms", "laundry"],
   receptionist: [],
 };
 
@@ -45,6 +46,7 @@ const STAFF_AREA: Record<PlaceAction, StaffArea> = {
   checkIn: "bookings",
   requests: "bookings",
   guestId: "bookings",
+  laundry: "laundry",
 };
 
 export async function canOn(actor: { id: string; role?: string | null; staffAreas?: readonly string[] | null }, listingId: string, action: PlaceAction): Promise<boolean> {
