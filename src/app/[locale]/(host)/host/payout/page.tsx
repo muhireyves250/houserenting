@@ -1,4 +1,5 @@
 import { BadgeCheck, Clock, Wallet } from "lucide-react";
+import { requireWorkArea } from "@/features/hosting/work";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Chip, StatTiles } from "@/features/admin/components/kit";
 import { Panel } from "@/features/admin/components/ui";
@@ -6,7 +7,6 @@ import { hostEarnings } from "@/features/ledger/service";
 import { PayoutForm } from "@/features/places/components/PayoutForm";
 import { payoutAccountOf } from "@/features/places/payout-service";
 import { formatRWF } from "@/lib/format";
-import { requireUser } from "@/lib/session";
 
 export async function generateMetadata() {
   const t = await getTranslations("Places");
@@ -18,7 +18,7 @@ export async function generateMetadata() {
  * that where VIIPA sends it (checked by staff before places go live) and the payouts so far.
  */
 export default async function PayoutPage() {
-  const user = await requireUser("/host/payout");
+  const { user } = await requireWorkArea("payout", "/host/payout");
   const [t, tDash, account, earnings, locale] = await Promise.all([getTranslations("Places"), getTranslations("Host.dash"), payoutAccountOf(user.id), hostEarnings(user.id), getLocale()]);
   const rwf = (n: number) => formatRWF(n, locale);
   const date = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeZone: "Africa/Kigali" });

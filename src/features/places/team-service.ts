@@ -1,5 +1,4 @@
 import "server-only";
-import { sendConfirmation } from "@/features/auth/confirm";
 import { audit } from "@/features/audit/service";
 import { notify } from "@/features/notifications/service";
 import { db } from "@/lib/db";
@@ -13,14 +12,14 @@ export function listTeam(listingId: string) {
   return db.placeMember.findMany({ where: { listingId }, orderBy: { createdAt: "asc" }, include: { user: { select: { name: true, email: true, emailVerified: true } } } });
 }
 
-export type TeamResult = { ok: true; pendingVerification: boolean } | { ok: false; error: "notAllowed" | "noAccount" | "isOwner" | "invalid" };
+export type TeamResult = { ok: true } | { ok: false; error: "notAllowed" | "noAccount" | "isOwner" | "invalid" };
 
 /** The owner (or staff) adds someone with an account as manager or receptionist of the place, or changes their role. */
 export async function addTeamMember(actor: Actor, listingId: string, email: string, role: TeamRole): Promise<TeamResult> {
   if (!TEAM_ROLES.includes(role) || typeof email !== "string" || email.length > 200) return { ok: false, error: "invalid" };
   if (!(await canOn(actor, listingId, "team"))) return { ok: false, error: "notAllowed" };
   const [user, listing] = await Promise.all([
-    db.user.findFirst({ where: { email: email.trim().toLowerCase(), status: "ACTIVE" }, select: { id: true, name: true, email: true, emailVerified: true } }),
+    db.user.findFirst({ where: { email: email.trim().toLowerCase(), status: "ACTIVE" }, select: { id: true, name: true, email: true } }),
     db.listing.findUnique({ where: { id: listingId }, select: { hostId: true, title: true } }),
   ]);
   if (!user) return { ok: false, error: "noAccount" };
@@ -36,9 +35,7 @@ export async function addTeamMember(actor: Actor, listingId: string, email: stri
     // Someone else (VIIPA staff, a manager) added them: the owner is told who joined their team.
     if (actor.id !== listing.hostId) await notify(tx, listing.hostId, "teamMemberJoined", { name: user.name, title: listing.title, roleLabel: role }, "/host/places");
   });
-  // Their access starts once the email is confirmed: send the confirmation link now.
-  if (!user.emailVerified) await sendConfirmation(user.email, "/host");
-  return { ok: true, pendingVerification: !user.emailVerified };
+  return { ok: true };
 }
 
 export async function removeTeamMember(actor: Actor, memberId: string): Promise<boolean> {

@@ -203,10 +203,13 @@ export function openPromoterRewards() {
 export type StaffPromoterResult = { ok: true } | { ok: false; error: "notAllowed" | "noAccount" | "already" | "notFound" | "hasRewards" } | { ok: false; errors: Record<string, string> };
 
 /** Staff add a promoter for someone with an account (by email): active straight away, and told. */
-export async function staffAddPromoter(actor: Actor, email: string, raw: PromoterInput): Promise<StaffPromoterResult> {
+export async function staffAddPromoter(actor: Actor, email: string, raw: PromoterInput, firstCode: FirstCodeInput): Promise<StaffPromoterResult> {
   if (!canStaff(actor, "promotions")) return { ok: false, error: "notAllowed" };
   const parsed = promoterInput.safeParse(raw);
   if (!parsed.success) return { ok: false, errors: errorsOf(parsed.error.issues) };
+  // Every promoter starts with their own promo code.
+  const checked = await checkFirstCode(firstCode);
+  if (!checked.ok) return checked;
   const user = await db.user.findUnique({ where: { email: email.trim().toLowerCase() }, select: { id: true, promoter: { select: { id: true } } } });
   if (!user) return { ok: false, error: "noAccount" };
   if (user.promoter) return { ok: false, error: "already" };
@@ -217,7 +220,9 @@ export async function staffAddPromoter(actor: Actor, email: string, raw: Promote
         await audit(tx, { actorId: actor.id, action: "promoter.add", entityType: "promoter", entityId: created.id });
         await notify(tx, user.id, "promoterStatus", { status: "ACTIVE", reason: "" }, "/promote");
       });
-      return { ok: true };
+      const promoter = await db.promoter.findUniqueOrThrow({ where: { userId: user.id }, select: { id: true } });
+      const given = await giveFirstCode(actor.id, promoter.id, checked.code);
+      return given.ok ? { ok: true } : given;
     } catch (error) {
       if ((error as { code?: string }).code !== "P2002") throw error;
     }
@@ -252,4 +257,48 @@ export async function deletePromoter(actor: Actor, promoterId: string): Promise<
 /** A paid booking was cancelled and refunded: its promoter reward is withdrawn (unless already paid out). */
 export async function voidPromoterReward(tx: Prisma.TransactionClient, bookingId: string): Promise<void> {
   await tx.promoterReward.updateMany({ where: { bookingId, paidAt: null, status: { not: "VOID" } }, data: { status: "VOID" } });
+}
+
+/** The promo code a promoter gets when they are added or approved: its code, the discount, and their share. */
+export const firstCodeInput = z.object({
+  code: z.string().transform((v) => v.trim().toUpperCase().replace(/\s+/g, "")).pipe(z.string().regex(/^[A-Z0-9_-]{3,30}$/)),
+  percentOff: z.number().int().min(1).max(100),
+  sharePercent: z.number().gt(0).max(50),
+});
+export type FirstCodeInput = z.input<typeof firstCodeInput>;
+
+/** Checks a first code before anything is saved: valid, and not used by another code. */
+async function checkFirstCode(raw: FirstCodeInput): Promise<{ ok: true; code: z.output<typeof firstCodeInput> } | { ok: false; errors: Record<string, string> }> {
+  const parsed = firstCodeInput.safeParse(raw);
+  if (!parsed.success) return { ok: false, errors: errorsOf(parsed.error.issues) };
+  if (await db.promoCode.findUnique({ where: { code: parsed.data.code }, select: { id: true } })) return { ok: false, errors: { code: "taken" } };
+  return { ok: true, code: parsed.data };
+}
+
+/** Gives an active promoter their promo code (the owner pays the discount; the promoter earns their share). */
+async function giveFirstCode(actorId: string, promoterId: string, code: z.output<typeof firstCodeInput>) {
+  const { createPromo } = await import("@/features/promotions/service");
+  return createPromo(actorId, {
+    code: code.code,
+    description: "",
+    percentOff: code.percentOff,
+    amountOff: null,
+    minSubtotal: null,
+    startsAt: null,
+    endsAt: null,
+    maxUses: null,
+    fundedBy: "HOST",
+    promoterId,
+    promoterPercent: code.sharePercent,
+  });
+}
+
+/** Staff approve someone who asked to be a promoter, giving them their promo code at the same time. */
+export async function approvePromoter(actor: Actor, promoterId: string, raw: FirstCodeInput): Promise<StaffPromoterResult> {
+  if (!canStaff(actor, "promotions")) return { ok: false, error: "notAllowed" };
+  const checked = await checkFirstCode(raw);
+  if (!checked.ok) return checked;
+  if (!(await setPromoterStatus(actor, promoterId, "ACTIVE"))) return { ok: false, error: "notFound" };
+  const given = await giveFirstCode(actor.id, promoterId, checked.code);
+  return given.ok ? { ok: true } : given;
 }

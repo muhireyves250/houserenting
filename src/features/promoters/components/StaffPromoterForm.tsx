@@ -7,6 +7,7 @@ import { AreaField, Field, SelectField } from "@/features/hosting/components/fie
 import { useRouter } from "@/i18n/navigation";
 import { staffAddPromoterAction, staffEditPromoterAction } from "../actions";
 import type { PromoterInput } from "../service";
+import { EMPTY_CODE, FirstCodeFields, toFirstCode, type FirstCode } from "./FirstCodeFields";
 
 const EMPTY: PromoterInput = { about: "", payoutMethod: "MOBILE_MONEY", payoutName: "", payoutNumber: "", bankName: null };
 
@@ -17,21 +18,27 @@ export function StaffPromoterForm({ promoterId, initial, onDone }: { promoterId?
   const [email, setEmail] = useState("");
   const [form, setForm] = useState<PromoterInput>(initial ?? EMPTY);
   const [error, setError] = useState<string | null>(null);
+  const [code, setCode] = useState<FirstCode>(EMPTY_CODE);
+  const [codeErrors, setCodeErrors] = useState<Record<string, string>>({});
   const [pending, start] = useTransition();
   const set = <K extends keyof PromoterInput>(k: K, v: PromoterInput[K]) => setForm((f) => ({ ...f, [k]: v }));
   const save = () =>
     start(async () => {
       setError(null);
-      const result = promoterId ? await staffEditPromoterAction(promoterId, form) : await staffAddPromoterAction(email, form);
+      setCodeErrors({});
+      const result = promoterId ? await staffEditPromoterAction(promoterId, form) : await staffAddPromoterAction(email, form, toFirstCode(code));
       if (result.ok) {
         onDone();
         router.refresh();
-      } else setError("error" in result ? t(`staffError.${result.error}`) : t("checkField"));
+      } else if ("errors" in result && ["code", "percentOff", "sharePercent"].some((k) => k in result.errors)) setCodeErrors(result.errors);
+      else setError("error" in result ? t(`staffError.${result.error}`) : t("checkField"));
     });
   return (
     <div className="flex flex-col gap-3 rounded-xl bg-canvas p-3">
       {/* Choose the person from everyone with an account (search by name or email). */}
       {!promoterId && <PersonPicker label={t("staffEmail")} onChange={setEmail} />}
+      {/* Every new promoter gets their own promo code with their share. */}
+      {!promoterId && <FirstCodeFields value={code} onChange={setCode} errors={codeErrors} />}
       <AreaField label={t("about")} rows={2} maxLength={500} value={form.about ?? ""} onChange={(e) => set("about", e.target.value)} />
       <div className="grid gap-3 sm:grid-cols-2">
         <SelectField label={t("payoutMethod")} value={form.payoutMethod} onChange={(e) => set("payoutMethod", e.target.value as PromoterInput["payoutMethod"])}>

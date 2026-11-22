@@ -148,13 +148,11 @@ describe("food from the kitchen of the guest's stay", () => {
     expect(await db.menuItem.count({ where: { restaurantId: id } })).toBe(0);
   });
 
-  it("VIIPA sets who works at a restaurant (not the owner); access starts once the email is confirmed", async () => {
+  it("VIIPA sets who works at a restaurant (not the owner)", async () => {
     const saved = await saveRestaurant(admin, null, { ...base, listingId: "place" }, "owner");
     if (!saved.ok) throw new Error("save failed");
     expect(await addRestaurantMember({ id: "owner" }, saved.id, "cook@example.com", "STAFF")).toEqual({ ok: false, error: "notAllowed" });
-    expect(await addRestaurantMember(admin, saved.id, "cook@example.com", "STAFF")).toEqual({ ok: true, pendingVerification: true });
-    expect(await restaurantRole({ id: "cook" }, saved.id)).toBeNull();
-    await db.user.update({ where: { id: "cook" }, data: { emailVerified: true } });
+    expect(await addRestaurantMember(admin, saved.id, "cook@example.com", "STAFF")).toEqual({ ok: true });
     expect(await restaurantRole({ id: "cook" }, saved.id)).toBe("kitchen");
     expect(await db.notification.count({ where: { userId: "owner", kind: "teamMemberJoined" } })).toBe(1);
   });

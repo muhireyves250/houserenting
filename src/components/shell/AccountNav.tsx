@@ -1,5 +1,6 @@
 "use client";
 
+import { Briefcase } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Avatar } from "@/components/ui/Avatar";
 import { SignOutButton } from "@/features/users/components/SignOutButton";
@@ -14,7 +15,7 @@ const isOn = (pathname: string, href: string) => pathname === href || pathname.s
  * Computers: the guest's account menu beside every account page (like the dashboards' sidebar): who they are, then
  * their pages with the current one in solid blue. Phones keep the bottom tabs instead.
  */
-export function AccountNav({ user, unread }: { user: { name: string; email: string; image: string | null }; unread: number }) {
+export function AccountNav({ user, unread, work = null }: { user: { name: string; email: string; image: string | null }; unread: number; /** Their work dashboard (a role at a place or restaurant). */ work?: string | null }) {
   const t = useTranslations("Nav");
   const pathname = usePathname();
   return (
@@ -28,6 +29,13 @@ export function AccountNav({ user, unread }: { user: { name: string; email: stri
             <span className="block truncate text-[12px] text-muted">{user.email}</span>
           </span>
         </Link>
+        {work && (
+          // Someone with a role at a place or restaurant: their work dashboard, one tap away.
+          <Link href={work} className="mx-2 mt-2 flex items-center gap-3 rounded-xl bg-primary/[0.08] px-3 py-2.5 text-[14px] font-semibold text-primary hover:bg-primary/[0.14]">
+            <Briefcase className="size-[18px] shrink-0" strokeWidth={1.9} aria-hidden="true" />
+            {t("account.work")}
+          </Link>
+        )}
         <nav aria-label={t("accountMenu")} data-lenis-prevent className="no-scrollbar min-h-0 flex-1 overflow-y-auto p-2">
           <ul className="flex flex-col gap-0.5">
             {ACCOUNT_ITEMS.map(({ key, href, icon: Icon }) => {

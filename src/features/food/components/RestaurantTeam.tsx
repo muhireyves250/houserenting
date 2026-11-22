@@ -15,9 +15,7 @@ export function RestaurantTeam({ restaurantId, members, staff = false, readOnly 
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<RestaurantTeamRole>("STAFF");
   const [error, setError] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
   const [added, setAdded] = useState(0);
-  const tPicker = useTranslations("Admin.picker");
   const [pending, start] = useTransition();
   return (
     <div className="flex flex-col gap-3">
@@ -30,7 +28,6 @@ export function RestaurantTeam({ restaurantId, members, staff = false, readOnly 
                 <span className="block truncate text-xs text-muted">
                   {t(`role.${m.role}`)} · {m.user.email}
                 </span>
-                {m.user.emailVerified === false && <span className="mt-0.5 inline-block rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800">{tPicker("waitingConfirm")}</span>}
               </span>
               {!readOnly && (
               <button
@@ -63,7 +60,6 @@ export function RestaurantTeam({ restaurantId, members, staff = false, readOnly 
             if (result.ok) {
               setEmail("");
               setAdded((n) => n + 1);
-              setNotice(result.pendingVerification ? tPicker("sentConfirm") : null);
               setError(null);
               router.refresh();
             } else setError(t(`teamError.${result.error}`));
@@ -86,7 +82,6 @@ export function RestaurantTeam({ restaurantId, members, staff = false, readOnly 
       <p className="text-xs text-muted">{t("rolesHint")}</p>
         </>
       )}
-      {notice && <p role="status" className="text-[13px] font-medium text-emerald-700">{notice}</p>}
       {error && <p role="alert" className="text-[13px] font-medium text-danger">{error}</p>}
     </div>
   );

@@ -5,7 +5,7 @@ vi.mock("@/lib/db", () => ({ db: {} }));
 const { can } = await import("./access");
 
 describe("place permissions", () => {
-  it("staff do everything; owners add places, block dates and upload papers; only staff see bookings and run the front desk", () => {
+  it("staff do everything; owners add places, block dates and upload papers; the place's manager and receptionist run its front desk", () => {
     expect(can("owner", "team")).toBe(false);
     expect(can("owner", "blocks")).toBe(true);
     expect(can("owner", "requests")).toBe(false);
@@ -16,10 +16,12 @@ describe("place permissions", () => {
     expect(can("manager", "money")).toBe(false);
     expect(can("manager", "documents")).toBe(false);
     expect(can("manager", "team")).toBe(false);
-    expect(can("receptionist", "checkIn")).toBe(false);
+    expect(can("receptionist", "checkIn")).toBe(true);
+    expect(can("receptionist", "guestId")).toBe(true);
+    expect(can("receptionist", "money")).toBe(false);
     expect(can("owner", "bookings")).toBe(false);
-    expect(can("manager", "bookings")).toBe(false);
-    expect(can("manager", "guestId")).toBe(false);
+    expect(can("manager", "bookings")).toBe(true);
+    expect(can("manager", "guestId")).toBe(true);
     expect(can("staff", "bookings")).toBe(true);
     expect(can("receptionist", "edit")).toBe(false);
     expect(can("receptionist", "requests")).toBe(false);

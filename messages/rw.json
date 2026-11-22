@@ -36,7 +36,8 @@
       "profile": "Umwirondoro",
       "promote": "Kwamamaza no kwinjiza",
       "help": "Ubufasha",
-      "food": "Ibiryo"
+      "food": "Ibiryo",
+      "work": "Aho nkorera"
     }
   },
   "Common": {
@@ -845,7 +846,8 @@
         "restaurants": "Igikoni",
         "account": "Konti yawe",
         "notifications": "Imenyesha",
-        "laundry": "Kumesa"
+        "laundry": "Kumesa",
+        "desk": "Kwakira abashyitsi"
       },
       "short": {
         "overview": "Incamake",
@@ -866,7 +868,29 @@
       "accountIntro": "Amakuru yawe n’ururimi.",
       "notificationsIntro": "Amakuru y’amacumbi yawe, ubwishyu n’ibyo kurya byoherejwe abashyitsi bawe."
     },
-    "allPlaces": "Byose"
+    "allPlaces": "Byose",
+    "desk": {
+      "role": {
+        "MANAGER": "Umuyobozi w'inzu",
+        "RECEPTIONIST": "Ushinzwe kwakira"
+      },
+      "group": {
+        "arriving": "Abagera uyu munsi n'ejo",
+        "leaving": "Abagenda uyu munsi",
+        "inHouse": "Abari hano ubu"
+      },
+      "empty": {
+        "arriving": "Nta bashyitsi bagera uyu munsi cyangwa ejo.",
+        "leaving": "Nta ugenda uyu munsi.",
+        "inHouse": "Nta bashyitsi bari hano ubu."
+      },
+      "guests": "{count, plural, one {umushyitsi #} other {abashyitsi #}}",
+      "checkIn": "Andika ko yageze",
+      "checkOut": "Andika ko yagiye",
+      "tomorrow": "Ejo",
+      "failed": "Ntibyakunze — ongera ugerageze.",
+      "idNote": "Reba indangamuntu y'umushyitsi mbere yo kwandika ko yageze."
+    }
   },
   "Admin": {
     "title": "Ubuyobozi",
@@ -1863,13 +1887,13 @@
     "deleteQuestion": "Gusiba kode {code}? Ntibisubirwamo.",
     "deleteUsed": "Iyi kode yarakoreshejwe: yihagarike aho kuyisiba.",
     "forPromoter": "Yihe umwamamaza (si ngombwa)",
-    "noPromoter": "Nta mwamamaza (kode ya VIIPA)",
+    "noPromoter": "VIIPA (kode ya admin)",
     "promoterOf": "Ya {name}",
     "promoterPercent": "Umugabane w’umwamamaza kuri buri cumbi (%)",
     "backToCodes": "Kode za promosiyo",
     "owner": "Nyirayo",
     "shareLine": "ahabwa {percent}% kuri buri cumbi",
-    "viipaCode": "Kode ya VIIPA",
+    "viipaCode": "VIIPA · kode ya admin",
     "stats": {
       "clients": "Abakiliya",
       "discounts": "Ibyagabanyijwe",
@@ -2693,7 +2717,25 @@
       "copied": "Byakoporowe",
       "inviteText": "Ngwino kuri VIIPA — iyandikishe ukoresheje ubutumire bwanjye:",
       "promoText": "Shaka aho uzacumbika kuri VIIPA:"
-    }
+    },
+    "firstCode": {
+      "title": "Kode ye ya promo",
+      "code": "Kode (urugero TNT)",
+      "percentOff": "Igabanywa ku mukiriya (%)",
+      "share": "Umugabane w'umwamamaza (%)",
+      "hint": "Abakiriya bafata bakoresheje iyi kode babona igabanywa; umwamamaza abona umugabane we kuri buri ifatwa.",
+      "approve": "Emeza ukoresheje iyi kode",
+      "decline": "Anga",
+      "declineQuestion": "Wanga iki cyifuzo?",
+      "error": {
+        "taken": "Iyi kode isanzwe ikoreshwa: hitamo indi.",
+        "code": "Koresha inyuguti cyangwa imibare 3–30.",
+        "percentOff": "Andika igabanywa riri hagati ya 1 na 100.",
+        "sharePercent": "Andika umugabane uri hagati ya 0.1 na 50."
+      }
+    },
+    "applicationsTitle": "Ibyifuzo",
+    "applicationsEmpty": "Nta muntu utegereje kuba umwamamaza."
   },
   "Reports": {
     "intro": "Amafaranga n'ibikorwa bikurikije itariki y'icumbi. Amacumbi yishyuwe n'abataje arabarwa; ayahagaritswe abarwa gusa ku mafaranga yasubijwe. Ingwate zirabikwa, si inyungu.",

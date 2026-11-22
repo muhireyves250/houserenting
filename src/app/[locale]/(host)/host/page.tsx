@@ -1,4 +1,5 @@
 import { ArrowRight, Plus } from "lucide-react";
+import { requireWorkArea } from "@/features/hosting/work";
 import { getLocale, getTranslations } from "next-intl/server";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ordersForHost } from "@/features/food/service";
@@ -10,7 +11,6 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { db } from "@/lib/db";
 import { formatRWF } from "@/lib/format";
-import { requireUser } from "@/lib/session";
 import { House } from "lucide-react";
 
 const panel = "rounded-2xl border border-line bg-surface";
@@ -21,7 +21,7 @@ const addButton = "inline-flex items-center gap-2 rounded-full bg-primary px-4 p
  * months beside what needs the owner, then recent payouts. Own places only; no guest details (guests deal with VIIPA).
  */
 export default async function HostPage() {
-  const user = await requireUser("/host");
+  const { user } = await requireWorkArea("overview", "/host");
   const [t, tHost, tPlaces, listings, earnings, dash, payout, locale, helping, orders, laundry] = await Promise.all([
     getTranslations("Host.dash"),
     getTranslations("Host"),

@@ -6,5 +6,7 @@
 export function landingAfterLogin(next: string, role: string | null | undefined, isHost = false): string {
   if (role === "MANAGER" || role === "ADMIN" || role === "SUPER_ADMIN") return next === "/admin" || next.startsWith("/admin/") ? next : "/admin";
   if (isHost) return next === "/host" || next.startsWith("/host/") ? next : "/host";
-  return next;
+  // No particular page asked for: /work opens their work dashboard when they have a role at a place or restaurant
+  // (property manager, receptionist, restaurant team), else the home page.
+  return next === "/" ? "/work" : next;
 }

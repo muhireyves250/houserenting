@@ -573,7 +573,6 @@ export default async function AdminUserPage({ params }: Props) {
                 <div className="border-t border-line pt-4">
                   <UserRoles
                     email={user.email}
-                    verified={user.emailVerified}
                     places={user.placeMembers}
                     restaurants={user.restaurantRoles}
                     ownedRestaurants={user.restaurantsOwned}

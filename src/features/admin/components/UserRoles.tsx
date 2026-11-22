@@ -17,7 +17,6 @@ type RestaurantJob = { id: string; role: "MANAGER" | "STAFF" | "DELIVERY"; resta
  */
 export function UserRoles({
   email,
-  verified,
   places,
   restaurants,
   placeOptions,
@@ -25,7 +24,6 @@ export function UserRoles({
   ownedRestaurants,
 }: {
   email: string;
-  verified: boolean;
   places: PlaceJob[];
   restaurants: RestaurantJob[];
   placeOptions: Option[];
@@ -41,9 +39,9 @@ export function UserRoles({
   const [place, setPlace] = useState({ id: "", role: "MANAGER" as PlaceJob["role"] });
   const [restaurant, setRestaurant] = useState({ id: "", role: "STAFF" as RestaurantJob["role"] });
 
-  const done = (r: { ok: boolean; pendingVerification?: boolean; error?: string }) => {
+  const done = (r: { ok: boolean; error?: string }) => {
     if (r.ok) {
-      setMessage({ ok: true, text: r.pendingVerification ? t("addedPending") : t("added") });
+      setMessage({ ok: true, text: t("added") });
       router.refresh();
     } else setMessage({ ok: false, text: t(`error.${r.error === "isOwner" ? "isOwner" : r.error === "notAllowed" ? "notAllowed" : "failed"}`) });
   };
@@ -71,8 +69,6 @@ export function UserRoles({
 
   return (
     <div className="flex flex-col gap-5">
-      {!verified && <p className="rounded-xl bg-amber-50 px-3 py-2 text-[12px] font-medium text-amber-900">{t("unverified")}</p>}
-
       {/* Places: property manager or receptionist. */}
       <section className="flex flex-col gap-2">
         <h3 className="text-[13px] font-semibold text-ink">{t("placesTitle")}</h3>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, ChefHat, Shirt, ClipboardList, House, LayoutDashboard, Menu, Settings, UtensilsCrossed, Wallet, X, type LucideIcon } from "lucide-react";
+import { Bell, ChefHat, ClipboardList, ConciergeBell, Shirt, House, LayoutDashboard, Menu, Settings, UtensilsCrossed, Wallet, X, type LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, type ReactNode } from "react";
 import { Avatar } from "@/components/ui/Avatar";
@@ -8,10 +8,11 @@ import { Logo } from "@/components/ui/Logo";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 
-type Key = "overview" | "places" | "orders" | "laundry" | "payout" | "restaurants" | "account" | "notifications";
+type Key = "overview" | "desk" | "places" | "orders" | "laundry" | "payout" | "restaurants" | "account" | "notifications";
 
 const NAV: { key: Key; href: string; icon: LucideIcon }[] = [
   { key: "overview", href: "/host", icon: LayoutDashboard },
+  { key: "desk", href: "/host/desk", icon: ConciergeBell },
   { key: "places", href: "/host/places", icon: House },
   { key: "orders", href: "/host/orders", icon: UtensilsCrossed },
   { key: "laundry", href: "/host/laundry", icon: Shirt },
@@ -35,15 +36,18 @@ const isOn = (pathname: string, key: Key, href: string) =>
  */
 export function HostShell({
   user,
-  kitchens,
+  areas,
+  home,
   counts,
   unread,
   languageSwitcher,
   children,
 }: {
   user: { name: string; email: string };
-  /** Kitchen teams VIIPA set up for this person (shows Kitchens). */
-  kitchens: boolean;
+  /** The pages this person's roles give them (owner, property manager, receptionist, restaurant team). */
+  areas: Key[];
+  /** Where their dashboard opens. */
+  home: string;
   counts: Partial<Record<Key, number>>;
   unread: number;
   /** The language switcher (rendered on the server side of the layout). */
@@ -53,12 +57,12 @@ export function HostShell({
   const t = useTranslations("Host.shell");
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const nav = NAV.filter((i) => i.key !== "restaurants" || kitchens);
+  const nav = NAV.filter((i) => areas.includes(i.key));
   const current = [...nav, ...EXTRA].find((i) => isOn(pathname, i.key, i.href)) ?? nav[0]!;
 
   const sidebar = (
     <div className="flex h-full flex-col" onClick={(e) => (e.target as HTMLElement).closest("a") && setOpen(false)}>
-      <Link href="/host" className="flex items-center border-b border-line/60 px-5 py-4">
+      <Link href={home} className="flex items-center border-b border-line/60 px-5 py-4">
         {/* The logo mark with the VIIPA lettering beside it, as in the site footer. */}
         <Logo withWordmark markClassName="h-7" wordmarkClassName="h-4" />
       </Link>
@@ -107,7 +111,7 @@ export function HostShell({
   );
 
   // Phones: the four pages used most (payouts and the rest are in Menu).
-  const bottom = nav.filter((i) => i.key !== "restaurants" && i.key !== "payout");
+  const bottom = (nav.length > 4 ? nav.filter((i) => i.key !== "restaurants" && i.key !== "payout") : nav).slice(0, 4);
 
   return (
     <div className="min-h-dvh bg-canvas" data-lenis-prevent>

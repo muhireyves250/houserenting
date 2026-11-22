@@ -1,18 +1,18 @@
 import { BedDouble, Bike, UtensilsCrossed } from "lucide-react";
+import { requireWorkArea } from "@/features/hosting/work";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Chip, FillScreen, ScrollArea, StatTiles, adminCard } from "@/features/admin/components/kit";
 import { formatKigaliDateTime } from "@/features/bookings/format";
 import { ordersForHost } from "@/features/food/service";
 import { roomLabel } from "@/features/rooms/links";
 import { cn } from "@/lib/cn";
-import { requireUser } from "@/lib/session";
 
 /**
  * A place's owner: the food orders of guests staying at their places, read only. Orders sent to the place come
  * first, so whoever receives one can match its number and take it to the guest's room.
  */
 export default async function HostOrdersPage() {
-  const user = await requireUser("/host/orders");
+  const { user } = await requireWorkArea("orders", "/host/orders");
   const [t, tRooms, locale, rows] = await Promise.all([getTranslations("Food"), getTranslations("Rooms"), getLocale(), ordersForHost(user.id)]);
   const orders = [...rows.filter((o) => o.status === "OUT_FOR_DELIVERY"), ...rows.filter((o) => o.status !== "OUT_FOR_DELIVERY")];
   const count = (status: string) => rows.filter((o) => o.status === status).length;

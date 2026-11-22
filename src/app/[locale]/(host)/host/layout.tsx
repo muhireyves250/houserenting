@@ -3,11 +3,11 @@ import { Suspense, type ReactNode } from "react";
 import { LocaleSwitcher } from "@/components/shell/LocaleSwitcher";
 import { getLocale } from "next-intl/server";
 import { ordersForHost } from "@/features/food/service";
+import { workRoles } from "@/features/hosting/work";
 import { HostShell } from "@/features/hosting/components/HostShell";
 import { placeLaundryToDo } from "@/features/laundry/service";
 import { unreadCount } from "@/features/notifications/service";
 import { redirect } from "@/i18n/navigation";
-import { db } from "@/lib/db";
 import { isAdmin } from "@/lib/roles";
 import { requireUser } from "@/lib/session";
 
@@ -18,16 +18,18 @@ export default async function HostLayout({ children, modal }: { children: ReactN
   const user = await requireUser("/host");
   // Staff use the admin dashboard.
   if (isAdmin(user)) redirect({ href: "/admin", locale: await getLocale() });
-  const [unread, kitchens, orders, laundry] = await Promise.all([
+  const [unread, work, orders, laundry] = await Promise.all([
     unreadCount(user.id),
-    db.restaurantMember.count({ where: { userId: user.id } }),
+    workRoles(user.id),
     ordersForHost(user.id),
     placeLaundryToDo(user.id),
   ]);
   return (
     <HostShell
       user={{ name: user.name, email: user.email }}
-      kitchens={kitchens > 0}
+      // Each role sees only its own pages; someone with no role yet still sees the owner's start (to add a place).
+      areas={work.areas.length > 0 ? work.areas : ["overview", "places"]}
+      home={work.home}
       unread={unread}
       counts={{ orders: orders.filter((o) => o.status === "OUT_FOR_DELIVERY").length, laundry }}
       languageSwitcher={

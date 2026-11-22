@@ -12,8 +12,10 @@ const ALLOWED: Record<PlaceRole, readonly PlaceAction[]> = {
   // Bookings, guests and the front desk are VIIPA's alone.
   // Once VIIPA accepts a guest's laundry, the place's owner (or manager) collects, washes and returns it.
   owner: ["edit", "blocks", "rooms", "documents", "money", "laundry"],
-  manager: ["edit", "blocks", "rooms", "laundry"],
-  receptionist: [],
+  // The place's front desk (requirements: reception confirms the guest's arrival and keeps their ID): the property
+  // manager and the receptionist see the place's bookings, check guests in and out and record their ID.
+  manager: ["edit", "blocks", "rooms", "laundry", "bookings", "checkIn", "guestId"],
+  receptionist: ["bookings", "checkIn", "guestId"],
 };
 
 export function can(role: PlaceRole | null, action: PlaceAction): boolean {
@@ -25,8 +27,7 @@ export async function placeRole(actor: { id: string; role?: string | null; staff
   if (canStaff(actor, "listings")) return "staff";
   const listing = await db.listing.findUnique({
     where: { id: listingId },
-    // A team member's access starts once their email is confirmed.
-    select: { hostId: true, team: { where: { userId: actor.id, user: { emailVerified: true, status: "ACTIVE" } }, select: { role: true } } },
+    select: { hostId: true, team: { where: { userId: actor.id, user: { status: "ACTIVE" } }, select: { role: true } } },
   });
   if (!listing) return null;
   if (listing.hostId === actor.id) return "owner";

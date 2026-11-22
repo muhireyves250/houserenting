@@ -3,7 +3,7 @@ import { setPromoShare } from "@/features/promotions/service";
 import { staffMoveBooking } from "@/features/bookings/service";
 import { db } from "@/lib/db";
 import { resetDb } from "@/test/db";
-import { attributeBooking, decidePromoterReward, deletePromoter, markPromoterRewardPaid, promoterDashboard, recordVisit, savePromoter, setPromoterStatus, staffAddPromoter, staffEditPromoter } from "./service";
+import { approvePromoter, attributeBooking, decidePromoterReward, deletePromoter, markPromoterRewardPaid, promoterDashboard, recordVisit, savePromoter, setPromoterStatus, staffAddPromoter, staffEditPromoter } from "./service";
 
 const admin = { id: "admin", role: "ADMIN" };
 let n = 0;
@@ -86,12 +86,16 @@ describe("staff manage promoters", () => {
   const payout = { about: "Campus", payoutMethod: "MOBILE_MONEY" as const, payoutName: "Pro Moter", payoutNumber: "0788123456", bankName: null };
 
   it("add someone with an account (active at once), edit them, and delete one without rewards", async () => {
-    expect(await staffAddPromoter({ id: "pro" }, "pro@example.com", payout)).toEqual({ ok: false, error: "notAllowed" });
-    expect(await staffAddPromoter(admin, "nobody@example.com", payout)).toEqual({ ok: false, error: "noAccount" });
-    expect(await staffAddPromoter(admin, "PRO@example.com", payout)).toEqual({ ok: true });
-    expect(await staffAddPromoter(admin, "pro@example.com", payout)).toEqual({ ok: false, error: "already" });
+    const code = { code: "pro5", percentOff: 5, sharePercent: 4 };
+    expect(await staffAddPromoter({ id: "pro" }, "pro@example.com", payout, code)).toEqual({ ok: false, error: "notAllowed" });
+    expect(await staffAddPromoter(admin, "nobody@example.com", payout, code)).toEqual({ ok: false, error: "noAccount" });
+    // Every new promoter needs their promo code.
+    expect(await staffAddPromoter(admin, "PRO@example.com", payout, { code: "x", percentOff: 0, sharePercent: 0 })).toMatchObject({ ok: false, errors: { code: expect.any(String) } });
+    expect(await staffAddPromoter(admin, "PRO@example.com", payout, code)).toEqual({ ok: true });
+    expect(await staffAddPromoter(admin, "pro@example.com", payout, { ...code, code: "PRO6" })).toEqual({ ok: false, error: "already" });
     const p = await db.promoter.findUniqueOrThrow({ where: { userId: "pro" } });
     expect(p.status).toBe("ACTIVE");
+    expect(await db.promoCode.findUniqueOrThrow({ where: { code: "PRO5" } })).toMatchObject({ promoterId: p.id, promoterBps: 400, percentOff: 5, fundedBy: "HOST" });
     expect(await staffEditPromoter(admin, p.id, { ...payout, about: "Markets in Huye" })).toEqual({ ok: true });
     expect((await db.promoter.findUniqueOrThrow({ where: { id: p.id } })).about).toBe("Markets in Huye");
     expect(await deletePromoter(admin, p.id)).toEqual({ ok: true });
@@ -99,9 +103,11 @@ describe("staff manage promoters", () => {
   });
 
   it("a promo code given to a promoter credits bookings that use it (no QR visit needed), and shows on their page", async () => {
-    expect(await staffAddPromoter(admin, "pro@example.com", { payoutMethod: "MOBILE_MONEY", payoutName: "Pro", payoutNumber: "0788000000" })).toEqual({ ok: true });
+    // Adding the promoter gives them their code (PRO10); its share is set further down.
+    expect(await staffAddPromoter(admin, "pro@example.com", { payoutMethod: "MOBILE_MONEY", payoutName: "Pro", payoutNumber: "0788000000" }, { code: "PRO10", percentOff: 10, sharePercent: 1 })).toEqual({ ok: true });
     const p = await db.promoter.findUniqueOrThrow({ where: { userId: "pro" } });
-    const promo = await db.promoCode.create({ data: { code: "PRO10", percentOff: 10, createdById: "admin", promoterId: p.id } });
+    const promo = await db.promoCode.findUniqueOrThrow({ where: { code: "PRO10" } });
+    await db.promoCode.update({ where: { id: promo.id }, data: { promoterBps: null } });
     const ref = await stay("guest", "2026-10-10");
     await db.booking.update({ where: { reference: ref }, data: { promoCodeId: promo.id } });
     await attributeBooking(ref, "guest", undefined);
@@ -113,5 +119,19 @@ describe("staff manage promoters", () => {
     // Finishing the stay doesn't add a second reward.
     expect(await staffMoveBooking("admin", ref, "COMPLETED", new Date("2026-10-11T10:00:00Z"))).toBe(true);
     expect(await db.promoterReward.count({ where: { promoterId: p.id } })).toBe(1);
+  });
+});
+
+describe("promoter applications", () => {
+  it("a client asks to be a promoter; staff approve them with their promo code", async () => {
+    expect((await savePromoter("pro", { about: "Campus", payoutMethod: "MOBILE_MONEY", payoutName: "Pro", payoutNumber: "0788000000" })).ok).toBe(true);
+    const p = await db.promoter.findUniqueOrThrow({ where: { userId: "pro" } });
+    expect(p.status).toBe("PENDING");
+    expect(await approvePromoter({ id: "pro" }, p.id, { code: "CAMPUS", percentOff: 10, sharePercent: 5 })).toEqual({ ok: false, error: "notAllowed" });
+    expect(await approvePromoter(admin, p.id, { code: "CAMPUS", percentOff: 10, sharePercent: 5 })).toEqual({ ok: true });
+    expect((await db.promoter.findUniqueOrThrow({ where: { id: p.id } })).status).toBe("ACTIVE");
+    expect(await db.promoCode.findUniqueOrThrow({ where: { code: "CAMPUS" } })).toMatchObject({ promoterId: p.id, promoterBps: 500, percentOff: 10 });
+    // A code already used elsewhere is refused before anything changes.
+    expect(await approvePromoter(admin, p.id, { code: "campus", percentOff: 10, sharePercent: 5 })).toEqual({ ok: false, errors: { code: "taken" } });
   });
 });

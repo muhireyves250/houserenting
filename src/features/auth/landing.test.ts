@@ -16,8 +16,8 @@ describe("landingAfterLogin", () => {
     expect(landingAfterLogin("/", "ADMIN", true)).toBe("/admin");
   });
 
-  it("sends everyone else where they were heading", () => {
-    expect(landingAfterLogin("/", "USER")).toBe("/");
+  it("sends everyone else where they were heading (their work dashboard, if any, when no page was asked for)", () => {
+    expect(landingAfterLogin("/", "USER")).toBe("/work");
     expect(landingAfterLogin("/profile", undefined)).toBe("/profile");
   });
 });

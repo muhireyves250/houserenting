@@ -36,7 +36,8 @@
       "profile": "Profil",
       "promote": "Promouvoir et gagner",
       "help": "Aide et assistance",
-      "food": "Menu repas"
+      "food": "Menu repas",
+      "work": "Tableau de travail"
     }
   },
   "Common": {
@@ -845,7 +846,8 @@
         "restaurants": "Cuisines",
         "account": "Votre compte",
         "notifications": "Notifications",
-        "laundry": "Blanchisserie"
+        "laundry": "Blanchisserie",
+        "desk": "Réception"
       },
       "short": {
         "overview": "Aperçu",
@@ -866,7 +868,29 @@
       "accountIntro": "Vos coordonnées et votre langue.",
       "notificationsIntro": "Les nouvelles de vos logements, paiements et repas envoyés à vos clients."
     },
-    "allPlaces": "Tous"
+    "allPlaces": "Tous",
+    "desk": {
+      "role": {
+        "MANAGER": "Gestionnaire",
+        "RECEPTIONIST": "Réceptionniste"
+      },
+      "group": {
+        "arriving": "Arrivées aujourd'hui et demain",
+        "leaving": "Départs aujourd'hui",
+        "inHouse": "Séjournent en ce moment"
+      },
+      "empty": {
+        "arriving": "Aucune arrivée aujourd'hui ni demain.",
+        "leaving": "Personne ne part aujourd'hui.",
+        "inHouse": "Aucun client en ce moment."
+      },
+      "guests": "{count, plural, one {# voyageur} other {# voyageurs}}",
+      "checkIn": "Enregistrer l'arrivée",
+      "checkOut": "Enregistrer le départ",
+      "tomorrow": "Demain",
+      "failed": "Échec — réessayez.",
+      "idNote": "Vérifiez la pièce d'identité du client avant d'enregistrer son arrivée."
+    }
   },
   "Admin": {
     "title": "Administration",
@@ -1863,13 +1887,13 @@
     "deleteQuestion": "Supprimer le code {code} ? C’est irréversible.",
     "deleteUsed": "Ce code a été utilisé : désactivez-le plutôt.",
     "forPromoter": "Le donner à un promoteur (facultatif)",
-    "noPromoter": "Aucun promoteur (code de VIIPA)",
+    "noPromoter": "VIIPA (code de l'admin)",
     "promoterOf": "Pour {name}",
     "promoterPercent": "Part du promoteur par réservation (%)",
     "backToCodes": "Codes promo",
     "owner": "Propriétaire",
     "shareLine": "gagne {percent} % par réservation",
-    "viipaCode": "Code de VIIPA",
+    "viipaCode": "VIIPA · code de l'admin",
     "stats": {
       "clients": "Clients",
       "discounts": "Réductions accordées",
@@ -2693,7 +2717,25 @@
       "copied": "Copié",
       "inviteText": "Rejoins-moi sur VIIPA — inscris-toi avec mon invitation :",
       "promoText": "Trouvez votre séjour sur VIIPA :"
-    }
+    },
+    "firstCode": {
+      "title": "Son code promo",
+      "code": "Code (ex. TNT)",
+      "percentOff": "Réduction client (%)",
+      "share": "Part du promoteur (%)",
+      "hint": "Les clients qui réservent avec ce code ont la réduction ; le promoteur gagne sa part de chaque réservation.",
+      "approve": "Approuver avec ce code",
+      "decline": "Refuser",
+      "declineQuestion": "Refuser cette demande ?",
+      "error": {
+        "taken": "Ce code est déjà utilisé : choisissez-en un autre.",
+        "code": "Utilisez 3 à 30 lettres ou chiffres.",
+        "percentOff": "Entrez une réduction de 1 à 100.",
+        "sharePercent": "Entrez une part de 0,1 à 50."
+      }
+    },
+    "applicationsTitle": "Demandes",
+    "applicationsEmpty": "Personne n'attend de devenir promoteur."
   },
   "Reports": {
     "intro": "Argent et activité par date de séjour. Les séjours payés et non présentés comptent ; les séjours annulés seulement pour leurs remboursements. Les cautions sont retenues, pas des revenus.",

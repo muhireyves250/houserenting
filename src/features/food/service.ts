@@ -1,5 +1,4 @@
 import "server-only";
-import { sendConfirmation } from "@/features/auth/confirm";
 import type { Prisma } from "@/generated/prisma/client";
 import { audit } from "@/features/audit/service";
 import { newReference } from "@/features/bookings/reference";
@@ -28,7 +27,7 @@ export const canRestaurant = (role: RestaurantRole | null, action: RestaurantAct
 
 export async function restaurantRole(actor: Actor, restaurantId: string): Promise<RestaurantRole | null> {
   if (canStaff(actor, "food")) return "staff";
-  const r = await db.restaurant.findUnique({ where: { id: restaurantId }, select: { ownerId: true, team: { where: { userId: actor.id, user: { emailVerified: true, status: "ACTIVE" } }, select: { role: true } } } });
+  const r = await db.restaurant.findUnique({ where: { id: restaurantId }, select: { ownerId: true, team: { where: { userId: actor.id, user: { status: "ACTIVE" } }, select: { role: true } } } });
   if (!r) return null;
   if (r.ownerId === actor.id) return "owner";
   const role = r.team[0]?.role;
@@ -122,11 +121,11 @@ export async function deleteMenuItem(actor: Actor, itemId: string): Promise<bool
 export const RESTAURANT_TEAM_ROLES = ["MANAGER", "STAFF", "DELIVERY"] as const;
 export type RestaurantTeamRole = (typeof RESTAURANT_TEAM_ROLES)[number];
 
-export async function addRestaurantMember(actor: Actor, restaurantId: string, email: string, role: RestaurantTeamRole): Promise<{ ok: true; pendingVerification: boolean } | { ok: false; error: "notAllowed" | "noAccount" | "isOwner" | "invalid" }> {
+export async function addRestaurantMember(actor: Actor, restaurantId: string, email: string, role: RestaurantTeamRole): Promise<{ ok: true } | { ok: false; error: "notAllowed" | "noAccount" | "isOwner" | "invalid" }> {
   if (!RESTAURANT_TEAM_ROLES.includes(role) || typeof email !== "string" || email.length > 200) return { ok: false, error: "invalid" };
   if (!canRestaurant(await restaurantRole(actor, restaurantId), "team")) return { ok: false, error: "notAllowed" };
   const [user, r] = await Promise.all([
-    db.user.findFirst({ where: { email: email.trim().toLowerCase(), status: "ACTIVE" }, select: { id: true, name: true, email: true, emailVerified: true } }),
+    db.user.findFirst({ where: { email: email.trim().toLowerCase(), status: "ACTIVE" }, select: { id: true, name: true, email: true } }),
     db.restaurant.findUnique({ where: { id: restaurantId }, select: { ownerId: true, name: true } }),
   ]);
   if (!user) return { ok: false, error: "noAccount" };
@@ -138,9 +137,7 @@ export async function addRestaurantMember(actor: Actor, restaurantId: string, em
     // Someone else (VIIPA staff, a manager) added them: the owner is told who joined their team.
     if (actor.id !== r.ownerId) await notify(tx, r.ownerId, "teamMemberJoined", { name: user.name, title: r.name, roleLabel: role }, `/host/restaurants/${restaurantId}`);
   });
-  // Their access starts once the email is confirmed: send the confirmation link now.
-  if (!user.emailVerified) await sendConfirmation(user.email, `/host/restaurants/${restaurantId}`);
-  return { ok: true, pendingVerification: !user.emailVerified };
+  return { ok: true };
 }
 
 export async function removeRestaurantMember(actor: Actor, memberId: string): Promise<boolean> {

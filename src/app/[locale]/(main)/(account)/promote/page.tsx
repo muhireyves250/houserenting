@@ -78,9 +78,10 @@ export default async function PromotePage() {
           )}
         </div>
       )}
-      <p className="mb-5 text-[15px] text-muted">{settings.promoterEnabled ? (reward ? t("introReward", { reward }) : t("intro")) : t("notOpen")}</p>
+      {/* Anyone can ask to become a promoter; VIIPA approves and gives them their promo code. */}
+      <p className="mb-5 text-[15px] text-muted">{reward && settings.promoterEnabled ? t("introReward", { reward }) : t("intro")}</p>
       {!data ? (
-        settings.promoterEnabled && (
+        (
           <Card title={t("applyTitle")}>
             <PromoterForm applying initial={{ about: "", payoutMethod: "MOBILE_MONEY", payoutName: user.name, payoutNumber: "", bankName: null }} />
           </Card>

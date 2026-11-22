@@ -134,11 +134,14 @@ export async function PromotionsView({
                         <Chip tone={STATE_TONE[state]}>
                           {t(`state.${state}`)}
                         </Chip>
-                        {p.promoter && (
+                        {/* Every code has an owner: a promoter, or VIIPA (the admin's own code, followed the same way). */}
+                        {p.promoter ? (
                           <Chip tone="bg-primary/10 text-primary">
                             {t("promoterOf", { name: p.promoter.user.name })}
                             {p.promoterBps ? ` · ${p.promoterBps / 100}%` : ""}
                           </Chip>
+                        ) : (
+                          <Chip tone="bg-ink/[0.06] text-ink">{t("viipaCode")}</Chip>
                         )}
                       </span>
                     </span>

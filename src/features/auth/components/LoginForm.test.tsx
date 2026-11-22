@@ -36,7 +36,8 @@ describe("LoginForm", () => {
     signInEmail.mockResolvedValue({ data: {}, error: null });
     renderWithIntl(<LoginForm next="//evil.com" />);
     await submit();
-    expect(push).toHaveBeenCalledWith("/");
+    // Falls back to the start (which opens their work dashboard, if they have one).
+    expect(push).toHaveBeenCalledWith("/work");
   });
 
   it("shows a friendly message for wrong credentials", async () => {

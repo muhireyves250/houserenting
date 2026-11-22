@@ -1,4 +1,5 @@
 import { BedDouble, Scale, Shirt, UserRound } from "lucide-react";
+import { requireWorkArea } from "@/features/hosting/work";
 import { getLocale, getTranslations } from "next-intl/server";
 import { adminCard, Chip, FillScreen, Group, ScrollArea, StatTiles, Toolbar } from "@/features/admin/components/kit";
 import { formatKigaliDateTime } from "@/features/bookings/format";
@@ -7,7 +8,6 @@ import type { LaundryStatus } from "@/features/laundry/rules";
 import { placeLaundry } from "@/features/laundry/service";
 import { formatRWF } from "@/lib/format";
 import { roomLabel } from "@/features/rooms/links";
-import { requireUser } from "@/lib/session";
 
 const TONE: Partial<Record<LaundryStatus, string>> = {
   ACCEPTED: "bg-amber-100 text-amber-900",
@@ -22,7 +22,7 @@ const TONE: Partial<Record<LaundryStatus, string>> = {
  * it (the weight sets the price), and bring it back; the guest then confirms they got it.
  */
 export default async function HostLaundryPage() {
-  const user = await requireUser("/host/laundry");
+  const { user } = await requireWorkArea("laundry", "/host/laundry");
   const [t, tRooms, locale, rows] = await Promise.all([getTranslations("Laundry"), getTranslations("Rooms"), getLocale(), placeLaundry(user.id)]);
   const toCollect = rows.filter((o) => o.status === "ACCEPTED");
   const washing = rows.filter((o) => o.status === "PICKED_UP");

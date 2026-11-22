@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/session";
-import { decidePromoterReward, deletePromoter, markPromoterRewardPaid, savePromoter, setPromoterStatus, staffAddPromoter, staffEditPromoter, type PromoterInput, type StaffPromoterResult } from "./service";
+import { decidePromoterReward, deletePromoter, markPromoterRewardPaid, savePromoter, setPromoterStatus, staffAddPromoter, staffEditPromoter, type PromoterInput, type StaffPromoterResult, approvePromoter, type FirstCodeInput } from "./service";
 
 const id = z.string().min(1).max(64);
 const refresh = () => revalidatePath("/[locale]", "layout");
@@ -40,10 +40,10 @@ export async function markPromoterRewardPaidAction(rewardId: string): Promise<{ 
   return { ok };
 }
 
-export async function staffAddPromoterAction(email: string, input: PromoterInput): Promise<StaffPromoterResult> {
+export async function staffAddPromoterAction(email: string, input: PromoterInput, firstCode: FirstCodeInput): Promise<StaffPromoterResult> {
   const user = await getCurrentUser();
   if (!user || typeof email !== "string" || email.length > 200) return { ok: false, error: "notAllowed" };
-  const result = await staffAddPromoter(user, email, input);
+  const result = await staffAddPromoter(user, email, input, firstCode);
   if (result.ok) revalidatePath("/[locale]", "layout");
   return result;
 }
@@ -62,4 +62,13 @@ export async function deletePromoterAction(promoterId: string): Promise<{ ok: bo
   const result = await deletePromoter(user, promoterId);
   if (result.ok) revalidatePath("/[locale]", "layout");
   return result.ok ? { ok: true } : { ok: false, error: "error" in result ? result.error : undefined };
+}
+
+/** Approve someone who asked to be a promoter, with their promo code. */
+export async function approvePromoterAction(promoterId: string, firstCode: FirstCodeInput): Promise<StaffPromoterResult> {
+  const user = await getCurrentUser();
+  if (!user || typeof promoterId !== "string" || promoterId.length > 64) return { ok: false, error: "notAllowed" };
+  const result = await approvePromoter(user, promoterId, firstCode);
+  if (result.ok) revalidatePath("/[locale]", "layout");
+  return result;
 }

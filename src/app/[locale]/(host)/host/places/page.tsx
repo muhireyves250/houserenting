@@ -1,4 +1,5 @@
 import { House, Pencil, Plus } from "lucide-react";
+import { requireWorkArea } from "@/features/hosting/work";
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { FillScreen, Toolbar } from "@/features/admin/components/kit";
@@ -6,7 +7,6 @@ import { HostStatus } from "@/features/hosting/components/HostStatus";
 import { hostDashboard, hostListings } from "@/features/hosting/service";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
-import { requireUser } from "@/lib/session";
 import { feesFor } from "@/features/bookings/money";
 import { getSettings } from "@/features/settings/service";
 
@@ -14,7 +14,7 @@ type Props = { searchParams: Promise<{ status?: string }> };
 
 /** The owner's places, like the staff list: filters and "List a place" on one row, the places scrolling below. */
 export default async function HostPlacesPage({ searchParams }: Props) {
-  const user = await requireUser("/host/places");
+  const { user } = await requireWorkArea("places", "/host/places");
   const raw = (await searchParams).status;
   const [t, tHost, tType, all, dash, settings] = await Promise.all([getTranslations("Host.dash"), getTranslations("Host"), getTranslations("ListingType"), hostListings(user.id), hostDashboard(user.id), getSettings()]);
   // VIIPA's commission on each place (its own rate, or its category's): what the owner keeps of each booking.
