@@ -129,7 +129,7 @@ export async function addRestaurantMember(actor: Actor, restaurantId: string, em
   if (!RESTAURANT_TEAM_ROLES.includes(role) || typeof email !== "string" || email.length > 200) return { ok: false, error: "invalid" };
   if (!canRestaurant(await restaurantRole(actor, restaurantId), "team")) return { ok: false, error: "notAllowed" };
   const [user, r] = await Promise.all([
-    db.user.findFirst({ where: { email: email.trim().toLowerCase(), status: "ACTIVE" }, select: { id: true, name: true, email: true } }),
+    db.user.findFirst({ where: { email: email.trim().toLowerCase(), status: "ACTIVE", role: "USER" }, select: { id: true, name: true, email: true } }),
     db.restaurant.findUnique({ where: { id: restaurantId }, select: { ownerId: true, name: true } }),
   ]);
   if (!user) return { ok: false, error: "noAccount" };

@@ -19,7 +19,7 @@ export async function addTeamMember(actor: Actor, listingId: string, email: stri
   if (!TEAM_ROLES.includes(role) || typeof email !== "string" || email.length > 200) return { ok: false, error: "invalid" };
   if (!(await canOn(actor, listingId, "team"))) return { ok: false, error: "notAllowed" };
   const [user, listing] = await Promise.all([
-    db.user.findFirst({ where: { email: email.trim().toLowerCase(), status: "ACTIVE" }, select: { id: true, name: true, email: true } }),
+    db.user.findFirst({ where: { email: email.trim().toLowerCase(), status: "ACTIVE", role: "USER" }, select: { id: true, name: true, email: true } }),
     db.listing.findUnique({ where: { id: listingId }, select: { hostId: true, title: true } }),
   ]);
   if (!user) return { ok: false, error: "noAccount" };

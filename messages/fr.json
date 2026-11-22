@@ -1456,7 +1456,8 @@
         "notAllowed": "Vous ne pouvez pas changer les rôles.",
         "failed": "Échec — réessayez."
       },
-      "allTitle": "Rôles"
+      "allTitle": "Rôles",
+      "staffNote": "Le personnel VIIPA gère tous les logements et restaurants depuis le tableau d'administration. Donnez les rôles de logement et de restaurant à des comptes clients (mettez d'abord leur accès sur Client)."
     }
   },
   "Questions": {

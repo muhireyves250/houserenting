@@ -569,7 +569,9 @@ export default async function AdminUserPage({ params }: Props) {
                 <h3 className="text-[13px] font-semibold text-ink">{t("hostAccess.title")}</h3>
                 {self ? <span className="text-xs text-muted">{t("you")}</span> : <HostToggle userId={user.id} isHost={user.isHost} places={user.listings.length} />}
               </section>
-              {!self && (
+              {/* VIIPA staff already manage every place and restaurant from the admin dashboard. */}
+              {!self && user.role !== "USER" && <p className="border-t border-line pt-4 text-[13px] text-muted">{t("roles.staffNote")}</p>}
+              {!self && user.role === "USER" && (
                 <div className="border-t border-line pt-4">
                   <UserRoles
                     email={user.email}

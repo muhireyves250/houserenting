@@ -1456,7 +1456,8 @@
         "notAllowed": "You can't change roles.",
         "failed": "Couldn't add the role — try again."
       },
-      "allTitle": "Roles"
+      "allTitle": "Roles",
+      "staffNote": "VIIPA staff manage every place and restaurant from the admin dashboard. Give place and restaurant roles to customer accounts (set their staff access to Customer first)."
     }
   },
   "Questions": {
