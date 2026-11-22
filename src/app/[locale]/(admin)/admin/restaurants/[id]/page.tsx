@@ -92,7 +92,7 @@ export default async function AdminRestaurantPage({ params }: Props) {
             />
           </Panel>
           <Panel title={tFood("teamTitle")}>
-            <RestaurantTeam restaurantId={r.id} members={r.team} />
+            <RestaurantTeam restaurantId={r.id} members={r.team} staff />
           </Panel>
           <Panel title={t("history")}>
             <ol className="flex flex-col gap-2 text-[13px]">

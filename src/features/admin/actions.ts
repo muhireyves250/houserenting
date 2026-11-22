@@ -72,19 +72,39 @@ export async function deleteUserAction(userId: string): Promise<AccountActionRes
 }
 
 /** People to pick from (name or email), e.g. when adding a promoter: newest first, at most 20. */
-export async function findPeopleAction(q: string): Promise<{ id: string; name: string; email: string }[]> {
-  const admin = (await staff("promotions")) ?? (await staff("settings"));
-  if (!admin) return [];
+export async function findPeopleAction(q: string): Promise<{ id: string; name: string; email: string; phone: string | null }[]> {
+  const user = await getCurrentUser();
+  // Staff who assign people: promoters, places (owners, managers), restaurants (owners, staff), accounts.
+  if (!user || !(["promotions", "settings", "listings", "food"] as const).some((a) => canStaff(user, a))) return [];
   const query = String(q ?? "").trim().slice(0, 80);
+  const digits = query.replace(/\D/g, "");
   return db.user.findMany({
     where: {
       role: "USER",
-      ...(query ? { OR: [{ name: { contains: query, mode: "insensitive" } }, { email: { contains: query, mode: "insensitive" } }] } : {}),
+      // Only accounts that can be used: suspended ones are never offered.
+      status: "ACTIVE",
+      ...(query
+        ? {
+            OR: [
+              { name: { contains: query, mode: "insensitive" } },
+              { email: { contains: query, mode: "insensitive" } },
+              ...(digits.length >= 3 ? [{ phone: { contains: digits.slice(-9) } }] : []),
+            ],
+          }
+        : {}),
     },
     orderBy: { createdAt: "desc" },
     take: 20,
-    select: { id: true, name: true, email: true },
+    select: { id: true, name: true, email: true, phone: true },
   });
+}
+
+/** Open an account for someone who has none yet; they set their password from an email. */
+export async function createAccountAction(input: { name: string; email: string; phone?: string | null }): Promise<import("./service").CreateAccountResult> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, error: "notAllowed" };
+  const { createAccountForPerson } = await import("./service");
+  return createAccountForPerson(user, input, `/${await getLocale()}/reset-password`);
 }
 
 /** Make someone a place owner (host), or take it away. */

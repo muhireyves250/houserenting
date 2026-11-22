@@ -53,6 +53,10 @@ export const auth = betterAuth({
     maxPasswordLength: PASSWORD_MAX,
     resetPasswordTokenExpiresIn: 60 * 60,
     revokeSessionsOnPasswordReset: true,
+    // Setting a password from the emailed link proves the inbox is theirs: the email counts as confirmed.
+    onPasswordReset: async ({ user }) => {
+      await db.user.update({ where: { id: user.id }, data: { emailVerified: true } }).catch((err: unknown) => logger.error({ err }, "verify on reset failed"));
+    },
     password: {
       hash: hashPassword,
       verify: ({ hash, password }) => verifyPassword(hash, password),

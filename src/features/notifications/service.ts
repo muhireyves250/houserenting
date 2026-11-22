@@ -45,6 +45,7 @@ export type NotificationKind =
   | "refundDeclined"
   | "listingAutoHidden"
   | "teamAdded"
+  | "teamMemberJoined"
   | "restaurantStatus"
   | "restaurantTeamAdded"
   | "orderPlaced"

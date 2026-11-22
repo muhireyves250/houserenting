@@ -49,8 +49,15 @@ describe("place teams", () => {
     expect(await addTeamMember({ id: "manager" }, "a", "desk@example.com", "RECEPTIONIST")).toEqual({ ok: false, error: "notAllowed" });
     expect(await addTeamMember(staff, "a", "nobody@example.com", "MANAGER")).toEqual({ ok: false, error: "noAccount" });
     expect(await addTeamMember(staff, "a", "owner@example.com", "MANAGER")).toEqual({ ok: false, error: "isOwner" });
-    expect(await addTeamMember(staff, "a", "manager@example.com", "MANAGER")).toEqual({ ok: true });
-    expect(await addTeamMember(staff, "a", "desk@example.com", "RECEPTIONIST")).toEqual({ ok: true });
+    expect(await addTeamMember(staff, "a", "manager@example.com", "MANAGER")).toEqual({ ok: true, pendingVerification: true });
+    expect(await addTeamMember(staff, "a", "desk@example.com", "RECEPTIONIST")).toEqual({ ok: true, pendingVerification: true });
+    // Their access starts once their email is confirmed.
+    expect(await placeRole({ id: "manager" }, "a")).toBeNull();
+    await db.user.updateMany({ where: { id: { in: ["manager", "desk"] } }, data: { emailVerified: true } });
+    // The owner is told who joined; a suspended account can't be added.
+    expect(await db.notification.count({ where: { userId: "owner", kind: "teamMemberJoined" } })).toBe(2);
+    await db.user.update({ where: { id: "admin2" }, data: { status: "SUSPENDED" } });
+    expect(await addTeamMember(staff, "b", "admin2@example.com", "MANAGER")).toEqual({ ok: false, error: "noAccount" });
 
     expect(await placeRole({ id: "manager" }, "a")).toBe("manager");
     expect(await placeRole({ id: "manager" }, "b")).toBeNull();

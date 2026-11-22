@@ -1337,10 +1337,27 @@
       "title": "Compte"
     },
     "picker": {
-      "placeholder": "Chercher par nom ou e-mail",
+      "placeholder": "Rechercher par nom, e-mail ou téléphone",
       "loading": "Chargement…",
       "none": "Personne trouvée.",
-      "clear": "Choisir quelqu’un d’autre"
+      "clear": "Choisir quelqu’un d’autre",
+      "activeAccount": "Compte actif",
+      "createNew": "Introuvable ? Créer son compte",
+      "createTitle": "Créer un compte",
+      "createName": "Nom complet",
+      "createEmail": "E-mail",
+      "createPhone": "Téléphone (facultatif)",
+      "createHint": "La personne reçoit un e-mail pour choisir son mot de passe.",
+      "createCancel": "Annuler",
+      "createSubmit": "Créer et choisir",
+      "createError": {
+        "notAllowed": "Vous ne pouvez pas créer de compte.",
+        "invalid": "Entrez un nom complet et un e-mail valide.",
+        "exists": "Cet e-mail a déjà un compte : cherchez-le ci-dessus.",
+        "failed": "Échec — réessayez."
+      },
+      "waitingConfirm": "En attente de confirmation de l'e-mail",
+      "sentConfirm": "Ajouté. La personne reçoit un e-mail de confirmation ; son accès commence une fois confirmé."
     },
     "adminAll": "Les admins VIIPA gèrent tout. Choisissez Gestionnaire pour ne donner que certains services.",
     "userPage": {
@@ -1497,7 +1514,8 @@
       "laundryForHost": "Linge {reference} : à récupérer dans {room} à {title}.",
       "laundryReturned": "Le linge {reference} à {title} a été rapporté au client.",
       "laundryReceived": "Linge {reference} à {title} : le client l’a récupéré.",
-      "payoutToCheck": "{name} a changé ses coordonnées de paiement. Vérifiez-les."
+      "payoutToCheck": "{name} a changé ses coordonnées de paiement. Vérifiez-les.",
+      "teamMemberJoined": "{name} a rejoint l'équipe de {title} comme {roleLabel}."
     },
     "filterLabel": "Afficher les notifications",
     "filter": {
@@ -2006,7 +2024,7 @@
     "forViipaBody": "VIIPA gère le logement et reçoit les paiements.",
     "forOwner": "Pour un propriétaire",
     "forOwnerBody": "Le logement appartient à une personne ayant un compte.",
-    "ownerEmail": "E-mail du propriétaire",
+    "ownerEmail": "Le propriétaire",
     "findOwner": "Chercher",
     "ownerFound": "Trouvé : {name}",
     "ownerMissing": "Aucun compte avec cet e-mail. Demandez au propriétaire de s'inscrire d'abord.",
@@ -2486,8 +2504,8 @@
         "body": "Vous pourrez commander des repas dans votre chambre à partir du {day}."
       },
       "noKitchen": {
-        "title": "Pas encore de repas ici",
-        "body": "{place} ne sert pas encore de repas. Écrivez-nous si vous avez besoin d'aide."
+        "title": "Aucun restaurant ne dessert ce logement",
+        "body": "Aucun restaurant ne dessert {place} pour le moment. Écrivez-nous si vous avez besoin d'aide pour les repas."
       }
     },
     "pay": {
@@ -2913,5 +2931,10 @@
     "sampleLine": "RWF 90 000 × 1 nuit",
     "sampleTotal": "Total",
     "noFooter": "(pas de note en bas)"
+  },
+  "MapPicker": {
+    "useMyLocation": "Utiliser ma position",
+    "denied": "Impossible de lire votre position. Touchez la carte ou déplacez l'épingle sur le lieu.",
+    "checkPin": "L'épingle est à votre position. Vérifiez qu'elle est sur le bien, sinon déplacez-la."
   }
 }

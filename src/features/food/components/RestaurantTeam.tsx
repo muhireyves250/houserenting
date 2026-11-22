@@ -4,16 +4,20 @@ import { Trash2, UserPlus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { useRouter } from "@/i18n/navigation";
+import { MemberField } from "@/features/admin/components/MemberField";
 import { addRestaurantMemberAction, removeRestaurantMemberAction } from "../actions";
 import type { RestaurantTeamRole } from "../service";
 
 /** The owner adds a manager, kitchen staff or delivery people. */
-export function RestaurantTeam({ restaurantId, members }: { restaurantId: string; members: { id: string; role: RestaurantTeamRole; user: { name: string; email: string } }[] }) {
+export function RestaurantTeam({ restaurantId, members, staff = false }: { restaurantId: string; staff?: boolean; members: { id: string; role: RestaurantTeamRole; user: { name: string; email: string; emailVerified?: boolean } }[] }) {
   const t = useTranslations("Food");
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<RestaurantTeamRole>("STAFF");
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [added, setAdded] = useState(0);
+  const tPicker = useTranslations("Admin.picker");
   const [pending, start] = useTransition();
   return (
     <div className="flex flex-col gap-3">
@@ -26,6 +30,7 @@ export function RestaurantTeam({ restaurantId, members }: { restaurantId: string
                 <span className="block truncate text-xs text-muted">
                   {t(`role.${m.role}`)} · {m.user.email}
                 </span>
+                {m.user.emailVerified === false && <span className="mt-0.5 inline-block rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800">{tPicker("waitingConfirm")}</span>}
               </span>
               <button
                 type="button"
@@ -53,13 +58,15 @@ export function RestaurantTeam({ restaurantId, members }: { restaurantId: string
             const result = await addRestaurantMemberAction(restaurantId, email, role);
             if (result.ok) {
               setEmail("");
+              setAdded((n) => n + 1);
+              setNotice(result.pendingVerification ? tPicker("sentConfirm") : null);
               setError(null);
               router.refresh();
             } else setError(t(`teamError.${result.error}`));
           });
         }}
       >
-        <input type="email" required value={email} placeholder={t("memberEmail")} aria-label={t("memberEmail")} onChange={(e) => setEmail(e.target.value)} className="min-w-0 flex-1 rounded-xl border border-line-strong px-3 py-2 text-[14px] outline-none focus:border-primary" />
+        <MemberField staff={staff} value={email} onChange={setEmail} label={t("memberEmail")} resetKey={added} />
         <select value={role} aria-label={t("memberRole")} onChange={(e) => setRole(e.target.value as RestaurantTeamRole)} className="rounded-xl border border-line-strong bg-surface px-3 py-2 text-[14px]">
           {(["MANAGER", "STAFF", "DELIVERY"] as const).map((r) => (
             <option key={r} value={r}>
@@ -73,6 +80,7 @@ export function RestaurantTeam({ restaurantId, members }: { restaurantId: string
         </button>
       </form>
       <p className="text-xs text-muted">{t("rolesHint")}</p>
+      {notice && <p role="status" className="text-[13px] font-medium text-emerald-700">{notice}</p>}
       {error && <p role="alert" className="text-[13px] font-medium text-danger">{error}</p>}
     </div>
   );

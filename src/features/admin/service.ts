@@ -180,3 +180,40 @@ export async function setHostAccess(actor: { id: string; role?: string | null; s
     return { ok: true } as const;
   });
 }
+
+export type PickedPerson = { id: string; name: string; email: string; phone: string | null };
+export type CreateAccountResult = { ok: true; person: PickedPerson } | { ok: false; error: "notAllowed" | "invalid" | "exists" | "failed" };
+
+/**
+ * Staff open an account for someone who has none yet (to make them an owner, manager or restaurant staff). The
+ * person gets an email to set their own password; nobody else ever knows it. Logged.
+ */
+export async function createAccountForPerson(
+  actor: { id: string; role?: string | null; staffAreas?: readonly string[] | null },
+  raw: { name: string; email: string; phone?: string | null },
+  redirectTo: string,
+): Promise<CreateAccountResult> {
+  if (!["settings", "listings", "food"].some((a) => canStaff(actor, a as "settings"))) return { ok: false, error: "notAllowed" };
+  const name = String(raw.name ?? "").trim().slice(0, 100);
+  const email = String(raw.email ?? "").trim().toLowerCase();
+  const phone = String(raw.phone ?? "").trim().slice(0, 30) || null;
+  if (name.length < 2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 200) return { ok: false, error: "invalid" };
+  if (await db.user.findUnique({ where: { email }, select: { id: true } })) return { ok: false, error: "exists" };
+  const { randomBytes, randomUUID } = await import("node:crypto");
+  const { hashPassword } = await import("@/features/auth/password");
+  const userId = randomUUID();
+  // A long random password no one knows: the person sets their own from the email.
+  const password = await hashPassword(randomBytes(32).toString("base64url"));
+  const person = await db.$transaction(async (tx) => {
+    const user = await tx.user.create({ data: { id: userId, name, email, phone }, select: { id: true, name: true, email: true, phone: true } });
+    await tx.account.create({ data: { id: randomUUID(), accountId: userId, providerId: "credential", userId, password } });
+    await audit(tx, { actorId: actor.id, action: "user.createdByStaff", entityType: "user", entityId: userId, data: { email } });
+    return user;
+  });
+  try {
+    await auth.api.requestPasswordReset({ body: { email, redirectTo } });
+  } catch {
+    // The account exists; staff can send the email again from the person's page.
+  }
+  return { ok: true, person };
+}

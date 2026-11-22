@@ -13,7 +13,8 @@ export const restaurantInput = z.object({
   lng: z.number().min(28).max(31.5),
   openingHours: text(120).default(""),
   photoUrl: z.url().max(500).nullable().default(null),
-  pickup: z.boolean(),
+  /** Never offered: the restaurant delivers every order (kept false for older rows). */
+  pickup: z.boolean().default(false).transform(() => false),
   delivery: z.boolean(),
   deliveryFee: z.number().int().min(0).max(100_000),
   deliveryKm: z.number().int().min(1).max(50),

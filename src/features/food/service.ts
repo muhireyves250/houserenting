@@ -1,4 +1,5 @@
 import "server-only";
+import { sendConfirmation } from "@/features/auth/confirm";
 import type { Prisma } from "@/generated/prisma/client";
 import { audit } from "@/features/audit/service";
 import { newReference } from "@/features/bookings/reference";
@@ -7,7 +8,7 @@ import { readSettings } from "@/features/settings/service";
 import { todayISO } from "@/features/search/date-range";
 import { db } from "@/lib/db";
 import { canStaff } from "@/lib/roles";
-import { distanceKm, nextOrderSteps, priceCart, type OrderActor, type OrderStatus } from "./rules";
+import { nextOrderSteps, priceCart, type OrderActor, type OrderStatus } from "./rules";
 import { menuItemInput, orderInput, restaurantInput, type MenuItemInput, type OrderInput, type RestaurantInput } from "./validation";
 
 type Actor = { id: string; role?: string | null };
@@ -26,7 +27,7 @@ export const canRestaurant = (role: RestaurantRole | null, action: RestaurantAct
 
 export async function restaurantRole(actor: Actor, restaurantId: string): Promise<RestaurantRole | null> {
   if (canStaff(actor, "food")) return "staff";
-  const r = await db.restaurant.findUnique({ where: { id: restaurantId }, select: { ownerId: true, team: { where: { userId: actor.id }, select: { role: true } } } });
+  const r = await db.restaurant.findUnique({ where: { id: restaurantId }, select: { ownerId: true, team: { where: { userId: actor.id, user: { emailVerified: true, status: "ACTIVE" } }, select: { role: true } } } });
   if (!r) return null;
   if (r.ownerId === actor.id) return "owner";
   const role = r.team[0]?.role;
@@ -120,11 +121,11 @@ export async function deleteMenuItem(actor: Actor, itemId: string): Promise<bool
 export const RESTAURANT_TEAM_ROLES = ["MANAGER", "STAFF", "DELIVERY"] as const;
 export type RestaurantTeamRole = (typeof RESTAURANT_TEAM_ROLES)[number];
 
-export async function addRestaurantMember(actor: Actor, restaurantId: string, email: string, role: RestaurantTeamRole): Promise<{ ok: true } | { ok: false; error: "notAllowed" | "noAccount" | "isOwner" | "invalid" }> {
+export async function addRestaurantMember(actor: Actor, restaurantId: string, email: string, role: RestaurantTeamRole): Promise<{ ok: true; pendingVerification: boolean } | { ok: false; error: "notAllowed" | "noAccount" | "isOwner" | "invalid" }> {
   if (!RESTAURANT_TEAM_ROLES.includes(role) || typeof email !== "string" || email.length > 200) return { ok: false, error: "invalid" };
   if (!canRestaurant(await restaurantRole(actor, restaurantId), "team")) return { ok: false, error: "notAllowed" };
   const [user, r] = await Promise.all([
-    db.user.findUnique({ where: { email: email.trim().toLowerCase() }, select: { id: true } }),
+    db.user.findFirst({ where: { email: email.trim().toLowerCase(), status: "ACTIVE" }, select: { id: true, name: true, email: true, emailVerified: true } }),
     db.restaurant.findUnique({ where: { id: restaurantId }, select: { ownerId: true, name: true } }),
   ]);
   if (!user) return { ok: false, error: "noAccount" };
@@ -133,8 +134,12 @@ export async function addRestaurantMember(actor: Actor, restaurantId: string, em
     await tx.restaurantMember.upsert({ where: { restaurantId_userId: { restaurantId, userId: user.id } }, create: { restaurantId, userId: user.id, role, addedById: actor.id }, update: { role } });
     await audit(tx, { actorId: actor.id, action: "restaurant.team", entityType: "restaurant", entityId: restaurantId, data: { user: user.id, role } });
     await notify(tx, user.id, "restaurantTeamAdded", { title: r.name, roleLabel: role }, `/host/restaurants/${restaurantId}`);
+    // Someone else (VIIPA staff, a manager) added them: the owner is told who joined their team.
+    if (actor.id !== r.ownerId) await notify(tx, r.ownerId, "teamMemberJoined", { name: user.name, title: r.name, roleLabel: role }, `/host/restaurants/${restaurantId}`);
   });
-  return { ok: true };
+  // Their access starts once the email is confirmed: send the confirmation link now.
+  if (!user.emailVerified) await sendConfirmation(user.email, `/host/restaurants/${restaurantId}`);
+  return { ok: true, pendingVerification: !user.emailVerified };
 }
 
 export async function removeRestaurantMember(actor: Actor, memberId: string): Promise<boolean> {
@@ -166,13 +171,6 @@ const PUBLIC_SELECT = {
   phone: true,
 } as const;
 
-/** Published restaurants, nearest first when a point is known (the guest's stay, or their location). */
-export async function restaurantsNear(point: { lat: number; lng: number } | null, listingId: string | null = null) {
-  const rows = await db.restaurant.findMany({ where: { status: "PUBLISHED" }, select: PUBLIC_SELECT, take: 300 });
-  const withDistance = rows.map((r) => ({ ...r, km: point ? distanceKm(point, r) : null, atYourStay: listingId !== null && r.listingId === listingId }));
-  return withDistance.sort((a, b) => Number(b.atYourStay) - Number(a.atYourStay) || (a.km ?? 0) - (b.km ?? 0) || a.name.localeCompare(b.name));
-}
-
 export function publicRestaurant(id: string) {
   return db.restaurant.findFirst({
     where: { id, status: "PUBLISHED" },
@@ -186,19 +184,15 @@ const KITCHEN_SELECT = {
 };
 
 /**
- * The kitchen that cooks for guests of a place, with its menu: the place's own kitchen, or else the nearest VIIPA
- * kitchen with dishes on its menu (VIIPA arranges the food to the guest's room). Clients never pick a restaurant.
+ * The kitchen VIIPA assigned to a place, with its menu (open and with dishes on it). Only an assigned kitchen:
+ * a nearby restaurant is never offered instead, and with none the guest is told no restaurant serves the place.
  */
 export async function kitchenForPlace(listingId: string) {
-  const own = await db.restaurant.findFirst({ where: { listingId, status: "PUBLISHED", menu: { some: { available: true } } }, orderBy: { createdAt: "asc" }, select: KITCHEN_SELECT });
-  if (own) return own;
-  const [place, kitchens] = await Promise.all([
-    db.listing.findUnique({ where: { id: listingId }, select: { lat: true, lng: true } }),
-    db.restaurant.findMany({ where: { status: "PUBLISHED", menu: { some: { available: true } } }, select: { id: true, lat: true, lng: true } }),
-  ]);
-  if (!place || kitchens.length === 0) return null;
-  const nearest = kitchens.reduce((best, k) => (distanceKm(place, k) < distanceKm(place, best) ? k : best));
-  return db.restaurant.findUnique({ where: { id: nearest.id }, select: KITCHEN_SELECT });
+  return db.restaurant.findFirst({
+    where: { listingId, status: "PUBLISHED", paused: false, menu: { some: { available: true } } },
+    orderBy: { createdAt: "asc" },
+    select: KITCHEN_SELECT,
+  });
 }
 
 export type Dish = { id: string; section: string; name: string; description: string; price: number; photoUrl: string | null };
@@ -417,7 +411,7 @@ export async function restaurantsRunBy(userId: string) {
 export function restaurantForTeam(id: string) {
   return db.restaurant.findUnique({
     where: { id },
-    include: { menu: { orderBy: { position: "asc" } }, team: { include: { user: { select: { name: true, email: true } } } }, owner: { select: { id: true, name: true, email: true } } },
+    include: { menu: { orderBy: { position: "asc" } }, team: { include: { user: { select: { name: true, email: true, emailVerified: true } } } }, owner: { select: { id: true, name: true, email: true } } },
   });
 }
 

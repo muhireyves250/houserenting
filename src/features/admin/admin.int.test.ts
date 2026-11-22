@@ -239,3 +239,19 @@ describe("making someone a place owner", () => {
     expect(await db.auditLog.count({ where: { action: { in: ["user.hostOn", "user.hostOff"] } } })).toBe(2);
   });
 });
+
+describe("opening an account for someone", () => {
+  it("staff open it (no password anyone knows), never twice for one email; others can't", async () => {
+    const { createAccountForPerson } = await import("./service");
+    const admin = { id: "admin", role: "ADMIN" };
+    expect(await createAccountForPerson({ id: "g1" }, { name: "Jean", email: "jean@example.com" }, "/en/reset-password")).toEqual({ ok: false, error: "notAllowed" });
+    expect(await createAccountForPerson(admin, { name: "J", email: "bad" }, "/en/reset-password")).toEqual({ ok: false, error: "invalid" });
+    const made = await createAccountForPerson(admin, { name: "Jean Owner", email: "Jean@Example.com", phone: "0788 111 222" }, "/en/reset-password");
+    expect(made).toMatchObject({ ok: true, person: { name: "Jean Owner", email: "jean@example.com", phone: "0788 111 222" } });
+    const account = await db.account.findFirst({ where: { user: { email: "jean@example.com" } } });
+    expect(account?.providerId).toBe("credential");
+    expect(account?.password).toBeTruthy();
+    expect(await createAccountForPerson(admin, { name: "Jean Again", email: "jean@example.com" }, "/en/reset-password")).toEqual({ ok: false, error: "exists" });
+    expect(await db.auditLog.count({ where: { action: "user.createdByStaff" } })).toBe(1);
+  });
+});

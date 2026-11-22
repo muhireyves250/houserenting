@@ -72,8 +72,8 @@ describe("food from the kitchen of the guest's stay", () => {
     await saveMenuItem(admin, saved.id, null, { name: "Brochette", price: 3000 });
     expect(await setRestaurantStatus(admin, saved.id, "PUBLISHED")).toBe(true);
     expect((await kitchenForPlace("place"))?.id).toBe(saved.id);
-    // A place without its own kitchen gets the nearest one.
-    expect((await kitchenForPlace("elsewhere"))?.id).toBe(saved.id);
+    // A place without a kitchen assigned gets none (never the nearest one).
+    expect(await kitchenForPlace("elsewhere")).toBeNull();
     expect(await setRestaurantStatus(admin, saved.id, "HIDDEN")).toBe(false);
     expect(await setRestaurantStatus(admin, saved.id, "HIDDEN", "Health inspection")).toBe(true);
   });

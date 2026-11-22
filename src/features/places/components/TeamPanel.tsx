@@ -4,18 +4,22 @@ import { Trash2, UserPlus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { useRouter } from "@/i18n/navigation";
+import { MemberField } from "@/features/admin/components/MemberField";
 import { addTeamMemberAction, removeTeamMemberAction } from "../actions";
 import type { TeamRole } from "../team-service";
 
-type Member = { id: string; role: TeamRole; user: { name: string; email: string } };
+type Member = { id: string; role: TeamRole; user: { name: string; email: string; emailVerified?: boolean } };
 
 /** The owner adds a manager or receptionist (someone with an account) to help run the place. */
-export function TeamPanel({ listingId, members }: { listingId: string; members: Member[] }) {
+export function TeamPanel({ listingId, members, staff = false }: { listingId: string; members: Member[]; staff?: boolean }) {
   const t = useTranslations("Places");
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<TeamRole>("RECEPTIONIST");
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [added, setAdded] = useState(0);
+  const tPicker = useTranslations("Admin.picker");
   const [pending, start] = useTransition();
 
   return (
@@ -30,6 +34,7 @@ export function TeamPanel({ listingId, members }: { listingId: string; members: 
                 <span className="block truncate text-xs text-muted">
                   {t(`teamRole.${m.role}`)} · {m.user.email}
                 </span>
+                {m.user.emailVerified === false && <span className="mt-0.5 inline-block rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800">{tPicker("waitingConfirm")}</span>}
               </span>
               <button
                 type="button"
@@ -58,20 +63,14 @@ export function TeamPanel({ listingId, members }: { listingId: string; members: 
             const result = await addTeamMemberAction(listingId, email, role);
             if (result.ok) {
               setEmail("");
+              setAdded((n) => n + 1);
+              setNotice(result.pendingVerification ? tPicker("sentConfirm") : null);
               router.refresh();
             } else setError(t(`teamError.${result.error}`));
           });
         }}
       >
-        <input
-          type="email"
-          required
-          placeholder={t("memberEmail")}
-          aria-label={t("memberEmail")}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="min-w-0 flex-1 rounded-xl border border-line-strong bg-surface px-3 py-2 text-[14px] outline-none focus:border-primary"
-        />
+        <MemberField staff={staff} value={email} onChange={setEmail} label={t("memberEmail")} resetKey={added} />
         <select value={role} onChange={(e) => setRole(e.target.value as TeamRole)} aria-label={t("memberRole")} className="rounded-xl border border-line-strong bg-surface px-3 py-2 text-[14px]">
           <option value="MANAGER">{t("teamRole.MANAGER")}</option>
           <option value="RECEPTIONIST">{t("teamRole.RECEPTIONIST")}</option>
@@ -82,6 +81,7 @@ export function TeamPanel({ listingId, members }: { listingId: string; members: 
         </button>
       </form>
       <p className="text-xs text-muted">{t("teamRolesHint")}</p>
+      {notice && <p role="status" className="text-[13px] font-medium text-emerald-700">{notice}</p>}
       {error && (
         <p role="alert" className="text-[13px] font-medium text-danger">
           {error}

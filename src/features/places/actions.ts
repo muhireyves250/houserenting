@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { LISTING_MOVES, type ListingMove } from "@/features/listings/lifecycle";
-import { db } from "@/lib/db";
 import { canStaff } from "@/lib/roles";
 import { getCurrentUser } from "@/lib/session";
 import { BLOCK_KINDS, createBlock, endBlock, type BlockKind, type BlockResult } from "./blocks-service";
@@ -85,12 +84,6 @@ export async function deleteDocumentAction(documentId: string): Promise<{ ok: bo
 }
 
 /** Staff list owners by email when creating a place for someone. */
-export async function findOwnerAction(email: string): Promise<{ id: string; name: string } | null> {
-  const user = await getCurrentUser();
-  if (!user || !canStaff(user, "listings") || typeof email !== "string" || email.length > 200) return null;
-  return db.user.findUnique({ where: { email: email.trim().toLowerCase() }, select: { id: true, name: true } });
-}
-
 export async function addTeamMemberAction(listingId: string, email: string, role: TeamRole): Promise<TeamResult | { ok: false; error: "auth" }> {
   const user = await getCurrentUser();
   if (!user) return { ok: false, error: "auth" };

@@ -1,5 +1,6 @@
 "use client";
 
+import { PersonPicker } from "@/features/admin/components/PersonPicker";
 import dynamic from "next/dynamic";
 import { ImagePlus } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -28,7 +29,7 @@ export const EMPTY_RESTAURANT: RestaurantInput = {
   lng: 30.0619,
   openingHours: "",
   photoUrl: null,
-  pickup: true,
+  pickup: false,
   delivery: false,
   deliveryFee: 0,
   deliveryKm: 5,
@@ -37,7 +38,7 @@ export const EMPTY_RESTAURANT: RestaurantInput = {
   listingId: null,
 };
 
-/** Create or edit a restaurant: where it is, how it serves (pickup, delivery), and which of your places it belongs to. */
+/** Create or edit a restaurant: where it is, how it delivers, and which of your places it belongs to. */
 export function RestaurantForm({
   restaurantId,
   initial,
@@ -97,7 +98,12 @@ export function RestaurantForm({
     <div className="flex flex-col gap-4">
       <Card title={t("aboutTitle")}>
         <div className="grid gap-3">
-          {staffNew && <Field label={t("ownerEmailOptional")} type="email" value={ownerEmail} onChange={(e) => setOwnerEmail(e.target.value)} error={err("ownerEmail")} />}
+          {staffNew && (
+            <div>
+              <PersonPicker label={t("ownerEmailOptional")} onChange={setOwnerEmail} />
+              {err("ownerEmail") && <p className="mt-1 text-[13px] font-medium text-danger">{err("ownerEmail")}</p>}
+            </div>
+          )}
           <Field label={t("name")} value={form.name} maxLength={80} onChange={(e) => set("name", e.target.value)} error={err("name")} />
           <AreaField label={t("description")} rows={3} value={form.description ?? ""} maxLength={1000} onChange={(e) => set("description", e.target.value)} />
           <div className="grid grid-cols-2 gap-3">
@@ -153,14 +159,9 @@ export function RestaurantForm({
       <Card title={t("serviceTitle")}>
         <div className="flex flex-col gap-3">
           <label className="flex cursor-pointer items-center gap-3 text-[15px] text-ink">
-            <input type="checkbox" checked={form.pickup} onChange={(e) => set("pickup", e.target.checked)} className="size-5 accent-[var(--color-primary)]" />
-            {t("pickup")}
-          </label>
-          <label className="flex cursor-pointer items-center gap-3 text-[15px] text-ink">
             <input type="checkbox" checked={form.delivery} onChange={(e) => set("delivery", e.target.checked)} className="size-5 accent-[var(--color-primary)]" />
             {t("delivery")}
           </label>
-          {err("pickup") && <p className="text-[13px] font-medium text-danger">{err("pickup")}</p>}
           <div className="grid grid-cols-2 gap-3">
             <Field label={t("prepMinutes")} type="number" min={5} max={240} value={form.prepMinutes ?? 30} onChange={(e) => set("prepMinutes", Number(e.target.value) || 30)} error={err("prepMinutes")} />
             <Field label={t("minOrder")} type="number" min={0} value={form.minOrder ?? 0} onChange={(e) => set("minOrder", Number(e.target.value) || 0)} error={err("minOrder")} />

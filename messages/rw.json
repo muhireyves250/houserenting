@@ -1337,10 +1337,27 @@
       "title": "Konti"
     },
     "picker": {
-      "placeholder": "Shakisha izina cyangwa imeli",
+      "placeholder": "Shakisha ukoresheje izina, imeyili cyangwa telefoni",
       "loading": "Biraza…",
       "none": "Nta muntu wabonetse.",
-      "clear": "Hitamo undi"
+      "clear": "Hitamo undi",
+      "activeAccount": "Konti ikora",
+      "createNew": "Ntabonetse? Mufungurire konti",
+      "createTitle": "Fungura konti",
+      "createName": "Amazina yose",
+      "createEmail": "Imeyili",
+      "createPhone": "Telefoni (si ngombwa)",
+      "createHint": "Azohererezwa imeyili yo kwishyiriraho ijambo ry'ibanga.",
+      "createCancel": "Reka",
+      "createSubmit": "Fungura uhitemo",
+      "createError": {
+        "notAllowed": "Ntushobora gufungura konti.",
+        "invalid": "Andika amazina yose n'imeyili nyayo.",
+        "exists": "Iyi meyili isanzwe ifite konti: yishakire hejuru.",
+        "failed": "Ntibyakunze — ongera ugerageze."
+      },
+      "waitingConfirm": "Ategereje kwemeza imeyili",
+      "sentConfirm": "Yongewemo. Azohererezwa imeyili yo kwemeza; uburenganzira bwe butangira amaze kwemeza."
     },
     "adminAll": "Abayobozi ba VIIPA bacunga byose. Hitamo Umucungamari kugira ngo umuhe serivisi zimwe gusa.",
     "userPage": {
@@ -1497,7 +1514,8 @@
       "laundryForHost": "Imyenda {reference}: yifate muri {room} kuri {title}.",
       "laundryReturned": "Imyenda {reference} kuri {title} yagaruwe ku mushyitsi.",
       "laundryReceived": "Imyenda {reference} kuri {title}: umushyitsi yayibonye.",
-      "payoutToCheck": "{name} yahinduye aho yishyurirwa. Genzura wemeze amakuru."
+      "payoutToCheck": "{name} yahinduye aho yishyurirwa. Genzura wemeze amakuru.",
+      "teamMemberJoined": "{name} yinjiye mu itsinda rya {title} nka {roleLabel}."
     },
     "filterLabel": "Erekana imenyesha",
     "filter": {
@@ -2006,7 +2024,7 @@
     "forViipaBody": "VIIPA icunga inzu kandi yakira amafaranga.",
     "forOwner": "Ya nyir'inzu",
     "forOwnerBody": "Inzu ni iy'umuntu ufite konti.",
-    "ownerEmail": "Imeyili ya nyir'inzu",
+    "ownerEmail": "Nyir'inzu",
     "findOwner": "Shaka",
     "ownerFound": "Yabonetse: {name}",
     "ownerMissing": "Nta konti ikoresha iyi meyili. Saba nyir'inzu kubanza kwiyandikisha.",
@@ -2486,8 +2504,8 @@
         "body": "Uzashobora gutumiza ibiryo mu cyumba guhera ku wa {day}."
       },
       "noKitchen": {
-        "title": "Nta biryo biraboneka hano",
-        "body": "{place} ntiratanga ibiryo. Twandikire niba ukeneye ubufasha."
+        "title": "Nta resitora ikorera aha",
+        "body": "Nta resitora irimo gukorera {place} ubu. Twandikire niba ukeneye ubufasha ku biryo."
       }
     },
     "pay": {
@@ -2913,5 +2931,10 @@
     "sampleLine": "RWF 90,000 × ijoro 1",
     "sampleTotal": "Igiteranyo",
     "noFooter": "(nta butumwa bwo hasi)"
+  },
+  "MapPicker": {
+    "useMyLocation": "Koresha aho ndi",
+    "denied": "Ntitwabashije kubona aho uri. Kanda ku ikarita cyangwa wimure akamenyetso ugashyire aho inzu iri.",
+    "checkPin": "Akamenyetso kashyizwe aho uri. Reba ko kari ku nzu, niba atari ho ukimure."
   }
 }

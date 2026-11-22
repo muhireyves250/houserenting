@@ -1337,10 +1337,27 @@
       "title": "Account"
     },
     "picker": {
-      "placeholder": "Search by name or email",
+      "placeholder": "Search by name, email or phone",
       "loading": "Loading…",
       "none": "Nobody found.",
-      "clear": "Choose someone else"
+      "clear": "Choose someone else",
+      "activeAccount": "Active account",
+      "createNew": "Not found? Create their account",
+      "createTitle": "Create an account",
+      "createName": "Full name",
+      "createEmail": "Email",
+      "createPhone": "Phone (optional)",
+      "createHint": "They get an email to set their own password.",
+      "createCancel": "Cancel",
+      "createSubmit": "Create and choose",
+      "createError": {
+        "notAllowed": "You can't create accounts.",
+        "invalid": "Enter a full name and a valid email.",
+        "exists": "This email already has an account: search for it above.",
+        "failed": "Couldn't create it — try again."
+      },
+      "waitingConfirm": "Waiting for email confirmation",
+      "sentConfirm": "Added. They get an email to confirm their address; their access starts once they confirm."
     },
     "adminAll": "VIIPA admins manage everything. Choose Manager to give someone only some services.",
     "userPage": {
@@ -1497,7 +1514,8 @@
       "laundryForHost": "Laundry {reference}: collect it from {room} at {title}.",
       "laundryReturned": "Laundry {reference} at {title} was brought back to the guest.",
       "laundryReceived": "Laundry {reference} at {title}: the guest got it back.",
-      "payoutToCheck": "{name} changed where they get paid. Check and verify the details."
+      "payoutToCheck": "{name} changed where they get paid. Check and verify the details.",
+      "teamMemberJoined": "{name} joined the team at {title} as {roleLabel}."
     },
     "filterLabel": "Show notifications",
     "filter": {
@@ -2006,7 +2024,7 @@
     "forViipaBody": "VIIPA runs the place and receives the payments.",
     "forOwner": "For an owner",
     "forOwnerBody": "The place belongs to someone with an account.",
-    "ownerEmail": "Owner's email",
+    "ownerEmail": "The owner",
     "findOwner": "Find",
     "ownerFound": "Found: {name}",
     "ownerMissing": "No account uses this email. Ask the owner to sign up first.",
@@ -2486,8 +2504,8 @@
         "body": "You can order meals to your room from {day}."
       },
       "noKitchen": {
-        "title": "No meals at this place yet",
-        "body": "{place} doesn't serve meals yet. Message us if you need help with food."
+        "title": "No restaurant serves this place yet",
+        "body": "No restaurant is currently serving {place}. Message us if you need help with food."
       }
     },
     "pay": {
@@ -2913,5 +2931,10 @@
     "sampleLine": "RWF 90,000 × 1 night",
     "sampleTotal": "Total",
     "noFooter": "(no note at the bottom)"
+  },
+  "MapPicker": {
+    "useMyLocation": "Use my location",
+    "denied": "We couldn't read your location. Tap the map or drag the pin to the place.",
+    "checkPin": "Pin moved to where you are. Check it sits on the property, and drag it if not."
   }
 }

@@ -10,6 +10,8 @@ import {
 } from "@/features/places/components/AdminPlaceSettings";
 import { BlocksPanel } from "@/features/places/components/BlocksPanel";
 import { DocumentsPanel } from "@/features/places/components/DocumentsPanel";
+import { TeamPanel } from "@/features/places/components/TeamPanel";
+import { listTeam } from "@/features/places/team-service";
 import { StatusActions } from "@/features/places/components/StatusActions";
 import { ConfirmAction } from "@/features/admin/components/ConfirmAction";
 import { deletePlaceAction } from "@/features/places/actions";
@@ -65,11 +67,12 @@ export default async function AdminListingPage({ params }: Props) {
     getTranslations("Bookings"),
     getTranslations("Rooms"),
   ]);
-  const [tPlaces, blocks, documents, payout] = await Promise.all([
+  const [tPlaces, blocks, documents, payout, team] = await Promise.all([
     getTranslations("Places"),
     listingBlocks(id),
     listingDocuments(id),
     payoutAccountOf(listing.host.id),
+    listTeam(id),
   ]);
   const day = (d: Date | null) => (d ? iso(d) : null);
   const iso = (d: Date) => d.toISOString().slice(0, 10);
@@ -424,6 +427,11 @@ export default async function AdminListingPage({ params }: Props) {
             }
           >
             <DocumentsPanel listingId={listing.id} documents={documents} />
+          </Fold>
+
+          {/* Managers and receptionists of this place (the owner is told when staff add someone). */}
+          <Fold title={<Count label={tPlaces("teamTitle")} n={team.length} />}>
+            <TeamPanel listingId={listing.id} members={team} staff />
           </Fold>
 
           <Fold title={<Count label={t("history")} n={history.length} />}>

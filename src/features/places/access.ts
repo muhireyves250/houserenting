@@ -25,7 +25,8 @@ export async function placeRole(actor: { id: string; role?: string | null; staff
   if (canStaff(actor, "listings")) return "staff";
   const listing = await db.listing.findUnique({
     where: { id: listingId },
-    select: { hostId: true, team: { where: { userId: actor.id }, select: { role: true } } },
+    // A team member's access starts once their email is confirmed.
+    select: { hostId: true, team: { where: { userId: actor.id, user: { emailVerified: true, status: "ACTIVE" } }, select: { role: true } } },
   });
   if (!listing) return null;
   if (listing.hostId === actor.id) return "owner";
