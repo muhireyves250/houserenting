@@ -1414,7 +1414,8 @@
         "isOwner": "They already own it.",
         "notAllowed": "You can't change roles.",
         "failed": "Couldn't add the role — try again."
-      }
+      },
+      "allTitle": "Roles"
     }
   },
   "Questions": {

@@ -552,51 +552,37 @@ export default async function AdminUserPage({ params }: Props) {
               </ul>
             )}
           </Panel>
-          {/* Every role at places and restaurants, set here by VIIPA. */}
-          {!self && (
-            <Panel title={t("roles.title")}>
-              <UserRoles
-                email={user.email}
-                verified={user.emailVerified}
-                places={user.placeMembers}
-                restaurants={user.restaurantRoles}
-                ownedRestaurants={user.restaurantsOwned}
-                placeOptions={placeOptions.map((p) => ({ id: p.id, name: p.title }))}
-                restaurantOptions={restaurantOptions.filter((r) => !user.restaurantsOwned.some((o) => o.id === r.id))}
-              />
-            </Panel>
-          )}
-          {/* Owner of places or customer: owners use the owner dashboard. */}
-          <Panel title={t("hostAccess.title")}>
-            {self ? <span className="text-xs text-muted">{t("you")}</span> : <HostToggle userId={user.id} isHost={user.isHost} places={user.listings.length} />}
-          </Panel>
-          <Panel title={t("staffAccess")}>
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-[13px] text-muted">
-                {t(`roleName.${user.role}`)}
-              </span>
-              <RoleToggle
-                userId={user.id}
-                role={user.role}
-                self={self}
-                canManage={manageStaff}
-              />
+          {/* All of this person's roles in one place, each set here by VIIPA: VIIPA staff, place owner, and roles at places and restaurants. */}
+          <Panel title={t("roles.allTitle")}>
+            <div className="flex flex-col gap-5">
+              <section className="flex flex-col gap-2">
+                <h3 className="text-[13px] font-semibold text-ink">{t("staffAccess")}</h3>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-[13px] text-muted">{t(`roleName.${user.role}`)}</span>
+                  <RoleToggle userId={user.id} role={user.role} self={self} canManage={manageStaff} />
+                </div>
+                {/* Which services this manager handles (admins and super admins manage everything; customers nothing). */}
+                {user.role === "MANAGER" && !self && <StaffAreasForm userId={user.id} initial={user.staffAreas} canManage={manageStaff} />}
+                {(user.role === "SUPER_ADMIN" || user.role === "ADMIN") && <p className="text-[13px] text-muted">{t(user.role === "ADMIN" ? "adminAll" : "superAdminAll")}</p>}
+              </section>
+              <section className="flex flex-col gap-2 border-t border-line pt-4">
+                <h3 className="text-[13px] font-semibold text-ink">{t("hostAccess.title")}</h3>
+                {self ? <span className="text-xs text-muted">{t("you")}</span> : <HostToggle userId={user.id} isHost={user.isHost} places={user.listings.length} />}
+              </section>
+              {!self && (
+                <div className="border-t border-line pt-4">
+                  <UserRoles
+                    email={user.email}
+                    verified={user.emailVerified}
+                    places={user.placeMembers}
+                    restaurants={user.restaurantRoles}
+                    ownedRestaurants={user.restaurantsOwned}
+                    placeOptions={placeOptions.map((p) => ({ id: p.id, name: p.title }))}
+                    restaurantOptions={restaurantOptions.filter((r) => !user.restaurantsOwned.some((o) => o.id === r.id))}
+                  />
+                </div>
+              )}
             </div>
-            {/* Which services this manager handles (admins and super admins manage everything; customers nothing). */}
-            {user.role === "MANAGER" && !self && (
-              <div className="mt-4 border-t border-line pt-4">
-                <StaffAreasForm
-                  userId={user.id}
-                  initial={user.staffAreas}
-                  canManage={manageStaff}
-                />
-              </div>
-            )}
-            {(user.role === "SUPER_ADMIN" || user.role === "ADMIN") && (
-              <p className="mt-3 text-[13px] text-muted">
-                {t(user.role === "ADMIN" ? "adminAll" : "superAdminAll")}
-              </p>
-            )}
           </Panel>
           {/* Password reset, suspend or reactivate, delete: each asks first. */}
           {!self && (
