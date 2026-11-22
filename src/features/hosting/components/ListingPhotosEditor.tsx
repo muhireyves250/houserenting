@@ -1,14 +1,15 @@
 "use client";
 
-import { ImagePlus, LoaderCircle, X } from "lucide-react";
+import { ImagePlus, LoaderCircle, X, ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "@/i18n/navigation";
-import { addPhotoAction, photoUploadAction, removePhotoAction } from "../actions";
+import { addPhotoAction, movePhotoAction, photoUploadAction, removePhotoAction, setPhotoKindAction } from "../actions";
 import { Card } from "./fields";
 
-type Photo = { id: string; url: string };
+type Photo = { id: string; url: string; kind?: string };
+const KINDS = ["GENERAL", "ROOM", "BATHROOM", "KITCHEN", "LIVING_ROOM", "EXTERIOR", "FACILITY"] as const;
 
 /** Photos go straight from the browser to our Cloudinary folder (signed by the server), then get attached to the place. */
 export function ListingPhotosEditor({ listingId, photos, enabled }: { listingId: string; photos: Photo[]; enabled: boolean }) {
@@ -58,10 +59,51 @@ export function ListingPhotosEditor({ listingId, photos, enabled }: { listingId:
   return (
     <Card title={t("sections.photos")} id="photos">
       {!enabled && <p className="mb-4 text-[13px] text-muted">{t("photosOff")}</p>}
+      {/* Photos are required: the place can't be sent for review without at least one. */}
+      {photos.length === 0 && <p className="mb-4 rounded-xl bg-amber-50 px-3 py-2 text-[13px] font-medium text-amber-900">{t("photosRequired")}</p>}
       <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {photos.map((photo, index) => (
           <li key={photo.id} className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-canvas">
             <Image src={photo.url} alt={t("photoAlt", { n: index + 1 })} fill sizes="(min-width: 640px) 33vw, 50vw" className="object-cover" />
+            {/* What it shows, and its place in the order (the first photo is the cover). */}
+            <div className="absolute inset-x-2 bottom-2 flex items-center gap-1.5">
+              <select
+                aria-label={t("photoKindLabel")}
+                value={photo.kind ?? "GENERAL"}
+                disabled={removing}
+                onChange={(e) =>
+                  startRemoving(async () => {
+                    await setPhotoKindAction(listingId, photo.id, e.target.value as (typeof KINDS)[number]);
+                    router.refresh();
+                  })
+                }
+                className="min-w-0 flex-1 rounded-full bg-white/95 px-2.5 py-1 text-[12px] font-semibold text-ink shadow"
+              >
+                {KINDS.map((k) => (
+                  <option key={k} value={k}>
+                    {t(`photoKind.${k}`)}
+                  </option>
+                ))}
+              </select>
+              {([-1, 1] as const).map((by) => (
+                <button
+                  key={by}
+                  type="button"
+                  disabled={removing || (by === -1 ? index === 0 : index === photos.length - 1)}
+                  aria-label={by === -1 ? t("photoEarlier") : t("photoLater")}
+                  onClick={() =>
+                    startRemoving(async () => {
+                      await movePhotoAction(listingId, photo.id, by);
+                      router.refresh();
+                    })
+                  }
+                  className="flex size-7 shrink-0 items-center justify-center rounded-full bg-white/95 text-ink shadow disabled:opacity-40"
+                >
+                  {by === -1 ? <ChevronLeft className="size-4" aria-hidden="true" /> : <ChevronRight className="size-4" aria-hidden="true" />}
+                </button>
+              ))}
+            </div>
+            {index === 0 && <span className="absolute top-2 left-2 rounded-full bg-primary px-2 py-0.5 text-[11px] font-bold text-white">{t("coverPhoto")}</span>}
             <button
               type="button"
               disabled={removing}

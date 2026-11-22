@@ -546,7 +546,9 @@
     "dayUseHint": "Pick one date: you use the place that day and leave the same evening.",
     "pickNightsBelow": "Pick your nights in the calendar below.",
     "availabilityTitle": "When it's free",
-    "availabilityHint": "Booked days are marked in red. Tap a free day to choose it."
+    "availabilityHint": "Booked days are marked in red. Tap a free day to choose it.",
+    "previousPhoto": "Previous photo",
+    "nextPhoto": "Next photo"
   },
   "Facility": {
     "KITCHEN": "Kitchen",
@@ -741,7 +743,8 @@
       "check": "Check the highlighted fields.",
       "failed": "Couldn't save. Try again.",
       "lodgeUnits": "Lodges are booked by the night or by the day only.",
-      "untilBeforeFrom": "The last date must be after the first."
+      "untilBeforeFrom": "The last date must be after the first.",
+      "location": "Choose the place's village (province down to village)."
     },
     "save": "Save",
     "saved": "Saved",
@@ -890,6 +893,20 @@
       "tomorrow": "Tomorrow",
       "failed": "Couldn't save — try again.",
       "idNote": "Check the guest's ID before checking them in."
+    },
+    "photosRequired": "Photos are required: add at least one (rooms, bathroom, kitchen, living room, outside).",
+    "photoKindLabel": "What this photo shows",
+    "photoEarlier": "Move earlier",
+    "photoLater": "Move later",
+    "coverPhoto": "Cover",
+    "photoKind": {
+      "GENERAL": "General",
+      "ROOM": "Room",
+      "BATHROOM": "Bathroom",
+      "KITCHEN": "Kitchen",
+      "LIVING_ROOM": "Living room",
+      "EXTERIOR": "Outside",
+      "FACILITY": "Other facilities"
     }
   },
   "Admin": {
@@ -1986,7 +2003,8 @@
       "reasonNeeded": "Please write a reason.",
       "payoutMissing": "The owner's payout details must be saved and verified first.",
       "noPrices": "Add at least one price first.",
-      "auth": "Please sign in again."
+      "auth": "Please sign in again.",
+      "noPhotos": "Add at least one photo first."
     },
     "blocksTitle": "Closed dates and maintenance",
     "noBlocks": "Nothing is blocked. Guests can book every open date.",
@@ -2013,10 +2031,12 @@
     "documentsTitle": "Documents",
     "documentsPrivate": "Private: only the owner and VIIPA staff can open these. PDF or photo, up to 8 MB.",
     "docKind": {
-      "OWNER_ID": "Owner's ID",
-      "OWNERSHIP_PROOF": "Proof of ownership",
-      "MANAGEMENT_AUTHORIZATION": "Management authorization",
-      "OTHER": "Other"
+      "OWNERSHIP_PROOF": "Ownership documents",
+      "OWNER_ID": "Owner ID or licence",
+      "OPERATING_LICENSE": "Operating licence or authorization",
+      "MANAGEMENT_AGREEMENT": "Management agreement (third-party manager)",
+      "MANAGEMENT_AUTHORIZATION": "Third-party management authorization",
+      "OTHER": "Other supporting documents"
     },
     "docKindLabel": "Document type",
     "uploadDocument": "Upload document",
@@ -2998,5 +3018,19 @@
     "useMyLocation": "Use my location",
     "denied": "We couldn't read your location. Tap the map or drag the pin to the place.",
     "checkPin": "Pin moved to where you are. Check it sits on the property, and drag it if not."
+  },
+  "Locations": {
+    "search": "Search a sector, cell or village",
+    "choose": "Choose…",
+    "chooseAbove": "Choose the level above first",
+    "level": {
+      "province": "Province",
+      "district": "District",
+      "sector": "Sector",
+      "cell": "Cell",
+      "village": "Village"
+    },
+    "clear": "Any location",
+    "required": "Choose the village (province down to village)."
   }
 }

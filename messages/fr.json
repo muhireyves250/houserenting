@@ -546,7 +546,9 @@
     "dayUseHint": "Choisissez une date : vous profitez du lieu ce jour-là et partez le soir même.",
     "pickNightsBelow": "Choisissez vos nuits dans le calendrier ci-dessous.",
     "availabilityTitle": "Disponibilités",
-    "availabilityHint": "Les jours réservés sont en rouge. Touchez un jour libre pour le choisir."
+    "availabilityHint": "Les jours réservés sont en rouge. Touchez un jour libre pour le choisir.",
+    "previousPhoto": "Photo précédente",
+    "nextPhoto": "Photo suivante"
   },
   "Facility": {
     "KITCHEN": "Cuisine",
@@ -741,7 +743,8 @@
       "check": "Vérifiez les champs signalés.",
       "failed": "Enregistrement impossible. Réessayez.",
       "lodgeUnits": "Les lodges se réservent uniquement à la nuit ou à la journée.",
-      "untilBeforeFrom": "La dernière date doit être après la première."
+      "untilBeforeFrom": "La dernière date doit être après la première.",
+      "location": "Choisissez le village du logement (de la province au village)."
     },
     "save": "Enregistrer",
     "saved": "Enregistré",
@@ -890,6 +893,20 @@
       "tomorrow": "Demain",
       "failed": "Échec — réessayez.",
       "idNote": "Vérifiez la pièce d'identité du client avant d'enregistrer son arrivée."
+    },
+    "photosRequired": "Les photos sont obligatoires : ajoutez-en au moins une (chambres, salle de bain, cuisine, salon, extérieur).",
+    "photoKindLabel": "Ce que montre la photo",
+    "photoEarlier": "Avancer",
+    "photoLater": "Reculer",
+    "coverPhoto": "Couverture",
+    "photoKind": {
+      "GENERAL": "Général",
+      "ROOM": "Chambre",
+      "BATHROOM": "Salle de bain",
+      "KITCHEN": "Cuisine",
+      "LIVING_ROOM": "Salon",
+      "EXTERIOR": "Extérieur",
+      "FACILITY": "Autres équipements"
     }
   },
   "Admin": {
@@ -1986,7 +2003,8 @@
       "reasonNeeded": "Veuillez indiquer une raison.",
       "payoutMissing": "Les coordonnées de paiement du propriétaire doivent d'abord être enregistrées et vérifiées.",
       "noPrices": "Ajoutez d'abord au moins un prix.",
-      "auth": "Veuillez vous reconnecter."
+      "auth": "Veuillez vous reconnecter.",
+      "noPhotos": "Ajoutez d'abord au moins une photo."
     },
     "blocksTitle": "Dates fermées et maintenance",
     "noBlocks": "Rien n'est bloqué. Les voyageurs peuvent réserver toutes les dates ouvertes.",
@@ -2013,10 +2031,12 @@
     "documentsTitle": "Documents",
     "documentsPrivate": "Privé : seuls le propriétaire et l'équipe VIIPA peuvent les ouvrir. PDF ou photo, 8 Mo maximum.",
     "docKind": {
-      "OWNER_ID": "Pièce d'identité du propriétaire",
-      "OWNERSHIP_PROOF": "Preuve de propriété",
-      "MANAGEMENT_AUTHORIZATION": "Autorisation de gestion",
-      "OTHER": "Autre"
+      "OWNERSHIP_PROOF": "Documents de propriété",
+      "OWNER_ID": "Pièce d'identité ou licence du propriétaire",
+      "OPERATING_LICENSE": "Licence ou autorisation d'exploitation",
+      "MANAGEMENT_AGREEMENT": "Contrat de gestion (gestionnaire tiers)",
+      "MANAGEMENT_AUTHORIZATION": "Autorisation de gestion par un tiers",
+      "OTHER": "Autres documents justificatifs"
     },
     "docKindLabel": "Type de document",
     "uploadDocument": "Ajouter un document",
@@ -2998,5 +3018,19 @@
     "useMyLocation": "Utiliser ma position",
     "denied": "Impossible de lire votre position. Touchez la carte ou déplacez l'épingle sur le lieu.",
     "checkPin": "L'épingle est à votre position. Vérifiez qu'elle est sur le bien, sinon déplacez-la."
+  },
+  "Locations": {
+    "search": "Rechercher un secteur, une cellule ou un village",
+    "choose": "Choisir…",
+    "chooseAbove": "Choisissez d'abord le niveau au-dessus",
+    "level": {
+      "province": "Province",
+      "district": "District",
+      "sector": "Secteur",
+      "cell": "Cellule",
+      "village": "Village"
+    },
+    "clear": "Tous les lieux",
+    "required": "Choisissez le village (de la province au village)."
   }
 }

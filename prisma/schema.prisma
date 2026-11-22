@@ -176,6 +176,10 @@ enum DocumentKind {
   OWNER_ID
   OWNERSHIP_PROOF
   MANAGEMENT_AUTHORIZATION
+  /// Licence or permit to operate the place.
+  OPERATING_LICENSE
+  /// Agreement with a third party who manages the place.
+  MANAGEMENT_AGREEMENT
   OTHER
 }
 
@@ -221,6 +225,12 @@ model Listing {
   rejectionReason   String?
   addressLine       String
   district          String
+  /// Official location (Rwanda): province, sector, cell, village with its code (district stays in `district`).
+  province      String?
+  sector        String?
+  cell          String?
+  village       String?
+  villageCode   String?
   city              String
   country           String              @default("RW")
   lat               Float
@@ -277,7 +287,19 @@ model Listing {
   commissionBps     Int?
   @@index([status, city])
   @@index([hostId])
+  @@index([villageCode])
   @@map("listing")
+}
+
+/// What a place photo shows (rooms, bathroom, kitchen, living room, outside, other facilities).
+enum PhotoKind {
+  GENERAL
+  ROOM
+  BATHROOM
+  KITCHEN
+  LIVING_ROOM
+  EXTERIOR
+  FACILITY
 }
 
 model ListingPhoto {
@@ -288,6 +310,7 @@ model ListingPhoto {
   publicId  String
   width     Int
   height    Int
+  kind      PhotoKind @default(GENERAL)
   position  Int
 
   @@unique([listingId, position])
@@ -1031,6 +1054,12 @@ model Restaurant {
   phone        String?
   addressLine  String
   district     String
+  /// Official location (Rwanda): province, sector, cell, village with its code (district stays in `district`).
+  province      String?
+  sector        String?
+  cell          String?
+  village       String?
+  villageCode   String?
   city         String
   lat          Float
   lng          Float

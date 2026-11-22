@@ -9,6 +9,8 @@ export const restaurantInput = z.object({
   addressLine: text(120).min(2),
   district: text(60).min(2),
   city: text(60).min(2),
+  /** The official village (Rwanda); the province, district, sector, cell and village names are set from it on save. */
+  villageCode: z.string().trim().min(1, "location").max(20),
   lat: z.number().min(-3).max(0),
   lng: z.number().min(28).max(31.5),
   openingHours: text(120).default(""),

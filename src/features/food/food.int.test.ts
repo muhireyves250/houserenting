@@ -12,6 +12,7 @@ const base = {
   addressLine: "Lake road",
   district: "Rubavu",
   city: "Gisenyi",
+  villageCode: "RW-V-05836",
   lat: -1.7,
   lng: 29.26,
   openingHours: "",

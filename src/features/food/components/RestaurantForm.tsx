@@ -1,10 +1,12 @@
 "use client";
 
+import { EMPTY_LOCATION, LocationPicker } from "@/features/locations/LocationPicker";
+import { locationCodesAction } from "@/features/locations/actions";
 import { PersonPicker } from "@/features/admin/components/PersonPicker";
 import dynamic from "next/dynamic";
 import { ImagePlus } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { Button } from "@/components/ui/Button";
 import { AreaField, Card, Field, SelectField } from "@/features/hosting/components/fields";
 import { useRouter } from "@/i18n/navigation";
@@ -25,6 +27,7 @@ export const EMPTY_RESTAURANT: RestaurantInput = {
   addressLine: "",
   district: "",
   city: "Kigali",
+  villageCode: "",
   lat: -1.9441,
   lng: 30.0619,
   openingHours: "",
@@ -55,6 +58,13 @@ export function RestaurantForm({
   after: string;
 }) {
   const t = useTranslations("Food");
+  const tLoc = useTranslations("Locations");
+  // A saved restaurant opens the location picker on its village (codes looked up once).
+  const [locationCodes, setLocationCodes] = useState<Record<string, string> | null | undefined>(initial.villageCode ? undefined : null);
+  useEffect(() => {
+    if (!initial.villageCode) return;
+    locationCodesAction(initial.villageCode).then((c) => setLocationCodes(c ?? null));
+  }, [initial.villageCode]);
   const router = useRouter();
   const [form, setForm] = useState<RestaurantInput>(initial);
   const [ownerEmail, setOwnerEmail] = useState("");
@@ -147,10 +157,17 @@ export function RestaurantForm({
       <Card title={t("whereTitle")}>
         <div className="grid gap-3">
           <Field label={t("address")} value={form.addressLine} maxLength={120} onChange={(e) => set("addressLine", e.target.value)} error={err("addressLine")} />
-          <div className="grid grid-cols-2 gap-3">
-            <Field label={t("district")} value={form.district} maxLength={60} onChange={(e) => set("district", e.target.value)} error={err("district")} />
-            <Field label={t("city")} value={form.city} maxLength={60} onChange={(e) => set("city", e.target.value)} error={err("city")} />
-          </div>
+          {/* Official Rwanda locations only: province down to village. */}
+          {locationCodes !== undefined && (
+            <LocationPicker
+              key={initial?.villageCode || "new"}
+              value={{ ...EMPTY_LOCATION, district: form.district, villageCode: form.villageCode ?? "" }}
+              startCodes={locationCodes}
+              error={err("villageCode") ? tLoc("required") : undefined}
+              onChange={(v) => setForm((f) => ({ ...f, district: v.district || f.district, villageCode: v.villageCode }))}
+            />
+          )}
+          <Field label={t("city")} value={form.city} maxLength={60} onChange={(e) => set("city", e.target.value)} error={err("city")} />
           <div className="h-64 overflow-hidden rounded-2xl border border-line/70">
             <MapPicker lat={form.lat} lng={form.lng} label={t("pin")} onChange={(lat, lng) => setForm((f) => ({ ...f, lat, lng }))} />
           </div>

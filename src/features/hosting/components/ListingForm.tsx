@@ -3,10 +3,12 @@
 import { Check, LoaderCircle } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useLocale, useTranslations } from "next-intl";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { PLACE_TYPES } from "@/features/search/params";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
+import { LocationPicker } from "@/features/locations/LocationPicker";
+import { locationCodesAction } from "@/features/locations/actions";
 import { adminSaveListingAction, saveListingAction } from "../actions";
 import { FACILITIES, RATE_UNITS, rateUnitsFor, type ListingInput } from "../validation";
 import { AreaField, Card, Chip, Field, SelectField } from "./fields";
@@ -30,6 +32,11 @@ export const EMPTY_LISTING: ListingInput = {
   addressLine: "",
   district: "",
   city: "Kigali",
+  villageCode: "",
+  province: null,
+  sector: null,
+  cell: null,
+  village: null,
   lat: KIGALI.lat,
   lng: KIGALI.lng,
   sizeM2: 0,
@@ -85,6 +92,12 @@ export function ListingForm({
   staff?: { ownerId: string | null };
 }) {
   const t = useTranslations("Host");
+  // A saved place opens the location picker on its village (codes looked up once).
+  const [locationCodes, setLocationCodes] = useState<Record<string, string> | null | undefined>(initial.villageCode ? undefined : null);
+  useEffect(() => {
+    if (!initial.villageCode) return;
+    locationCodesAction(initial.villageCode).then((c) => setLocationCodes(c ?? null));
+  }, [initial.villageCode]);
   const tType = useTranslations("ListingType");
   const tFacility = useTranslations("Facility");
   const tLaundry = useTranslations("Laundry");
@@ -204,9 +217,16 @@ export function ListingForm({
       </Card>
 
       <Card title={t("sections.location")} id="location">
-        <div className="grid gap-3 sm:grid-cols-2">
-          <Field label={t("fields.address")} className="sm:col-span-2" value={form.addressLine} onChange={(e) => set("addressLine", e.target.value)} error={err("addressLine")} />
-          <Field label={t("fields.district")} value={form.district} onChange={(e) => set("district", e.target.value)} error={err("district")} />
+        {/* Official Rwanda locations only: province down to village (search or choose level by level). */}
+        {locationCodes !== undefined && <LocationPicker
+          key={initial.villageCode || "new"}
+          value={{ province: form.province ?? "", district: form.district, sector: form.sector ?? "", cell: form.cell ?? "", village: form.village ?? "", villageCode: form.villageCode }}
+          startCodes={locationCodes}
+          error={err("villageCode") ? t("errors.location") : undefined}
+          onChange={(v) => setForm((f) => ({ ...f, province: v.province || null, district: v.district || f.district, sector: v.sector || null, cell: v.cell || null, village: v.village || null, villageCode: v.villageCode }))}
+        />}
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          <Field label={t("fields.address")} value={form.addressLine} onChange={(e) => set("addressLine", e.target.value)} error={err("addressLine")} />
           <Field label={t("fields.city")} value={form.city} onChange={(e) => set("city", e.target.value)} error={err("city")} />
         </div>
         <p className={cn("mt-4 mb-2 text-[13px]", err("lat") || err("lng") ? "font-medium text-danger" : "text-muted")}>

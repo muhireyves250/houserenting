@@ -1,4 +1,5 @@
 import "server-only";
+import { pathOfVillage } from "@/features/locations/rwanda";
 import type { Prisma } from "@/generated/prisma/client";
 import { audit } from "@/features/audit/service";
 import { newReference } from "@/features/bookings/reference";
@@ -56,7 +57,10 @@ export async function saveRestaurant(actor: Actor, id: string | null, raw: Resta
   if (id === null && !(await canAddRestaurant(actor))) return { ok: false, error: "notAllowed" };
   const parsed = restaurantInput.safeParse(raw);
   if (!parsed.success) return { ok: false, errors: errorsOf(parsed.error.issues) };
-  const data = parsed.data;
+  // Only official locations: the names come from the village chosen, never from what was typed.
+  const place = pathOfVillage(parsed.data.villageCode);
+  if (!place) return { ok: false, errors: { villageCode: "location" } };
+  const data = { ...parsed.data, ...place };
   if (data.listingId) {
     const listing = await db.listing.findUnique({ where: { id: data.listingId }, select: { hostId: true } });
     if (!listing || (!canStaff(actor, "food") && listing.hostId !== (ownerId ?? actor.id))) data.listingId = null;

@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { canStaff } from "@/lib/roles";
 import type { Actor } from "./status-service";
 
-export const DOCUMENT_KINDS = ["OWNER_ID", "OWNERSHIP_PROOF", "MANAGEMENT_AUTHORIZATION", "OTHER"] as const;
+export const DOCUMENT_KINDS = ["OWNERSHIP_PROOF", "OWNER_ID", "OPERATING_LICENSE", "MANAGEMENT_AGREEMENT", "MANAGEMENT_AUTHORIZATION", "OTHER"] as const;
 export type DocumentKind = (typeof DOCUMENT_KINDS)[number];
 export const DOCUMENT_MAX_BYTES = 8 * 1024 * 1024;
 export const DOCUMENT_TYPES = ["application/pdf", "image/jpeg", "image/png", "image/webp"] as const;

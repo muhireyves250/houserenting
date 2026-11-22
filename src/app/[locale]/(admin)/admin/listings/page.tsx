@@ -11,11 +11,13 @@ import { cn } from "@/lib/cn";
 import { requireStaff } from "@/lib/permissions";
 import { contractsEnding } from "@/features/places/status-service";
 import { db } from "@/lib/db";
+import { LocationFilter } from "@/features/locations/LocationFilter";
+import { nameOf, villageCodesUnder } from "@/features/locations/rwanda";
 import { PLACE_TYPES, type PlaceType } from "@/features/search/params";
 
 const STATUSES = ["PENDING_REVIEW", "PUBLISHED", "CHANGES_REQUESTED", "HIDDEN", "PAUSED", "SUSPENDED", "REJECTED", "DRAFT", "ARCHIVED"] as const;
 type Status = (typeof STATUSES)[number];
-type Props = { searchParams: Promise<{ status?: string; type?: string }> };
+type Props = { searchParams: Promise<{ status?: string; type?: string; loc?: string }> };
 
 export default async function AdminListingsPage({ searchParams }: Props) {
   await requireStaff("listings", "/admin/listings");
@@ -26,7 +28,10 @@ export default async function AdminListingsPage({ searchParams }: Props) {
   // With no filter chosen: what waits for review, or everything when nothing does.
   const endingSoon = raw === "ending";
   let status: Status | undefined = STATUSES.includes(raw as Status) ? (raw as Status) : raw === "all" || endingSoon ? undefined : "PENDING_REVIEW";
-  let listings = await allListings(status, type);
+  // Official location filter (province down to village): every village under the chosen place.
+  const loc = params.loc && nameOf(params.loc) ? params.loc : null;
+  const villages = loc ? villageCodesUnder(loc) : undefined;
+  let listings = await allListings(status, type, villages);
   // Agreements ending within a month (from the dashboard's renewal reminder).
   if (endingSoon) {
     const ids = new Set((await contractsEnding()).map((l) => l.id));
@@ -34,7 +39,7 @@ export default async function AdminListingsPage({ searchParams }: Props) {
   }
   if (!raw && listings.length === 0) {
     status = undefined;
-    listings = await allListings(undefined, type);
+    listings = await allListings(undefined, type, villages);
   }
   const [t, tHost, tType, tPlaces] = await Promise.all([
     getTranslations("Admin"),
@@ -50,7 +55,7 @@ export default async function AdminListingsPage({ searchParams }: Props) {
   ]);
   const typeCount = (t: PlaceType) => typeCounts.find((c) => c.type === t)?._count._all ?? 0;
   const keep = (extra: Record<string, string | undefined>) =>
-    Object.fromEntries(Object.entries({ status: endingSoon ? "ending" : (status ?? (raw === "all" ? "all" : undefined)), type, ...extra }).filter(([, v]) => v)) as Record<string, string>;
+    Object.fromEntries(Object.entries({ status: endingSoon ? "ending" : (status ?? (raw === "all" ? "all" : undefined)), type, loc: loc ?? undefined, ...extra }).filter(([, v]) => v)) as Record<string, string>;
   const countOf = (s: Status) => counts.find((c) => c.status === s)?._count._all ?? 0;
   const total = counts.filter((c) => c.status !== "ARCHIVED").reduce((n, c) => n + c._count._all, 0);
   type Filter = { value: Status | "ending" | "all"; label: string; count: number };
@@ -108,6 +113,7 @@ export default async function AdminListingsPage({ searchParams }: Props) {
             );
           })}
         </div>
+        <LocationFilter pathname="/admin/listings" current={loc} keep={keep({ loc: undefined })} />
       </Toolbar>
       {/* The card stays put; its rows scroll inside (no scrollbar shown). */}
       <div className="no-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain rounded-2xl border border-line bg-surface">

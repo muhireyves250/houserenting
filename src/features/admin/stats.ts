@@ -96,9 +96,9 @@ export function latestBookings(take = 6) {
   });
 }
 
-export function allListings(status?: ListingStatus, type?: PlaceType) {
+export function allListings(status?: ListingStatus, type?: PlaceType, villageCodes?: string[]) {
   return db.listing.findMany({
-    where: { ...(status ? { status } : { status: { not: "ARCHIVED" as const } }), ...(type ? { type } : {}) },
+    where: { ...(status ? { status } : { status: { not: "ARCHIVED" as const } }), ...(type ? { type } : {}), ...(villageCodes ? { villageCode: { in: villageCodes } } : {}) },
     orderBy: { updatedAt: "desc" },
     take: 200,
     select: {

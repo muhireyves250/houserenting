@@ -90,6 +90,7 @@ export default async function HostRestaurantPage({ params }: Props) {
               phone: r.phone,
               addressLine: r.addressLine,
               district: r.district,
+              villageCode: r.villageCode ?? "",
               city: r.city,
               lat: r.lat,
               lng: r.lng,

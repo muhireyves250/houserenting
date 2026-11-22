@@ -45,7 +45,7 @@ export default async function AdminEditListingPage({ params }: Props) {
         </div>
         <div className="flex max-w-3xl min-w-0 flex-col gap-4 lg:order-1">
           <p className="rounded-2xl bg-primary-soft px-5 py-3 text-[14px] text-ink">{tPlaces("staffEditNote")}</p>
-          <ListingPhotosEditor listingId={id} photos={listing.photos.map((p) => ({ id: p.id, url: p.url }))} enabled={uploadsEnabled()} />
+          <ListingPhotosEditor listingId={id} photos={listing.photos.map((p) => ({ id: p.id, url: p.url, kind: p.kind }))} enabled={uploadsEnabled()} />
           <ListingForm listingId={id} initial={toListingInput(listing)} live={false} staff={{ ownerId: listing.hostId }} />
           {hasRooms && (
             <RoomsEditor

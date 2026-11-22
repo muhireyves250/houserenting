@@ -49,7 +49,8 @@ export default async function EditListingPage({ params }: Props) {
 
   const initial = toListingInput(listing);
 
-  const canSubmit = listing.status === "DRAFT" || listing.status === "REJECTED" || listing.status === "CHANGES_REQUESTED";
+  // Photos are required before sending it for review.
+  const canSubmit = (listing.status === "DRAFT" || listing.status === "REJECTED" || listing.status === "CHANGES_REQUESTED") && listing.photos.length > 0;
   const reasonShown = ["REJECTED", "CHANGES_REQUESTED", "HIDDEN", "SUSPENDED"].includes(listing.status) && listing.rejectionReason;
   const payoutNeeded = owner && listing.operator === "OWNER" && !payout?.verifiedAt;
 
@@ -99,7 +100,7 @@ export default async function EditListingPage({ params }: Props) {
       <div className="flex flex-col gap-4">
         {editable && (
           <>
-            <ListingPhotosEditor listingId={listing.id} photos={listing.photos.map((p) => ({ id: p.id, url: p.url }))} enabled={uploadsEnabled()} />
+            <ListingPhotosEditor listingId={listing.id} photos={listing.photos.map((p) => ({ id: p.id, url: p.url, kind: p.kind }))} enabled={uploadsEnabled()} />
             <ListingForm listingId={listing.id} initial={initial} live={false} />
             {(listing.bookingModel !== "WHOLE_PROPERTY" || rooms.length > 0) && (
               <RoomsEditor

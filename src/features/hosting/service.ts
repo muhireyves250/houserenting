@@ -1,4 +1,5 @@
 import "server-only";
+import { pathOfVillage } from "@/features/locations/rwanda";
 import { OWNER_EDITABLE } from "@/features/listings/lifecycle";
 import { audit } from "@/features/audit/service";
 import { notifyAdmins } from "@/features/notifications/service";
@@ -55,8 +56,11 @@ export async function saveListing(
     return { ok: false, errors };
   }
   const { rates, availableFrom, availableUntil, ...rest } = parsed.data;
+  // Only official locations: the names come from the village chosen, never from what was typed.
+  const place = pathOfVillage(rest.villageCode);
+  if (!place) return { ok: false, errors: { villageCode: "location" } };
   const asDate = (v: string | null) => (v ? new Date(`${v}T00:00:00Z`) : null);
-  const fields = { ...rest, availableFrom: asDate(availableFrom), availableUntil: asDate(availableUntil) };
+  const fields = { ...rest, ...place, availableFrom: asDate(availableFrom), availableUntil: asDate(availableUntil) };
 
   return db.$transaction(async (tx) => {
     if (id === null) {
@@ -105,6 +109,33 @@ export async function addPhoto(
     if (!listing || listing.photos.length >= MAX_PHOTOS) return false;
     const position = Math.max(-1, ...listing.photos.map((p) => p.position)) + 1;
     await tx.listingPhoto.create({ data: { listingId, position, ...photo } });
+    return true;
+  });
+}
+
+export const PHOTO_KINDS = ["GENERAL", "ROOM", "BATHROOM", "KITCHEN", "LIVING_ROOM", "EXTERIOR", "FACILITY"] as const;
+export type PhotoKind = (typeof PHOTO_KINDS)[number];
+
+/** Says what a photo shows (room, bathroom, kitchen, living room, outside, other facilities). */
+export async function setPhotoKind(hostId: string, listingId: string, photoId: string, kind: PhotoKind): Promise<boolean> {
+  if (!PHOTO_KINDS.includes(kind)) return false;
+  const { count } = await db.listingPhoto.updateMany({ where: { id: photoId, listingId, listing: { hostId } }, data: { kind } });
+  return count === 1;
+}
+
+/** Moves a photo one place earlier or later (the first photo is the cover). */
+export async function movePhoto(hostId: string, listingId: string, photoId: string, by: -1 | 1): Promise<boolean> {
+  return db.$transaction(async (tx) => {
+    const photos = await tx.listingPhoto.findMany({ where: { listingId, listing: { hostId } }, orderBy: { position: "asc" }, select: { id: true, position: true } });
+    const i = photos.findIndex((p) => p.id === photoId);
+    const j = i + by;
+    if (i < 0 || j < 0 || j >= photos.length) return false;
+    const a = photos[i]!;
+    const b = photos[j]!;
+    // Swap positions through a free slot (positions are unique per place).
+    await tx.listingPhoto.update({ where: { id: a.id }, data: { position: -1 - a.position } });
+    await tx.listingPhoto.update({ where: { id: b.id }, data: { position: a.position } });
+    await tx.listingPhoto.update({ where: { id: a.id }, data: { position: b.position } });
     return true;
   });
 }

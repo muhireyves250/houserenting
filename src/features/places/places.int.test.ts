@@ -37,6 +37,8 @@ async function place(status: "DRAFT" | "PUBLISHED" = "PUBLISHED") {
       rates: { create: [{ unit: "NIGHT", price: 80000 }] },
     },
   });
+  // Photos are required before review or going live.
+  await db.listingPhoto.create({ data: { listingId: "house", url: "https://res.cloudinary.com/x/1.jpg", publicId: "x/1", width: 800, height: 600, position: 0 } });
 }
 
 const book = (over: Partial<RentalRequest> = {}) =>
@@ -103,6 +105,7 @@ describe("listing status", () => {
       addressLine: "KG 1",
       district: "Rubavu",
       city: "Gisenyi",
+      villageCode: "RW-V-05836",
       lat: -1.7,
       lng: 29.26,
       sizeM2: 90,

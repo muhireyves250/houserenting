@@ -25,6 +25,8 @@ beforeEach(async () => {
 async function created() {
   const result = await saveListing("host", null, validListing);
   if (!result.ok) throw new Error("save failed");
+  // Photos are required before review.
+  await db.listingPhoto.create({ data: { listingId: result.id, url: "https://res.cloudinary.com/x/1.jpg", publicId: "x/1", width: 800, height: 600, position: 0 } });
   return result.id;
 }
 
@@ -91,6 +93,7 @@ describe("hosting a place", () => {
 
   it("accepts photos only from our image host, for the owner", async () => {
     const id = await created();
+    await db.listingPhoto.deleteMany({ where: { listingId: id } });
     const photo = { url: `${CLOUD}image/upload/v1/a.jpg`, publicId: "a", width: 1200, height: 800 };
     expect(await addPhoto("other", id, photo, CLOUD)).toBe(false);
     expect(await addPhoto("host", id, { ...photo, url: "https://evil.example/a.jpg" }, CLOUD)).toBe(false);
@@ -154,5 +157,22 @@ describe("owner dashboard", () => {
     expect(dash.months.map((m) => m.month)).toEqual(["2026-06", "2026-07", "2026-08", "2026-09", "2026-10", "2026-11"]);
     expect(dash.months.find((m) => m.month === "2026-11")?.amount).toBe(45000);
     expect(dash.months.find((m) => m.month === "2026-09")?.amount).toBe(20000);
+  });
+});
+
+describe("photos are required", () => {
+  it("a place without photos can't be sent for review", async () => {
+    const result = await saveListing("host", null, validListing);
+    if (!result.ok) throw new Error("save failed");
+    expect(await submitForReview("host", result.id)).toBe(false);
+    await db.listingPhoto.create({ data: { listingId: result.id, url: "https://res.cloudinary.com/x/1.jpg", publicId: "x/1", width: 800, height: 600, position: 0 } });
+    expect(await submitForReview("host", result.id)).toBe(true);
+  });
+
+  it("only official villages are accepted as the location; the names come from the village", async () => {
+    expect(await saveListing("host", null, { ...validListing, villageCode: "RW-V-99999" })).toMatchObject({ ok: false, errors: { villageCode: "location" } });
+    const result = await saveListing("host", null, { ...validListing, district: "typed by hand" });
+    if (!result.ok) throw new Error("save failed");
+    expect(await db.listing.findUniqueOrThrow({ where: { id: result.id } })).toMatchObject({ province: "Kigali City", district: "Gasabo", sector: "Kimihurura", cell: "Kamukina", village: "Inyamibwa", villageCode: "RW-V-00582" });
   });
 });

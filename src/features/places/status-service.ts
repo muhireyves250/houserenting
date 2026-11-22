@@ -6,7 +6,7 @@ import { db } from "@/lib/db";
 import { canStaff } from "@/lib/roles";
 
 export type Actor = { id: string; role?: string | null };
-export type MoveResult = { ok: true } | { ok: false; error: "notFound" | "notAllowed" | "wrongStatus" | "reasonNeeded" | "payoutMissing" | "noPrices" };
+export type MoveResult = { ok: true } | { ok: false; error: "notFound" | "notAllowed" | "wrongStatus" | "reasonNeeded" | "payoutMissing" | "noPrices" | "noPhotos" };
 
 const GOES_LIVE: ListingMove[] = ["approve", "publishDirect", "unhide", "resume", "reinstate"];
 // Checked payout details are needed the first time a place is published; restoring a place that was live doesn't ask again.
@@ -21,11 +21,13 @@ export async function moveListing(actor: Actor, listingId: string, move: Listing
   return db.$transaction(async (tx) => {
     const listing = await tx.listing.findUnique({
       where: { id: listingId },
-      select: { status: true, hostId: true, title: true, operator: true, publishedAt: true, _count: { select: { rates: true } } },
+      select: { status: true, hostId: true, title: true, operator: true, publishedAt: true, _count: { select: { rates: true, photos: true } } },
     });
     if (!listing) return { ok: false, error: "notFound" } as const;
     const check = checkMove(move, listing.status, { isStaff: canStaff(actor, "listings"), isOwner: listing.hostId === actor.id }, why);
     if (!check.ok) return check;
+    // Photos are required: a place is sent for review (or put live) only with at least one.
+    if ((move === "submit" || GOES_LIVE.includes(move)) && listing._count.photos === 0) return { ok: false, error: "noPhotos" } as const;
     if (GOES_LIVE.includes(move)) {
       if (listing._count.rates === 0) return { ok: false, error: "noPrices" } as const;
       // Owners must be payable before their place takes bookings; places VIIPA runs itself don't need this.

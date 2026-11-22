@@ -72,6 +72,12 @@ export const listingInput = z
     addressLine: text(2, 120),
     district: text(2, 60),
     city: text(2, 60),
+    /** The official village (Rwanda); province, district, sector, cell and village names are set from it on save. */
+    villageCode: z.string().trim().min(1, "location").max(20),
+    province: z.string().max(60).nullable().optional(),
+    sector: z.string().max(60).nullable().optional(),
+    cell: z.string().max(60).nullable().optional(),
+    village: z.string().max(60).nullable().optional(),
     lat: z.number().min(LAT.min).max(LAT.max),
     lng: z.number().min(LNG.min).max(LNG.max),
     sizeM2: z.number().int().min(1).max(100_000),

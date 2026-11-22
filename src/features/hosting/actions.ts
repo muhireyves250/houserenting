@@ -10,7 +10,7 @@ import { canOn } from "@/features/places/access";
 import { canStaff } from "@/lib/roles";
 import type { SessionUser } from "@/lib/auth";
 import { getCurrentUser } from "@/lib/session";
-import { addPhoto, archiveListing, getHostListing, removePhoto, saveListing, submitForReview, type SaveResult } from "./service";
+import { addPhoto, archiveListing, getHostListing, removePhoto, saveListing, submitForReview, type SaveResult, movePhoto, setPhotoKind, type PhotoKind } from "./service";
 import type { ListingInput } from "./validation";
 
 const id = z.string().min(1).max(64);
@@ -118,6 +118,24 @@ export async function removePhotoAction(listingId: string, photoId: string): Pro
   const user = await getCurrentUser();
   if (!user || !id.safeParse(listingId).success || !id.safeParse(photoId).success) return { ok: false };
   const ok = await removePhoto(await ownerFor(user, listingId), listingId, photoId);
+  if (ok) refresh(listingId);
+  return { ok };
+}
+
+/** Says what a photo shows. */
+export async function setPhotoKindAction(listingId: string, photoId: string, kind: PhotoKind): Promise<{ ok: boolean }> {
+  const user = await getCurrentUser();
+  if (!user || !id.safeParse(listingId).success || !id.safeParse(photoId).success) return { ok: false };
+  const ok = await setPhotoKind(await ownerFor(user, listingId), listingId, photoId, kind);
+  if (ok) refresh(listingId);
+  return { ok };
+}
+
+/** Moves a photo earlier or later (the first one is the cover). */
+export async function movePhotoAction(listingId: string, photoId: string, by: -1 | 1): Promise<{ ok: boolean }> {
+  const user = await getCurrentUser();
+  if (!user || !id.safeParse(listingId).success || !id.safeParse(photoId).success || (by !== -1 && by !== 1)) return { ok: false };
+  const ok = await movePhoto(await ownerFor(user, listingId), listingId, photoId, by);
   if (ok) refresh(listingId);
   return { ok };
 }

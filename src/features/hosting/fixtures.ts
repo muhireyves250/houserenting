@@ -8,6 +8,8 @@ export const validListing: ListingInput = {
   addressLine: "KG 7 Ave",
   district: "Gasabo",
   city: "Kigali",
+  // Inyamibwa village, Kamukina cell, Kimihurura sector (official code).
+  villageCode: "RW-V-00582",
   lat: -1.95,
   lng: 30.09,
   sizeM2: 40,

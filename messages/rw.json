@@ -546,7 +546,9 @@
     "dayUseHint": "Hitamo itariki imwe: ukoresha aho hantu uwo munsi ukagenda nimugoroba.",
     "pickNightsBelow": "Hitamo amajoro yawe muri kalendari iri hasi.",
     "availabilityTitle": "Igihe kiri ubusa",
-    "availabilityHint": "Iminsi yafashwe iri mu mutuku. Kanda umunsi uri ubusa uwuhitemo."
+    "availabilityHint": "Iminsi yafashwe iri mu mutuku. Kanda umunsi uri ubusa uwuhitemo.",
+    "previousPhoto": "Ifoto ibanza",
+    "nextPhoto": "Ifoto ikurikira"
   },
   "Facility": {
     "KITCHEN": "Igikoni",
@@ -741,7 +743,8 @@
       "check": "Reba ahagaragajwe.",
       "failed": "Kubika byanze. Ongera ugerageze.",
       "lodgeUnits": "Lodge zibikwa ku ijoro cyangwa ku munsi gusa.",
-      "untilBeforeFrom": "Itariki ya nyuma igomba kuba nyuma y'iya mbere."
+      "untilBeforeFrom": "Itariki ya nyuma igomba kuba nyuma y'iya mbere.",
+      "location": "Hitamo umudugudu inzu iherereyemo (kuva ku ntara kugeza ku mudugudu)."
     },
     "save": "Bika",
     "saved": "Byabitswe",
@@ -890,6 +893,20 @@
       "tomorrow": "Ejo",
       "failed": "Ntibyakunze — ongera ugerageze.",
       "idNote": "Reba indangamuntu y'umushyitsi mbere yo kwandika ko yageze."
+    },
+    "photosRequired": "Amafoto arakenewe: shyiramo nibura imwe (ibyumba, ubwiherero, igikoni, uruganiriro, hanze).",
+    "photoKindLabel": "Iyi foto yerekana iki",
+    "photoEarlier": "Shyira imbere",
+    "photoLater": "Shyira inyuma",
+    "coverPhoto": "Iya mbere",
+    "photoKind": {
+      "GENERAL": "Rusange",
+      "ROOM": "Icyumba",
+      "BATHROOM": "Ubwiherero",
+      "KITCHEN": "Igikoni",
+      "LIVING_ROOM": "Uruganiriro",
+      "EXTERIOR": "Hanze",
+      "FACILITY": "Ibindi bikoresho"
     }
   },
   "Admin": {
@@ -1986,7 +2003,8 @@
       "reasonNeeded": "Andika impamvu.",
       "payoutMissing": "Uburyo nyir'inzu yishyurwamo bugomba kubanza kubikwa no kugenzurwa.",
       "noPrices": "Banza ushyireho nibura igiciro kimwe.",
-      "auth": "Ongera winjire."
+      "auth": "Ongera winjire.",
+      "noPhotos": "Banza ushyiremo nibura ifoto imwe."
     },
     "blocksTitle": "Iminsi ifunze n'isanwa",
     "noBlocks": "Nta minsi ifunze. Abashyitsi bashobora gufata iminsi yose ifunguye.",
@@ -2013,10 +2031,12 @@
     "documentsTitle": "Inyandiko",
     "documentsPrivate": "Ni ibanga: nyir'inzu n'abakozi ba VIIPA bonyine ni bo bazifungura. PDF cyangwa ifoto, kugeza kuri MB 8.",
     "docKind": {
-      "OWNER_ID": "Indangamuntu ya nyir'inzu",
-      "OWNERSHIP_PROOF": "Icyemezo cy'umutungo",
-      "MANAGEMENT_AUTHORIZATION": "Uruhushya rwo gucunga",
-      "OTHER": "Ikindi"
+      "OWNERSHIP_PROOF": "Ibyangombwa by'umutungo",
+      "OWNER_ID": "Indangamuntu cyangwa uruhushya rwa nyirayo",
+      "OPERATING_LICENSE": "Uruhushya rwo gukora",
+      "MANAGEMENT_AGREEMENT": "Amasezerano yo gucunga (ucunga utari nyirayo)",
+      "MANAGEMENT_AUTHORIZATION": "Uburenganzira bwo gucunga buhawe undi",
+      "OTHER": "Ibindi byangombwa"
     },
     "docKindLabel": "Ubwoko bw'inyandiko",
     "uploadDocument": "Ohereza inyandiko",
@@ -2998,5 +3018,19 @@
     "useMyLocation": "Koresha aho ndi",
     "denied": "Ntitwabashije kubona aho uri. Kanda ku ikarita cyangwa wimure akamenyetso ugashyire aho inzu iri.",
     "checkPin": "Akamenyetso kashyizwe aho uri. Reba ko kari ku nzu, niba atari ho ukimure."
+  },
+  "Locations": {
+    "search": "Shakisha umurenge, akagari cyangwa umudugudu",
+    "choose": "Hitamo…",
+    "chooseAbove": "Banza uhitemo icyiciro kiri hejuru",
+    "level": {
+      "province": "Intara",
+      "district": "Akarere",
+      "sector": "Umurenge",
+      "cell": "Akagari",
+      "village": "Umudugudu"
+    },
+    "clear": "Ahantu hose",
+    "required": "Hitamo umudugudu (kuva ku ntara kugeza ku mudugudu)."
   }
 }

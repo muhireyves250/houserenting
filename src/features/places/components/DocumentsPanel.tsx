@@ -7,7 +7,7 @@ import { useRouter } from "@/i18n/navigation";
 import { deleteDocumentAction } from "../actions";
 
 type Doc = { id: string; kind: string; filename: string; size: number; createdAt: Date };
-const KINDS = ["OWNER_ID", "OWNERSHIP_PROOF", "MANAGEMENT_AUTHORIZATION", "OTHER"] as const;
+const KINDS = ["OWNERSHIP_PROOF", "OWNER_ID", "OPERATING_LICENSE", "MANAGEMENT_AGREEMENT", "MANAGEMENT_AUTHORIZATION", "OTHER"] as const;
 
 /** Private paperwork for a place: only its owner and staff can open it. PDF or photo, up to 8 MB. */
 export function DocumentsPanel({ listingId, documents }: { listingId: string; documents: Doc[] }) {
@@ -15,7 +15,7 @@ export function DocumentsPanel({ listingId, documents }: { listingId: string; do
   const locale = useLocale();
   const router = useRouter();
   const file = useRef<HTMLInputElement>(null);
-  const [kind, setKind] = useState<(typeof KINDS)[number]>("OWNER_ID");
+  const [kind, setKind] = useState<(typeof KINDS)[number]>("OWNERSHIP_PROOF");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [pending, start] = useTransition();

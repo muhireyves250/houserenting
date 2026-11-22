@@ -1,9 +1,9 @@
 "use client";
 
-import { LayoutGrid, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, LayoutGrid, X } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useModal } from "@/lib/use-modal";
 import { cn } from "@/lib/cn";
 
@@ -14,6 +14,7 @@ export function ListingPhotos({ title, photos }: { title: string; photos: Photo[
   const t = useTranslations("Listings");
   const [current, setCurrent] = useState(1);
   const [viewerAt, setViewerAt] = useState<number | null>(null);
+  const strip = useRef<HTMLDivElement>(null);
   const alt = (index: number) => t("photoAlt", { title, number: index + 1 });
   const mosaic = photos.slice(0, 5);
 
@@ -22,6 +23,7 @@ export function ListingPhotos({ title, photos }: { title: string; photos: Photo[
       {/* Phones */}
       <div className="relative -mx-4 md:hidden">
         <div
+          ref={strip}
           className="flex aspect-[4/3] snap-x snap-mandatory overflow-x-auto [scrollbar-width:none]"
           onScroll={(event) => {
             const el = event.currentTarget;
@@ -34,6 +36,17 @@ export function ListingPhotos({ title, photos }: { title: string; photos: Photo[
             </button>
           ))}
         </div>
+        {/* Arrows on the strip too (as well as swiping). */}
+        {photos.length > 1 && (
+          <>
+            <button type="button" aria-label={t("previousPhoto")} onClick={() => strip.current?.scrollBy({ left: -strip.current.clientWidth, behavior: "smooth" })} className="absolute top-1/2 left-3 flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-ink shadow disabled:opacity-0" disabled={current === 1}>
+              <ChevronLeft className="size-5" aria-hidden="true" />
+            </button>
+            <button type="button" aria-label={t("nextPhoto")} onClick={() => strip.current?.scrollBy({ left: strip.current.clientWidth, behavior: "smooth" })} className="absolute top-1/2 right-3 flex size-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-ink shadow disabled:opacity-0" disabled={current === photos.length}>
+              <ChevronRight className="size-5" aria-hidden="true" />
+            </button>
+          </>
+        )}
         <span className="absolute right-3 bottom-9 rounded-full bg-ink/70 px-2.5 py-1 text-xs font-medium text-white tabular-nums">
           {t("photoCount", { current, total: photos.length })}
         </span>
@@ -78,45 +91,66 @@ export function ListingPhotos({ title, photos }: { title: string; photos: Photo[
   );
 }
 
-/** Full-screen scroll of every photo, starting at the one clicked. */
+/** Full-screen slider: one photo at a time with arrows (and the keyboard's arrow keys), a counter and thumbnails. */
 function PhotoViewer({ title, photos, startAt, onClose }: { title: string; photos: Photo[]; startAt: number; onClose: () => void }) {
   const t = useTranslations("Listings");
   const ref = useRef<HTMLDivElement>(null);
-  const titleId = useId();
+  const [at, setAt] = useState(startAt);
   useModal(ref, onClose);
+  const go = (by: number) => setAt((i) => (i + by + photos.length) % photos.length);
 
   useEffect(() => {
-    ref.current?.querySelector(`[data-photo="${startAt}"]`)?.scrollIntoView?.({ block: "center" });
-  }, [startAt]);
+    const key = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight") setAt((i) => (i + 1) % photos.length);
+      if (e.key === "ArrowLeft") setAt((i) => (i - 1 + photos.length) % photos.length);
+    };
+    window.addEventListener("keydown", key);
+    return () => window.removeEventListener("keydown", key);
+  }, [photos.length]);
 
+  useEffect(() => {
+    ref.current?.querySelector(`[data-thumb="${at}"]`)?.scrollIntoView?.({ inline: "center", block: "nearest" });
+  }, [at]);
+
+  const photo = photos[at]!;
+  const arrow = "absolute top-1/2 z-10 flex size-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-ink shadow-lg transition-transform hover:scale-105 active:scale-95";
   return (
-    <div
-      ref={ref}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby={titleId}
-      className="fixed inset-0 z-[60] overflow-y-auto bg-surface motion-safe:animate-[fade-in_250ms_ease-out]"
-    >
-      <div className="sticky top-0 z-10 flex items-center justify-between border-b border-line/70 bg-surface/90 px-4 py-3 backdrop-blur-md md:px-8">
-        <button
-          type="button"
-          aria-label={t("closePhotos")}
-          onClick={onClose}
-          className="flex size-10 items-center justify-center rounded-full transition-colors hover:bg-canvas"
-        >
+    <div ref={ref} role="dialog" aria-modal="true" aria-label={t("allPhotos")} className="fixed inset-0 z-[60] flex flex-col bg-[#0b1220] text-white motion-safe:animate-[fade-in_250ms_ease-out]">
+      <div className="flex items-center justify-between px-4 py-3 md:px-8">
+        <button type="button" aria-label={t("closePhotos")} onClick={onClose} className="flex size-10 items-center justify-center rounded-full hover:bg-white/10">
           <X className="size-5" aria-hidden="true" />
         </button>
-        <h2 id={titleId} className="font-display text-base font-bold">
-          {t("allPhotos")}
+        <h2 aria-live="polite" className="text-[14px] font-semibold tabular-nums">
+          {t("photoCount", { current: at + 1, total: photos.length })}
         </h2>
         <span className="w-10" aria-hidden="true" />
       </div>
-      <div className="mx-auto grid max-w-4xl grid-cols-2 gap-2 px-4 py-8 md:px-8">
-        {photos.map((photo, index) => (
-          // Every third photo spans the full width, the rest pair up: a calm editorial rhythm.
-          <div key={photo.id} data-photo={index} className={cn("relative overflow-hidden rounded-lg bg-canvas", index % 3 === 0 ? "col-span-2 aspect-[3/2]" : "aspect-square")}>
-            <Image src={photo.url} alt={t("photoAlt", { title, number: index + 1 })} fill sizes="(min-width: 896px) 896px, 100vw" className="object-cover" />
-          </div>
+      <div className="relative min-h-0 flex-1">
+        <Image key={photo.id} src={photo.url} alt={t("photoAlt", { title, number: at + 1 })} fill sizes="100vw" className="object-contain motion-safe:animate-[fade-in_200ms_ease-out]" />
+        {photos.length > 1 && (
+          <>
+            <button type="button" aria-label={t("previousPhoto")} onClick={() => go(-1)} className={`${arrow} left-3 md:left-6`}>
+              <ChevronLeft className="size-6" aria-hidden="true" />
+            </button>
+            <button type="button" aria-label={t("nextPhoto")} onClick={() => go(1)} className={`${arrow} right-3 md:right-6`}>
+              <ChevronRight className="size-6" aria-hidden="true" />
+            </button>
+          </>
+        )}
+      </div>
+      <div className="no-scrollbar flex gap-2 overflow-x-auto px-4 py-3 md:justify-center md:px-8" data-lenis-prevent>
+        {photos.map((p, index) => (
+          <button
+            key={p.id}
+            type="button"
+            data-thumb={index}
+            aria-label={t("photoAlt", { title, number: index + 1 })}
+            aria-current={index === at}
+            onClick={() => setAt(index)}
+            className={cn("relative h-14 w-20 shrink-0 overflow-hidden rounded-lg ring-2 transition-opacity", index === at ? "ring-white" : "opacity-60 ring-transparent hover:opacity-100")}
+          >
+            <Image src={p.url} alt="" fill sizes="80px" className="object-cover" />
+          </button>
         ))}
       </div>
     </div>
