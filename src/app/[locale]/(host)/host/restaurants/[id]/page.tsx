@@ -73,9 +73,10 @@ export default async function HostRestaurantPage({ params }: Props) {
             <MenuEditor restaurantId={r.id} items={r.menu} />
           </Card>
         )}
-        {canRestaurant(role, "team") && (
+        {(role === "owner" || role === "manager") && r.team.length > 0 && (
+          // VIIPA sets who works here; the owner and managers see the team.
           <Card title={t("teamTitle")}>
-            <RestaurantTeam restaurantId={r.id} members={r.team} />
+            <RestaurantTeam restaurantId={r.id} members={r.team} readOnly />
           </Card>
         )}
         {canRestaurant(role, "edit") && (

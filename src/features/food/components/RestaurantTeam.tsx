@@ -9,7 +9,7 @@ import { addRestaurantMemberAction, removeRestaurantMemberAction } from "../acti
 import type { RestaurantTeamRole } from "../service";
 
 /** The owner adds a manager, kitchen staff or delivery people. */
-export function RestaurantTeam({ restaurantId, members, staff = false }: { restaurantId: string; staff?: boolean; members: { id: string; role: RestaurantTeamRole; user: { name: string; email: string; emailVerified?: boolean } }[] }) {
+export function RestaurantTeam({ restaurantId, members, staff = false, readOnly = false }: { restaurantId: string; staff?: boolean; readOnly?: boolean; members: { id: string; role: RestaurantTeamRole; user: { name: string; email: string; emailVerified?: boolean } }[] }) {
   const t = useTranslations("Food");
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -32,6 +32,7 @@ export function RestaurantTeam({ restaurantId, members, staff = false }: { resta
                 </span>
                 {m.user.emailVerified === false && <span className="mt-0.5 inline-block rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800">{tPicker("waitingConfirm")}</span>}
               </span>
+              {!readOnly && (
               <button
                 type="button"
                 aria-label={t("removeMember", { name: m.user.name })}
@@ -46,10 +47,13 @@ export function RestaurantTeam({ restaurantId, members, staff = false }: { resta
               >
                 <Trash2 className="size-4" aria-hidden="true" />
               </button>
+              )}
             </li>
           ))}
         </ul>
       )}
+      {!readOnly && (
+        <>
       <form
         className="flex flex-col gap-2 sm:flex-row"
         onSubmit={(e) => {
@@ -80,6 +84,8 @@ export function RestaurantTeam({ restaurantId, members, staff = false }: { resta
         </button>
       </form>
       <p className="text-xs text-muted">{t("rolesHint")}</p>
+        </>
+      )}
       {notice && <p role="status" className="text-[13px] font-medium text-emerald-700">{notice}</p>}
       {error && <p role="alert" className="text-[13px] font-medium text-danger">{error}</p>}
     </div>

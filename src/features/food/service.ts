@@ -17,7 +17,8 @@ export type RestaurantAction = "edit" | "menu" | "team" | "orders" | "deliver" |
 
 const ALLOWED: Record<RestaurantRole, readonly RestaurantAction[]> = {
   staff: ["edit", "menu", "team", "orders", "deliver", "pause"],
-  owner: ["edit", "menu", "team", "orders", "deliver", "pause"],
+  // Who works at a restaurant is set by VIIPA staff only; the owner sees the team.
+  owner: ["edit", "menu", "orders", "deliver", "pause"],
   manager: ["edit", "menu", "orders", "pause"],
   kitchen: ["orders"],
   courier: ["deliver"],

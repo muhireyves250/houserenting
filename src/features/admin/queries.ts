@@ -294,6 +294,9 @@ export function userForStaff(id: string) {
           updatedAt: true,
         },
       },
+      placeMembers: { orderBy: { createdAt: "asc" }, select: { id: true, role: true, listing: { select: { id: true, title: true } } } },
+      restaurantRoles: { orderBy: { createdAt: "asc" }, select: { id: true, role: true, restaurant: { select: { id: true, name: true } } } },
+      restaurantsOwned: { select: { id: true, name: true } },
     },
   });
 }

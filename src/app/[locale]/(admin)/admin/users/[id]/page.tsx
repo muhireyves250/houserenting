@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Avatar } from "@/components/ui/Avatar";
 import { HostToggle } from "@/features/admin/components/HostToggle";
+import { UserRoles } from "@/features/admin/components/UserRoles";
+import { db } from "@/lib/db";
 import { RoleToggle } from "@/features/admin/components/RoleToggle";
 import { StaffAreasForm } from "@/features/admin/components/StaffAreasForm";
 import { UserActions } from "@/features/admin/components/UserActions";
@@ -92,6 +94,11 @@ export default async function AdminUserPage({ params }: Props) {
     getLocale(),
     recentAudit({ entityType: "user", entityId: id, take: 20 }),
     userActivityForStaff(id),
+  ]);
+  // What can be assigned: places that aren't archived, and every restaurant.
+  const [placeOptions, restaurantOptions] = await Promise.all([
+    db.listing.findMany({ where: { status: { not: "ARCHIVED" } }, orderBy: { title: "asc" }, select: { id: true, title: true } }),
+    db.restaurant.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
   ]);
   const rwf = (n: number) => formatRWF(n, locale);
   const sum = (rs: { amount: number }[]) =>
@@ -545,6 +552,20 @@ export default async function AdminUserPage({ params }: Props) {
               </ul>
             )}
           </Panel>
+          {/* Every role at places and restaurants, set here by VIIPA. */}
+          {!self && (
+            <Panel title={t("roles.title")}>
+              <UserRoles
+                email={user.email}
+                verified={user.emailVerified}
+                places={user.placeMembers}
+                restaurants={user.restaurantRoles}
+                ownedRestaurants={user.restaurantsOwned}
+                placeOptions={placeOptions.map((p) => ({ id: p.id, name: p.title }))}
+                restaurantOptions={restaurantOptions.filter((r) => !user.restaurantsOwned.some((o) => o.id === r.id))}
+              />
+            </Panel>
+          )}
           {/* Owner of places or customer: owners use the owner dashboard. */}
           <Panel title={t("hostAccess.title")}>
             {self ? <span className="text-xs text-muted">{t("you")}</span> : <HostToggle userId={user.id} isHost={user.isHost} places={user.listings.length} />}

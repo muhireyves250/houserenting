@@ -1396,6 +1396,25 @@
       "hasPlaces": "Possède encore {count, plural, one {# logement} other {# logements}} : archivez-les ou transférez-les d'abord.",
       "failed": "Échec — réessayez.",
       "title": "Propriétaire"
+    },
+    "roles": {
+      "title": "Rôles dans les logements et restaurants",
+      "placesTitle": "Logements",
+      "restaurantsTitle": "Restaurants",
+      "none": "Aucun pour l'instant.",
+      "choosePlace": "Choisir un logement",
+      "chooseRestaurant": "Choisir un restaurant",
+      "role": "Rôle",
+      "add": "Ajouter",
+      "remove": "Retirer de {name}",
+      "added": "Rôle ajouté.",
+      "addedPending": "Rôle ajouté. Il commence une fois l'e-mail confirmé (le lien a été envoyé).",
+      "unverified": "Son e-mail n'est pas encore confirmé : ses rôles commencent une fois confirmé.",
+      "error": {
+        "isOwner": "Cette personne en est déjà propriétaire.",
+        "notAllowed": "Vous ne pouvez pas changer les rôles.",
+        "failed": "Échec — réessayez."
+      }
     }
   },
   "Questions": {
@@ -2049,8 +2068,8 @@
     "addMember": "Ajouter",
     "teamRolesHint": "Les gestionnaires modifient le logement, les chambres et les dates fermées, et gèrent réservations et demandes. Les réceptionnistes enregistrent arrivées et départs. Aucun ne voit les paiements ni les documents.",
     "teamError": {
-      "notAllowed": "Seul le propriétaire peut modifier l'équipe.",
-      "noAccount": "Aucun compte avec cet e-mail. Demandez-lui de s'inscrire d'abord.",
+      "notAllowed": "Seul VIIPA peut modifier l'équipe.",
+      "noAccount": "Aucun compte n'utilise cet e-mail.",
       "isOwner": "C'est le propriétaire de ce logement.",
       "invalid": "Vérifiez l'e-mail et le rôle.",
       "auth": "Veuillez vous reconnecter."
@@ -2388,8 +2407,8 @@
     "removeMember": "Retirer {name}",
     "rolesHint": "Les gérants modifient le menu et les informations et gèrent les commandes. La cuisine gère les commandes. Les livreurs font les livraisons.",
     "teamError": {
-      "notAllowed": "Seul le propriétaire peut modifier l'équipe.",
-      "noAccount": "Aucun compte avec cet e-mail. Demandez-lui de s'inscrire.",
+      "notAllowed": "Seul VIIPA peut modifier l'équipe.",
+      "noAccount": "Aucun compte n'utilise cet e-mail.",
       "isOwner": "C'est le propriétaire.",
       "invalid": "Vérifiez l'e-mail et le rôle."
     },
