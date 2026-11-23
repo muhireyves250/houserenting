@@ -61,6 +61,28 @@ export async function hostEarnings(hostId: string) {
   return { ...b, due: b.earned - b.paidOut, payouts };
 }
 
+/**
+ * What one of an owner's places brought them: earned (finished stays and its guests' laundry) and still to come
+ * (stays under way). Payouts are made to the owner for all their places together, so they aren't split by place.
+ */
+export async function placeEarnings(hostId: string, listingId: string) {
+  const [entries, laundry] = await Promise.all([
+    db.ledgerEntry.findMany({ where: { hostId, kind: "HOST_PAYABLE" }, select: { amount: true, note: true, booking: { select: { status: true, listingId: true } } } }),
+    db.laundryOrder.findMany({ where: { listingId }, select: { reference: true } }),
+  ]);
+  const laundryNotes = new Set(laundry.map((l) => `laundry ${l.reference}`));
+  let earned = 0;
+  let upcoming = 0;
+  for (const e of entries) {
+    if (e.note && laundryNotes.has(e.note)) earned += e.amount;
+    else if (e.booking?.listingId === listingId) {
+      if (e.booking.status === "COMPLETED") earned += e.amount;
+      else if (e.booking.status === "CONFIRMED" || e.booking.status === "CHECKED_IN") upcoming += e.amount;
+    }
+  }
+  return { earned, upcoming };
+}
+
 export type SettlementResult = { ok: true; reference: string } | { ok: false; error: "invalid" | "tooMuch" };
 
 /** Staff record a payout to an owner (never more than is due for finished stays). Logged in the ledger and audit log. */

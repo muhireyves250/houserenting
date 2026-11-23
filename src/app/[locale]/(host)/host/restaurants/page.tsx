@@ -20,8 +20,9 @@ export default async function HostRestaurantsPage() {
       {t("addRestaurant")}
     </Link>
   );
+  // The dashboard's own margins (full width), restaurants as cards side by side on wide screens.
   return (
-    <div className="mx-auto max-w-3xl">
+    <div>
       <Link href="/host" className="mb-3 inline-flex items-center gap-1 text-sm text-muted transition-colors hover:text-ink">
         <ChevronLeft className="size-4" aria-hidden="true" />
         {t("backToHosting")}
@@ -46,10 +47,10 @@ export default async function HostRestaurantsPage() {
           }
         />
       ) : (
-        <ul className="flex flex-col divide-y divide-line rounded-3xl bg-surface ring-1 ring-line">
+        <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {list.map((r) => (
             <li key={r.id}>
-              <Link href={`/host/restaurants/${r.id}`} className="flex items-center justify-between gap-3 px-5 py-4">
+              <Link href={`/host/restaurants/${r.id}`} className="flex h-full items-center justify-between gap-3 rounded-2xl bg-surface px-5 py-4 ring-1 ring-line transition-shadow hover:shadow-md hover:ring-primary/40">
                 <span>
                   <span className="block text-[15px] font-semibold text-ink">{r.name}</span>
                   <span className="block text-[13px] text-muted">

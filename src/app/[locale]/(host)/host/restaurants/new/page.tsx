@@ -11,7 +11,7 @@ export default async function NewRestaurantPage() {
   // Restaurant owners and managers (the role VIIPA gives) set their restaurant up; then they add its menu.
   if (!(await canAddRestaurant(user))) redirect({ href: "/host/restaurants", locale: await getLocale() });
   return (
-    <div className="mx-auto max-w-3xl">
+    <div>
       <Link href="/host/restaurants" className="mb-3 inline-flex items-center gap-1 text-sm text-muted transition-colors hover:text-ink">
         <ChevronLeft className="size-4" aria-hidden="true" />
         {t("yourRestaurants")}

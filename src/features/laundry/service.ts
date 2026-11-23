@@ -148,7 +148,7 @@ export async function placeLaundry(userId: string, take = 60) {
       ...LAUNDRY_SELECT,
       updatedAt: true,
       booking: { select: { reference: true, roomNumber: true, room: { select: { name: true } }, guest: { select: { name: true } } } },
-      listing: { select: { title: true } },
+      listing: { select: { id: true, title: true } },
     },
   });
 }

@@ -60,7 +60,7 @@ export default async function HostRestaurantPage({ params }: Props) {
   const done = board.filter((o) => !open.includes(o)).slice(0, 20);
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div>
       <Link href="/host/restaurants" className="mb-3 inline-flex items-center gap-1 text-sm text-muted transition-colors hover:text-ink">
         <ChevronLeft className="size-4" aria-hidden="true" />
         {t("yourRestaurants")}

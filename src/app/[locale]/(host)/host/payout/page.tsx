@@ -3,7 +3,9 @@ import { requireWorkArea } from "@/features/hosting/work";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Chip, StatTiles } from "@/features/admin/components/kit";
 import { Panel } from "@/features/admin/components/ui";
-import { hostEarnings } from "@/features/ledger/service";
+import { hostEarnings, placeEarnings } from "@/features/ledger/service";
+import { PlaceFilter, chosenPlace } from "@/features/hosting/place-filter";
+import { db } from "@/lib/db";
 import { PayoutForm } from "@/features/places/components/PayoutForm";
 import { payoutAccountOf } from "@/features/places/payout-service";
 import { formatRWF } from "@/lib/format";
@@ -17,21 +19,46 @@ export async function generateMetadata() {
  * The owner's money, like the staff Money page: what they're owed, what's coming and what's been paid on top; beside
  * that where VIIPA sends it (checked by staff before places go live) and the payouts so far.
  */
-export default async function PayoutPage() {
+export default async function PayoutPage({ searchParams }: { searchParams: Promise<{ place?: string }> }) {
   const { user } = await requireWorkArea("payout", "/host/payout");
-  const [t, tDash, account, earnings, locale] = await Promise.all([getTranslations("Places"), getTranslations("Host.dash"), payoutAccountOf(user.id), hostEarnings(user.id), getLocale()]);
+  const [t, tDash, account, earnings, locale, places, { place }] = await Promise.all([
+    getTranslations("Places"),
+    getTranslations("Host.dash"),
+    payoutAccountOf(user.id),
+    hostEarnings(user.id),
+    getLocale(),
+    db.listing.findMany({ where: { hostId: user.id, status: { not: "ARCHIVED" } }, orderBy: { title: "asc" }, select: { id: true, title: true } }),
+    searchParams,
+  ]);
+  // One house: what it earned and what's coming (payouts cover all their houses together).
+  const chosen = chosenPlace(places, place);
+  const one = chosen ? await placeEarnings(user.id, chosen) : null;
   const rwf = (n: number) => formatRWF(n, locale);
   const date = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeZone: "Africa/Kigali" });
   return (
     <div className="flex flex-col gap-6">
-      <StatTiles
-        format={rwf}
-        items={[
-          { label: tDash("due"), count: earnings.due, tone: "text-primary" },
-          { label: tDash("upcoming"), count: earnings.upcoming },
-          { label: tDash("paidOut"), count: earnings.paidOut, tone: "text-emerald-700" },
-        ]}
-      />
+      <PlaceFilter path="/host/payout" places={places} chosen={chosen} />
+      {one ? (
+        <div className="flex flex-col gap-2">
+          <StatTiles
+            format={rwf}
+            items={[
+              { label: tDash("placeEarned"), count: one.earned, tone: "text-primary" },
+              { label: tDash("upcoming"), count: one.upcoming },
+            ]}
+          />
+          <p className="text-[12px] text-muted">{tDash("placePayoutNote")}</p>
+        </div>
+      ) : (
+        <StatTiles
+          format={rwf}
+          items={[
+            { label: tDash("due"), count: earnings.due, tone: "text-primary" },
+            { label: tDash("upcoming"), count: earnings.upcoming },
+            { label: tDash("paidOut"), count: earnings.paidOut, tone: "text-emerald-700" },
+          ]}
+        />
+      )}
       <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
         <Panel title={t("payoutDetails")}>
           <div className="mb-4 flex flex-wrap items-center gap-2">

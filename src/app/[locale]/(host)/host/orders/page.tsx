@@ -7,14 +7,24 @@ import { ordersForHost } from "@/features/food/service";
 import { ConfirmDeliveryButton } from "@/features/food/components/ConfirmDeliveryButton";
 import { roomLabel } from "@/features/rooms/links";
 import { cn } from "@/lib/cn";
+import { PlaceFilter, chosenPlace, myPlaces } from "@/features/hosting/place-filter";
 
 /**
  * A place's owner: the food orders of guests staying at their places, read only. Orders sent to the place come
  * first, so whoever receives one can match its number and take it to the guest's room.
  */
-export default async function HostOrdersPage() {
+export default async function HostOrdersPage({ searchParams }: { searchParams: Promise<{ place?: string }> }) {
   const { user } = await requireWorkArea("orders", "/host/orders");
-  const [t, tRooms, locale, rows] = await Promise.all([getTranslations("Food"), getTranslations("Rooms"), getLocale(), ordersForHost(user.id)]);
+  const [t, tRooms, locale, all, places, { place }] = await Promise.all([
+    getTranslations("Food"),
+    getTranslations("Rooms"),
+    getLocale(),
+    ordersForHost(user.id),
+    myPlaces(user.id),
+    searchParams,
+  ]);
+  const chosen = chosenPlace(places, place);
+  const rows = chosen ? all.filter((o) => o.stay.listing.id === chosen) : all;
   const orders = [...rows.filter((o) => o.status === "OUT_FOR_DELIVERY"), ...rows.filter((o) => o.status !== "OUT_FOR_DELIVERY")];
   const count = (status: string) => rows.filter((o) => o.status === status).length;
 
@@ -28,6 +38,8 @@ export default async function HostOrdersPage() {
           { label: t("hostOrders.all"), count: rows.length },
         ]}
       />
+      {/* Filter by house (only when they have more than one). */}
+      <PlaceFilter path="/host/orders" places={places} chosen={chosen} counts={{ all: all.length, ...Object.fromEntries(places.map((p) => [p.id, all.filter((o) => o.stay.listing.id === p.id).length])) }} />
       <ScrollArea>
       {orders.length === 0 ? (
         <div className="flex flex-col items-center gap-2 rounded-2xl bg-surface py-14 text-center ring-1 ring-line">

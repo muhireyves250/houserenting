@@ -8,6 +8,7 @@ import type { LaundryStatus } from "@/features/laundry/rules";
 import { placeLaundry } from "@/features/laundry/service";
 import { formatRWF } from "@/lib/format";
 import { roomLabel } from "@/features/rooms/links";
+import { PlaceFilter, chosenPlace, myPlaces } from "@/features/hosting/place-filter";
 
 const TONE: Partial<Record<LaundryStatus, string>> = {
   ACCEPTED: "bg-amber-100 text-amber-900",
@@ -21,9 +22,13 @@ const TONE: Partial<Record<LaundryStatus, string>> = {
  * The owner's laundry: guests' laundry VIIPA accepted at their places. They collect it from the room, wash and weigh
  * it (the weight sets the price), and bring it back; the guest then confirms they got it.
  */
-export default async function HostLaundryPage() {
+export default async function HostLaundryPage({ searchParams }: { searchParams: Promise<{ place?: string }> }) {
   const { user } = await requireWorkArea("laundry", "/host/laundry");
-  const [t, tRooms, locale, rows] = await Promise.all([getTranslations("Laundry"), getTranslations("Rooms"), getLocale(), placeLaundry(user.id)]);
+  const [t, tRooms, locale, all, places, { place }] = await Promise.all([getTranslations("Laundry"), getTranslations("Rooms"), getLocale(), placeLaundry(user.id), myPlaces(user.id), searchParams]);
+  // One house, or all of them.
+  const chosen = chosenPlace(places, place);
+  const rows = chosen ? all.filter((o) => o.listing.id === chosen) : all;
+  const filter = <PlaceFilter path="/host/laundry" places={places} chosen={chosen} counts={{ all: all.length, ...Object.fromEntries(places.map((p) => [p.id, all.filter((o) => o.listing.id === p.id).length])) }} />;
   const toCollect = rows.filter((o) => o.status === "ACCEPTED");
   const washing = rows.filter((o) => o.status === "PICKED_UP");
   const toReturn = rows.filter((o) => o.status === "WASHED");
@@ -83,6 +88,7 @@ export default async function HostLaundryPage() {
           ]}
         />
       </Toolbar>
+      {filter}
       <ScrollArea className="flex flex-col gap-8">
         <p className="text-[13px] text-muted">{t("host.intro")}</p>
         {toCollect.length + washing.length + toReturn.length + withGuest.length === 0 && (

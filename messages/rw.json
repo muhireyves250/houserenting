@@ -838,7 +838,9 @@
         "laundry": "Imyenda yo kwitaho"
       },
       "noPayouts": "Nta bwishyu buraba.",
-      "commissionLine": "VIIPA {commission}% · usigarana {keep}%"
+      "commissionLine": "VIIPA {commission}% · usigarana {keep}%",
+      "placeEarned": "Ibyinjiye kuri iyi nzu",
+      "placePayoutNote": "Kwishyurwa bikorwa ku nzu zawe zose hamwe: ibyo ugomba guhabwa n'ibyishyuwe biri kuri Inzu zose."
     },
     "shell": {
       "console": "Nyir’inzu",
@@ -873,7 +875,7 @@
       "accountIntro": "Amakuru yawe n’ururimi.",
       "notificationsIntro": "Amakuru y’amacumbi yawe, ubwishyu n’ibyo kurya byoherejwe abashyitsi bawe."
     },
-    "allPlaces": "Byose",
+    "allPlaces": "Inzu zose",
     "desk": {
       "role": {
         "MANAGER": "Umuyobozi w'inzu",

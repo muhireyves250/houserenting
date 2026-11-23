@@ -838,7 +838,9 @@
         "laundry": "Laundry to handle"
       },
       "noPayouts": "No payouts yet.",
-      "commissionLine": "VIIPA {commission}% · you keep {keep}%"
+      "commissionLine": "VIIPA {commission}% · you keep {keep}%",
+      "placeEarned": "Earned at this place",
+      "placePayoutNote": "Payouts are sent for all your places together: what's owed and paid is under All places."
     },
     "shell": {
       "console": "Owner",
@@ -873,7 +875,7 @@
       "accountIntro": "Your details and language.",
       "notificationsIntro": "News about your places, payouts and the food sent to your guests."
     },
-    "allPlaces": "All",
+    "allPlaces": "All places",
     "desk": {
       "role": {
         "MANAGER": "Property manager",

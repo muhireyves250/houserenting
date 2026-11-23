@@ -838,7 +838,9 @@
         "laundry": "Linge à traiter"
       },
       "noPayouts": "Aucun paiement pour l’instant.",
-      "commissionLine": "VIIPA {commission} % · vous gardez {keep} %"
+      "commissionLine": "VIIPA {commission} % · vous gardez {keep} %",
+      "placeEarned": "Gagné dans ce logement",
+      "placePayoutNote": "Les paiements couvrent tous vos logements ensemble : le dû et le payé sont sous Tous les logements."
     },
     "shell": {
       "console": "Propriétaire",
@@ -873,7 +875,7 @@
       "accountIntro": "Vos coordonnées et votre langue.",
       "notificationsIntro": "Les nouvelles de vos logements, paiements et repas envoyés à vos clients."
     },
-    "allPlaces": "Tous",
+    "allPlaces": "Tous les logements",
     "desk": {
       "role": {
         "MANAGER": "Gestionnaire",
