@@ -1670,7 +1670,8 @@
       "orderTimedOut": "Ibyatumijwe {reference} kuri {title} byataye igihe: resitora ntiyasubije mu minota 5. Ibiryo byabyo byashyizwe ku bitaboneka.",
       "ebmRequested": "Umukiriya wa {reference} arasaba fagitire ya EBM.",
       "restaurantNew": "Resitora nshya yo kugenzura: {title}. Reba amakuru yayo na menu, shyiraho komisiyo, hanyuma uyishyire ahagaragara.",
-      "restaurantRoleGiven": "VIIPA yakugize nyiri/umuyobozi wa resitora: tegura resitora yawe na menu yayo."
+      "restaurantRoleGiven": "VIIPA yakugize nyiri/umuyobozi wa resitora: tegura resitora yawe na menu yayo.",
+      "bookingCheckedOut": "Igihe cyawe kuri {title} cyarangiye, wasohowe ({reference}). Murakoze kubana na VIIPA!"
     },
     "filterLabel": "Erekana imenyesha",
     "filter": {

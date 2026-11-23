@@ -5,6 +5,7 @@ import { canTransition } from "@/features/bookings/status";
 import { notify, notifyAdmins } from "@/features/notifications/service";
 import { todayISO, type ISODate } from "@/features/search/date-range";
 import { createTicket } from "@/features/support/service";
+import { autoCheckOut } from "@/features/bookings/service";
 import { db } from "@/lib/db";
 import { canOn } from "@/features/places/access";
 import { checkRequest, daysBetween, priceChangeFor, shouldAutoHide, type RequestInput, type RequestProblem } from "./rules";
@@ -60,6 +61,8 @@ const STAY_SELECT = {
  * `others` lists the rest still to come.
  */
 export async function myStay(guestId: string, now: Date = new Date()) {
+  // A stay whose time is up is checked out first.
+  await autoCheckOut(now);
   const today = todayISO(now);
   const rows = await db.booking.findMany({
     where: {

@@ -622,6 +622,30 @@ export function staffBookings(take = 100) {
   });
 }
 
+/**
+ * Checks guests out on their own once their stay's end time has passed (checked in, not yet out): the same as the
+ * front desk checking them out, logged by the system, and the guest is told. Runs with the daily job and whenever the
+ * front desk, the guest's stay or the staff bookings are opened. Gives back how many were checked out.
+ */
+export async function autoCheckOut(now: Date = new Date()): Promise<number> {
+  const due = await db.booking.findMany({ where: { status: "CHECKED_IN", endAt: { lte: now } }, select: { id: true, reference: true, guestId: true, listing: { select: { title: true } } }, take: 200 });
+  let done = 0;
+  for (const b of due) {
+    const ok = await db.$transaction(async (tx) => {
+      const { count } = await tx.booking.updateMany({ where: { id: b.id, status: "CHECKED_IN" }, data: { status: "COMPLETED" } });
+      if (count !== 1) return false;
+      await tx.bookingEvent.create({ data: { bookingId: b.id, fromStatus: "CHECKED_IN", toStatus: "COMPLETED", actorId: null, reason: "checked out automatically (stay ended)" } });
+      await audit(tx, { actorId: null, action: "booking.autoCheckOut", entityType: "booking", entityId: b.reference });
+      await maybeCreateReward(tx, b.id);
+      await maybePromoterReward(tx, b.id, now);
+      await notify(tx, b.guestId, "bookingCheckedOut", { title: b.listing.title, reference: b.reference }, `/bookings/${b.reference}`);
+      return true;
+    });
+    if (ok) done++;
+  }
+  return done;
+}
+
 /** Background job: releases every unpaid hold past its time (they are also released whenever a place is booked). */
 export async function expireAllHolds(now: Date = new Date()): Promise<number> {
   const before = await db.booking.count({ where: { status: "PENDING_PAYMENT", holdExpiresAt: { lte: now } } });

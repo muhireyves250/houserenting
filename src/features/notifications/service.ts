@@ -11,6 +11,7 @@ export type NotificationKind =
   | "payoutToCheck"
   | "bookingCancelled"
   | "bookingExpired"
+  | "bookingCheckedOut"
   | "listingApproved"
   | "listingRejected"
   | "listingSubmitted"

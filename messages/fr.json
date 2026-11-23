@@ -1670,7 +1670,8 @@
       "orderTimedOut": "La commande {reference} chez {title} a expiré : le restaurant n'a pas répondu sous 5 minutes. Ses plats ont été marqués indisponibles.",
       "ebmRequested": "Le client de {reference} demande une facture EBM.",
       "restaurantNew": "Nouveau restaurant à vérifier : {title}. Vérifiez ses informations et son menu, réglez sa commission, puis publiez-le.",
-      "restaurantRoleGiven": "VIIPA vous a nommé propriétaire/gérant de restaurant : configurez votre restaurant et son menu."
+      "restaurantRoleGiven": "VIIPA vous a nommé propriétaire/gérant de restaurant : configurez votre restaurant et son menu.",
+      "bookingCheckedOut": "Votre séjour à {title} est terminé et votre départ a été enregistré ({reference}). Merci d'avoir séjourné avec VIIPA !"
     },
     "filterLabel": "Afficher les notifications",
     "filter": {

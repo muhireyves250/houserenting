@@ -1670,7 +1670,8 @@
       "orderTimedOut": "Order {reference} at {title} timed out: the restaurant didn't answer within 5 minutes. Its dishes were marked unavailable.",
       "ebmRequested": "The guest of {reference} asks for an EBM invoice.",
       "restaurantNew": "New restaurant to check: {title}. Look at its details and menu, set its commission, then publish it.",
-      "restaurantRoleGiven": "VIIPA made you a restaurant owner/manager: set up your restaurant and its menu."
+      "restaurantRoleGiven": "VIIPA made you a restaurant owner/manager: set up your restaurant and its menu.",
+      "bookingCheckedOut": "Your stay at {title} ended and you were checked out ({reference}). Thank you for staying with VIIPA!"
     },
     "filterLabel": "Show notifications",
     "filter": {

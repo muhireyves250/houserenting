@@ -2,6 +2,7 @@ import { ConciergeBell, Phone } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { formatStayDates } from "@/features/bookings/format";
 import { DeskButton } from "@/features/hosting/components/DeskButton";
+import { autoCheckOut } from "@/features/bookings/service";
 import { requireWorkArea } from "@/features/hosting/work";
 import { todayISO } from "@/features/search/date-range";
 import { roomLabel } from "@/features/rooms/links";
@@ -15,6 +16,8 @@ const iso = (d: Date) => d.toISOString().slice(0, 10);
  */
 export default async function FrontDeskPage() {
   const { work } = await requireWorkArea("desk", "/host/desk");
+  // Guests whose stay ended are checked out before the desk is shown.
+  await autoCheckOut();
   const listingIds = work.places.map((p) => p.listingId);
   const today = todayISO();
   const tomorrow = iso(new Date(Date.parse(`${today}T00:00:00Z`) + 86_400_000));

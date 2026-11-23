@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { db } from "@/lib/db";
 import { resetDb } from "@/test/db";
-import { bookedRanges, cancelPendingBooking, createBooking, getGuestBooking, guestBookings, staffMoveBooking } from "./service";
+import { autoCheckOut, bookedRanges, cancelPendingBooking, createBooking, getGuestBooking, guestBookings, staffMoveBooking } from "./service";
 
 const NOW = new Date("2026-10-14T08:00:00Z");
 
@@ -157,5 +157,32 @@ describe("staffMoveBooking", () => {
       ["CONFIRMED", "CHECKED_IN", "host"],
       ["CHECKED_IN", "COMPLETED", "host"],
     ]);
+  });
+});
+
+describe("checking out when the stay is over", () => {
+  it("checks a guest out on their own once the stay's end time has passed (never before, never one not checked in)", async () => {
+    // Each at its own place (stays at one place never overlap).
+    await listing("b");
+    await listing("c");
+    const make = (reference: string, status: "CHECKED_IN" | "CONFIRMED", endAt: string, listingId: string) =>
+      db.booking.create({
+        data: {
+          reference, listingId, guestId: "u1", status,
+          checkIn: new Date("2026-10-12T00:00:00Z"), checkOut: new Date("2026-10-14T00:00:00Z"),
+          startAt: new Date("2026-10-12T12:00:00Z"), endAt: new Date(endAt),
+          nights: 2, guests: 1, nightlyPrice: 50_000, subtotal: 100_000, total: 100_000, hostPayout: 90_000, policySnapshot: {},
+        },
+      });
+    await make("SR-OUT001", "CHECKED_IN", "2026-10-14T07:00:00Z", "a"); // ended an hour ago
+    await make("SR-OUT002", "CHECKED_IN", "2026-10-14T09:00:00Z", "b"); // ends in an hour
+    await make("SR-OUT003", "CONFIRMED", "2026-10-14T07:00:00Z", "c"); // never checked in (staff mark it a no-show)
+    expect(await autoCheckOut(NOW)).toBe(1);
+    const status = async (reference: string) => (await db.booking.findUniqueOrThrow({ where: { reference } })).status;
+    expect([await status("SR-OUT001"), await status("SR-OUT002"), await status("SR-OUT003")]).toEqual(["COMPLETED", "CHECKED_IN", "CONFIRMED"]);
+    expect(await db.notification.count({ where: { userId: "u1", kind: "bookingCheckedOut" } })).toBe(1);
+    expect(await db.bookingEvent.findFirst({ where: { booking: { reference: "SR-OUT001" } }, select: { actorId: true, toStatus: true } })).toEqual({ actorId: null, toStatus: "COMPLETED" });
+    // Running again does nothing more.
+    expect(await autoCheckOut(NOW)).toBe(0);
   });
 });

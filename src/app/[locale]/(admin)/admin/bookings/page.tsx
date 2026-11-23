@@ -12,6 +12,7 @@ import { formatStayDates } from "@/features/bookings/format";
 import { GuestRequests } from "@/features/stay/components/GuestRequests";
 import { Link } from "@/i18n/navigation";
 import { formatRWF } from "@/lib/format";
+import { autoCheckOut } from "@/features/bookings/service";
 import { requireStaff } from "@/lib/permissions";
 
 type Props = { searchParams: Promise<{ status?: string; q?: string; page?: string }> };
@@ -24,6 +25,8 @@ export default async function AdminBookingsPage({ searchParams }: Props) {
   const q = (params.q ?? "").slice(0, 100);
   const page = Math.max(1, Number(params.page) || 1);
   const today = todayISO();
+  // Stays whose time is up are checked out first.
+  await autoCheckOut();
   const [t, tBookings, tListings, tRooms, locale, result] = await Promise.all([
     getTranslations("Admin"),
     getTranslations("Bookings"),
