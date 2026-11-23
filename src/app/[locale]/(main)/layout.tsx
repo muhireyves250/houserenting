@@ -6,14 +6,19 @@ import { SiteHeader } from "@/components/shell/SiteHeader";
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { ordersLive } from "@/features/food/service";
+import { hasWork, workRoles } from "@/features/hosting/work";
 import { isAdmin } from "@/lib/roles";
 import { getCurrentUser } from "@/lib/session";
 
 export default async function MainLayout({ children, modal }: { children: ReactNode; modal: ReactNode }) {
   const user = await getCurrentUser();
-  // Staff only use the admin dashboard, and house owners theirs: every client page sends them there.
+  // Only customers see the client pages. Everyone with another role (VIIPA staff; a place's owner or receptionist;
+  // a restaurant's owner, manager or delivery person) only ever sees their own dashboard.
   if (user && isAdmin(user)) redirect({ href: "/admin", locale: await getLocale() });
-  if (user?.isHost) redirect({ href: "/host", locale: await getLocale() });
+  if (user) {
+    const work = await workRoles(user.id);
+    if (hasWork(work)) redirect({ href: work.home, locale: await getLocale() });
+  }
   const orders = await ordersLive();
   return (
     <>
