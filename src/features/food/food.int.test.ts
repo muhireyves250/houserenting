@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { db } from "@/lib/db";
+import { setAgreement } from "@/features/agreements/service";
 import { resetDb } from "@/test/db";
 import { addRestaurantMember, assignCourier, expireOrders, rateOrder, restaurantRole, claimOrderPayment, confirmOrderPayment, deleteFoodOrder, deleteRestaurant, hideMyOrder, myOrders, kitchenForPlace, moveOrder, ordersForHost, ordersLive, placeOrder, saveMenuItem, saveRestaurant, setRestaurantStatus } from "./service";
 
@@ -29,6 +30,7 @@ async function liveKitchen() {
   const saved = await saveRestaurant(admin, null, base);
   if (!saved.ok) throw new Error("save failed");
   await saveMenuItem(admin, saved.id, null, { name: "Brochette", price: 3000 });
+  await setAgreement(admin, "RESTAURANT", saved.id, { percent: 10 });
   expect(await setRestaurantStatus(admin, saved.id, "PUBLISHED")).toBe(true);
   return saved.id;
 }
@@ -71,6 +73,9 @@ describe("food from the kitchen of the guest's stay", () => {
     expect(await ordersLive()).toBe(false);
     expect(await setRestaurantStatus(admin, saved.id, "PUBLISHED")).toBe(false); // no menu yet
     await saveMenuItem(admin, saved.id, null, { name: "Brochette", price: 3000 });
+    // Its commission agreement comes first.
+    expect(await setRestaurantStatus(admin, saved.id, "PUBLISHED")).toBe(false);
+    expect(await setAgreement(admin, "RESTAURANT", saved.id, { percent: 10 })).toEqual({ ok: true });
     expect(await setRestaurantStatus(admin, saved.id, "PUBLISHED")).toBe(true);
     expect((await kitchenForPlace("place"))?.id).toBe(saved.id);
     // A place without a kitchen assigned gets none (never the nearest one).

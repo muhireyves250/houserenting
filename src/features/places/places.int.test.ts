@@ -37,7 +37,8 @@ async function place(status: "DRAFT" | "PUBLISHED" = "PUBLISHED") {
       rates: { create: [{ unit: "NIGHT", price: 80000 }] },
     },
   });
-  // Photos are required before review or going live.
+  // An agreed commission and photos are required before going live.
+  await db.commissionAgreement.create({ data: { subject: "PLACE", subjectId: "house", percentBps: 1000, effectiveFrom: new Date("2026-01-01T00:00:00Z"), createdById: "admin" } });
   await db.listingPhoto.create({ data: { listingId: "house", url: "https://res.cloudinary.com/x/1.jpg", publicId: "x/1", width: 800, height: 600, position: 0 } });
 }
 
@@ -71,6 +72,10 @@ describe("listing status", () => {
   it("publishes VIIPA-run places without owner payout details", async () => {
     await place("DRAFT");
     await updatePlaceAdmin("admin", "house", { contractStart: null, contractEnd: null, featured: true, operator: "VIIPA" });
+    // No commission agreement: it can't go live.
+    await db.commissionAgreement.deleteMany({ where: { subjectId: "house" } });
+    expect(await moveListing(admin, "house", "publishDirect")).toEqual({ ok: false, error: "noAgreement" });
+    await db.commissionAgreement.create({ data: { subject: "PLACE", subjectId: "house", percentBps: 800, effectiveFrom: new Date("2026-01-01T00:00:00Z"), createdById: "admin" } });
     expect(await moveListing(admin, "house", "publishDirect")).toEqual({ ok: true });
     expect((await highlightedListings()).map((l) => l.id)).toEqual(["house"]);
   });

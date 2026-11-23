@@ -1,10 +1,9 @@
-import { CalendarDays, Plus, TicketPercent } from "lucide-react";
+import { CalendarDays, TicketPercent } from "lucide-react";
 import type { ReactNode } from "react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Chip, FillScreen } from "@/features/admin/components/kit";
-import { PromoForm, PromoToggle } from "@/features/admin/components/PromoForm";
+import { PromoToggle } from "@/features/admin/components/PromoForm";
 import { listPromos } from "@/features/promotions/service";
-import { allPromoters } from "@/features/promoters/service";
 import { ConfirmAction } from "@/features/admin/components/ConfirmAction";
 import { deletePromoAction } from "@/features/admin/money-actions";
 import { formatRWF } from "@/lib/format";
@@ -23,21 +22,11 @@ const STATE_TONE: Record<State, string> = {
 /** Promo codes: the new-code form beside the list; each code a card with what it gives, who pays and how far it's used. */
 export async function PromotionsView({
   tabs,
-  forPromoter,
 }: {
   tabs: ReactNode;
   forPromoter?: string;
 }) {
-  const [t, locale, promos, promoterRows] = await Promise.all([
-    getTranslations("Promotions"),
-    getLocale(),
-    listPromos(),
-    allPromoters(),
-  ]);
-  // Active promoters a new code can be given to (optional).
-  const promoters = promoterRows
-    .filter((p) => p.status === "ACTIVE")
-    .map((p) => ({ id: p.id, name: p.user.name, code: p.code }));
+  const [t, locale, promos] = await Promise.all([getTranslations("Promotions"), getLocale(), listPromos()]);
   const date = new Intl.DateTimeFormat(locale, {
     dateStyle: "medium",
     timeZone: "Africa/Kigali",
@@ -58,29 +47,12 @@ export async function PromotionsView({
   return (
     <FillScreen>
       {tabs}
-      {/* Computers: the new-code form beside the list, each scrolling in its own box. Phones: the form folds away. */}
-      <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)] grid-rows-[auto_minmax(0,1fr)] gap-4 lg:grid-cols-[400px_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)]">
-        <details
-          open={Boolean(forPromoter)}
-          className="group no-scrollbar max-h-[70dvh] shrink-0 overflow-y-auto rounded-2xl bg-surface ring-1 ring-line lg:hidden"
-        >
-          <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-[15px] font-semibold text-primary [&::-webkit-details-marker]:hidden">
-            <span className="flex size-7 items-center justify-center rounded-full bg-primary text-white">
-              <Plus
-                className="size-4 transition-transform group-open:rotate-45"
-                aria-hidden="true"
-              />
-            </span>
-            {t("newCode")}
-          </summary>
-          <div className="border-t border-line p-3">
-            <PromoForm promoters={promoters} initialPromoter={forPromoter} />
-          </div>
-        </details>
-        <div className="no-scrollbar hidden min-h-0 overflow-y-auto lg:block">
-          <PromoForm promoters={promoters} initialPromoter={forPromoter} />
-        </div>
-
+      {/* Codes are made on the Promoters page (adding a promoter gives them their code; an admin adds themself for
+          their own). Here: every code, what it gives, who owns it, and who used it. */}
+      <div className="flex min-h-0 flex-1 flex-col gap-4">
+        <Link href="/admin/promotions?tab=promoters" className="self-start rounded-full border border-line bg-surface px-4 py-2 text-[13px] font-semibold text-primary hover:border-primary">
+          {t("newCodeOnPromoters")}
+        </Link>
         <section className="flex min-h-0 flex-col gap-3">
           <p className="shrink-0 text-[13px] font-semibold text-muted">
             {t("codesCount", { count: promos.length, active: activeCount })}

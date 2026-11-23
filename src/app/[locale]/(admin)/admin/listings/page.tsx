@@ -4,8 +4,9 @@ import { getTranslations } from "next-intl/server";
 import { allListings } from "@/features/admin/stats";
 import { FillScreen, Toolbar } from "@/features/admin/components/kit";
 import { HostStatus } from "@/features/hosting/components/HostStatus";
-import { movesFrom } from "@/features/listings/lifecycle";
-import { PlaceRowActions } from "@/features/places/components/PlaceRowActions";
+import { LISTING_MOVES, movesFrom } from "@/features/listings/lifecycle";
+import { ActionsMenu } from "@/features/admin/components/ActionsMenu";
+import { deletePlaceAction, moveListingAction } from "@/features/places/actions";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { requireStaff } from "@/lib/permissions";
@@ -56,6 +57,8 @@ export default async function AdminListingsPage({ searchParams }: Props) {
   const typeCount = (t: PlaceType) => typeCounts.find((c) => c.type === t)?._count._all ?? 0;
   const keep = (extra: Record<string, string | undefined>) =>
     Object.fromEntries(Object.entries({ status: endingSoon ? "ending" : (status ?? (raw === "all" ? "all" : undefined)), type, loc: loc ?? undefined, ...extra }).filter(([, v]) => v)) as Record<string, string>;
+  // Wording for what a status change may answer (shown under the Actions button).
+  const moveErrors = Object.fromEntries(["notFound", "notAllowed", "wrongStatus", "reasonNeeded", "payoutMissing", "noPrices", "noPhotos", "noAgreement"].map((k) => [k, tPlaces(`moveError.${k as "notFound"}`)]));
   const countOf = (s: Status) => counts.find((c) => c.status === s)?._count._all ?? 0;
   const total = counts.filter((c) => c.status !== "ARCHIVED").reduce((n, c) => n + c._count._all, 0);
   type Filter = { value: Status | "ending" | "all"; label: string; count: number };
@@ -137,7 +140,25 @@ export default async function AdminListingsPage({ searchParams }: Props) {
                     </span>
                   </span>
                 </Link>
-                <PlaceRowActions listingId={listing.id} moves={movesFrom(listing.status, { isStaff: true, isOwner: false })} editable={listing.status !== "ARCHIVED"} deletable={listing._count.bookings === 0} />
+                {/* One Actions button: open, edit, every status change allowed now, delete (never booked). */}
+                <ActionsMenu
+                  items={[
+                    { kind: "link", label: tPlaces("actions.open"), href: `/admin/listings/${listing.id}` },
+                    ...(listing.status !== "ARCHIVED" ? [{ kind: "link" as const, label: tPlaces("editShort"), href: `/admin/listings/${listing.id}/edit` }] : []),
+                    ...movesFrom(listing.status, { isStaff: true, isOwner: false }).map((move) => ({
+                      kind: "run" as const,
+                      label: tPlaces(`move.${move}`),
+                      action: moveListingAction.bind(null, listing.id, move),
+                      reason: LISTING_MOVES[move].reason,
+                      confirm: LISTING_MOVES[move].reason ? undefined : tPlaces("actions.confirm", { action: tPlaces(`move.${move}`), title: listing.title }),
+                      danger: ["suspend", "archive", "reject", "hide"].includes(move),
+                      errors: moveErrors,
+                    })),
+                    ...(listing._count.bookings === 0
+                      ? [{ kind: "run" as const, label: tPlaces("deleteShort"), action: deletePlaceAction.bind(null, listing.id), confirm: tPlaces("deletePlaceQuestion"), danger: true, errors: { hasBookings: tPlaces("deleteHasBookings"), notAllowed: tPlaces("deleteNotAllowed") } }]
+                      : []),
+                  ]}
+                />
               </li>
             ))}
           </ul>

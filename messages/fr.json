@@ -1459,6 +1459,12 @@
       },
       "allTitle": "Rôles",
       "staffNote": "Le personnel VIIPA gère tous les logements et restaurants depuis le tableau d'administration. Donnez les rôles de logement et de restaurant à des comptes clients (mettez d'abord leur accès sur Client)."
+    },
+    "actionsMenu": {
+      "label": "Actions",
+      "reason": "Raison (la personne la lira)",
+      "cancel": "Annuler",
+      "failed": "Échec — réessayez."
     }
   },
   "Questions": {
@@ -1721,7 +1727,8 @@
     "paymentTitle": "Instructions de paiement",
     "paymentInstructions": "Comment les voyageurs paient",
     "paymentInstructionsHint": "ex. MTN MoMo 078 000 0000 (VIIPA Ltd)",
-    "paymentHint": "Affiché sur les réservations impayées tant qu'aucun prestataire n'est connecté. Le propriétaire ou l'équipe confirme chaque paiement."
+    "paymentHint": "Affiché sur les réservations impayées tant qu'aucun prestataire n'est connecté. Le propriétaire ou l'équipe confirme chaque paiement.",
+    "commissionPerAgreement": "La commission de VIIPA est convenue avec chaque logement, restaurant et blanchisserie. Réglez-la sur leur page (Accord de commission) ; chaque changement est conservé avec sa date."
   },
   "Money": {
     "notConnected": "Les paiements ne sont pas encore connectés : définissez PAYMENT_WEBHOOK_SECRET et connectez un prestataire. D'ici là, rien ne change ici automatiquement.",
@@ -1981,7 +1988,8 @@
     },
     "open": "Voir qui l’a utilisé",
     "saveShare": "Enregistrer",
-    "noShareYet": "Aucune part : le promoteur ne gagne encore rien avec ce code."
+    "noShareYet": "Aucune part : le promoteur ne gagne encore rien avec ce code.",
+    "newCodeOnPromoters": "Les nouveaux codes se créent sur la page Promoteurs (ajoutez un promoteur, ou vous-même, avec son code) →"
   },
   "Referrals": {
     "title": "Inviter des amis",
@@ -2056,7 +2064,8 @@
       "payoutMissing": "Les coordonnées de paiement du propriétaire doivent d'abord être enregistrées et vérifiées.",
       "noPrices": "Ajoutez d'abord au moins un prix.",
       "auth": "Veuillez vous reconnecter.",
-      "noPhotos": "Ajoutez d'abord au moins une photo."
+      "noPhotos": "Ajoutez d'abord au moins une photo.",
+      "noAgreement": "Réglez d'abord l'accord de commission de VIIPA pour ce logement."
     },
     "blocksTitle": "Dates fermées et maintenance",
     "noBlocks": "Rien n'est bloqué. Les voyageurs peuvent réserver toutes les dates ouvertes.",
@@ -2193,7 +2202,11 @@
     "deleteHasBookings": "Ce logement a des réservations ou commandes : archivez-le plutôt.",
     "deleteNotAllowed": "Réservé au personnel qui gère les logements.",
     "archivedFilter": "Archivés",
-    "deleteShort": "Supprimer"
+    "deleteShort": "Supprimer",
+    "actions": {
+      "open": "Ouvrir",
+      "confirm": "{action} : {title} ?"
+    }
   },
   "MyStay": {
     "title": "Mon séjour",

@@ -302,3 +302,14 @@ export async function approvePromoter(actor: Actor, promoterId: string, raw: Fir
   const given = await giveFirstCode(actor.id, promoterId, checked.code);
   return given.ok ? { ok: true } : given;
 }
+
+/** Staff give an active promoter another promo code (the code, the discount and their share). */
+export async function givePromoCode(actor: Actor, promoterId: string, raw: FirstCodeInput): Promise<StaffPromoterResult> {
+  if (!canStaff(actor, "promotions")) return { ok: false, error: "notAllowed" };
+  const p = await db.promoter.findUnique({ where: { id: promoterId }, select: { status: true } });
+  if (!p || p.status !== "ACTIVE") return { ok: false, error: "notFound" };
+  const checked = await checkFirstCode(raw);
+  if (!checked.ok) return checked;
+  const given = await giveFirstCode(actor.id, promoterId, checked.code);
+  return given.ok ? { ok: true } : given;
+}

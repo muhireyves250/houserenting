@@ -1459,6 +1459,12 @@
       },
       "allTitle": "Roles",
       "staffNote": "VIIPA staff manage every place and restaurant from the admin dashboard. Give place and restaurant roles to customer accounts (set their staff access to Customer first)."
+    },
+    "actionsMenu": {
+      "label": "Actions",
+      "reason": "Reason (they will read it)",
+      "cancel": "Cancel",
+      "failed": "Couldn't do that — try again."
     }
   },
   "Questions": {
@@ -1721,7 +1727,8 @@
     "paymentTitle": "Payment instructions",
     "paymentInstructions": "How guests pay",
     "paymentInstructionsHint": "e.g. MTN MoMo 078 000 0000 (VIIPA Ltd)",
-    "paymentHint": "Shown on unpaid bookings while no payment provider is connected. The owner or staff confirm each payment."
+    "paymentHint": "Shown on unpaid bookings while no payment provider is connected. The owner or staff confirm each payment.",
+    "commissionPerAgreement": "VIIPA's commission is agreed with each place, restaurant and laundry provider. Set it on their page (Commission agreement); every change is kept with its date."
   },
   "Money": {
     "notConnected": "Payments aren't connected yet: set PAYMENT_WEBHOOK_SECRET and connect a provider. Until then nothing here changes on its own.",
@@ -1981,7 +1988,8 @@
     },
     "open": "See who used it",
     "saveShare": "Save",
-    "noShareYet": "No share set: the promoter earns nothing from this code yet."
+    "noShareYet": "No share set: the promoter earns nothing from this code yet.",
+    "newCodeOnPromoters": "New promo codes are made on the Promoters page (add a promoter, or yourself, with their code) →"
   },
   "Referrals": {
     "title": "Invite friends",
@@ -2056,7 +2064,8 @@
       "payoutMissing": "The owner's payout details must be saved and verified first.",
       "noPrices": "Add at least one price first.",
       "auth": "Please sign in again.",
-      "noPhotos": "Add at least one photo first."
+      "noPhotos": "Add at least one photo first.",
+      "noAgreement": "Set VIIPA's commission agreement for this place first."
     },
     "blocksTitle": "Closed dates and maintenance",
     "noBlocks": "Nothing is blocked. Guests can book every open date.",
@@ -2193,7 +2202,11 @@
     "deleteHasBookings": "This place has bookings or orders: archive it instead.",
     "deleteNotAllowed": "Only staff who manage places can delete them.",
     "archivedFilter": "Archived",
-    "deleteShort": "Delete"
+    "deleteShort": "Delete",
+    "actions": {
+      "open": "Open",
+      "confirm": "{action}: {title}?"
+    }
   },
   "MyStay": {
     "title": "My stay",

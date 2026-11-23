@@ -25,8 +25,9 @@ beforeEach(async () => {
 async function created() {
   const result = await saveListing("host", null, validListing);
   if (!result.ok) throw new Error("save failed");
-  // Photos are required before review.
+  // Photos are required before review; an agreed commission before going live.
   await db.listingPhoto.create({ data: { listingId: result.id, url: "https://res.cloudinary.com/x/1.jpg", publicId: "x/1", width: 800, height: 600, position: 0 } });
+  await db.commissionAgreement.create({ data: { subject: "PLACE", subjectId: result.id, percentBps: 1000, effectiveFrom: new Date("2026-01-01T00:00:00Z"), createdById: "admin" } });
   return result.id;
 }
 

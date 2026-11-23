@@ -6,7 +6,7 @@ import { db } from "@/lib/db";
 import { canStaff } from "@/lib/roles";
 
 export type Actor = { id: string; role?: string | null };
-export type MoveResult = { ok: true } | { ok: false; error: "notFound" | "notAllowed" | "wrongStatus" | "reasonNeeded" | "payoutMissing" | "noPrices" | "noPhotos" };
+export type MoveResult = { ok: true } | { ok: false; error: "notFound" | "notAllowed" | "wrongStatus" | "reasonNeeded" | "payoutMissing" | "noPrices" | "noPhotos" | "noAgreement" };
 
 const GOES_LIVE: ListingMove[] = ["approve", "publishDirect", "unhide", "resume", "reinstate"];
 // Checked payout details are needed the first time a place is published; restoring a place that was live doesn't ask again.
@@ -30,6 +30,8 @@ export async function moveListing(actor: Actor, listingId: string, move: Listing
     if ((move === "submit" || GOES_LIVE.includes(move)) && listing._count.photos === 0) return { ok: false, error: "noPhotos" } as const;
     if (GOES_LIVE.includes(move)) {
       if (listing._count.rates === 0) return { ok: false, error: "noPrices" } as const;
+      // VIIPA's commission is agreed per place: no agreement, no going live.
+      if (!(await tx.commissionAgreement.findFirst({ where: { subject: "PLACE", subjectId: listingId }, select: { id: true } }))) return { ok: false, error: "noAgreement" } as const;
       // Owners must be payable before their place takes bookings; places VIIPA runs itself don't need this.
       if (FIRST_PUBLISH.includes(move) && listing.operator === "OWNER") {
         const payout = await tx.payoutAccount.findUnique({ where: { userId: listing.hostId }, select: { verifiedAt: true } });

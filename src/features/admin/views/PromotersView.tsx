@@ -5,6 +5,7 @@ import { Panel, Table, td } from "@/features/admin/components/ui";
 import { deletePromoterAction } from "@/features/promoters/actions";
 import { AddPromoter, EditPromoter } from "@/features/promoters/components/StaffPromoterForm";
 import { ApprovePromoter } from "@/features/promoters/components/ApprovePromoter";
+import { GivePromoCode } from "@/features/promoters/components/GivePromoCode";
 import { formatKigaliDateTime } from "@/features/bookings/format";
 import { PromoterRewardButtons, PromoterStatusButtons } from "@/features/promoters/components/StaffPromoterButtons";
 import { allPromoters, openPromoterRewards } from "@/features/promoters/service";
@@ -126,11 +127,7 @@ export async function PromotersView() {
                       {c.code}
                     </span>
                   ))}
-                  {p.status === "ACTIVE" && (
-                    <Link href={{ pathname: "/admin/promotions", query: { for: p.id } }} className="ml-auto text-[12px] font-semibold text-primary hover:underline">
-                      + {tP("givePromoCode")}
-                    </Link>
-                  )}
+                  {p.status === "ACTIVE" && <GivePromoCode promoterId={p.id} />}
                 </div>
                 {p.about && <p className="rounded-xl bg-canvas px-3 py-2 text-[13px] text-ink">{p.about}</p>}
                 {p.payoutNumber && (

@@ -86,6 +86,8 @@ export async function setRestaurantStatus(actor: Actor, id: string, status: "PUB
   if (status === "HIDDEN" && !why) return false;
   const r = await db.restaurant.findUnique({ where: { id }, select: { status: true, ownerId: true, name: true, _count: { select: { menu: true } } } });
   if (!r || r.status === status || (status === "PUBLISHED" && r._count.menu === 0)) return false;
+  // VIIPA's commission is agreed per restaurant: no agreement, no going live.
+  if (status === "PUBLISHED" && !(await db.commissionAgreement.findFirst({ where: { subject: "RESTAURANT", subjectId: id }, select: { id: true } }))) return false;
   await db.$transaction(async (tx) => {
     await tx.restaurant.update({ where: { id }, data: { status, statusReason: status === "HIDDEN" ? why : null } });
     await audit(tx, { actorId: actor.id, action: status === "HIDDEN" ? "restaurant.hide" : "restaurant.publish", entityType: "restaurant", entityId: id, data: { from: r.status, to: status, ...(why ? { reason: why } : {}) } });

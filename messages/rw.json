@@ -1459,6 +1459,12 @@
       },
       "allTitle": "Inshingano",
       "staffNote": "Abakozi ba VIIPA bacunga inzu zose na resitora zose bakoresheje dashboard y'ubuyobozi. Inshingano z'inzu na resitora zihabwa konti z'abakiriya (banza ushyire uburenganzira bwabo kuri Umukiriya)."
+    },
+    "actionsMenu": {
+      "label": "Ibikorwa",
+      "reason": "Impamvu (bazayisoma)",
+      "cancel": "Reka",
+      "failed": "Ntibyakunze — ongera ugerageze."
     }
   },
   "Questions": {
@@ -1721,7 +1727,8 @@
     "paymentTitle": "Amabwiriza yo kwishyura",
     "paymentInstructions": "Uko abashyitsi bishyura",
     "paymentInstructionsHint": "urugero MTN MoMo 078 000 0000 (VIIPA Ltd)",
-    "paymentHint": "Bigaragara ku mafatwa atishyuwe igihe nta buryo bwo kwishyura buhujwe. Nyir'inzu cyangwa abakozi bemeza buri kwishyura."
+    "paymentHint": "Bigaragara ku mafatwa atishyuwe igihe nta buryo bwo kwishyura buhujwe. Nyir'inzu cyangwa abakozi bemeza buri kwishyura.",
+    "commissionPerAgreement": "Komisiyo ya VIIPA yumvikanwaho na buri nzu, resitora n'umesa. Yishyireho ku rupapuro rwabo (Amasezerano ya komisiyo); buri mpinduka ibikwa n'itariki yayo."
   },
   "Money": {
     "notConnected": "Kwishyura ntikurahuzwa: shyiraho PAYMENT_WEBHOOK_SECRET kandi uhuze utanga serivisi. Kugeza icyo gihe, nta kintu gihinduka hano ubwacyo.",
@@ -1981,7 +1988,8 @@
     },
     "open": "Reba abayikoresheje",
     "saveShare": "Bika",
-    "noShareYet": "Nta mugabane washyizweho: umwamamaza nta cyo arabona kuri iyi kode."
+    "noShareYet": "Nta mugabane washyizweho: umwamamaza nta cyo arabona kuri iyi kode.",
+    "newCodeOnPromoters": "Kode nshya zikorerwa ku rupapuro rw'Abamamaza (ongeramo umwamamaza, cyangwa wowe ubwawe, n'kode ye) →"
   },
   "Referrals": {
     "title": "Tumira inshuti",
@@ -2056,7 +2064,8 @@
       "payoutMissing": "Uburyo nyir'inzu yishyurwamo bugomba kubanza kubikwa no kugenzurwa.",
       "noPrices": "Banza ushyireho nibura igiciro kimwe.",
       "auth": "Ongera winjire.",
-      "noPhotos": "Banza ushyiremo nibura ifoto imwe."
+      "noPhotos": "Banza ushyiremo nibura ifoto imwe.",
+      "noAgreement": "Banza ushyireho amasezerano ya komisiyo ya VIIPA kuri iyi nzu."
     },
     "blocksTitle": "Iminsi ifunze n'isanwa",
     "noBlocks": "Nta minsi ifunze. Abashyitsi bashobora gufata iminsi yose ifunguye.",
@@ -2193,7 +2202,11 @@
     "deleteHasBookings": "Iri cumbi rifite ibyafashwe cyangwa ibyatumijwe: ribike (archive) aho kurisiba.",
     "deleteNotAllowed": "Ni ab’abakozi bacunga amacumbi gusa.",
     "archivedFilter": "Byabitswe",
-    "deleteShort": "Siba"
+    "deleteShort": "Siba",
+    "actions": {
+      "open": "Fungura",
+      "confirm": "{action}: {title}?"
+    }
   },
   "MyStay": {
     "title": "Aho ncumbitse",
