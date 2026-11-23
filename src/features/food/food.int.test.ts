@@ -66,6 +66,22 @@ beforeEach(async () => {
 });
 
 describe("food from the kitchen of the guest's stay", () => {
+  it("with no delivery person, the kitchen takes the ready order to the guest itself", async () => {
+    const id = await liveKitchen();
+    const dish = await db.menuItem.findFirstOrThrow();
+    const placed = await order(id, dish.id);
+    if (!placed.ok) throw new Error("order failed");
+    const ref = placed.reference;
+    expect(await moveOrder(admin, ref, "ACCEPTED")).toBe(true);
+    expect(await claimOrderPayment("guest", ref, "MP2611.FOOD.009")).toEqual({ ok: true });
+    expect(await confirmOrderPayment(admin, ref)).toEqual({ ok: true });
+    expect(await moveOrder(admin, ref, "PREPARING")).toBe(true);
+    expect(await moveOrder(admin, ref, "READY")).toBe(true);
+    expect(await moveOrder(admin, ref, "OUT_FOR_DELIVERY")).toBe(true);
+    expect(await moveOrder(admin, ref, "DELIVERED")).toBe(true);
+    expect((await db.foodOrder.findUniqueOrThrow({ where: { reference: ref } })).status).toBe("DELIVERED");
+  });
+
   it("a place can have several kitchens: one menu without their names, and each gets its own dishes' order", async () => {
     const first = await liveKitchen();
     const second = await saveRestaurant(admin, null, { ...base, name: "Grill", listingId: null });

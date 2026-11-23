@@ -2818,12 +2818,13 @@
       },
       "courier": "Ubigeza: {name}",
       "chooseCourier": "Hitamo ugeza ibiryo",
-      "noCouriers": "Nta ugeza ibiryo uri mu itsinda",
+      "noCouriers": "Nta ugeza ibiryo uri mu ikipe — mwabyigereza ubwanyu hepfo",
       "assign": "Mushinge",
       "failed": "Ntibyagejejwe",
       "failedReason": "Kuki bitagejejwe?",
       "answerWithin": "Emera cyangwa wange mu {time}",
-      "timedOut": "Igihe kirarangiye: ibyatumijwe biratakaza igihe"
+      "timedOut": "Igihe kirarangiye: ibyatumijwe biratakaza igihe",
+      "deliverOurselves": "Turabyigereza ubwacu"
     },
     "waitingRestaurant": "Resitora ifite kugeza {time} ngo yemeze. Wishyura ari uko imaze kwemeza.",
     "courierLine": "Bizanwa na {name}",

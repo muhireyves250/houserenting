@@ -2818,12 +2818,13 @@
       },
       "courier": "Delivery: {name}",
       "chooseCourier": "Choose a delivery person",
-      "noCouriers": "No delivery person in the team yet",
+      "noCouriers": "No delivery person in the team — take it yourselves below",
       "assign": "Assign",
       "failed": "Delivery failed",
       "failedReason": "Why did the delivery fail?",
       "answerWithin": "Accept or reject within {time}",
-      "timedOut": "Time's up: the order will time out"
+      "timedOut": "Time's up: the order will time out",
+      "deliverOurselves": "We'll take it ourselves"
     },
     "waitingRestaurant": "The restaurant has until {time} to confirm. You pay only after it confirms.",
     "courierLine": "Brought by {name}",

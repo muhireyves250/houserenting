@@ -152,7 +152,7 @@ export function OrdersBoard({ orders, compact = false, staffDelete = false }: { 
                 .filter((s) => !["CANCELLED", "REJECTED", "COURIER_ASSIGNED"].includes(s) && !(s === "READY" && o.status === "OUT_FOR_DELIVERY"))
                 .map((step) => (
                   <button key={step} type="button" disabled={pending} onClick={() => move(o.reference, step)} className="flex-1 rounded-full bg-primary px-4 py-2.5 text-[14px] font-semibold text-white hover:bg-primary-hover disabled:opacity-50">
-                    {t(`board.step.${step as "ACCEPTED"}`)}
+                    {o.status === "READY" && step === "OUT_FOR_DELIVERY" ? t("board.deliverOurselves") : t(`board.step.${step as "ACCEPTED"}`)}
                   </button>
                 ))}
               {/* Ready: hand it to one of the restaurant's delivery people. */}

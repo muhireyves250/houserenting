@@ -2818,12 +2818,13 @@
       },
       "courier": "Livraison : {name}",
       "chooseCourier": "Choisir un livreur",
-      "noCouriers": "Aucun livreur dans l'équipe",
+      "noCouriers": "Aucun livreur dans l'équipe — livrez-le vous-mêmes ci-dessous",
       "assign": "Assigner",
       "failed": "Livraison échouée",
       "failedReason": "Pourquoi la livraison a-t-elle échoué ?",
       "answerWithin": "Acceptez ou refusez dans {time}",
-      "timedOut": "Temps écoulé : la commande va expirer"
+      "timedOut": "Temps écoulé : la commande va expirer",
+      "deliverOurselves": "Nous le livrons nous-mêmes"
     },
     "waitingRestaurant": "Le restaurant a jusqu'à {time} pour confirmer. Vous ne payez qu'après sa confirmation.",
     "courierLine": "Livrée par {name}",

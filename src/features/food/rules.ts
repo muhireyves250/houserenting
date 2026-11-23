@@ -33,7 +33,8 @@ export function nextOrderSteps(status: OrderStatus, _fulfilment: Fulfilment, act
     case "PREPARING":
       return ["READY"];
     case "READY":
-      return ["COURIER_ASSIGNED"];
+      // Hand it to a delivery person, or (none free, or none in the team) the kitchen takes it itself.
+      return ["COURIER_ASSIGNED", "OUT_FOR_DELIVERY"];
     default:
       return courier;
   }

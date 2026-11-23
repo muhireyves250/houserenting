@@ -8,7 +8,7 @@ describe("nextOrderSteps", () => {
     expect(nextOrderSteps("ACCEPTED", "TO_STAY", "kitchen", false)).toEqual(["CANCELLED"]);
     expect(nextOrderSteps("PAID", "TO_STAY", "kitchen", true)).toEqual(["PREPARING"]);
     expect(nextOrderSteps("PREPARING", "TO_STAY", "kitchen", true)).toEqual(["READY"]);
-    expect(nextOrderSteps("READY", "TO_STAY", "kitchen", true)).toEqual(["COURIER_ASSIGNED"]);
+    expect(nextOrderSteps("READY", "TO_STAY", "kitchen", true)).toEqual(["COURIER_ASSIGNED", "OUT_FOR_DELIVERY"]);
     // The restaurant answers for its delivery, so its kitchen can do the delivery steps too.
     expect(nextOrderSteps("COURIER_ASSIGNED", "TO_STAY", "kitchen", true)).toEqual(["OUT_FOR_DELIVERY"]);
   });
