@@ -5,6 +5,7 @@ import { discountedPrice } from "@/features/listings/pricing";
 import { nightsBetween } from "@/features/listings/quote";
 import { todayISO, type BookedRange, type ISODate } from "@/features/search/date-range";
 import { db } from "@/lib/db";
+import { isCustomer } from "@/lib/customer";
 import { holdMinutesFrom, readSettings, type CancellationPolicy } from "@/features/settings/service";
 import { logger } from "@/lib/logger";
 import { notify } from "@/features/notifications/service";
@@ -38,6 +39,7 @@ export type BookingError =
   | "pastTime"
   | "notFound"
   | "ownListing"
+  | "notCustomer"
   | "stayLength"
   | "phone"
   | "unavailable"
@@ -135,6 +137,8 @@ const HHMM = /^([01]\d|2[0-3]):[0-5]\d$/;
  * comes from the host's rates, and overlapping bookings are refused on exact times by the database.
  */
 export async function createRentalBooking(request: RentalRequest, now: Date = new Date()): Promise<CreateBookingResult> {
+  // Only customers book (staff and people with a place or restaurant role don't).
+  if (!(await isCustomer(request.guestId))) return { ok: false, error: "notCustomer" };
   const { guestId, listingId, unit, start, quantity, guests } = request;
   if (!BOOKING_UNITS.includes(unit) || !isRealDate(start) || start < todayISO(now)) return { ok: false, error: "invalid" };
   if (!Number.isInteger(quantity) || quantity < 1 || quantity > MAX_QUANTITY[unit] || !Number.isInteger(guests) || guests < 1) return { ok: false, error: "invalid" };
@@ -294,6 +298,8 @@ export async function createRentalBooking(request: RentalRequest, now: Date = ne
 
 /** Nightly stay from check-in to checkout (the calendar on the listing page). */
 export async function createBooking(request: BookingRequest, now: Date = new Date()): Promise<CreateBookingResult> {
+  // Only customers book (staff and people with a place or restaurant role don't).
+  if (!(await isCustomer(request.guestId))) return { ok: false, error: "notCustomer" };
   const { checkIn, checkOut, ...rest } = request;
   if (!isRealDate(checkIn) || !isRealDate(checkOut)) return { ok: false, error: "invalid" };
   const nights = nightsBetween({ checkIn, checkOut });

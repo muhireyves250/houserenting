@@ -7,6 +7,7 @@ import { notify, notifyAdmins } from "@/features/notifications/service";
 import { todayISO } from "@/features/search/date-range";
 import { readSettings } from "@/features/settings/service";
 import { db } from "@/lib/db";
+import { isCustomer } from "@/lib/customer";
 import { canStaff } from "@/lib/roles";
 import { canOn } from "@/features/places/access";
 import { gramsFromKg, laundryPrice, laundrySplit, NEXT_LAUNDRY_STEP, OPEN_LAUNDRY, PLACE_LAUNDRY_STEPS, PRICED_LAUNDRY, type LaundryStatus } from "./rules";
@@ -33,13 +34,14 @@ export function stayLaundry(bookingId: string) {
   return db.laundryOrder.findMany({ where: { bookingId }, orderBy: { createdAt: "desc" }, select: LAUNDRY_SELECT });
 }
 
-export type RequestLaundryResult = { ok: true; reference: string } | { ok: false; error: "notOffered" | "noStay" | "open" };
+export type RequestLaundryResult = { ok: true; reference: string } | { ok: false; error: "notOffered" | "noStay" | "open" | "notCustomer" };
 
 /**
  * A guest staying now asks for their laundry to be collected. Only while a paid stay is under way at a place that
  * offers laundry; one open request at a time. The place's price per kg is kept on the order. VIIPA staff are told.
  */
 export async function requestLaundry(guestId: string, bookingReference: string, note: string, now: Date = new Date()): Promise<RequestLaundryResult> {
+  if (!(await isCustomer(guestId))) return { ok: false, error: "notCustomer" };
   const today = new Date(`${todayISO(now)}T00:00:00Z`);
   const booking = await db.booking.findFirst({
     where: { reference: bookingReference, guestId, status: { in: ["CONFIRMED", "CHECKED_IN"] }, checkIn: { lte: today }, checkOut: { gte: today } },

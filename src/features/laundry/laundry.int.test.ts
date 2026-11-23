@@ -136,7 +136,7 @@ describe("laundry during a stay", () => {
     await stay("SR-LAUND5", "paid");
     expect(await requestLaundry("guest", "SR-LAUND3", "", NOW)).toEqual({ ok: false, error: "notOffered" });
     expect(await requestLaundry("guest", "SR-LAUND4", "", NOW)).toEqual({ ok: false, error: "noStay" });
-    expect(await requestLaundry("someone", "SR-LAUND5", "", NOW)).toEqual({ ok: false, error: "noStay" });
+    expect(await requestLaundry("someone", "SR-LAUND5", "", NOW)).toEqual({ ok: false, error: "notCustomer" });
     const req = await requestLaundry("guest", "SR-LAUND5", "", NOW);
     if (!req.ok) throw new Error("request failed");
     expect(await cancelMyLaundry("guest", req.reference)).toBe(true);

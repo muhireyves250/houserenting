@@ -4,6 +4,8 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { Avatar } from "@/components/ui/Avatar";
 import { FilterTabs, Pagination, Panel, SearchBox, Table, td } from "@/features/admin/components/ui";
 import { searchUsers, type UserFilter } from "@/features/admin/queries";
+import { RoleBadge } from "@/features/admin/components/RoleBadge";
+import { currentPersonRole } from "@/features/admin/service";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { UserActions } from "@/features/admin/components/UserActions";
@@ -54,11 +56,7 @@ export async function UsersView({ searchParams, tabs }: { searchParams: Props["s
                 </Link>
               </td>
               <td className={td}>
-                <span className="flex flex-wrap gap-1">
-                  {u.role !== "USER" && <span className={cn(badge, "bg-primary/10 text-primary")}>{t(`roleName.${u.role}`)}</span>}
-                  {u.isHost && <span className={cn(badge, "bg-canvas text-ink/80")}>{t("hostBadge")}</span>}
-                  {u.role === "USER" && !u.isHost && <span className="text-[13px] text-muted">{t("guestRole")}</span>}
-                </span>
+<RoleBadge role={currentPersonRole(u).role} label={t(`personRole.${currentPersonRole(u).role}`)} />
               </td>
               <td className={`${td} text-[13px] text-ink/80 tabular-nums`}>{t("activityLine", { bookings: u._count.bookings, listings: u._count.listings })}</td>
               <td className={`${td} text-[13px] whitespace-nowrap text-muted`}>{date.format(u.createdAt)}</td>

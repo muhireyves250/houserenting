@@ -462,7 +462,8 @@
       "identity": "Uzuza amakuru yawe kugira ngo ubike.",
       "outsideWindow": "Aha ntihabikwa kuri iyo minsi. Hitamo iminsi iri mu gihe hafunguye.",
       "closedDay": "Aha ntihakira ibyabitswe kuri uwo munsi w'icyumweru.",
-      "pastTime": "Iyo saha yamaze kurenga. Hitamo isaha iri imbere."
+      "pastTime": "Iyo saha yamaze kurenga. Hitamo isaha iri imbere.",
+      "notCustomer": "Konti yawe ifite inshingano y'akazi kuri VIIPA, ntishobora gufata icyumba. Saba VIIPA kuyigira umukiriya."
     },
     "qrCode": "Kode ya QR",
     "qrCodeFor": "Kode ya QR ya {title}",
@@ -1529,6 +1530,16 @@
         "ownsPlaces": "Afite inzu: banza uziha undi muntu.",
         "ownsRestaurants": "Afite resitora: banza uziha undi muntu."
       }
+    },
+    "personRole": {
+      "CUSTOMER": "Umukiriya",
+      "STAFF_MANAGER": "Umuyobozi wa VIIPA",
+      "STAFF_ADMIN": "Admin wa VIIPA",
+      "PLACE_OWNER": "Nyir'inzu",
+      "PLACE_RECEPTIONIST": "Ushinzwe kwakira",
+      "RESTAURANT_OWNER": "Nyiri resitora",
+      "RESTAURANT_MANAGER": "Umuyobozi wa resitora",
+      "RESTAURANT_DELIVERY": "Ugeza ibiryo"
     }
   },
   "Questions": {
@@ -2528,7 +2539,8 @@
       "noStay": "Ntitwabonye aho ucumbitse uyu munsi.",
       "cart": "Ibiryo bimwe ntibikiboneka. Reba ibyo watumije.",
       "auth": "Ongera winjire.",
-      "minOrder": "Ibyo watumije biri munsi y'ibyo igikoni cyemera nibura."
+      "minOrder": "Ibyo watumije biri munsi y'ibyo igikoni cyemera nibura.",
+      "notCustomer": "Konti yawe ifite inshingano y'akazi kuri VIIPA, ntishobora gutumiza ibiryo. Saba VIIPA kuyigira umukiriya."
     },
     "ordersTitle": "Ibyo natumije",
     "noOrdersYet": "Nta byo uratumiza",
@@ -3099,7 +3111,8 @@
       "notOffered": "Aha hantu nta serivisi yo kumesa ihari.",
       "noStay": "Kumesa ni iby'abashyitsi bari mu gihe bishyuye.",
       "open": "Usanzwe ufite imyenda iri gukorwa.",
-      "auth": "Ongera winjire."
+      "auth": "Ongera winjire.",
+      "notCustomer": "Konti yawe ifite inshingano y'akazi kuri VIIPA, ntishobora gusaba kumesa. Saba VIIPA kuyigira umukiriya."
     },
     "payError": {
       "notFound": "Iyi myenda ntishobora kwishyurwa ubu.",

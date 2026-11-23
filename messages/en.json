@@ -462,7 +462,8 @@
       "identity": "Fill in your details to book.",
       "outsideWindow": "This place can't be booked for those dates. Choose dates inside its open period.",
       "closedDay": "This place doesn't take bookings starting (or on) that day of the week.",
-      "pastTime": "That time has already passed. Choose a later time."
+      "pastTime": "That time has already passed. Choose a later time.",
+      "notCustomer": "Your account has a work role on VIIPA, so it can't book stays. Ask VIIPA to make it a customer again."
     },
     "qrCode": "QR code",
     "qrCodeFor": "QR code for {title}",
@@ -1529,6 +1530,16 @@
         "ownsPlaces": "They own places: hand those over to someone else first.",
         "ownsRestaurants": "They own restaurants: hand those over to someone else first."
       }
+    },
+    "personRole": {
+      "CUSTOMER": "Customer",
+      "STAFF_MANAGER": "VIIPA manager",
+      "STAFF_ADMIN": "VIIPA admin",
+      "PLACE_OWNER": "Place owner",
+      "PLACE_RECEPTIONIST": "Receptionist",
+      "RESTAURANT_OWNER": "Restaurant owner",
+      "RESTAURANT_MANAGER": "Restaurant manager",
+      "RESTAURANT_DELIVERY": "Delivery"
     }
   },
   "Questions": {
@@ -2528,7 +2539,8 @@
       "noStay": "We couldn't find a stay of yours today.",
       "cart": "Some dishes are no longer available. Check your order.",
       "auth": "Please log in again.",
-      "minOrder": "Your order is below the kitchen's minimum."
+      "minOrder": "Your order is below the kitchen's minimum.",
+      "notCustomer": "Your account has a work role on VIIPA, so it can't order food. Ask VIIPA to make it a customer again."
     },
     "ordersTitle": "Orders",
     "noOrdersYet": "No orders yet",
@@ -3099,7 +3111,8 @@
       "notOffered": "This place doesn't offer laundry.",
       "noStay": "Laundry is for guests during a paid stay.",
       "open": "You already have laundry in progress.",
-      "auth": "Please log in again."
+      "auth": "Please log in again.",
+      "notCustomer": "Your account has a work role on VIIPA, so it can't ask for laundry. Ask VIIPA to make it a customer again."
     },
     "payError": {
       "notFound": "This laundry can't be paid now.",

@@ -291,6 +291,18 @@ describe("one role per person", () => {
     expect(await setPersonRole(admin, "g1", "CUSTOMER")).toEqual({ ok: false, error: "ownsPlaces" });
   });
 
+  it("only customers book: with another role they can't, until they are a customer again", async () => {
+    const { setPersonRole } = await import("./service");
+    await db.user.update({ where: { id: "g1" }, data: { status: "ACTIVE" } });
+    // A second place where they work the front desk.
+    await db.listing.create({ data: { ...(await db.listing.findUniqueOrThrow({ where: { id: "flat" }, omit: { id: true, createdAt: true, updatedAt: true } })), id: "hotel", title: "Hotel" } });
+    const book = () => createBooking({ guestId: "g1", listingId: "flat", checkIn: "2026-10-20", checkOut: "2026-10-22", guests: 1, payment: pay }, NOW);
+    expect(await setPersonRole(admin, "g1", "PLACE_RECEPTIONIST", "hotel")).toEqual({ ok: true });
+    expect(await book()).toEqual({ ok: false, error: "notCustomer" });
+    expect(await setPersonRole(admin, "g1", "CUSTOMER")).toEqual({ ok: true });
+    expect(await book()).toMatchObject({ ok: true });
+  });
+
   it("receptionists handle the place's laundry", async () => {
     const { canOn } = await import("@/features/places/access");
     await db.placeMember.create({ data: { listingId: "flat", userId: "g1", role: "RECEPTIONIST", addedById: "admin" } });

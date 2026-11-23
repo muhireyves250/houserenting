@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Avatar } from "@/components/ui/Avatar";
 import { RolesEditor } from "@/features/admin/components/RolesEditor";
+import { RoleBadge } from "@/features/admin/components/RoleBadge";
 import { db } from "@/lib/db";
 import { UserActions } from "@/features/admin/components/UserActions";
 import {
@@ -134,16 +135,8 @@ export default async function AdminUserPage({ params }: Props) {
           <p className="truncate text-[13px] text-muted">{user.email}</p>
         </div>
         <span className="flex flex-wrap gap-1.5">
-          {user.role !== "USER" && (
-            <span className={cn(badge, "bg-primary/10 text-primary")}>
-              {t(`roleName.${user.role}`)}
-            </span>
-          )}
-          {user.isHost && (
-            <span className={cn(badge, "bg-canvas text-ink/80")}>
-              {t("hostBadge")}
-            </span>
-          )}
+          {/* Their one role. */}
+          <RoleBadge role={currentPersonRole(user).role} label={t(`personRole.${currentPersonRole(user).role}`)} />
           <span
             className={cn(
               badge,

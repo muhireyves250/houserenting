@@ -8,6 +8,7 @@ import { notify, notifyAdmins } from "@/features/notifications/service";
 import { readSettings } from "@/features/settings/service";
 import { todayISO } from "@/features/search/date-range";
 import { db } from "@/lib/db";
+import { isCustomer } from "@/lib/customer";
 import { canStaff } from "@/lib/roles";
 import { ACCEPT_MINUTES, nextOrderSteps, priceCart, type OrderActor, type OrderStatus } from "./rules";
 import { menuItemInput, orderInput, restaurantInput, type MenuItemInput, type OrderInput, type RestaurantInput } from "./validation";
@@ -261,7 +262,7 @@ async function currentStay(customerId: string, reference: string | null, now: Da
   });
 }
 
-export type PlaceOrderResult = { ok: true; reference: string; count: number } | { ok: false; error: "invalid" | "closed" | "notOffered" | "tooFar" | "noStay" | "cart" | "minOrder" };
+export type PlaceOrderResult = { ok: true; reference: string; count: number } | { ok: false; error: "invalid" | "closed" | "notOffered" | "tooFar" | "noStay" | "cart" | "minOrder" | "notCustomer" };
 
 /**
  * A guest orders from the menu of the place they are staying at. The dishes may come from several of the place's
@@ -273,6 +274,7 @@ export async function placeOrder(customerId: string, raw: OrderInput, now: Date 
   const input = parsed.data;
   // Food is cooked for the place where the guest is staying and brought to their room: no pickup, no delivery elsewhere.
   if (input.fulfilment !== "TO_STAY") return { ok: false, error: "notOffered" };
+  if (!(await isCustomer(customerId))) return { ok: false, error: "notCustomer" };
   const stay = await currentStay(customerId, input.bookingReference, now);
   if (!stay) return { ok: false, error: "noStay" };
   const kitchens = await kitchensForPlace(stay.listingId);

@@ -462,7 +462,8 @@
       "identity": "Renseignez vos informations pour réserver.",
       "outsideWindow": "Ce logement n'est pas réservable à ces dates. Choisissez des dates dans sa période d'ouverture.",
       "closedDay": "Ce logement n'accepte pas de réservation ce jour de la semaine.",
-      "pastTime": "Cette heure est déjà passée. Choisissez une heure plus tard."
+      "pastTime": "Cette heure est déjà passée. Choisissez une heure plus tard.",
+      "notCustomer": "Votre compte a un rôle de travail sur VIIPA : il ne peut pas réserver. Demandez à VIIPA de le remettre en client."
     },
     "qrCode": "Code QR",
     "qrCodeFor": "Code QR pour {title}",
@@ -1529,6 +1530,16 @@
         "ownsPlaces": "Il possède des logements : transférez-les d'abord à quelqu'un d'autre.",
         "ownsRestaurants": "Il possède des restaurants : transférez-les d'abord à quelqu'un d'autre."
       }
+    },
+    "personRole": {
+      "CUSTOMER": "Client",
+      "STAFF_MANAGER": "Gestionnaire VIIPA",
+      "STAFF_ADMIN": "Admin VIIPA",
+      "PLACE_OWNER": "Propriétaire de logement",
+      "PLACE_RECEPTIONIST": "Réceptionniste",
+      "RESTAURANT_OWNER": "Propriétaire de restaurant",
+      "RESTAURANT_MANAGER": "Gérant de restaurant",
+      "RESTAURANT_DELIVERY": "Livreur"
     }
   },
   "Questions": {
@@ -2528,7 +2539,8 @@
       "noStay": "Aucun séjour trouvé aujourd'hui.",
       "cart": "Certains plats ne sont plus disponibles. Vérifiez votre commande.",
       "auth": "Veuillez vous reconnecter.",
-      "minOrder": "Votre commande est en dessous du minimum de la cuisine."
+      "minOrder": "Votre commande est en dessous du minimum de la cuisine.",
+      "notCustomer": "Votre compte a un rôle de travail sur VIIPA : il ne peut pas commander de repas. Demandez à VIIPA de le remettre en client."
     },
     "ordersTitle": "Commandes",
     "noOrdersYet": "Pas encore de commandes",
@@ -3099,7 +3111,8 @@
       "notOffered": "Ce logement ne propose pas de blanchisserie.",
       "noStay": "La blanchisserie est pour les voyageurs pendant un séjour payé.",
       "open": "Vous avez déjà du linge en cours.",
-      "auth": "Veuillez vous reconnecter."
+      "auth": "Veuillez vous reconnecter.",
+      "notCustomer": "Votre compte a un rôle de travail sur VIIPA : il ne peut pas demander de blanchisserie. Demandez à VIIPA de le remettre en client."
     },
     "payError": {
       "notFound": "Ce linge ne peut pas être payé maintenant.",

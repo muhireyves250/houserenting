@@ -105,7 +105,7 @@ describe("createBooking", () => {
     expect(await createBooking(stay({ listingId: "b", checkOut: "2026-10-21" }), NOW)).toEqual({ ok: false, error: "stayLength" });
     expect(await createBooking(stay({ listingId: "b", checkOut: "2026-10-27" }), NOW)).toEqual({ ok: false, error: "stayLength" });
     expect(await createBooking(stay({ listingId: "draft" }), NOW)).toEqual({ ok: false, error: "notFound" });
-    expect(await createBooking(stay({ guestId: "host" }), NOW)).toEqual({ ok: false, error: "ownListing" });
+    expect(await createBooking(stay({ guestId: "host" }), NOW)).toEqual({ ok: false, error: "notCustomer" }); // an owner is not a customer
     expect(await createBooking(stay({ payment: { method: "airtel", phone: "0781234567" } }), NOW)).toEqual({ ok: false, error: "phone" });
     expect(await db.booking.count()).toBe(0);
   });
