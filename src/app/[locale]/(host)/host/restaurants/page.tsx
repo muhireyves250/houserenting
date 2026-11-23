@@ -1,9 +1,9 @@
 import { ChevronLeft, ChevronRight, Plus, UtensilsCrossed } from "lucide-react";
 import { requireWorkArea } from "@/features/hosting/work";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { canAddRestaurant, restaurantsRunBy } from "@/features/food/service";
-import { Link } from "@/i18n/navigation";
+import { Link, redirect } from "@/i18n/navigation";
 
 export async function generateMetadata() {
   const t = await getTranslations("Food");
@@ -14,6 +14,8 @@ export async function generateMetadata() {
 export default async function HostRestaurantsPage() {
   const { user } = await requireWorkArea("restaurants", "/host/restaurants");
   const [t, list, canAdd] = await Promise.all([getTranslations("Food"), restaurantsRunBy(user.id), canAddRestaurant(user)]);
+  // One restaurant and no way to add another (a manager, a delivery person): open it directly.
+  if (list.length === 1 && !canAdd) redirect({ href: `/host/restaurants/${list[0]!.id}`, locale: await getLocale() });
   const add = (
     <Link href="/host/restaurants/new" className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-[15px] font-semibold text-white hover:bg-primary-hover">
       <Plus className="size-4" aria-hidden="true" />

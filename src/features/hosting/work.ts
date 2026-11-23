@@ -46,7 +46,9 @@ export const workRoles = cache(async (userId: string): Promise<WorkRoles> => {
   // Restaurant owners and managers (the role VIIPA gives): their restaurants, or setting the first one up.
   const restaurateur = Boolean(user?.isRestaurateur);
   if (restaurants.length > 0 || restaurateur) areas.push("restaurants");
-  const home = areas.includes("overview") ? "/host" : desk ? "/host/desk" : restaurants.length > 0 ? "/host/restaurants" : restaurateur ? "/host/restaurants/new" : "/host";
+  // Working at one restaurant (not its owner): straight to its own page, no list of one.
+  const onlyRestaurant = restaurants.length === 1 && !restaurateur ? `/host/restaurants/${restaurants[0]!.id}` : null;
+  const home = areas.includes("overview") ? "/host" : desk ? "/host/desk" : onlyRestaurant ? onlyRestaurant : restaurants.length > 0 ? "/host/restaurants" : restaurateur ? "/host/restaurants/new" : "/host";
   return { owner, places: placeJobs, restaurants, restaurateur, areas, home };
 });
 

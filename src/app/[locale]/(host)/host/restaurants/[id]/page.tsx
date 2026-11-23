@@ -12,7 +12,7 @@ import { formatKigaliDateTime } from "@/features/bookings/format";
 import { cn } from "@/lib/cn";
 import { formatRWF } from "@/lib/format";
 import { ACTIVE_ORDER, acceptDeadline, nextOrderSteps, type OrderActor } from "@/features/food/rules";
-import { canRestaurant, confirmationsOf, restaurantForTeam, restaurantOrders, placesToApply, restaurantMoney, restaurantPlaces, restaurantReviews, restaurantRole, withDesk, withStayLocation } from "@/features/food/service";
+import { canAddRestaurant, canRestaurant, confirmationsOf, restaurantsRunBy, restaurantForTeam, restaurantOrders, placesToApply, restaurantMoney, restaurantPlaces, restaurantReviews, restaurantRole, withDesk, withStayLocation } from "@/features/food/service";
 import { Card } from "@/features/hosting/components/fields";
 import { Link } from "@/i18n/navigation";
 import { requireUser } from "@/lib/session";
@@ -40,6 +40,7 @@ export default async function HostRestaurantPage({ params, searchParams }: Props
     role === "owner" || role === "staff" ? Promise.all([restaurantPlaces(id), placesToApply(id)]).then(([p, options]) => ({ ...p, options })) : null,
     canRestaurant(role, "money") ? restaurantMoney(id) : null,
   ]);
+  const manyRestaurants = role === "staff" || (await canAddRestaurant(user)) || (await restaurantsRunBy(user.id)).length > 1;
   const kitchen = canRestaurant(role, "orders");
   // The restaurant's delivery people (to assign ready orders), and who is on each order.
   const couriers = r.team.filter((m) => m.role === "DELIVERY").map((m) => ({ id: m.userId, name: m.user.name }));
@@ -124,10 +125,13 @@ export default async function HostRestaurantPage({ params, searchParams }: Props
             )}
           </span>
           <span className="min-w-0">
-            <Link href="/host/restaurants" className="inline-flex items-center gap-1 text-[12px] text-muted hover:text-ink">
-              <ChevronLeft className="size-3.5" aria-hidden="true" />
-              {t("yourRestaurants")}
-            </Link>
+            {/* Back to the list only for those with several restaurants (or who can add one). */}
+            {manyRestaurants && (
+              <Link href="/host/restaurants" className="inline-flex items-center gap-1 text-[12px] text-muted hover:text-ink">
+                <ChevronLeft className="size-3.5" aria-hidden="true" />
+                {t("yourRestaurants")}
+              </Link>
+            )}
             <span className="block truncate text-[22px] leading-7 font-bold tracking-[-0.02em] text-ink">{r.name}</span>
             <span className={cn("mt-1 inline-flex rounded-full px-2.5 py-0.5 text-[12px] font-semibold", r.status === "PUBLISHED" ? "bg-emerald-50 text-emerald-800" : r.status === "DRAFT" ? "bg-amber-50 text-amber-900" : "bg-red-50 text-red-800")}>
               {t(`restaurantStatus.${r.status}`)}
