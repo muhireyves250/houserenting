@@ -3,7 +3,8 @@ import { DownloadLink } from "@/components/ui/DownloadLink";
 import { PayoutChecks } from "@/features/places/components/PayoutChecks";
 import { SendReceiptButton } from "@/features/receipt/components/SendReceiptButton";
 import { getLocale, getTranslations } from "next-intl/server";
-import { adminCard, Chip, StatTiles } from "@/features/admin/components/kit";
+import { adminCard, Chip } from "@/features/admin/components/kit";
+import { MoneyOverview } from "@/features/admin/components/MoneyOverview";
 import {
   PayoutForm,
   RewardButtons,
@@ -11,7 +12,7 @@ import {
 import { Pagination } from "@/features/admin/components/ui";
 import { allPayments } from "@/features/admin/queries";
 import { formatKigaliDateTime } from "@/features/bookings/format";
-import { ownerBalances, recentLedger } from "@/features/ledger/service";
+import { dailySettlements, ownerBalances, recentLedger } from "@/features/ledger/service";
 import { PAYMENT_FILTERS, type PaymentFilter } from "@/features/admin/queries";
 import { FilterTabs, SearchBox } from "@/features/admin/components/ui";
 import { placeCommissions } from "@/features/places/commission";
@@ -85,10 +86,8 @@ export async function MoneyView({
     ]);
   const connected = Boolean(getEnv().PAYMENT_WEBHOOK_SECRET);
   // Each owner's places and VIIPA's commission on each (editable here).
-  const commissions = await placeCommissions(balances.map((b) => b.hostId));
+  const [commissions, daily] = await Promise.all([placeCommissions(balances.map((b) => b.hostId)), dailySettlements()]);
   const rwf = (n: number) => formatRWF(n, locale);
-  const sum = (k: "due" | "upcoming" | "paidOut" | "depositsHeld") =>
-    balances.reduce((n, b) => n + b[k], 0);
 
   // The ledger, one group per payment: same booking (or payout), same reason, same moment.
   type Group = {
@@ -169,19 +168,8 @@ export async function MoneyView({
         </div>
       </div>
 
-      <StatTiles
-        items={[
-          { label: t("tiles.due"), count: sum("due"), tone: "text-primary" },
-          { label: t("tiles.upcoming"), count: sum("upcoming") },
-          {
-            label: t("tiles.paidOut"),
-            count: sum("paidOut"),
-            tone: "text-emerald-700",
-          },
-          { label: t("tiles.deposits"), count: sum("depositsHeld") },
-        ]}
-        format={rwf}
-      />
+      {/* Money at a glance, in plain words. */}
+      <MoneyOverview />
 
       {/* New or changed owner payout details, to check first. */}
       <PayoutChecks />
@@ -197,11 +185,17 @@ export async function MoneyView({
           <ul className="grid gap-3 lg:grid-cols-2">
             {balances.map((b) => (
               <li key={b.hostId} className={adminCard}>
-                <div className="min-w-0">
-                  <p className="truncate text-[16px] font-bold text-ink">
-                    {b.name}
-                  </p>
-                  <p className="truncate text-[12px] text-muted">{b.email}</p>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-[16px] font-bold text-ink">
+                      {b.name}
+                    </p>
+                    <p className="truncate text-[12px] text-muted">{b.email}</p>
+                  </div>
+                  {/* Their full money account: transactions, commission, payouts, history. */}
+                  <Link href={`/admin/money/providers/${b.hostId}`} className="shrink-0 rounded-full border border-line px-3 py-1 text-[12px] font-semibold text-primary hover:border-primary">
+                    {t("statement.open")}
+                  </Link>
                 </div>
                 <dl className="grid grid-cols-2 gap-2 text-[13px]">
                   {(
@@ -262,6 +256,44 @@ export async function MoneyView({
               </li>
             ))}
           </ul>
+        )}
+      </section>
+
+      {/* Restaurant and laundry money, day by day and provider by provider (settled daily). */}
+      <section className="flex flex-col gap-3">
+        <h2 className="text-[17px] font-bold text-ink">{t("daily.title")}</h2>
+        <p className="-mt-2 text-[13px] text-muted">{t("daily.hint")}</p>
+        {daily.length === 0 ? (
+          <p className="rounded-2xl bg-surface py-6 text-center text-[14px] text-muted ring-1 ring-line">{t("nothing")}</p>
+        ) : (
+          <div className="overflow-x-auto rounded-2xl bg-surface ring-1 ring-line" data-lenis-prevent>
+            <table className="w-full text-[13px]">
+              <thead className="text-left text-[12px] text-muted">
+                <tr>
+                  <th className="px-4 py-2.5 font-semibold">{t("daily.day")}</th>
+                  <th className="px-4 py-2.5 font-semibold">{t("daily.provider")}</th>
+                  <th className="px-4 py-2.5 text-right font-semibold">{t("daily.food")}</th>
+                  <th className="px-4 py-2.5 text-right font-semibold">{t("daily.laundry")}</th>
+                  <th className="px-4 py-2.5 text-right font-semibold">{t("daily.total")}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-line">
+                {daily.map((d) => (
+                  <tr key={`${d.day}${d.hostId}`}>
+                    <td className="px-4 py-2.5 whitespace-nowrap tabular-nums">{d.day}</td>
+                    <td className="px-4 py-2.5">
+                      <Link href={`/admin/money/providers/${d.hostId}`} className="font-semibold text-primary hover:underline">
+                        {d.name}
+                      </Link>
+                    </td>
+                    <td className="px-4 py-2.5 text-right tabular-nums">{d.food ? rwf(d.food) : "—"}</td>
+                    <td className="px-4 py-2.5 text-right tabular-nums">{d.laundry ? rwf(d.laundry) : "—"}</td>
+                    <td className="px-4 py-2.5 text-right font-bold tabular-nums">{rwf(d.food + d.laundry)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
 

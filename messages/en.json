@@ -1322,7 +1322,8 @@
       "money": "Money",
       "reports": "Reports",
       "receipt": "Receipt",
-      "users": "Users"
+      "users": "Users",
+      "expenses": "Expenses"
     },
     "areas": {
       "listings": "Places",
@@ -1860,6 +1861,53 @@
       "name": "Name on the account",
       "number": "Number",
       "checkFirst": "Check before verifying"
+    },
+    "overview": {
+      "in": "Money in",
+      "received": "Received from guests",
+      "receivedHint": "Every payment that came in",
+      "revenue": "VIIPA's revenue",
+      "revenueHint": "Commission and service fees only",
+      "net": "Net earnings",
+      "netHint": "Revenue less commissions and expenses",
+      "owed": "Owed to owners and providers",
+      "dueNow": "Due now",
+      "dueNowHint": "Finished stays, food and laundry",
+      "dueLater": "Due after stays end",
+      "dueLaterHint": "Paid stays still in progress",
+      "paidOut": "Already paid out",
+      "paidOutHint": "Payouts recorded",
+      "costs": "Commissions and costs",
+      "promoterOwed": "Promoter commissions owed",
+      "referralOwed": "Customer referral rewards owed",
+      "paidSoFar": "{amount} paid so far",
+      "refunds": "Refunds and compensation",
+      "expenses": "Operating expenses"
+    },
+    "statement": {
+      "open": "Statement",
+      "transactions": "Paid by their guests",
+      "commission": "VIIPA commission",
+      "dueNow": "Due now",
+      "dueLater": "Due after stays",
+      "paid": "Paid to them",
+      "payNow": "Record a payout",
+      "payouts": "Payouts",
+      "noPayouts": "Nothing paid yet.",
+      "history": "Every money movement",
+      "date": "Date",
+      "what": "What",
+      "reference": "Reference",
+      "amount": "Amount"
+    },
+    "daily": {
+      "title": "Daily settlements (food and laundry)",
+      "hint": "What each restaurant and laundry provider earned each day, after VIIPA's commission. Pay them from their card above.",
+      "day": "Day",
+      "provider": "Provider",
+      "food": "Food",
+      "laundry": "Laundry",
+      "total": "To pay"
     }
   },
   "Promotions": {
@@ -3136,5 +3184,48 @@
       "saveCorrection": "Save as a new version",
       "failed": "Couldn't save — check the details."
     }
+  },
+  "Agreements": {
+    "title": "Commission agreement",
+    "laundryTitle": "Laundry commission",
+    "fixed": "RWF {amount} fixed",
+    "noAgreement": "default rate (no agreement yet)",
+    "change": "Change",
+    "history": "History ({count})",
+    "kind": {
+      "percent": "Percent (%)",
+      "fixed": "Fixed fee (RWF)"
+    },
+    "from": "From",
+    "note": "Note (optional), e.g. signed contract",
+    "invalid": "Check the amount (0–50% or a fee in RWF).",
+    "save": "Save agreement",
+    "fromDate": "from {date}"
+  },
+  "Expenses": {
+    "title": "Expenses",
+    "add": "Add an expense",
+    "date": "Date",
+    "category": "Kind",
+    "description": "What it was for",
+    "amount": "Amount (RWF)",
+    "reference": "Receipt or reference (optional)",
+    "invalid": "Check the date, description and amount.",
+    "cancel": "Cancel",
+    "save": "Save expense",
+    "none": "No expenses recorded yet.",
+    "delete": "Delete",
+    "deleteQuestion": "Delete this expense?",
+    "cat": {
+      "SALARIES": "Salaries",
+      "RENT": "Rent",
+      "MARKETING": "Marketing",
+      "TRANSPORT": "Transport",
+      "INTERNET": "Internet & phone",
+      "SOFTWARE": "Software",
+      "FEES": "Bank & payment fees",
+      "OTHER": "Other"
+    },
+    "thisMonth": "This month:"
   }
 }

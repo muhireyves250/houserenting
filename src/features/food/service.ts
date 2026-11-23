@@ -1,4 +1,5 @@
 import "server-only";
+import { agreementAt, commissionUnder } from "@/features/agreements/service";
 import { pathOfVillage } from "@/features/locations/rwanda";
 import type { Prisma } from "@/generated/prisma/client";
 import { audit } from "@/features/audit/service";
@@ -528,7 +529,8 @@ export async function confirmOrderPayment(actor: Actor, reference: string, trans
   const tx = (transactionId ?? order.paymentClaim ?? "").trim();
   if (!TX.test(tx)) return { ok: false, error: "transaction" };
   if (await db.foodOrder.findUnique({ where: { paidReference: tx }, select: { id: true } })) return { ok: false, error: "used" };
-  const commission = Math.round((order.total * ((await readSettings()).commissionBps ?? 0)) / 10_000);
+  // The restaurant's commission agreement in force at payment (a % or a fixed fee), else the platform's rate.
+  const commission = commissionUnder(await agreementAt("RESTAURANT", order.restaurant.id, now), order.total) ?? Math.round((order.total * ((await readSettings()).commissionBps ?? 0)) / 10_000);
   const done = await db.$transaction(async (t) => {
     const { count } = await t.foodOrder.updateMany({ where: { id: order.id, paidAt: null }, data: { paidAt: now, paidReference: tx } });
     if (count !== 1) return false;

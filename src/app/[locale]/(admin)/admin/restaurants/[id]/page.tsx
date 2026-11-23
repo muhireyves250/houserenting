@@ -13,12 +13,15 @@ import { db } from "@/lib/db";
 import { dynamicMessage } from "@/lib/dynamic-message";
 import { formatRWF } from "@/lib/format";
 import { requireStaff } from "@/lib/permissions";
+import { AgreementEditor } from "@/features/agreements/components/AgreementEditor";
+import { agreementPanel } from "@/features/agreements/service";
 
 type Props = { params: Promise<{ id: string }> };
 
 export default async function AdminRestaurantPage({ params }: Props) {
   const { id } = await params;
   await requireStaff("food", `/admin/restaurants/${id}`);
+  const [tAgree, agreement] = await Promise.all([getTranslations("Agreements"), agreementPanel("RESTAURANT", id)]);
   const r = await restaurantForTeam(id);
   if (!r) notFound();
   const [t, tFood, locale, orders, places, history] = await Promise.all([
@@ -91,6 +94,10 @@ export default async function AdminRestaurantPage({ params }: Props) {
                 { label: t("col.email"), value: <span className="break-all">{r.owner.email}</span> },
               ]}
             />
+          </Panel>
+          {/* VIIPA's commission agreement with this restaurant (a % or a fixed fee per order), with its history. */}
+          <Panel title={tAgree("title")}>
+            <AgreementEditor subject="RESTAURANT" subjectId={r.id} current={agreement.current} history={agreement.history} fallback={tAgree("noAgreement")} />
           </Panel>
           <Panel title={tFood("teamTitle")}>
             <RestaurantTeam restaurantId={r.id} members={r.team} staff />

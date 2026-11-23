@@ -1,4 +1,5 @@
-import { ChartColumn, Receipt, Wallet } from "lucide-react";
+import { ChartColumn, Receipt, Wallet, Wallet2 } from "lucide-react";
+import { ExpensesView } from "@/features/expenses/components/ExpensesView";
 import { getTranslations } from "next-intl/server";
 import { PageTabs, StickyTabs } from "@/features/admin/components/kit";
 import { MoneyView } from "@/features/admin/views/MoneyView";
@@ -15,7 +16,7 @@ export default async function MoneyAndReportsPage({ searchParams }: Props) {
   await requireStaff("money", "/admin/money");
   const params = await searchParams;
   const tab =
-    params.tab === "reports" || params.tab === "receipt" ? params.tab : "money";
+    params.tab === "reports" || params.tab === "receipt" || params.tab === "expenses" ? params.tab : "money";
   const t = await getTranslations("Admin");
   return (
     <div className="flex flex-col gap-5">
@@ -38,6 +39,13 @@ export default async function MoneyAndReportsPage({ searchParams }: Props) {
               on: tab === "reports",
             },
             {
+              key: "expenses",
+              label: t("pageTabs.expenses"),
+              icon: Wallet2,
+              href: { pathname: "/admin/money", query: { tab: "expenses" } },
+              on: tab === "expenses",
+            },
+            {
               key: "receipt",
               label: t("pageTabs.receipt"),
               icon: Receipt,
@@ -47,7 +55,9 @@ export default async function MoneyAndReportsPage({ searchParams }: Props) {
           ]}
         />
       </StickyTabs>
-      {tab === "reports" ? (
+      {tab === "expenses" ? (
+        <ExpensesView />
+      ) : tab === "reports" ? (
         <ReportsView searchParams={Promise.resolve(params)} />
       ) : tab === "receipt" ? (
         <>

@@ -1393,3 +1393,44 @@ model Invoice {
   @@index([bookingId, version])
   @@map("invoice")
 }
+
+/// What a commission agreement covers.
+enum AgreementSubject {
+  PLACE
+  RESTAURANT
+  LAUNDRY
+}
+
+/// VIIPA's commission agreement with one place, restaurant or laundry provider (requirements 5.2). Never edited: a new
+/// agreement starts on its date and the old ones stay as the history. A payment uses the one in force when it's made.
+model CommissionAgreement {
+  id            String           @id @default(cuid())
+  subject       AgreementSubject
+  /// The place's or restaurant's id (laundry: the place whose laundry it is).
+  subjectId     String
+  /// Percentage in basis points (750 = 7.5%), or a fixed fee in RWF per booking/order.
+  percentBps    Int?
+  fixedFee      Int?
+  effectiveFrom DateTime
+  note          String?
+  createdById   String
+  createdAt     DateTime         @default(now())
+
+  @@index([subject, subjectId, effectiveFrom])
+  @@map("commissionAgreement")
+}
+
+/// VIIPA's own operating expenses (for net earnings in the money reports).
+model Expense {
+  id          String   @id @default(cuid())
+  spentOn     DateTime
+  category    String
+  description String
+  amount      Int
+  reference   String?
+  createdById String
+  createdAt   DateTime @default(now())
+
+  @@index([spentOn])
+  @@map("expense")
+}

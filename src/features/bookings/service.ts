@@ -14,6 +14,7 @@ import { checkPromo, claimPromoUse, type PromoCheck } from "@/features/promotion
 import { maybeCreateReward } from "@/features/referrals/service";
 import { maybePromoterReward } from "@/features/promoters/service";
 import { feesFor, priceBreakdown } from "./money";
+import { agreementAt } from "@/features/agreements/service";
 import { bookableWindow, insideWindow, onWorkingDays } from "./availability";
 import { BOOKING_UNITS, LONG_UNITS, periodFor, unitsAllowedFor, withinHours, type BookingUnit } from "./period";
 import { BLOCKING_STATUSES, canTransition } from "./status";
@@ -222,8 +223,9 @@ export async function createRentalBooking(request: RentalRequest, now: Date = ne
   // Deposit for long stays: a percent of one month's rent (a year's rent / 12).
   const monthRent = unit === "MONTH" ? unitPrice : unit === "YEAR" ? Math.round(unitPrice / 12) : 0;
   const deposit = long && settings.monthlyDepositPercent ? Math.round((monthRent * settings.monthlyDepositPercent) / 100) : 0;
-  // Category commission and fee model in force now; kept on the booking (policySnapshot.fees).
-  const fees = feesFor(settings, listing.type, listing.commissionBps);
+  // The place's commission agreement in force now (a % or a fixed fee), else its category's rate; kept on the booking.
+  const agreement = await agreementAt("PLACE", listingId, now);
+  const fees = { ...feesFor(settings, listing.type, agreement?.percentBps ?? listing.commissionBps), fixedCommission: agreement?.fixedFee ?? null };
   let promo: Extract<PromoCheck, { ok: true }> | null = null;
   if (request.promoCode) {
     const checked = await checkPromo(db, request.promoCode, unitPrice * paidUnits, now);

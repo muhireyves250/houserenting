@@ -1,5 +1,6 @@
 import "server-only";
 import { audit } from "@/features/audit/service";
+import { setAgreement } from "@/features/agreements/service";
 import { feesFor } from "@/features/bookings/money";
 import { getSettings } from "@/features/settings/service";
 import { db } from "@/lib/db";
@@ -17,7 +18,9 @@ export const MAX_COMMISSION_PERCENT = 50;
 export async function setPlaceCommission(actor: Actor, listingId: string, percent: number | null): Promise<boolean> {
   if (!canStaff(actor, "money")) return false;
   if (percent !== null && (!Number.isFinite(percent) || percent < 0 || percent > MAX_COMMISSION_PERCENT)) return false;
-  const bps = percent === null ? null : Math.round(percent * 100);
+  // A rate is an agreement from today (kept in the history); clearing it goes back to the category's rate.
+  if (percent !== null) return (await setAgreement(actor, "PLACE", listingId, { percent })).ok;
+  const bps = null;
   const listing = await db.listing.findUnique({ where: { id: listingId }, select: { commissionBps: true } });
   if (!listing) return false;
   await db.$transaction(async (tx) => {

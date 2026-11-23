@@ -1322,7 +1322,8 @@
       "money": "Argent",
       "reports": "Rapports",
       "receipt": "Reçu",
-      "users": "Utilisateurs"
+      "users": "Utilisateurs",
+      "expenses": "Dépenses"
     },
     "areas": {
       "listings": "Logements",
@@ -1860,6 +1861,53 @@
       "name": "Nom sur le compte",
       "number": "Numéro",
       "checkFirst": "Vérifiez avant de valider"
+    },
+    "overview": {
+      "in": "Argent reçu",
+      "received": "Reçu des clients",
+      "receivedHint": "Tous les paiements reçus",
+      "revenue": "Revenu de VIIPA",
+      "revenueHint": "Commissions et frais de service seulement",
+      "net": "Bénéfice net",
+      "netHint": "Revenu moins commissions et dépenses",
+      "owed": "Dû aux propriétaires et prestataires",
+      "dueNow": "Dû maintenant",
+      "dueNowHint": "Séjours terminés, repas et blanchisserie",
+      "dueLater": "Dû à la fin des séjours",
+      "dueLaterHint": "Séjours payés en cours",
+      "paidOut": "Déjà versé",
+      "paidOutHint": "Versements enregistrés",
+      "costs": "Commissions et coûts",
+      "promoterOwed": "Commissions promoteurs dues",
+      "referralOwed": "Récompenses de parrainage dues",
+      "paidSoFar": "{amount} déjà payé",
+      "refunds": "Remboursements et compensations",
+      "expenses": "Dépenses de fonctionnement"
+    },
+    "statement": {
+      "open": "Relevé",
+      "transactions": "Payé par leurs clients",
+      "commission": "Commission VIIPA",
+      "dueNow": "Dû maintenant",
+      "dueLater": "Dû après les séjours",
+      "paid": "Versé",
+      "payNow": "Enregistrer un versement",
+      "payouts": "Versements",
+      "noPayouts": "Rien versé pour l'instant.",
+      "history": "Tous les mouvements",
+      "date": "Date",
+      "what": "Quoi",
+      "reference": "Référence",
+      "amount": "Montant"
+    },
+    "daily": {
+      "title": "Règlements quotidiens (repas et blanchisserie)",
+      "hint": "Ce que chaque restaurant et blanchisserie a gagné chaque jour, après la commission de VIIPA. Payez-les depuis leur carte ci-dessus.",
+      "day": "Jour",
+      "provider": "Prestataire",
+      "food": "Repas",
+      "laundry": "Blanchisserie",
+      "total": "À payer"
     }
   },
   "Promotions": {
@@ -3136,5 +3184,48 @@
       "saveCorrection": "Enregistrer une nouvelle version",
       "failed": "Échec — vérifiez les informations."
     }
+  },
+  "Agreements": {
+    "title": "Accord de commission",
+    "laundryTitle": "Commission blanchisserie",
+    "fixed": "RWF {amount} fixe",
+    "noAgreement": "taux par défaut (pas encore d'accord)",
+    "change": "Modifier",
+    "history": "Historique ({count})",
+    "kind": {
+      "percent": "Pourcentage (%)",
+      "fixed": "Montant fixe (RWF)"
+    },
+    "from": "À partir du",
+    "note": "Note (facultatif), ex. contrat signé",
+    "invalid": "Vérifiez le montant (0–50 % ou un montant en RWF).",
+    "save": "Enregistrer l'accord",
+    "fromDate": "depuis le {date}"
+  },
+  "Expenses": {
+    "title": "Dépenses",
+    "add": "Ajouter une dépense",
+    "date": "Date",
+    "category": "Type",
+    "description": "Objet",
+    "amount": "Montant (RWF)",
+    "reference": "Reçu ou référence (facultatif)",
+    "invalid": "Vérifiez la date, l'objet et le montant.",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "none": "Aucune dépense enregistrée.",
+    "delete": "Supprimer",
+    "deleteQuestion": "Supprimer cette dépense ?",
+    "cat": {
+      "SALARIES": "Salaires",
+      "RENT": "Loyer",
+      "MARKETING": "Marketing",
+      "TRANSPORT": "Transport",
+      "INTERNET": "Internet et téléphone",
+      "SOFTWARE": "Logiciels",
+      "FEES": "Frais bancaires et de paiement",
+      "OTHER": "Autre"
+    },
+    "thisMonth": "Ce mois-ci :"
   }
 }

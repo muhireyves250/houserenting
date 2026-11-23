@@ -1322,7 +1322,8 @@
       "money": "Amafaranga",
       "reports": "Raporo",
       "receipt": "Inyemezabwishyu",
-      "users": "Abakoresha"
+      "users": "Abakoresha",
+      "expenses": "Ibyakoreshejwe"
     },
     "areas": {
       "listings": "Amacumbi",
@@ -1860,6 +1861,53 @@
       "name": "Izina kuri konti",
       "number": "Nimero",
       "checkFirst": "Banza ugenzure"
+    },
+    "overview": {
+      "in": "Amafaranga yinjiye",
+      "received": "Ayavuye ku bakiriya",
+      "receivedHint": "Ubwishyu bwose bwinjiye",
+      "revenue": "Inyungu ya VIIPA",
+      "revenueHint": "Komisiyo n'amafaranga ya serivisi gusa",
+      "net": "Inyungu nyayo",
+      "netHint": "Inyungu ukuyemo komisiyo n'ibyakoreshejwe",
+      "owed": "Abo tugomba kwishyura",
+      "dueNow": "Bigomba kwishyurwa ubu",
+      "dueNowHint": "Ibyarangiye, ibiryo no kumesa",
+      "dueLater": "Nyuma y'uko abashyitsi bagenda",
+      "dueLaterHint": "Ibyishyuwe bitararangira",
+      "paidOut": "Byamaze kwishyurwa",
+      "paidOutHint": "Ubwishyu bwanditswe",
+      "costs": "Komisiyo n'ibyakoreshejwe",
+      "promoterOwed": "Komisiyo z'abamamaza zitarishyurwa",
+      "referralOwed": "Ibihembo byo gutumira bitarishyurwa",
+      "paidSoFar": "{amount} byishyuwe",
+      "refunds": "Amafaranga yasubijwe n'indishyi",
+      "expenses": "Amafaranga yakoreshejwe"
+    },
+    "statement": {
+      "open": "Raporo",
+      "transactions": "Ibyishyuwe n'abakiriya babo",
+      "commission": "Komisiyo ya VIIPA",
+      "dueNow": "Bigomba kwishyurwa ubu",
+      "dueLater": "Nyuma y'uko bagenda",
+      "paid": "Byabishyuwe",
+      "payNow": "Andika ubwishyu",
+      "payouts": "Ubwishyu bwakozwe",
+      "noPayouts": "Nta cyishyuwe kugeza ubu.",
+      "history": "Ihererekanya ryose",
+      "date": "Itariki",
+      "what": "Iki",
+      "reference": "Nimero",
+      "amount": "Amafaranga"
+    },
+    "daily": {
+      "title": "Kwishyura buri munsi (ibiryo no kumesa)",
+      "hint": "Icyo buri resitora n'umesa babonye buri munsi, ukuyemo komisiyo ya VIIPA. Bishyure ukoresheje ikarita yabo iri hejuru.",
+      "day": "Umunsi",
+      "provider": "Utanga serivisi",
+      "food": "Ibiryo",
+      "laundry": "Kumesa",
+      "total": "Kwishyura"
     }
   },
   "Promotions": {
@@ -3136,5 +3184,48 @@
       "saveCorrection": "Bika nka verisiyo nshya",
       "failed": "Ntibyakunze — reba amakuru."
     }
+  },
+  "Agreements": {
+    "title": "Amasezerano ya komisiyo",
+    "laundryTitle": "Komisiyo yo kumesa",
+    "fixed": "RWF {amount} ihoraho",
+    "noAgreement": "igipimo gisanzwe (nta masezerano arabaho)",
+    "change": "Hindura",
+    "history": "Amateka ({count})",
+    "kind": {
+      "percent": "Ijanisha (%)",
+      "fixed": "Amafaranga ahoraho (RWF)"
+    },
+    "from": "Guhera",
+    "note": "Icyitonderwa (si ngombwa), urugero amasezerano yasinywe",
+    "invalid": "Reba umubare (0–50% cyangwa amafaranga muri RWF).",
+    "save": "Bika amasezerano",
+    "fromDate": "guhera {date}"
+  },
+  "Expenses": {
+    "title": "Amafaranga yakoreshejwe",
+    "add": "Ongeraho ayakoreshejwe",
+    "date": "Itariki",
+    "category": "Ubwoko",
+    "description": "Icyo yakoreshejwe",
+    "amount": "Amafaranga (RWF)",
+    "reference": "Inyemezabwishyu (si ngombwa)",
+    "invalid": "Reba itariki, icyo yakoreshejwe n'amafaranga.",
+    "cancel": "Reka",
+    "save": "Bika",
+    "none": "Nta mafaranga yakoreshejwe yanditswe.",
+    "delete": "Siba",
+    "deleteQuestion": "Usiba aya mafaranga?",
+    "cat": {
+      "SALARIES": "Imishahara",
+      "RENT": "Ubukode",
+      "MARKETING": "Kwamamaza",
+      "TRANSPORT": "Ingendo",
+      "INTERNET": "Interineti na telefoni",
+      "SOFTWARE": "Porogaramu",
+      "FEES": "Amafaranga ya banki",
+      "OTHER": "Ibindi"
+    },
+    "thisMonth": "Uku kwezi:"
   }
 }

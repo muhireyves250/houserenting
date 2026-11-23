@@ -11,6 +11,8 @@ import {
 import { BlocksPanel } from "@/features/places/components/BlocksPanel";
 import { DocumentsPanel } from "@/features/places/components/DocumentsPanel";
 import { TeamPanel } from "@/features/places/components/TeamPanel";
+import { AgreementEditor } from "@/features/agreements/components/AgreementEditor";
+import { agreementPanel } from "@/features/agreements/service";
 import { listTeam } from "@/features/places/team-service";
 import { StatusActions } from "@/features/places/components/StatusActions";
 import { ConfirmAction } from "@/features/admin/components/ConfirmAction";
@@ -67,12 +69,15 @@ export default async function AdminListingPage({ params }: Props) {
     getTranslations("Bookings"),
     getTranslations("Rooms"),
   ]);
-  const [tPlaces, blocks, documents, payout, team] = await Promise.all([
+  const [tPlaces, blocks, documents, payout, team, tAgree, placeAgreement, laundryAgreement] = await Promise.all([
     getTranslations("Places"),
     listingBlocks(id),
     listingDocuments(id),
     payoutAccountOf(listing.host.id),
     listTeam(id),
+    getTranslations("Agreements"),
+    agreementPanel("PLACE", id),
+    agreementPanel("LAUNDRY", id),
   ]);
   const day = (d: Date | null) => (d ? iso(d) : null);
   const iso = (d: Date) => d.toISOString().slice(0, 10);
@@ -427,6 +432,17 @@ export default async function AdminListingPage({ params }: Props) {
             }
           >
             <DocumentsPanel listingId={listing.id} documents={documents} />
+          </Fold>
+
+          {/* VIIPA's commission agreements with this place: stays, and laundry. Every change kept with its date. */}
+          <Fold title={tAgree("title")}>
+            <div className="flex flex-col gap-4">
+              <AgreementEditor subject="PLACE" subjectId={listing.id} current={placeAgreement.current} history={placeAgreement.history} fallback={tAgree("noAgreement")} />
+              <div className="border-t border-line pt-3">
+                <p className="mb-1.5 text-[13px] font-semibold text-ink">{tAgree("laundryTitle")}</p>
+                <AgreementEditor subject="LAUNDRY" subjectId={listing.id} current={laundryAgreement.current} history={laundryAgreement.history} fallback={tAgree("noAgreement")} />
+              </div>
+            </div>
           </Fold>
 
           {/* Managers and receptionists of this place (the owner is told when staff add someone). */}

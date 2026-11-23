@@ -3,6 +3,8 @@ export type FeeConfig = {
   commissionBps: number | null;
   guestFeeBps: number | null;
   model?: FeeModel;
+  /** An agreed fixed fee per booking (RWF) instead of a percentage. */
+  fixedCommission?: number | null;
 };
 
 /**
@@ -71,7 +73,7 @@ export function priceBreakdown(
   const guestPays = subtotal - off;
   const guestFee = share(guestPays, fees.guestFeeBps);
   // VIIPA's commission is on the full price; the owner gets the price less the commission and less any promo discount.
-  const commission = share(subtotal, fees.commissionBps);
+  const commission = typeof fees.fixedCommission === "number" ? Math.min(fees.fixedCommission, subtotal) : share(subtotal, fees.commissionBps);
   const hostPayout = subtotal - commission - off;
   return {
     subtotal,
