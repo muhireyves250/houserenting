@@ -52,7 +52,7 @@ export async function buildReport(f: ReportFilter) {
     readSettings(),
     db.foodOrder.groupBy({
       by: ["restaurantId"],
-      where: { status: "DELIVERED", createdAt: { gte: new Date(`${f.from}T00:00:00Z`), lt: new Date(Date.parse(`${f.to}T00:00:00Z`) + 86_400_000) } },
+      where: { status: { in: ["DELIVERED", "FINISHED"] }, createdAt: { gte: new Date(`${f.from}T00:00:00Z`), lt: new Date(Date.parse(`${f.to}T00:00:00Z`) + 86_400_000) } },
       _sum: { total: true, deliveryFee: true },
       _count: true,
     }),

@@ -5,6 +5,8 @@ import { StaffCancel } from "@/features/admin/components/StaffForms";
 import { Facts, PageIntro, Panel } from "@/features/admin/components/ui";
 import { roomLabel } from "@/features/rooms/links";
 import { actorNames, bookingForStaff } from "@/features/admin/queries";
+import { StaffInvoices, type StaffInvoice } from "@/features/invoices/components/StaffInvoices";
+import { invoiceHistory, invoiceView } from "@/features/invoices/service";
 import { StatusBadge } from "@/features/bookings/components/StatusBadge";
 import {
   formatKigaliDateTime,
@@ -33,8 +35,29 @@ export default async function AdminBookingPage({ params }: Props) {
   const { reference } = await params;
   await requireStaff("bookings", `/admin/bookings/${reference}`);
   if (!isBookingReference(reference)) notFound();
+  const tInvoiceStaff = await getTranslations("Invoice.staff");
   const b = await bookingForStaff(reference);
   if (!b) notFound();
+  // Every invoice version, with what each shows (unpaid, paid…) for the staff panel.
+  const invoiceRows = await invoiceHistory(b.id);
+  const invoiceList: StaffInvoice[] = await Promise.all(
+    invoiceRows.map(async (inv) => {
+      const view = await invoiceView(inv.id);
+      return {
+        id: inv.id,
+        number: inv.number,
+        version: inv.version,
+        state: inv.state,
+        stamp: view!.stamp,
+        createdAt: inv.createdAt.toISOString().slice(0, 16).replace("T", " "),
+        note: inv.note,
+        ebmRequested: inv.ebmRequested,
+        billTo: { billToName: inv.billToName, billToEmail: inv.billToEmail, billToPhone: inv.billToPhone, companyName: inv.companyName, companyTin: inv.companyTin, contactPerson: inv.contactPerson, address: inv.address, extraInfo: inv.extraInfo },
+        lines: inv.lines as StaffInvoice["lines"],
+        total: inv.total,
+      };
+    }),
+  );
   const [
     t,
     tBookings,
@@ -350,6 +373,9 @@ export default async function AdminBookingPage({ params }: Props) {
                   : []),
               ]}
             />
+          </Panel>
+          <Panel title={tInvoiceStaff("title")}>
+            <StaffInvoices reference={b.reference} invoices={invoiceList} />
           </Panel>
           <Panel title={t("moneySplit")}>
             <Facts

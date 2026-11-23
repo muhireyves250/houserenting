@@ -1,48 +1,48 @@
-export const ORDER_STATUSES = ["PLACED", "ACCEPTED", "PREPARING", "READY", "OUT_FOR_DELIVERY", "DELIVERED", "CANCELLED"] as const;
+export const ORDER_STATUSES = ["PLACED", "ACCEPTED", "PAID", "PREPARING", "READY", "COURIER_ASSIGNED", "OUT_FOR_DELIVERY", "DELIVERED", "FINISHED", "REJECTED", "TIMED_OUT", "CANCELLED"] as const;
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
 export type Fulfilment = "PICKUP" | "DELIVERY" | "TO_STAY";
-/** Who moves an order: the restaurant's kitchen (owner, manager, staff), its couriers, or the customer. */
+/** Who moves an order: the restaurant's kitchen (owner, manager, staff, VIIPA), its delivery people, or the customer. */
 export type OrderActor = "kitchen" | "courier" | "customer";
 
-const KITCHEN: Partial<Record<OrderStatus, OrderStatus[]>> = {
-  PLACED: ["ACCEPTED", "CANCELLED"],
-  ACCEPTED: ["PREPARING", "CANCELLED"],
-  PREPARING: ["READY"],
-};
+/** The restaurant has this long to accept or reject a new order; after that it times out (nothing is charged). */
+export const ACCEPT_MINUTES = 5;
+export const acceptDeadline = (placedAt: Date) => new Date(placedAt.getTime() + ACCEPT_MINUTES * 60_000);
 
 /**
- * Room orders (food brought to the guest's stay), run by VIIPA staff: confirmed once paid → sent to the place →
- * only the guest says they got it.
+ * The order's next steps for this person (requirements 3.5): the restaurant confirms or rejects → the customer pays
+ * (VIIPA verifies: PAID) → the kitchen prepares → ready → a delivery person is assigned → collected → delivered (or it
+ * failed and goes back to ready) → the customer's feedback finishes it. The restaurant is responsible for delivery, so
+ * its kitchen can also do the delivery steps. Customers cancel only before paying.
  */
-const TO_STAY_KITCHEN: Partial<Record<OrderStatus, OrderStatus[]>> = {
-  PLACED: ["ACCEPTED", "CANCELLED"],
-  ACCEPTED: ["OUT_FOR_DELIVERY", "CANCELLED"],
-  PREPARING: ["OUT_FOR_DELIVERY"],
-  READY: ["OUT_FOR_DELIVERY"],
-};
-
-/**
- * The order's next steps for this person. Pickups and room orders are handed over by the kitchen (READY → DELIVERED);
- * deliveries go out with a courier. Customers can only cancel before the restaurant accepts.
- */
-export function nextOrderSteps(status: OrderStatus, fulfilment: Fulfilment, actor: OrderActor): OrderStatus[] {
-  if (fulfilment === "TO_STAY") {
-    if (actor === "customer") return status === "PLACED" ? ["CANCELLED"] : status === "OUT_FOR_DELIVERY" ? ["DELIVERED"] : [];
-    return actor === "kitchen" ? (TO_STAY_KITCHEN[status] ?? []) : [];
+export function nextOrderSteps(status: OrderStatus, _fulfilment: Fulfilment, actor: OrderActor, paid = false): OrderStatus[] {
+  if (actor === "customer") {
+    if (status === "PLACED" || (status === "ACCEPTED" && !paid)) return ["CANCELLED"];
+    if (status === "OUT_FOR_DELIVERY") return ["DELIVERED"];
+    return [];
   }
-  if (actor === "customer") return status === "PLACED" ? ["CANCELLED"] : [];
-  if (actor === "kitchen") {
-    if (status === "READY") return fulfilment === "DELIVERY" ? ["OUT_FOR_DELIVERY"] : ["DELIVERED"];
-    return KITCHEN[status] ?? [];
+  const courier: OrderStatus[] = status === "COURIER_ASSIGNED" ? ["OUT_FOR_DELIVERY"] : status === "OUT_FOR_DELIVERY" ? ["DELIVERED", "READY"] : [];
+  if (actor === "courier") return courier;
+  switch (status) {
+    case "PLACED":
+      return ["ACCEPTED", "REJECTED"];
+    case "ACCEPTED":
+      // Older orders were paid before acceptance: they go straight on to the kitchen.
+      return paid ? ["PREPARING"] : ["CANCELLED"];
+    case "PAID":
+      return ["PREPARING"];
+    case "PREPARING":
+      return ["READY"];
+    case "READY":
+      return ["COURIER_ASSIGNED"];
+    default:
+      return courier;
   }
-  // Couriers take ready deliveries out and hand them over.
-  if (fulfilment !== "DELIVERY") return [];
-  if (status === "READY") return ["OUT_FOR_DELIVERY"];
-  if (status === "OUT_FOR_DELIVERY") return ["DELIVERED"];
-  return [];
 }
 
-export const ACTIVE_ORDER: readonly OrderStatus[] = ["PLACED", "ACCEPTED", "PREPARING", "READY", "OUT_FOR_DELIVERY"];
+/** Still in progress (shown as current to the customer and the restaurant). */
+export const ACTIVE_ORDER: readonly OrderStatus[] = ["PLACED", "ACCEPTED", "PAID", "PREPARING", "READY", "COURIER_ASSIGNED", "OUT_FOR_DELIVERY"];
+/** Ended without food: nothing is charged (or it is refunded). */
+export const CLOSED_UNSERVED: readonly OrderStatus[] = ["REJECTED", "TIMED_OUT", "CANCELLED"];
 
 /** Great-circle distance in km. */
 export function distanceKm(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {

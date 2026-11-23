@@ -1563,21 +1563,24 @@
       "teamAdded": "You were added to {title} as {roleLabel}.",
       "restaurantStatus": "{title} is now: {statusLabel}. {reason}",
       "restaurantTeamAdded": "You were added to {title} as {roleLabel}.",
-      "orderPlaced": "New order {reference} at {title} ({total} RWF).",
+      "orderPlaced": "New order {reference} at {title} ({total} RWF): accept or reject it within 5 minutes.",
       "orderStatus": "Your order {reference} from {title}: {statusLabel}.",
       "promoterApplied": "Someone applied to be a promoter.",
       "promoterStatus": "Your promoter account is now: {statusLabel}. {reason}",
       "paymentClaim": "A guest says they paid for {reference} at {title}. Please confirm it.",
       "paymentNotReceived": "Your payment for {reference} at {title} wasn't found: {reason}",
       "orderPaymentClaim": "Order {reference} at {title} ({total} RWF): the guest says they paid. Check and confirm.",
-      "orderNew": "New food order {reference} — {title} ({total} RWF). It waits for payment.",
+      "orderNew": "New food order {reference} — {title} ({total} RWF). It waits for the restaurant to confirm.",
       "orderSentToStay": "Food order {reference} for {name} was sent to {where}. When it arrives, check the number and take it to them.",
       "orderReceived": "Order {reference} was received by the guest ({title}).",
       "laundryForHost": "Laundry {reference}: collect it from {room} at {title}.",
       "laundryReturned": "Laundry {reference} at {title} was brought back to the guest.",
       "laundryReceived": "Laundry {reference} at {title}: the guest got it back.",
       "payoutToCheck": "{name} changed where they get paid. Check and verify the details.",
-      "teamMemberJoined": "{name} joined the team at {title} as {roleLabel}."
+      "teamMemberJoined": "{name} joined the team at {title} as {roleLabel}.",
+      "orderPaid": "Order {reference} at {title} is paid ({total} RWF): start preparing it.",
+      "orderTimedOut": "Order {reference} at {title} timed out: the restaurant didn't answer within 5 minutes. Its dishes were marked unavailable.",
+      "ebmRequested": "The guest of {reference} asks for an EBM invoice."
     },
     "filterLabel": "Show notifications",
     "filter": {
@@ -2327,14 +2330,18 @@
       "TO_STAY": "To my room"
     },
     "status": {
-      "PLACED": "Placed",
-      "ACCEPTED": "Confirmed",
+      "PLACED": "Awaiting restaurant",
+      "ACCEPTED": "Awaiting payment",
+      "PAID": "Paid",
       "PREPARING": "Preparing",
-      "READY": "Ready",
-      "OUT_FOR_DELIVERY": "Sent",
-      "DELIVERED": "Received",
-      "CANCELLED": "Cancelled",
-      "PAID": "Paid"
+      "READY": "Ready for collection",
+      "COURIER_ASSIGNED": "Delivery person assigned",
+      "OUT_FOR_DELIVERY": "On delivery",
+      "DELIVERED": "Delivered",
+      "FINISHED": "Finished",
+      "REJECTED": "Rejected",
+      "TIMED_OUT": "Timed out",
+      "CANCELLED": "Cancelled"
     },
     "step": {
       "ACCEPTED": "Confirm",
@@ -2505,12 +2512,17 @@
     "takingOrders": "Taking orders",
     "orderTitle": "Order {reference}",
     "statusTitle": {
-      "PLACED": "Order sent to the kitchen",
-      "ACCEPTED": "Your order is confirmed",
+      "PLACED": "Waiting for the restaurant to confirm",
+      "ACCEPTED": "Confirmed: pay to start your order",
+      "PAID": "Paid: the kitchen starts soon",
       "PREPARING": "Your food is being prepared",
-      "READY": "Your order is ready",
-      "OUT_FOR_DELIVERY": "Your order was sent to you",
+      "READY": "Your food is ready",
+      "COURIER_ASSIGNED": "A delivery person is on the way to collect it",
+      "OUT_FOR_DELIVERY": "Your order is on its way",
       "DELIVERED": "Enjoy your meal!",
+      "FINISHED": "Thank you for your feedback",
+      "REJECTED": "The restaurant couldn't take this order",
+      "TIMED_OUT": "The restaurant didn't answer in time",
       "CANCELLED": "Order cancelled"
     },
     "readyAround": "Ready around {time}",
@@ -2617,7 +2629,8 @@
       "sent": "Sent",
       "nothing": "Nothing here.",
       "delete": "Delete",
-      "deleteQuestion": "Delete this order?"
+      "deleteQuestion": "Delete this order?",
+      "paymentNotConfirmed": "Payment not confirmed"
     },
     "gotIt": "I got my order",
     "gotItHint": "Tap when the food reaches you.",
@@ -2638,6 +2651,34 @@
       "deleteQuestion": "Delete this restaurant and its menu?",
       "hasOrders": "It has orders, so it can't be deleted. Hide it instead.",
       "orders": "{count, plural, one {# order} other {# orders}}"
+    },
+    "board": {
+      "step": {
+        "ACCEPTED": "Accept",
+        "REJECTED": "Reject",
+        "CANCELLED": "Cancel",
+        "PREPARING": "Start preparing",
+        "READY": "Mark prepared",
+        "OUT_FOR_DELIVERY": "Collected: on delivery",
+        "DELIVERED": "Delivered"
+      },
+      "courier": "Delivery: {name}",
+      "chooseCourier": "Choose a delivery person",
+      "noCouriers": "No delivery person in the team yet",
+      "assign": "Assign",
+      "failed": "Delivery failed",
+      "failedReason": "Why did the delivery fail?",
+      "answerWithin": "Accept or reject within {time}",
+      "timedOut": "Time's up: the order will time out"
+    },
+    "waitingRestaurant": "The restaurant has until {time} to confirm. You pay only after it confirms.",
+    "courierLine": "Brought by {name}",
+    "timedOutNote": "The restaurant didn't answer within 5 minutes, so nothing was charged. Choose another meal from the menu.",
+    "rate": {
+      "title": "How was your meal?",
+      "stars": "{count, plural, one {# star} other {# stars}}",
+      "comment": "Anything to tell us? (optional)",
+      "send": "Send"
     }
   },
   "Promoters": {
@@ -3033,5 +3074,67 @@
     },
     "clear": "Any location",
     "required": "Choose the village (province down to village)."
+  },
+  "Invoice": {
+    "title": "Invoice",
+    "number": "Invoice no.",
+    "issued": "Issued",
+    "billTo": "Bill to",
+    "tin": "TIN",
+    "contact": "Contact",
+    "booking": "Booking",
+    "place": "Property",
+    "stay": "Stay",
+    "description": "Description",
+    "qty": "Qty",
+    "unitPrice": "Unit price",
+    "amount": "Amount",
+    "subtotal": "Subtotal (excl. VAT)",
+    "vat": "VAT included",
+    "total": "Total",
+    "paid": "Paid",
+    "paymentRef": "Payment reference",
+    "statusLabel": "Status",
+    "stamp": {
+      "UNPAID": "Unpaid",
+      "PARTLY_PAID": "Partly paid",
+      "PAID": "Paid",
+      "CANCELLED": "Cancelled",
+      "CORRECTED": "Corrected"
+    },
+    "client": {
+      "title": "Invoice",
+      "get": "Get my invoice",
+      "download": "Download PDF",
+      "company": "Invoice in a company's name",
+      "companyName": "Company name",
+      "companyTin": "Company TIN",
+      "contactPerson": "Contact person",
+      "email": "Email",
+      "address": "Company address",
+      "extra": "Other details for the invoice (optional)",
+      "companySave": "Issue the company invoice",
+      "ebm": "Request an EBM invoice",
+      "ebmRequested": "EBM invoice requested",
+      "failed": "Couldn't do that — check the details and try again."
+    },
+    "staff": {
+      "title": "Invoices",
+      "issue": "Issue the invoice",
+      "correct": "Correct",
+      "cancel": "Cancel",
+      "cancelConfirm": "Cancel invoice",
+      "reason": "Reason (kept in the history)",
+      "billToName": "Name on the invoice",
+      "lines": "Lines",
+      "description": "Description",
+      "qty": "Quantity",
+      "unitPrice": "Unit price (RWF)",
+      "removeLine": "Remove line",
+      "addLine": "Add a line",
+      "correctHint": "The correction is a new version; the original stays on record.",
+      "saveCorrection": "Save as a new version",
+      "failed": "Couldn't save — check the details."
+    }
   }
 }

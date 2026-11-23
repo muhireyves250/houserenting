@@ -1,13 +1,13 @@
 "use client";
 
-import { BedDouble, Phone, Store } from "lucide-react";
+import { BedDouble, Bike, Phone, Store, Timer } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useState, useTransition, type ReactNode } from "react";
+import { useEffect, useState, useTransition, type ReactNode } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { formatRWF } from "@/lib/format";
 import { ConfirmAction } from "@/features/admin/components/ConfirmAction";
-import { deleteFoodOrderAction, moveOrderAction } from "../actions";
+import { assignCourierAction, deleteFoodOrderAction, moveOrderAction } from "../actions";
 import type { Fulfilment, OrderStatus } from "../rules";
 
 export type BoardOrder = {
@@ -28,15 +28,25 @@ export type BoardOrder = {
   steps: OrderStatus[];
   /** Whether money was received (paid orders are never deleted). */
   paid?: boolean;
+  /** New orders: when the restaurant must have answered (5 minutes). */
+  deadline?: Date | null;
+  /** The delivery person on it, and the ones the kitchen can choose from. */
+  courier?: string | null;
+  couriers?: { id: string; name: string }[];
 };
 
 export const ORDER_TONE: Record<OrderStatus, string> = {
   PLACED: "bg-amber-100 text-amber-900",
-  ACCEPTED: "bg-primary/10 text-primary",
+  ACCEPTED: "bg-amber-50 text-amber-800",
+  PAID: "bg-primary/10 text-primary",
   PREPARING: "bg-primary/10 text-primary",
   READY: "bg-primary/10 text-primary",
+  COURIER_ASSIGNED: "bg-emerald-50 text-emerald-800",
   OUT_FOR_DELIVERY: "bg-emerald-100 text-emerald-800",
   DELIVERED: "bg-canvas text-muted",
+  FINISHED: "bg-canvas text-muted",
+  REJECTED: "bg-red-50 text-red-700",
+  TIMED_OUT: "bg-red-50 text-red-700",
   CANCELLED: "bg-red-50 text-red-700",
 };
 
@@ -57,7 +67,9 @@ export function OrdersBoard({ orders, compact = false, staffDelete = false }: { 
   const t = useTranslations("Food");
   const locale = useLocale();
   const router = useRouter();
-  const [cancelling, setCancelling] = useState<string | null>(null);
+  // A step that needs a reason the guest reads: reject, cancel, or a failed delivery.
+  const [cancelling, setCancelling] = useState<{ ref: string; to: OrderStatus } | null>(null);
+  const [courierFor, setCourierFor] = useState<Record<string, string>>({});
   const [reason, setReason] = useState("");
   const [pending, start] = useTransition();
   const time = new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit", day: "numeric", month: "short", timeZone: "Africa/Kigali" });
@@ -126,32 +138,76 @@ export function OrdersBoard({ orders, compact = false, staffDelete = false }: { 
             <span className="text-[12px] text-muted">{time.format(o.createdAt)}</span>
             <span className="text-[16px] font-bold text-ink tabular-nums">{formatRWF(o.total, locale)}</span>
           </div>
+          {o.status === "PLACED" && o.deadline && <Countdown until={o.deadline} />}
+          {o.courier && (
+            <Line icon={<Bike />}>
+              <span className="text-muted">{t("board.courier", { name: o.courier })}</span>
+            </Line>
+          )}
           {o.steps.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {o.steps
-                .filter((s) => s !== "CANCELLED")
+                .filter((s) => !["CANCELLED", "REJECTED", "COURIER_ASSIGNED"].includes(s) && !(s === "READY" && o.status === "OUT_FOR_DELIVERY"))
                 .map((step) => (
                   <button key={step} type="button" disabled={pending} onClick={() => move(o.reference, step)} className="flex-1 rounded-full bg-primary px-4 py-2.5 text-[14px] font-semibold text-white hover:bg-primary-hover disabled:opacity-50">
-                    {t(`step.${step as "ACCEPTED"}`)}
+                    {t(`board.step.${step as "ACCEPTED"}`)}
                   </button>
                 ))}
-              {o.steps.includes("CANCELLED") && (
-                <button type="button" disabled={pending} onClick={() => setCancelling(cancelling === o.reference ? null : o.reference)} className="rounded-full border border-line px-4 py-2.5 text-[14px] font-semibold text-danger disabled:opacity-50">
-                  {t("decline")}
+              {/* Ready: hand it to one of the restaurant's delivery people. */}
+              {o.steps.includes("COURIER_ASSIGNED") && (
+                <span className="flex w-full gap-2">
+                  <select
+                    aria-label={t("board.chooseCourier")}
+                    value={courierFor[o.reference] ?? ""}
+                    onChange={(e) => setCourierFor({ ...courierFor, [o.reference]: e.target.value })}
+                    className="min-w-0 flex-1 rounded-full border border-line-strong bg-surface px-3 py-2 text-[14px]"
+                  >
+                    <option value="">{(o.couriers ?? []).length ? t("board.chooseCourier") : t("board.noCouriers")}</option>
+                    {(o.couriers ?? []).map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    disabled={pending || !courierFor[o.reference]}
+                    onClick={() =>
+                      start(async () => {
+                        await assignCourierAction(o.reference, courierFor[o.reference]!);
+                        router.refresh();
+                      })
+                    }
+                    className="rounded-full bg-primary px-4 py-2 text-[14px] font-semibold text-white disabled:opacity-50"
+                  >
+                    {t("board.assign")}
+                  </button>
+                </span>
+              )}
+              {(["REJECTED", "CANCELLED"] as const)
+                .filter((s) => o.steps.includes(s))
+                .map((s) => (
+                  <button key={s} type="button" disabled={pending} onClick={() => setCancelling(cancelling?.ref === o.reference ? null : { ref: o.reference, to: s })} className="rounded-full border border-line px-4 py-2.5 text-[14px] font-semibold text-danger disabled:opacity-50">
+                    {t(`board.step.${s}`)}
+                  </button>
+                ))}
+              {o.status === "OUT_FOR_DELIVERY" && o.steps.includes("READY") && (
+                <button type="button" disabled={pending} onClick={() => setCancelling(cancelling?.ref === o.reference ? null : { ref: o.reference, to: "READY" })} className="rounded-full border border-line px-4 py-2.5 text-[14px] font-semibold text-danger disabled:opacity-50">
+                  {t("board.failed")}
                 </button>
               )}
             </div>
           )}
-          {cancelling === o.reference && (
+          {cancelling?.ref === o.reference && (
             <div className="flex gap-2">
               <input
                 value={reason}
                 maxLength={300}
-                placeholder={t("declineReason")}
+                placeholder={cancelling.to === "READY" ? t("board.failedReason") : t("declineReason")}
                 onChange={(e) => setReason(e.target.value)}
                 className="min-w-0 flex-1 rounded-xl border border-line-strong px-3 py-2 text-[14px] outline-none focus:border-primary"
               />
-              <button type="button" disabled={pending || !reason.trim()} onClick={() => move(o.reference, "CANCELLED", reason)} className="rounded-full bg-danger px-4 py-2 text-[13px] font-semibold text-white disabled:opacity-50">
+              <button type="button" disabled={pending || !reason.trim()} onClick={() => move(o.reference, cancelling.to, reason)} className="rounded-full bg-danger px-4 py-2 text-[13px] font-semibold text-white disabled:opacity-50">
                 {t("declineConfirm")}
               </button>
             </div>
@@ -159,5 +215,23 @@ export function OrdersBoard({ orders, compact = false, staffDelete = false }: { 
         </li>
       ))}
     </ul>
+  );
+}
+
+/** Time left to answer a new order (5 minutes), ticking every second. */
+function Countdown({ until }: { until: Date }) {
+  const t = useTranslations("Food.board");
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+  const left = Math.max(0, Math.round((new Date(until).getTime() - now) / 1000));
+  const mmss = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`;
+  return (
+    <p className={cn("flex items-center gap-2 rounded-xl px-3 py-2 text-[13px] font-semibold tabular-nums", left > 60 ? "bg-amber-50 text-amber-900" : "bg-red-50 text-red-800")}>
+      <Timer className="size-4" aria-hidden="true" />
+      {left > 0 ? t("answerWithin", { time: mmss }) : t("timedOut")}
+    </p>
   );
 }

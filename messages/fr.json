@@ -1563,21 +1563,24 @@
       "teamAdded": "Vous avez été ajouté à {title} comme {roleLabel}.",
       "restaurantStatus": "{title} est maintenant : {statusLabel}. {reason}",
       "restaurantTeamAdded": "Vous avez été ajouté à {title} comme {roleLabel}.",
-      "orderPlaced": "Nouvelle commande {reference} chez {title} ({total} RWF).",
+      "orderPlaced": "Nouvelle commande {reference} chez {title} ({total} RWF) : acceptez-la ou refusez-la sous 5 minutes.",
       "orderStatus": "Votre commande {reference} chez {title} : {statusLabel}.",
       "promoterApplied": "Quelqu'un souhaite devenir promoteur.",
       "promoterStatus": "Votre compte promoteur est maintenant : {statusLabel}. {reason}",
       "paymentClaim": "Un voyageur dit avoir payé {reference} à {title}. Merci de confirmer.",
       "paymentNotReceived": "Votre paiement pour {reference} à {title} n'a pas été trouvé : {reason}",
       "orderPaymentClaim": "Commande {reference} à {title} ({total} RWF) : le voyageur dit avoir payé. Vérifiez et confirmez.",
-      "orderNew": "Nouvelle commande {reference} — {title} ({total} RWF). En attente de paiement.",
+      "orderNew": "Nouvelle commande {reference} — {title} ({total} RWF). Elle attend la confirmation du restaurant.",
       "orderSentToStay": "La commande {reference} de {name} a été envoyée à {where}. À son arrivée, vérifiez le numéro et apportez-la.",
       "orderReceived": "La commande {reference} a été reçue par le client ({title}).",
       "laundryForHost": "Linge {reference} : à récupérer dans {room} à {title}.",
       "laundryReturned": "Le linge {reference} à {title} a été rapporté au client.",
       "laundryReceived": "Linge {reference} à {title} : le client l’a récupéré.",
       "payoutToCheck": "{name} a changé ses coordonnées de paiement. Vérifiez-les.",
-      "teamMemberJoined": "{name} a rejoint l'équipe de {title} comme {roleLabel}."
+      "teamMemberJoined": "{name} a rejoint l'équipe de {title} comme {roleLabel}.",
+      "orderPaid": "La commande {reference} chez {title} est payée ({total} RWF) : commencez la préparation.",
+      "orderTimedOut": "La commande {reference} chez {title} a expiré : le restaurant n'a pas répondu sous 5 minutes. Ses plats ont été marqués indisponibles.",
+      "ebmRequested": "Le client de {reference} demande une facture EBM."
     },
     "filterLabel": "Afficher les notifications",
     "filter": {
@@ -2327,14 +2330,18 @@
       "TO_STAY": "Dans ma chambre"
     },
     "status": {
-      "PLACED": "Passée",
-      "ACCEPTED": "Confirmée",
+      "PLACED": "En attente du restaurant",
+      "ACCEPTED": "En attente du paiement",
+      "PAID": "Payée",
       "PREPARING": "En préparation",
-      "READY": "Prête",
-      "OUT_FOR_DELIVERY": "Envoyée",
-      "DELIVERED": "Reçue",
-      "CANCELLED": "Annulée",
-      "PAID": "Payée"
+      "READY": "Prête à être récupérée",
+      "COURIER_ASSIGNED": "Livreur assigné",
+      "OUT_FOR_DELIVERY": "En livraison",
+      "DELIVERED": "Livrée",
+      "FINISHED": "Terminée",
+      "REJECTED": "Refusée",
+      "TIMED_OUT": "Sans réponse",
+      "CANCELLED": "Annulée"
     },
     "step": {
       "ACCEPTED": "Confirmer",
@@ -2505,12 +2512,17 @@
     "takingOrders": "Prend des commandes",
     "orderTitle": "Commande {reference}",
     "statusTitle": {
-      "PLACED": "Commande envoyée à la cuisine",
-      "ACCEPTED": "Votre commande est confirmée",
+      "PLACED": "En attente de confirmation du restaurant",
+      "ACCEPTED": "Confirmée : payez pour lancer la commande",
+      "PAID": "Payée : la cuisine commence bientôt",
       "PREPARING": "Votre repas est en préparation",
-      "READY": "Votre commande est prête",
-      "OUT_FOR_DELIVERY": "Votre commande vous a été envoyée",
+      "READY": "Votre repas est prêt",
+      "COURIER_ASSIGNED": "Un livreur vient le récupérer",
+      "OUT_FOR_DELIVERY": "Votre commande arrive",
       "DELIVERED": "Bon appétit !",
+      "FINISHED": "Merci pour votre avis",
+      "REJECTED": "Le restaurant n'a pas pu prendre cette commande",
+      "TIMED_OUT": "Le restaurant n'a pas répondu à temps",
       "CANCELLED": "Commande annulée"
     },
     "readyAround": "Prête vers {time}",
@@ -2617,7 +2629,8 @@
       "sent": "Envoyées",
       "nothing": "Rien ici.",
       "delete": "Supprimer",
-      "deleteQuestion": "Supprimer cette commande ?"
+      "deleteQuestion": "Supprimer cette commande ?",
+      "paymentNotConfirmed": "Paiement non confirmé"
     },
     "gotIt": "J'ai reçu ma commande",
     "gotItHint": "Touchez quand le repas vous parvient.",
@@ -2638,6 +2651,34 @@
       "deleteQuestion": "Supprimer ce restaurant et son menu ?",
       "hasOrders": "Il a des commandes : il ne peut pas être supprimé. Masquez-le plutôt.",
       "orders": "{count, plural, one {# commande} other {# commandes}}"
+    },
+    "board": {
+      "step": {
+        "ACCEPTED": "Accepter",
+        "REJECTED": "Refuser",
+        "CANCELLED": "Annuler",
+        "PREPARING": "Commencer la préparation",
+        "READY": "Marquer prête",
+        "OUT_FOR_DELIVERY": "Récupérée : en livraison",
+        "DELIVERED": "Livrée"
+      },
+      "courier": "Livraison : {name}",
+      "chooseCourier": "Choisir un livreur",
+      "noCouriers": "Aucun livreur dans l'équipe",
+      "assign": "Assigner",
+      "failed": "Livraison échouée",
+      "failedReason": "Pourquoi la livraison a-t-elle échoué ?",
+      "answerWithin": "Acceptez ou refusez dans {time}",
+      "timedOut": "Temps écoulé : la commande va expirer"
+    },
+    "waitingRestaurant": "Le restaurant a jusqu'à {time} pour confirmer. Vous ne payez qu'après sa confirmation.",
+    "courierLine": "Livrée par {name}",
+    "timedOutNote": "Le restaurant n'a pas répondu sous 5 minutes : rien n'a été facturé. Choisissez un autre plat dans le menu.",
+    "rate": {
+      "title": "Comment était votre repas ?",
+      "stars": "{count, plural, one {# étoile} other {# étoiles}}",
+      "comment": "Un commentaire ? (facultatif)",
+      "send": "Envoyer"
     }
   },
   "Promoters": {
@@ -3033,5 +3074,67 @@
     },
     "clear": "Tous les lieux",
     "required": "Choisissez le village (de la province au village)."
+  },
+  "Invoice": {
+    "title": "Facture",
+    "number": "Facture n°",
+    "issued": "Émise le",
+    "billTo": "Facturé à",
+    "tin": "NIF",
+    "contact": "Contact",
+    "booking": "Réservation",
+    "place": "Logement",
+    "stay": "Séjour",
+    "description": "Description",
+    "qty": "Qté",
+    "unitPrice": "Prix unitaire",
+    "amount": "Montant",
+    "subtotal": "Sous-total (hors TVA)",
+    "vat": "TVA incluse",
+    "total": "Total",
+    "paid": "Payé",
+    "paymentRef": "Référence de paiement",
+    "statusLabel": "Statut",
+    "stamp": {
+      "UNPAID": "Non payée",
+      "PARTLY_PAID": "Payée en partie",
+      "PAID": "Payée",
+      "CANCELLED": "Annulée",
+      "CORRECTED": "Corrigée"
+    },
+    "client": {
+      "title": "Facture",
+      "get": "Obtenir ma facture",
+      "download": "Télécharger le PDF",
+      "company": "Facture au nom d'une société",
+      "companyName": "Nom de la société",
+      "companyTin": "NIF de la société",
+      "contactPerson": "Personne de contact",
+      "email": "E-mail",
+      "address": "Adresse de la société",
+      "extra": "Autres informations (facultatif)",
+      "companySave": "Émettre la facture société",
+      "ebm": "Demander une facture EBM",
+      "ebmRequested": "Facture EBM demandée",
+      "failed": "Échec — vérifiez les informations et réessayez."
+    },
+    "staff": {
+      "title": "Factures",
+      "issue": "Émettre la facture",
+      "correct": "Corriger",
+      "cancel": "Annuler",
+      "cancelConfirm": "Annuler la facture",
+      "reason": "Raison (gardée dans l'historique)",
+      "billToName": "Nom sur la facture",
+      "lines": "Lignes",
+      "description": "Description",
+      "qty": "Quantité",
+      "unitPrice": "Prix unitaire (RWF)",
+      "removeLine": "Retirer la ligne",
+      "addLine": "Ajouter une ligne",
+      "correctHint": "La correction est une nouvelle version ; l'originale reste enregistrée.",
+      "saveCorrection": "Enregistrer une nouvelle version",
+      "failed": "Échec — vérifiez les informations."
+    }
   }
 }

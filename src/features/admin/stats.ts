@@ -165,9 +165,9 @@ export const adminBadges = cache(async (staffId: string) => {
         WHERE "status" = 'REQUESTED'
            OR ("paymentClaim" IS NOT NULL AND "paidAt" IS NULL AND "status" <> 'CANCELLED')) AS laundry,
       (SELECT count(*) FROM "foodOrder"
-        WHERE ("paymentMethod" = 'PAY_FIRST' AND "paidAt" IS NULL AND "status" = 'PLACED' AND "paymentClaim" IS NOT NULL)
-           OR "status" IN ('ACCEPTED', 'PREPARING', 'READY', 'OUT_FOR_DELIVERY')
-           OR ("status" = 'PLACED' AND ("paymentMethod" = 'ON_DELIVERY' OR "paidAt" IS NOT NULL))) AS orders,
+        -- Payments to verify (the guest says they paid), and orders on their way through the kitchen and delivery.
+        WHERE ("paidAt" IS NULL AND "status" = 'ACCEPTED' AND "paymentClaim" IS NOT NULL)
+           OR "status" IN ('PLACED', 'PAID', 'PREPARING', 'READY', 'COURIER_ASSIGNED', 'OUT_FOR_DELIVERY')) AS orders,
       (SELECT count(*) FROM (
         SELECT c."guestId", c."hostReadAt", last."senderId", last."createdAt"
         FROM (SELECT * FROM "conversation" ORDER BY "lastMessageAt" DESC LIMIT 200) c

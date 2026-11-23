@@ -26,6 +26,8 @@ import {
   type PlaceOrderResult,
   type RestaurantTeamRole,
   type SaveRestaurantResult,
+  assignCourier,
+  rateOrder,
 } from "./service";
 import type { MenuItemInput, OrderInput, RestaurantInput } from "./validation";
 
@@ -151,5 +153,23 @@ export async function deleteFoodOrderAction(reference: string): Promise<{ ok: bo
   if (!user || !z.string().min(1).max(40).safeParse(reference).success) return { ok: false };
   const ok = await deleteFoodOrder(user, reference);
   if (ok) refresh();
+  return { ok };
+}
+
+/** The kitchen hands a ready order to one of its delivery people. */
+export async function assignCourierAction(reference: string, courierId: string): Promise<{ ok: boolean }> {
+  const user = await getCurrentUser();
+  if (!user || typeof reference !== "string" || reference.length > 20 || typeof courierId !== "string" || courierId.length > 64) return { ok: false };
+  const ok = await assignCourier(user, reference, courierId);
+  if (ok) revalidatePath("/[locale]", "layout");
+  return { ok };
+}
+
+/** The guest rates their delivered order (1–5) with an optional comment. */
+export async function rateOrderAction(reference: string, rating: number, comment: string): Promise<{ ok: boolean }> {
+  const user = await getCurrentUser();
+  if (!user || typeof reference !== "string" || reference.length > 20) return { ok: false };
+  const ok = await rateOrder(user.id, reference, Number(rating), String(comment ?? ""));
+  if (ok) revalidatePath("/[locale]", "layout");
   return { ok };
 }

@@ -6,7 +6,7 @@ import { formatKigaliDateTime } from "@/features/bookings/format";
 import { ConfirmOrderPayment } from "@/features/food/components/ConfirmOrderPayment";
 import { OrdersBoard, type BoardOrder } from "@/features/food/components/OrdersBoard";
 import { StaffDeclineOrder } from "@/features/food/components/StaffDeclineOrder";
-import { nextOrderSteps } from "@/features/food/rules";
+import { ORDER_STATUSES, acceptDeadline, nextOrderSteps } from "@/features/food/rules";
 import { allOrders, ordersAwaitingPayment } from "@/features/food/service";
 import { cn } from "@/lib/cn";
 import { formatRWF } from "@/lib/format";
@@ -31,8 +31,8 @@ function Group({ id, title, count, tone, children }: { id: string; title: string
 export async function FoodOrdersView({ tabs }: { tabs?: ReactNode }) {
   const [t, locale, awaiting, orders] = await Promise.all([getTranslations("Food"), getLocale(), ordersAwaitingPayment(), allOrders()]);
   const board: BoardOrder[] = orders
-    // Unpaid pay-first orders are in "To pay".
-    .filter((o) => !(o.paymentMethod === "PAY_FIRST" && o.total > 0 && !o.paidAt && o.status === "PLACED"))
+    // Orders the restaurant confirmed that wait for payment are in "To pay".
+    .filter((o) => !(o.total > 0 && !o.paidAt && o.status === "ACCEPTED"))
     .map((o) => ({
       reference: o.reference,
       status: o.status,
@@ -46,11 +46,17 @@ export async function FoodOrdersView({ tabs }: { tabs?: ReactNode }) {
       total: o.total,
       createdAt: o.createdAt,
       items: o.items.map((i) => ({ name: i.name, quantity: i.quantity })),
-      steps: [...new Set((["kitchen", "courier"] as const).flatMap((a) => nextOrderSteps(o.status, o.fulfilment, a)))],
+      deadline: o.status === "PLACED" ? acceptDeadline(o.createdAt) : null,
+      steps: [...new Set((["kitchen", "courier"] as const).flatMap((a) => nextOrderSteps(o.status, o.fulfilment, a, Boolean(o.paidAt) || o.total <= 0)))],
     }));
-  const toSend = board.filter((o) => ["PLACED", "ACCEPTED", "PREPARING", "READY"].includes(o.status));
+  const toSend = board.filter((o) => ["PLACED", "ACCEPTED", "PAID", "PREPARING", "READY", "COURIER_ASSIGNED"].includes(o.status));
   const sent = board.filter((o) => o.status === "OUT_FOR_DELIVERY");
-  const done = board.filter((o) => o.status === "DELIVERED" || o.status === "CANCELLED").slice(0, 40);
+  const done = board.filter((o) => ["DELIVERED", "FINISHED", "REJECTED", "TIMED_OUT", "CANCELLED"].includes(o.status)).slice(0, 40);
+  // The number of orders in each classification (requirements 3.6); "payment not confirmed" = the guest says they paid.
+  const classes: { key: string; label: string; n: number }[] = [
+    { key: "claim", label: t("staffOrders.paymentNotConfirmed"), n: orders.filter((o) => o.paymentClaim && !o.paidAt && o.status === "ACCEPTED").length },
+    ...ORDER_STATUSES.map((st) => ({ key: st, label: t(`status.${st}`), n: orders.filter((o) => o.status === st).length })),
+  ];
   const none = <p className="rounded-2xl bg-surface py-6 text-center text-[14px] text-muted ring-1 ring-line">{t("staffOrders.nothing")}</p>;
 
   return (
@@ -72,6 +78,13 @@ export async function FoodOrdersView({ tabs }: { tabs?: ReactNode }) {
             </a>
           ))}
         </nav>
+        <div data-lenis-prevent className="filter-row mt-3 flex flex-wrap gap-1.5">
+          {classes.map((c) => (
+            <span key={c.key} className={cn("rounded-full px-2.5 py-1 text-[12px] font-semibold", c.n > 0 ? "bg-primary/10 text-primary" : "bg-canvas text-muted")}>
+              {c.label} <span className="tabular-nums">{c.n}</span>
+            </span>
+          ))}
+        </div>
       </Toolbar>
       <ScrollArea className="flex flex-col gap-8">
 

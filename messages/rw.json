@@ -1563,21 +1563,24 @@
       "teamAdded": "Wongewe kuri {title} nka {roleLabel}.",
       "restaurantStatus": "{title} ubu ni: {statusLabel}. {reason}",
       "restaurantTeamAdded": "Wongewe kuri {title} nka {roleLabel}.",
-      "orderPlaced": "Ibitumijwe bishya {reference} kuri {title} ({total} RWF).",
+      "orderPlaced": "Ibyatumijwe bishya {reference} kuri {title} ({total} RWF): byemere cyangwa ubyange mu minota 5.",
       "orderStatus": "Ibyo watumije {reference} kuri {title}: {statusLabel}.",
       "promoterApplied": "Hari umuntu wasabye kuba umwamamaza.",
       "promoterStatus": "Konti yawe y'umwamamaza ubu ni: {statusLabel}. {reason}",
       "paymentClaim": "Umushyitsi avuga ko yishyuye {reference} kuri {title}. Byemeze.",
       "paymentNotReceived": "Kwishyura kwawe kwa {reference} kuri {title} ntikwabonetse: {reason}",
       "orderPaymentClaim": "Ibyatumijwe {reference} kuri {title} ({total} RWF): umushyitsi avuga ko yishyuye. Genzura wemeze.",
-      "orderNew": "Ibyatumijwe bishya {reference} — {title} ({total} RWF). Bitegereje kwishyurwa.",
+      "orderNew": "Ibiryo bishya byatumijwe {reference} — {title} ({total} RWF). Bitegereje ko resitora ibyemeza.",
       "orderSentToStay": "Ibyo {name} yatumije {reference} byoherejwe kuri {where}. Nibigera, reba nimero ubimushyikirize.",
       "orderReceived": "Ibyatumijwe {reference} byakiriwe n'umukiriya ({title}).",
       "laundryForHost": "Imyenda {reference}: yifate muri {room} kuri {title}.",
       "laundryReturned": "Imyenda {reference} kuri {title} yagaruwe ku mushyitsi.",
       "laundryReceived": "Imyenda {reference} kuri {title}: umushyitsi yayibonye.",
       "payoutToCheck": "{name} yahinduye aho yishyurirwa. Genzura wemeze amakuru.",
-      "teamMemberJoined": "{name} yinjiye mu itsinda rya {title} nka {roleLabel}."
+      "teamMemberJoined": "{name} yinjiye mu itsinda rya {title} nka {roleLabel}.",
+      "orderPaid": "Ibyatumijwe {reference} kuri {title} byishyuwe ({total} RWF): tangira kubitegura.",
+      "orderTimedOut": "Ibyatumijwe {reference} kuri {title} byataye igihe: resitora ntiyasubije mu minota 5. Ibiryo byabyo byashyizwe ku bitaboneka.",
+      "ebmRequested": "Umukiriya wa {reference} arasaba fagitire ya EBM."
     },
     "filterLabel": "Erekana imenyesha",
     "filter": {
@@ -2327,14 +2330,18 @@
       "TO_STAY": "Mu cyumba cyanjye"
     },
     "status": {
-      "PLACED": "Yatumijwe",
-      "ACCEPTED": "Byemejwe",
-      "PREPARING": "Irimo gutegurwa",
-      "READY": "Yiteguye",
-      "OUT_FOR_DELIVERY": "Byoherejwe",
-      "DELIVERED": "Byakiriwe",
-      "CANCELLED": "Yahagaritswe",
-      "PAID": "Byishyuwe"
+      "PLACED": "Bitegereje resitora",
+      "ACCEPTED": "Bitegereje kwishyura",
+      "PAID": "Byishyuwe",
+      "PREPARING": "Biri gutegurwa",
+      "READY": "Byiteguye gutwarwa",
+      "COURIER_ASSIGNED": "Ugeza ibiryo yahawe",
+      "OUT_FOR_DELIVERY": "Biri mu nzira",
+      "DELIVERED": "Byagejejwe",
+      "FINISHED": "Byarangiye",
+      "REJECTED": "Byanzwe",
+      "TIMED_OUT": "Nta gisubizo",
+      "CANCELLED": "Byahagaritswe"
     },
     "step": {
       "ACCEPTED": "Emeza",
@@ -2505,12 +2512,17 @@
     "takingOrders": "Irakira ibyo bayitumiza",
     "orderTitle": "Ibyatumijwe {reference}",
     "statusTitle": {
-      "PLACED": "Ibyo watumije byoherejwe ku gikoni",
-      "ACCEPTED": "Ibyo watumije byemejwe",
-      "PREPARING": "Ibiryo byawe birimo gutegurwa",
-      "READY": "Ibyo watumije byiteguye",
-      "OUT_FOR_DELIVERY": "Ibyo watumije byakoherejwe",
-      "DELIVERED": "Murye neza!",
+      "PLACED": "Dutegereje ko resitora yemeza",
+      "ACCEPTED": "Byemejwe: ishyura kugira ngo bitangire",
+      "PAID": "Byishyuwe: igikoni kiratangira vuba",
+      "PREPARING": "Ibiryo byawe biri gutegurwa",
+      "READY": "Ibiryo byawe byiteguye",
+      "COURIER_ASSIGNED": "Ugeza ibiryo agiye kubitwara",
+      "OUT_FOR_DELIVERY": "Ibyo watumije biri mu nzira",
+      "DELIVERED": "Uryoherwe!",
+      "FINISHED": "Murakoze ku gitekerezo cyanyu",
+      "REJECTED": "Resitora ntiyashoboye kwakira ibi",
+      "TIMED_OUT": "Resitora ntiyasubije ku gihe",
       "CANCELLED": "Byahagaritswe"
     },
     "readyAround": "Biba byiteguye ahagana {time}",
@@ -2617,7 +2629,8 @@
       "sent": "Byoherejwe",
       "nothing": "Nta kintu.",
       "delete": "Siba",
-      "deleteQuestion": "Usibe ibi byatumijwe?"
+      "deleteQuestion": "Usibe ibi byatumijwe?",
+      "paymentNotConfirmed": "Ubwishyu butaremezwa"
     },
     "gotIt": "Nabonye ibyo natumije",
     "gotItHint": "Kanda igihe ibiryo bikugezeho.",
@@ -2638,6 +2651,34 @@
       "deleteQuestion": "Usibe iyi resitora n'ibiryo byayo?",
       "hasOrders": "Ifite ibyatumijwe, ntishobora gusibwa. Yihishe aho kuyisiba.",
       "orders": "{count, plural, one {ibyatumijwe #} other {ibyatumijwe #}}"
+    },
+    "board": {
+      "step": {
+        "ACCEPTED": "Emera",
+        "REJECTED": "Anga",
+        "CANCELLED": "Hagarika",
+        "PREPARING": "Tangira gutegura",
+        "READY": "Byiteguye",
+        "OUT_FOR_DELIVERY": "Byatwawe: biri mu nzira",
+        "DELIVERED": "Byagejejwe"
+      },
+      "courier": "Ubigeza: {name}",
+      "chooseCourier": "Hitamo ugeza ibiryo",
+      "noCouriers": "Nta ugeza ibiryo uri mu itsinda",
+      "assign": "Mushinge",
+      "failed": "Ntibyagejejwe",
+      "failedReason": "Kuki bitagejejwe?",
+      "answerWithin": "Emera cyangwa wange mu {time}",
+      "timedOut": "Igihe kirarangiye: ibyatumijwe biratakaza igihe"
+    },
+    "waitingRestaurant": "Resitora ifite kugeza {time} ngo yemeze. Wishyura ari uko imaze kwemeza.",
+    "courierLine": "Bizanwa na {name}",
+    "timedOutNote": "Resitora ntiyasubije mu minota 5, nta mafaranga yakuweho. Hitamo ibindi biryo kuri menu.",
+    "rate": {
+      "title": "Ibiryo byari bimeze bite?",
+      "stars": "{count, plural, one {inyenyeri #} other {inyenyeri #}}",
+      "comment": "Hari icyo ushaka kutubwira? (si ngombwa)",
+      "send": "Ohereza"
     }
   },
   "Promoters": {
@@ -3033,5 +3074,67 @@
     },
     "clear": "Ahantu hose",
     "required": "Hitamo umudugudu (kuva ku ntara kugeza ku mudugudu)."
+  },
+  "Invoice": {
+    "title": "Fagitire",
+    "number": "Nimero ya fagitire",
+    "issued": "Yatanzwe",
+    "billTo": "Yandikiwe",
+    "tin": "TIN",
+    "contact": "Uhagarariye",
+    "booking": "Ifatwa",
+    "place": "Aho gucumbika",
+    "stay": "Igihe",
+    "description": "Ibisobanuro",
+    "qty": "Umubare",
+    "unitPrice": "Igiciro kimwe",
+    "amount": "Amafaranga",
+    "subtotal": "Igiteranyo (nta TVA)",
+    "vat": "TVA irimo",
+    "total": "Igiteranyo",
+    "paid": "Byishyuwe",
+    "paymentRef": "Nimero y'ubwishyu",
+    "statusLabel": "Uko bihagaze",
+    "stamp": {
+      "UNPAID": "Ntiyishyuwe",
+      "PARTLY_PAID": "Yishyuwe igice",
+      "PAID": "Yishyuwe",
+      "CANCELLED": "Yahagaritswe",
+      "CORRECTED": "Yakosowe"
+    },
+    "client": {
+      "title": "Fagitire",
+      "get": "Bona fagitire yanjye",
+      "download": "Manura PDF",
+      "company": "Fagitire mu izina ry'ikigo",
+      "companyName": "Izina ry'ikigo",
+      "companyTin": "TIN y'ikigo",
+      "contactPerson": "Uhagarariye",
+      "email": "Imeyili",
+      "address": "Aderesi y'ikigo",
+      "extra": "Andi makuru (si ngombwa)",
+      "companySave": "Tanga fagitire y'ikigo",
+      "ebm": "Saba fagitire ya EBM",
+      "ebmRequested": "Fagitire ya EBM yasabwe",
+      "failed": "Ntibyakunze — reba amakuru wongere ugerageze."
+    },
+    "staff": {
+      "title": "Fagitire",
+      "issue": "Tanga fagitire",
+      "correct": "Kosora",
+      "cancel": "Hagarika",
+      "cancelConfirm": "Hagarika fagitire",
+      "reason": "Impamvu (ibikwa mu mateka)",
+      "billToName": "Izina kuri fagitire",
+      "lines": "Imirongo",
+      "description": "Ibisobanuro",
+      "qty": "Umubare",
+      "unitPrice": "Igiciro kimwe (RWF)",
+      "removeLine": "Kuraho umurongo",
+      "addLine": "Ongeraho umurongo",
+      "correctHint": "Ikosorwa ni verisiyo nshya; iya mbere iguma ibitswe.",
+      "saveCorrection": "Bika nka verisiyo nshya",
+      "failed": "Ntibyakunze — reba amakuru."
+    }
   }
 }

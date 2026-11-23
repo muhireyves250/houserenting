@@ -20,6 +20,8 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { formatRWF } from "@/lib/format";
 import { requireUser } from "@/lib/session";
+import { ClientInvoice } from "@/features/invoices/components/ClientInvoice";
+import { currentInvoiceFor, invoiceView } from "@/features/invoices/service";
 import { ReviewForm } from "@/features/reviews/components/ReviewForm";
 import { canReview } from "@/features/reviews/service";
 import { getSettings, policyText } from "@/features/settings/service";
@@ -64,7 +66,8 @@ export default async function BookingPage({ params }: Props) {
     getLocale(),
     canReview(user.id, reference),
   ]);
-  const [tRooms, tReceipt, receiptDetails] = await Promise.all([getTranslations("Rooms"), getTranslations("Receipt"), getReceiptDetails()]);
+  const [tRooms, tReceipt, receiptDetails, tInvoice, invoiceRow] = await Promise.all([getTranslations("Rooms"), getTranslations("Receipt"), getReceiptDetails(), getTranslations("Invoice.client"), currentInvoiceFor(booking.reference)]);
+  const invoice = invoiceRow ? await invoiceView(invoiceRow.id) : null;
   const { listing, policySnapshot: policy } = booking;
   const holding = isHoldActive(booking, now);
   const [settings, claim] = await Promise.all([
@@ -181,6 +184,18 @@ export default async function BookingPage({ params }: Props) {
           <Row label={tListings("guestsLabel")}>{tListings("statGuests", { count: booking.guests })}</Row>
         </dl>
       </section>
+
+      {/* The invoice: unpaid until paid, in the guest's or a company's name, with EBM on request. */}
+      {booking.total > 0 ? (
+        <section id="invoice" className={cn(card, "mt-4")}>
+          <h2 className="mb-3 text-lg font-bold text-ink">{tInvoice("title")}</h2>
+          <ClientInvoice
+            reference={booking.reference}
+            guest={{ name: user.name, email: user.email }}
+            current={invoice ? { id: invoice.invoice.id, number: invoice.invoice.number, stamp: invoice.stamp, companyName: invoice.invoice.companyName, ebmRequested: invoice.invoice.ebmRequested } : null}
+          />
+        </section>
+      ) : null}
 
       {/* Electronic receipt */}
       <section id="receipt" className={cn(card, "mt-4")}>

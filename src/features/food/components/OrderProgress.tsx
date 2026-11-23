@@ -4,23 +4,17 @@ import { cn } from "@/lib/cn";
 import type { Fulfilment, OrderStatus } from "../rules";
 
 /** Where the order is: the steps for its kind of service, done ones ticked, the current one highlighted. */
-export async function OrderProgress({ status, fulfilment, payFirst = null }: { status: OrderStatus; fulfilment: Fulfilment; payFirst?: { paid: boolean } | null }) {
+export async function OrderProgress({ status }: { status: OrderStatus; fulfilment?: Fulfilment; payFirst?: { paid: boolean } | null }) {
   const t = await getTranslations("Food");
-  type Step = OrderStatus | "PAID";
-  // Pay-first orders: "Paid" comes right after ordering, and the kitchen waits for it.
-  // Room orders (run by VIIPA): ordered → paid → confirmed → sent → received.
-  const steps: Step[] =
-    fulfilment === "TO_STAY"
-      ? ["PLACED", ...(payFirst ? (["PAID"] as const) : []), "ACCEPTED", "OUT_FOR_DELIVERY", "DELIVERED"]
-      : ["PLACED", ...(payFirst ? (["PAID"] as const) : []), "ACCEPTED", "PREPARING", "READY", ...(fulfilment === "DELIVERY" ? (["OUT_FOR_DELIVERY"] as const) : []), "DELIVERED"];
-  // Older room orders may sit at a kitchen step: show them as confirmed.
-  const shown: Step = fulfilment === "TO_STAY" && (status === "PREPARING" || status === "READY") ? "ACCEPTED" : status;
-  const at = payFirst && status === "PLACED" ? (payFirst.paid ? 2 : 1) : steps.indexOf(shown);
+  // The order's journey (requirements 3.5): restaurant confirms → paid → preparing → ready → on delivery → delivered.
+  const steps: OrderStatus[] = ["PLACED", "ACCEPTED", "PAID", "PREPARING", "READY", "OUT_FOR_DELIVERY", "DELIVERED"];
+  const shown: OrderStatus = status === "COURIER_ASSIGNED" ? "READY" : status === "FINISHED" ? "DELIVERED" : status;
+  const at = steps.indexOf(shown);
   return (
     <ol className="grid gap-0" style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}>
       {steps.map((step, i) => {
-        const done = i < at || status === "DELIVERED";
-        const current = i === at && status !== "DELIVERED";
+        const done = i < at || shown === "DELIVERED";
+        const current = i === at && shown !== "DELIVERED";
         return (
           <li key={step} className="relative flex flex-col items-center gap-1.5 text-center">
             {i > 0 && <span aria-hidden="true" className={cn("absolute top-3.5 right-1/2 h-0.5 w-full -translate-y-1/2", i <= at ? "bg-primary" : "bg-line")} />}

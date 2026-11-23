@@ -8,7 +8,7 @@ import { readSettings } from "@/features/settings/service";
 import { todayISO } from "@/features/search/date-range";
 import { db } from "@/lib/db";
 import { canStaff } from "@/lib/roles";
-import { nextOrderSteps, priceCart, type OrderActor, type OrderStatus } from "./rules";
+import { ACCEPT_MINUTES, nextOrderSteps, priceCart, type OrderActor, type OrderStatus } from "./rules";
 import { menuItemInput, orderInput, restaurantInput, type MenuItemInput, type OrderInput, type RestaurantInput } from "./validation";
 
 type Actor = { id: string; role?: string | null };
@@ -278,7 +278,7 @@ export async function placeOrder(customerId: string, raw: OrderInput, now: Date 
             subtotal: cart.subtotal,
             deliveryFee: fee,
             total: cart.subtotal + fee,
-            // Paid by mobile money before the kitchen starts (staff confirm the payment).
+            // Paid after the restaurant confirms (mobile money, verified by VIIPA) and before the kitchen starts.
             paymentMethod: "PAY_FIRST",
             items: { create: cart.items },
             events: { create: { to: "PLACED", actorId: customerId } },
@@ -300,38 +300,95 @@ export async function placeOrder(customerId: string, raw: OrderInput, now: Date 
 }
 
 /** Moves an order one step (kitchen, courier or customer, each only their own steps). Every step is kept. */
-export async function moveOrder(actor: Actor, reference: string, to: OrderStatus, note = ""): Promise<boolean> {
+export async function moveOrder(actor: Actor, reference: string, to: OrderStatus, note = "", now: Date = new Date()): Promise<boolean> {
+  await expireOrders(now);
   const order = await db.foodOrder.findUnique({ where: { reference }, select: { id: true, status: true, fulfilment: true, customerId: true, restaurantId: true, courierId: true, paymentMethod: true, paidAt: true, total: true, bookingId: true, address: true, restaurant: { select: { name: true } } } });
   if (!order) return false;
   const role = await restaurantRole(actor, order.restaurantId);
   const actors: OrderActor[] = [];
   if (canRestaurant(role, "orders")) actors.push("kitchen");
-  if (canRestaurant(role, "deliver")) actors.push("courier");
+  // Delivery steps: the delivery person assigned to this order (or the kitchen, which answers for its delivery).
+  if (canRestaurant(role, "deliver") && (!order.courierId || order.courierId === actor.id || actors.includes("kitchen"))) actors.push("courier");
   if (order.customerId === actor.id) actors.push("customer");
-  const allowed = actors.some((a) => nextOrderSteps(order.status, order.fulfilment, a).includes(to));
-  if (!allowed) return false;
-  // Pay-first orders: the kitchen only starts once VIIPA has confirmed the payment.
-  if (to === "ACCEPTED" && order.paymentMethod === "PAY_FIRST" && order.total > 0 && !order.paidAt) return false;
-  // Once out, only the courier who took it (or the kitchen/staff) marks it delivered.
-  // (The guest confirming their own room order is always fine.)
-  const guestConfirms = order.fulfilment === "TO_STAY" && actors.includes("customer");
-  if (to === "DELIVERED" && order.status === "OUT_FOR_DELIVERY" && !actors.includes("kitchen") && !guestConfirms && order.courierId && order.courierId !== actor.id) return false;
+  const paid = Boolean(order.paidAt) || order.total <= 0;
+  const allowed = actors.some((a) => nextOrderSteps(order.status, order.fulfilment, a, paid).includes(to));
+  // A delivery person is assigned with assignCourier (it needs their name); feedback finishes an order.
+  if (!allowed || to === "COURIER_ASSIGNED" || to === "FINISHED") return false;
   const why = note.trim().slice(0, 300);
-  if (to === "CANCELLED" && actors.includes("kitchen") && !actors.includes("customer") && !why) return false;
+  // Rejecting, cancelling for the guest and a failed delivery all need a reason the guest can read.
+  const failed = order.status === "OUT_FOR_DELIVERY" && to === "READY";
+  if ((to === "REJECTED" || failed || (to === "CANCELLED" && !actors.includes("customer"))) && !why) return false;
   return db.$transaction(async (tx) => {
     const { count } = await tx.foodOrder.updateMany({
       where: { id: order.id, status: order.status },
-      data: { status: to, ...(to === "OUT_FOR_DELIVERY" && actors.includes("courier") ? { courierId: actor.id } : {}), ...(to === "CANCELLED" ? { cancelReason: why || null } : {}) },
+      data: { status: to, ...(to === "CANCELLED" || to === "REJECTED" ? { cancelReason: why || null } : {}), ...(failed ? { courierId: null } : {}) },
     });
     if (count !== 1) return false;
-    await tx.orderEvent.create({ data: { orderId: order.id, from: order.status, to, actorId: actor.id, note: why || null } });
+    await tx.orderEvent.create({ data: { orderId: order.id, from: order.status, to, actorId: actor.id, note: failed ? `delivery failed: ${why}` : why || null } });
+    await audit(tx, { actorId: actor.id, action: `order.${to.toLowerCase()}`, entityType: "order", entityId: reference, ...(why ? { data: { reason: why } } : {}) });
+    // The guest follows every step (confirmed: now pay; on its way; delivered…).
     if (order.customerId !== actor.id) await notify(tx, order.customerId, "orderStatus", { reference, title: order.restaurant.name, status: to }, `/orders/${reference}`);
-    // Sent to a stay: the place's owner (and its managers) are told, to hand it to the guest's room.
+    if (to === "REJECTED") await notifyAdmins(tx, "orderStatus", { reference, title: order.restaurant.name, status: to }, "/admin/orders");
+    // On its way to a stay: the place's owner (and its managers) are told, to let it in.
     if (to === "OUT_FOR_DELIVERY" && order.fulfilment === "TO_STAY" && order.bookingId) await notifyPlaceOfOrder(tx, order.bookingId, reference);
     // The guest says they got it: staff are told the order is done.
     if (to === "DELIVERED" && order.customerId === actor.id) await notifyAdmins(tx, "orderReceived", { reference, title: order.address ?? order.restaurant.name }, "/admin/orders");
     return true;
   });
+}
+
+/**
+ * New orders the restaurant didn't answer within 5 minutes: timed out (nothing is charged — they're paid only after
+ * the restaurant confirms). The guest and VIIPA are told, and the dishes are marked unavailable until the restaurant
+ * turns them back on. Runs whenever orders are read or moved.
+ */
+export async function expireOrders(now: Date = new Date()): Promise<number> {
+  const late = await db.foodOrder.findMany({
+    where: { status: "PLACED", createdAt: { lt: new Date(now.getTime() - ACCEPT_MINUTES * 60_000) } },
+    select: { id: true, reference: true, customerId: true, restaurant: { select: { name: true } }, items: { select: { menuItemId: true } } },
+    take: 50,
+  });
+  let n = 0;
+  for (const o of late) {
+    await db.$transaction(async (tx) => {
+      const { count } = await tx.foodOrder.updateMany({ where: { id: o.id, status: "PLACED" }, data: { status: "TIMED_OUT", cancelReason: "timeout" } });
+      if (count !== 1) return;
+      n++;
+      await tx.orderEvent.create({ data: { orderId: o.id, from: "PLACED", to: "TIMED_OUT", note: "no answer within 5 minutes" } });
+      const dishes = o.items.map((i) => i.menuItemId).filter((v): v is string => Boolean(v));
+      if (dishes.length) await tx.menuItem.updateMany({ where: { id: { in: dishes } }, data: { available: false } });
+      await notify(tx, o.customerId, "orderStatus", { reference: o.reference, title: o.restaurant.name, status: "TIMED_OUT" }, `/orders/${o.reference}`);
+      await notifyAdmins(tx, "orderTimedOut", { reference: o.reference, title: o.restaurant.name }, "/admin/orders");
+    });
+  }
+  return n;
+}
+
+/** The kitchen hands a ready order to one of its delivery people (name and phone shown to the guest). */
+export async function assignCourier(actor: Actor, reference: string, courierId: string): Promise<boolean> {
+  const order = await db.foodOrder.findUnique({ where: { reference }, select: { id: true, status: true, restaurantId: true, customerId: true, restaurant: { select: { name: true } } } });
+  if (!order || order.status !== "READY" || !canRestaurant(await restaurantRole(actor, order.restaurantId), "orders")) return false;
+  const courier = await db.restaurantMember.findFirst({ where: { restaurantId: order.restaurantId, userId: courierId, role: "DELIVERY" }, select: { userId: true } });
+  if (!courier) return false;
+  return db.$transaction(async (tx) => {
+    const { count } = await tx.foodOrder.updateMany({ where: { id: order.id, status: "READY" }, data: { status: "COURIER_ASSIGNED", courierId } });
+    if (count !== 1) return false;
+    await tx.orderEvent.create({ data: { orderId: order.id, from: "READY", to: "COURIER_ASSIGNED", actorId: actor.id, note: courierId } });
+    await notify(tx, courierId, "orderStatus", { reference, title: order.restaurant.name, status: "COURIER_ASSIGNED" }, `/host/restaurants/${order.restaurantId}`);
+    await notify(tx, order.customerId, "orderStatus", { reference, title: order.restaurant.name, status: "COURIER_ASSIGNED" }, `/orders/${reference}`);
+    return true;
+  });
+}
+
+/** The guest's feedback once the food is delivered (1–5 and a comment): the order is finished. */
+export async function rateOrder(customerId: string, reference: string, rating: number, comment: string): Promise<boolean> {
+  if (!Number.isInteger(rating) || rating < 1 || rating > 5 || typeof comment !== "string") return false;
+  const { count } = await db.foodOrder.updateMany({ where: { reference, customerId, status: "DELIVERED" }, data: { status: "FINISHED", rating, feedback: comment.trim().slice(0, 500) || null } });
+  if (count === 1) {
+    const order = await db.foodOrder.findUniqueOrThrow({ where: { reference }, select: { id: true } });
+    await db.orderEvent.create({ data: { orderId: order.id, from: "DELIVERED", to: "FINISHED", actorId: customerId, note: `rating ${rating}` } });
+  }
+  return count === 1;
 }
 
 /** Tells the owner and managers of the place a guest stays at that the guest's food order is on its way there. */
@@ -348,7 +405,7 @@ async function notifyPlaceOfOrder(tx: Prisma.TransactionClient, bookingId: strin
 }
 
 /** Orders shown to a place's owner: confirmed ones and on, read only. */
-export const HOST_ORDER_STATUSES = ["ACCEPTED", "PREPARING", "READY", "OUT_FOR_DELIVERY", "DELIVERED"] as const;
+export const HOST_ORDER_STATUSES = ["PAID", "PREPARING", "READY", "COURIER_ASSIGNED", "OUT_FOR_DELIVERY", "DELIVERED", "FINISHED"] as const;
 
 /**
  * Food orders of guests staying at the places this person owns or manages (last 30 days), newest first: the
@@ -371,7 +428,8 @@ export async function ordersForHost(userId: string, now: Date = new Date()) {
 }
 
 /** One of the customer's orders with its steps, for the tracking page. */
-export function myOrder(customerId: string, reference: string) {
+export async function myOrder(customerId: string, reference: string) {
+  await expireOrders();
   return db.foodOrder.findFirst({
     where: { customerId, reference },
     include: {
@@ -382,7 +440,8 @@ export function myOrder(customerId: string, reference: string) {
   });
 }
 
-export function myOrders(customerId: string) {
+export async function myOrders(customerId: string) {
+  await expireOrders();
   return db.foodOrder.findMany({
     where: { customerId, hiddenByCustomer: false },
     orderBy: { createdAt: "desc" },
@@ -392,7 +451,8 @@ export function myOrders(customerId: string) {
 }
 
 /** A restaurant's orders for its team: open ones first. */
-export function restaurantOrders(restaurantId: string, take = 100) {
+export async function restaurantOrders(restaurantId: string, take = 100) {
+  await expireOrders();
   return db.foodOrder.findMany({
     where: { restaurantId },
     orderBy: [{ createdAt: "desc" }],
@@ -440,7 +500,8 @@ export type ClaimOrderResult = { ok: true } | { ok: false; error: "notFound" | "
 export async function claimOrderPayment(customerId: string, reference: string, transactionId: string): Promise<ClaimOrderResult> {
   const tx = transactionId.trim();
   if (!TX.test(tx)) return { ok: false, error: "transaction" };
-  const order = await db.foodOrder.findFirst({ where: { reference, customerId, paymentMethod: "PAY_FIRST", status: "PLACED", paidAt: null }, select: { id: true, total: true, restaurant: { select: { name: true } } } });
+  // The guest pays only once the restaurant has confirmed the order.
+  const order = await db.foodOrder.findFirst({ where: { reference, customerId, status: "ACCEPTED", paidAt: null }, select: { id: true, total: true, restaurant: { select: { name: true } } } });
   if (!order) return { ok: false, error: "notFound" };
   await db.$transaction(async (t) => {
     await t.foodOrder.update({ where: { id: order.id }, data: { paymentClaim: tx } });
@@ -462,7 +523,8 @@ export async function confirmOrderPayment(actor: Actor, reference: string, trans
     where: { reference },
     select: { id: true, total: true, status: true, paidAt: true, paymentClaim: true, customerId: true, bookingId: true, restaurant: { select: { id: true, name: true, ownerId: true, team: { where: { role: { in: ["MANAGER", "STAFF"] } }, select: { userId: true } } } } },
   });
-  if (!order || order.paidAt || order.status === "CANCELLED" || order.total <= 0) return { ok: false, error: "notFound" };
+  // Payment comes after the restaurant confirmed (ACCEPTED); older orders may still be waiting at PLACED.
+  if (!order || order.paidAt || !["ACCEPTED", "PLACED"].includes(order.status) || order.total <= 0) return { ok: false, error: "notFound" };
   const tx = (transactionId ?? order.paymentClaim ?? "").trim();
   if (!TX.test(tx)) return { ok: false, error: "transaction" };
   if (await db.foodOrder.findUnique({ where: { paidReference: tx }, select: { id: true } })) return { ok: false, error: "used" };
@@ -479,24 +541,23 @@ export async function confirmOrderPayment(actor: Actor, reference: string, trans
       ].filter((e) => e.amount > 0),
     });
     await audit(t, { actorId: actor.id, action: "order.paid", entityType: "order", entityId: reference, data: { amount: order.total, commission, providerReference: tx } });
-    // Paid means confirmed: the order moves on and the guest is told it's confirmed.
-    if (order.status === "PLACED") {
-      await t.foodOrder.update({ where: { id: order.id }, data: { status: "ACCEPTED" } });
-      await t.orderEvent.create({ data: { orderId: order.id, from: "PLACED", to: "ACCEPTED", actorId: actor.id } });
-    }
-    await notify(t, order.customerId, "orderStatus", { reference, title: order.restaurant.name, status: order.status === "PLACED" ? "ACCEPTED" : "PAID" }, `/orders/${reference}`);
+    // Paid: the kitchen can start (it is told), and the guest sees it's paid.
+    await t.foodOrder.update({ where: { id: order.id }, data: { status: "PAID" } });
+    await t.orderEvent.create({ data: { orderId: order.id, from: order.status, to: "PAID", actorId: actor.id } });
+    await notify(t, order.customerId, "orderStatus", { reference, title: order.restaurant.name, status: "PAID" }, `/orders/${reference}`);
     for (const userId of new Set([order.restaurant.ownerId, ...order.restaurant.team.map((m) => m.userId)])) {
-      await notify(t, userId, "orderPlaced", { reference, title: order.restaurant.name, total: order.total }, `/host/restaurants/${order.restaurant.id}`);
+      await notify(t, userId, "orderPaid", { reference, title: order.restaurant.name, total: order.total }, `/host/restaurants/${order.restaurant.id}`);
     }
     return true;
   });
   return done ? { ok: true } : { ok: false, error: "notFound" };
 }
 
-/** Staff: pay-first orders waiting for their payment to be confirmed, the ones the customer says they paid first. */
-export function ordersAwaitingPayment(take = 100) {
+/** Staff: orders the restaurant confirmed that wait for payment to be verified (the ones the guest says they paid first). */
+export async function ordersAwaitingPayment(take = 100) {
+  await expireOrders();
   return db.foodOrder.findMany({
-    where: { paymentMethod: "PAY_FIRST", paidAt: null, status: "PLACED" },
+    where: { paidAt: null, status: { in: ["ACCEPTED", "PLACED"] }, total: { gt: 0 } },
     orderBy: [{ paymentClaim: { sort: "desc", nulls: "last" } }, { createdAt: "desc" }],
     take,
     select: { reference: true, total: true, paymentClaim: true, createdAt: true, address: true, phone: true, note: true, items: { select: { name: true, quantity: true } }, restaurant: { select: { name: true } }, customer: { select: { name: true } } },
@@ -504,7 +565,8 @@ export function ordersAwaitingPayment(take = 100) {
 }
 
 /** Staff: every kitchen's orders, newest first (open ones are picked out on the page). */
-export function allOrders(take = 150) {
+export async function allOrders(take = 150) {
+  await expireOrders();
   return db.foodOrder.findMany({
     orderBy: [{ createdAt: "desc" }],
     take,

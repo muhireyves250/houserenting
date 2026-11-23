@@ -440,6 +440,7 @@ model Booking {
   promoterReward PromoterReward?  @relation("promoterRewardBooking")
   laundryOrders  LaundryOrder[]
 
+  invoices       Invoice[]
   @@index([guestId, checkIn])
   @@index([listingId, checkIn])
   @@map("booking")
@@ -1128,13 +1129,25 @@ model RestaurantMember {
   @@map("restaurantMember")
 }
 
+/// Food order steps (requirements 3.5–3.6): the restaurant confirms first, then the customer pays.
 enum OrderStatus {
+  /// Waiting for the restaurant (5 minutes to accept).
   PLACED
+  /// Confirmed by the restaurant: waiting for the customer's payment.
   ACCEPTED
+  /// Payment verified: the kitchen can start.
+  PAID
   PREPARING
+  /// Prepared, waiting for collection.
   READY
+  COURIER_ASSIGNED
   OUT_FOR_DELIVERY
   DELIVERED
+  /// The customer gave their feedback (or the order was closed).
+  FINISHED
+  REJECTED
+  /// The restaurant didn't answer within 5 minutes (nothing charged).
+  TIMED_OUT
   CANCELLED
 }
 
@@ -1173,6 +1186,9 @@ model FoodOrder {
   hiddenByCustomer Boolean      @default(false)
   courierId        String?
   cancelReason     String?
+  /// The customer's feedback once delivered (1–5) and comment.
+  rating           Int?
+  feedback         String?
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
   items            OrderItem[]
@@ -1333,4 +1349,47 @@ model LaundryOrder {
   @@index([status, createdAt])
   @@index([bookingId])
   @@map("laundryOrder")
+}
+
+/// An invoice's place in its history: the one in force, cancelled, or replaced by a corrected version.
+enum InvoiceState {
+  ISSUED
+  CANCELLED
+  CORRECTED
+}
+
+/// A booking's invoice (requirements 7). Never overwritten: a correction is a new version, the old one stays as CORRECTED.
+/// Whether it's paid is worked out from the booking's payments (unpaid, partly paid, paid).
+model Invoice {
+  id            String       @id @default(cuid())
+  /// e.g. "INV-SR-7K2M9Q-2" (booking reference and version).
+  number        String       @unique
+  bookingId     String
+  booking       Booking      @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+  version       Int          @default(1)
+  state         InvoiceState @default(ISSUED)
+  billToName    String
+  billToEmail   String?
+  billToPhone   String?
+  /// Invoices in an organisation's name.
+  companyName   String?
+  companyTin    String?
+  contactPerson String?
+  address       String?
+  extraInfo     String?
+  /// [{ description, quantity, unitPrice }] in RWF.
+  lines         Json
+  subtotal      Int
+  /// VAT included in the total (from the platform's VAT rate).
+  tax           Int          @default(0)
+  total         Int
+  /// The guest asked for an EBM (electronic billing machine) invoice too.
+  ebmRequested  Boolean      @default(false)
+  /// Why it was cancelled or corrected.
+  note          String?
+  createdById   String?
+  createdAt     DateTime     @default(now())
+
+  @@index([bookingId, version])
+  @@map("invoice")
 }

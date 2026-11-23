@@ -11,7 +11,9 @@ import { OrderAgain } from "@/features/food/components/OrderAgain";
 import { OrderPayment } from "@/features/food/components/OrderPayment";
 import { OrderProgress } from "@/features/food/components/OrderProgress";
 import { RemoveOrder } from "@/features/food/components/RemoveOrder";
-import { ACTIVE_ORDER, type OrderStatus } from "@/features/food/rules";
+import { ACTIVE_ORDER, CLOSED_UNSERVED, acceptDeadline, type OrderStatus } from "@/features/food/rules";
+import { RateOrder } from "@/features/food/components/RateOrder";
+import { db } from "@/lib/db";
 import { myOrder } from "@/features/food/service";
 import { getSettings } from "@/features/settings/service";
 import { Link } from "@/i18n/navigation";
@@ -32,7 +34,12 @@ const card = "rounded-3xl bg-surface shadow-[0_10px_30px_-14px_rgba(16,24,40,0.3
 const LOOK: Record<OrderStatus | "UNPAID", { icon: LucideIcon; tone: string }> = {
   UNPAID: { icon: CreditCard, tone: "bg-amber-100 text-amber-700" },
   PLACED: { icon: Receipt, tone: "bg-primary/10 text-primary" },
-  ACCEPTED: { icon: CheckCircle2, tone: "bg-primary/10 text-primary" },
+  ACCEPTED: { icon: CreditCard, tone: "bg-amber-100 text-amber-700" },
+  PAID: { icon: CheckCircle2, tone: "bg-primary/10 text-primary" },
+  COURIER_ASSIGNED: { icon: Bike, tone: "bg-emerald-100 text-emerald-700" },
+  FINISHED: { icon: CheckCircle2, tone: "bg-emerald-100 text-emerald-700" },
+  REJECTED: { icon: CircleX, tone: "bg-red-100 text-red-700" },
+  TIMED_OUT: { icon: Clock, tone: "bg-red-100 text-red-700" },
   PREPARING: { icon: ChefHat, tone: "bg-amber-100 text-amber-700" },
   READY: { icon: PackageCheck, tone: "bg-emerald-100 text-emerald-700" },
   OUT_FOR_DELIVERY: { icon: Bike, tone: "bg-emerald-100 text-emerald-700" },
@@ -50,9 +57,14 @@ export default async function OrderPage({ params }: Props) {
   const order = await myOrder(user.id, reference);
   if (!order) notFound();
   const [t, locale, settings] = await Promise.all([getTranslations("Food"), getLocale(), getSettings()]);
-  const cancelled = order.status === "CANCELLED";
+  // Ended without food (cancelled, rejected by the restaurant, or no answer in 5 minutes): nothing is charged.
+  const cancelled = CLOSED_UNSERVED.includes(order.status);
   const payFirst = order.paymentMethod === "PAY_FIRST" && order.total > 0;
-  const unpaid = payFirst && !order.paidAt && !cancelled;
+  // The guest pays once the restaurant has confirmed (not before).
+  const unpaid = order.status === "ACCEPTED" && order.total > 0 && !order.paidAt;
+  const waiting = order.status === "PLACED";
+  // Who brings it (name and phone), once a delivery person is assigned.
+  const courier = order.courierId && ["COURIER_ASSIGNED", "OUT_FOR_DELIVERY", "DELIVERED"].includes(order.status) ? await db.user.findUnique({ where: { id: order.courierId }, select: { name: true, phone: true } }) : null;
   const active = ACTIVE_ORDER.includes(order.status);
   const time = new Intl.DateTimeFormat(locale, { hour: "2-digit", minute: "2-digit", timeZone: "Africa/Kigali" });
   // Counted from the payment for pay-first orders (the kitchen starts then).
@@ -86,6 +98,33 @@ export default async function OrderPage({ params }: Props) {
           </div>
         </div>
 
+        {waiting && (
+          <p className="mt-4 flex items-center gap-2 rounded-2xl bg-amber-50 px-4 py-3 text-[14px] text-amber-900">
+            <Clock className="size-4 shrink-0" aria-hidden="true" />
+            {t("waitingRestaurant", { time: time.format(acceptDeadline(order.createdAt)) })}
+          </p>
+        )}
+
+        {courier && (
+          <p className="mt-4 flex flex-wrap items-center gap-2 rounded-2xl bg-canvas px-4 py-3 text-[14px] text-ink">
+            <Bike className="size-4 shrink-0 text-primary" aria-hidden="true" />
+            {t("courierLine", { name: courier.name })}
+            {courier.phone && <span className="font-semibold select-all">{courier.phone}</span>}
+          </p>
+        )}
+
+        {order.status === "DELIVERED" && (
+          <div className="mt-4">
+            <RateOrder reference={order.reference} />
+          </div>
+        )}
+        {order.status === "FINISHED" && order.rating && (
+          <p className="mt-4 rounded-2xl bg-canvas px-4 py-3 text-[14px] text-ink">
+            {"★".repeat(order.rating)}
+            {order.feedback && <span className="mt-1 block text-muted">{order.feedback}</span>}
+          </p>
+        )}
+
         {unpaid && (
           <div className="mt-5">
             <OrderPayment reference={order.reference} amount={order.total} instructions={settings.paymentInstructions} claimed={order.paymentClaim} />
@@ -93,7 +132,7 @@ export default async function OrderPage({ params }: Props) {
           </div>
         )}
 
-        {!unpaid && active && (
+        {!unpaid && !waiting && active && (
           <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl bg-canvas px-4 py-3">
             <span className="inline-flex items-center gap-2 text-[14px] text-muted">
               <Clock className="size-4 text-primary" aria-hidden="true" />
@@ -105,7 +144,9 @@ export default async function OrderPage({ params }: Props) {
 
         {cancelled && (
           <div className="mt-4 flex flex-col gap-3">
-            <p className="rounded-2xl bg-red-50 px-4 py-3 text-[14px] text-red-900">{order.cancelReason ? t("cancelledBecause", { reason: order.cancelReason }) : t("cancelledNoReason")}</p>
+            <p className="rounded-2xl bg-red-50 px-4 py-3 text-[14px] text-red-900">
+              {order.status === "TIMED_OUT" ? t("timedOutNote") : order.cancelReason ? t("cancelledBecause", { reason: order.cancelReason }) : t("cancelledNoReason")}
+            </p>
             <div className="flex flex-wrap items-center gap-3">
               <OrderAgain restaurantId={order.restaurant.id} items={order.items} />
               <RemoveOrder reference={order.reference} backToList />
@@ -189,7 +230,7 @@ export default async function OrderPage({ params }: Props) {
 
       <section className="mt-4 flex flex-wrap items-center justify-between gap-3">
         <span className="flex flex-wrap items-center gap-4">
-          {order.status === "PLACED" && !order.paidAt && <CancelOrder reference={order.reference} />}
+          {(order.status === "PLACED" || unpaid) && <CancelOrder reference={order.reference} />}
           {!active && !cancelled && <OrderAgain restaurantId={order.restaurant.id} items={order.items} />}
         </span>
         <Link href={{ pathname: "/support", query: { order: order.reference } }} className="inline-flex items-center gap-1.5 text-[14px] font-semibold text-primary hover:underline">

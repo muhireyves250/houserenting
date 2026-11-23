@@ -7,7 +7,7 @@ import { OrdersBoard, type BoardOrder } from "@/features/food/components/OrdersB
 import { PauseToggle } from "@/features/food/components/RestaurantControls";
 import { RestaurantForm } from "@/features/food/components/RestaurantForm";
 import { RestaurantTeam } from "@/features/food/components/RestaurantTeam";
-import { nextOrderSteps, type OrderActor } from "@/features/food/rules";
+import { ACTIVE_ORDER, acceptDeadline, nextOrderSteps, type OrderActor } from "@/features/food/rules";
 import { canRestaurant, restaurantForTeam, restaurantOrders, restaurantRole } from "@/features/food/service";
 import { Card } from "@/features/hosting/components/fields";
 import { Link } from "@/i18n/navigation";
@@ -29,24 +29,35 @@ export default async function HostRestaurantPage({ params }: Props) {
     restaurantOrders(id),
     db.listing.findMany({ where: { hostId: r.ownerId, status: { not: "ARCHIVED" } }, select: { id: true, title: true } }),
   ]);
-  const actors: OrderActor[] = [...(canRestaurant(role, "orders") ? (["kitchen"] as const) : []), ...(canRestaurant(role, "deliver") ? (["courier"] as const) : [])];
+  const kitchen = canRestaurant(role, "orders");
+  // The restaurant's delivery people (to assign ready orders), and who is on each order.
+  const couriers = r.team.filter((m) => m.role === "DELIVERY").map((m) => ({ id: m.userId, name: m.user.name }));
+  const courierName = (id: string | null) => (id ? (couriers.find((c) => c.id === id)?.name ?? null) : null);
+  const actors: OrderActor[] = [...(kitchen ? (["kitchen"] as const) : []), ...(canRestaurant(role, "deliver") ? (["courier"] as const) : [])];
   const board: BoardOrder[] = orders
-    // Couriers see deliveries only.
-    .filter((o) => canRestaurant(role, "orders") || o.fulfilment === "DELIVERY")
-    .map((o) => ({
-      reference: o.reference,
-      status: o.status,
-      fulfilment: o.fulfilment,
-      customer: o.customer.name,
-      phone: o.phone,
-      address: o.address,
-      note: o.note,
-      total: o.total,
-      createdAt: o.createdAt,
-      items: o.items.map((i) => ({ name: i.name, quantity: i.quantity })),
-      steps: [...new Set(actors.flatMap((a) => nextOrderSteps(o.status, o.fulfilment, a)))],
-    }));
-  const open = board.filter((o) => o.status !== "DELIVERED" && o.status !== "CANCELLED");
+    // Delivery people see the orders given to them.
+    .filter((o) => kitchen || o.courierId === user.id)
+    .map((o) => {
+      const paid = Boolean(o.paidAt) || o.total <= 0;
+      return {
+        reference: o.reference,
+        status: o.status,
+        fulfilment: o.fulfilment,
+        customer: o.customer.name,
+        phone: o.phone,
+        address: o.address,
+        note: o.note,
+        total: o.total,
+        createdAt: o.createdAt,
+        items: o.items.map((i) => ({ name: i.name, quantity: i.quantity })),
+        paid,
+        deadline: o.status === "PLACED" ? acceptDeadline(o.createdAt) : null,
+        courier: courierName(o.courierId),
+        couriers: kitchen ? couriers : [],
+        steps: [...new Set(actors.flatMap((a) => nextOrderSteps(o.status, o.fulfilment, a, paid)))],
+      };
+    });
+  const open = board.filter((o) => ACTIVE_ORDER.includes(o.status));
   const done = board.filter((o) => !open.includes(o)).slice(0, 20);
 
   return (
