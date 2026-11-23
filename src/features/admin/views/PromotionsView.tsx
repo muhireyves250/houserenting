@@ -2,10 +2,9 @@ import { CalendarDays, TicketPercent } from "lucide-react";
 import type { ReactNode } from "react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Chip, FillScreen } from "@/features/admin/components/kit";
-import { PromoToggle } from "@/features/admin/components/PromoForm";
+import { ActionsMenu } from "@/features/admin/components/ActionsMenu";
 import { listPromos } from "@/features/promotions/service";
-import { ConfirmAction } from "@/features/admin/components/ConfirmAction";
-import { deletePromoAction } from "@/features/admin/money-actions";
+import { deletePromoAction, setPromoActiveAction } from "@/features/admin/money-actions";
 import { formatRWF } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import { Link } from "@/i18n/navigation";
@@ -118,16 +117,14 @@ export async function PromotionsView({
                       </span>
                     </span>
                     <span className="flex shrink-0 flex-col items-end gap-1.5">
-                      <PromoToggle id={p.id} active={p.active} />
-                      {/* Never used: it can be deleted (used codes stay on record). */}
-                      {p.usedCount === 0 && (
-                        <ConfirmAction
-                          label={t("delete")}
-                          question={t("deleteQuestion", { code: p.code })}
-                          action={deletePromoAction.bind(null, p.id)}
-                          errors={{ used: t("deleteUsed") }}
-                        />
-                      )}
+                      {/* One Actions button: who used it, turn it on or off, delete it (never used). */}
+                      <ActionsMenu
+                        items={[
+                          { kind: "link", label: t("seeWhoUsed"), href: `/admin/promotions/codes/${p.id}` },
+                          { kind: "run", label: p.active ? t("turnOff") : t("turnOn"), action: setPromoActiveAction.bind(null, p.id, !p.active) },
+                          ...(p.usedCount === 0 ? [{ kind: "run" as const, label: t("delete"), action: deletePromoAction.bind(null, p.id), confirm: t("deleteQuestion", { code: p.code }), danger: true, errors: { used: t("deleteUsed") } }] : []),
+                        ]}
+                      />
                     </span>
                   </div>
 

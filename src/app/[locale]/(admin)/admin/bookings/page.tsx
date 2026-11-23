@@ -1,10 +1,11 @@
 import { getLocale, getTranslations } from "next-intl/server";
-import { CheckInOut } from "@/features/admin/components/StaffButtons";
+import { ActionsMenu } from "@/features/admin/components/ActionsMenu";
+import { moveBookingAction } from "@/features/admin/moderation-actions";
+import { markNoShowAction } from "@/features/stay/actions";
 import { FillScreen, ScrollArea, Toolbar } from "@/features/admin/components/kit";
 import { ExportLink, FilterTabs, Pagination, SearchBox } from "@/features/admin/components/ui";
 import { roomLabel } from "@/features/rooms/links";
 import { todayISO } from "@/features/search/date-range";
-import { NoShowButton } from "@/features/stay/components/StaffStayPanels";
 import { BOOKING_STATUSES, searchBookings, type BookingStatusFilter } from "@/features/admin/queries";
 import { StatusBadge } from "@/features/bookings/components/StatusBadge";
 import { formatStayDates } from "@/features/bookings/format";
@@ -94,12 +95,15 @@ export default async function AdminBookingsPage({ searchParams }: Props) {
                   <span className="block text-[12px] text-muted">{t("ownerShort", { amount: formatRWF(b.hostPayout, locale) })}</span>
                 </div>
                 <div className="flex flex-wrap items-center gap-2 md:justify-end">
-                  {b.status === "CONFIRMED" && started && <CheckInOut reference={b.reference} to="CHECKED_IN" />}
-                  {b.status === "CHECKED_IN" && <CheckInOut reference={b.reference} to="COMPLETED" />}
-                  {b.status === "CONFIRMED" && iso(b.checkIn) < today && <NoShowButton reference={b.reference} />}
-                  <Link href={`/admin/bookings/${b.reference}`} className="rounded-lg border border-line px-3.5 py-1.5 text-[13px] font-semibold text-ink hover:border-primary">
-                    {t("openToAnswer")}
-                  </Link>
+                  {/* One Actions button: open it, check in or out, mark a no-show. */}
+                  <ActionsMenu
+                    items={[
+                      { kind: "link", label: t("openToAnswer"), href: `/admin/bookings/${b.reference}` },
+                      ...(b.status === "CONFIRMED" && started ? [{ kind: "run" as const, label: t("checkIn"), action: moveBookingAction.bind(null, b.reference, "CHECKED_IN") }] : []),
+                      ...(b.status === "CHECKED_IN" ? [{ kind: "run" as const, label: t("checkOut"), action: moveBookingAction.bind(null, b.reference, "COMPLETED") }] : []),
+                      ...(b.status === "CONFIRMED" && iso(b.checkIn) < today ? [{ kind: "run" as const, label: t("noShow"), action: markNoShowAction.bind(null, b.reference), confirm: t("noShowQuestion"), danger: true }] : []),
+                    ]}
+                  />
                 </div>
               </li>
             );

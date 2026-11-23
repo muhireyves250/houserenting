@@ -1,10 +1,9 @@
 import type { ReactNode } from "react";
-import { Pencil, Plus, Store } from "lucide-react";
+import { Plus, Store } from "lucide-react";
 import { getTranslations } from "next-intl/server";
-import { ConfirmAction } from "@/features/admin/components/ConfirmAction";
+import { ActionsMenu } from "@/features/admin/components/ActionsMenu";
 import { adminCard, Chip, FillScreen, ScrollArea, StatTiles, Toolbar } from "@/features/admin/components/kit";
-import { deleteRestaurantAction } from "@/features/food/actions";
-import { PauseToggle, RestaurantStatusActions } from "@/features/food/components/RestaurantControls";
+import { deleteRestaurantAction, setRestaurantPausedAction, setRestaurantStatusAction } from "@/features/food/actions";
 import { allRestaurants } from "@/features/food/service";
 import { Link } from "@/i18n/navigation";
 
@@ -62,15 +61,17 @@ export async function RestaurantsView({ searchParams, tabs }: { searchParams: Pr
                 {r.paused && <Chip tone="bg-amber-100 text-amber-900">{tFood("closedNow")}</Chip>}
               </div>
               <div className="flex flex-wrap items-start gap-2 border-t border-line pt-3">
-                <Link href={`/admin/restaurants/${r.id}`} className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-[13px] font-semibold text-white hover:bg-primary-hover">
-                  <Pencil className="size-3.5" aria-hidden="true" />
-                  {tFood("adminList.edit")}
-                </Link>
-                <RestaurantStatusActions restaurantId={r.id} status={r.status} compact />
-                {r.status === "PUBLISHED" && <PauseToggle restaurantId={r.id} paused={r.paused} />}
-                {r._count.orders === 0 && (
-                  <ConfirmAction label={tFood("adminList.delete")} question={tFood("adminList.deleteQuestion")} action={deleteRestaurantAction.bind(null, r.id)} errors={{ hasOrders: tFood("adminList.hasOrders") }} />
-                )}
+                {/* One Actions button: open and edit, publish or hide, open or close for orders, delete (no orders). */}
+                <ActionsMenu
+                  align="left"
+                  items={[
+                    { kind: "link", label: tFood("adminList.edit"), href: `/admin/restaurants/${r.id}` },
+                    ...(r.status !== "PUBLISHED" ? [{ kind: "run" as const, label: tFood("rowActions.publish"), action: setRestaurantStatusAction.bind(null, r.id, "PUBLISHED"), errors: {} }] : []),
+                    ...(r.status === "PUBLISHED" ? [{ kind: "run" as const, label: tFood("rowActions.hide"), action: setRestaurantStatusAction.bind(null, r.id, "HIDDEN"), reason: true, danger: true }] : []),
+                    ...(r.status === "PUBLISHED" ? [{ kind: "run" as const, label: r.paused ? tFood("rowActions.open") : tFood("rowActions.close"), action: setRestaurantPausedAction.bind(null, r.id, !r.paused) }] : []),
+                    ...(r._count.orders === 0 ? [{ kind: "run" as const, label: tFood("adminList.delete"), action: deleteRestaurantAction.bind(null, r.id), confirm: tFood("adminList.deleteQuestion"), danger: true, errors: { hasOrders: tFood("adminList.hasOrders") } }] : []),
+                  ]}
+                />
               </div>
             </li>
           ))}

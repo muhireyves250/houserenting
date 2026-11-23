@@ -1,6 +1,6 @@
 "use client";
 
-import { Ban, KeyRound, MoreHorizontal, RotateCcw, ShieldCheck, Trash2 } from "lucide-react";
+import { Ban, ChevronDown, KeyRound, RotateCcw, ShieldCheck, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { Link, useRouter } from "@/i18n/navigation";
@@ -16,6 +16,7 @@ type Dialog = "reset" | "suspend" | "reactivate" | "delete" | null;
  */
 export function UserActions({ user, self, inline = false }: { user: { id: string; name: string; status: string }; self: boolean; inline?: boolean }) {
   const t = useTranslations("Admin.userActions");
+  const tMenu = useTranslations("Admin.actionsMenu");
   const router = useRouter();
   const [menu, setMenu] = useState(false);
   // The menu floats above the list (so the list's edge can't cut it off), opening upwards near the bottom.
@@ -107,9 +108,10 @@ export function UserActions({ user, self, inline = false }: { user: { id: string
             aria-haspopup="menu"
             aria-expanded={menu}
             aria-label={t("menu", { name: user.name })}
-            className="flex size-9 items-center justify-center rounded-full text-ink/70 hover:bg-canvas hover:text-ink"
+            className={cn("inline-flex items-center gap-1 rounded-full border px-3.5 py-1.5 text-[13px] font-semibold transition-colors", menu ? "border-primary text-primary" : "border-line text-ink hover:border-primary")}
           >
-            <MoreHorizontal className="size-5" aria-hidden="true" />
+            {tMenu("label")}
+            <ChevronDown className={cn("size-3.5 transition-transform", menu && "rotate-180")} aria-hidden="true" />
           </button>
           {menu && (
             <div role="menu" style={at} className="fixed z-50 w-60 rounded-2xl text-left border border-line bg-surface p-1.5 shadow-[0_18px_40px_-16px_rgba(16,24,40,0.45)]">

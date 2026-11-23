@@ -1467,7 +1467,9 @@
       "reason": "Raison (la personne la lira)",
       "cancel": "Annuler",
       "failed": "Échec — réessayez."
-    }
+    },
+    "noShow": "Marquer comme absent",
+    "noShowQuestion": "Le client n'est pas venu : marquer cette réservation comme absence ?"
   },
   "Questions": {
     "title": "Questions et réponses",
@@ -2003,7 +2005,10 @@
     "open": "Voir qui l’a utilisé",
     "saveShare": "Enregistrer",
     "noShareYet": "Aucune part : le promoteur ne gagne encore rien avec ce code.",
-    "newCodeOnPromoters": "Les nouveaux codes se créent sur la page Promoteurs (ajoutez un promoteur, ou vous-même, avec son code) →"
+    "newCodeOnPromoters": "Les nouveaux codes se créent sur la page Promoteurs (ajoutez un promoteur, ou vous-même, avec son code) →",
+    "seeWhoUsed": "Voir qui l'a utilisé",
+    "turnOn": "Activer",
+    "turnOff": "Désactiver"
   },
   "Referrals": {
     "title": "Inviter des amis",
@@ -2754,6 +2759,12 @@
       "stars": "{count, plural, one {# étoile} other {# étoiles}}",
       "comment": "Un commentaire ? (facultatif)",
       "send": "Envoyer"
+    },
+    "rowActions": {
+      "publish": "Publier (un plat et un accord de commission requis)",
+      "hide": "Masquer",
+      "open": "Ouvrir aux commandes",
+      "close": "Fermer aux commandes"
     }
   },
   "Promoters": {

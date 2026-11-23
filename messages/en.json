@@ -1467,7 +1467,9 @@
       "reason": "Reason (they will read it)",
       "cancel": "Cancel",
       "failed": "Couldn't do that — try again."
-    }
+    },
+    "noShow": "Mark as no-show",
+    "noShowQuestion": "The guest didn't come: mark this booking as a no-show?"
   },
   "Questions": {
     "title": "Questions and answers",
@@ -2003,7 +2005,10 @@
     "open": "See who used it",
     "saveShare": "Save",
     "noShareYet": "No share set: the promoter earns nothing from this code yet.",
-    "newCodeOnPromoters": "New promo codes are made on the Promoters page (add a promoter, or yourself, with their code) →"
+    "newCodeOnPromoters": "New promo codes are made on the Promoters page (add a promoter, or yourself, with their code) →",
+    "seeWhoUsed": "See who used it",
+    "turnOn": "Turn on",
+    "turnOff": "Turn off"
   },
   "Referrals": {
     "title": "Invite friends",
@@ -2754,6 +2759,12 @@
       "stars": "{count, plural, one {# star} other {# stars}}",
       "comment": "Anything to tell us? (optional)",
       "send": "Send"
+    },
+    "rowActions": {
+      "publish": "Publish (needs a dish and a commission agreement)",
+      "hide": "Hide",
+      "open": "Open for orders",
+      "close": "Close for orders"
     }
   },
   "Promoters": {

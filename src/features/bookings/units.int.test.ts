@@ -78,10 +78,11 @@ describe("booking by hour, day, week and year", () => {
     expect(await db.booking.findFirstOrThrow({ where: { unit: "YEAR" } })).toMatchObject({ months: 12, subtotal: 9600000 });
   });
 
-  it("books lodges by the night or the day only", async () => {
+  it("books a lodge by any unit it offers (weeks too), and not by one it doesn't", async () => {
     await place("lodge", "LODGE", [{ unit: "NIGHT", price: 40000 }, { unit: "DAY", price: 30000 }, { unit: "WEEK", price: 200000 }]);
     expect((await book({ listingId: "lodge", unit: "DAY", quantity: 2 })).ok).toBe(true);
-    expect(await book({ listingId: "lodge", unit: "WEEK", start: "2026-12-01" })).toEqual({ ok: false, error: "notOffered" });
+    expect((await book({ listingId: "lodge", unit: "WEEK", start: "2026-12-01" })).ok).toBe(true);
+    expect(await book({ listingId: "lodge", unit: "YEAR", start: "2027-03-01" })).toEqual({ ok: false, error: "notOffered" });
   });
 
   it("books a room at the room's own price for the chosen unit", async () => {

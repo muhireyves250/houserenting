@@ -1467,7 +1467,9 @@
       "reason": "Impamvu (bazayisoma)",
       "cancel": "Reka",
       "failed": "Ntibyakunze — ongera ugerageze."
-    }
+    },
+    "noShow": "Andika ko ataje",
+    "noShowQuestion": "Umushyitsi ntiyaje: wandika ko ataje?"
   },
   "Questions": {
     "title": "Ibibazo n'ibisubizo",
@@ -2003,7 +2005,10 @@
     "open": "Reba abayikoresheje",
     "saveShare": "Bika",
     "noShareYet": "Nta mugabane washyizweho: umwamamaza nta cyo arabona kuri iyi kode.",
-    "newCodeOnPromoters": "Kode nshya zikorerwa ku rupapuro rw'Abamamaza (ongeramo umwamamaza, cyangwa wowe ubwawe, n'kode ye) →"
+    "newCodeOnPromoters": "Kode nshya zikorerwa ku rupapuro rw'Abamamaza (ongeramo umwamamaza, cyangwa wowe ubwawe, n'kode ye) →",
+    "seeWhoUsed": "Reba abayikoresheje",
+    "turnOn": "Fungura",
+    "turnOff": "Funga"
   },
   "Referrals": {
     "title": "Tumira inshuti",
@@ -2754,6 +2759,12 @@
       "stars": "{count, plural, one {inyenyeri #} other {inyenyeri #}}",
       "comment": "Hari icyo ushaka kutubwira? (si ngombwa)",
       "send": "Ohereza"
+    },
+    "rowActions": {
+      "publish": "Shyira ahagaragara (bisaba ibiryo n'amasezerano ya komisiyo)",
+      "hide": "Hisha",
+      "open": "Fungura ku byatumizwa",
+      "close": "Funga ku byatumizwa"
     }
   },
   "Promoters": {
