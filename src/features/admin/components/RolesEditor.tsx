@@ -120,7 +120,8 @@ export function RolesEditor({
           {/* 1. The kind of role. */}
           <section className="flex flex-col gap-2">
             <span className={step}>{t("step1")}</span>
-            <div role="radiogroup" aria-label={t("group")} className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {/* One compact bar of tabs (two rows of two on phones); the chosen one is filled. */}
+            <div role="radiogroup" aria-label={t("group")} className="grid grid-cols-2 gap-1 rounded-2xl bg-canvas p-1 ring-1 ring-line sm:grid-cols-4">
               {GROUPS.map(({ group: g, icon: Icon }) => {
                 const on = g === group;
                 return (
@@ -131,19 +132,12 @@ export function RolesEditor({
                     aria-checked={on}
                     onClick={() => pickGroup(g)}
                     className={cn(
-                      "relative flex flex-col items-start gap-2 rounded-2xl p-3 text-left ring-1 transition-all",
-                      on ? "bg-primary/[0.06] ring-2 ring-primary" : "bg-surface ring-line hover:ring-line-strong hover:shadow-sm",
+                      "flex h-10 items-center justify-center gap-1.5 rounded-xl px-2 text-[13px] font-semibold whitespace-nowrap transition-colors",
+                      on ? "bg-primary text-white shadow-[0_6px_14px_-8px_rgba(0,87,184,0.9)]" : "text-ink/70 hover:bg-surface hover:text-ink",
                     )}
                   >
-                    <span className={cn("flex size-9 items-center justify-center rounded-xl", on ? "bg-primary text-white" : "bg-canvas text-ink/70")}>
-                      <Icon className="size-[18px]" aria-hidden="true" />
-                    </span>
-                    <span className="text-[14px] font-semibold text-ink">{t(`groups.${g}`)}</span>
-                    {on && (
-                      <span className="absolute top-2.5 right-2.5 flex size-5 items-center justify-center rounded-full bg-primary text-white">
-                        <Check className="size-3" strokeWidth={3} aria-hidden="true" />
-                      </span>
-                    )}
+                    <Icon className="size-4 shrink-0" aria-hidden="true" />
+                    {t(`groups.${g}`)}
                   </button>
                 );
               })}
