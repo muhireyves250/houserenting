@@ -29,6 +29,8 @@ import {
   assignCourier,
   rateOrder,
   setPlaceKitchens,
+  confirmDelivery,
+  type ConfirmDeliveryResult,
 } from "./service";
 import type { MenuItemInput, OrderInput, RestaurantInput } from "./validation";
 
@@ -182,4 +184,14 @@ export async function setPlaceKitchensAction(listingId: string, restaurantIds: s
   const ok = await setPlaceKitchens(user, listingId, restaurantIds);
   if (ok) refresh();
   return ok;
+}
+
+/** The guest, the delivery person or the place's receptionist confirms the food reached the guest. */
+export async function confirmDeliveryAction(reference: string): Promise<ConfirmDeliveryResult | { ok: false; error: "auth" }> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, error: "auth" };
+  if (typeof reference !== "string" || reference.length > 20) return { ok: false, error: "notFound" };
+  const result = await confirmDelivery(user, reference);
+  if (result.ok) refresh();
+  return result;
 }

@@ -1481,7 +1481,7 @@
       "failed": "Ntibyakunze — ongera ugerageze."
     },
     "rolesEditor": {
-      "now": "Inshingano ubu:",
+      "now": "Inshingano ubu",
       "group": "Ubwoko bw'inshingano",
       "roleLabel": "Inshingano",
       "groups": {
@@ -1529,7 +1529,13 @@
         "invalid": "Banza uhitemo inzu cyangwa resitora.",
         "ownsPlaces": "Afite inzu: banza uziha undi muntu.",
         "ownsRestaurants": "Afite resitora: banza uziha undi muntu."
-      }
+      },
+      "step1": "1 · Ubwoko bw'inshingano",
+      "step2": "2 · Inshingano",
+      "owns": "Afite ubu:",
+      "youShort": "Wowe",
+      "adminsOnlyShort": "Admin bonyine",
+      "areas": "Ibice ayobora"
     },
     "personRole": {
       "CUSTOMER": "Umukiriya",
@@ -2824,7 +2830,8 @@
       "failedReason": "Kuki bitagejejwe?",
       "answerWithin": "Emera cyangwa wange mu {time}",
       "timedOut": "Igihe kirarangiye: ibyatumijwe biratakaza igihe",
-      "deliverOurselves": "Turabyigereza ubwacu"
+      "deliverOurselves": "Turabyigereza ubwacu",
+      "directions": "Inzira"
     },
     "waitingRestaurant": "Resitora ifite kugeza {time} ngo yemeze. Wishyura ari uko imaze kwemeza.",
     "courierLine": "Bizanwa na {name}",
@@ -2854,6 +2861,18 @@
       "failed": "Ntibyakunze — ongera ugerageze.",
       "cooksFor": "Itekera",
       "cooksForNone": "Nta nzu iragenerwa: yongereho ku rupapuro rw'inzu (Resitora zitekera hano)."
+    },
+    "confirm": {
+      "title": "Igezwa iyo bemeje",
+      "who": {
+        "guest": "Umukiriya",
+        "courier": "Ugeza ibiryo",
+        "desk": "Ushinzwe kwakira"
+      },
+      "handedOver": "Nabihaye umukiriya",
+      "deskReceived": "Byakiriwe ku ruganiriro",
+      "waiting": "Bitegereje: {who}",
+      "guestDone": "Wemeje. Bitegereje: {who}"
     }
   },
   "Promoters": {

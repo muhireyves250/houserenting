@@ -8,7 +8,7 @@ import { PauseToggle } from "@/features/food/components/RestaurantControls";
 import { RestaurantForm } from "@/features/food/components/RestaurantForm";
 import { RestaurantTeam } from "@/features/food/components/RestaurantTeam";
 import { ACTIVE_ORDER, acceptDeadline, nextOrderSteps, type OrderActor } from "@/features/food/rules";
-import { canRestaurant, restaurantForTeam, restaurantOrders, restaurantRole } from "@/features/food/service";
+import { canRestaurant, confirmationsOf, restaurantForTeam, restaurantOrders, restaurantRole, withDesk, withStayLocation } from "@/features/food/service";
 import { Card } from "@/features/hosting/components/fields";
 import { Link } from "@/i18n/navigation";
 import { requireUser } from "@/lib/session";
@@ -23,7 +23,7 @@ export default async function HostRestaurantPage({ params }: Props) {
   if (!role) notFound();
   const r = await restaurantForTeam(id);
   if (!r) notFound();
-  const [t, orders] = await Promise.all([getTranslations("Food"), restaurantOrders(id)]);
+  const [t, orders] = await Promise.all([getTranslations("Food"), restaurantOrders(id).then(withDesk).then(withStayLocation)]);
   const kitchen = canRestaurant(role, "orders");
   // The restaurant's delivery people (to assign ready orders), and who is on each order.
   const couriers = r.team.filter((m) => m.role === "DELIVERY").map((m) => ({ id: m.userId, name: m.user.name }));
@@ -49,6 +49,10 @@ export default async function HostRestaurantPage({ params }: Props) {
         deadline: o.status === "PLACED" ? acceptDeadline(o.createdAt) : null,
         courier: courierName(o.courierId),
         couriers: kitchen ? couriers : [],
+        confirmations: confirmationsOf(o, o.hasDesk),
+        location: o.location,
+        // The delivery person who took it says they handed it over (the kitchen can't mark it delivered).
+        canConfirm: o.status === "OUT_FOR_DELIVERY" && o.courierId === user.id && !o.courierConfirmedAt,
         steps: [...new Set(actors.flatMap((a) => nextOrderSteps(o.status, o.fulfilment, a, paid)))],
       };
     });

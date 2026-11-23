@@ -2,14 +2,14 @@
 
 import { Select } from "@/components/ui/Select";
 
-import { BedDouble, Bike, Phone, Store, Timer } from "lucide-react";
+import { BedDouble, Bike, CheckCircle2, Circle, MapPin, Navigation, Phone, Store, Timer } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState, useTransition, type ReactNode } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { formatRWF } from "@/lib/format";
 import { ConfirmAction } from "@/features/admin/components/ConfirmAction";
-import { assignCourierAction, deleteFoodOrderAction, moveOrderAction } from "../actions";
+import { assignCourierAction, confirmDeliveryAction, deleteFoodOrderAction, moveOrderAction } from "../actions";
 import type { Fulfilment, OrderStatus } from "../rules";
 
 export type BoardOrder = {
@@ -35,6 +35,11 @@ export type BoardOrder = {
   /** The delivery person on it, and the ones the kitchen can choose from. */
   courier?: string | null;
   couriers?: { id: string; name: string }[];
+  /** On its way: who has confirmed the guest got it, and whether this person still has to ("handed over"). */
+  confirmations?: { who: "guest" | "courier" | "desk"; done: boolean }[];
+  canConfirm?: boolean;
+  /** The house it goes to, with a map link (for the delivery person). */
+  location?: { title: string; address: string; mapUrl: string } | null;
 };
 
 export const ORDER_TONE: Record<OrderStatus, string> = {
@@ -140,11 +145,55 @@ export function OrdersBoard({ orders, compact = false, staffDelete = false }: { 
             <span className="text-[12px] text-muted">{time.format(o.createdAt)}</span>
             <span className="text-[16px] font-bold text-ink tabular-nums">{formatRWF(o.total, locale)}</span>
           </div>
+          {/* The house it goes to: its address and directions (open in maps). */}
+          {o.location && (
+            <div className="flex items-center gap-3 rounded-xl bg-primary/[0.05] p-3 ring-1 ring-primary/10">
+              <MapPin className="size-5 shrink-0 text-primary" aria-hidden="true" />
+              <span className="min-w-0 flex-1 text-[13px] leading-[18px]">
+                <b className="block font-semibold text-ink">{o.location.title}</b>
+                <span className="text-muted">{o.location.address}</span>
+              </span>
+              <a href={o.location.mapUrl} target="_blank" rel="noopener noreferrer" className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-primary px-3.5 py-2 text-[13px] font-semibold text-white hover:bg-primary-hover">
+                <Navigation className="size-4" aria-hidden="true" />
+                {t("board.directions")}
+              </a>
+            </div>
+          )}
           {o.status === "PLACED" && o.deadline && <Countdown until={o.deadline} />}
           {o.courier && (
             <Line icon={<Bike />}>
               <span className="text-muted">{t("board.courier", { name: o.courier })}</span>
             </Line>
+          )}
+          {/* On its way: it is delivered once the guest (and the delivery person, the receptionist) confirm. */}
+          {o.status === "OUT_FOR_DELIVERY" && o.confirmations && (
+            <div className="flex flex-col gap-2 rounded-xl bg-canvas p-3">
+              <span className="text-[12px] font-semibold text-muted">{t("confirm.title")}</span>
+              <ul className="flex flex-wrap gap-1.5">
+                {o.confirmations.map((c) => (
+                  <li key={c.who} className={cn("inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[12px] font-semibold", c.done ? "bg-emerald-50 text-emerald-800" : "bg-surface text-muted ring-1 ring-line")}>
+                    {c.done ? <CheckCircle2 className="size-3.5" aria-hidden="true" /> : <Circle className="size-3.5" aria-hidden="true" />}
+                    {t(`confirm.who.${c.who}`)}
+                  </li>
+                ))}
+              </ul>
+              {o.canConfirm && (
+                <button
+                  type="button"
+                  disabled={pending}
+                  onClick={() =>
+                    start(async () => {
+                      await confirmDeliveryAction(o.reference);
+                      router.refresh();
+                    })
+                  }
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-600 px-4 py-2.5 text-[14px] font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                >
+                  <CheckCircle2 className="size-4" aria-hidden="true" />
+                  {t("confirm.handedOver")}
+                </button>
+              )}
+            </div>
           )}
           {o.steps.length > 0 && (
             <div className="flex flex-wrap gap-2">

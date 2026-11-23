@@ -17,10 +17,10 @@ export const acceptDeadline = (placedAt: Date) => new Date(placedAt.getTime() + 
 export function nextOrderSteps(status: OrderStatus, _fulfilment: Fulfilment, actor: OrderActor, paid = false): OrderStatus[] {
   if (actor === "customer") {
     if (status === "PLACED" || (status === "ACCEPTED" && !paid)) return ["CANCELLED"];
-    if (status === "OUT_FOR_DELIVERY") return ["DELIVERED"];
+    // Delivered is not a step anyone takes: the guest (and the delivery person, the receptionist) confirm it.
     return [];
   }
-  const courier: OrderStatus[] = status === "COURIER_ASSIGNED" ? ["OUT_FOR_DELIVERY"] : status === "OUT_FOR_DELIVERY" ? ["DELIVERED", "READY"] : [];
+  const courier: OrderStatus[] = status === "COURIER_ASSIGNED" ? ["OUT_FOR_DELIVERY"] : status === "OUT_FOR_DELIVERY" ? ["READY"] : [];
   if (actor === "courier") return courier;
   switch (status) {
     case "PLACED":

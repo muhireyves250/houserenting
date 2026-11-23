@@ -7,6 +7,7 @@ import { formatKigaliDateTime } from "@/features/bookings/format";
 import { AutoRefresh } from "@/features/food/components/AutoRefresh";
 import { CancelOrder } from "@/features/food/components/CancelOrder";
 import { ConfirmReceived } from "@/features/food/components/ConfirmReceived";
+import { confirmationsOf, withDesk } from "@/features/food/service";
 import { OrderAgain } from "@/features/food/components/OrderAgain";
 import { OrderPayment } from "@/features/food/components/OrderPayment";
 import { OrderProgress } from "@/features/food/components/OrderProgress";
@@ -56,6 +57,9 @@ export default async function OrderPage({ params }: Props) {
   const user = await requireUser(`/orders/${reference}`);
   const order = await myOrder(user.id, reference);
   if (!order) notFound();
+  // Who else confirms the food arrived (its delivery person, the place's receptionist).
+  const [flagged] = await withDesk([order]);
+  const pending = confirmationsOf(order, flagged!.hasDesk).filter((c) => !c.done && c.who !== "guest");
   const [t, locale, settings] = await Promise.all([getTranslations("Food"), getLocale(), getSettings()]);
   // Ended without food (cancelled, rejected by the restaurant, or no answer in 5 minutes): nothing is charged.
   const cancelled = CLOSED_UNSERVED.includes(order.status);
@@ -157,7 +161,14 @@ export default async function OrderPage({ params }: Props) {
         {/* Sent to the guest's stay: they say when it reached them. */}
         {order.status === "OUT_FOR_DELIVERY" && order.fulfilment === "TO_STAY" && (
           <div className="mt-4">
-            <ConfirmReceived reference={order.reference} />
+            {order.guestConfirmedAt ? (
+              // They confirmed; the delivery person or the receptionist still has to.
+              <p className="rounded-2xl bg-emerald-50 px-4 py-3 text-center text-[14px] font-medium text-emerald-800">
+                {t("confirm.guestDone", { who: pending.map((c) => t(`confirm.who.${c.who}`)).join(", ") })}
+              </p>
+            ) : (
+              <ConfirmReceived reference={order.reference} />
+            )}
           </div>
         )}
 

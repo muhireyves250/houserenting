@@ -4,6 +4,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { Chip, FillScreen, ScrollArea, StatTiles, adminCard } from "@/features/admin/components/kit";
 import { formatKigaliDateTime } from "@/features/bookings/format";
 import { ordersForHost } from "@/features/food/service";
+import { ConfirmDeliveryButton } from "@/features/food/components/ConfirmDeliveryButton";
 import { roomLabel } from "@/features/rooms/links";
 import { cn } from "@/lib/cn";
 
@@ -79,6 +80,20 @@ export default async function HostOrdersPage() {
                   ))}
                 </ul>
                 {o.note && <p className="mt-2 text-[13px] text-muted">{t("yourNote", { note: o.note })}</p>}
+                {/* On its way: delivered once the guest (and the delivery person, the receptionist) confirm. */}
+                {sent && (
+                  <div className="mt-3 flex flex-col gap-2 border-t border-line pt-3">
+                    <ul className="flex flex-wrap gap-1.5">
+                      {o.confirmations.map((c) => (
+                        <li key={c.who} className={cn("rounded-full px-2.5 py-1 text-[12px] font-semibold", c.done ? "bg-emerald-50 text-emerald-800" : "bg-canvas text-muted")}>
+                          {c.done ? "✓ " : ""}
+                          {t(`confirm.who.${c.who}`)}
+                        </li>
+                      ))}
+                    </ul>
+                    {o.canConfirm && <ConfirmDeliveryButton reference={o.reference} label={t("confirm.deskReceived")} />}
+                  </div>
+                )}
               </li>
             );
           })}

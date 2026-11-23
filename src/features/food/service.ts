@@ -429,6 +429,53 @@ export async function assignCourier(actor: Actor, reference: string, courierId: 
   });
 }
 
+export type ConfirmDeliveryResult = { ok: true; delivered: boolean } | { ok: false; error: "notFound" | "notAllowed" | "done" };
+
+/** Who still has to confirm an order on its way: the guest; its delivery person; the place's receptionist (if any). */
+export async function deliveryConfirmations(order: { courierId: string | null; bookingId: string | null; guestConfirmedAt: Date | null; courierConfirmedAt: Date | null; deskConfirmedAt: Date | null }) {
+  const listingId = order.bookingId ? (await db.booking.findUnique({ where: { id: order.bookingId }, select: { listingId: true } }))?.listingId : null;
+  const desk = listingId ? (await db.placeMember.count({ where: { listingId, role: "RECEPTIONIST" } })) > 0 : false;
+  return {
+    guest: { needed: true, done: Boolean(order.guestConfirmedAt) },
+    courier: { needed: Boolean(order.courierId), done: Boolean(order.courierConfirmedAt) },
+    desk: { needed: desk, done: Boolean(order.deskConfirmedAt) },
+    listingId,
+  };
+}
+
+/**
+ * Someone confirms the food reached the guest: the guest ("I got it"), the delivery person who took it ("handed
+ * over") or the receptionist of the place ("received at the desk"). Only they can: never the kitchen, the owner or
+ * VIIPA staff. Once everyone needed has confirmed, the order is delivered (VIIPA and the guest are told).
+ */
+export async function confirmDelivery(actor: Actor, reference: string, now: Date = new Date()): Promise<ConfirmDeliveryResult> {
+  const order = await db.foodOrder.findUnique({
+    where: { reference },
+    select: { id: true, status: true, customerId: true, courierId: true, bookingId: true, address: true, guestConfirmedAt: true, courierConfirmedAt: true, deskConfirmedAt: true, restaurant: { select: { name: true } } },
+  });
+  if (!order) return { ok: false, error: "notFound" };
+  if (order.status !== "OUT_FOR_DELIVERY") return { ok: false, error: order.status === "DELIVERED" || order.status === "FINISHED" ? "done" : "notFound" };
+  const need = await deliveryConfirmations(order);
+  const asGuest = order.customerId === actor.id && !order.guestConfirmedAt;
+  const asCourier = order.courierId === actor.id && !order.courierConfirmedAt;
+  const asDesk = need.desk.needed && !order.deskConfirmedAt && Boolean(need.listingId) && (await db.placeMember.count({ where: { listingId: need.listingId!, userId: actor.id, role: "RECEPTIONIST" } })) > 0;
+  if (!asGuest && !asCourier && !asDesk) return { ok: false, error: "notAllowed" };
+  const data = { ...(asGuest ? { guestConfirmedAt: now } : {}), ...(asCourier ? { courierConfirmedAt: now } : {}), ...(asDesk ? { deskConfirmedAt: now, deskConfirmedById: actor.id } : {}) };
+  const done = (need.guest.done || asGuest) && (!need.courier.needed || need.courier.done || asCourier) && (!need.desk.needed || need.desk.done || asDesk);
+  return db.$transaction(async (tx) => {
+    const { count } = await tx.foodOrder.updateMany({ where: { id: order.id, status: "OUT_FOR_DELIVERY" }, data: { ...data, ...(done ? { status: "DELIVERED" } : {}) } });
+    if (count !== 1) return { ok: false, error: "notFound" } as const;
+    const who = [asGuest && "guest", asCourier && "courier", asDesk && "desk"].filter(Boolean).join(",");
+    await tx.orderEvent.create({ data: { orderId: order.id, from: "OUT_FOR_DELIVERY", to: done ? "DELIVERED" : "OUT_FOR_DELIVERY", actorId: actor.id, note: `confirmed by ${who}` } });
+    await audit(tx, { actorId: actor.id, action: "order.confirm", entityType: "order", entityId: reference, data: { who, delivered: done } });
+    if (done) {
+      if (order.customerId !== actor.id) await notify(tx, order.customerId, "orderStatus", { reference, title: order.restaurant.name, status: "DELIVERED" }, `/orders/${reference}`);
+      await notifyAdmins(tx, "orderReceived", { reference, title: order.address ?? order.restaurant.name }, "/admin/orders");
+    }
+    return { ok: true, delivered: done } as const;
+  });
+}
+
 /** The guest's feedback once the food is delivered (1–5 and a comment): the order is finished. */
 export async function rateOrder(customerId: string, reference: string, rating: number, comment: string): Promise<boolean> {
   if (!Number.isInteger(rating) || rating < 1 || rating > 5 || typeof comment !== "string") return false;
@@ -462,7 +509,7 @@ export const HOST_ORDER_STATUSES = ["PAID", "PREPARING", "READY", "COURIER_ASSIG
  */
 export async function ordersForHost(userId: string, now: Date = new Date()) {
   const bookings = await db.booking.findMany({
-    where: { checkOut: { gte: new Date(now.getTime() - 30 * 86_400_000) }, listing: { OR: [{ hostId: userId }, { team: { some: { userId, role: "MANAGER" } } }] } },
+    where: { checkOut: { gte: new Date(now.getTime() - 30 * 86_400_000) }, listing: { OR: [{ hostId: userId }, { team: { some: { userId, role: { in: ["MANAGER", "RECEPTIONIST"] } } } }] } },
     select: { id: true, reference: true, roomNumber: true, room: { select: { name: true } }, guest: { select: { name: true, phone: true } }, listing: { select: { id: true, title: true } } },
   });
   if (bookings.length === 0) return [];
@@ -471,9 +518,21 @@ export async function ordersForHost(userId: string, now: Date = new Date()) {
     where: { bookingId: { in: [...byId.keys()] }, status: { in: [...HOST_ORDER_STATUSES] } },
     orderBy: { createdAt: "desc" },
     take: 200,
-    select: { reference: true, status: true, createdAt: true, bookingId: true, note: true, items: { select: { name: true, quantity: true } }, events: { where: { to: "OUT_FOR_DELIVERY" }, select: { createdAt: true }, take: 1 } },
+    select: { reference: true, status: true, createdAt: true, bookingId: true, note: true, courierId: true, guestConfirmedAt: true, courierConfirmedAt: true, deskConfirmedAt: true, items: { select: { name: true, quantity: true } }, events: { where: { to: "OUT_FOR_DELIVERY" }, select: { createdAt: true }, take: 1 } },
   });
-  return orders.map(({ bookingId, events, ...o }) => ({ ...o, sentAt: events[0]?.createdAt ?? null, stay: byId.get(bookingId!)! }));
+  // Where they are the receptionist: they confirm the food that arrives there.
+  const desk = new Set((await db.placeMember.findMany({ where: { userId, role: "RECEPTIONIST" }, select: { listingId: true } })).map((m) => m.listingId));
+  const flagged = await withDesk(orders);
+  return flagged.map(({ bookingId, events, hasDesk, ...o }) => {
+    const stay = byId.get(bookingId!)!;
+    return {
+      ...o,
+      sentAt: events[0]?.createdAt ?? null,
+      stay,
+      confirmations: confirmationsOf(o, hasDesk),
+      canConfirm: o.status === "OUT_FOR_DELIVERY" && desk.has(stay.listing.id) && !o.deskConfirmedAt,
+    };
+  });
 }
 
 /** One of the customer's orders with its steps, for the tracking page. */
@@ -607,7 +666,8 @@ export async function confirmOrderPayment(actor: Actor, reference: string, trans
 export async function ordersAwaitingPayment(take = 100) {
   await expireOrders();
   return db.foodOrder.findMany({
-    where: { paidAt: null, status: { in: ["ACCEPTED", "PLACED"] }, total: { gt: 0 } },
+    // Only once the restaurant has accepted: before that the guest has nothing to pay yet.
+    where: { paidAt: null, status: "ACCEPTED", total: { gt: 0 } },
     orderBy: [{ paymentClaim: { sort: "desc", nulls: "last" } }, { createdAt: "desc" }],
     take,
     select: { reference: true, total: true, paymentClaim: true, createdAt: true, address: true, phone: true, note: true, items: { select: { name: true, quantity: true } }, restaurant: { select: { name: true } }, customer: { select: { name: true } } },
@@ -617,11 +677,51 @@ export async function ordersAwaitingPayment(take = 100) {
 /** Staff: every kitchen's orders, newest first (open ones are picked out on the page). */
 export async function allOrders(take = 150) {
   await expireOrders();
-  return db.foodOrder.findMany({
+  const orders = await db.foodOrder.findMany({
     orderBy: [{ createdAt: "desc" }],
     take,
-    include: { items: true, customer: { select: { name: true } }, restaurant: { select: { name: true } } },
+    include: {
+      items: true,
+      customer: { select: { name: true } },
+      // Its delivery people (to assign a ready order).
+      restaurant: { select: { name: true, team: { where: { role: "DELIVERY" }, select: { userId: true, user: { select: { name: true } } } } } },
+    },
   });
+  return withDesk(orders);
+}
+
+/** Where each order goes: the guest's place (address, official location, and a map link), for the delivery person. */
+export async function withStayLocation<T extends { bookingId: string | null }>(orders: T[]): Promise<(T & { location: { title: string; address: string; mapUrl: string } | null })[]> {
+  const bookingIds = [...new Set(orders.flatMap((o) => (o.bookingId ? [o.bookingId] : [])))];
+  const rows =
+    bookingIds.length === 0
+      ? []
+      : await db.booking.findMany({ where: { id: { in: bookingIds } }, select: { id: true, listing: { select: { title: true, addressLine: true, village: true, cell: true, sector: true, district: true, lat: true, lng: true } } } });
+  const byId = new Map(
+    rows.map(({ id, listing: l }) => [
+      id,
+      { title: l.title, address: [l.addressLine, l.village, l.cell, l.sector, l.district].filter(Boolean).join(", "), mapUrl: `https://www.google.com/maps/dir/?api=1&destination=${l.lat},${l.lng}` },
+    ]),
+  );
+  return orders.map((o) => ({ ...o, location: (o.bookingId && byId.get(o.bookingId)) || null }));
+}
+
+/** Marks each order whose guest's place has a receptionist (who confirms the food arrived too). */
+export async function withDesk<T extends { bookingId: string | null }>(orders: T[]): Promise<(T & { hasDesk: boolean })[]> {
+  const bookingIds = [...new Set(orders.flatMap((o) => (o.bookingId ? [o.bookingId] : [])))];
+  const desk = new Set(
+    bookingIds.length === 0 ? [] : (await db.booking.findMany({ where: { id: { in: bookingIds }, listing: { team: { some: { role: "RECEPTIONIST" } } } }, select: { id: true } })).map((b) => b.id),
+  );
+  return orders.map((o) => ({ ...o, hasDesk: Boolean(o.bookingId && desk.has(o.bookingId)) }));
+}
+
+/** Who confirms an order on its way, and who has: the guest, its delivery person (if any), the receptionist (if any). */
+export function confirmationsOf(o: { courierId: string | null; guestConfirmedAt: Date | null; courierConfirmedAt: Date | null; deskConfirmedAt: Date | null }, hasDesk: boolean) {
+  return [
+    { who: "guest" as const, done: Boolean(o.guestConfirmedAt) },
+    ...(o.courierId ? [{ who: "courier" as const, done: Boolean(o.courierConfirmedAt) }] : []),
+    ...(hasDesk ? [{ who: "desk" as const, done: Boolean(o.deskConfirmedAt) }] : []),
+  ];
 }
 
 /** Staff delete a restaurant that never had an order (with its menu and team); one with orders can only be hidden. */

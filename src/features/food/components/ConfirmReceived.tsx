@@ -4,9 +4,9 @@ import { CheckCircle2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useTransition } from "react";
 import { useRouter } from "@/i18n/navigation";
-import { moveOrderAction } from "../actions";
+import { confirmDeliveryAction } from "../actions";
 
-/** The guest confirms the food reached them (closes the order; VIIPA is told). */
+/** The guest confirms the food reached them (with the delivery person and receptionist, if any, it is delivered). */
 export function ConfirmReceived({ reference }: { reference: string }) {
   const t = useTranslations("Food");
   const router = useRouter();
@@ -18,7 +18,7 @@ export function ConfirmReceived({ reference }: { reference: string }) {
         disabled={pending}
         onClick={() =>
           start(async () => {
-            await moveOrderAction(reference, "DELIVERED", "");
+            await confirmDeliveryAction(reference);
             router.refresh();
           })
         }

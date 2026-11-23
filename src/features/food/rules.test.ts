@@ -15,12 +15,12 @@ describe("nextOrderSteps", () => {
 
   it("delivery people collect and deliver (or report a failed delivery); the guest cancels only before paying", () => {
     expect(nextOrderSteps("COURIER_ASSIGNED", "TO_STAY", "courier", true)).toEqual(["OUT_FOR_DELIVERY"]);
-    expect(nextOrderSteps("OUT_FOR_DELIVERY", "TO_STAY", "courier", true)).toEqual(["DELIVERED", "READY"]);
+    expect(nextOrderSteps("OUT_FOR_DELIVERY", "TO_STAY", "courier", true)).toEqual(["READY"]); // delivered is confirmed, not a step
     expect(nextOrderSteps("READY", "TO_STAY", "courier", true)).toEqual([]);
     expect(nextOrderSteps("PLACED", "TO_STAY", "customer")).toEqual(["CANCELLED"]);
     expect(nextOrderSteps("ACCEPTED", "TO_STAY", "customer", false)).toEqual(["CANCELLED"]);
     expect(nextOrderSteps("PAID", "TO_STAY", "customer", true)).toEqual([]);
-    expect(nextOrderSteps("OUT_FOR_DELIVERY", "TO_STAY", "customer", true)).toEqual(["DELIVERED"]);
+    expect(nextOrderSteps("OUT_FOR_DELIVERY", "TO_STAY", "customer", true)).toEqual([]); // the guest confirms instead
     expect(nextOrderSteps("TIMED_OUT", "TO_STAY", "kitchen")).toEqual([]);
   });
 });

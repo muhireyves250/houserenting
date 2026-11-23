@@ -1481,7 +1481,7 @@
       "failed": "Couldn't change it — try again."
     },
     "rolesEditor": {
-      "now": "Role now:",
+      "now": "Role now",
       "group": "Kind of role",
       "roleLabel": "Role",
       "groups": {
@@ -1529,7 +1529,13 @@
         "invalid": "Choose a place or restaurant first.",
         "ownsPlaces": "They own places: hand those over to someone else first.",
         "ownsRestaurants": "They own restaurants: hand those over to someone else first."
-      }
+      },
+      "step1": "1 · Kind of role",
+      "step2": "2 · Role",
+      "owns": "Owns now:",
+      "youShort": "You",
+      "adminsOnlyShort": "Admins only",
+      "areas": "Areas they manage"
     },
     "personRole": {
       "CUSTOMER": "Customer",
@@ -2824,7 +2830,8 @@
       "failedReason": "Why did the delivery fail?",
       "answerWithin": "Accept or reject within {time}",
       "timedOut": "Time's up: the order will time out",
-      "deliverOurselves": "We'll take it ourselves"
+      "deliverOurselves": "We'll take it ourselves",
+      "directions": "Directions"
     },
     "waitingRestaurant": "The restaurant has until {time} to confirm. You pay only after it confirms.",
     "courierLine": "Brought by {name}",
@@ -2854,6 +2861,18 @@
       "failed": "Couldn't save — try again.",
       "cooksFor": "Cooks for",
       "cooksForNone": "No place yet: add it on a place's page (Restaurants cooking here)."
+    },
+    "confirm": {
+      "title": "Delivered once they confirm",
+      "who": {
+        "guest": "Guest",
+        "courier": "Delivery person",
+        "desk": "Receptionist"
+      },
+      "handedOver": "I handed it to the guest",
+      "deskReceived": "Received at the desk",
+      "waiting": "Waiting for: {who}",
+      "guestDone": "You confirmed. Waiting for: {who}"
     }
   },
   "Promoters": {

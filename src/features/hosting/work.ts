@@ -40,7 +40,8 @@ export const workRoles = cache(async (userId: string): Promise<WorkRoles> => {
   if (owner || manager) areas.push("overview");
   if (desk) areas.push("desk");
   if (owner || manager) areas.push("places", "orders", "laundry");
-  else if (desk) areas.push("laundry");
+  // Receptionists: the food arriving for guests (they confirm it at the desk) and the laundry.
+  else if (desk) areas.push("orders", "laundry");
   if (owner) areas.push("payout");
   // Restaurant owners and managers (the role VIIPA gives): their restaurants, or setting the first one up.
   const restaurateur = Boolean(user?.isRestaurateur);

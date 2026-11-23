@@ -1,6 +1,6 @@
 "use client";
 
-import { Check } from "lucide-react";
+import { ArrowRight, BedDouble, Check, Lock, ShieldCheck, UserRound, UtensilsCrossed, type LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { Select } from "@/components/ui/Select";
@@ -13,7 +13,12 @@ import { StaffAreasForm } from "./StaffAreasForm";
 type Option = { id: string; name: string };
 type Group = "CUSTOMER" | "STAFF" | "PLACE" | "RESTAURANT";
 
-const GROUPS: Group[] = ["CUSTOMER", "STAFF", "PLACE", "RESTAURANT"];
+const GROUPS: { group: Group; icon: LucideIcon }[] = [
+  { group: "CUSTOMER", icon: UserRound },
+  { group: "STAFF", icon: ShieldCheck },
+  { group: "PLACE", icon: BedDouble },
+  { group: "RESTAURANT", icon: UtensilsCrossed },
+];
 const ROLES: Record<Group, PersonRole[]> = {
   CUSTOMER: ["CUSTOMER"],
   STAFF: ["STAFF_MANAGER", "STAFF_ADMIN"],
@@ -21,34 +26,15 @@ const ROLES: Record<Group, PersonRole[]> = {
   RESTAURANT: ["RESTAURANT_OWNER", "RESTAURANT_MANAGER", "RESTAURANT_DELIVERY"],
 };
 const groupOf = (role: PersonRole): Group => (role === "CUSTOMER" ? "CUSTOMER" : (role.split("_")[0] as Group));
-
-/** Tap one of a few choices (VIIPA's segmented buttons). */
-function Choice<T extends string>({ value, options, onChange, disabled, label }: { value: T; options: { value: T; label: string }[]; onChange: (v: T) => void; disabled?: boolean; label: string }) {
-  return (
-    <div role="radiogroup" aria-label={label} className="grid w-full auto-cols-fr grid-flow-col rounded-xl bg-canvas p-1 ring-1 ring-line">
-      {options.map((o) => (
-        <button
-          key={o.value}
-          type="button"
-          role="radio"
-          aria-checked={value === o.value}
-          disabled={disabled}
-          onClick={() => onChange(o.value)}
-          className={cn(
-            "rounded-lg px-2 py-2 text-[13px] font-semibold transition-colors disabled:cursor-not-allowed",
-            value === o.value ? "bg-primary text-white shadow-sm" : "text-ink hover:bg-surface disabled:opacity-60",
-          )}
-        >
-          {o.label}
-        </button>
-      ))}
-    </div>
-  );
+/** The icon of a role's kind. */
+function RoleIcon({ role }: { role: PersonRole }) {
+  const Icon = GROUPS.find((g) => g.group === groupOf(role))!.icon;
+  return <Icon className="size-5" aria-hidden="true" />;
 }
 
 /**
- * The person's one role, easy to switch: tap the group (Customer, VIIPA staff, Place, Restaurant), tap the role in
- * it, choose the place or restaurant when it needs one, Save. The new role replaces the old one.
+ * The person's one role, easy to switch: pick the kind (Customer, VIIPA staff, Place, Restaurant), then the role in
+ * it, then the place or restaurant when it needs one, and Save. The new role replaces the old one.
  */
 export function RolesEditor({
   userId,
@@ -76,7 +62,7 @@ export function RolesEditor({
   const [pending, start] = useTransition();
   const [draft, setDraft] = useState(current);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
-  const locked = self || !canManage || pending;
+  const locked = self || !canManage;
   const group = groupOf(draft.role);
   const needsTarget = group === "PLACE" || group === "RESTAURANT";
   const isOwner = draft.role.endsWith("_OWNER");
@@ -89,8 +75,7 @@ export function RolesEditor({
 
   const pickGroup = (g: Group) => {
     setMessage(null);
-    if (g === groupOf(current.role)) return setDraft(current);
-    setDraft({ role: ROLES[g][0]!, target: "new" });
+    setDraft(g === groupOf(current.role) ? current : { role: ROLES[g][0]!, target: "new" });
   };
   const pickRole = (role: PersonRole) => {
     setMessage(null);
@@ -104,71 +89,162 @@ export function RolesEditor({
       if (r.ok) router.refresh();
     });
 
+  const step = "text-[11px] font-bold tracking-[0.08em] text-muted uppercase";
+
   return (
-    <div className="flex flex-col gap-4">
-      <p className="text-[13px] text-muted">
-        {t("now")} <b className="font-semibold text-ink">{t(`role.${current.role}`)}</b>
-      </p>
-
-      <Choice label={t("group")} value={group} disabled={locked} options={GROUPS.map((g) => ({ value: g, label: t(`groups.${g}`) }))} onChange={pickGroup} />
-
-      {group !== "CUSTOMER" && <Choice label={t("roleLabel")} value={draft.role} disabled={locked} options={ROLES[group].map((r) => ({ value: r, label: t(`role.${r}`) }))} onChange={pickRole} />}
-
-      {needsTarget && (
-        <label className="flex flex-col gap-1">
-          <span className="text-xs font-semibold text-muted">{t(group === "PLACE" ? "whichPlace" : "whichRestaurant")}</span>
-          <Select
-            aria-label={t(group === "PLACE" ? "whichPlace" : "whichRestaurant")}
-            value={draft.target}
-            disabled={locked}
-            onChange={(e) => setDraft({ ...draft, target: e.target.value })}
-            className="w-full rounded-xl border border-line-strong bg-surface px-3 py-2.5 text-[14px] text-ink"
-          >
-            {isOwner ? <option value="new">{t(group === "PLACE" ? "newPlace" : "newRestaurant")}</option> : <option value="new">{t("choose")}</option>}
-            {options.map((o) => (
-              <option key={o.id} value={o.id}>
-                {o.name}
-              </option>
-            ))}
-          </Select>
-        </label>
-      )}
-
-      <p className="text-[12px] text-muted">{self ? t("you") : !canManage ? t("adminsOnly") : t(`hint.${draft.role}`)}</p>
-
-      {/* What they own now (owners keep these; hand them over before giving another role). */}
-      {owned.length > 0 && isOwner && (
-        <div className="flex flex-wrap gap-2">
-          {owned.map((o) => (
-            <Link key={o.id} href={group === "PLACE" ? `/admin/listings/${o.id}` : `/admin/restaurants/${o.id}`} className="rounded-full bg-canvas px-3 py-1 text-[13px] text-ink ring-1 ring-line hover:ring-primary">
-              {o.name}
-            </Link>
-          ))}
-        </div>
-      )}
-
-      {changed && !locked && (
-        <div className="flex flex-col gap-2 rounded-xl bg-canvas p-3 sm:flex-row sm:items-center sm:justify-between">
-          <span className={cn("text-[13px]", handingOver ? "font-medium text-amber-800" : "text-muted")}>
-            {handingOver ? t("handOver", { name: options.find((o) => o.id === draft.target)?.name ?? "" }) : t("replaces", { role: t(`role.${current.role}`) })}
+    <div className="flex flex-col gap-5">
+      {/* Their role now. */}
+      <div className="flex items-center gap-3 rounded-2xl bg-gradient-to-br from-primary/[0.08] to-primary/[0.02] p-3.5 ring-1 ring-primary/15">
+        <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary text-white shadow-sm">
+          <RoleIcon role={current.role} />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-[12px] text-muted">{t("now")}</span>
+          <span className="block text-[16px] font-bold text-ink">
+            {t(`role.${current.role}`)}
+            {groupOf(current.role) !== "CUSTOMER" && <span className="font-medium text-muted"> · {t(`groups.${groupOf(current.role)}`)}</span>}
           </span>
-          <div className="flex gap-2">
-            <button type="button" onClick={() => (setDraft(current), setMessage(null))} className="rounded-full px-3 py-2 text-[13px] font-semibold text-ink hover:bg-surface">
-              {t("cancel")}
-            </button>
-            <button type="button" disabled={missingTarget} onClick={save} className="inline-flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-[13px] font-semibold text-white hover:bg-primary-hover disabled:opacity-50">
-              <Check className="size-4" aria-hidden="true" />
-              {t("save")}
-            </button>
-          </div>
-        </div>
-      )}
-      {pending && <p className="text-[13px] text-muted">{t("saving")}</p>}
+        </span>
+        {locked && (
+          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-surface px-2.5 py-1 text-[11px] font-semibold text-muted ring-1 ring-line">
+            <Lock className="size-3" aria-hidden="true" />
+            {self ? t("youShort") : t("adminsOnlyShort")}
+          </span>
+        )}
+      </div>
 
-      {current.role === "STAFF_MANAGER" && draft.role === "STAFF_MANAGER" && !self && <StaffAreasForm userId={userId} initial={staffAreas} canManage={canManage} />}
+      {locked ? (
+        <p className="text-[13px] text-muted">{self ? t("you") : t("adminsOnly")}</p>
+      ) : (
+        <>
+          {/* 1. The kind of role. */}
+          <section className="flex flex-col gap-2">
+            <span className={step}>{t("step1")}</span>
+            <div role="radiogroup" aria-label={t("group")} className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {GROUPS.map(({ group: g, icon: Icon }) => {
+                const on = g === group;
+                return (
+                  <button
+                    key={g}
+                    type="button"
+                    role="radio"
+                    aria-checked={on}
+                    onClick={() => pickGroup(g)}
+                    className={cn(
+                      "relative flex flex-col items-start gap-2 rounded-2xl p-3 text-left ring-1 transition-all",
+                      on ? "bg-primary/[0.06] ring-2 ring-primary" : "bg-surface ring-line hover:ring-line-strong hover:shadow-sm",
+                    )}
+                  >
+                    <span className={cn("flex size-9 items-center justify-center rounded-xl", on ? "bg-primary text-white" : "bg-canvas text-ink/70")}>
+                      <Icon className="size-[18px]" aria-hidden="true" />
+                    </span>
+                    <span className="text-[14px] font-semibold text-ink">{t(`groups.${g}`)}</span>
+                    {on && (
+                      <span className="absolute top-2.5 right-2.5 flex size-5 items-center justify-center rounded-full bg-primary text-white">
+                        <Check className="size-3" strokeWidth={3} aria-hidden="true" />
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* 2. The role in it, each with what it does. */}
+          <section className="flex flex-col gap-2">
+            <span className={step}>{t("step2")}</span>
+            <div role="radiogroup" aria-label={t("roleLabel")} className="flex flex-col gap-2">
+              {ROLES[group].map((r) => {
+                const on = r === draft.role;
+                return (
+                  <button
+                    key={r}
+                    type="button"
+                    role="radio"
+                    aria-checked={on}
+                    onClick={() => pickRole(r)}
+                    className={cn("flex items-start gap-3 rounded-2xl px-3.5 py-3 text-left ring-1 transition-all", on ? "bg-primary/[0.06] ring-2 ring-primary" : "bg-surface ring-line hover:ring-line-strong")}
+                  >
+                    <span className={cn("mt-0.5 flex size-[18px] shrink-0 items-center justify-center rounded-full border-2", on ? "border-primary" : "border-line-strong")}>
+                      {on && <span className="size-2 rounded-full bg-primary" />}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block text-[14px] font-semibold text-ink">{t(`role.${r}`)}</span>
+                      <span className="block text-[12px] leading-[17px] text-muted">{t(`hint.${r}`)}</span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* 3. Which place or restaurant. */}
+          {needsTarget && (
+            <section className="flex flex-col gap-2">
+              <span className={step}>{t(group === "PLACE" ? "whichPlace" : "whichRestaurant")}</span>
+              <Select
+                aria-label={t(group === "PLACE" ? "whichPlace" : "whichRestaurant")}
+                value={draft.target}
+                onChange={(e) => setDraft({ ...draft, target: e.target.value })}
+                className="w-full rounded-2xl border border-line-strong bg-surface px-3.5 py-3 text-[14px] font-medium text-ink"
+              >
+                <option value="new">{isOwner ? t(group === "PLACE" ? "newPlace" : "newRestaurant") : t("choose")}</option>
+                {options.map((o) => (
+                  <option key={o.id} value={o.id}>
+                    {o.name}
+                  </option>
+                ))}
+              </Select>
+              {owned.length > 0 && isOwner && (
+                <div className="flex flex-wrap items-center gap-1.5 text-[12px] text-muted">
+                  {t("owns")}
+                  {owned.map((o) => (
+                    <Link key={o.id} href={group === "PLACE" ? `/admin/listings/${o.id}` : `/admin/restaurants/${o.id}`} className="rounded-full bg-canvas px-2.5 py-1 font-semibold text-ink ring-1 ring-line hover:ring-primary">
+                      {o.name}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* Save: what changes, then the buttons. */}
+          {changed && (
+            <div className="flex flex-col gap-3 rounded-2xl bg-ink/[0.03] p-3.5 ring-1 ring-line sm:flex-row sm:items-center sm:justify-between">
+              <span className="flex min-w-0 items-center gap-2 text-[13px]">
+                <span className="truncate text-muted line-through decoration-muted/50">{t(`role.${current.role}`)}</span>
+                <ArrowRight className="size-4 shrink-0 text-primary" aria-hidden="true" />
+                <b className="truncate font-semibold text-ink">{t(`role.${draft.role}`)}</b>
+              </span>
+              <div className="flex shrink-0 gap-2">
+                <button type="button" onClick={() => (setDraft(current), setMessage(null))} className="h-10 flex-1 rounded-xl px-4 text-[14px] font-semibold text-ink ring-1 ring-line hover:bg-surface sm:flex-none">
+                  {t("cancel")}
+                </button>
+                <button
+                  type="button"
+                  disabled={missingTarget || pending}
+                  onClick={save}
+                  className="inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-xl bg-primary px-5 text-[14px] font-semibold text-white shadow-[0_8px_20px_-10px_rgba(0,87,184,0.9)] hover:bg-primary-hover disabled:opacity-50 disabled:shadow-none sm:flex-none"
+                >
+                  <Check className="size-4" aria-hidden="true" />
+                  {pending ? t("saving") : t("save")}
+                </button>
+              </div>
+            </div>
+          )}
+          {changed && handingOver && <p className="-mt-2 text-[12px] font-medium text-amber-800">{t("handOver", { name: options.find((o) => o.id === draft.target)?.name ?? "" })}</p>}
+        </>
+      )}
+
+      {current.role === "STAFF_MANAGER" && draft.role === "STAFF_MANAGER" && !self && (
+        <section className="flex flex-col gap-2 border-t border-line pt-4">
+          <span className={step}>{t("areas")}</span>
+          <StaffAreasForm userId={userId} initial={staffAreas} canManage={canManage} />
+        </section>
+      )}
 
       {message && (
-        <p role="status" className={message.ok ? "text-[13px] font-medium text-emerald-700" : "text-[13px] font-medium text-danger"}>
+        <p role="status" className={cn("rounded-xl px-3 py-2 text-[13px] font-medium", message.ok ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-danger")}>
           {message.text}
         </p>
       )}

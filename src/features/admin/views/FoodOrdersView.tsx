@@ -7,7 +7,7 @@ import { ConfirmOrderPayment } from "@/features/food/components/ConfirmOrderPaym
 import { OrdersBoard, type BoardOrder } from "@/features/food/components/OrdersBoard";
 import { StaffDeclineOrder } from "@/features/food/components/StaffDeclineOrder";
 import { ORDER_STATUSES, acceptDeadline, nextOrderSteps } from "@/features/food/rules";
-import { allOrders, ordersAwaitingPayment } from "@/features/food/service";
+import { allOrders, confirmationsOf, ordersAwaitingPayment, withStayLocation } from "@/features/food/service";
 import { cn } from "@/lib/cn";
 import { formatRWF } from "@/lib/format";
 
@@ -29,7 +29,7 @@ function Group({ id, title, count, tone, children }: { id: string; title: string
  * mark it sent) → sent (the guest confirms they got it). Finished ones are folded away.
  */
 export async function FoodOrdersView({ tabs }: { tabs?: ReactNode }) {
-  const [t, locale, awaiting, orders] = await Promise.all([getTranslations("Food"), getLocale(), ordersAwaitingPayment(), allOrders()]);
+  const [t, locale, awaiting, orders] = await Promise.all([getTranslations("Food"), getLocale(), ordersAwaitingPayment(), allOrders().then(withStayLocation)]);
   const board: BoardOrder[] = orders
     // Orders the restaurant confirmed that wait for payment are in "To pay".
     .filter((o) => !(o.total > 0 && !o.paidAt && o.status === "ACCEPTED"))
@@ -47,6 +47,10 @@ export async function FoodOrdersView({ tabs }: { tabs?: ReactNode }) {
       createdAt: o.createdAt,
       items: o.items.map((i) => ({ name: i.name, quantity: i.quantity })),
       deadline: o.status === "PLACED" ? acceptDeadline(o.createdAt) : null,
+      couriers: o.restaurant.team.map((m) => ({ id: m.userId, name: m.user.name })),
+      courier: o.restaurant.team.find((m) => m.userId === o.courierId)?.user.name ?? null,
+      confirmations: confirmationsOf(o, o.hasDesk),
+      location: o.location,
       steps: [...new Set((["kitchen", "courier"] as const).flatMap((a) => nextOrderSteps(o.status, o.fulfilment, a, Boolean(o.paidAt) || o.total <= 0)))],
     }));
   const toSend = board.filter((o) => ["PLACED", "ACCEPTED", "PAID", "PREPARING", "READY", "COURIER_ASSIGNED"].includes(o.status));

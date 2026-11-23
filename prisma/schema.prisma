@@ -1217,6 +1217,12 @@ model FoodOrder {
   /// The customer removed this (cancelled) order from their list; staff and the kitchen still see it.
   hiddenByCustomer Boolean      @default(false)
   courierId        String?
+  /// Who confirmed the food reached the guest: the guest always, the delivery person when one took it, and the
+  /// place's receptionist when the place has one. It is delivered once all of them have.
+  guestConfirmedAt   DateTime?
+  courierConfirmedAt DateTime?
+  deskConfirmedAt    DateTime?
+  deskConfirmedById  String?
   cancelReason     String?
   /// The customer's feedback once delivered (1–5) and comment.
   rating           Int?

@@ -1481,7 +1481,7 @@
       "failed": "Échec — réessayez."
     },
     "rolesEditor": {
-      "now": "Rôle actuel :",
+      "now": "Rôle actuel",
       "group": "Type de rôle",
       "roleLabel": "Rôle",
       "groups": {
@@ -1529,7 +1529,13 @@
         "invalid": "Choisissez d'abord un logement ou un restaurant.",
         "ownsPlaces": "Il possède des logements : transférez-les d'abord à quelqu'un d'autre.",
         "ownsRestaurants": "Il possède des restaurants : transférez-les d'abord à quelqu'un d'autre."
-      }
+      },
+      "step1": "1 · Type de rôle",
+      "step2": "2 · Rôle",
+      "owns": "Possède :",
+      "youShort": "Vous",
+      "adminsOnlyShort": "Admins seulement",
+      "areas": "Domaines gérés"
     },
     "personRole": {
       "CUSTOMER": "Client",
@@ -2824,7 +2830,8 @@
       "failedReason": "Pourquoi la livraison a-t-elle échoué ?",
       "answerWithin": "Acceptez ou refusez dans {time}",
       "timedOut": "Temps écoulé : la commande va expirer",
-      "deliverOurselves": "Nous le livrons nous-mêmes"
+      "deliverOurselves": "Nous le livrons nous-mêmes",
+      "directions": "Itinéraire"
     },
     "waitingRestaurant": "Le restaurant a jusqu'à {time} pour confirmer. Vous ne payez qu'après sa confirmation.",
     "courierLine": "Livrée par {name}",
@@ -2854,6 +2861,18 @@
       "failed": "Échec — réessayez.",
       "cooksFor": "Cuisine pour",
       "cooksForNone": "Aucun logement : ajoutez-le depuis la page d'un logement (Restaurants qui cuisinent ici)."
+    },
+    "confirm": {
+      "title": "Livrée quand ils confirment",
+      "who": {
+        "guest": "Client",
+        "courier": "Livreur",
+        "desk": "Réceptionniste"
+      },
+      "handedOver": "Je l'ai remise au client",
+      "deskReceived": "Reçue à la réception",
+      "waiting": "En attente de : {who}",
+      "guestDone": "Vous avez confirmé. En attente de : {who}"
     }
   },
   "Promoters": {

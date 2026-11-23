@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { db } from "@/lib/db";
 import { setAgreement } from "@/features/agreements/service";
 import { resetDb } from "@/test/db";
-import { addRestaurantMember, assignCourier, expireOrders, rateOrder, restaurantRole, claimOrderPayment, confirmOrderPayment, deleteFoodOrder, deleteRestaurant, hideMyOrder, myOrders, kitchenForPlace, moveOrder, ordersForHost, ordersLive, placeOrder, saveMenuItem, saveRestaurant, setPlaceKitchens, setRestaurantStatus } from "./service";
+import { addRestaurantMember, assignCourier, expireOrders, rateOrder, restaurantRole, claimOrderPayment, confirmOrderPayment, deleteFoodOrder, deleteRestaurant, hideMyOrder, myOrders, kitchenForPlace, confirmDelivery, moveOrder, ordersForHost, ordersLive, placeOrder, saveMenuItem, saveRestaurant, setPlaceKitchens, setRestaurantStatus } from "./service";
 
 const admin = { id: "admin", role: "ADMIN" };
 const NOW = new Date("2026-11-03T08:00:00Z");
@@ -78,7 +78,12 @@ describe("food from the kitchen of the guest's stay", () => {
     expect(await moveOrder(admin, ref, "PREPARING")).toBe(true);
     expect(await moveOrder(admin, ref, "READY")).toBe(true);
     expect(await moveOrder(admin, ref, "OUT_FOR_DELIVERY")).toBe(true);
-    expect(await moveOrder(admin, ref, "DELIVERED")).toBe(true);
+    // The place has a receptionist: they confirm it arrived too, with the guest (no delivery person on it).
+    await db.user.create({ data: { id: "desk", name: "Desk", email: "desk@example.com" } });
+    await db.placeMember.create({ data: { listingId: "place", userId: "desk", role: "RECEPTIONIST", addedById: "admin" } });
+    expect(await confirmDelivery({ id: "owner" }, ref)).toEqual({ ok: false, error: "notAllowed" });
+    expect(await confirmDelivery({ id: "desk" }, ref)).toEqual({ ok: true, delivered: false });
+    expect(await confirmDelivery({ id: "guest" }, ref)).toEqual({ ok: true, delivered: true });
     expect((await db.foodOrder.findUniqueOrThrow({ where: { reference: ref } })).status).toBe("DELIVERED");
   });
 
@@ -176,14 +181,19 @@ describe("food from the kitchen of the guest's stay", () => {
     expect(await moveOrder({ id: "rider" }, ref, "READY", "Nobody at the gate")).toBe(true);
     expect(await assignCourier({ id: "cook" }, ref, "rider")).toBe(true);
     expect(await moveOrder({ id: "rider" }, ref, "OUT_FOR_DELIVERY")).toBe(true);
-    // The guest says they got it; staff are told. Then their feedback finishes the order.
-    expect(await moveOrder({ id: "guest" }, ref, "DELIVERED")).toBe(true);
+    // Nobody marks it delivered: the guest and the delivery person both confirm (never the kitchen or staff).
+    expect(await moveOrder({ id: "rider" }, ref, "DELIVERED")).toBe(false);
+    expect(await confirmDelivery({ id: "cook" }, ref)).toEqual({ ok: false, error: "notAllowed" });
+    expect(await confirmDelivery(admin, ref)).toEqual({ ok: false, error: "notAllowed" });
+    expect(await confirmDelivery({ id: "guest" }, ref)).toEqual({ ok: true, delivered: false });
+    expect(await confirmDelivery({ id: "guest" }, ref)).toEqual({ ok: false, error: "notAllowed" });
+    expect(await confirmDelivery({ id: "rider" }, ref)).toEqual({ ok: true, delivered: true });
     expect(await db.notification.count({ where: { userId: "admin", kind: "orderReceived" } })).toBe(1);
     expect(await rateOrder("guest", ref, 6, "")).toBe(false);
     expect(await rateOrder("guest", ref, 5, "Hot and fast")).toBe(true);
     expect(await db.foodOrder.findUniqueOrThrow({ where: { reference: ref } })).toMatchObject({ status: "FINISHED", rating: 5, feedback: "Hot and fast" });
     // Every step is kept with its time.
-    expect((await db.orderEvent.findMany({ where: { order: { reference: ref } }, orderBy: { createdAt: "asc" } })).map((e) => e.to)).toEqual(["PLACED", "ACCEPTED", "PAID", "PREPARING", "READY", "COURIER_ASSIGNED", "OUT_FOR_DELIVERY", "READY", "COURIER_ASSIGNED", "OUT_FOR_DELIVERY", "DELIVERED", "FINISHED"]);
+    expect((await db.orderEvent.findMany({ where: { order: { reference: ref } }, orderBy: { createdAt: "asc" } })).map((e) => e.to)).toEqual(["PLACED", "ACCEPTED", "PAID", "PREPARING", "READY", "COURIER_ASSIGNED", "OUT_FOR_DELIVERY", "READY", "COURIER_ASSIGNED", "OUT_FOR_DELIVERY", "OUT_FOR_DELIVERY", "DELIVERED", "FINISHED"]);
   }, 180_000);
 
   it("refuses orders when the kitchen is paused or below its minimum; guests cancel before acceptance", async () => {
