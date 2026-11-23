@@ -29,7 +29,7 @@ export default async function AdminRestaurantPage({ params }: Props) {
     getTranslations("Food"),
     getLocale(),
     restaurantOrders(id, 30),
-    db.listing.findMany({ where: { hostId: r.ownerId, status: { not: "ARCHIVED" } }, select: { id: true, title: true } }),
+    db.placeRestaurant.findMany({ where: { restaurantId: id }, orderBy: { createdAt: "asc" }, select: { listing: { select: { id: true, title: true } } } }),
     recentAudit({ entityType: "restaurant", entityId: id, take: 20 }),
   ]);
   return (
@@ -55,7 +55,6 @@ export default async function AdminRestaurantPage({ params }: Props) {
           </Panel>
           <RestaurantForm
             restaurantId={r.id}
-            places={places}
             after="/admin/restaurants"
             initial={{
               name: r.name,
@@ -98,6 +97,22 @@ export default async function AdminRestaurantPage({ params }: Props) {
           {/* VIIPA's commission agreement with this restaurant (a % or a fixed fee per order), with its history. */}
           <Panel title={tAgree("title")}>
             <AgreementEditor subject="RESTAURANT" subjectId={r.id} current={agreement.current} history={agreement.history} fallback={tAgree("noAgreement")} />
+          </Panel>
+          {/* The places it cooks for (set on each place's page). */}
+          <Panel title={tFood("placeKitchens.cooksFor")}>
+            {places.length === 0 ? (
+              <p className="text-[13px] text-muted">{tFood("placeKitchens.cooksForNone")}</p>
+            ) : (
+              <ul className="flex flex-wrap gap-2">
+                {places.map(({ listing }) => (
+                  <li key={listing.id}>
+                    <Link href={`/admin/listings/${listing.id}`} className="inline-flex rounded-full bg-canvas px-3 py-1 text-[13px] text-ink ring-1 ring-line hover:ring-primary">
+                      {listing.title}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
           </Panel>
           <Panel title={tFood("teamTitle")}>
             <RestaurantTeam restaurantId={r.id} members={r.team} staff />

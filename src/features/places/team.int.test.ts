@@ -80,12 +80,11 @@ describe("place teams", () => {
 });
 
 describe("staff access", () => {
-  it("any admin manages staff until a super admin exists; then only super admins do", async () => {
+  it("any admin manages staff; managers don't; there is no super admin to give", async () => {
     expect(await canManageStaff({ id: "admin", role: "ADMIN" })).toBe(true);
-    expect(await setUserRole("admin", "admin2", "SUPER_ADMIN")).toBe(true);
-    expect(await canManageStaff({ id: "admin", role: "ADMIN" })).toBe(false);
-    expect(await setUserRole("admin", "owner", "ADMIN")).toBe(false);
-    expect(await setUserRole("admin2", "owner", "ADMIN")).toBe(true);
+    expect(await canManageStaff({ id: "m", role: "MANAGER" })).toBe(false);
+    expect(await setUserRole("admin", "admin2", "SUPER_ADMIN")).toBe(false);
+    expect(await setUserRole("admin", "owner", "ADMIN")).toBe(true);
     expect(await setUserRole("admin2", "admin2", "USER")).toBe(false);
   });
 });

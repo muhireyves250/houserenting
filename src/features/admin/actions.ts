@@ -128,3 +128,13 @@ export async function setRestaurateurAction(userId: string, on: boolean): Promis
   if (result.ok) revalidatePath("/[locale]/admin/users", "layout");
   return result;
 }
+
+/** Gives someone their one role from the person's page (it replaces the role they had). */
+export async function setPersonRoleAction(userId: string, role: import("./service").PersonRole, target: string): Promise<import("./service").PersonRoleResult> {
+  const user = await getCurrentUser();
+  if (!user || !id.safeParse(userId).success) return { ok: false, error: "invalid" };
+  const { setPersonRole } = await import("./service");
+  const r = await setPersonRole(user, userId, role, target);
+  if (r.ok) revalidatePath("/[locale]", "layout");
+  return r;
+}

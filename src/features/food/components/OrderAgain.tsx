@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 
 /** Puts the same dishes back in the cart and opens the food menu of the guest's stay (prices are checked again there). */
-export function OrderAgain({ restaurantId, items, compact = false }: { restaurantId: string; items: { menuItemId: string | null; quantity: number }[]; compact?: boolean }) {
+export function OrderAgain({ items, compact = false }: { items: { menuItemId: string | null; quantity: number }[]; compact?: boolean }) {
   const t = useTranslations("Food");
   const router = useRouter();
   return (
@@ -14,7 +14,7 @@ export function OrderAgain({ restaurantId, items, compact = false }: { restauran
       onClick={() => {
         const cart = Object.fromEntries(items.filter((i) => i.menuItemId).map((i) => [i.menuItemId!, i.quantity]));
         try {
-          localStorage.setItem(`sr_cart_${restaurantId}`, JSON.stringify(cart));
+          localStorage.setItem("sr_cart_stay", JSON.stringify(cart));
         } catch {}
         router.push("/food");
       }}

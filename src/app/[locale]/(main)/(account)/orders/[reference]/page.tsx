@@ -148,7 +148,7 @@ export default async function OrderPage({ params }: Props) {
               {order.status === "TIMED_OUT" ? t("timedOutNote") : order.cancelReason ? t("cancelledBecause", { reason: order.cancelReason }) : t("cancelledNoReason")}
             </p>
             <div className="flex flex-wrap items-center gap-3">
-              <OrderAgain restaurantId={order.restaurant.id} items={order.items} />
+              <OrderAgain items={order.items} />
               <RemoveOrder reference={order.reference} backToList />
             </div>
           </div>
@@ -231,7 +231,7 @@ export default async function OrderPage({ params }: Props) {
       <section className="mt-4 flex flex-wrap items-center justify-between gap-3">
         <span className="flex flex-wrap items-center gap-4">
           {(order.status === "PLACED" || unpaid) && <CancelOrder reference={order.reference} />}
-          {!active && !cancelled && <OrderAgain restaurantId={order.restaurant.id} items={order.items} />}
+          {!active && !cancelled && <OrderAgain items={order.items} />}
         </span>
         <Link href={{ pathname: "/support", query: { order: order.reference } }} className="inline-flex items-center gap-1.5 text-[14px] font-semibold text-primary hover:underline">
           <LifeBuoy className="size-4" aria-hidden="true" />

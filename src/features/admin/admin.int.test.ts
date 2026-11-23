@@ -186,7 +186,7 @@ describe("managing accounts", () => {
   it("deletes only accounts without history, never your own; sends reset links; only staff who manage staff", async () => {
     await db.user.update({ where: { id: "admin" }, data: { role: "SUPER_ADMIN" } });
     await db.user.create({ data: { id: "empty", name: "New", email: "new@example.com" } });
-    await db.user.create({ data: { id: "helper", name: "Helper", email: "helper@example.com", role: "ADMIN", staffAreas: ["settings"] } });
+    await db.user.create({ data: { id: "helper", name: "Helper", email: "helper@example.com", role: "MANAGER", staffAreas: ["settings"] } });
     await createBooking({ guestId: "g1", listingId: "flat", checkIn: "2026-10-20", checkOut: "2026-10-22", guests: 1, payment: pay }, NOW);
 
     expect(await deleteUser("admin", "admin")).toEqual({ ok: false, error: "self" });
@@ -253,5 +253,48 @@ describe("opening an account for someone", () => {
     expect(account?.password).toBeTruthy();
     expect(await createAccountForPerson(admin, { name: "Jean Again", email: "jean@example.com" }, "/en/reset-password")).toEqual({ ok: false, error: "exists" });
     expect(await db.auditLog.count({ where: { action: "user.createdByStaff" } })).toBe(1);
+  });
+});
+
+describe("one role per person", () => {
+  const admin = { id: "admin", role: "ADMIN" };
+  const me = () => db.user.findUniqueOrThrow({ where: { id: "g1" }, include: { placeMembers: true, restaurantRoles: true } });
+
+  it("switching replaces the role they had", async () => {
+    const { setPersonRole } = await import("./service");
+    await db.user.update({ where: { id: "g1" }, data: { status: "ACTIVE" } });
+    expect(await setPersonRole({ id: "g1" }, "g1", "STAFF_ADMIN")).toEqual({ ok: false, error: "notAllowed" });
+    expect(await setPersonRole(admin, "admin", "CUSTOMER")).toEqual({ ok: false, error: "notAllowed" });
+
+    expect(await setPersonRole(admin, "g1", "STAFF_MANAGER")).toEqual({ ok: true });
+    expect((await me()).role).toBe("MANAGER");
+    // Receptionist at a place: no longer staff.
+    expect(await setPersonRole(admin, "g1", "PLACE_RECEPTIONIST", "new")).toEqual({ ok: false, error: "invalid" });
+    expect(await setPersonRole(admin, "g1", "PLACE_RECEPTIONIST", "flat")).toEqual({ ok: true });
+    let u = await me();
+    expect([u.role, u.placeMembers.map((m) => m.role)]).toEqual(["USER", ["RECEPTIONIST"]]);
+    // Restaurant owner who will set one up: no longer at the place.
+    expect(await setPersonRole(admin, "g1", "RESTAURANT_OWNER")).toEqual({ ok: true });
+    u = await me();
+    expect([u.isRestaurateur, u.placeMembers.length]).toEqual([true, 0]);
+    expect(await setPersonRole(admin, "g1", "CUSTOMER")).toEqual({ ok: true });
+    u = await me();
+    expect([u.role, u.isHost, u.isRestaurateur, u.placeMembers.length, u.restaurantRoles.length]).toEqual(["USER", false, false, 0, 0]);
+  });
+
+  it("an owner given an existing place takes it over; owners keep their role until it's handed on", async () => {
+    const { setPersonRole } = await import("./service");
+    await db.user.update({ where: { id: "g1" }, data: { status: "ACTIVE" } });
+    expect(await setPersonRole(admin, "g1", "PLACE_OWNER", "flat")).toEqual({ ok: true });
+    expect((await db.listing.findUnique({ where: { id: "flat" } }))?.hostId).toBe("g1");
+    expect((await me()).isHost).toBe(true);
+    expect(await setPersonRole(admin, "g1", "CUSTOMER")).toEqual({ ok: false, error: "ownsPlaces" });
+  });
+
+  it("receptionists handle the place's laundry", async () => {
+    const { canOn } = await import("@/features/places/access");
+    await db.placeMember.create({ data: { listingId: "flat", userId: "g1", role: "RECEPTIONIST", addedById: "admin" } });
+    expect(await canOn({ id: "g1" }, "flat", "laundry")).toBe(true);
+    expect(await canOn({ id: "g1" }, "flat", "money")).toBe(false);
   });
 });

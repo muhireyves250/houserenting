@@ -11,6 +11,8 @@ import {
 import { BlocksPanel } from "@/features/places/components/BlocksPanel";
 import { DocumentsPanel } from "@/features/places/components/DocumentsPanel";
 import { TeamPanel } from "@/features/places/components/TeamPanel";
+import { PlaceKitchens } from "@/features/food/components/PlaceKitchens";
+import { db } from "@/lib/db";
 import { AgreementEditor } from "@/features/agreements/components/AgreementEditor";
 import { agreementPanel } from "@/features/agreements/service";
 import { listTeam } from "@/features/places/team-service";
@@ -69,7 +71,7 @@ export default async function AdminListingPage({ params }: Props) {
     getTranslations("Bookings"),
     getTranslations("Rooms"),
   ]);
-  const [tPlaces, blocks, documents, payout, team, tAgree, placeAgreement, laundryAgreement] = await Promise.all([
+  const [tPlaces, blocks, documents, payout, team, tAgree, placeAgreement, laundryAgreement, tFood, restaurants] = await Promise.all([
     getTranslations("Places"),
     listingBlocks(id),
     listingDocuments(id),
@@ -78,7 +80,10 @@ export default async function AdminListingPage({ params }: Props) {
     getTranslations("Agreements"),
     agreementPanel("PLACE", id),
     agreementPanel("LAUNDRY", id),
+    getTranslations("Food.placeKitchens"),
+    db.restaurant.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true, status: true, places: { where: { listingId: id }, select: { id: true } } } }),
   ]);
+  const kitchens = restaurants.map((r) => ({ id: r.id, name: r.name, live: r.status === "PUBLISHED", assigned: r.places.length > 0 }));
   const day = (d: Date | null) => (d ? iso(d) : null);
   const iso = (d: Date) => d.toISOString().slice(0, 10);
 
@@ -443,6 +448,11 @@ export default async function AdminListingPage({ params }: Props) {
                 <AgreementEditor subject="LAUNDRY" subjectId={listing.id} current={laundryAgreement.current} history={laundryAgreement.history} fallback={tAgree("noAgreement")} />
               </div>
             </div>
+          </Fold>
+
+          {/* The restaurants that cook for guests here (several are fine; guests see one menu). */}
+          <Fold title={<Count label={tFood("title")} n={kitchens.filter((k) => k.assigned).length} />}>
+            <PlaceKitchens listingId={listing.id} assigned={kitchens.filter((k) => k.assigned)} all={kitchens} />
           </Fold>
 
           {/* Managers and receptionists of this place (the owner is told when staff add someone). */}

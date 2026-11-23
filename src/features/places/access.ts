@@ -15,7 +15,8 @@ const ALLOWED: Record<PlaceRole, readonly PlaceAction[]> = {
   // The place's front desk (requirements: reception confirms the guest's arrival and keeps their ID): the property
   // manager and the receptionist see the place's bookings, check guests in and out and record their ID.
   manager: ["edit", "blocks", "rooms", "laundry", "bookings", "checkIn", "guestId"],
-  receptionist: ["bookings", "checkIn", "guestId"],
+  // Receptionists also handle the guests' laundry (collect, wash and weigh, return).
+  receptionist: ["bookings", "checkIn", "guestId", "laundry"],
 };
 
 export function can(role: PlaceRole | null, action: PlaceAction): boolean {

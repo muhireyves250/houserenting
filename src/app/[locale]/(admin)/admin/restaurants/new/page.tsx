@@ -9,7 +9,7 @@ export default async function AdminNewRestaurantPage() {
   return (
     <div className="flex max-w-3xl flex-col gap-4">
       <PageIntro back={{ href: "/admin/restaurants", label: t("restaurantsTitle") }} description={t("adminNewIntro")} />
-      <RestaurantForm restaurantId={null} initial={EMPTY_RESTAURANT} places={[]} staffNew after="/admin/restaurants" />
+      <RestaurantForm restaurantId={null} initial={EMPTY_RESTAURANT} staffNew after="/admin/restaurants" />
     </div>
   );
 }

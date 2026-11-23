@@ -88,6 +88,8 @@ export async function seedDemoRestaurants(db: PrismaClient, ownerId: string = DE
   for (const { id, menu, listingId, ...fields } of SEED_RESTAURANTS) {
     const data = { ...fields, ownerId, listingId: listingId && places.has(listingId) ? listingId : null, status: "PUBLISHED" as const, paused: false, statusReason: null };
     await db.restaurant.upsert({ where: { id }, create: { id, ...data }, update: data });
+    // The demo place it cooks for.
+    if (data.listingId) await db.placeRestaurant.upsert({ where: { listingId_restaurantId: { listingId: data.listingId, restaurantId: id } }, create: { listingId: data.listingId, restaurantId: id }, update: {} });
     await db.menuItem.deleteMany({ where: { restaurantId: id } });
     await db.menuItem.createMany({ data: menu.map((dish, position) => ({ restaurantId: id, position, section: dish.section, name: dish.name, description: dish.description ?? "", price: dish.price, photoUrl: dish.photo ? `https://images.unsplash.com/${dish.photo}?auto=format&fit=crop&w=400&q=80` : null })) });
   }

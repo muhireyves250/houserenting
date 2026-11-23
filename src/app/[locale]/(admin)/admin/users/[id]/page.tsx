@@ -1,12 +1,8 @@
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Avatar } from "@/components/ui/Avatar";
-import { HostToggle } from "@/features/admin/components/HostToggle";
-import { RestaurateurToggle } from "@/features/admin/components/RestaurateurToggle";
-import { UserRoles } from "@/features/admin/components/UserRoles";
+import { RolesEditor } from "@/features/admin/components/RolesEditor";
 import { db } from "@/lib/db";
-import { RoleToggle } from "@/features/admin/components/RoleToggle";
-import { StaffAreasForm } from "@/features/admin/components/StaffAreasForm";
 import { UserActions } from "@/features/admin/components/UserActions";
 import {
   Facts,
@@ -31,7 +27,7 @@ import { cn } from "@/lib/cn";
 import { dynamicMessage } from "@/lib/dynamic-message";
 import { formatRWF } from "@/lib/format";
 import { requireStaff } from "@/lib/permissions";
-import { canManageStaff } from "@/features/admin/service";
+import { canManageStaff, currentPersonRole } from "@/features/admin/service";
 
 type Props = { params: Promise<{ id: string }> };
 const iso = (d: Date) => d.toISOString().slice(0, 10);
@@ -555,43 +551,17 @@ export default async function AdminUserPage({ params }: Props) {
           </Panel>
           {/* All of this person's roles in one place, each set here by VIIPA: VIIPA staff, place owner, and roles at places and restaurants. */}
           <Panel title={t("roles.allTitle")}>
-            <div className="flex flex-col gap-5">
-              <section className="flex flex-col gap-2">
-                <h3 className="text-[13px] font-semibold text-ink">{t("staffAccess")}</h3>
-                <div className="flex items-center justify-between gap-3">
-                  <span className="text-[13px] text-muted">{t(`roleName.${user.role}`)}</span>
-                  <RoleToggle userId={user.id} role={user.role} self={self} canManage={manageStaff} />
-                </div>
-                {/* Which services this manager handles (admins and super admins manage everything; customers nothing). */}
-                {user.role === "MANAGER" && !self && <StaffAreasForm userId={user.id} initial={user.staffAreas} canManage={manageStaff} />}
-                {(user.role === "SUPER_ADMIN" || user.role === "ADMIN") && <p className="text-[13px] text-muted">{t(user.role === "ADMIN" ? "adminAll" : "superAdminAll")}</p>}
-              </section>
-              {/* Restaurant owner or manager: sets up and runs a restaurant (customers only, not VIIPA staff). */}
-              {user.role === "USER" && (
-                <section className="flex flex-col gap-2 border-t border-line pt-4">
-                  <h3 className="text-[13px] font-semibold text-ink">{t("restaurateur.title")}</h3>
-                  {self ? <span className="text-xs text-muted">{t("you")}</span> : <RestaurateurToggle userId={user.id} isRestaurateur={user.isRestaurateur} places={user.restaurantsOwned.length} />}
-                </section>
-              )}
-              <section className="flex flex-col gap-2 border-t border-line pt-4">
-                <h3 className="text-[13px] font-semibold text-ink">{t("hostAccess.title")}</h3>
-                {self ? <span className="text-xs text-muted">{t("you")}</span> : <HostToggle userId={user.id} isHost={user.isHost} places={user.listings.length} />}
-              </section>
-              {/* VIIPA staff already manage every place and restaurant from the admin dashboard. */}
-              {!self && user.role !== "USER" && <p className="border-t border-line pt-4 text-[13px] text-muted">{t("roles.staffNote")}</p>}
-              {!self && user.role === "USER" && (
-                <div className="border-t border-line pt-4">
-                  <UserRoles
-                    email={user.email}
-                    places={user.placeMembers}
-                    restaurants={user.restaurantRoles}
-                    ownedRestaurants={user.restaurantsOwned}
-                    placeOptions={placeOptions.map((p) => ({ id: p.id, name: p.title }))}
-                    restaurantOptions={restaurantOptions.filter((r) => !user.restaurantsOwned.some((o) => o.id === r.id))}
-                  />
-                </div>
-              )}
-            </div>
+            <RolesEditor
+              userId={user.id}
+              self={self}
+              canManage={manageStaff}
+              current={currentPersonRole(user)}
+              staffAreas={user.staffAreas}
+              ownedPlaces={user.listings.map((l) => ({ id: l.id, name: l.title }))}
+              ownedRestaurants={user.restaurantsOwned}
+              placeOptions={placeOptions.map((p) => ({ id: p.id, name: p.title }))}
+              restaurantOptions={restaurantOptions}
+            />
           </Panel>
           {/* Password reset, suspend or reactivate, delete: each asks first. */}
           {!self && (

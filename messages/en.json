@@ -1478,6 +1478,57 @@
       "hasPlaces": "They still own {count, plural, one {# restaurant} other {# restaurants}}: move them first.",
       "hasRestaurants": "They still own {count, plural, one {# restaurant} other {# restaurants}}: move them first.",
       "failed": "Couldn't change it — try again."
+    },
+    "rolesEditor": {
+      "now": "Role now:",
+      "group": "Kind of role",
+      "roleLabel": "Role",
+      "groups": {
+        "CUSTOMER": "Customer",
+        "STAFF": "VIIPA staff",
+        "PLACE": "Place",
+        "RESTAURANT": "Restaurant"
+      },
+      "role": {
+        "CUSTOMER": "Customer",
+        "STAFF_MANAGER": "Manager",
+        "STAFF_ADMIN": "Admin",
+        "PLACE_OWNER": "Owner",
+        "PLACE_RECEPTIONIST": "Receptionist",
+        "RESTAURANT_OWNER": "Owner",
+        "RESTAURANT_MANAGER": "Manager",
+        "RESTAURANT_DELIVERY": "Delivery"
+      },
+      "hint": {
+        "CUSTOMER": "Books stays and orders food.",
+        "STAFF_MANAGER": "Uses the admin dashboard for the areas ticked below.",
+        "STAFF_ADMIN": "Uses the whole admin dashboard and sets everyone's role.",
+        "PLACE_OWNER": "Owns places: adds and runs them, and is paid for their stays.",
+        "PLACE_RECEPTIONIST": "Works the place's front desk: bookings, check-in and out, guests' IDs, and the guests' laundry.",
+        "RESTAURANT_OWNER": "Owns a restaurant: sets it up, adds the menu and runs it.",
+        "RESTAURANT_MANAGER": "Runs the restaurant's orders and menu.",
+        "RESTAURANT_DELIVERY": "Takes the restaurant's orders to guests."
+      },
+      "whichPlace": "Which place",
+      "whichRestaurant": "Which restaurant",
+      "newPlace": "A new place they'll add",
+      "newRestaurant": "A new restaurant they'll set up",
+      "choose": "Choose…",
+      "replaces": "This replaces their role ({role}).",
+      "handOver": "{name} will be handed over to them.",
+      "save": "Save role",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "saved": "Role saved.",
+      "you": "You can't change your own role.",
+      "adminsOnly": "Only admins change roles.",
+      "errors": {
+        "notAllowed": "Only admins change roles.",
+        "notFound": "That account, place or restaurant wasn't found (or the account is suspended).",
+        "invalid": "Choose a place or restaurant first.",
+        "ownsPlaces": "They own places: hand those over to someone else first.",
+        "ownsRestaurants": "They own restaurants: hand those over to someone else first."
+      }
     }
   },
   "Questions": {
@@ -2778,7 +2829,19 @@
       "close": "Close for orders"
     },
     "ownerRoleHint": "Only people with the restaurant owner/manager role are listed. Give someone that role on their account (Users → their page → Roles) first.",
-    "notRestaurateur": "That person doesn't have the restaurant owner/manager role."
+    "notRestaurateur": "That person doesn't have the restaurant owner/manager role.",
+    "placeKitchens": {
+      "title": "Restaurants cooking here",
+      "intro": "Guests staying here see one menu with the dishes of every restaurant below, without the restaurant names. Each restaurant gets the orders for its own dishes.",
+      "none": "No restaurant cooks here yet: guests can't order food.",
+      "notLive": "not live",
+      "remove": "Remove {name}",
+      "choose": "Add a restaurant…",
+      "add": "Add",
+      "failed": "Couldn't save — try again.",
+      "cooksFor": "Cooks for",
+      "cooksForNone": "No place yet: add it on a place's page (Restaurants cooking here)."
+    }
   },
   "Promoters": {
     "title": "Promote and earn",

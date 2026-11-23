@@ -1478,6 +1478,57 @@
       "hasPlaces": "Aracyafite {count, plural, one {resitora #} other {resitora #}}: banza uzimure.",
       "hasRestaurants": "Aracyafite {count, plural, one {resitora #} other {resitora #}}: banza uzimure.",
       "failed": "Ntibyakunze — ongera ugerageze."
+    },
+    "rolesEditor": {
+      "now": "Inshingano ubu:",
+      "group": "Ubwoko bw'inshingano",
+      "roleLabel": "Inshingano",
+      "groups": {
+        "CUSTOMER": "Umukiriya",
+        "STAFF": "Abakozi ba VIIPA",
+        "PLACE": "Inzu",
+        "RESTAURANT": "Resitora"
+      },
+      "role": {
+        "CUSTOMER": "Umukiriya",
+        "STAFF_MANAGER": "Umuyobozi",
+        "STAFF_ADMIN": "Admin",
+        "PLACE_OWNER": "Nyirayo",
+        "PLACE_RECEPTIONIST": "Ushinzwe kwakira",
+        "RESTAURANT_OWNER": "Nyirayo",
+        "RESTAURANT_MANAGER": "Umuyobozi",
+        "RESTAURANT_DELIVERY": "Ugeza ibiryo"
+      },
+      "hint": {
+        "CUSTOMER": "Afata ibyumba agatumiza ibiryo.",
+        "STAFF_MANAGER": "Akoresha dashboard y'ubuyobozi mu bice byatoranyijwe hepfo.",
+        "STAFF_ADMIN": "Akoresha dashboard yose kandi agena inshingano za buri wese.",
+        "PLACE_OWNER": "Afite inzu: arazongeramo, arazicunga kandi yishyurwa.",
+        "PLACE_RECEPTIONIST": "Yakira abashyitsi: ibyumba byafashwe, kwinjira no gusohoka, indangamuntu n'imyenda yo kumesa.",
+        "RESTAURANT_OWNER": "Afite resitora: arayitegura, ashyiraho menu kandi arayicunga.",
+        "RESTAURANT_MANAGER": "Acunga komande na menu bya resitora.",
+        "RESTAURANT_DELIVERY": "Ageza komande za resitora ku bakiriya."
+      },
+      "whichPlace": "Iyihe nzu",
+      "whichRestaurant": "Iyihe resitora",
+      "newPlace": "Inzu nshya azongeramo",
+      "newRestaurant": "Resitora nshya azategura",
+      "choose": "Hitamo…",
+      "replaces": "Ibi bisimbura inshingano yari afite ({role}).",
+      "handOver": "{name} izahabwa we.",
+      "save": "Bika inshingano",
+      "saving": "Birabikwa…",
+      "cancel": "Reka",
+      "saved": "Inshingano yabitswe.",
+      "you": "Ntushobora guhindura inshingano yawe.",
+      "adminsOnly": "Admin bonyine ni bo bahindura inshingano.",
+      "errors": {
+        "notAllowed": "Admin bonyine ni bo bahindura inshingano.",
+        "notFound": "Konti, inzu cyangwa resitora ntibyabonetse (cyangwa konti yahagaritswe).",
+        "invalid": "Banza uhitemo inzu cyangwa resitora.",
+        "ownsPlaces": "Afite inzu: banza uziha undi muntu.",
+        "ownsRestaurants": "Afite resitora: banza uziha undi muntu."
+      }
     }
   },
   "Questions": {
@@ -2778,7 +2829,19 @@
       "close": "Funga ku byatumizwa"
     },
     "ownerRoleHint": "Hagaragara gusa abafite inshingano ya nyiri/umuyobozi wa resitora. Banza uyimuhe kuri konti ye (Abakoresha → urupapuro rwe → Inshingano).",
-    "notRestaurateur": "Uwo muntu ntafite inshingano ya nyiri/umuyobozi wa resitora."
+    "notRestaurateur": "Uwo muntu ntafite inshingano ya nyiri/umuyobozi wa resitora.",
+    "placeKitchens": {
+      "title": "Resitora zitekera hano",
+      "intro": "Abacumbitse hano babona menu imwe irimo ibiryo bya resitora zose ziri hepfo, nta mazina yazo. Buri resitora ihabwa komande z'ibiryo byayo.",
+      "none": "Nta resitora itekera hano: abashyitsi ntibashobora gutumiza ibiryo.",
+      "notLive": "ntiragaragara",
+      "remove": "Kuraho {name}",
+      "choose": "Ongeraho resitora…",
+      "add": "Ongeraho",
+      "failed": "Ntibyakunze — ongera ugerageze.",
+      "cooksFor": "Itekera",
+      "cooksForNone": "Nta nzu iragenerwa: yongereho ku rupapuro rw'inzu (Resitora zitekera hano)."
+    }
   },
   "Promoters": {
     "title": "Kwamamaza no kwinjiza",

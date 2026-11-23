@@ -1478,6 +1478,57 @@
       "hasPlaces": "Possède encore {count, plural, one {# restaurant} other {# restaurants}} : transférez-les d'abord.",
       "hasRestaurants": "Possède encore {count, plural, one {# restaurant} other {# restaurants}} : transférez-les d'abord.",
       "failed": "Échec — réessayez."
+    },
+    "rolesEditor": {
+      "now": "Rôle actuel :",
+      "group": "Type de rôle",
+      "roleLabel": "Rôle",
+      "groups": {
+        "CUSTOMER": "Client",
+        "STAFF": "Personnel VIIPA",
+        "PLACE": "Logement",
+        "RESTAURANT": "Restaurant"
+      },
+      "role": {
+        "CUSTOMER": "Client",
+        "STAFF_MANAGER": "Gestionnaire",
+        "STAFF_ADMIN": "Admin",
+        "PLACE_OWNER": "Propriétaire",
+        "PLACE_RECEPTIONIST": "Réceptionniste",
+        "RESTAURANT_OWNER": "Propriétaire",
+        "RESTAURANT_MANAGER": "Gérant",
+        "RESTAURANT_DELIVERY": "Livreur"
+      },
+      "hint": {
+        "CUSTOMER": "Réserve des séjours et commande des repas.",
+        "STAFF_MANAGER": "Utilise l'administration pour les domaines cochés ci-dessous.",
+        "STAFF_ADMIN": "Utilise toute l'administration et attribue les rôles.",
+        "PLACE_OWNER": "Possède des logements : les ajoute, les gère et est payé pour les séjours.",
+        "PLACE_RECEPTIONIST": "Tient la réception : réservations, arrivées et départs, pièces d'identité et blanchisserie des clients.",
+        "RESTAURANT_OWNER": "Possède un restaurant : le configure, ajoute le menu et le gère.",
+        "RESTAURANT_MANAGER": "Gère les commandes et le menu du restaurant.",
+        "RESTAURANT_DELIVERY": "Livre les commandes du restaurant aux clients."
+      },
+      "whichPlace": "Quel logement",
+      "whichRestaurant": "Quel restaurant",
+      "newPlace": "Un nouveau logement qu'il ajoutera",
+      "newRestaurant": "Un nouveau restaurant qu'il configurera",
+      "choose": "Choisir…",
+      "replaces": "Ceci remplace son rôle ({role}).",
+      "handOver": "{name} lui sera transféré.",
+      "save": "Enregistrer le rôle",
+      "saving": "Enregistrement…",
+      "cancel": "Annuler",
+      "saved": "Rôle enregistré.",
+      "you": "Vous ne pouvez pas changer votre propre rôle.",
+      "adminsOnly": "Seuls les admins changent les rôles.",
+      "errors": {
+        "notAllowed": "Seuls les admins changent les rôles.",
+        "notFound": "Compte, logement ou restaurant introuvable (ou compte suspendu).",
+        "invalid": "Choisissez d'abord un logement ou un restaurant.",
+        "ownsPlaces": "Il possède des logements : transférez-les d'abord à quelqu'un d'autre.",
+        "ownsRestaurants": "Il possède des restaurants : transférez-les d'abord à quelqu'un d'autre."
+      }
     }
   },
   "Questions": {
@@ -2778,7 +2829,19 @@
       "close": "Fermer aux commandes"
     },
     "ownerRoleHint": "Seules les personnes ayant le rôle propriétaire/gérant de restaurant apparaissent. Donnez d'abord ce rôle sur leur compte (Utilisateurs → leur page → Rôles).",
-    "notRestaurateur": "Cette personne n'a pas le rôle propriétaire/gérant de restaurant."
+    "notRestaurateur": "Cette personne n'a pas le rôle propriétaire/gérant de restaurant.",
+    "placeKitchens": {
+      "title": "Restaurants qui cuisinent ici",
+      "intro": "Les clients qui séjournent ici voient un seul menu avec les plats de tous les restaurants ci-dessous, sans leurs noms. Chaque restaurant reçoit les commandes de ses propres plats.",
+      "none": "Aucun restaurant ne cuisine ici : les clients ne peuvent pas commander.",
+      "notLive": "pas en ligne",
+      "remove": "Retirer {name}",
+      "choose": "Ajouter un restaurant…",
+      "add": "Ajouter",
+      "failed": "Échec — réessayez.",
+      "cooksFor": "Cuisine pour",
+      "cooksForNone": "Aucun logement : ajoutez-le depuis la page d'un logement (Restaurants qui cuisinent ici)."
+    }
   },
   "Promoters": {
     "title": "Promouvoir et gagner",

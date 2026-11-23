@@ -54,10 +54,9 @@ export function findUsers(query: string) {
 }
 
 /** Whether this staff member may give or remove staff access: super admins, or any admin until a super admin exists. */
+/** Staff access is Customer, Manager or Admin; any admin manages it (older super admins count as admins). */
 export async function canManageStaff(actor: { id: string; role?: string | null }): Promise<boolean> {
-  if (actor.role === "SUPER_ADMIN") return true;
-  if (actor.role !== "ADMIN") return false;
-  return (await db.user.count({ where: { role: "SUPER_ADMIN" } })) === 0;
+  return actor.role === "ADMIN" || actor.role === "SUPER_ADMIN";
 }
 
 /**
@@ -65,7 +64,8 @@ export async function canManageStaff(actor: { id: string; role?: string | null }
  * and nobody changes their own role (no accidental lock-out).
  */
 export async function setUserRole(adminId: string, userId: string, role: AppRole): Promise<boolean> {
-  if (adminId === userId) return false;
+  // Customer, Manager or Admin (there is no separate super admin any more).
+  if (adminId === userId || !["USER", "MANAGER", "ADMIN"].includes(role)) return false;
   const actor = await db.user.findUnique({ where: { id: adminId }, select: { id: true, role: true } });
   if (!actor || !(await canManageStaff(actor))) return false;
   return db.$transaction(async (tx) => {
@@ -239,4 +239,94 @@ export async function setRestaurateur(actor: { id: string; role?: string | null;
     }
     return { ok: true } as const;
   });
+}
+
+type StaffActor = { id: string; role?: string | null; staffAreas?: readonly string[] | null };
+
+/** The one role a person has: a customer, VIIPA staff, or a role at a place or a restaurant. */
+export const PERSON_ROLES = ["CUSTOMER", "STAFF_MANAGER", "STAFF_ADMIN", "PLACE_OWNER", "PLACE_RECEPTIONIST", "RESTAURANT_OWNER", "RESTAURANT_MANAGER", "RESTAURANT_DELIVERY"] as const;
+export type PersonRole = (typeof PERSON_ROLES)[number];
+export type PersonRoleResult = { ok: true } | { ok: false; error: "notAllowed" | "notFound" | "invalid" | "ownsPlaces" | "ownsRestaurants" };
+
+/**
+ * Gives someone their one role, replacing whatever they had (staff access, place owner or team, restaurant owner
+ * or team). `target` is the place or restaurant: "new" for an owner who will add their own; an existing one is
+ * handed over to them. Someone who owns places or restaurants keeps that role until those are handed over.
+ * Only admins, never on themselves. Logged; they are told.
+ */
+export async function setPersonRole(actor: StaffActor, userId: string, role: PersonRole, target = "new"): Promise<PersonRoleResult> {
+  if (actor.id === userId || !(await canManageStaff(actor))) return { ok: false, error: "notAllowed" };
+  if (!PERSON_ROLES.includes(role) || typeof target !== "string" || target.length > 64) return { ok: false, error: "invalid" };
+  const atPlace = role.startsWith("PLACE_");
+  const atRestaurant = role.startsWith("RESTAURANT_");
+  // Only an owner may be given a place or restaurant they will add; the other roles are at an existing one.
+  if ((atPlace || atRestaurant) && target === "new" && !role.endsWith("_OWNER")) return { ok: false, error: "invalid" };
+  const { notify } = await import("@/features/notifications/service");
+  return db.$transaction(async (tx) => {
+    const user = await tx.user.findUnique({
+      where: { id: userId },
+      select: { role: true, status: true, staffAreas: true, _count: { select: { listings: true, restaurantsOwned: true } } },
+    });
+    if (!user || user.status !== "ACTIVE") return { ok: false, error: "notFound" } as const;
+    if (user._count.listings > 0 && role !== "PLACE_OWNER") return { ok: false, error: "ownsPlaces" } as const;
+    if (user._count.restaurantsOwned > 0 && role !== "RESTAURANT_OWNER") return { ok: false, error: "ownsRestaurants" } as const;
+    const listing = atPlace && target !== "new" ? await tx.listing.findUnique({ where: { id: target }, select: { id: true, title: true, hostId: true } }) : null;
+    const restaurant = atRestaurant && target !== "new" ? await tx.restaurant.findUnique({ where: { id: target }, select: { id: true, name: true, ownerId: true } }) : null;
+    if (target !== "new" && ((atPlace && !listing) || (atRestaurant && !restaurant))) return { ok: false, error: "notFound" } as const;
+
+    // Clear the role they had: one role at a time.
+    const staffRole = role === "STAFF_ADMIN" ? "ADMIN" : role === "STAFF_MANAGER" ? "MANAGER" : "USER";
+    await tx.user.update({
+      where: { id: userId },
+      data: {
+        role: staffRole,
+        staffAreas: staffRole === "MANAGER" && user.role === "MANAGER" ? user.staffAreas : [],
+        isHost: role === "PLACE_OWNER",
+        isRestaurateur: role === "RESTAURANT_OWNER" || role === "RESTAURANT_MANAGER",
+      },
+    });
+    await tx.placeMember.deleteMany({ where: { userId } });
+    await tx.restaurantMember.deleteMany({ where: { userId } });
+
+    // Then give the new one.
+    if (role === "PLACE_OWNER" && listing && listing.hostId !== userId) {
+      await tx.listing.update({ where: { id: listing.id }, data: { hostId: userId } });
+      await notify(tx, userId, "teamAdded", { title: listing.title, roleLabel: "OWNER" }, "/host/places");
+    } else if (role === "PLACE_RECEPTIONIST" && listing) {
+      await tx.placeMember.create({ data: { listingId: listing.id, userId, role: "RECEPTIONIST", addedById: actor.id } });
+      await notify(tx, userId, "teamAdded", { title: listing.title, roleLabel: "RECEPTIONIST" }, "/host");
+    } else if (role === "RESTAURANT_OWNER" && restaurant && restaurant.ownerId !== userId) {
+      await tx.restaurant.update({ where: { id: restaurant.id }, data: { ownerId: userId } });
+      await notify(tx, userId, "restaurantTeamAdded", { title: restaurant.name, roleLabel: "OWNER" }, `/host/restaurants/${restaurant.id}`);
+    } else if ((role === "RESTAURANT_MANAGER" || role === "RESTAURANT_DELIVERY") && restaurant) {
+      const memberRole = role === "RESTAURANT_MANAGER" ? "MANAGER" : "DELIVERY";
+      await tx.restaurantMember.create({ data: { restaurantId: restaurant.id, userId, role: memberRole, addedById: actor.id } });
+      await notify(tx, userId, "restaurantTeamAdded", { title: restaurant.name, roleLabel: memberRole }, `/host/restaurants/${restaurant.id}`);
+    } else if (role === "RESTAURANT_OWNER") {
+      await notify(tx, userId, "restaurantRoleGiven", {}, "/host/restaurants/new");
+    }
+    await audit(tx, { actorId: actor.id, action: "user.personRole", entityType: "user", entityId: userId, data: { from: user.role, to: role, target } });
+    return { ok: true } as const;
+  });
+}
+
+/** Someone's one role now (for the person's page). Older accounts with several roles show the first that applies. */
+export function currentPersonRole(user: {
+  role: string;
+  isHost: boolean;
+  isRestaurateur: boolean;
+  listings: { id: string }[];
+  placeMembers: { listing: { id: string } }[];
+  restaurantsOwned: { id: string }[];
+  restaurantRoles: { role: string; restaurant: { id: string } }[];
+}): { role: PersonRole; target: string } {
+  if (user.role === "ADMIN" || user.role === "SUPER_ADMIN") return { role: "STAFF_ADMIN", target: "new" };
+  if (user.role === "MANAGER") return { role: "STAFF_MANAGER", target: "new" };
+  if (user.listings.length > 0 || user.isHost) return { role: "PLACE_OWNER", target: user.listings[0]?.id ?? "new" };
+  if (user.placeMembers[0]) return { role: "PLACE_RECEPTIONIST", target: user.placeMembers[0].listing.id };
+  if (user.restaurantsOwned.length > 0) return { role: "RESTAURANT_OWNER", target: user.restaurantsOwned[0]!.id };
+  const job = user.restaurantRoles[0];
+  if (job) return { role: job.role === "DELIVERY" ? "RESTAURANT_DELIVERY" : "RESTAURANT_MANAGER", target: job.restaurant.id };
+  if (user.isRestaurateur) return { role: "RESTAURANT_OWNER", target: "new" };
+  return { role: "CUSTOMER", target: "new" };
 }

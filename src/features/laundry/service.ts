@@ -70,9 +70,9 @@ export async function cancelMyLaundry(guestId: string, reference: string): Promi
 
 export type MoveLaundryResult = { ok: true } | { ok: false; error: "notAllowed" | "notFound" | "weight" | "reason" };
 
-/** Who runs the place (owner and managers): they handle the laundry once VIIPA accepts it. */
+/** Who runs the place (owner, managers and receptionists): they handle the laundry once VIIPA accepts it. */
 async function placeTeam(listingId: string, hostId: string) {
-  const managers = await db.placeMember.findMany({ where: { listingId, role: "MANAGER" }, select: { userId: true } });
+  const managers = await db.placeMember.findMany({ where: { listingId, role: { in: ["MANAGER", "RECEPTIONIST"] } }, select: { userId: true } });
   return [...new Set([hostId, ...managers.map((m) => m.userId)])];
 }
 
@@ -136,7 +136,7 @@ export async function confirmLaundryReceived(guestId: string, reference: string)
 
 /** The place's team: laundry VIIPA accepted at the places they run (to do first, then the latest done). */
 export async function placeLaundry(userId: string, take = 60) {
-  const places = await db.listing.findMany({ where: { OR: [{ hostId: userId }, { team: { some: { userId, role: "MANAGER" } } }] }, select: { id: true } });
+  const places = await db.listing.findMany({ where: { OR: [{ hostId: userId }, { team: { some: { userId, role: { in: ["MANAGER", "RECEPTIONIST"] } } } }] }, select: { id: true } });
   if (places.length === 0) return [];
   return db.laundryOrder.findMany({
     where: { listingId: { in: places.map((p) => p.id) }, status: { in: ["ACCEPTED", "PICKED_UP", "WASHED", "RETURNED", "RECEIVED"] } },
@@ -154,7 +154,7 @@ export async function placeLaundry(userId: string, take = 60) {
 /** Laundry the place's team still has to collect, wash or return (their sidebar count). */
 export async function placeLaundryToDo(userId: string) {
   return db.laundryOrder.count({
-    where: { status: { in: ["ACCEPTED", "PICKED_UP", "WASHED"] }, listing: { OR: [{ hostId: userId }, { team: { some: { userId, role: "MANAGER" } } }] } },
+    where: { status: { in: ["ACCEPTED", "PICKED_UP", "WASHED"] }, listing: { OR: [{ hostId: userId }, { team: { some: { userId, role: { in: ["MANAGER", "RECEPTIONIST"] } } } }] } },
   });
 }
 

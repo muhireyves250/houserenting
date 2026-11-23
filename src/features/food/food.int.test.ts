@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { db } from "@/lib/db";
 import { setAgreement } from "@/features/agreements/service";
 import { resetDb } from "@/test/db";
-import { addRestaurantMember, assignCourier, expireOrders, rateOrder, restaurantRole, claimOrderPayment, confirmOrderPayment, deleteFoodOrder, deleteRestaurant, hideMyOrder, myOrders, kitchenForPlace, moveOrder, ordersForHost, ordersLive, placeOrder, saveMenuItem, saveRestaurant, setRestaurantStatus } from "./service";
+import { addRestaurantMember, assignCourier, expireOrders, rateOrder, restaurantRole, claimOrderPayment, confirmOrderPayment, deleteFoodOrder, deleteRestaurant, hideMyOrder, myOrders, kitchenForPlace, moveOrder, ordersForHost, ordersLive, placeOrder, saveMenuItem, saveRestaurant, setPlaceKitchens, setRestaurantStatus } from "./service";
 
 const admin = { id: "admin", role: "ADMIN" };
 const NOW = new Date("2026-11-03T08:00:00Z");
@@ -66,6 +66,31 @@ beforeEach(async () => {
 });
 
 describe("food from the kitchen of the guest's stay", () => {
+  it("a place can have several kitchens: one menu without their names, and each gets its own dishes' order", async () => {
+    const first = await liveKitchen();
+    const second = await saveRestaurant(admin, null, { ...base, name: "Grill", listingId: null });
+    if (!second.ok) throw new Error("save failed");
+    await saveMenuItem(admin, second.id, null, { name: "Fish", price: 5000 });
+    await setAgreement(admin, "RESTAURANT", second.id, { percent: 10 });
+    await setRestaurantStatus(admin, second.id, "PUBLISHED");
+    expect(await setPlaceKitchens(admin, "place", [first, second.id])).toBe(true);
+    // The same restaurant can cook for another place too.
+    expect(await setPlaceKitchens(admin, "elsewhere", [second.id])).toBe(true);
+
+    const kitchen = await kitchenForPlace("place");
+    expect(kitchen?.menu.map((d) => d.name).sort()).toEqual(["Brochette", "Fish"]);
+    expect(JSON.stringify(kitchen)).not.toContain("Grill");
+
+    const [brochette, fish] = await Promise.all([db.menuItem.findFirstOrThrow({ where: { name: "Brochette" } }), db.menuItem.findFirstOrThrow({ where: { name: "Fish" } })]);
+    const placed = await order("stay", brochette.id, { lines: [{ menuItemId: brochette.id, quantity: 1 }, { menuItemId: fish.id, quantity: 2 }] });
+    expect(placed).toMatchObject({ ok: true, count: 2 });
+    const orders = await db.foodOrder.findMany({ orderBy: { total: "asc" }, select: { restaurantId: true, total: true } });
+    expect(orders).toEqual([
+      { restaurantId: first, total: 3000 },
+      { restaurantId: second.id, total: 10000 },
+    ]);
+  });
+
   it("only VIIPA sets up kitchens; publishing needs a dish; hiding needs a reason", async () => {
     expect(await saveRestaurant({ id: "owner" }, null, base)).toEqual({ ok: false, error: "notAllowed" });
     const saved = await saveRestaurant(admin, null, base);
@@ -77,7 +102,7 @@ describe("food from the kitchen of the guest's stay", () => {
     expect(await setRestaurantStatus(admin, saved.id, "PUBLISHED")).toBe(false);
     expect(await setAgreement(admin, "RESTAURANT", saved.id, { percent: 10 })).toEqual({ ok: true });
     expect(await setRestaurantStatus(admin, saved.id, "PUBLISHED")).toBe(true);
-    expect((await kitchenForPlace("place"))?.id).toBe(saved.id);
+    expect((await kitchenForPlace("place"))?.menu.map((d) => d.name)).toEqual(["Brochette"]);
     // A place without a kitchen assigned gets none (never the nearest one).
     expect(await kitchenForPlace("elsewhere")).toBeNull();
     expect(await setRestaurantStatus(admin, saved.id, "HIDDEN")).toBe(false);
@@ -90,12 +115,11 @@ describe("food from the kitchen of the guest's stay", () => {
     expect(await order(id, dish.id, { fulfilment: "DELIVERY", address: "KN 5 Rd" })).toEqual({ ok: false, error: "notOffered" });
     expect(await order(id, dish.id, { bookingReference: null })).toEqual({ ok: false, error: "noStay" });
     // The stay's own kitchen cooks; another place's kitchen can't take the order.
-    await db.restaurant.update({ where: { id }, data: { listingId: "elsewhere" } });
-    const own = await db.restaurant.create({ data: { ...(await db.restaurant.findUniqueOrThrow({ where: { id }, omit: { id: true, createdAt: true, updatedAt: true } })), name: "Lake house kitchen", listingId: "place" } });
-    await db.menuItem.create({ data: { restaurantId: own.id, name: "Fish", price: 5000 } });
+    expect(await setPlaceKitchens({ id: "owner" }, "place", [])).toBe(false);
+    expect(await setPlaceKitchens(admin, "place", [])).toBe(true);
+    expect(await setPlaceKitchens(admin, "elsewhere", [id])).toBe(true);
     expect(await order(id, dish.id)).toEqual({ ok: false, error: "tooFar" });
-    await db.restaurant.delete({ where: { id: own.id } });
-    await db.restaurant.update({ where: { id }, data: { listingId: "place" } });
+    expect(await setPlaceKitchens(admin, "place", [id])).toBe(true);
 
     const placed = await order(id, dish.id);
     if (!placed.ok) throw new Error("order failed");

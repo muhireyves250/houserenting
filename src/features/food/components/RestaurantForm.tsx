@@ -8,7 +8,7 @@ import { ImagePlus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState, useTransition } from "react";
 import { Button } from "@/components/ui/Button";
-import { AreaField, Card, Field, SelectField } from "@/features/hosting/components/fields";
+import { AreaField, Card, Field } from "@/features/hosting/components/fields";
 import { useRouter } from "@/i18n/navigation";
 import { restaurantPhotoTicketAction } from "@/features/users/photo-actions";
 import { uploadImage } from "@/lib/cloudinary-upload";
@@ -41,17 +41,15 @@ export const EMPTY_RESTAURANT: RestaurantInput = {
   listingId: null,
 };
 
-/** Create or edit a restaurant: where it is, how it delivers, and which of your places it belongs to. */
+/** Create or edit a restaurant: where it is and how it delivers (VIIPA sets the places it cooks for, on each place). */
 export function RestaurantForm({
   restaurantId,
   initial,
-  places,
   staffNew = false,
   after,
 }: {
   restaurantId: string | null;
   initial: RestaurantInput;
-  places: { id: string; title: string }[];
   /** Staff creating one for an owner: ask for the owner's email. */
   staffNew?: boolean;
   /** Where to go after creating (the id is appended). */
@@ -144,16 +142,6 @@ export function RestaurantForm({
               {photoError && <span className="text-xs font-medium text-danger">{photoError}</span>}
             </span>
           </div>
-          {places.length > 0 && (
-            <SelectField label={t("atPlace")} value={form.listingId ?? ""} onChange={(e) => set("listingId", e.target.value || null)}>
-              <option value="">{t("standalone")}</option>
-              {places.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.title}
-                </option>
-              ))}
-            </SelectField>
-          )}
         </div>
       </Card>
       <Card title={t("whereTitle")}>

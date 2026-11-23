@@ -381,7 +381,8 @@ function Checkout({
         try {
           localStorage.removeItem(CART_KEY(restaurant.id));
         } catch {}
-        router.push(`/orders/${result.reference}`);
+        // Dishes from several of the place's kitchens become one order each: show them all.
+        router.push(result.count > 1 ? "/orders" : `/orders/${result.reference}`);
       } else setError(t(`orderError.${result.error}`));
     });
 

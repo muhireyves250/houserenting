@@ -28,6 +28,7 @@ import {
   type SaveRestaurantResult,
   assignCourier,
   rateOrder,
+  setPlaceKitchens,
 } from "./service";
 import type { MenuItemInput, OrderInput, RestaurantInput } from "./validation";
 
@@ -172,4 +173,13 @@ export async function rateOrderAction(reference: string, rating: number, comment
   const ok = await rateOrder(user.id, reference, Number(rating), String(comment ?? ""));
   if (ok) revalidatePath("/[locale]", "layout");
   return { ok };
+}
+
+/** Staff set the restaurants that cook for a place (from the place's admin page). */
+export async function setPlaceKitchensAction(listingId: string, restaurantIds: string[]): Promise<boolean> {
+  const user = await getCurrentUser();
+  if (!user || !id.safeParse(listingId).success || !z.array(id).max(30).safeParse(restaurantIds).success) return false;
+  const ok = await setPlaceKitchens(user, listingId, restaurantIds);
+  if (ok) refresh();
+  return ok;
 }

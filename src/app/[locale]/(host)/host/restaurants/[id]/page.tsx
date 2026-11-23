@@ -11,7 +11,6 @@ import { ACTIVE_ORDER, acceptDeadline, nextOrderSteps, type OrderActor } from "@
 import { canRestaurant, restaurantForTeam, restaurantOrders, restaurantRole } from "@/features/food/service";
 import { Card } from "@/features/hosting/components/fields";
 import { Link } from "@/i18n/navigation";
-import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 
 type Props = { params: Promise<{ id: string }> };
@@ -24,11 +23,7 @@ export default async function HostRestaurantPage({ params }: Props) {
   if (!role) notFound();
   const r = await restaurantForTeam(id);
   if (!r) notFound();
-  const [t, orders, places] = await Promise.all([
-    getTranslations("Food"),
-    restaurantOrders(id),
-    db.listing.findMany({ where: { hostId: r.ownerId, status: { not: "ARCHIVED" } }, select: { id: true, title: true } }),
-  ]);
+  const [t, orders] = await Promise.all([getTranslations("Food"), restaurantOrders(id)]);
   const kitchen = canRestaurant(role, "orders");
   // The restaurant's delivery people (to assign ready orders), and who is on each order.
   const couriers = r.team.filter((m) => m.role === "DELIVERY").map((m) => ({ id: m.userId, name: m.user.name }));
@@ -93,7 +88,6 @@ export default async function HostRestaurantPage({ params }: Props) {
         {canRestaurant(role, "edit") && (
           <RestaurantForm
             restaurantId={r.id}
-            places={places}
             after="/host/restaurants"
             initial={{
               name: r.name,

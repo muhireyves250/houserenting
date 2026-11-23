@@ -73,7 +73,7 @@ export async function saveRestaurant(actor: Actor, id: string | null, raw: Resta
     const owner = staff && ownerId ? ownerId : actor.id;
     // Staff set a restaurant up for someone with the restaurant owner/manager role (or for VIIPA itself).
     if (staff && ownerId && !(await db.user.findFirst({ where: { id: ownerId, isRestaurateur: true, status: "ACTIVE" }, select: { id: true } }))) return { ok: false, errors: { ownerEmail: "notRestaurateur" } };
-    const created = await db.restaurant.create({ data: { ...data, ownerId: owner } });
+    const created = await db.restaurant.create({ data: { ...data, ownerId: owner, ...(data.listingId ? { places: { create: { listingId: data.listingId, addedById: actor.id } } } : {}) } });
     await audit(db, { actorId: actor.id, action: "restaurant.create", entityType: "restaurant", entityId: created.id });
     // Set up by its owner: VIIPA checks it (and its menu) before it goes live.
     if (!staff) await notifyAdmins(db, "restaurantNew", { title: created.name }, `/admin/restaurants/${created.id}`);
@@ -189,21 +189,39 @@ export function publicRestaurant(id: string) {
   });
 }
 
-const KITCHEN_SELECT = {
-  ...PUBLIC_SELECT,
-  menu: { where: { available: true }, orderBy: [{ position: "asc" as const }], select: { id: true, section: true, name: true, description: true, price: true, photoUrl: true } },
-};
+/** The restaurants VIIPA set to cook for a place that are taking orders now (open, with dishes on the menu). */
+function kitchensForPlace(listingId: string) {
+  return db.restaurant.findMany({
+    where: { places: { some: { listingId } }, status: "PUBLISHED", paused: false, menu: { some: { available: true } } },
+    orderBy: { createdAt: "asc" },
+    select: {
+      id: true,
+      name: true,
+      ownerId: true,
+      prepMinutes: true,
+      minOrder: true,
+      menu: { where: { available: true }, orderBy: [{ position: "asc" }, { createdAt: "asc" }], select: { id: true, section: true, name: true, description: true, price: true, photoUrl: true, available: true } },
+      team: { where: { role: { in: ["MANAGER", "STAFF"] } }, select: { userId: true } },
+    },
+  });
+}
 
 /**
- * The kitchen VIIPA assigned to a place, with its menu (open and with dishes on it). Only an assigned kitchen:
- * a nearby restaurant is never offered instead, and with none the guest is told no restaurant serves the place.
+ * The kitchen at a place, as guests see it: one menu with the dishes of every restaurant VIIPA set to cook there
+ * (no restaurant names), ready in the slowest one's time. Only assigned restaurants: a nearby one is never offered
+ * instead, and with none the guest is told no restaurant serves the place.
  */
 export async function kitchenForPlace(listingId: string) {
-  return db.restaurant.findFirst({
-    where: { listingId, status: "PUBLISHED", paused: false, menu: { some: { available: true } } },
-    orderBy: { createdAt: "asc" },
-    select: KITCHEN_SELECT,
-  });
+  const kitchens = await kitchensForPlace(listingId);
+  if (kitchens.length === 0) return null;
+  return {
+    // One cart for the stay's menu, whichever restaurants cook it (Order again fills the same one).
+    id: "stay",
+    paused: false,
+    prepMinutes: Math.max(...kitchens.map((k) => k.prepMinutes)),
+    minOrder: Math.max(...kitchens.map((k) => k.minOrder)),
+    menu: kitchens.flatMap((k) => k.menu.map((d) => ({ id: d.id, section: d.section, name: d.name, description: d.description, price: d.price, photoUrl: d.photoUrl }))),
+  };
 }
 
 export type Dish = { id: string; section: string; name: string; description: string; price: number; photoUrl: string | null };
@@ -214,7 +232,7 @@ export type Dish = { id: string; section: string; name: string; description: str
  */
 export async function foodMenu(limit?: number): Promise<Dish[]> {
   const items = await db.menuItem.findMany({
-    where: { available: true, restaurant: { status: "PUBLISHED", listingId: { not: null } } },
+    where: { available: true, restaurant: { status: "PUBLISHED", places: { some: {} } } },
     orderBy: [{ position: "asc" }, { createdAt: "asc" }],
     select: { id: true, section: true, name: true, description: true, price: true, photoUrl: true },
   });
@@ -243,69 +261,89 @@ async function currentStay(customerId: string, reference: string | null, now: Da
   });
 }
 
-export type PlaceOrderResult = { ok: true; reference: string } | { ok: false; error: "invalid" | "closed" | "notOffered" | "tooFar" | "noStay" | "cart" | "minOrder" };
+export type PlaceOrderResult = { ok: true; reference: string; count: number } | { ok: false; error: "invalid" | "closed" | "notOffered" | "tooFar" | "noStay" | "cart" | "minOrder" };
 
+/**
+ * A guest orders from the menu of the place they are staying at. The dishes may come from several of the place's
+ * restaurants: each restaurant gets its own order with only its dishes (the guest never picks a restaurant).
+ */
 export async function placeOrder(customerId: string, raw: OrderInput, now: Date = new Date()): Promise<PlaceOrderResult> {
   const parsed = orderInput.safeParse(raw);
   if (!parsed.success) return { ok: false, error: "invalid" };
   const input = parsed.data;
-  const r = await db.restaurant.findFirst({
-    where: { id: input.restaurantId, status: "PUBLISHED" },
-    select: { id: true, name: true, ownerId: true, paused: true, pickup: true, delivery: true, deliveryFee: true, deliveryKm: true, minOrder: true, lat: true, lng: true, listingId: true, menu: { select: { id: true, name: true, price: true, available: true } }, team: { where: { role: { in: ["MANAGER", "STAFF"] } }, select: { userId: true } } },
-  });
-  if (!r) return { ok: false, error: "invalid" };
-  if (r.paused) return { ok: false, error: "closed" };
-  const cart = priceCart(input.lines, r.menu);
-  if (!cart) return { ok: false, error: "cart" };
-  if (cart.subtotal < r.minOrder) return { ok: false, error: "minOrder" };
-
-  let address: string | null = null;
-  let bookingId: string | null = null;
-  const fee = 0;
-  // Food is cooked where the guest is staying and brought to their room: no pickup, no delivery elsewhere.
+  // Food is cooked for the place where the guest is staying and brought to their room: no pickup, no delivery elsewhere.
   if (input.fulfilment !== "TO_STAY") return { ok: false, error: "notOffered" };
   const stay = await currentStay(customerId, input.bookingReference, now);
   if (!stay) return { ok: false, error: "noStay" };
-  if ((await kitchenForPlace(stay.listingId))?.id !== r.id) return { ok: false, error: "tooFar" };
-  bookingId = stay.id;
-  address = [stay.listing.title, [stay.room?.name, stay.roomNumber].filter(Boolean).join(" "), stay.reference].filter(Boolean).join(" · ");
+  const kitchens = await kitchensForPlace(stay.listingId);
+  if (kitchens.length === 0) {
+    // Its kitchens are closed for now (rather than none cooking for the place).
+    const closed = await db.restaurant.count({ where: { places: { some: { listingId: stay.listingId } }, status: "PUBLISHED", paused: true } });
+    return { ok: false, error: closed > 0 ? "closed" : "tooFar" };
+  }
+  const cart = priceCart(input.lines, kitchens.flatMap((k) => k.menu));
+  if (!cart) return { ok: false, error: "cart" };
+  // One order per restaurant, each with its own dishes.
+  const groups = kitchens.flatMap((k) => {
+    const items = cart.items.filter((i) => k.menu.some((m) => m.id === i.menuItemId));
+    return items.length > 0 ? [{ kitchen: k, items, subtotal: items.reduce((sum, i) => sum + i.price * i.quantity, 0) }] : [];
+  });
+  if (cart.subtotal < Math.max(...groups.map((g) => g.kitchen.minOrder))) return { ok: false, error: "minOrder" };
+  const address = [stay.listing.title, [stay.room?.name, stay.roomNumber].filter(Boolean).join(" "), stay.reference].filter(Boolean).join(" · ");
 
   for (let attempt = 0; attempt < 3; attempt++) {
-    const reference = newReference("OR");
+    const references = groups.map(() => newReference("OR"));
     try {
       await db.$transaction(async (tx) => {
-        const order = await tx.foodOrder.create({
-          data: {
-            reference,
-            restaurantId: r.id,
-            customerId,
-            fulfilment: input.fulfilment,
-            address,
-            bookingId,
-            phone: input.phone,
-            note: input.note,
-            subtotal: cart.subtotal,
-            deliveryFee: fee,
-            total: cart.subtotal + fee,
-            // Paid after the restaurant confirms (mobile money, verified by VIIPA) and before the kitchen starts.
-            paymentMethod: "PAY_FIRST",
-            items: { create: cart.items },
-            events: { create: { to: "PLACED", actorId: customerId } },
-          },
-        });
-        await audit(tx, { actorId: customerId, action: "order.place", entityType: "order", entityId: order.reference });
-        for (const userId of new Set([r.ownerId, ...r.team.map((m) => m.userId)])) {
-          await notify(tx, userId, "orderPlaced", { reference, title: r.name, total: order.total }, `/host/restaurants/${r.id}`);
+        for (const [i, { kitchen: r, items, subtotal }] of groups.entries()) {
+          const reference = references[i]!;
+          const order = await tx.foodOrder.create({
+            data: {
+              reference,
+              restaurantId: r.id,
+              customerId,
+              fulfilment: input.fulfilment,
+              address,
+              bookingId: stay.id,
+              phone: input.phone,
+              note: input.note,
+              subtotal,
+              deliveryFee: 0,
+              total: subtotal,
+              // Paid after the restaurant confirms (mobile money, verified by VIIPA) and before the kitchen starts.
+              paymentMethod: "PAY_FIRST",
+              items: { create: items },
+              events: { create: { to: "PLACED", actorId: customerId } },
+            },
+          });
+          await audit(tx, { actorId: customerId, action: "order.place", entityType: "order", entityId: order.reference });
+          for (const userId of new Set([r.ownerId, ...r.team.map((m) => m.userId)])) {
+            await notify(tx, userId, "orderPlaced", { reference, title: r.name, total: order.total }, `/host/restaurants/${r.id}`);
+          }
+          // VIIPA staff see every new order (it waits for the guest's payment).
+          await notifyAdmins(tx, "orderNew", { reference, title: address, total: order.total }, "/admin/orders");
         }
-        // VIIPA staff see every new order (it waits for the guest's payment).
-        await notifyAdmins(tx, "orderNew", { reference, title: address ?? r.name, total: order.total }, "/admin/orders");
       });
-      return { ok: true, reference };
+      return { ok: true, reference: references[0]!, count: references.length };
     } catch (error) {
       if ((error as { code?: string }).code !== "P2002") throw error;
     }
   }
   return { ok: false, error: "invalid" };
+}
+
+/** Staff set which restaurants cook for a place (several are fine; a restaurant can cook for several places). Logged. */
+export async function setPlaceKitchens(actor: Actor, listingId: string, restaurantIds: readonly string[]): Promise<boolean> {
+  if (!canStaff(actor, "food") || !Array.isArray(restaurantIds) || restaurantIds.length > 30) return false;
+  const ids = [...new Set(restaurantIds.filter((x) => typeof x === "string"))];
+  return db.$transaction(async (tx) => {
+    const listing = await tx.listing.findUnique({ where: { id: listingId }, select: { id: true } });
+    if (!listing || (await tx.restaurant.count({ where: { id: { in: ids } } })) !== ids.length) return false;
+    await tx.placeRestaurant.deleteMany({ where: { listingId, restaurantId: { notIn: ids } } });
+    await tx.placeRestaurant.createMany({ data: ids.map((restaurantId) => ({ listingId, restaurantId, addedById: actor.id })), skipDuplicates: true });
+    await audit(tx, { actorId: actor.id, action: "listing.kitchens", entityType: "listing", entityId: listingId, data: { restaurants: ids } });
+    return true;
+  });
 }
 
 /** Moves an order one step (kitchen, courier or customer, each only their own steps). Every step is kept. */
