@@ -171,6 +171,7 @@ describe("food from the kitchen of the guest's stay", () => {
   });
 
   it("VIIPA sets who works at a restaurant (not the owner)", async () => {
+    await db.user.update({ where: { id: "owner" }, data: { isRestaurateur: true } });
     const saved = await saveRestaurant(admin, null, { ...base, listingId: "place" }, "owner");
     if (!saved.ok) throw new Error("save failed");
     expect(await addRestaurantMember({ id: "owner" }, saved.id, "cook@example.com", "STAFF")).toEqual({ ok: false, error: "notAllowed" });
@@ -193,5 +194,23 @@ describe("food from the kitchen of the guest's stay", () => {
     expect(await db.notification.count({ where: { userId: "guest", kind: "orderStatus" } })).toBe(1);
     // Too late to accept now.
     expect(await moveOrder(admin, placed.reference, "ACCEPTED")).toBe(false);
+  });
+
+  it("restaurants are added by people with the restaurant role (VIIPA checks them) or by VIIPA for them", async () => {
+    const { setRestaurateur } = await import("@/features/admin/service");
+    // Without the role: no restaurant, and staff can't make them its owner.
+    expect(await saveRestaurant({ id: "owner" }, null, base)).toEqual({ ok: false, error: "notAllowed" });
+    expect(await saveRestaurant(admin, null, base, "owner")).toEqual({ ok: false, errors: { ownerEmail: "notRestaurateur" } });
+    expect(await setRestaurateur({ id: "owner" }, "owner", true)).toEqual({ ok: false, error: "notAllowed" });
+    expect(await setRestaurateur(admin, "owner", true)).toEqual({ ok: true });
+    expect(await db.notification.count({ where: { userId: "owner", kind: "restaurantRoleGiven" } })).toBe(1);
+    // With it: they set it up themselves (a draft VIIPA is told about), or staff do it for them.
+    const own = await saveRestaurant({ id: "owner" }, null, { ...base, name: "Owner's kitchen" });
+    if (!own.ok) throw new Error("save failed");
+    expect((await db.restaurant.findUniqueOrThrow({ where: { id: own.id } })).status).toBe("DRAFT");
+    expect(await db.notification.count({ where: { userId: "admin", kind: "restaurantNew" } })).toBe(1);
+    expect((await saveRestaurant(admin, null, { ...base, name: "Set up by VIIPA" }, "owner")).ok).toBe(true);
+    // Not taken away while they own restaurants.
+    expect(await setRestaurateur(admin, "owner", false)).toEqual({ ok: false, error: "hasRestaurants" });
   });
 });

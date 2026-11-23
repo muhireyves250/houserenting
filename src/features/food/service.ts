@@ -49,8 +49,9 @@ export type SaveRestaurantResult = { ok: true; id: string } | { ok: false; error
  * Clients who only book can't; staff create restaurants for other owners from the dashboard.
  */
 export async function canAddRestaurant(actor: Actor): Promise<boolean> {
-  // Kitchens are set up by VIIPA for the places they serve.
-  return canStaff(actor, "food");
+  // VIIPA staff, and people VIIPA gave the restaurant owner/manager role.
+  if (canStaff(actor, "food")) return true;
+  return Boolean((await db.user.findUnique({ where: { id: actor.id }, select: { isRestaurateur: true, status: true } }))?.isRestaurateur);
 }
 
 /** Owners or staff create a restaurant (a draft until staff publish it); its owner, managers or staff edit it. */
@@ -68,9 +69,14 @@ export async function saveRestaurant(actor: Actor, id: string | null, raw: Resta
   }
   if (id === null) {
     if (!(await canAddRestaurant(actor))) return { ok: false, error: "notAllowed" };
-    const owner = canStaff(actor, "food") && ownerId ? ownerId : actor.id;
+    const staff = canStaff(actor, "food");
+    const owner = staff && ownerId ? ownerId : actor.id;
+    // Staff set a restaurant up for someone with the restaurant owner/manager role (or for VIIPA itself).
+    if (staff && ownerId && !(await db.user.findFirst({ where: { id: ownerId, isRestaurateur: true, status: "ACTIVE" }, select: { id: true } }))) return { ok: false, errors: { ownerEmail: "notRestaurateur" } };
     const created = await db.restaurant.create({ data: { ...data, ownerId: owner } });
     await audit(db, { actorId: actor.id, action: "restaurant.create", entityType: "restaurant", entityId: created.id });
+    // Set up by its owner: VIIPA checks it (and its menu) before it goes live.
+    if (!staff) await notifyAdmins(db, "restaurantNew", { title: created.name }, `/admin/restaurants/${created.id}`);
     return { ok: true, id: created.id };
   }
   if (!canRestaurant(await restaurantRole(actor, id), "edit")) return { ok: false, error: "notAllowed" };

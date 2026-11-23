@@ -4,6 +4,7 @@ import { EMPTY_RESTAURANT, RestaurantForm } from "@/features/food/components/Res
 import { Link, redirect } from "@/i18n/navigation";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
+import { canAddRestaurant } from "@/features/food/service";
 
 export default async function NewRestaurantPage() {
   const user = await requireUser("/host/restaurants/new");
@@ -11,8 +12,8 @@ export default async function NewRestaurantPage() {
     getTranslations("Food"),
     db.listing.findMany({ where: { hostId: user.id, status: { not: "ARCHIVED" } }, select: { id: true, title: true }, orderBy: { title: "asc" } }),
   ]);
-  // Only property owners add restaurants themselves; everyone else is sent to the list, which explains it.
-  if (places.length === 0) redirect({ href: "/host/restaurants", locale: await getLocale() });
+  // Restaurant owners and managers (the role VIIPA gives) set their restaurant up; then they add its menu.
+  if (!(await canAddRestaurant(user))) redirect({ href: "/host/restaurants", locale: await getLocale() });
   return (
     <div className="mx-auto max-w-3xl">
       <Link href="/host/restaurants" className="mb-3 inline-flex items-center gap-1 text-sm text-muted transition-colors hover:text-ink">

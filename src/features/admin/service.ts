@@ -217,3 +217,26 @@ export async function createAccountForPerson(
   }
   return { ok: true, person };
 }
+
+export type RestaurateurResult = { ok: true } | { ok: false; error: "notAllowed" | "notFound" | "hasRestaurants" };
+
+/**
+ * Staff give someone the restaurant owner/manager role (they set up and run a restaurant from their dashboard), or
+ * take it away. Not for oneself; not taken from someone who still owns a restaurant. Logged.
+ */
+export async function setRestaurateur(actor: { id: string; role?: string | null; staffAreas?: readonly string[] | null }, userId: string, on: boolean): Promise<RestaurateurResult> {
+  if (actor.id === userId || !(canStaff(actor, "settings") || canStaff(actor, "food"))) return { ok: false, error: "notAllowed" };
+  return db.$transaction(async (tx) => {
+    const user = await tx.user.findUnique({ where: { id: userId }, select: { isRestaurateur: true, role: true, _count: { select: { restaurantsOwned: true } } } });
+    if (!user || user.role !== "USER") return { ok: false, error: "notFound" } as const;
+    if (user.isRestaurateur === on) return { ok: true } as const;
+    if (!on && user._count.restaurantsOwned > 0) return { ok: false, error: "hasRestaurants" } as const;
+    await tx.user.update({ where: { id: userId }, data: { isRestaurateur: on } });
+    await audit(tx, { actorId: actor.id, action: on ? "user.restaurateurOn" : "user.restaurateurOff", entityType: "user", entityId: userId });
+    if (on) {
+      const { notify } = await import("@/features/notifications/service");
+      await notify(tx, userId, "restaurantRoleGiven", {}, "/host/restaurants/new");
+    }
+    return { ok: true } as const;
+  });
+}

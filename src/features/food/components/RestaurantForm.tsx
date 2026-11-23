@@ -90,7 +90,7 @@ export function RestaurantForm({
     if (uploaded) set("photoUrl", uploaded.url);
     else setPhotoError(t("photoFailed"));
   }
-  const err = (k: string) => (errors[k] ? (errors[k] === "noAccount" ? t("ownerMissing") : errors[k] === "needsOne" ? t("needsOne") : t("checkField")) : undefined);
+  const err = (k: string) => (errors[k] ? (errors[k] === "noAccount" ? t("ownerMissing") : errors[k] === "needsOne" ? t("needsOne") : errors[k] === "notRestaurateur" ? t("notRestaurateur") : t("checkField")) : undefined);
 
   const save = () =>
     start(async () => {
@@ -110,7 +110,9 @@ export function RestaurantForm({
         <div className="grid gap-3">
           {staffNew && (
             <div>
-              <PersonPicker label={t("ownerEmailOptional")} onChange={setOwnerEmail} />
+              {/* Only people VIIPA gave the restaurant owner/manager role (set on their account first). */}
+              <PersonPicker label={t("ownerEmailOptional")} onChange={setOwnerEmail} only="restaurant" canCreate={false} />
+              <p className="mt-1 text-[12px] text-muted">{t("ownerRoleHint")}</p>
               {err("ownerEmail") && <p className="mt-1 text-[13px] font-medium text-danger">{err("ownerEmail")}</p>}
             </div>
           )}

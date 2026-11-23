@@ -47,6 +47,8 @@ export type NotificationKind =
   | "teamAdded"
   | "teamMemberJoined"
   | "restaurantStatus"
+  | "restaurantNew"
+  | "restaurantRoleGiven"
   | "restaurantTeamAdded"
   | "orderPlaced"
   | "ebmRequested"

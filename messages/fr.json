@@ -1469,7 +1469,16 @@
       "failed": "Échec — réessayez."
     },
     "noShow": "Marquer comme absent",
-    "noShowQuestion": "Le client n'est pas venu : marquer cette réservation comme absence ?"
+    "noShowQuestion": "Le client n'est pas venu : marquer cette réservation comme absence ?",
+    "restaurateur": {
+      "title": "Propriétaire ou gérant de restaurant",
+      "label": "Propriétaire ou gérant de restaurant",
+      "onHint": "Configure et gère un restaurant (menu, commandes, équipe) depuis son tableau de bord.",
+      "offHint": "Aucun rôle restaurant.",
+      "hasPlaces": "Possède encore {count, plural, one {# restaurant} other {# restaurants}} : transférez-les d'abord.",
+      "hasRestaurants": "Possède encore {count, plural, one {# restaurant} other {# restaurants}} : transférez-les d'abord.",
+      "failed": "Échec — réessayez."
+    }
   },
   "Questions": {
     "title": "Questions et réponses",
@@ -1591,7 +1600,9 @@
       "teamMemberJoined": "{name} a rejoint l'équipe de {title} comme {roleLabel}.",
       "orderPaid": "La commande {reference} chez {title} est payée ({total} RWF) : commencez la préparation.",
       "orderTimedOut": "La commande {reference} chez {title} a expiré : le restaurant n'a pas répondu sous 5 minutes. Ses plats ont été marqués indisponibles.",
-      "ebmRequested": "Le client de {reference} demande une facture EBM."
+      "ebmRequested": "Le client de {reference} demande une facture EBM.",
+      "restaurantNew": "Nouveau restaurant à vérifier : {title}. Vérifiez ses informations et son menu, réglez sa commission, puis publiez-le.",
+      "restaurantRoleGiven": "VIIPA vous a nommé propriétaire/gérant de restaurant : configurez votre restaurant et son menu."
     },
     "filterLabel": "Afficher les notifications",
     "filter": {
@@ -2478,7 +2489,7 @@
     "yourRestaurants": "Vos restaurants",
     "backToHosting": "Hébergement",
     "addRestaurant": "Ajouter un restaurant",
-    "addRestaurantIntro": "Présentez votre restaurant. Notre équipe le vérifie avant l'ouverture des commandes.",
+    "addRestaurantIntro": "Configurez votre restaurant : ses informations, son adresse et ses horaires. Ensuite, ajoutez votre menu ; VIIPA vérifie les deux avant l'ouverture aux commandes.",
     "noOwnRestaurants": "Pas encore de restaurants",
     "noOwnRestaurantsBody": "Ajoutez votre restaurant pour recevoir les commandes des voyageurs et clients proches.",
     "aboutTitle": "Présentation",
@@ -2765,7 +2776,9 @@
       "hide": "Masquer",
       "open": "Ouvrir aux commandes",
       "close": "Fermer aux commandes"
-    }
+    },
+    "ownerRoleHint": "Seules les personnes ayant le rôle propriétaire/gérant de restaurant apparaissent. Donnez d'abord ce rôle sur leur compte (Utilisateurs → leur page → Rôles).",
+    "notRestaurateur": "Cette personne n'a pas le rôle propriétaire/gérant de restaurant."
   },
   "Promoters": {
     "title": "Promouvoir et gagner",

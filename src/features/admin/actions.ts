@@ -72,7 +72,7 @@ export async function deleteUserAction(userId: string): Promise<AccountActionRes
 }
 
 /** People to pick from (name or email), e.g. when adding a promoter: newest first, at most 20. */
-export async function findPeopleAction(q: string): Promise<{ id: string; name: string; email: string; phone: string | null }[]> {
+export async function findPeopleAction(q: string, only?: "restaurant"): Promise<{ id: string; name: string; email: string; phone: string | null }[]> {
   const user = await getCurrentUser();
   // Staff who assign people: promoters, places (owners, managers), restaurants (owners, staff), accounts.
   if (!user || !(["promotions", "settings", "listings", "food"] as const).some((a) => canStaff(user, a))) return [];
@@ -83,6 +83,8 @@ export async function findPeopleAction(q: string): Promise<{ id: string; name: s
       role: "USER",
       // Only accounts that can be used: suspended ones are never offered.
       status: "ACTIVE",
+      // Restaurant owners are chosen among people with the restaurant owner/manager role.
+      ...(only === "restaurant" ? { isRestaurateur: true } : {}),
       ...(query
         ? {
             OR: [
@@ -113,6 +115,16 @@ export async function setHostAccessAction(userId: string, isHost: boolean): Prom
   if (!user || !id.safeParse(userId).success || typeof isHost !== "boolean") return { ok: false, error: "notAllowed" };
   const { setHostAccess } = await import("./service");
   const result = await setHostAccess(user, userId, isHost);
+  if (result.ok) revalidatePath("/[locale]/admin/users", "layout");
+  return result;
+}
+
+/** Give or take away the restaurant owner/manager role. */
+export async function setRestaurateurAction(userId: string, on: boolean): Promise<import("./service").RestaurateurResult> {
+  const user = await getCurrentUser();
+  if (!user || !id.safeParse(userId).success || typeof on !== "boolean") return { ok: false, error: "notAllowed" };
+  const { setRestaurateur } = await import("./service");
+  const result = await setRestaurateur(user, userId, on);
   if (result.ok) revalidatePath("/[locale]/admin/users", "layout");
   return result;
 }

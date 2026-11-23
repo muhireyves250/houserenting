@@ -35,6 +35,8 @@ model User {
   /// ADMIN and SUPER_ADMIN manage everything whatever is here; customers have none.
   staffAreas       String[]           @default([])
   isHost           Boolean            @default(false)
+  /// Given by VIIPA: owns or manages a restaurant (sets it up and runs it from the restaurant dashboard).
+  isRestaurateur   Boolean            @default(false)
   status           UserStatus         @default(ACTIVE)
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt

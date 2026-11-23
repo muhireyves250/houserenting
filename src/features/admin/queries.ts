@@ -267,6 +267,7 @@ export function userForStaff(id: string) {
       phone: true,
       role: true,
       isHost: true,
+      isRestaurateur: true,
       status: true,
       emailVerified: true,
       locale: true,

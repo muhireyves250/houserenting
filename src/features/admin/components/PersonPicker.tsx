@@ -19,6 +19,7 @@ export function PersonPicker({
   onChange,
   onPick,
   canCreate = true,
+  only,
 }: {
   label: string;
   /** The chosen person's email ("" when cleared). */
@@ -27,6 +28,8 @@ export function PersonPicker({
   onPick?: (person: Person | null) => void;
   /** Offer to open an account when nobody is found. */
   canCreate?: boolean;
+  /** Only people with this role (restaurant owners and managers). */
+  only?: "restaurant";
 }) {
   const t = useTranslations("Admin.picker");
   const [open, setOpen] = useState(false);
@@ -46,11 +49,11 @@ export function PersonPicker({
     if (!open) return;
     const timer = setTimeout(async () => {
       setLoading(true);
-      setPeople(await findPeopleAction(q));
+      setPeople(await findPeopleAction(q, only));
       setLoading(false);
     }, 200);
     return () => clearTimeout(timer);
-  }, [q, open]);
+  }, [q, open, only]);
 
   useEffect(() => {
     if (!open) return;

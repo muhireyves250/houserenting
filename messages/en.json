@@ -1469,7 +1469,16 @@
       "failed": "Couldn't do that — try again."
     },
     "noShow": "Mark as no-show",
-    "noShowQuestion": "The guest didn't come: mark this booking as a no-show?"
+    "noShowQuestion": "The guest didn't come: mark this booking as a no-show?",
+    "restaurateur": {
+      "title": "Restaurant owner or manager",
+      "label": "Restaurant owner or manager",
+      "onHint": "Sets up and runs a restaurant (menu, orders, team) from their dashboard.",
+      "offHint": "No restaurant role.",
+      "hasPlaces": "They still own {count, plural, one {# restaurant} other {# restaurants}}: move them first.",
+      "hasRestaurants": "They still own {count, plural, one {# restaurant} other {# restaurants}}: move them first.",
+      "failed": "Couldn't change it — try again."
+    }
   },
   "Questions": {
     "title": "Questions and answers",
@@ -1591,7 +1600,9 @@
       "teamMemberJoined": "{name} joined the team at {title} as {roleLabel}.",
       "orderPaid": "Order {reference} at {title} is paid ({total} RWF): start preparing it.",
       "orderTimedOut": "Order {reference} at {title} timed out: the restaurant didn't answer within 5 minutes. Its dishes were marked unavailable.",
-      "ebmRequested": "The guest of {reference} asks for an EBM invoice."
+      "ebmRequested": "The guest of {reference} asks for an EBM invoice.",
+      "restaurantNew": "New restaurant to check: {title}. Look at its details and menu, set its commission, then publish it.",
+      "restaurantRoleGiven": "VIIPA made you a restaurant owner/manager: set up your restaurant and its menu."
     },
     "filterLabel": "Show notifications",
     "filter": {
@@ -2478,7 +2489,7 @@
     "yourRestaurants": "Your restaurants",
     "backToHosting": "Hosting",
     "addRestaurant": "Add a restaurant",
-    "addRestaurantIntro": "Tell customers about your restaurant. Our team checks it before it opens for orders.",
+    "addRestaurantIntro": "Set up your restaurant: its details, where it is and its hours. Next you add your menu; VIIPA checks both before you open for orders.",
     "noOwnRestaurants": "No restaurants yet",
     "noOwnRestaurantsBody": "Add your restaurant to take orders from guests and customers nearby.",
     "aboutTitle": "About",
@@ -2765,7 +2776,9 @@
       "hide": "Hide",
       "open": "Open for orders",
       "close": "Close for orders"
-    }
+    },
+    "ownerRoleHint": "Only people with the restaurant owner/manager role are listed. Give someone that role on their account (Users → their page → Roles) first.",
+    "notRestaurateur": "That person doesn't have the restaurant owner/manager role."
   },
   "Promoters": {
     "title": "Promote and earn",

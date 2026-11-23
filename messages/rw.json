@@ -1469,7 +1469,16 @@
       "failed": "Ntibyakunze — ongera ugerageze."
     },
     "noShow": "Andika ko ataje",
-    "noShowQuestion": "Umushyitsi ntiyaje: wandika ko ataje?"
+    "noShowQuestion": "Umushyitsi ntiyaje: wandika ko ataje?",
+    "restaurateur": {
+      "title": "Nyiri cyangwa umuyobozi wa resitora",
+      "label": "Nyiri cyangwa umuyobozi wa resitora",
+      "onHint": "Ategura kandi ayobora resitora (menu, ibyatumijwe, itsinda) kuri dashboard ye.",
+      "offHint": "Nta nshingano ya resitora.",
+      "hasPlaces": "Aracyafite {count, plural, one {resitora #} other {resitora #}}: banza uzimure.",
+      "hasRestaurants": "Aracyafite {count, plural, one {resitora #} other {resitora #}}: banza uzimure.",
+      "failed": "Ntibyakunze — ongera ugerageze."
+    }
   },
   "Questions": {
     "title": "Ibibazo n'ibisubizo",
@@ -1591,7 +1600,9 @@
       "teamMemberJoined": "{name} yinjiye mu itsinda rya {title} nka {roleLabel}.",
       "orderPaid": "Ibyatumijwe {reference} kuri {title} byishyuwe ({total} RWF): tangira kubitegura.",
       "orderTimedOut": "Ibyatumijwe {reference} kuri {title} byataye igihe: resitora ntiyasubije mu minota 5. Ibiryo byabyo byashyizwe ku bitaboneka.",
-      "ebmRequested": "Umukiriya wa {reference} arasaba fagitire ya EBM."
+      "ebmRequested": "Umukiriya wa {reference} arasaba fagitire ya EBM.",
+      "restaurantNew": "Resitora nshya yo kugenzura: {title}. Reba amakuru yayo na menu, shyiraho komisiyo, hanyuma uyishyire ahagaragara.",
+      "restaurantRoleGiven": "VIIPA yakugize nyiri/umuyobozi wa resitora: tegura resitora yawe na menu yayo."
     },
     "filterLabel": "Erekana imenyesha",
     "filter": {
@@ -2478,7 +2489,7 @@
     "yourRestaurants": "Resitora zawe",
     "backToHosting": "Kwakira abashyitsi",
     "addRestaurant": "Ongeraho resitora",
-    "addRestaurantIntro": "Bwira abakiriya ibya resitora yawe. Itsinda ryacu riyigenzura mbere y'uko itangira kwakira ibyo bayitumiza.",
+    "addRestaurantIntro": "Tegura resitora yawe: amakuru yayo, aho iherereye n'amasaha. Hanyuma wongeremo menu; VIIPA irabigenzura mbere yo gutangira kwakira ibyatumijwe.",
     "noOwnRestaurants": "Nta resitora urashyiraho",
     "noOwnRestaurantsBody": "Ongeraho resitora yawe kugira ngo wakire ibyo abashyitsi n'abakiriya bakwegereye batumiza.",
     "aboutTitle": "Ibyerekeye",
@@ -2765,7 +2776,9 @@
       "hide": "Hisha",
       "open": "Fungura ku byatumizwa",
       "close": "Funga ku byatumizwa"
-    }
+    },
+    "ownerRoleHint": "Hagaragara gusa abafite inshingano ya nyiri/umuyobozi wa resitora. Banza uyimuhe kuri konti ye (Abakoresha → urupapuro rwe → Inshingano).",
+    "notRestaurateur": "Uwo muntu ntafite inshingano ya nyiri/umuyobozi wa resitora."
   },
   "Promoters": {
     "title": "Kwamamaza no kwinjiza",
