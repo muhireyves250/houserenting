@@ -140,9 +140,9 @@ describe("monthly rentals", () => {
     expect(await db.booking.findFirstOrThrow({ where: { rentalMode: "MONTHLY" } })).toMatchObject({ months: 4, upfrontMonths: 4, subtotal: 2400000 });
   });
 
-  it("are not offered for lodges (paid by the night)", async () => {
+  it("are offered for every kind of place, lodges too, when its owner sets a monthly price", async () => {
     await db.listing.update({ where: { id: "flat" }, data: { type: "LODGE" } });
-    expect(await monthly()).toEqual({ ok: false, error: "notOffered" });
+    expect(await monthly()).toMatchObject({ ok: true });
   });
 
   it("hold the whole period, charge the upfront months plus any deposit, and follow the month limits", async () => {
