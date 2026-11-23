@@ -82,6 +82,13 @@ export function RolesEditor({
     setDraft(role === current.role ? current : { role, target: role.endsWith("_OWNER") ? "new" : (options[0]?.id ?? "new") });
   };
 
+  // A role in words, with its place or restaurant ("Receptionist · Lake Kivu beach house").
+  const label = (x: { role: PersonRole; target: string }) => {
+    const g = groupOf(x.role);
+    const where = g === "PLACE" ? (placeOptions.find((o) => o.id === x.target) ?? ownedPlaces.find((o) => o.id === x.target))?.name : g === "RESTAURANT" ? (restaurantOptions.find((o) => o.id === x.target) ?? ownedRestaurants.find((o) => o.id === x.target))?.name : null;
+    return [t(`role.${x.role}`), where].filter(Boolean).join(" · ");
+  };
+
   const save = () =>
     start(async () => {
       const r = await setPersonRoleAction(userId, draft.role, needsTarget ? draft.target : "new");
@@ -120,8 +127,8 @@ export function RolesEditor({
           {/* 1. The kind of role. */}
           <section className="flex flex-col gap-2">
             <span className={step}>{t("step1")}</span>
-            {/* One compact bar of tabs (two rows of two on phones); the chosen one is filled. */}
-            <div role="radiogroup" aria-label={t("group")} className="grid grid-cols-2 gap-1 rounded-2xl bg-canvas p-1 ring-1 ring-line sm:grid-cols-4">
+            {/* Two rows of two (the card is narrow); the chosen one is filled. */}
+            <div role="radiogroup" aria-label={t("group")} className="grid grid-cols-2 gap-1 rounded-2xl bg-canvas p-1 ring-1 ring-line">
               {GROUPS.map(({ group: g, icon: Icon }) => {
                 const on = g === group;
                 return (
@@ -204,21 +211,24 @@ export function RolesEditor({
 
           {/* Save: what changes, then the buttons. */}
           {changed && (
-            <div className="flex flex-col gap-3 rounded-2xl bg-ink/[0.03] p-3.5 ring-1 ring-line sm:flex-row sm:items-center sm:justify-between">
-              <span className="flex min-w-0 items-center gap-2 text-[13px]">
-                <span className="truncate text-muted line-through decoration-muted/50">{t(`role.${current.role}`)}</span>
-                <ArrowRight className="size-4 shrink-0 text-primary" aria-hidden="true" />
-                <b className="truncate font-semibold text-ink">{t(`role.${draft.role}`)}</b>
+            // The card is narrow: the change on its own line (wrapping, never cut), the buttons below, side by side.
+            <div className="flex flex-col gap-3 rounded-2xl bg-ink/[0.03] p-3.5 ring-1 ring-line">
+              <span className="flex flex-col gap-1 text-[13px]">
+                <span className="text-muted line-through decoration-muted/50">{label(current)}</span>
+                <span className="flex items-start gap-1.5">
+                  <ArrowRight className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+                  <b className="font-semibold text-ink">{label(draft)}</b>
+                </span>
               </span>
-              <div className="flex shrink-0 gap-2">
-                <button type="button" onClick={() => (setDraft(current), setMessage(null))} className="h-10 flex-1 rounded-xl px-4 text-[14px] font-semibold text-ink ring-1 ring-line hover:bg-surface sm:flex-none">
+              <div className="grid grid-cols-2 gap-2">
+                <button type="button" onClick={() => (setDraft(current), setMessage(null))} className="h-11 rounded-xl px-4 text-[14px] font-semibold text-ink ring-1 ring-line hover:bg-surface">
                   {t("cancel")}
                 </button>
                 <button
                   type="button"
                   disabled={missingTarget || pending}
                   onClick={save}
-                  className="inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-xl bg-primary px-5 text-[14px] font-semibold text-white shadow-[0_8px_20px_-10px_rgba(0,87,184,0.9)] hover:bg-primary-hover disabled:opacity-50 disabled:shadow-none sm:flex-none"
+                  className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl bg-primary px-4 text-[14px] font-semibold text-white shadow-[0_8px_20px_-10px_rgba(0,87,184,0.9)] hover:bg-primary-hover disabled:opacity-50 disabled:shadow-none"
                 >
                   <Check className="size-4" aria-hidden="true" />
                   {pending ? t("saving") : t("save")}
