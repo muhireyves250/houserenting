@@ -282,6 +282,7 @@ model Listing {
   restaurants       Restaurant[]
   /// The restaurants VIIPA set to cook for guests staying here (one or more).
   kitchens          PlaceRestaurant[]
+  kitchenRequests   KitchenRequest[]
   documents         ListingDocument[]
   /// Laundry for guests staying here: null = not offered, 0 = free, otherwise RWF per kilogram.
   laundryPricePerKg Int?
@@ -1098,6 +1099,8 @@ model Restaurant {
   menu         MenuItem[]
   /// The places it cooks for (set by VIIPA).
   places       PlaceRestaurant[]
+  /// Its applications to cook for places (VIIPA approves or declines).
+  placeRequests KitchenRequest[]
   team         RestaurantMember[]
   orders       FoodOrder[]
 
@@ -1138,6 +1141,33 @@ model PlaceRestaurant {
   @@unique([listingId, restaurantId])
   @@index([restaurantId])
   @@map("placeRestaurant")
+}
+
+enum KitchenRequestStatus {
+  PENDING
+  APPROVED
+  DECLINED
+}
+
+/// A restaurant's owner applies to cook for a place's guests; VIIPA approves (it then cooks there) or declines.
+model KitchenRequest {
+  id           String               @id @default(cuid())
+  restaurantId String
+  restaurant   Restaurant           @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  listingId    String
+  listing      Listing              @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  note         String?
+  status       KitchenRequestStatus @default(PENDING)
+  reason       String?
+  requestedById String
+  decidedById  String?
+  decidedAt    DateTime?
+  createdAt    DateTime             @default(now())
+
+  @@index([status, createdAt])
+  @@index([restaurantId])
+  @@index([listingId])
+  @@map("kitchenRequest")
 }
 
 enum RestaurantRole {

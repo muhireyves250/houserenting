@@ -15,13 +15,15 @@ import { menuItemInput, orderInput, restaurantInput, type MenuItemInput, type Or
 
 type Actor = { id: string; role?: string | null };
 export type RestaurantRole = "staff" | "owner" | "manager" | "kitchen" | "courier";
-export type RestaurantAction = "edit" | "menu" | "team" | "orders" | "deliver" | "pause";
+export type RestaurantAction = "edit" | "menu" | "team" | "orders" | "deliver" | "pause" | "delivery" | "reviews" | "money";
 
 const ALLOWED: Record<RestaurantRole, readonly RestaurantAction[]> = {
-  staff: ["edit", "menu", "team", "orders", "deliver", "pause"],
-  // Who works at a restaurant is set by VIIPA staff only; the owner sees the team.
-  owner: ["edit", "menu", "orders", "deliver", "pause"],
-  manager: ["edit", "menu", "orders", "pause"],
+  staff: ["edit", "menu", "team", "orders", "deliver", "pause", "delivery", "reviews", "money"],
+  // The owner runs everything at their restaurant: its details, menu, orders and its people (managers and delivery
+  // people, added by their exact email); a manager adds delivery people only.
+  owner: ["edit", "menu", "team", "orders", "deliver", "pause", "delivery", "reviews", "money"],
+  // A manager runs the orders and the menu, sees the reviews and adds delivery people; only the owner edits the details.
+  manager: ["menu", "orders", "pause", "delivery", "reviews", "money"],
   kitchen: ["orders"],
   courier: ["deliver"],
 };
@@ -135,15 +137,19 @@ export async function deleteMenuItem(actor: Actor, itemId: string): Promise<bool
 export const RESTAURANT_TEAM_ROLES = ["MANAGER", "STAFF", "DELIVERY"] as const;
 export type RestaurantTeamRole = (typeof RESTAURANT_TEAM_ROLES)[number];
 
-export async function addRestaurantMember(actor: Actor, restaurantId: string, email: string, role: RestaurantTeamRole): Promise<{ ok: true } | { ok: false; error: "notAllowed" | "noAccount" | "isOwner" | "invalid" }> {
+export async function addRestaurantMember(actor: Actor, restaurantId: string, email: string, role: RestaurantTeamRole): Promise<{ ok: true } | { ok: false; error: "notAllowed" | "noAccount" | "isOwner" | "invalid" | "hasRole" }> {
   if (!RESTAURANT_TEAM_ROLES.includes(role) || typeof email !== "string" || email.length > 200) return { ok: false, error: "invalid" };
-  if (!canRestaurant(await restaurantRole(actor, restaurantId), "team")) return { ok: false, error: "notAllowed" };
+  // VIIPA staff and the owner add managers and delivery people; a manager adds delivery people only.
+  const can = await restaurantRole(actor, restaurantId);
+  if (!canRestaurant(can, "team") && !(canRestaurant(can, "delivery") && role === "DELIVERY")) return { ok: false, error: "notAllowed" };
   const [user, r] = await Promise.all([
     db.user.findFirst({ where: { email: email.trim().toLowerCase(), status: "ACTIVE", role: "USER" }, select: { id: true, name: true, email: true } }),
     db.restaurant.findUnique({ where: { id: restaurantId }, select: { ownerId: true, name: true } }),
   ]);
   if (!user) return { ok: false, error: "noAccount" };
   if (!r || r.ownerId === user.id) return { ok: false, error: "isOwner" };
+  // One role per person: only a customer can join (not someone with another role already).
+  if (!(await isCustomer(user.id))) return { ok: false, error: "hasRole" };
   await db.$transaction(async (tx) => {
     await tx.restaurantMember.upsert({ where: { restaurantId_userId: { restaurantId, userId: user.id } }, create: { restaurantId, userId: user.id, role, addedById: actor.id }, update: { role } });
     await audit(tx, { actorId: actor.id, action: "restaurant.team", entityType: "restaurant", entityId: restaurantId, data: { user: user.id, role } });
@@ -155,10 +161,132 @@ export async function addRestaurantMember(actor: Actor, restaurantId: string, em
 }
 
 export async function removeRestaurantMember(actor: Actor, memberId: string): Promise<boolean> {
-  const m = await db.restaurantMember.findUnique({ where: { id: memberId }, select: { restaurantId: true } });
-  if (!m || !canRestaurant(await restaurantRole(actor, m.restaurantId), "team")) return false;
+  const m = await db.restaurantMember.findUnique({ where: { id: memberId }, select: { restaurantId: true, role: true } });
+  if (!m) return false;
+  // Staff and the owner remove anyone; a manager removes delivery people.
+  const can = await restaurantRole(actor, m.restaurantId);
+  if (!canRestaurant(can, "team") && !(canRestaurant(can, "delivery") && m.role === "DELIVERY")) return false;
   await db.restaurantMember.delete({ where: { id: memberId } });
   return true;
+}
+
+export type KitchenApplyResult = { ok: true } | { ok: false; error: "notAllowed" | "notFound" | "already" | "pending" | "invalid" };
+
+/** A restaurant's owner applies to cook for a place's guests (VIIPA is told and decides). */
+export async function applyToCook(actor: Actor, restaurantId: string, listingId: string, note = ""): Promise<KitchenApplyResult> {
+  if (typeof listingId !== "string" || typeof note !== "string" || note.length > 500) return { ok: false, error: "invalid" };
+  const role = await restaurantRole(actor, restaurantId);
+  if (role !== "owner" && role !== "staff") return { ok: false, error: "notAllowed" };
+  const [r, listing] = await Promise.all([
+    db.restaurant.findUnique({ where: { id: restaurantId }, select: { name: true } }),
+    db.listing.findFirst({ where: { id: listingId, status: "PUBLISHED" }, select: { title: true } }),
+  ]);
+  if (!r || !listing) return { ok: false, error: "notFound" };
+  if (await db.placeRestaurant.findUnique({ where: { listingId_restaurantId: { listingId, restaurantId } }, select: { id: true } })) return { ok: false, error: "already" };
+  if (await db.kitchenRequest.findFirst({ where: { restaurantId, listingId, status: "PENDING" }, select: { id: true } })) return { ok: false, error: "pending" };
+  await db.$transaction(async (tx) => {
+    const req = await tx.kitchenRequest.create({ data: { restaurantId, listingId, note: note.trim() || null, requestedById: actor.id } });
+    await audit(tx, { actorId: actor.id, action: "restaurant.applyToCook", entityType: "restaurant", entityId: restaurantId, data: { listingId, request: req.id } });
+    await notifyAdmins(tx, "kitchenRequest", { title: r.name, place: listing.title }, `/admin/listings/${listingId}`);
+  });
+  return { ok: true };
+}
+
+/** VIIPA approves an application (the restaurant then cooks for the place) or declines it with a reason. */
+export async function decideKitchenRequest(actor: Actor, requestId: string, approve: boolean, reason = ""): Promise<boolean> {
+  if (!canStaff(actor, "food") || typeof reason !== "string") return false;
+  const why = reason.trim().slice(0, 300);
+  if (!approve && !why) return false;
+  return db.$transaction(async (tx) => {
+    const req = await tx.kitchenRequest.findUnique({ where: { id: requestId }, select: { id: true, status: true, restaurantId: true, listingId: true, restaurant: { select: { name: true, ownerId: true } }, listing: { select: { title: true } } } });
+    if (!req || req.status !== "PENDING") return false;
+    await tx.kitchenRequest.update({ where: { id: req.id }, data: { status: approve ? "APPROVED" : "DECLINED", reason: why || null, decidedById: actor.id, decidedAt: new Date() } });
+    if (approve) await tx.placeRestaurant.upsert({ where: { listingId_restaurantId: { listingId: req.listingId, restaurantId: req.restaurantId } }, create: { listingId: req.listingId, restaurantId: req.restaurantId, addedById: actor.id }, update: {} });
+    await audit(tx, { actorId: actor.id, action: approve ? "restaurant.cookApproved" : "restaurant.cookDeclined", entityType: "restaurant", entityId: req.restaurantId, data: { listingId: req.listingId, ...(why ? { reason: why } : {}) } });
+    await notify(tx, req.restaurant.ownerId, approve ? "kitchenApproved" : "kitchenDeclined", { title: req.restaurant.name, place: req.listing.title, reason: why }, `/host/restaurants/${req.restaurantId}?tab=places`);
+    return true;
+  });
+}
+
+/** A restaurant's applications (newest first) and the places it cooks for. */
+export async function restaurantPlaces(restaurantId: string) {
+  const [serving, requests] = await Promise.all([
+    db.placeRestaurant.findMany({ where: { restaurantId }, orderBy: { createdAt: "asc" }, select: { listing: { select: { id: true, title: true, city: true } } } }),
+    db.kitchenRequest.findMany({ where: { restaurantId }, orderBy: { createdAt: "desc" }, take: 30, select: { id: true, status: true, reason: true, createdAt: true, listing: { select: { id: true, title: true, city: true } } } }),
+  ]);
+  return { serving: serving.map((s) => s.listing), requests };
+}
+
+/** Places a restaurant can apply to cook for: live places it doesn't serve yet. */
+export function placesToApply(restaurantId: string) {
+  return db.listing.findMany({ where: { status: "PUBLISHED", kitchens: { none: { restaurantId } } }, orderBy: [{ city: "asc" }, { title: "asc" }], select: { id: true, title: true, city: true }, take: 300 });
+}
+
+/** Staff: applications waiting for an answer (for one place, or all). */
+export function pendingKitchenRequests(listingId?: string) {
+  return db.kitchenRequest.findMany({ where: { status: "PENDING", ...(listingId ? { listingId } : {}) }, orderBy: { createdAt: "asc" }, select: { id: true, note: true, createdAt: true, restaurant: { select: { id: true, name: true, city: true } }, listing: { select: { id: true, title: true } } } });
+}
+
+/** Kigali day (UTC+2) of a moment, as YYYY-MM-DD. */
+const kigaliDay = (d: Date) => new Date(d.getTime() + 2 * 3_600_000).toISOString().slice(0, 10);
+
+/**
+ * A restaurant's money from its orders: each paid order with what the guest paid, VIIPA's commission and the
+ * restaurant's share; totals for today and this month; and a report day by day (the last `days` days).
+ */
+export async function restaurantMoney(restaurantId: string, now: Date = new Date(), days = 31) {
+  const since = new Date(now.getTime() - days * 86_400_000);
+  const orders = await db.foodOrder.findMany({
+    where: { restaurantId, paidAt: { gte: since } },
+    orderBy: { paidAt: "desc" },
+    select: { reference: true, paidAt: true, total: true, status: true, paymentClaim: true, customer: { select: { name: true } }, items: { select: { name: true, quantity: true, price: true } } },
+  });
+  const ledger = orders.length
+    ? await db.ledgerEntry.findMany({ where: { note: { in: orders.map((o) => `food ${o.reference}`) }, kind: { in: ["COMMISSION", "HOST_PAYABLE"] } }, select: { kind: true, amount: true, note: true } })
+    : [];
+  const part = (ref: string, kind: "COMMISSION" | "HOST_PAYABLE") => ledger.filter((e) => e.note === `food ${ref}` && e.kind === kind).reduce((n, e) => n + e.amount, 0);
+  const rows = orders.map((o) => {
+    const commission = part(o.reference, "COMMISSION");
+    const share = part(o.reference, "HOST_PAYABLE") || o.total - commission;
+    return { ...o, customer: o.customer.name, paidAt: o.paidAt!, day: kigaliDay(o.paidAt!), commission, share };
+  });
+  const sum = (list: typeof rows) => ({ orders: list.length, sales: list.reduce((n, r) => n + r.total, 0), commission: list.reduce((n, r) => n + r.commission, 0), share: list.reduce((n, r) => n + r.share, 0) });
+  const today = kigaliDay(now);
+  const byDay = new Map<string, typeof rows>();
+  for (const r of rows) byDay.set(r.day, [...(byDay.get(r.day) ?? []), r]);
+  return {
+    today: sum(rows.filter((r) => r.day === today)),
+    month: sum(rows.filter((r) => r.day.slice(0, 7) === today.slice(0, 7))),
+    days: [...byDay.entries()].sort((a, b) => b[0].localeCompare(a[0])).map(([day, list]) => ({ day, ...sum(list) })),
+    orders: rows,
+  };
+}
+
+export type FoundPerson = { ok: true; name: string; email: string } | { ok: false; error: "notAllowed" | "noAccount" | "hasRole" | "invalid" };
+
+/**
+ * The owner or a manager looks up who they want as a delivery person by their exact email (they never see a list of
+ * people): their name comes back so they can check it is the right person before adding them. Only customers.
+ */
+export async function findPersonByEmail(actor: Actor, restaurantId: string, email: string): Promise<FoundPerson> {
+  if (typeof email !== "string" || email.length > 200 || !email.includes("@")) return { ok: false, error: "invalid" };
+  if (!canRestaurant(await restaurantRole(actor, restaurantId), "delivery")) return { ok: false, error: "notAllowed" };
+  const user = await db.user.findFirst({ where: { email: email.trim().toLowerCase(), status: "ACTIVE" }, select: { id: true, name: true, email: true } });
+  if (!user) return { ok: false, error: "noAccount" };
+  if (!(await isCustomer(user.id))) return { ok: false, error: "hasRole" };
+  return { ok: true, name: user.name, email: user.email };
+}
+
+/** What guests said about a restaurant's food (their star rating and comment after an order), newest first. */
+export async function restaurantReviews(restaurantId: string, take = 100) {
+  const rows = await db.foodOrder.findMany({
+    where: { restaurantId, rating: { not: null } },
+    orderBy: { updatedAt: "desc" },
+    take,
+    select: { reference: true, rating: true, feedback: true, updatedAt: true, customer: { select: { name: true } }, items: { select: { name: true, quantity: true } } },
+  });
+  const average = rows.length ? rows.reduce((sum, r) => sum + (r.rating ?? 0), 0) / rows.length : null;
+  return { average, rows: rows.map((r) => ({ ...r, customer: r.customer.name.split(" ")[0] ?? "" })) };
 }
 
 const PUBLIC_SELECT = {

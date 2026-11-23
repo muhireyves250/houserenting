@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/cn";
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { useRouter } from "@/i18n/navigation";
@@ -20,9 +21,18 @@ export function PauseToggle({ restaurantId, paused }: { restaurantId: string; pa
           router.refresh();
         })
       }
-      className={paused ? "rounded-full bg-primary px-4 py-2 text-[13px] font-semibold text-white" : "rounded-full border border-line bg-surface px-4 py-2 text-[13px] font-semibold text-ink"}
+      role="switch"
+      aria-checked={!paused}
+      className={cn("flex items-center gap-3 rounded-2xl px-4 py-3 text-left ring-1 transition-colors disabled:opacity-60", paused ? "bg-red-50 ring-red-200" : "bg-emerald-50 ring-emerald-200")}
     >
-      {paused ? t("openOrders") : t("pauseOrders")}
+      {/* Open (taking orders) or closed: the state in words, and a big switch. */}
+      <span className="flex flex-col">
+        <span className={cn("text-[15px] font-bold", paused ? "text-red-800" : "text-emerald-800")}>{paused ? t("closedNowTitle") : t("openNowTitle")}</span>
+        <span className="text-[12px] text-muted">{paused ? t("tapToOpen") : t("tapToClose")}</span>
+      </span>
+      <span className={cn("relative h-7 w-12 shrink-0 rounded-full transition-colors", paused ? "bg-line-strong" : "bg-emerald-600")}>
+        <span className={cn("absolute top-0.5 size-6 rounded-full bg-white shadow transition-all", paused ? "left-0.5" : "left-[22px]")} />
+      </span>
     </button>
   );
 }

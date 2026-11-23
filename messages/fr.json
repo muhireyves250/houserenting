@@ -1673,7 +1673,10 @@
       "ebmRequested": "Le client de {reference} demande une facture EBM.",
       "restaurantNew": "Nouveau restaurant à vérifier : {title}. Vérifiez ses informations et son menu, réglez sa commission, puis publiez-le.",
       "restaurantRoleGiven": "VIIPA vous a nommé propriétaire/gérant de restaurant : configurez votre restaurant et son menu.",
-      "bookingCheckedOut": "Votre séjour à {title} est terminé et votre départ a été enregistré ({reference}). Merci d'avoir séjourné avec VIIPA !"
+      "bookingCheckedOut": "Votre séjour à {title} est terminé et votre départ a été enregistré ({reference}). Merci d'avoir séjourné avec VIIPA !",
+      "kitchenRequest": "{title} demande à cuisiner pour les clients de {place}.",
+      "kitchenApproved": "{title} cuisine maintenant pour les clients de {place}.",
+      "kitchenDeclined": "VIIPA a refusé que {title} cuisine pour {place} : {reason}"
     },
     "filterLabel": "Afficher les notifications",
     "filter": {
@@ -2626,7 +2629,8 @@
       "notAllowed": "Seul VIIPA peut modifier l'équipe.",
       "noAccount": "Aucun compte n'utilise cet e-mail.",
       "isOwner": "C'est le propriétaire.",
-      "invalid": "Vérifiez l'e-mail et le rôle."
+      "invalid": "Vérifiez l'e-mail et le rôle.",
+      "hasRole": "Cette personne a déjà un autre rôle sur VIIPA."
     },
     "adminIntro": "Restaurants, menus et commandes. Publiez-les quand ils sont prêts ; masquez-les avec une raison si besoin.",
     "adminNewIntro": "Créez un restaurant pour un propriétaire, ou géré par VIIPA.",
@@ -2863,7 +2867,11 @@
       "add": "Ajouter",
       "failed": "Échec — réessayez.",
       "cooksFor": "Cuisine pour",
-      "cooksForNone": "Aucun logement : ajoutez-le depuis la page d'un logement (Restaurants qui cuisinent ici)."
+      "cooksForNone": "Aucun logement : ajoutez-le depuis la page d'un logement (Restaurants qui cuisinent ici).",
+      "applied": "{name} demande à cuisiner ici",
+      "approve": "Approuver",
+      "decline": "Refuser",
+      "declineReason": "Pourquoi (le propriétaire le lit)"
     },
     "confirm": {
       "title": "Livrée quand ils confirment",
@@ -2876,6 +2884,121 @@
       "deskReceived": "Reçue à la réception",
       "waiting": "En attente de : {who}",
       "guestDone": "Vous avez confirmé. En attente de : {who}"
+    },
+    "dash": {
+      "sections": "Sections du restaurant",
+      "orders": "Commandes",
+      "myDeliveries": "Mes livraisons",
+      "menu": "Menu",
+      "reviews": "Avis",
+      "delivery": "Livreurs",
+      "details": "Détails",
+      "noOrders": "Aucune commande pour l'instant",
+      "noOrdersHint": "Les nouvelles commandes apparaissent ici toutes seules. Gardez cette page ouverte.",
+      "new": "Nouvelles — répondez maintenant",
+      "newHint": "Acceptez ou refusez chacune dans les 5 minutes.",
+      "working": "En cuisine et en route",
+      "workingHint": "Appuyez sur le grand bouton de chaque commande à chaque étape.",
+      "myWorking": "À livrer",
+      "myWorkingHint": "Portez chaque commande dans la chambre du client, puis appuyez sur le bouton.",
+      "done": "Terminées",
+      "noReviews": "Pas encore d'avis. Les clients notent leur repas après l'avoir reçu.",
+      "reviewCount": "{count, plural, one {# avis} other {# avis}}",
+      "team": "Équipe",
+      "places": "Logements"
+    },
+    "deliveryTeam": {
+      "none": "Personne pour l'instant",
+      "noneHint": "Ajoutez les personnes qui portent vos commandes aux clients. Sans livreur, vous pouvez livrer vous-mêmes.",
+      "remove": "Retirer {name}",
+      "addTitle": "Ajouter un livreur",
+      "addHint": "Tapez son e-mail exact (celui de son inscription). Vous verrez son nom pour vérifier.",
+      "emailPlaceholder": "Son e-mail, ex. nom@gmail.com",
+      "find": "Chercher",
+      "isThis": "Ajouter cette personne comme {role} ?",
+      "yesAdd": "Oui, ajouter",
+      "no": "Non",
+      "added": "{name} fait maintenant partie de vos livreurs.",
+      "error": {
+        "notAllowed": "Vous ne pouvez pas ajouter de personnes à ce restaurant.",
+        "noAccount": "Aucun compte VIIPA avec cet e-mail. Vérifiez-le ou demandez-lui de s'inscrire.",
+        "hasRole": "Cette personne a déjà un autre rôle sur VIIPA. Demandez à VIIPA de la remettre en client.",
+        "invalid": "Tapez une adresse e-mail complète.",
+        "isOwner": "C'est le propriétaire du restaurant."
+      },
+      "addPerson": "Ajouter une personne",
+      "asRole": "Son rôle",
+      "addedManager": "{name} est maintenant gérant ici.",
+      "role": {
+        "MANAGER": "Gérant",
+        "DELIVERY": "Livreur"
+      },
+      "noneDelivery": "Aucun livreur pour l'instant"
+    },
+    "openNowTitle": "Ouvert — commandes acceptées",
+    "closedNowTitle": "Fermé — pas de commandes",
+    "tapToClose": "Touchez pour fermer",
+    "tapToOpen": "Touchez pour rouvrir",
+    "cookFor": {
+      "serving": "Logements pour lesquels vous cuisinez",
+      "servingNone": "Aucun pour l'instant. Postulez ci-dessous : VIIPA vérifie et répond.",
+      "applications": "Vos demandes",
+      "waiting": "En attente de la réponse de VIIPA",
+      "declined": "Refusée : {reason}",
+      "applyTitle": "Postuler pour cuisiner pour un logement",
+      "applyHint": "Choisissez un logement dont vous aimeriez nourrir les clients. VIIPA vérifie et vous répond.",
+      "choosePlace": "Choisir un logement…",
+      "notePlaceholder": "Un mot pour VIIPA (facultatif) : ce que vous proposez, vos délais…",
+      "apply": "Envoyer la demande",
+      "sent": "Envoyée. VIIPA répondra bientôt.",
+      "error": {
+        "notAllowed": "Seul le propriétaire du restaurant peut postuler.",
+        "notFound": "Ce logement n'est pas disponible.",
+        "already": "Vous cuisinez déjà pour ce logement.",
+        "pending": "Vous avez déjà postulé pour ce logement : attendez la réponse de VIIPA.",
+        "invalid": "Choisissez d'abord un logement."
+      }
+    },
+    "money": {
+      "tab": "Argent",
+      "today": "Aujourd'hui",
+      "thisMonth": "Ce mois-ci",
+      "sales": "Ventes",
+      "commission": "Commission VIIPA",
+      "share": "Votre part",
+      "orders": "{count, plural, one {# commande} other {# commandes}}",
+      "daily": "Rapport quotidien",
+      "dailyHint": "Chaque jour de vente : touchez Télécharger pour le rapport du jour (PDF).",
+      "download": "Télécharger",
+      "receipts": "Reçus",
+      "receiptsHint": "Toutes les commandes payées. Touchez Reçu pour le télécharger (PDF).",
+      "receipt": "Reçu",
+      "noSales": "Aucune commande payée pour l'instant. L'argent des commandes apparaît ici dès que les clients paient.",
+      "payoutNote": "VIIPA verse votre part sur le compte du propriétaire, pour tous ses restaurants ensemble.",
+      "reportTitle": "Rapport quotidien",
+      "reportDay": "Jour : {day}",
+      "ordersCount": "{count, plural, one {# commande payée} other {# commandes payées}}",
+      "receiptTitle": "Reçu de commande",
+      "receiptOrder": "Commande {reference}",
+      "receiptPaid": "Payée le {when}",
+      "guestPaid": "Payé par le client",
+      "totalSales": "Total des ventes",
+      "totalCommission": "Commission VIIPA",
+      "totalShare": "Votre part",
+      "footer": "VIIPA - ce document liste les commandes payées via VIIPA.",
+      "col": {
+        "order": "Commande",
+        "time": "Heure",
+        "guest": "Client",
+        "paid": "Payé",
+        "commission": "Commission",
+        "share": "Votre part",
+        "dish": "Plat",
+        "qty": "Qté",
+        "price": "Prix",
+        "amount": "Montant",
+        "day": "Jour"
+      }
     }
   },
   "Promoters": {

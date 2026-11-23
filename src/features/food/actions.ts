@@ -31,6 +31,11 @@ import {
   setPlaceKitchens,
   confirmDelivery,
   type ConfirmDeliveryResult,
+  findPersonByEmail,
+  type FoundPerson,
+  applyToCook,
+  decideKitchenRequest,
+  type KitchenApplyResult,
 } from "./service";
 import type { MenuItemInput, OrderInput, RestaurantInput } from "./validation";
 
@@ -194,4 +199,29 @@ export async function confirmDeliveryAction(reference: string): Promise<ConfirmD
   const result = await confirmDelivery(user, reference);
   if (result.ok) refresh();
   return result;
+}
+
+/** The owner or a manager checks who an exact email belongs to before adding them as a delivery person. */
+export async function findPersonByEmailAction(restaurantId: string, email: string): Promise<FoundPerson> {
+  const user = await getCurrentUser();
+  if (!user || !id.safeParse(restaurantId).success) return { ok: false, error: "notAllowed" };
+  return findPersonByEmail(user, restaurantId, email);
+}
+
+/** The owner applies for their restaurant to cook for a place. */
+export async function applyToCookAction(restaurantId: string, listingId: string, note: string): Promise<KitchenApplyResult> {
+  const user = await getCurrentUser();
+  if (!user || !id.safeParse(restaurantId).success || !id.safeParse(listingId).success) return { ok: false, error: "invalid" };
+  const r = await applyToCook(user, restaurantId, listingId, note);
+  if (r.ok) refresh();
+  return r;
+}
+
+/** Staff approve or decline an application to cook for a place. */
+export async function decideKitchenRequestAction(requestId: string, approve: boolean, reason: string): Promise<boolean> {
+  const user = await getCurrentUser();
+  if (!user || !id.safeParse(requestId).success) return false;
+  const ok = await decideKitchenRequest(user, requestId, approve, reason);
+  if (ok) refresh();
+  return ok;
 }

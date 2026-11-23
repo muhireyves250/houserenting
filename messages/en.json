@@ -1673,7 +1673,10 @@
       "ebmRequested": "The guest of {reference} asks for an EBM invoice.",
       "restaurantNew": "New restaurant to check: {title}. Look at its details and menu, set its commission, then publish it.",
       "restaurantRoleGiven": "VIIPA made you a restaurant owner/manager: set up your restaurant and its menu.",
-      "bookingCheckedOut": "Your stay at {title} ended and you were checked out ({reference}). Thank you for staying with VIIPA!"
+      "bookingCheckedOut": "Your stay at {title} ended and you were checked out ({reference}). Thank you for staying with VIIPA!",
+      "kitchenRequest": "{title} applied to cook for guests at {place}.",
+      "kitchenApproved": "{title} now cooks for guests at {place}.",
+      "kitchenDeclined": "VIIPA declined {title} cooking for {place}: {reason}"
     },
     "filterLabel": "Show notifications",
     "filter": {
@@ -2626,7 +2629,8 @@
       "notAllowed": "Only VIIPA can change the team.",
       "noAccount": "No account uses this email.",
       "isOwner": "That's the owner.",
-      "invalid": "Check the email and role."
+      "invalid": "Check the email and role.",
+      "hasRole": "This person already has another role on VIIPA."
     },
     "adminIntro": "Restaurants, their menus and orders. Publish them when ready; hide them with a reason when needed.",
     "adminNewIntro": "Create a restaurant for an owner, or one VIIPA runs.",
@@ -2863,7 +2867,11 @@
       "add": "Add",
       "failed": "Couldn't save — try again.",
       "cooksFor": "Cooks for",
-      "cooksForNone": "No place yet: add it on a place's page (Restaurants cooking here)."
+      "cooksForNone": "No place yet: add it on a place's page (Restaurants cooking here).",
+      "applied": "{name} applied to cook here",
+      "approve": "Approve",
+      "decline": "Decline",
+      "declineReason": "Why (the owner reads it)"
     },
     "confirm": {
       "title": "Delivered once they confirm",
@@ -2876,6 +2884,121 @@
       "deskReceived": "Received at the desk",
       "waiting": "Waiting for: {who}",
       "guestDone": "You confirmed. Waiting for: {who}"
+    },
+    "dash": {
+      "sections": "Restaurant sections",
+      "orders": "Orders",
+      "myDeliveries": "My deliveries",
+      "menu": "Menu",
+      "reviews": "Reviews",
+      "delivery": "Delivery people",
+      "details": "Details",
+      "noOrders": "No orders right now",
+      "noOrdersHint": "New orders appear here on their own. Keep this page open.",
+      "new": "New — answer now",
+      "newHint": "Accept or reject each one within 5 minutes.",
+      "working": "Cooking and on the way",
+      "workingHint": "Tap the big button on each order when you finish a step.",
+      "myWorking": "To deliver",
+      "myWorkingHint": "Take each order to the guest's room, then tap the button.",
+      "done": "Done",
+      "noReviews": "No reviews yet. Guests rate their food after it reaches them.",
+      "reviewCount": "{count, plural, one {# review} other {# reviews}}",
+      "team": "People",
+      "places": "Places"
+    },
+    "deliveryTeam": {
+      "none": "Nobody here yet",
+      "noneHint": "Add the people who take your orders to guests. Without one, you can still take orders yourselves.",
+      "remove": "Remove {name}",
+      "addTitle": "Add a delivery person",
+      "addHint": "Type their exact email (the one they signed up with). You'll see their name to check it's them.",
+      "emailPlaceholder": "Their email, e.g. name@gmail.com",
+      "find": "Find",
+      "isThis": "Add this person as {role}?",
+      "yesAdd": "Yes, add",
+      "no": "No",
+      "added": "{name} is now one of your delivery people.",
+      "error": {
+        "notAllowed": "You can't add people to this restaurant.",
+        "noAccount": "No VIIPA account has this email. Check it, or ask them to sign up first.",
+        "hasRole": "This person already has another role on VIIPA. Ask VIIPA to make them a customer first.",
+        "invalid": "Type a full email address.",
+        "isOwner": "This is the restaurant's owner."
+      },
+      "addPerson": "Add a person",
+      "asRole": "Their role",
+      "addedManager": "{name} is now a manager here.",
+      "role": {
+        "MANAGER": "Manager",
+        "DELIVERY": "Delivery"
+      },
+      "noneDelivery": "No delivery people yet"
+    },
+    "openNowTitle": "Open — taking orders",
+    "closedNowTitle": "Closed — not taking orders",
+    "tapToClose": "Tap to close for now",
+    "tapToOpen": "Tap to open again",
+    "cookFor": {
+      "serving": "Places you cook for",
+      "servingNone": "None yet. Apply below: VIIPA checks and answers.",
+      "applications": "Your applications",
+      "waiting": "Waiting for VIIPA's answer",
+      "declined": "Declined: {reason}",
+      "applyTitle": "Apply to cook for a place",
+      "applyHint": "Choose a place whose guests you'd like to cook for. VIIPA checks and tells you.",
+      "choosePlace": "Choose a place…",
+      "notePlaceholder": "A note for VIIPA (optional): what you'd offer, how fast…",
+      "apply": "Send application",
+      "sent": "Sent. VIIPA will answer soon.",
+      "error": {
+        "notAllowed": "Only the restaurant's owner can apply.",
+        "notFound": "That place isn't available.",
+        "already": "You already cook for this place.",
+        "pending": "You already applied for this place: wait for VIIPA's answer.",
+        "invalid": "Choose a place first."
+      }
+    },
+    "money": {
+      "tab": "Money",
+      "today": "Today",
+      "thisMonth": "This month",
+      "sales": "Sales",
+      "commission": "VIIPA commission",
+      "share": "Your share",
+      "orders": "{count, plural, one {# order} other {# orders}}",
+      "daily": "Daily report",
+      "dailyHint": "Every day you sold: tap Download for that day's report (PDF).",
+      "download": "Download",
+      "receipts": "Receipts",
+      "receiptsHint": "Every paid order. Tap Receipt to download it (PDF).",
+      "receipt": "Receipt",
+      "noSales": "No paid orders yet. Money from orders shows here once guests pay.",
+      "payoutNote": "VIIPA sends your share to the owner's payout account for all their restaurants together.",
+      "reportTitle": "Daily report",
+      "reportDay": "Day: {day}",
+      "ordersCount": "{count, plural, one {# paid order} other {# paid orders}}",
+      "receiptTitle": "Order receipt",
+      "receiptOrder": "Order {reference}",
+      "receiptPaid": "Paid {when}",
+      "guestPaid": "Guest paid",
+      "totalSales": "Total sales",
+      "totalCommission": "VIIPA commission",
+      "totalShare": "Your share",
+      "footer": "VIIPA - this document lists orders paid through VIIPA.",
+      "col": {
+        "order": "Order",
+        "time": "Time",
+        "guest": "Guest",
+        "paid": "Paid",
+        "commission": "Commission",
+        "share": "Your share",
+        "dish": "Dish",
+        "qty": "Qty",
+        "price": "Price",
+        "amount": "Amount",
+        "day": "Day"
+      }
     }
   },
   "Promoters": {

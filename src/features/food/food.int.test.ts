@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { db } from "@/lib/db";
 import { setAgreement } from "@/features/agreements/service";
 import { resetDb } from "@/test/db";
-import { addRestaurantMember, assignCourier, expireOrders, rateOrder, restaurantRole, claimOrderPayment, confirmOrderPayment, deleteFoodOrder, deleteRestaurant, hideMyOrder, myOrders, kitchenForPlace, confirmDelivery, moveOrder, ordersForHost, ordersLive, placeOrder, saveMenuItem, saveRestaurant, setPlaceKitchens, setRestaurantStatus } from "./service";
+import { addRestaurantMember, assignCourier, expireOrders, rateOrder, restaurantRole, claimOrderPayment, confirmOrderPayment, deleteFoodOrder, deleteRestaurant, hideMyOrder, myOrders, kitchenForPlace, confirmDelivery, findPersonByEmail, applyToCook, decideKitchenRequest, restaurantMoney, canAddRestaurant, moveOrder, ordersForHost, ordersLive, placeOrder, saveMenuItem, saveRestaurant, setPlaceKitchens, setRestaurantStatus } from "./service";
 
 const admin = { id: "admin", role: "ADMIN" };
 const NOW = new Date("2026-11-03T08:00:00Z");
@@ -220,11 +220,11 @@ describe("food from the kitchen of the guest's stay", () => {
     expect(await db.menuItem.count({ where: { restaurantId: id } })).toBe(0);
   });
 
-  it("VIIPA sets who works at a restaurant (not the owner)", async () => {
+  it("VIIPA (or the owner) sets who works at a restaurant; the owner is told when staff add someone", async () => {
     await db.user.update({ where: { id: "owner" }, data: { isRestaurateur: true } });
     const saved = await saveRestaurant(admin, null, { ...base, listingId: "place" }, "owner");
     if (!saved.ok) throw new Error("save failed");
-    expect(await addRestaurantMember({ id: "owner" }, saved.id, "cook@example.com", "STAFF")).toEqual({ ok: false, error: "notAllowed" });
+    expect(await addRestaurantMember({ id: "guest" }, saved.id, "cook@example.com", "STAFF")).toEqual({ ok: false, error: "notAllowed" });
     expect(await addRestaurantMember(admin, saved.id, "cook@example.com", "STAFF")).toEqual({ ok: true });
     expect(await restaurantRole({ id: "cook" }, saved.id)).toBe("kitchen");
     expect(await db.notification.count({ where: { userId: "owner", kind: "teamMemberJoined" } })).toBe(1);
@@ -262,5 +262,56 @@ describe("food from the kitchen of the guest's stay", () => {
     expect((await saveRestaurant(admin, null, { ...base, name: "Set up by VIIPA" }, "owner")).ok).toBe(true);
     // Not taken away while they own restaurants.
     expect(await setRestaurateur(admin, "owner", false)).toEqual({ ok: false, error: "hasRestaurants" });
+  });
+});
+
+describe("a restaurant's owner and managers", () => {
+  it("the owner adds managers and delivery people by exact email; a manager adds delivery people only and can't add restaurants", async () => {
+    const id = await liveKitchen();
+    await db.restaurant.update({ where: { id }, data: { ownerId: "owner" } });
+    await db.user.updateMany({ where: { id: { in: ["cook", "guest"] } }, data: { status: "ACTIVE" } });
+    await db.user.create({ data: { id: "rider", name: "Rider", email: "rider@example.com", status: "ACTIVE" } });
+    // Looking someone up needs their exact email (no lists), and gives back only their name.
+    expect(await findPersonByEmail({ id: "guest" }, id, "cook@example.com")).toEqual({ ok: false, error: "notAllowed" });
+    expect(await findPersonByEmail({ id: "owner" }, id, "cook@")).toEqual({ ok: false, error: "noAccount" });
+    expect(await findPersonByEmail({ id: "owner" }, id, "COOK@example.com")).toEqual({ ok: true, name: "Cook", email: "cook@example.com" });
+    expect(await addRestaurantMember({ id: "owner" }, id, "cook@example.com", "MANAGER")).toEqual({ ok: true });
+    // The manager: delivery people only.
+    expect(await addRestaurantMember({ id: "cook" }, id, "rider@example.com", "MANAGER")).toEqual({ ok: false, error: "notAllowed" });
+    expect(await addRestaurantMember({ id: "cook" }, id, "rider@example.com", "DELIVERY")).toEqual({ ok: true });
+    // Someone who already has a role can't be added again elsewhere.
+    expect(await findPersonByEmail({ id: "owner" }, id, "rider@example.com")).toEqual({ ok: false, error: "hasRole" });
+    expect(await restaurantRole({ id: "cook" }, id)).toBe("manager");
+    expect(await canAddRestaurant({ id: "cook" })).toBe(false);
+  });
+
+  it("the owner applies to cook for a place; VIIPA approves (it cooks there) or declines with a reason", async () => {
+    const id = await liveKitchen();
+    await db.restaurant.update({ where: { id }, data: { ownerId: "owner" } });
+    await setPlaceKitchens(admin, "place", []);
+    expect(await applyToCook({ id: "guest" }, id, "place")).toEqual({ ok: false, error: "notAllowed" });
+    expect(await applyToCook({ id: "owner" }, id, "place", "Breakfast in 20 minutes")).toEqual({ ok: true });
+    expect(await applyToCook({ id: "owner" }, id, "place")).toEqual({ ok: false, error: "pending" });
+    const req = await db.kitchenRequest.findFirstOrThrow();
+    expect(await decideKitchenRequest({ id: "owner" }, req.id, true)).toBe(false);
+    expect(await decideKitchenRequest(admin, req.id, false)).toBe(false); // declining needs a reason
+    expect(await decideKitchenRequest(admin, req.id, true)).toBe(true);
+    expect(await db.placeRestaurant.count({ where: { listingId: "place", restaurantId: id } })).toBe(1);
+    expect(await applyToCook({ id: "owner" }, id, "place")).toEqual({ ok: false, error: "already" });
+    expect(await db.notification.count({ where: { userId: "owner", kind: "kitchenApproved" } })).toBe(1);
+  });
+
+  it("shows the money from paid orders: sales, VIIPA's commission and the restaurant's share, today and day by day", async () => {
+    const id = await liveKitchen();
+    const dish = await db.menuItem.findFirstOrThrow();
+    const placed = await order(id, dish.id);
+    if (!placed.ok) throw new Error("order failed");
+    await moveOrder(admin, placed.reference, "ACCEPTED");
+    await claimOrderPayment("guest", placed.reference, "MP2611.FOOD.077");
+    await confirmOrderPayment(admin, placed.reference);
+    const money = await restaurantMoney(id);
+    expect(money.today).toEqual({ orders: 1, sales: 6000, commission: 600, share: 5400 });
+    expect(money.days).toHaveLength(1);
+    expect(money.orders[0]).toMatchObject({ reference: placed.reference, total: 6000, commission: 600, share: 5400 });
   });
 });

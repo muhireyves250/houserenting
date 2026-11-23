@@ -1673,7 +1673,10 @@
       "ebmRequested": "Umukiriya wa {reference} arasaba fagitire ya EBM.",
       "restaurantNew": "Resitora nshya yo kugenzura: {title}. Reba amakuru yayo na menu, shyiraho komisiyo, hanyuma uyishyire ahagaragara.",
       "restaurantRoleGiven": "VIIPA yakugize nyiri/umuyobozi wa resitora: tegura resitora yawe na menu yayo.",
-      "bookingCheckedOut": "Igihe cyawe kuri {title} cyarangiye, wasohowe ({reference}). Murakoze kubana na VIIPA!"
+      "bookingCheckedOut": "Igihe cyawe kuri {title} cyarangiye, wasohowe ({reference}). Murakoze kubana na VIIPA!",
+      "kitchenRequest": "{title} yasabye gutekera abashyitsi ba {place}.",
+      "kitchenApproved": "{title} ubu itekera abashyitsi ba {place}.",
+      "kitchenDeclined": "VIIPA yanze ko {title} itekera {place}: {reason}"
     },
     "filterLabel": "Erekana imenyesha",
     "filter": {
@@ -2626,7 +2629,8 @@
       "notAllowed": "VIIPA yonyine niyo ishobora guhindura itsinda.",
       "noAccount": "Nta konti ikoresha iyi meyili.",
       "isOwner": "Uwo ni nyirayo.",
-      "invalid": "Reba imeyili n'inshingano."
+      "invalid": "Reba imeyili n'inshingano.",
+      "hasRole": "Uyu muntu afite indi nshingano kuri VIIPA."
     },
     "adminIntro": "Resitora, urutonde rw'ibiryo n'ibitumijwe. Zishyire ku rubuga ziteguye; uzihishe utanze impamvu bibaye ngombwa.",
     "adminNewIntro": "Kora resitora ya nyirayo, cyangwa icungwa na VIIPA.",
@@ -2863,7 +2867,11 @@
       "add": "Ongeraho",
       "failed": "Ntibyakunze — ongera ugerageze.",
       "cooksFor": "Itekera",
-      "cooksForNone": "Nta nzu iragenerwa: yongereho ku rupapuro rw'inzu (Resitora zitekera hano)."
+      "cooksForNone": "Nta nzu iragenerwa: yongereho ku rupapuro rw'inzu (Resitora zitekera hano).",
+      "applied": "{name} yasabye gutekera hano",
+      "approve": "Emeza",
+      "decline": "Wanga",
+      "declineReason": "Impamvu (nyirayo arayisoma)"
     },
     "confirm": {
       "title": "Igezwa iyo bemeje",
@@ -2876,6 +2884,121 @@
       "deskReceived": "Byakiriwe ku ruganiriro",
       "waiting": "Bitegereje: {who}",
       "guestDone": "Wemeje. Bitegereje: {who}"
+    },
+    "dash": {
+      "sections": "Ibice bya resitora",
+      "orders": "Komande",
+      "myDeliveries": "Ibyo ngeza",
+      "menu": "Menu",
+      "reviews": "Ibitekerezo",
+      "delivery": "Abageza ibiryo",
+      "details": "Amakuru",
+      "noOrders": "Nta komande ubu",
+      "noOrdersHint": "Komande nshya zigaragara hano ubwazo. Siga uru rupapuro rufunguye.",
+      "new": "Nshya — subiza ubu",
+      "newHint": "Emera cyangwa wange buri imwe mu minota 5.",
+      "working": "Birimo gutekwa n'ibiri mu nzira",
+      "workingHint": "Kanda buto nini kuri buri komande urangije intambwe.",
+      "myWorking": "Ibyo kugeza",
+      "myWorkingHint": "Geza buri komande mu cyumba cy'umukiriya, hanyuma ukande buto.",
+      "done": "Byarangiye",
+      "noReviews": "Nta bitekerezo biraza. Abakiriya batanga amanota nyuma yo kubona ibiryo.",
+      "reviewCount": "{count, plural, one {# igitekerezo} other {# ibitekerezo}}",
+      "team": "Abakozi",
+      "places": "Inzu"
+    },
+    "deliveryTeam": {
+      "none": "Nta muntu urajyaho",
+      "noneHint": "Ongeraho abantu bageza komande ku bakiriya. Utabafite, mushobora kubyigereza ubwanyu.",
+      "remove": "Kuraho {name}",
+      "addTitle": "Ongeraho ugeza ibiryo",
+      "addHint": "Andika imeyili ye nyayo (iyo yiyandikishije). Uzabona izina rye ngo urebe ko ari we.",
+      "emailPlaceholder": "Imeyili ye, urugero name@gmail.com",
+      "find": "Shakisha",
+      "isThis": "Kongeraho uyu muntu nka {role}?",
+      "yesAdd": "Yego, mwongereho",
+      "no": "Oya",
+      "added": "{name} ubu ni umwe mu bageza ibiryo.",
+      "error": {
+        "notAllowed": "Ntushobora kongera abantu kuri iyi resitora.",
+        "noAccount": "Nta konti ya VIIPA ifite iyi meyili. Yigenzure, cyangwa umusabe kwiyandikisha.",
+        "hasRole": "Uyu muntu afite indi nshingano kuri VIIPA. Saba VIIPA kumugira umukiriya.",
+        "invalid": "Andika imeyili yuzuye.",
+        "isOwner": "Uyu ni nyiri resitora."
+      },
+      "addPerson": "Ongeraho umuntu",
+      "asRole": "Inshingano ze",
+      "addedManager": "{name} ubu ni umuyobozi hano.",
+      "role": {
+        "MANAGER": "Umuyobozi",
+        "DELIVERY": "Ugeza ibiryo"
+      },
+      "noneDelivery": "Nta bageza ibiryo barajyaho"
+    },
+    "openNowTitle": "Irafunguye — yakira komande",
+    "closedNowTitle": "Irafunze — ntiyakira komande",
+    "tapToClose": "Kanda uyifunge",
+    "tapToOpen": "Kanda wongere uyifungure",
+    "cookFor": {
+      "serving": "Inzu mutekera",
+      "servingNone": "Nta na imwe. Saba hepfo: VIIPA irabigenzura igusubize.",
+      "applications": "Ubusabe bwawe",
+      "waiting": "Bitegereje igisubizo cya VIIPA",
+      "declined": "Byanzwe: {reason}",
+      "applyTitle": "Saba gutekera inzu",
+      "applyHint": "Hitamo inzu wifuza gutekera abashyitsi bayo. VIIPA irabigenzura ikakubwira.",
+      "choosePlace": "Hitamo inzu…",
+      "notePlaceholder": "Ubutumwa kuri VIIPA (si ngombwa): ibyo mwatanga, igihe…",
+      "apply": "Ohereza ubusabe",
+      "sent": "Byoherejwe. VIIPA izasubiza vuba.",
+      "error": {
+        "notAllowed": "Nyiri resitora wenyine ni we usaba.",
+        "notFound": "Iyo nzu ntiboneka.",
+        "already": "Usanzwe utekera iyi nzu.",
+        "pending": "Wamaze gusaba iyi nzu: tegereza igisubizo cya VIIPA.",
+        "invalid": "Banza uhitemo inzu."
+      }
+    },
+    "money": {
+      "tab": "Amafaranga",
+      "today": "Uyu munsi",
+      "thisMonth": "Uku kwezi",
+      "sales": "Ibyagurishijwe",
+      "commission": "Komisiyo ya VIIPA",
+      "share": "Umugabane wawe",
+      "orders": "{count, plural, one {komande #} other {komande #}}",
+      "daily": "Raporo ya buri munsi",
+      "dailyHint": "Buri munsi wagurishije: kanda Kuramo ubone raporo y'uwo munsi (PDF).",
+      "download": "Kuramo",
+      "receipts": "Inyemezabwishyu",
+      "receiptsHint": "Komande zose zishyuwe. Kanda Inyemezabwishyu uyikuremo (PDF).",
+      "receipt": "Inyemezabwishyu",
+      "noSales": "Nta komande irishyurwa. Amafaranga ya komande agaragara hano abakiriya bamaze kwishyura.",
+      "payoutNote": "VIIPA yohereza umugabane wawe kuri konti ya nyiri resitora, ku maresitora ye yose hamwe.",
+      "reportTitle": "Raporo ya buri munsi",
+      "reportDay": "Umunsi: {day}",
+      "ordersCount": "{count, plural, one {komande # yishyuwe} other {komande # zishyuwe}}",
+      "receiptTitle": "Inyemezabwishyu ya komande",
+      "receiptOrder": "Komande {reference}",
+      "receiptPaid": "Yishyuwe {when}",
+      "guestPaid": "Umukiriya yishyuye",
+      "totalSales": "Ibyagurishijwe byose",
+      "totalCommission": "Komisiyo ya VIIPA",
+      "totalShare": "Umugabane wawe",
+      "footer": "VIIPA - iyi nyandiko igaragaza komande zishyuwe binyuze kuri VIIPA.",
+      "col": {
+        "order": "Komande",
+        "time": "Isaha",
+        "guest": "Umukiriya",
+        "paid": "Yishyuwe",
+        "commission": "Komisiyo",
+        "share": "Umugabane",
+        "dish": "Ibiryo",
+        "qty": "Umubare",
+        "price": "Igiciro",
+        "amount": "Amafaranga",
+        "day": "Umunsi"
+      }
     }
   },
   "Promoters": {

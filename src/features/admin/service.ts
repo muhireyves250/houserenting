@@ -282,7 +282,8 @@ export async function setPersonRole(actor: StaffActor, userId: string, role: Per
         role: staffRole,
         staffAreas: staffRole === "MANAGER" && user.role === "MANAGER" ? user.staffAreas : [],
         isHost: role === "PLACE_OWNER",
-        isRestaurateur: role === "RESTAURANT_OWNER" || role === "RESTAURANT_MANAGER",
+        // Only an owner sets up a restaurant (a manager runs one they're added to).
+        isRestaurateur: role === "RESTAURANT_OWNER",
       },
     });
     await tx.placeMember.deleteMany({ where: { userId } });

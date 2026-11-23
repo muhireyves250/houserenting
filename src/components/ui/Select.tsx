@@ -58,13 +58,19 @@ export function Select({ value, defaultValue, onChange, children, className, dis
     if (!open) return;
     const away = (e: PointerEvent) => !button.current?.contains(e.target as Node) && !list.current?.contains(e.target as Node) && setOpen(false);
     const close = () => !phone && setOpen(false);
+    // The page scrolling moves the field away, so the list closes; scrolling inside the list itself (a long list, or
+    // it scrolling to the current choice as it opens) must not, or the list shuts before anything can be picked.
+    const onScroll = (e: Event) => {
+      if (list.current && e.target instanceof Node && list.current.contains(e.target)) return;
+      close();
+    };
     document.addEventListener("pointerdown", away);
     window.addEventListener("resize", close);
-    window.addEventListener("scroll", close, true);
+    window.addEventListener("scroll", onScroll, true);
     return () => {
       document.removeEventListener("pointerdown", away);
       window.removeEventListener("resize", close);
-      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("scroll", onScroll, true);
     };
   }, [open, phone]);
 
