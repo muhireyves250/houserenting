@@ -27,8 +27,9 @@ describe("periodFor", () => {
 });
 
 describe("units by type of place", () => {
-  it("lodges offer hours, days and nights; other places any unit", () => {
-    expect(unitsAllowedFor("LODGE")).toEqual(["HOUR", "DAY", "NIGHT"]);
+  it("every kind of place may be rented by the hour, day, night, week, month or year", () => {
+    expect(unitsAllowedFor("LODGE")).toEqual(["HOUR", "DAY", "NIGHT", "WEEK", "MONTH", "YEAR"]);
+    expect(unitsAllowedFor("GUEST_HOUSE")).toContain("MONTH");
     expect(unitsAllowedFor("APARTMENT")).toContain("YEAR");
   });
 });

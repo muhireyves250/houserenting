@@ -9,8 +9,10 @@ export const LODGE_UNITS: readonly BookingUnit[] = ["HOUR", "DAY", "NIGHT"];
 /** Long stays (moving in): deposits and upfront rules apply. */
 export const LONG_UNITS: readonly BookingUnit[] = ["MONTH", "YEAR"];
 
-export function unitsAllowedFor(type: string): readonly BookingUnit[] {
-  return type === "LODGE" ? LODGE_UNITS : BOOKING_UNITS;
+/** Every kind of place may be rented by the hour, day, night, week, month or year, as its owner or VIIPA sets it. */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- kept so callers can still pass the type of place
+export function unitsAllowedFor(_type: string): readonly BookingUnit[] {
+  return BOOKING_UNITS;
 }
 
 // Rwanda is UTC+2 all year (no daylight saving).

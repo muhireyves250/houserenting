@@ -1,3 +1,4 @@
+import { Select } from "@/components/ui/Select";
 import { getLocale, getTranslations } from "next-intl/server";
 import { ExportLink, PageIntro, Panel, Table, td } from "@/features/admin/components/ui";
 import type { Money } from "@/features/reports/aggregate";
@@ -106,46 +107,46 @@ export async function ReportsView({ searchParams }: { searchParams: Props["searc
         </label>
         <label className="flex min-w-0 flex-col gap-1 text-xs font-semibold text-muted">
           {t("view")}
-          <select name="by" defaultValue={f.by} className={input}>
+          <Select name="by" defaultValue={f.by} className={input}>
             {(["day", "week", "month", "year"] as const).map((g) => (
               <option key={g} value={g}>
                 {t(`by.${g}`)}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
         <label className="flex min-w-0 flex-col gap-1 text-xs font-semibold text-muted">
           {t("category")}
-          <select name="type" defaultValue={f.type ?? ""} className={input}>
+          <Select name="type" defaultValue={f.type ?? ""} className={input}>
             <option value="">{t("allCategories")}</option>
             {PLACE_TYPES.map((type) => (
               <option key={type} value={type}>
                 {tType(type)}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
         <label className="flex min-w-0 flex-col gap-1 text-xs font-semibold text-muted">
           {t("place")}
-          <select name="place" defaultValue={f.listingId ?? ""} className={`${input} sm:max-w-[220px]`}>
+          <Select name="place" defaultValue={f.listingId ?? ""} className={`${input} sm:max-w-[220px]`}>
             <option value="">{t("allPlaces")}</option>
             {places.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.title}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
         <label className="flex min-w-0 flex-col gap-1 text-xs font-semibold text-muted">
           {t("owner")}
-          <select name="owner" defaultValue={f.ownerId ?? ""} className={`${input} sm:max-w-[200px]`}>
+          <Select name="owner" defaultValue={f.ownerId ?? ""} className={`${input} sm:max-w-[200px]`}>
             <option value="">{t("allOwners")}</option>
             {owners.map((o) => (
               <option key={o.id} value={o.id}>
                 {o.name}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
         <button type="submit" className="col-span-2 rounded-full bg-primary px-5 py-2.5 sm:py-2 text-[14px] font-semibold text-white hover:bg-primary-hover">
           {t("show")}

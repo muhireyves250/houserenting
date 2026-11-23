@@ -1,5 +1,7 @@
 "use client";
 
+import { Select } from "@/components/ui/Select";
+
 import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
@@ -27,13 +29,13 @@ export function AddExpense() {
   return (
     <div className="grid gap-2 rounded-2xl bg-surface p-4 ring-1 ring-line sm:grid-cols-2 lg:grid-cols-5">
       <input className={field} type="date" aria-label={t("date")} value={form.spentOn} onChange={(e) => setForm({ ...form, spentOn: e.target.value })} />
-      <select className={field} aria-label={t("category")} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
+      <Select className={field} aria-label={t("category")} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
         {CATEGORIES.map((c) => (
           <option key={c} value={c}>
             {t(`cat.${c}`)}
           </option>
         ))}
-      </select>
+      </Select>
       <input className={`${field} lg:col-span-2`} placeholder={t("description")} aria-label={t("description")} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
       <input className={field} inputMode="numeric" placeholder={t("amount")} aria-label={t("amount")} value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value.replace(/\D/g, "") })} />
       <input className={`${field} lg:col-span-2`} placeholder={t("reference")} aria-label={t("reference")} value={form.reference} onChange={(e) => setForm({ ...form, reference: e.target.value })} />

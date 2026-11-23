@@ -1,5 +1,7 @@
 "use client";
 
+import { Select } from "@/components/ui/Select";
+
 import { useLocale, useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { useRouter } from "@/i18n/navigation";
@@ -70,24 +72,24 @@ export function BlocksPanel({ listingId, rooms, active, past }: { listingId: str
         <p className="text-[13px] font-semibold text-ink sm:col-span-2">{t("addBlock")}</p>
         <label className="flex flex-col gap-1 text-xs font-semibold text-muted">
           {t("blockWhat")}
-          <select value={form.roomId} onChange={(e) => setForm({ ...form, roomId: e.target.value })} className={input}>
+          <Select value={form.roomId} onChange={(e) => setForm({ ...form, roomId: e.target.value })} className={input}>
             <option value="">{t("wholePlace")}</option>
             {rooms.map((r) => (
               <option key={r.id} value={r.id}>
                 {r.name}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
         <label className="flex flex-col gap-1 text-xs font-semibold text-muted">
           {t("blockWhy")}
-          <select value={form.kind} onChange={(e) => setForm({ ...form, kind: e.target.value as BlockKind })} className={input}>
+          <Select value={form.kind} onChange={(e) => setForm({ ...form, kind: e.target.value as BlockKind })} className={input}>
             {(["MAINTENANCE", "UNAVAILABLE", "OFFLINE_BOOKING"] as const).map((k) => (
               <option key={k} value={k}>
                 {t(`blockKind.${k}`)}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
         <label className="flex flex-col gap-1 text-xs font-semibold text-muted">
           {t("blockFrom")}

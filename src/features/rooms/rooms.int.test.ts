@@ -55,6 +55,31 @@ beforeEach(async () => {
   await db.listing.update({ where: { id: "lodge" }, data: { status: "PUBLISHED" } });
 });
 
+describe("room categories have their own rules", () => {
+  it("a category's minimum stay, opening hours and discount apply to its rooms; laundry uses its price", async () => {
+    await db.listing.update({ where: { id: "lodge" }, data: { discountPercent: 10, laundryPricePerKg: 1000 } });
+    await saveRoom({ id: "admin", role: "ADMIN" }, "lodge", roomA, {
+      ...room,
+      name: "Suite",
+      discountPercent: 20,
+      laundryPricePerKg: 0,
+      rates: [
+        { unit: "NIGHT", price: 50000, minUnits: 2 },
+        { unit: "HOUR", price: 5000, dayStartTime: "08:00", dayEndTime: "12:00" },
+      ],
+    });
+    const base = { guestId: "g1", listingId: "lodge", guests: 1, payment: pay, roomId: roomA };
+    // Two nights at least, for this category.
+    expect(await createRentalBooking({ ...base, unit: "NIGHT", start: "2026-11-05", quantity: 1 }, NOW)).toEqual({ ok: false, error: "stayLength" });
+    const ok = await createRentalBooking({ ...base, unit: "NIGHT", start: "2026-11-05", quantity: 2 }, NOW);
+    if (!ok.ok) throw new Error(ok.error);
+    // The category's 20% discount, not the place's 10%.
+    expect(await db.booking.findUniqueOrThrow({ where: { reference: ok.reference } })).toMatchObject({ subtotal: 80000 });
+    // Its hours: 08:00 to 12:00.
+    expect(await createRentalBooking({ ...base, guestId: "g2", unit: "HOUR", start: "2026-11-20", startTime: "13:00", quantity: 1 }, NOW)).toEqual({ ok: false, error: "stayLength" });
+  });
+});
+
 describe("room-by-room and whole-place bookings", () => {
   it("a lodge room can be booked by the hour, but not for a time that has already passed", async () => {
     await db.listing.update({ where: { id: "lodge" }, data: { rates: { create: [{ unit: "HOUR", price: 10000, minUnits: 1, maxUnits: 8, dayStartTime: "07:00", dayEndTime: "22:00" }] } } });

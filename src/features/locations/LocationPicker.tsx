@@ -1,5 +1,7 @@
 "use client";
 
+import { Select } from "@/components/ui/Select";
+
 import { MapPin, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
@@ -108,14 +110,14 @@ export function LocationPicker({ value, onChange, error, startCodes }: { value: 
           return (
             <label key={level} className="flex flex-col gap-1">
               <span className="text-xs font-semibold text-muted">{t(`level.${level}`)}</span>
-              <select value={codes[level] ?? ""} disabled={!parentChosen || !options[level]} onChange={(e) => choose(level, e.target.value)} className={select}>
+              <Select value={codes[level] ?? ""} disabled={!parentChosen || !options[level]} onChange={(e) => choose(level, e.target.value)} className={select}>
                 <option value="">{parentChosen ? t("choose") : t("chooseAbove")}</option>
                 {(options[level] ?? []).map((o) => (
                   <option key={o.code} value={o.code}>
                     {o.name}
                   </option>
                 ))}
-              </select>
+              </Select>
             </label>
           );
         })}

@@ -1,5 +1,7 @@
 "use client";
 
+import { Select } from "@/components/ui/Select";
+
 import { Tag } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { createContext, useContext, useId, useState, type ReactNode } from "react";
@@ -653,7 +655,7 @@ export function BookingCard({
           {!long && guestLimit > 1 && (
             <label htmlFor={guestsId} className="flex flex-col gap-0.5 border-t border-line-strong px-3.5 py-2.5 transition-colors hover:bg-canvas">
               <span className="text-xs font-semibold text-ink">{t("guestsLabel")}</span>
-              <select
+              <Select
                 id={guestsId}
                 value={guests}
                 onChange={(event) => setGuests(Number(event.target.value))}
@@ -664,7 +666,7 @@ export function BookingCard({
                     {t("statGuests", { count: n })}
                   </option>
                 ))}
-              </select>
+              </Select>
             </label>
           )}
         </div>
@@ -749,7 +751,7 @@ function PlanFields({ rate }: { rate: BookingRate }) {
       {unit === "HOUR" && (
         <label htmlFor={timeId} className="flex flex-col gap-0.5 border-t border-line-strong px-3.5 py-2.5 transition-colors hover:bg-canvas">
           <span className="text-xs font-semibold text-ink">{t("startTime")}</span>
-          <select
+          <Select
             id={timeId}
             value={plan.startTime}
             onChange={(e) => setPlan({ ...plan, startTime: e.target.value })}
@@ -761,12 +763,12 @@ function PlanFields({ rate }: { rate: BookingRate }) {
                 {time}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
       )}
       <label htmlFor={countId} className="flex flex-col gap-0.5 border-t border-line-strong px-3.5 py-2.5 transition-colors hover:bg-canvas">
         <span className="text-xs font-semibold text-ink">{t("rentalLength")}</span>
-        <select
+        <Select
           id={countId}
           value={quantity}
           onChange={(e) => setPlan({ ...plan, quantity: Number(e.target.value) })}
@@ -777,7 +779,7 @@ function PlanFields({ rate }: { rate: BookingRate }) {
               {t(`unitCount.${unit}`, { count: n })}
             </option>
           ))}
-        </select>
+        </Select>
       </label>
     </>
   );
@@ -867,13 +869,13 @@ export function MobileBookingPlan({ rates, maxGuests }: { rates: BookingRate[]; 
           {askGuests && (
             <label htmlFor={guestsId} className={cn("flex flex-col gap-0.5 px-3.5 py-2.5", unit !== "NIGHT" && "border-t border-line-strong")}>
               <span className="text-xs font-semibold text-ink">{t("guestsLabel")}</span>
-              <select id={guestsId} value={guests} onChange={(event) => setGuests(Number(event.target.value))} className="-ml-1 bg-transparent text-sm text-ink outline-none">
+              <Select id={guestsId} value={guests} onChange={(event) => setGuests(Number(event.target.value))} className="-ml-1 bg-transparent text-sm text-ink outline-none">
                 {Array.from({ length: guestLimit }, (_, i) => i + 1).map((n) => (
                   <option key={n} value={n}>
                     {t("statGuests", { count: n })}
                   </option>
                 ))}
-              </select>
+              </Select>
             </label>
           )}
         </div>

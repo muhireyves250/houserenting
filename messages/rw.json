@@ -785,7 +785,8 @@
     "lodge": {
       "amenitiesHint": "Ibya lodge yose. Ibiri mu byumba (TV, igikoni…) bishyirwa kuri buri bwoko bw'icyumba hepfo.",
       "rulesTitle": "Amabwiriza yo gukodesha",
-      "rulesHint": "Uko ibyumba bikodeshwa: ku ijoro cyangwa ku munsi, amasaha yo kwinjira no gusohoka, igihe gito n'ikirekire. Buri bwoko bw'icyumba bufite igiciro cyabwo (hepfo)."
+      "rulesHint": "Uko ibyumba bikodeshwa: ku ijoro cyangwa ku munsi, amasaha yo kwinjira no gusohoka, igihe gito n'ikirekire. Buri bwoko bw'icyumba bufite igiciro cyabwo (hepfo).",
+      "rulesPerCategory": "Ibiciro, amategeko yo gufata (isaha, umunsi, ijoro, icyumweru, ukwezi, umwaka), igabanywa no kumesa bishyirwaho kuri buri cyiciro cy'ibyumba hepfo: buri cyiciro gifite ibyacyo."
     },
     "dash": {
       "hello": "Muraho, {name}",
@@ -907,7 +908,8 @@
       "LIVING_ROOM": "Uruganiriro",
       "EXTERIOR": "Hanze",
       "FACILITY": "Ibindi bikoresho"
-    }
+    },
+    "roomsAfterSave": "Banza ubike: hanyuma wongeremo ibyiciro by'ibyumba (buri kimwe n'ibyumba byacyo, ibiciro n'amategeko) hepfo."
   },
   "Admin": {
     "title": "Ubuyobozi",
@@ -1670,6 +1672,18 @@
       "name": "Ha icyumba izina cyangwa nimero.",
       "notFound": "Iki cyumba cyahindutse. Ongera ufungure urupapuro.",
       "notAllowed": "Ntushobora guhindura ibyumba by'aha hantu."
+    },
+    "rules": {
+      "min": "Igihe gito",
+      "max": "Igihe kirekire",
+      "noMax": "Nta mbibi",
+      "openFrom": "Hafungura",
+      "openUntil": "Hafunga",
+      "checkIn": "Kwinjira guhera",
+      "checkOut": "Gusohoka mbere ya",
+      "discount": "Igabanywa (%)",
+      "laundry": "Kumesa ku kilo (0 = ubuntu)",
+      "placeDefault": "Iby'inzu"
     }
   },
   "Settings": {

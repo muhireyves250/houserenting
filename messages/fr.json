@@ -785,7 +785,8 @@
     "lodge": {
       "amenitiesHint": "Pour le lodge dans son ensemble. Les équipements des chambres (TV, cuisine…) se règlent sur chaque catégorie de chambre ci-dessous.",
       "rulesTitle": "Règles de réservation",
-      "rulesHint": "Comment les chambres se réservent : à la nuit ou à la journée, heures d'arrivée et de départ, séjour le plus court et le plus long. Chaque catégorie de chambre a son propre prix (ci-dessous)."
+      "rulesHint": "Comment les chambres se réservent : à la nuit ou à la journée, heures d'arrivée et de départ, séjour le plus court et le plus long. Chaque catégorie de chambre a son propre prix (ci-dessous).",
+      "rulesPerCategory": "Les prix, règles de réservation (heure, jour, nuit, semaine, mois, année), réduction et blanchisserie se règlent sur chaque catégorie de chambres ci-dessous : chacune a les siens."
     },
     "dash": {
       "hello": "Bonjour, {name}",
@@ -907,7 +908,8 @@
       "LIVING_ROOM": "Salon",
       "EXTERIOR": "Extérieur",
       "FACILITY": "Autres équipements"
-    }
+    },
+    "roomsAfterSave": "Enregistrez d'abord : vous ajouterez ensuite les catégories de chambres (avec leurs chambres, prix et règles) juste en dessous."
   },
   "Admin": {
     "title": "Administration",
@@ -1670,6 +1672,18 @@
       "name": "Donnez un nom ou un numéro à la chambre.",
       "notFound": "Cette chambre a changé. Actualisez la page.",
       "notAllowed": "Vous ne pouvez pas modifier les chambres de ce lieu."
+    },
+    "rules": {
+      "min": "Séjour minimum",
+      "max": "Séjour maximum",
+      "noMax": "Sans limite",
+      "openFrom": "Ouvert de",
+      "openUntil": "Ouvert jusqu'à",
+      "checkIn": "Arrivée dès",
+      "checkOut": "Départ avant",
+      "discount": "Réduction (%)",
+      "laundry": "Blanchisserie par kg (0 = gratuit)",
+      "placeDefault": "Celui du logement"
     }
   },
   "Settings": {

@@ -169,6 +169,9 @@ export async function createRentalBooking(request: RentalRequest, now: Date = ne
   // What is being booked: the whole place at its rate for this unit, or one available room at the room's rate.
   let base: number;
   let room: { id: string; name: string; numbers: string[] } | null = null;
+  // The rules for this unit: the room category's own when it has them, else the place's.
+  let rules: { minUnits: number; maxUnits: number | null; dayStartTime: string | null; dayEndTime: string | null } | null = rate;
+  let discount = listing.discountPercent;
   if (roomId === null) {
     if (listing.bookingModel === "ROOM_BY_ROOM") return { ok: false, error: "notFound" };
     if (!rate) return { ok: false, error: "notOffered" };
@@ -182,13 +185,21 @@ export async function createRentalBooking(request: RentalRequest, now: Date = ne
     if (!roomRate) return { ok: false, error: "notOffered" };
     if (guests > found.maxGuests) return { ok: false, error: "invalid" };
     base = roomRate.price;
+    // Each rule the category leaves empty falls back to the place's.
+    rules = {
+      minUnits: roomRate.minUnits > 1 ? roomRate.minUnits : (rate?.minUnits ?? 1),
+      maxUnits: roomRate.maxUnits ?? rate?.maxUnits ?? null,
+      dayStartTime: roomRate.dayStartTime ?? rate?.dayStartTime ?? null,
+      dayEndTime: roomRate.dayEndTime ?? rate?.dayEndTime ?? null,
+    };
+    if (found.discountPercent !== null) discount = found.discountPercent;
     // A room number the guest picked must be one of this type's rooms.
     if (request.roomNumber && !found.numbers.includes(request.roomNumber)) return { ok: false, error: "unavailable" };
     room = { id: found.id, name: found.name, numbers: found.numbers };
   }
   // Length and opening hours follow the place's rules for this unit (when set).
-  if (rate && (quantity < rate.minUnits || (rate.maxUnits !== null && quantity > rate.maxUnits))) return { ok: false, error: "stayLength" };
-  if (unit === "HOUR" && !withinHours(startTime!, quantity, rate?.dayStartTime ?? null, rate?.dayEndTime ?? null)) return { ok: false, error: "stayLength" };
+  if (rules && (quantity < rules.minUnits || (rules.maxUnits !== null && quantity > rules.maxUnits))) return { ok: false, error: "stayLength" };
+  if (unit === "HOUR" && !withinHours(startTime!, quantity, rules?.dayStartTime ?? null, rules?.dayEndTime ?? null)) return { ok: false, error: "stayLength" };
 
   // Inside the management agreement and the place's own dates, starting on a working day.
   const span = periodFor(unit, start, quantity, startTime);
@@ -217,7 +228,7 @@ export async function createRentalBooking(request: RentalRequest, now: Date = ne
   if ((needsId && idNumber.length < 4) || (needsNationality && nationality.length < 2)) return { ok: false, error: "identity" };
   const identity = needsId ? { idNumber, nationality: needsNationality ? nationality : null } : null;
 
-  const unitPrice = discountedPrice(base, listing.discountPercent);
+  const unitPrice = discountedPrice(base, discount);
   // Monthly: all chosen months now unless staff set fewer upfront. Everything else is paid in full.
   const paidUnits = unit === "MONTH" ? Math.min(settings.monthlyUpfrontMonths ?? quantity, quantity) : quantity;
   // Deposit for long stays: a percent of one month's rent (a year's rent / 12).

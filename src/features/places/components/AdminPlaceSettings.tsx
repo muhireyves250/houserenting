@@ -1,5 +1,7 @@
 "use client";
 
+import { Select } from "@/components/ui/Select";
+
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/Button";
@@ -36,10 +38,10 @@ export function AdminPlaceSettings({
       <p className="text-xs text-muted">{t("contractHint")}</p>
       <label className="flex flex-col gap-1 text-xs font-semibold text-muted">
         {t("operator")}
-        <select value={form.operator} onChange={(e) => setForm({ ...form, operator: e.target.value as "OWNER" | "VIIPA" })} className={input}>
+        <Select value={form.operator} onChange={(e) => setForm({ ...form, operator: e.target.value as "OWNER" | "VIIPA" })} className={input}>
           <option value="OWNER">{t("operatorOwner")}</option>
           <option value="VIIPA">{t("operatorViipa")}</option>
-        </select>
+        </Select>
       </label>
       <label className="flex cursor-pointer items-center gap-3 text-[14px] text-ink">
         <input type="checkbox" checked={form.featured} onChange={(e) => setForm({ ...form, featured: e.target.checked })} className="size-5 accent-[var(--color-primary)]" />

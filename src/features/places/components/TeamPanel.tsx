@@ -1,5 +1,7 @@
 "use client";
 
+import { Select } from "@/components/ui/Select";
+
 import { Trash2, UserPlus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
@@ -67,10 +69,10 @@ export function TeamPanel({ listingId, members, staff = false }: { listingId: st
         }}
       >
         <MemberField staff={staff} value={email} onChange={setEmail} label={t("memberEmail")} resetKey={added} />
-        <select value={role} onChange={(e) => setRole(e.target.value as TeamRole)} aria-label={t("memberRole")} className="rounded-xl border border-line-strong bg-surface px-3 py-2 text-[14px]">
+        <Select value={role} onChange={(e) => setRole(e.target.value as TeamRole)} aria-label={t("memberRole")} className="rounded-xl border border-line-strong bg-surface px-3 py-2 text-[14px]">
           <option value="MANAGER">{t("teamRole.MANAGER")}</option>
           <option value="RECEPTIONIST">{t("teamRole.RECEPTIONIST")}</option>
-        </select>
+        </Select>
         <button type="submit" disabled={pending} className="inline-flex items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2 text-[13px] font-semibold text-white disabled:opacity-50">
           <UserPlus className="size-4" aria-hidden="true" />
           {t("addMember")}

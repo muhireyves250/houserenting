@@ -1,5 +1,7 @@
 "use client";
 
+import { Select } from "@/components/ui/Select";
+
 import { BadgeCheck, Phone, User } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useActionState, useEffect } from "react";
@@ -65,7 +67,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
         <label htmlFor="profile-locale" className="text-sm text-muted">
           {t("language")}
         </label>
-        <select
+        <Select
           id="profile-locale"
           name="locale"
           defaultValue={profile.locale}
@@ -76,7 +78,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
               {tLocale(value)}
             </option>
           ))}
-        </select>
+        </Select>
         {state.errors?.locale && (
           <span role="alert" className="text-xs text-danger">
             {error(state.errors.locale)}

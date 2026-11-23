@@ -108,8 +108,10 @@ export function ListingForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<"idle" | "saved" | "failed" | "invalid">("idle");
   const [saving, startSaving] = useTransition();
-  // Lodges are booked room by room: size, guests, in-room amenities and prices belong to the rooms.
-  const lodge = form.type === "LODGE";
+  // Lodges and guest houses have room categories. Rented room by room, their prices, rules and in-room amenities
+  // belong to each category (set below the form), not to the place.
+  const categories = form.type === "LODGE" || form.type === "GUEST_HOUSE";
+  const lodge = categories && form.bookingModel === "ROOM_BY_ROOM";
 
   const set = <K extends keyof ListingInput>(key: K, value: ListingInput[K]) => {
     setForm((f) => ({ ...f, [key]: value }));
@@ -137,24 +139,25 @@ export function ListingForm({
 
   function save() {
     startSaving(async () => {
-      // A lodge keeps valid place-wide values for what its rooms carry (hidden here).
+      // Rented room by room, the place keeps valid place-wide values for what its room categories carry (hidden here).
       const payload: ListingInput = lodge
         ? {
             ...form,
-            bookingModel: "ROOM_BY_ROOM",
             sizeM2: form.sizeM2 || 1,
             rooms: form.rooms || 1,
             bedrooms: form.bedrooms || 1,
             bathrooms: form.bathrooms || 1,
             maxGuests: form.maxGuests || 1,
-            rates: form.rates.map((r) => (r.price >= 100 ? r : { ...r, price: 1000 })),
+            rates: (form.rates.length ? form.rates : [NEW_RATE.NIGHT]).map((r) => (r.price >= 100 ? r : { ...r, price: 1000 })),
           }
         : form;
       const result = staff ? await adminSaveListingAction(listingId, payload, staff.ownerId) : await saveListingAction(listingId, payload);
       if (result.ok) {
         setErrors({});
         setStatus("saved");
-        if (listingId === null) router.replace(staff ? `/admin/listings/${result.id}/edit` : `/host/listings/${result.id}`);
+        // A new place with rooms: straight to adding its room categories.
+        const toRooms = form.bookingModel !== "WHOLE_PROPERTY" ? "#rooms" : "";
+        if (listingId === null) router.replace(`${staff ? `/admin/listings/${result.id}/edit` : `/host/listings/${result.id}`}${toRooms}`);
         else router.refresh();
         return;
       }
@@ -181,8 +184,8 @@ export function ListingForm({
             value={form.type}
             onChange={(e) => {
               const type = e.target.value as ListingInput["type"];
-              // A lodge keeps only nightly and daily prices.
-              setForm((f) => ({ ...f, type, rates: f.rates.filter((r) => rateUnitsFor(type).includes(r.unit)), ...(type === "LODGE" ? { bookingModel: "ROOM_BY_ROOM" as const } : {}) }));
+              // Lodges and guest houses start room by room (their categories hold the rooms); it can be changed below.
+              setForm((f) => ({ ...f, type, ...((type === "LODGE" || type === "GUEST_HOUSE") && f.type !== "LODGE" && f.type !== "GUEST_HOUSE" ? { bookingModel: "ROOM_BY_ROOM" as const } : {}) }));
               setStatus("idle");
             }}
           >
@@ -192,7 +195,8 @@ export function ListingForm({
               </option>
             ))}
           </SelectField>
-          {!lodge && (
+          {/* Every kind of place: rented whole, room by room, or both, as its owner or VIIPA sets it. */}
+          {(
             <SelectField
               label={t("fields.bookingModel")}
               value={form.bookingModel}
@@ -296,6 +300,14 @@ export function ListingForm({
         </div>
       </Card>
 
+      {/* A new place with rooms: say that room categories come right after saving. */}
+      {listingId === null && form.bookingModel !== "WHOLE_PROPERTY" && (
+        <p className="rounded-2xl bg-amber-50 px-5 py-3.5 text-[14px] text-amber-900">{t("roomsAfterSave")}</p>
+      )}
+      {/* Rented room by room (lodge, guest house): prices and rules are set on each room category below. */}
+      {lodge ? (
+        <p className="rounded-2xl bg-primary/[0.06] px-5 py-3.5 text-[14px] text-ink">{t("lodge.rulesPerCategory")}</p>
+      ) : (
       <Card title={lodge ? t("lodge.rulesTitle") : t("sections.prices")} id="prices">
         <p className="-mt-2 mb-4 text-[13px] text-muted">{lodge ? t("lodge.rulesHint") : <>{t("pricesHint")} {form.bookingModel !== "WHOLE_PROPERTY" && t("pricesRoomsHint")}</>}</p>
         <div className="mb-4 flex flex-wrap gap-2">
@@ -412,6 +424,7 @@ export function ListingForm({
         </div>
         <p className="mt-2 text-[12px] text-muted">{tLaundry("placeHint")}</p>
       </Card>
+      )}
 
       <Card title={t("sections.availability")} id="availability">
         <p className="-mt-2 mb-4 text-[13px] text-muted">{t("availabilityIntro")}</p>

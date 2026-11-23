@@ -21,8 +21,10 @@ export const FACILITIES = [
 export const RATE_UNITS = ["HOUR", "DAY", "NIGHT", "WEEK", "MONTH", "YEAR"] as const;
 /** Lodges are booked by the night or by the day only. */
 export const LODGE_RATE_UNITS = ["HOUR", "DAY", "NIGHT"] as const;
-export function rateUnitsFor(type: string): readonly (typeof RATE_UNITS)[number][] {
-  return type === "LODGE" ? LODGE_RATE_UNITS : RATE_UNITS;
+/** Every kind of place may offer every unit (hour, day, night, week, month, year), as its owner or VIIPA sets it. */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- kept so callers can still pass the type of place
+export function rateUnitsFor(_type: string): readonly (typeof RATE_UNITS)[number][] {
+  return RATE_UNITS;
 }
 
 // Rwanda, with a little margin.

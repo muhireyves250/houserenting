@@ -6,16 +6,33 @@ export type RoomStatus = (typeof ROOM_STATUSES)[number];
 
 const photoUrl = z.string().max(500).regex(/^https:\/\/(res\.cloudinary\.com|images\.unsplash\.com)\//);
 
+const time = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).nullable().default(null).or(z.literal("").transform(() => null));
+
 const roomFields = z.object({
   name: z.string().trim().min(2).max(60),
   description: z.string().trim().max(500),
   maxGuests: z.number().int().min(1).max(50),
   /** The room's own price for each way of booking it (at least one). */
   rates: z
-    .array(z.object({ unit: z.enum(RATE_UNITS), price: z.number().int().min(100).max(100_000_000) }))
+    .array(
+      z.object({
+        unit: z.enum(RATE_UNITS),
+        price: z.number().int().min(100).max(100_000_000),
+        // This category's own rules for the unit: shortest and longest stay, and times (empty = none).
+        minUnits: z.number().int().min(1).max(1000).default(1),
+        maxUnits: z.number().int().min(1).max(1000).nullable().default(null),
+        checkInTime: time,
+        checkOutTime: time,
+        dayStartTime: time,
+        dayEndTime: time,
+      }),
+    )
     .min(1)
     .max(RATE_UNITS.length)
     .refine((rates) => new Set(rates.map((r) => r.unit)).size === rates.length, { message: "duplicateUnit" }),
+  /** This category's own discount (%) and laundry price per kg (0 = free laundry); empty = the place's. */
+  discountPercent: z.number().int().min(0).max(90).nullable().default(null),
+  laundryPricePerKg: z.number().int().min(0).max(100_000).nullable().default(null),
   facilities: z.array(z.enum(FACILITIES)).max(FACILITIES.length).transform((f) => [...new Set(f)]),
   /** Identical rooms of this type ("101", "102"…); each guest is given a free one. Empty = a single room. */
   /** Photos of this room type: our uploads (Cloudinary) or the demo photos. */

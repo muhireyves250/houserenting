@@ -1,5 +1,7 @@
 "use client";
 
+import { Select } from "@/components/ui/Select";
+
 import { BedDouble, Bike, Phone, Store, Timer } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState, useTransition, type ReactNode } from "react";
@@ -156,7 +158,7 @@ export function OrdersBoard({ orders, compact = false, staffDelete = false }: { 
               {/* Ready: hand it to one of the restaurant's delivery people. */}
               {o.steps.includes("COURIER_ASSIGNED") && (
                 <span className="flex w-full gap-2">
-                  <select
+                  <Select
                     aria-label={t("board.chooseCourier")}
                     value={courierFor[o.reference] ?? ""}
                     onChange={(e) => setCourierFor({ ...courierFor, [o.reference]: e.target.value })}
@@ -168,7 +170,7 @@ export function OrdersBoard({ orders, compact = false, staffDelete = false }: { 
                         {c.name}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                   <button
                     type="button"
                     disabled={pending || !courierFor[o.reference]}

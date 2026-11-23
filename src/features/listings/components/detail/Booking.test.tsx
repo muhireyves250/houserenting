@@ -224,8 +224,11 @@ describe("Booking by the hour", () => {
     // The night calendar goes away; the card asks for a date, a time and hours.
     expect(screen.queryByRole("button", { name: /October 14, 2026/ })).not.toBeInTheDocument();
     await userEvent.type(screen.getByLabelText("Date"), "2026-10-20");
-    await userEvent.selectOptions(screen.getByLabelText("Start time"), "09:00");
-    await userEvent.selectOptions(screen.getByLabelText("Length"), "3");
+    // VIIPA's own dropdowns: open, then pick.
+    await userEvent.click(screen.getByRole("combobox", { name: "Start time" }));
+    await userEvent.click(screen.getByRole("option", { name: "09:00" }));
+    await userEvent.click(screen.getByRole("combobox", { name: "Length" }));
+    await userEvent.click(screen.getByRole("option", { name: /^3/ }));
     expect(screen.getByText("RWF 9,000 × 3 hours")).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Reserve" }));
     const dialog = screen.getByRole("dialog");

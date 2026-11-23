@@ -617,6 +617,9 @@ model Room {
   /// Each room's own photos and description, by its name or number: { "101": { "photos": [], "description": "" } }.
   /// A room without its own uses the type's.
   unitDetails Json       @default("{}")
+  /// This category's own discount (%) and laundry price per kg (0 = free); empty = the place's.
+  discountPercent   Int?
+  laundryPricePerKg Int?
   rates       RoomRate[]
   position    Int        @default(0)
   createdAt   DateTime   @default(now())
@@ -889,6 +892,13 @@ model RoomRate {
   room   Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
   unit   RateUnit
   price  Int
+  /// This room category's own rules for the unit (shortest and longest stay, times); empty = the place's.
+  minUnits     Int     @default(1)
+  maxUnits     Int?
+  checkInTime  String?
+  checkOutTime String?
+  dayStartTime String?
+  dayEndTime   String?
 
   @@unique([roomId, unit])
   @@map("roomRate")

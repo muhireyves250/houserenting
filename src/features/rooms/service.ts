@@ -24,7 +24,7 @@ export function listingRooms(listingId: string) {
   return db.room.findMany({
     where: { listingId },
     orderBy: [{ position: "asc" }, { createdAt: "asc" }],
-    include: { rates: { select: { unit: true, price: true } } },
+    include: { rates: { select: { unit: true, price: true, minUnits: true, maxUnits: true, checkInTime: true, checkOutTime: true, dayStartTime: true, dayEndTime: true } } },
   });
 }
 

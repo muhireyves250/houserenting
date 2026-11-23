@@ -1,5 +1,7 @@
 "use client";
 
+import { Select } from "@/components/ui/Select";
+
 import { useTranslations } from "next-intl";
 import { useTransition } from "react";
 import { setRoomStatusAction } from "@/features/rooms/actions";
@@ -12,7 +14,7 @@ export function RoomStatusSelect({ roomId, status, name }: { roomId: string; sta
   const router = useRouter();
   const [pending, start] = useTransition();
   return (
-    <select
+    <Select
       aria-label={`${t("status")}: ${name}`}
       value={status}
       disabled={pending}
@@ -29,6 +31,6 @@ export function RoomStatusSelect({ roomId, status, name }: { roomId: string; sta
           {t(`statuses.${s}`)}
         </option>
       ))}
-    </select>
+    </Select>
   );
 }

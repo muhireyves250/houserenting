@@ -1,5 +1,7 @@
 "use client";
 
+import { Select } from "@/components/ui/Select";
+
 import { MapPin, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
@@ -53,7 +55,7 @@ export function LocationFilter({ pathname, current, keep }: { pathname: "/admin/
       <MapPin className="size-4 shrink-0 text-muted" aria-hidden="true" />
       {LEVELS.map((level, i) =>
         i === 0 || codes[LEVELS[i - 1]!] ? (
-          <select
+          <Select
             key={level}
             aria-label={t(`level.${level}`)}
             value={codes[level] ?? ""}
@@ -66,7 +68,7 @@ export function LocationFilter({ pathname, current, keep }: { pathname: "/admin/
                 {o.name}
               </option>
             ))}
-          </select>
+          </Select>
         ) : null,
       )}
       {current && (

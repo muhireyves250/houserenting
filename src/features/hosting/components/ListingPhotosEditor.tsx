@@ -1,5 +1,7 @@
 "use client";
 
+import { Select } from "@/components/ui/Select";
+
 import { ImagePlus, LoaderCircle, X, ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
@@ -67,7 +69,7 @@ export function ListingPhotosEditor({ listingId, photos, enabled }: { listingId:
             <Image src={photo.url} alt={t("photoAlt", { n: index + 1 })} fill sizes="(min-width: 640px) 33vw, 50vw" className="object-cover" />
             {/* What it shows, and its place in the order (the first photo is the cover). */}
             <div className="absolute inset-x-2 bottom-2 flex items-center gap-1.5">
-              <select
+              <Select
                 aria-label={t("photoKindLabel")}
                 value={photo.kind ?? "GENERAL"}
                 disabled={removing}
@@ -84,7 +86,7 @@ export function ListingPhotosEditor({ listingId, photos, enabled }: { listingId:
                     {t(`photoKind.${k}`)}
                   </option>
                 ))}
-              </select>
+              </Select>
               {([-1, 1] as const).map((by) => (
                 <button
                   key={by}

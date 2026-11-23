@@ -1,5 +1,7 @@
 "use client";
 
+import { Select } from "@/components/ui/Select";
+
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { useRouter } from "@/i18n/navigation";
@@ -47,7 +49,7 @@ export function TicketStatusSelect({ reference, status }: { reference: string; s
   return (
     <label className="flex items-center gap-2 text-[13px] text-muted">
       {tAdmin("status")}
-      <select
+      <Select
         value={status}
         disabled={pending || status === "CLOSED"}
         onChange={(e) => run(() => setTicketStatusAction(reference, e.target.value as typeof status))}
@@ -58,7 +60,7 @@ export function TicketStatusSelect({ reference, status }: { reference: string; s
             {t(`status.${s}`)}
           </option>
         ))}
-      </select>
+      </Select>
       {failed && <span className="text-danger">{tAdmin("actionFailed")}</span>}
     </label>
   );

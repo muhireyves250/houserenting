@@ -785,7 +785,8 @@
     "lodge": {
       "amenitiesHint": "For the lodge as a whole. In-room amenities (TV, kitchen…) are set on each room category below.",
       "rulesTitle": "Booking rules",
-      "rulesHint": "How rooms can be booked: by the night or the day, check-in and check-out times, shortest and longest stay. Each room category has its own price (below)."
+      "rulesHint": "How rooms can be booked: by the night or the day, check-in and check-out times, shortest and longest stay. Each room category has its own price (below).",
+      "rulesPerCategory": "Prices, booking rules (hour, day, night, week, month, year), discount and laundry are set on each room category below: each category has its own."
     },
     "dash": {
       "hello": "Hello, {name}",
@@ -907,7 +908,8 @@
       "LIVING_ROOM": "Living room",
       "EXTERIOR": "Outside",
       "FACILITY": "Other facilities"
-    }
+    },
+    "roomsAfterSave": "Save first: then you add the room categories (each with its rooms, prices and rules) right below."
   },
   "Admin": {
     "title": "Admin",
@@ -1670,6 +1672,18 @@
       "name": "Give the room a name or number.",
       "notFound": "This room changed. Refresh the page.",
       "notAllowed": "You can't change this place's rooms."
+    },
+    "rules": {
+      "min": "Shortest stay",
+      "max": "Longest stay",
+      "noMax": "No limit",
+      "openFrom": "Open from",
+      "openUntil": "Open until",
+      "checkIn": "Check-in from",
+      "checkOut": "Check-out until",
+      "discount": "Discount (%)",
+      "laundry": "Laundry price per kg (0 = free)",
+      "placeDefault": "The place's"
     }
   },
   "Settings": {

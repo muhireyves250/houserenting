@@ -43,10 +43,11 @@ export async function requestLaundry(guestId: string, bookingReference: string, 
   const today = new Date(`${todayISO(now)}T00:00:00Z`);
   const booking = await db.booking.findFirst({
     where: { reference: bookingReference, guestId, status: { in: ["CONFIRMED", "CHECKED_IN"] }, checkIn: { lte: today }, checkOut: { gte: today } },
-    select: { id: true, reference: true, listingId: true, roomNumber: true, room: { select: { name: true } }, listing: { select: { title: true, laundryPricePerKg: true } } },
+    select: { id: true, reference: true, listingId: true, roomNumber: true, room: { select: { name: true, laundryPricePerKg: true } }, listing: { select: { title: true, laundryPricePerKg: true } } },
   });
   if (!booking) return { ok: false, error: "noStay" };
-  const price = booking.listing.laundryPricePerKg;
+  // The room category's own laundry price when it has one, else the place's.
+  const price = booking.room?.laundryPricePerKg ?? booking.listing.laundryPricePerKg;
   if (price === null || price < 0) return { ok: false, error: "notOffered" };
   if (await db.laundryOrder.findFirst({ where: { bookingId: booking.id, status: { in: [...OPEN_LAUNDRY] } }, select: { id: true } })) return { ok: false, error: "open" };
   const reference = newReference("LD");

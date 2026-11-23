@@ -1,5 +1,7 @@
 "use client";
 
+import { Select } from "@/components/ui/Select";
+
 import { Plus, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
@@ -85,18 +87,18 @@ export function UserRoles({
           </div>
         ))}
         <div className="flex flex-col gap-2 sm:flex-row">
-          <select aria-label={t("choosePlace")} value={place.id} onChange={(e) => setPlace({ ...place, id: e.target.value })} className={select}>
+          <Select aria-label={t("choosePlace")} value={place.id} onChange={(e) => setPlace({ ...place, id: e.target.value })} className={select}>
             <option value="">{t("choosePlace")}</option>
             {placeOptions.map((o) => (
               <option key={o.id} value={o.id}>
                 {o.name}
               </option>
             ))}
-          </select>
-          <select aria-label={t("role")} value={place.role} onChange={(e) => setPlace({ ...place, role: e.target.value as PlaceJob["role"] })} className={select}>
+          </Select>
+          <Select aria-label={t("role")} value={place.role} onChange={(e) => setPlace({ ...place, role: e.target.value as PlaceJob["role"] })} className={select}>
             <option value="MANAGER">{tPlaces("teamRole.MANAGER")}</option>
             <option value="RECEPTIONIST">{tPlaces("teamRole.RECEPTIONIST")}</option>
-          </select>
+          </Select>
           <button type="button" disabled={pending || !place.id} onClick={() => start(async () => done(await addTeamMemberAction(place.id, email, place.role)))} className={addBtn}>
             <Plus className="size-4" aria-hidden="true" />
             {t("add")}
@@ -130,21 +132,21 @@ export function UserRoles({
           </div>
         ))}
         <div className="flex flex-col gap-2 sm:flex-row">
-          <select aria-label={t("chooseRestaurant")} value={restaurant.id} onChange={(e) => setRestaurant({ ...restaurant, id: e.target.value })} className={select}>
+          <Select aria-label={t("chooseRestaurant")} value={restaurant.id} onChange={(e) => setRestaurant({ ...restaurant, id: e.target.value })} className={select}>
             <option value="">{t("chooseRestaurant")}</option>
             {restaurantOptions.map((o) => (
               <option key={o.id} value={o.id}>
                 {o.name}
               </option>
             ))}
-          </select>
-          <select aria-label={t("role")} value={restaurant.role} onChange={(e) => setRestaurant({ ...restaurant, role: e.target.value as RestaurantJob["role"] })} className={select}>
+          </Select>
+          <Select aria-label={t("role")} value={restaurant.role} onChange={(e) => setRestaurant({ ...restaurant, role: e.target.value as RestaurantJob["role"] })} className={select}>
             {(["MANAGER", "STAFF", "DELIVERY"] as const).map((r) => (
               <option key={r} value={r}>
                 {tFood(`role.${r}`)}
               </option>
             ))}
-          </select>
+          </Select>
           <button type="button" disabled={pending || !restaurant.id} onClick={() => start(async () => done(await addRestaurantMemberAction(restaurant.id, email, restaurant.role)))} className={addBtn}>
             <Plus className="size-4" aria-hidden="true" />
             {t("add")}

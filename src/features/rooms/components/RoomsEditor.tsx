@@ -1,5 +1,7 @@
 "use client";
 
+import { Select } from "@/components/ui/Select";
+
 import { ImagePlus, Pencil, Plus, Trash2, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRef, useState, useTransition } from "react";
@@ -17,7 +19,7 @@ import { parseRoomNumbers, ROOM_STATUSES, type RoomInput, type RoomStatus } from
 type Room = RoomInput & { id: string; status: RoomStatus };
 
 type Unit = RoomInput["rates"][number]["unit"];
-const emptyRoom = (units: readonly Unit[]): RoomInput => ({ name: "", description: "", maxGuests: 2, rates: [{ unit: units[0] ?? "NIGHT", price: 0 }], facilities: [], numbers: [], photos: [], unitDetails: {} });
+const emptyRoom = (units: readonly Unit[]): RoomInput => ({ name: "", description: "", maxGuests: 2, rates: [{ unit: units.includes("NIGHT") ? "NIGHT" : (units[0] ?? "NIGHT"), price: 0, minUnits: 1, maxUnits: null }], discountPercent: null, laundryPricePerKg: null, facilities: [], numbers: [], photos: [], unitDetails: {} });
 
 const STATUS_TONE: Record<RoomStatus, string> = {
   AVAILABLE: "text-emerald-700",
@@ -69,7 +71,7 @@ export function RoomsEditor({ listingId, rooms, units }: { listingId: string; ro
                     {room.rates.map((r) => `${formatRWF(r.price, locale)} ${tListings(`perUnit.${r.unit}`)}`).join(" · ")} · {t("guests", { count: room.maxGuests })}
                   </p>
                 </div>
-                <select
+                <Select
                   value={room.status}
                   disabled={pending}
                   aria-label={t("status")}
@@ -81,7 +83,7 @@ export function RoomsEditor({ listingId, rooms, units }: { listingId: string; ro
                       {t(`statuses.${s}`)}
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
               <div className="flex flex-wrap gap-2">
                 <button type="button" onClick={() => setEditing(room.id)} className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-[13px] font-semibold text-white hover:bg-primary-hover">
@@ -158,7 +160,7 @@ function RoomForm({
   const priceOf = (unit: Unit) => rates.find((r) => r.unit === unit);
   const toggleUnit = (unit: Unit) =>
     set("rates", priceOf(unit) ? rates.filter((r) => r.unit !== unit) : [...rates, { unit, price: 0 }]);
-  const setPrice = (unit: Unit, price: number) => set("rates", rates.map((r) => (r.unit === unit ? { ...r, price } : r)));
+  const setRate = (unit: Unit, patch: Partial<RoomInput["rates"][number]>) => set("rates", rates.map((r) => (r.unit === unit ? { ...r, ...patch } : r)));
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-primary/40 bg-primary/[0.02] p-4">
       <p className="text-[15px] font-bold text-ink">{isNew ? t("add") : t("editCategory")}</p>
@@ -185,19 +187,29 @@ function RoomForm({
           </Chip>
         ))}
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      {/* Each way of booking this category: its price and its own rules (shortest and longest stay, times). */}
+      <div className="flex flex-col gap-3">
         {units
           .filter((unit) => priceOf(unit))
-          .map((unit) => (
-            <Field
-              key={unit}
-              label={`${t("price")} ${tListings(`perUnit.${unit}`)}`}
-              type="number"
-              min={0}
-              value={priceOf(unit)?.price || ""}
-              onChange={(e) => setPrice(unit, Number(e.target.value) || 0)}
-            />
-          ))}
+          .map((unit) => {
+            const r = priceOf(unit)!;
+            const byTime = unit === "HOUR" || unit === "DAY";
+            return (
+              <div key={unit} className="grid grid-cols-2 gap-3 rounded-xl bg-canvas p-3 sm:grid-cols-3">
+                <p className="col-span-full text-[13px] font-semibold text-ink">{tListings(`unitName.${unit}`)}</p>
+                <Field label={`${t("price")} ${tListings(`perUnit.${unit}`)}`} type="number" min={0} value={r.price || ""} onChange={(e) => setRate(unit, { price: Number(e.target.value) || 0 })} />
+                <Field label={t("rules.min")} type="number" min={1} value={r.minUnits ?? 1} onChange={(e) => setRate(unit, { minUnits: Math.max(1, Number(e.target.value) || 1) })} />
+                <Field label={t("rules.max")} type="number" min={1} placeholder={t("rules.noMax")} value={r.maxUnits ?? ""} onChange={(e) => setRate(unit, { maxUnits: e.target.value ? Number(e.target.value) : null })} />
+                <Field label={byTime ? t("rules.openFrom") : t("rules.checkIn")} type="time" value={(byTime ? r.dayStartTime : r.checkInTime) ?? ""} onChange={(e) => setRate(unit, byTime ? { dayStartTime: e.target.value || null } : { checkInTime: e.target.value || null })} />
+                <Field label={byTime ? t("rules.openUntil") : t("rules.checkOut")} type="time" value={(byTime ? r.dayEndTime : r.checkOutTime) ?? ""} onChange={(e) => setRate(unit, byTime ? { dayEndTime: e.target.value || null } : { checkOutTime: e.target.value || null })} />
+              </div>
+            );
+          })}
+      </div>
+      {/* This category's own discount and laundry price (empty: the place's). */}
+      <div className="grid grid-cols-2 gap-3">
+        <Field label={t("rules.discount")} type="number" min={0} max={90} placeholder={t("rules.placeDefault")} value={room.discountPercent ?? ""} onChange={(e) => set("discountPercent", e.target.value === "" ? null : Number(e.target.value))} />
+        <Field label={t("rules.laundry")} type="number" min={0} placeholder={t("rules.placeDefault")} value={room.laundryPricePerKg ?? ""} onChange={(e) => set("laundryPricePerKg", e.target.value === "" ? null : Number(e.target.value))} />
       </div>
       <RoomPhotos listingId={listingId} photos={room.photos ?? []} onChange={(photos) => set("photos", photos)} />
       <AreaField label={t("description")} rows={2} maxLength={500} value={room.description ?? ""} onChange={(e) => set("description", e.target.value)} />

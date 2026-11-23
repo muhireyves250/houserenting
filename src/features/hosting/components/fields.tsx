@@ -1,3 +1,4 @@
+import { Select } from "@/components/ui/Select";
 import { useId, type ComponentProps, type ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
@@ -65,9 +66,9 @@ export function SelectField({
       <label htmlFor={id} className="text-xs font-semibold text-muted">
         {label}
       </label>
-      <select id={id} className="-ml-1 w-full cursor-pointer bg-transparent text-[15px] text-ink outline-none" {...props}>
+      <Select id={id} className="w-full cursor-pointer bg-transparent text-[15px] text-ink outline-none" value={props.value as string | undefined} defaultValue={props.defaultValue as string | undefined} onChange={props.onChange} disabled={props.disabled} name={props.name} aria-label={label}>
         {children}
-      </select>
+      </Select>
     </div>
   );
 }

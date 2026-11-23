@@ -1,5 +1,7 @@
 "use client";
 
+import { Select } from "@/components/ui/Select";
+
 import { FileText, Trash2, Upload } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRef, useState, useTransition } from "react";
@@ -72,13 +74,13 @@ export function DocumentsPanel({ listingId, documents }: { listingId: string; do
         </ul>
       )}
       <div className="flex flex-wrap items-center gap-2">
-        <select value={kind} onChange={(e) => setKind(e.target.value as (typeof KINDS)[number])} aria-label={t("docKindLabel")} className="rounded-xl border border-line-strong bg-surface px-3 py-2 text-[14px]">
+        <Select value={kind} onChange={(e) => setKind(e.target.value as (typeof KINDS)[number])} aria-label={t("docKindLabel")} className="rounded-xl border border-line-strong bg-surface px-3 py-2 text-[14px]">
           {KINDS.map((k) => (
             <option key={k} value={k}>
               {t(`docKind.${k}`)}
             </option>
           ))}
-        </select>
+        </Select>
         <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-line bg-surface px-4 py-2 text-[13px] font-semibold text-ink hover:border-primary">
           <Upload className="size-4" aria-hidden="true" />
           {busy ? t("uploading") : t("uploadDocument")}

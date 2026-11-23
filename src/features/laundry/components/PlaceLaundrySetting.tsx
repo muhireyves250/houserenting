@@ -1,5 +1,7 @@
 "use client";
 
+import { Select } from "@/components/ui/Select";
+
 import { Check } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
@@ -25,7 +27,7 @@ export function PlaceLaundrySetting({ listingId, initial }: { listingId: string;
     });
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <select
+      <Select
         aria-label={t("placeLabel")}
         value={mode}
         disabled={pending}
@@ -38,7 +40,7 @@ export function PlaceLaundrySetting({ listingId, initial }: { listingId: string;
         <option value="off">{t("placeOff")}</option>
         <option value="free">{t("placeFree")}</option>
         <option value="paid">{t("placePaid")}</option>
-      </select>
+      </Select>
       {mode === "paid" && (
         <>
           <input

@@ -1,5 +1,7 @@
 "use client";
 
+import { Select } from "@/components/ui/Select";
+
 import { useTranslations } from "next-intl";
 import { useTransition } from "react";
 import { useRouter } from "@/i18n/navigation";
@@ -15,7 +17,7 @@ export function RoleToggle({ userId, role, self, canManage }: { userId: string; 
   if (self) return <span className="text-xs text-muted">{t("you")}</span>;
   if (!canManage) return <span className="text-xs text-muted">{t("superAdminOnly")}</span>;
   return (
-    <select
+    <Select
       aria-label={t("staffAccess")}
       value={role}
       disabled={pending}
@@ -31,6 +33,6 @@ export function RoleToggle({ userId, role, self, canManage }: { userId: string; 
       <option value="MANAGER">{t("roleName.MANAGER")}</option>
       <option value="ADMIN">{t("roleName.ADMIN")}</option>
       <option value="SUPER_ADMIN">{t("roleName.SUPER_ADMIN")}</option>
-    </select>
+    </Select>
   );
 }

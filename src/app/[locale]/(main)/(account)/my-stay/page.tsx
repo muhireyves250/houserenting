@@ -103,7 +103,9 @@ export default async function MyStayPage() {
   const food = Boolean(await kitchenForPlace(current.listing.id)) && current.checkIn <= today;
   const paid = current.status === "CONFIRMED" || current.status === "CHECKED_IN";
   // Laundry: at places that offer it, once the paid stay has started (free when the price is 0).
-  const laundryOn = paid && current.listing.laundryPricePerKg !== null && current.checkIn <= today;
+  // The room category's own laundry price when it has one, else the place's.
+  const laundryPrice = current.room?.laundryPricePerKg ?? current.listing.laundryPricePerKg;
+  const laundryOn = paid && laundryPrice !== null && current.checkIn <= today;
   const [laundry, settings] = laundryOn ? await Promise.all([stayLaundry(current.id), getSettings()]) : [[], null];
   const [reviewable, tReviews, tRooms] = await Promise.all([canReview(user.id, current.reference), getTranslations("Reviews"), getTranslations("Rooms")]);
   const moment = stayMoment(current, today);
@@ -286,7 +288,7 @@ export default async function MyStayPage() {
 
         {laundryOn && (
           <Section title={tLaundry("title")} icon={Shirt}>
-            <LaundryCard booking={current.reference} pricePerKg={listing.laundryPricePerKg ?? 0} orders={laundry} instructions={settings?.paymentInstructions ?? null} />
+            <LaundryCard booking={current.reference} pricePerKg={laundryPrice ?? 0} orders={laundry} instructions={settings?.paymentInstructions ?? null} />
           </Section>
         )}
 

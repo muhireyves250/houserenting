@@ -50,7 +50,7 @@ export default async function AdminEditListingPage({ params }: Props) {
           {hasRooms && (
             <RoomsEditor
               listingId={id}
-              rooms={rooms.map(({ id: roomId, name, description, maxGuests, rates, facilities, status, numbers, photos, unitDetails }) => ({ id: roomId, name, description, maxGuests, rates, facilities, status, numbers, photos, unitDetails: unitDetailsMap(unitDetails) }))}
+              rooms={rooms.map(({ id: roomId, name, description, maxGuests, rates, facilities, status, numbers, photos, unitDetails, discountPercent, laundryPricePerKg }) => ({ id: roomId, name, description, maxGuests, rates, facilities, status, numbers, photos, discountPercent, laundryPricePerKg, unitDetails: unitDetailsMap(unitDetails) }))}
               units={rateUnitsFor(listing.type)}
             />
           )}
