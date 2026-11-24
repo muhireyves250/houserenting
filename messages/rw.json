@@ -962,7 +962,8 @@
         "orders": "Ibiryo",
         "messages": "Ubutumwa",
         "menu": "Ibindi"
-      }
+      },
+      "homePage": "Ipaji y'itangiriro"
     },
     "count": {
       "listings": "Ahantu ho kugenzura",
@@ -1566,6 +1567,37 @@
       "approve": "Emeza impinduka",
       "decline": "Wanga",
       "failed": "Ntibyakunze — ongera ugerageze."
+    },
+    "homePage": {
+      "pageTitle": "Ibice by'ipaji y'itangiriro",
+      "intro": "Imirongo abakiriya babona ku ipaji y'itangiriro, kuva hejuru kugeza hasi. Uyizimya, uyimura, cyangwa uyihindura: umutwe wayo, imijyi, ubwoko bw'inzu n'inzu ziza mbere. Ibiciro byiza byerekana izo wahisemo, hanyuma izafashwe cyane.",
+      "hotRule": "Izo wahisemo mbere, hanyuma inzu zafashwe cyane (iminsi 90 ishize)",
+      "anywhere": "Ahantu hose",
+      "allKinds": "Ubwoko bwose",
+      "short": "Igihe gito",
+      "long": "Igihe kirekire (ukwezi)",
+      "first": "Mbere:",
+      "shown": "Igaragara ku ipaji y'itangiriro",
+      "edit": "Hindura",
+      "up": "Zamura",
+      "down": "Manura",
+      "delete": "Kuraho",
+      "deleteConfirm": "Gukura igice \"{title}\" ku ipaji y'itangiriro?",
+      "add": "Ongeraho igice",
+      "title": "Umutwe",
+      "titleHint": "urugero: Inzu ziri hafi y'ikibuga cy'indege",
+      "subtitle": "Interuro ngufi munsi y'umutwe",
+      "places": "Imijyi cyangwa uturere (koma hagati)",
+      "placesHint": "urugero: Kigali, Musanze — ubusa ni ahantu hose",
+      "kinds": "Ubwoko bw'inzu",
+      "kindsHint": "Nta na bumwe: ubwoko bwose.",
+      "housesFirst": "Inzu ziza mbere (kuri uru rutonde)",
+      "hotFirst": "Ibiciro byawe byiza (biza mbere, hanyuma izafashwe cyane)",
+      "searchHouse": "Shakisha inzu ku izina cyangwa umujyi",
+      "removeHouse": "Kuraho {title}",
+      "failed": "Ntibyakunze — reba umutwe wongere ugerageze.",
+      "cancel": "Reka",
+      "save": "Bika igice"
     }
   },
   "Questions": {

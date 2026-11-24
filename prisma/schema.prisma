@@ -640,6 +640,36 @@ model Room {
   @@map("room")
 }
 
+enum HomeSectionKind {
+  /// Houses matching its places and kinds (its picked houses first).
+  CUSTOM
+  /// The most booked houses lately, after the ones VIIPA picks.
+  HOT_DEALS
+}
+
+/// A row of houses on the guest home page, run by VIIPA: its title, which houses it shows, and its place in the page.
+model HomeSection {
+  id        String          @id @default(cuid())
+  kind      HomeSectionKind @default(CUSTOM)
+  title     String
+  subtitle  String          @default("")
+  /// Towns or districts its houses are in (any of them); empty = anywhere.
+  places    String[]        @default([])
+  /// Kinds of place (APARTMENT, PRIVATE_HOUSE, GUEST_HOUSE); empty = all.
+  types     String[]        @default([])
+  /// "short" (by the night/day/hour) or "long" (monthly rentals).
+  mode      String          @default("short")
+  /// Houses VIIPA put first, in this order.
+  houseIds  String[]        @default([])
+  position  Int             @default(0)
+  active    Boolean         @default(true)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  @@index([active, position])
+  @@map("homeSection")
+}
+
 /// Business settings staff control (one row). Empty values mean "not set": nothing is charged or promised for them.
 model PlatformConfig {
   id                    Int                 @id @default(1)

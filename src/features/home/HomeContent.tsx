@@ -6,14 +6,13 @@ import { HeroVideo } from "@/features/home/components/HeroVideo";
 import { savedListingIds } from "@/features/favorites/service";
 import { CompactListingCard } from "@/features/home/components/CompactListingCard";
 import { HomeRow } from "@/features/home/components/HomeRow";
-import { buildHomeSections, type HomeSectionKey } from "@/features/home/sections";
+import { homeRows } from "@/features/home/sections-service";
 import { KIND_TYPES, type PlaceKind, type PlaceType } from "@/features/search/params";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PendingArea, RowsSkeleton } from "@/components/ui/Skeletons";
 import { House, UtensilsCrossed, ChevronRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { RecentlyViewedRow } from "@/features/listings/components/RecentlyViewed";
-import { featuredListings, highlightedListings } from "@/features/listings/service";
+import { highlightedListings } from "@/features/listings/service";
 import { ordersLive } from "@/features/food/service";
 import { HERO_SEARCH_ID, SearchBar } from "@/features/search/components/SearchBar";
 import { getCurrentUser } from "@/lib/session";
@@ -24,34 +23,25 @@ import { todayISO } from "@/features/search/date-range";
 const HERO_PHOTO = "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=3840&q=90";
 // Looping drone shot of a modern house (Mixkit free stock video). Override with your own hosted file.
 const HERO_VIDEO = process.env.NEXT_PUBLIC_HERO_VIDEO_URL || "https://assets.mixkit.co/videos/27543/27543-720.mp4";
-// Newest homes the rows are built from (each row shows up to 10).
-const ROW_POOL = 80;
-
-const ROWS = {
-  kigali: { title: "rowKigali", subtitle: "rowKigaliSub" },
-  volcanoes: { title: "rowVolcanoes", subtitle: "rowVolcanoesSub" },
-  kivu: { title: "rowKivu", subtitle: "rowKivuSub" },
-  long: { title: "rowLong", subtitle: "rowLongSub" },
-} as const satisfies Record<HomeSectionKey, { title: string; subtitle: string }>;
 
 /** Home page body: hero search and rows of homes by destination. Also the backdrop for direct /login, /signup visits. */
 export async function HomeContent({ type = null, kind = null }: { type?: PlaceType | null; kind?: PlaceKind | null }) {
-  const [t, tListings, tFood, pool, highlighted, user, food] = await Promise.all([
+  // Both lodges and apartments, until the search switch (computers) or a category chip (phones) narrows the rows.
+  const only = type ? [type] : kind ? [...KIND_TYPES[kind]] : null;
+  const [t, tListings, tFood, sections, highlighted, user, food] = await Promise.all([
     getTranslations("Home"),
     getTranslations("Listings"),
     getTranslations("Food"),
-    featuredListings(ROW_POOL),
+    // The rows VIIPA set up (Hot deals first, then its sections), each with its picked houses first.
+    homeRows(only),
     highlightedListings(),
     getCurrentUser(),
     ordersLive(),
   ]);
-  // Both lodges and apartments, until the search switch (computers) or a category chip (phones) narrows the rows.
-  const shows = (listing: { type: string }) => (type ? listing.type === type : kind ? (KIND_TYPES[kind] as readonly string[]).includes(listing.type) : true);
-  const picks = highlighted.filter(shows);
-  const sections = buildHomeSections(pool.filter(shows));
+  const picks = highlighted.filter((l) => !only || (only as string[]).includes(l.type));
   const [saved, hasStay] = user
     ? await Promise.all([
-        savedListingIds(user.id, [...pool, ...highlighted].map((l) => l.id)),
+        savedListingIds(user.id, [...sections.flatMap((s) => s.listings), ...highlighted].map((l) => l.id)),
         // A paid stay that hasn't ended: only then can they order food to their room.
         food ? db.booking.count({ where: { guestId: user.id, status: { in: ["CONFIRMED", "CHECKED_IN"] }, checkOut: { gte: new Date(`${todayISO()}T00:00:00Z`) } } }).then((n) => n > 0) : false,
       ])
@@ -148,15 +138,12 @@ export async function HomeContent({ type = null, kind = null }: { type?: PlaceTy
               ))}
             </HomeRow>
           )}
-          {/* The plain home page only: not once Lodges, Apartments or a category is chosen. */}
-          {!type && !kind && <RecentlyViewedRow />}
           {sections.map((section) => {
-            const { title, subtitle } = ROWS[section.key];
             return (
               <HomeRow
-                key={section.key}
-                title={tListings(title)}
-                subtitle={tListings(subtitle)}
+                key={section.id}
+                title={section.title}
+                subtitle={section.subtitle}
                 query={section.query}
               >
                 {section.listings.map((listing) => (

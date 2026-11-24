@@ -962,7 +962,8 @@
         "orders": "Repas",
         "messages": "Messages",
         "menu": "Menu"
-      }
+      },
+      "homePage": "Page d'accueil"
     },
     "count": {
       "listings": "Annonces à vérifier",
@@ -1566,6 +1567,37 @@
       "approve": "Approuver",
       "decline": "Refuser",
       "failed": "Échec — réessayez."
+    },
+    "homePage": {
+      "pageTitle": "Sections de la page d'accueil",
+      "intro": "Les rangées que les clients voient sur la page d'accueil, de haut en bas. Désactivez-en une, déplacez-la ou modifiez-la : son titre, ses villes, ses types de logement et les logements affichés en premier. Bons plans montre vos choix, puis les plus réservés.",
+      "hotRule": "Vos choix d'abord, puis les logements les plus réservés (90 derniers jours)",
+      "anywhere": "Partout",
+      "allKinds": "Tous types",
+      "short": "Courts séjours",
+      "long": "Longs séjours (au mois)",
+      "first": "En premier :",
+      "shown": "Affichée sur la page d'accueil",
+      "edit": "Modifier",
+      "up": "Monter",
+      "down": "Descendre",
+      "delete": "Retirer",
+      "deleteConfirm": "Retirer la section « {title} » de la page d'accueil ?",
+      "add": "Ajouter une section",
+      "title": "Titre",
+      "titleHint": "ex. Logements près de l'aéroport",
+      "subtitle": "Petite ligne sous le titre",
+      "places": "Villes ou districts (séparés par une virgule)",
+      "placesHint": "ex. Kigali, Musanze — vide pour partout",
+      "kinds": "Types de logement",
+      "kindsHint": "Aucun choisi : tous types.",
+      "housesFirst": "Logements affichés en premier (dans cet ordre)",
+      "hotFirst": "Vos bons plans (en premier, puis les plus réservés)",
+      "searchHouse": "Chercher un logement par nom ou ville",
+      "removeHouse": "Retirer {title}",
+      "failed": "Échec — vérifiez le titre et réessayez.",
+      "cancel": "Annuler",
+      "save": "Enregistrer"
     }
   },
   "Questions": {

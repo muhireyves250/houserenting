@@ -14,7 +14,7 @@ import {
   Settings,
   Wallet,
   X,
-  type LucideIcon, Shirt, ShoppingBag } from "lucide-react";
+  type LucideIcon, Shirt, ShoppingBag, LayoutList } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, type ReactNode } from "react";
 import { Avatar } from "@/components/ui/Avatar";
@@ -23,7 +23,7 @@ import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import type { StaffArea } from "@/lib/roles";
 
-type Key = "orders" | "laundry" | "messages" | "reports" | "overview" | "listings" | "bookings" | "requests" | "restaurants" | "promoters" | "money" | "promotions" | "moderation" | "support" | "users" | "settings" | "audit" | "account" | "notifications";
+type Key = "homePage" | "orders" | "laundry" | "messages" | "reports" | "overview" | "listings" | "bookings" | "requests" | "restaurants" | "promoters" | "money" | "promotions" | "moderation" | "support" | "users" | "settings" | "audit" | "account" | "notifications";
 
 type Group = "home" | "stays" | "services" | "care" | "money" | "people" | "system";
 
@@ -34,6 +34,8 @@ const GROUPS: { label: Group; items: { key: Key; href: string; icon: LucideIcon 
     label: "stays",
     items: [
       { key: "listings", href: "/admin/listings", icon: Home },
+      // The guest home page's rows (Hot deals and the sections), in order.
+      { key: "homePage", href: "/admin/home-page", icon: LayoutList },
       { key: "bookings", href: "/admin/bookings", icon: CalendarCheck },
       { key: "messages", href: "/admin/messages", icon: MessageSquare },
     ],
@@ -90,6 +92,7 @@ const EXTRA: { key: Key; href: string; icon: LucideIcon }[] = [
 /** The staff area each page belongs to (Overview, account and notices are for all staff). */
 const AREA_OF: Partial<Record<Key, StaffArea>> = {
   listings: "listings",
+  homePage: "listings",
   bookings: "bookings",
   messages: "messages",
   orders: "food",

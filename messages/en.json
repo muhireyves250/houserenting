@@ -962,7 +962,8 @@
         "orders": "Food",
         "messages": "Messages",
         "menu": "Menu"
-      }
+      },
+      "homePage": "Home page"
     },
     "count": {
       "listings": "Listings to review",
@@ -1566,6 +1567,37 @@
       "approve": "Approve changes",
       "decline": "Decline",
       "failed": "Couldn't save — try again."
+    },
+    "homePage": {
+      "pageTitle": "Home page sections",
+      "intro": "The rows guests see on the home page, top to bottom. Turn one off, move it, or edit it: its title, towns, kinds of place, and the houses it shows first. Hot deals shows the houses you pick, then the most booked ones.",
+      "hotRule": "Your picks first, then the most booked houses (last 90 days)",
+      "anywhere": "Anywhere",
+      "allKinds": "All kinds",
+      "short": "Short stays",
+      "long": "Long stays (monthly)",
+      "first": "First:",
+      "shown": "Shown on the home page",
+      "edit": "Edit",
+      "up": "Move up",
+      "down": "Move down",
+      "delete": "Remove",
+      "deleteConfirm": "Remove the section \"{title}\" from the home page?",
+      "add": "Add a section",
+      "title": "Title",
+      "titleHint": "e.g. Homes near the airport",
+      "subtitle": "Short line under the title",
+      "places": "Towns or districts (comma between them)",
+      "placesHint": "e.g. Kigali, Musanze — empty for anywhere",
+      "kinds": "Kinds of place",
+      "kindsHint": "None chosen: all kinds.",
+      "housesFirst": "Houses shown first (in this order)",
+      "hotFirst": "Your hot deals (shown first, then the most booked)",
+      "searchHouse": "Find a house by name or town",
+      "removeHouse": "Remove {title}",
+      "failed": "Couldn't save — check the title and try again.",
+      "cancel": "Cancel",
+      "save": "Save section"
     }
   },
   "Questions": {
