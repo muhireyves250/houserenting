@@ -1599,6 +1599,11 @@
       "failed": "Couldn't save — check the title and try again.",
       "cancel": "Cancel",
       "save": "Save section"
+    },
+    "pay": {
+      "paid": "Paid",
+      "waiting": "Waiting for confirmation",
+      "unpaid": "Not paid"
     }
   },
   "Questions": {

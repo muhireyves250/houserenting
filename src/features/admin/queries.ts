@@ -58,7 +58,9 @@ const BOOKING_ROW = {
   roomNumber: true,
   room: { select: { name: true } },
   guest: { select: { id: true, name: true, email: true } },
-  listing: { select: { id: true, title: true } },
+  listing: { select: { id: true, title: true, type: true } },
+  // Its payments: paid, or the guest said they paid and it waits for VIIPA to confirm.
+  payments: { select: { status: true } },
 } satisfies Prisma.BookingSelect;
 
 /** Bookings for the staff table: filter by status, search reference / guest / place; newest first. */

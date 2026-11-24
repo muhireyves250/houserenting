@@ -1599,6 +1599,11 @@
       "failed": "Échec — vérifiez le titre et réessayez.",
       "cancel": "Annuler",
       "save": "Enregistrer"
+    },
+    "pay": {
+      "paid": "Payée",
+      "waiting": "En attente de confirmation",
+      "unpaid": "Non payée"
     }
   },
   "Questions": {

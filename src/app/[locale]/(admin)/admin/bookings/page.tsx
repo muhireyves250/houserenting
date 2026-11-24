@@ -27,13 +27,14 @@ export default async function AdminBookingsPage({ searchParams }: Props) {
   const today = todayISO();
   // Stays whose time is up are checked out first.
   await autoCheckOut();
-  const [t, tBookings, tListings, tRooms, locale, result] = await Promise.all([
+  const [t, tBookings, tListings, tRooms, locale, result, tType] = await Promise.all([
     getTranslations("Admin"),
     getTranslations("Bookings"),
     getTranslations("Listings"),
     getTranslations("Rooms"),
     getLocale(),
     searchBookings({ status, q, page }),
+    getTranslations("ListingType"),
   ]);
   const query = (extra: Record<string, string | undefined>) =>
     Object.fromEntries(Object.entries({ status, q: q || undefined, ...extra }).filter(([, v]) => v)) as Record<string, string>;
@@ -76,9 +77,16 @@ export default async function AdminBookingsPage({ searchParams }: Props) {
                     {b.reference}
                   </Link>
                   <StatusBadge status={b.status} label={tBookings(`status.${b.status}`)} />
+                  {/* Paid, waiting for VIIPA to confirm the guest's payment, or not paid. */}
+                  {(() => {
+                    const pay = b.payments.some((p) => p.status === "SUCCEEDED") || ["CONFIRMED", "CHECKED_IN", "COMPLETED"].includes(b.status) ? "paid" : b.payments.some((p) => p.status === "PENDING") ? "waiting" : "unpaid";
+                    const tone = pay === "paid" ? "bg-emerald-50 text-emerald-800" : pay === "waiting" ? "bg-amber-100 text-amber-900" : "bg-red-50 text-red-800";
+                    return <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${tone}`}>{t(`pay.${pay}`)}</span>;
+                  })()}
                 </div>
                 <div className="min-w-0 text-[14px]">
                   <span className="block truncate font-semibold text-ink">{b.listing.title}</span>
+                  <span className="block truncate text-[12px] text-muted">{tType(b.listing.type)}</span>
                   {b.room && (
                     <span className="block truncate text-[12px] text-muted">
                       {[b.room.name, b.roomNumber && roomLabel(b.roomNumber, (number) => tRooms("roomNumber", { number }))].filter(Boolean).join(" · ")}

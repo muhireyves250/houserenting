@@ -1599,6 +1599,11 @@
       "failed": "Ntibyakunze — reba umutwe wongere ugerageze.",
       "cancel": "Reka",
       "save": "Bika igice"
+    },
+    "pay": {
+      "paid": "Yishyuwe",
+      "waiting": "Itegereje kwemezwa",
+      "unpaid": "Ntiyishyuwe"
     }
   },
   "Questions": {
