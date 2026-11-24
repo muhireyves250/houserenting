@@ -2,7 +2,7 @@
 
 import { Select } from "@/components/ui/Select";
 
-import { Bell, BedDouble, Bike, DoorOpen, CheckCircle2, Circle, MapPin, Navigation, Phone, Store, Timer } from "lucide-react";
+import { Bell, BedDouble, Bike, DoorOpen, CheckCircle2, Circle, MapPin, Navigation, Phone, Timer } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState, useTransition, type ReactNode } from "react";
 import { useRouter } from "@/i18n/navigation";
@@ -119,83 +119,78 @@ export function OrdersBoard({ orders, compact = false, staffDelete = false }: { 
   return (
     <ul className="grid gap-3 lg:grid-cols-2">
       {orders.map((o) => (
-        <li key={o.reference} className="flex flex-col gap-3 rounded-2xl bg-surface p-4 ring-1 ring-line">
-          <div className="flex items-center justify-between gap-2">
-            <span className="font-mono text-[16px] font-bold text-ink">{o.reference}</span>
+        <li key={o.reference} className="flex flex-col gap-2.5 rounded-2xl bg-surface p-3.5 ring-1 ring-line">
+          {/* Reference, status, time and total on one line. */}
+          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+            <span className="font-mono text-[15px] font-bold text-ink">{o.reference}</span>
             <span className={cn("rounded-full px-2.5 py-0.5 text-[12px] font-bold", ORDER_TONE[o.status])}>{t(`status.${o.status}`)}</span>
-          </div>
-          <div className="flex flex-col gap-1.5 text-[13px] text-ink">
-            <Line icon={<Phone />}>
-              <b className="font-semibold">{o.customer}</b> ·{" "}
-              <a href={`tel:${o.phone}`} className="text-primary hover:underline">
-                {o.phone}
-              </a>
-            </Line>
-            {o.address && <Line icon={<BedDouble />}>{o.address}</Line>}
-            {o.kitchen && (
-              <Line icon={<Store />}>
-                <span className="text-muted">{o.kitchen}</span>
-              </Line>
-            )}
-          </div>
-          <ul className="flex flex-wrap gap-1.5 text-[13px]">
-            {o.items.map((i, n) => (
-              <li key={n} className="rounded-full bg-canvas px-2.5 py-1 text-ink">
-                <b className="font-semibold tabular-nums">{i.quantity} ×</b> {i.name}
-              </li>
-            ))}
-          </ul>
-          {o.note && <p className="rounded-xl bg-amber-50 px-3 py-2 text-[13px] text-amber-900">{t("customerNote", { note: o.note })}</p>}
-          <div className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3">
             <span className="text-[12px] text-muted">{time.format(o.createdAt)}</span>
-            <span className="text-[16px] font-bold text-ink tabular-nums">{formatRWF(o.total, locale)}</span>
+            <span className="ml-auto text-[16px] font-bold text-ink tabular-nums">{formatRWF(o.total, locale)}</span>
           </div>
-          {/* The exact room the guest is in: where to bring it. */}
-          {o.location?.room && (
-            <div className="flex items-center gap-3 rounded-xl bg-amber-50 px-3 py-2.5 ring-1 ring-amber-200">
-              <DoorOpen className="size-5 shrink-0 text-amber-700" aria-hidden="true" />
-              <span className="min-w-0 text-[14px] leading-5">
-                <span className="block text-[11px] font-bold tracking-[0.06em] text-amber-800 uppercase">{t("board.room")}</span>
-                <b className="text-[16px] font-bold text-amber-950">
-                  {o.location.room.number ? roomLabel(o.location.room.number, (n) => tRooms("roomNumber", { number: n })) : o.location.room.name}
-                </b>
-                {o.location.room.number && <span className="text-amber-900"> · {o.location.room.name}</span>}
+          {/* Who, from which kitchen, and what. */}
+          <p className="text-[13px] leading-5 text-ink">
+            <Phone className="mr-1 inline size-3.5 text-primary" aria-hidden="true" />
+            <b className="font-semibold">{o.customer}</b> ·{" "}
+            <a href={`tel:${o.phone}`} className="text-primary hover:underline">
+              {o.phone}
+            </a>
+            {o.kitchen && <span className="text-muted"> · {o.kitchen}</span>}
+          </p>
+          <p className="text-[13px] leading-5 text-ink">
+            {o.items.map((i, n) => (
+              <span key={n}>
+                {n > 0 && <span className="text-muted"> · </span>}
+                <b className="font-semibold tabular-nums">{i.quantity} ×</b> {i.name}
               </span>
-            </div>
-          )}
-          {/* The house it goes to: its address and directions (open in maps). */}
-          {o.location && (
-            <div className="flex items-center gap-3 rounded-xl bg-primary/[0.05] p-3 ring-1 ring-primary/10">
-              <MapPin className="size-5 shrink-0 text-primary" aria-hidden="true" />
+            ))}
+          </p>
+          {o.note && <p className="rounded-lg bg-amber-50 px-2.5 py-1.5 text-[13px] text-amber-900">{t("customerNote", { note: o.note })}</p>}
+          {/* Where it goes: the exact room (bold) and the place, with directions; one strip. */}
+          {o.location ? (
+            <div className="flex items-center gap-2.5 rounded-xl bg-amber-50 px-3 py-2 ring-1 ring-amber-200">
+              {o.location.room ? <DoorOpen className="size-5 shrink-0 text-amber-700" aria-hidden="true" /> : <MapPin className="size-5 shrink-0 text-amber-700" aria-hidden="true" />}
               <span className="min-w-0 flex-1 text-[13px] leading-[18px]">
-                <b className="block font-semibold text-ink">{o.location.title}</b>
-                <span className="text-muted">{o.location.address}</span>
+                {o.location.room && (
+                  <b className="block truncate text-[15px] font-bold text-amber-950">
+                    {o.location.room.number ? `${roomLabel(o.location.room.number, (n) => tRooms("roomNumber", { number: n }))} · ${o.location.room.name}` : o.location.room.name}
+                  </b>
+                )}
+                <span className="block truncate text-amber-900">
+                  {o.location.title} · {o.location.address}
+                </span>
               </span>
-              <a href={o.location.mapUrl} target="_blank" rel="noopener noreferrer" className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-primary px-3.5 py-2 text-[13px] font-semibold text-white hover:bg-primary-hover">
-                <Navigation className="size-4" aria-hidden="true" />
-                {t("board.directions")}
+              <a href={o.location.mapUrl} target="_blank" rel="noopener noreferrer" aria-label={t("board.directions")} className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-primary-hover">
+                <Navigation className="size-3.5" aria-hidden="true" />
+                <span className="max-sm:hidden">{t("board.directions")}</span>
               </a>
             </div>
+          ) : (
+            o.address && (
+              <p className="text-[13px] text-muted">
+                <BedDouble className="mr-1 inline size-3.5 text-primary" aria-hidden="true" />
+                {o.address}
+              </p>
+            )
           )}
-          {/* Staff: who handles it at the restaurant; call them, or send a reminder. */}
+          {/* Staff: who handles it at the restaurant (call them), and Remind. */}
           {o.kitchenPeople && o.kitchenPeople.length > 0 && (
-            <div className="flex flex-col gap-2 rounded-xl bg-canvas p-3">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl bg-canvas px-3 py-2 text-[13px]">
               <span className="text-[12px] font-semibold text-muted">{t("board.handledBy")}</span>
-              <ul className="flex flex-col gap-1">
-                {o.kitchenPeople.map((p, i) => (
-                  <li key={i} className="flex items-center justify-between gap-2 text-[13px]">
-                    <span className="min-w-0 truncate">
-                      <b className="font-semibold text-ink">{p.name}</b> <span className="text-muted">· {t(`board.kitchenRole.${p.role}`)}</span>
-                    </span>
-                    {p.phone && (
-                      <a href={`tel:${p.phone}`} className="shrink-0 text-primary hover:underline">
-                        {p.phone}
-                      </a>
-                    )}
-                  </li>
-                ))}
-              </ul>
-              {o.canRemind && <RemindButton reference={o.reference} />}
+              {o.kitchenPeople.map((p, i) => (
+                <span key={i} className="min-w-0">
+                  <b className="font-semibold text-ink">{p.name}</b> <span className="text-muted">({t(`board.kitchenRole.${p.role}`)})</span>
+                  {p.phone && (
+                    <a href={`tel:${p.phone}`} className="ml-1 text-primary hover:underline">
+                      {p.phone}
+                    </a>
+                  )}
+                </span>
+              ))}
+              {o.canRemind && (
+                <span className="ml-auto">
+                  <RemindButton reference={o.reference} />
+                </span>
+              )}
             </div>
           )}
           {o.status === "PLACED" && o.deadline && <Countdown until={o.deadline} />}
@@ -342,7 +337,7 @@ function RemindButton({ reference }: { reference: string }) {
             setState(r.ok ? "sent" : r.error === "tooSoon" ? "tooSoon" : "failed");
           })
         }
-        className="inline-flex h-9 items-center gap-1.5 rounded-full bg-amber-500 px-3.5 text-[13px] font-semibold text-white hover:bg-amber-600 disabled:opacity-50"
+        className="inline-flex h-8 items-center gap-1.5 rounded-full bg-amber-500 px-3 text-[12px] font-semibold text-white hover:bg-amber-600 disabled:opacity-50"
       >
         <Bell className="size-4" aria-hidden="true" />
         {t("remind")}
