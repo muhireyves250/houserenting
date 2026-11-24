@@ -2395,6 +2395,37 @@
       "coming": "{count, plural, one {Ifatwa # riri imbere} other {Ifatwa # ziri imbere}}",
       "food": "Ibiryo: {names}",
       "categories": "Ibyiciro: {names}"
+    },
+    "glance": {
+      "now": "Ubu",
+      "bookedNow": "Irimo umushyitsi: {guest} arimo kugeza {until}.",
+      "freeNow": "Irimo ubusa: nta mushyitsi urimo ubu.",
+      "roomsSummary": "Ibyumba {free} kuri {all} birimo ubusa uyu munsi · {staying, plural, =0 {nta mushyitsi urimo} other {abashyitsi # barimo}}",
+      "next": "Ukurikiraho: {guest}, {when} ({reference})",
+      "noNext": "Nta ifatwa riri imbere.",
+      "roomOccupied": "{guest} kugeza {until}",
+      "room": {
+        "free": "Kirimo ubusa",
+        "MAINTENANCE": "Kirimo gusanwa",
+        "CLEANING": "Kirimo gukorwa isuku",
+        "UNAVAILABLE": "Ntikiboneka",
+        "blocked": "Gifunze (iminsi ifunze)"
+      },
+      "work": "Ibikorwa kuri iyi nzu",
+      "allDone": "Byose byarangiye: nta gitegereje.",
+      "hint": "Bivugururwa buri uko ufunguye uru rupapuro.",
+      "task": {
+        "claims": "{count, plural, other {Kwishyura # bitegereje kwemezwa}}",
+        "requests": "{count, plural, other {Ibyifuzo # by'abashyitsi bitegereje igisubizo}}",
+        "laundry": "{count, plural, other {Imyenda # irimo kumeswa}}",
+        "food": "{count, plural, other {Komande # z'ibiryo zirimo gukorwa}}",
+        "changes": "Impinduka za nyirayo zitegereje kwemezwa (hejuru kuri uru rupapuro)",
+        "kitchens": "{count, plural, other {Resitora # zirasaba gutekera hano}}",
+        "blocks": "{count, plural, other {Ibihe # bifunze biriho}}",
+        "noAgreement": "Nta masezerano ya komisiyo arajyaho (akenewe ngo ijye ku rubuga)",
+        "payout": "Amakuru yo kwishyurwa ya nyirayo ntaragenzurwa",
+        "photos": "Nta mafoto arajyaho"
+      }
     }
   },
   "MyStay": {

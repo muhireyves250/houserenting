@@ -2395,6 +2395,37 @@
       "coming": "{count, plural, one {# booking coming} other {# bookings coming}}",
       "food": "Food: {names}",
       "categories": "Categories: {names}"
+    },
+    "glance": {
+      "now": "Right now",
+      "bookedNow": "Booked: {guest} is staying, until {until}.",
+      "freeNow": "Free: nobody is staying now.",
+      "roomsSummary": "{free} of {all} rooms free today · {staying, plural, =0 {no guests staying} one {# stay under way} other {# stays under way}}",
+      "next": "Next: {guest}, {when} ({reference})",
+      "noNext": "No booking coming yet.",
+      "roomOccupied": "{guest} until {until}",
+      "room": {
+        "free": "Free",
+        "MAINTENANCE": "Under repair",
+        "CLEANING": "Being cleaned",
+        "UNAVAILABLE": "Not offered",
+        "blocked": "Closed (dates closed)"
+      },
+      "work": "Work on this place",
+      "allDone": "All done: nothing is waiting.",
+      "hint": "Updated each time this page opens.",
+      "task": {
+        "claims": "{count, plural, one {# payment to confirm} other {# payments to confirm}}",
+        "requests": "{count, plural, one {# guest request to answer} other {# guest requests to answer}}",
+        "laundry": "{count, plural, one {# laundry order in progress} other {# laundry orders in progress}}",
+        "food": "{count, plural, one {# food order in progress} other {# food orders in progress}}",
+        "changes": "The owner's changes wait for approval (top of this page)",
+        "kitchens": "{count, plural, one {# restaurant asks to cook here} other {# restaurants ask to cook here}}",
+        "blocks": "{count, plural, one {# closed period in force} other {# closed periods in force}}",
+        "noAgreement": "No commission agreement yet (needed to go live)",
+        "payout": "The owner's payout details aren't checked yet",
+        "photos": "No photos yet"
+      }
     }
   },
   "MyStay": {

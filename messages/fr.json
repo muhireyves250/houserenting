@@ -2395,6 +2395,37 @@
       "coming": "{count, plural, one {# réservation à venir} other {# réservations à venir}}",
       "food": "Repas : {names}",
       "categories": "Catégories : {names}"
+    },
+    "glance": {
+      "now": "En ce moment",
+      "bookedNow": "Occupé : {guest} séjourne jusqu'au {until}.",
+      "freeNow": "Libre : personne ne séjourne en ce moment.",
+      "roomsSummary": "{free} chambres libres sur {all} aujourd'hui · {staying, plural, =0 {aucun séjour en cours} one {# séjour en cours} other {# séjours en cours}}",
+      "next": "Prochain : {guest}, {when} ({reference})",
+      "noNext": "Aucune réservation à venir.",
+      "roomOccupied": "{guest} jusqu'au {until}",
+      "room": {
+        "free": "Libre",
+        "MAINTENANCE": "En réparation",
+        "CLEANING": "En nettoyage",
+        "UNAVAILABLE": "Non proposée",
+        "blocked": "Fermée (dates fermées)"
+      },
+      "work": "Travail sur ce logement",
+      "allDone": "Tout est fait : rien n'attend.",
+      "hint": "Mis à jour à chaque ouverture de la page.",
+      "task": {
+        "claims": "{count, plural, one {# paiement à confirmer} other {# paiements à confirmer}}",
+        "requests": "{count, plural, one {# demande client à traiter} other {# demandes client à traiter}}",
+        "laundry": "{count, plural, one {# blanchisserie en cours} other {# blanchisseries en cours}}",
+        "food": "{count, plural, one {# commande de repas en cours} other {# commandes de repas en cours}}",
+        "changes": "Les modifications du propriétaire attendent l'approbation (en haut de la page)",
+        "kitchens": "{count, plural, one {# restaurant demande à cuisiner ici} other {# restaurants demandent à cuisiner ici}}",
+        "blocks": "{count, plural, one {# période fermée en cours} other {# périodes fermées en cours}}",
+        "noAgreement": "Pas encore d'accord de commission (nécessaire pour la mise en ligne)",
+        "payout": "Les coordonnées de paiement du propriétaire ne sont pas vérifiées",
+        "photos": "Pas encore de photos"
+      }
     }
   },
   "MyStay": {

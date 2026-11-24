@@ -15,6 +15,8 @@ import { ListingChangesReview } from "@/features/hosting/components/ListingChang
 import { listingChanges, toListingInput } from "@/features/hosting/to-input";
 import type { ListingInput } from "@/features/hosting/validation";
 import { PlaceKitchens } from "@/features/food/components/PlaceKitchens";
+import { PlaceGlance } from "@/features/places/components/PlaceGlance";
+import { placeOverview } from "@/features/places/overview";
 import { pendingKitchenRequests } from "@/features/food/service";
 import { db } from "@/lib/db";
 import { AgreementEditor } from "@/features/agreements/components/AgreementEditor";
@@ -75,7 +77,7 @@ export default async function AdminListingPage({ params }: Props) {
     getTranslations("Bookings"),
     getTranslations("Rooms"),
   ]);
-  const [tPlaces, blocks, documents, payout, team, tAgree, placeAgreement, laundryAgreement, tFood, restaurants, kitchenRequests] = await Promise.all([
+  const [tPlaces, blocks, documents, payout, team, tAgree, placeAgreement, laundryAgreement, tFood, restaurants, kitchenRequests, overview] = await Promise.all([
     getTranslations("Places"),
     listingBlocks(id),
     listingDocuments(id),
@@ -87,6 +89,7 @@ export default async function AdminListingPage({ params }: Props) {
     getTranslations("Food.placeKitchens"),
     db.restaurant.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true, status: true, places: { where: { listingId: id }, select: { id: true } } } }),
     pendingKitchenRequests(id),
+    placeOverview(id),
   ]);
   const kitchens = restaurants.map((r) => ({ id: r.id, name: r.name, live: r.status === "PUBLISHED", assigned: r.places.length > 0 }));
   const day = (d: Date | null) => (d ? iso(d) : null);
@@ -132,6 +135,9 @@ export default async function AdminListingPage({ params }: Props) {
           )}
         </span>
       </div>
+
+      {/* At a glance: booked or free now, each room today, and the work still open on this place. */}
+      <PlaceGlance overview={overview} />
 
       {/* Photos as a strip of thumbnails. */}
       {listing.photos.length > 0 ? (
