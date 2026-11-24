@@ -2,11 +2,12 @@
 
 import { Select } from "@/components/ui/Select";
 
-import { Bell, BedDouble, Bike, CheckCircle2, Circle, MapPin, Navigation, Phone, Store, Timer } from "lucide-react";
+import { Bell, BedDouble, Bike, DoorOpen, CheckCircle2, Circle, MapPin, Navigation, Phone, Store, Timer } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState, useTransition, type ReactNode } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
+import { roomLabel } from "@/features/rooms/links";
 import { formatRWF } from "@/lib/format";
 import { ConfirmAction } from "@/features/admin/components/ConfirmAction";
 import { assignCourierAction, confirmDeliveryAction, deleteFoodOrderAction, moveOrderAction, remindRestaurantAction } from "../actions";
@@ -42,7 +43,7 @@ export type BoardOrder = {
   kitchenPeople?: { name: string; phone: string | null; role: "OWNER" | "MANAGER" }[];
   canRemind?: boolean;
   /** The house it goes to, with a map link (for the delivery person). */
-  location?: { title: string; address: string; mapUrl: string } | null;
+  location?: { title: string; address: string; mapUrl: string; room?: { name: string; number: string | null } | null } | null;
 };
 
 export const ORDER_TONE: Record<OrderStatus, string> = {
@@ -75,6 +76,7 @@ function Line({ icon, children }: { icon: ReactNode; children: ReactNode }) {
  */
 export function OrdersBoard({ orders, compact = false, staffDelete = false }: { orders: BoardOrder[]; compact?: boolean; /** Staff may delete cancelled, unpaid orders. */ staffDelete?: boolean }) {
   const t = useTranslations("Food");
+  const tRooms = useTranslations("Rooms");
   const locale = useLocale();
   const router = useRouter();
   // A step that needs a reason the guest reads: reject, cancel, or a failed delivery.
@@ -148,6 +150,19 @@ export function OrdersBoard({ orders, compact = false, staffDelete = false }: { 
             <span className="text-[12px] text-muted">{time.format(o.createdAt)}</span>
             <span className="text-[16px] font-bold text-ink tabular-nums">{formatRWF(o.total, locale)}</span>
           </div>
+          {/* The exact room the guest is in: where to bring it. */}
+          {o.location?.room && (
+            <div className="flex items-center gap-3 rounded-xl bg-amber-50 px-3 py-2.5 ring-1 ring-amber-200">
+              <DoorOpen className="size-5 shrink-0 text-amber-700" aria-hidden="true" />
+              <span className="min-w-0 text-[14px] leading-5">
+                <span className="block text-[11px] font-bold tracking-[0.06em] text-amber-800 uppercase">{t("board.room")}</span>
+                <b className="text-[16px] font-bold text-amber-950">
+                  {o.location.room.number ? roomLabel(o.location.room.number, (n) => tRooms("roomNumber", { number: n })) : o.location.room.name}
+                </b>
+                {o.location.room.number && <span className="text-amber-900"> · {o.location.room.name}</span>}
+              </span>
+            </div>
+          )}
           {/* The house it goes to: its address and directions (open in maps). */}
           {o.location && (
             <div className="flex items-center gap-3 rounded-xl bg-primary/[0.05] p-3 ring-1 ring-primary/10">

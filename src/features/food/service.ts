@@ -826,16 +826,25 @@ export async function allOrders(take = 150) {
 }
 
 /** Where each order goes: the guest's place (address, official location, and a map link), for the delivery person. */
-export async function withStayLocation<T extends { bookingId: string | null }>(orders: T[]): Promise<(T & { location: { title: string; address: string; mapUrl: string } | null })[]> {
+export async function withStayLocation<T extends { bookingId: string | null }>(orders: T[]): Promise<(T & { location: { title: string; address: string; mapUrl: string; room: { name: string; number: string | null } | null } | null })[]> {
   const bookingIds = [...new Set(orders.flatMap((o) => (o.bookingId ? [o.bookingId] : [])))];
   const rows =
     bookingIds.length === 0
       ? []
-      : await db.booking.findMany({ where: { id: { in: bookingIds } }, select: { id: true, listing: { select: { title: true, addressLine: true, village: true, cell: true, sector: true, district: true, lat: true, lng: true } } } });
+      : await db.booking.findMany({
+          where: { id: { in: bookingIds } },
+          select: { id: true, roomNumber: true, room: { select: { name: true } }, listing: { select: { title: true, addressLine: true, village: true, cell: true, sector: true, district: true, lat: true, lng: true } } },
+        });
   const byId = new Map(
-    rows.map(({ id, listing: l }) => [
+    rows.map(({ id, listing: l, room, roomNumber }) => [
       id,
-      { title: l.title, address: [l.addressLine, l.village, l.cell, l.sector, l.district].filter(Boolean).join(", "), mapUrl: `https://www.google.com/maps/dir/?api=1&destination=${l.lat},${l.lng}` },
+      {
+        title: l.title,
+        address: [l.addressLine, l.village, l.cell, l.sector, l.district].filter(Boolean).join(", "),
+        mapUrl: `https://www.google.com/maps/dir/?api=1&destination=${l.lat},${l.lng}`,
+        // The exact room the guest is in (a room booking): its category and number.
+        room: room ? { name: room.name, number: roomNumber } : null,
+      },
     ]),
   );
   return orders.map((o) => ({ ...o, location: (o.bookingId && byId.get(o.bookingId)) || null }));

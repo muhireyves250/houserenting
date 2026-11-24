@@ -3039,7 +3039,8 @@
         "sent": "Kwibutsa byoherejwe",
         "tooSoon": "Bibukijwe vuba aha",
         "failed": "Ntibyoherejwe"
-      }
+      },
+      "room": "Icyumba"
     },
     "waitingRestaurant": "Resitora ifite kugeza {time} ngo yemeze. Wishyura ari uko imaze kwemeza.",
     "courierLine": "Bizanwa na {name}",
