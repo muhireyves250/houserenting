@@ -3040,7 +3040,8 @@
         "tooSoon": "Déjà rappelé il y a un instant",
         "failed": "Échec de l'envoi"
       },
-      "room": "Chambre"
+      "room": "Chambre",
+      "call": "Appeler {name}"
     },
     "waitingRestaurant": "Le restaurant a jusqu'à {time} pour confirmer. Vous ne payez qu'après sa confirmation.",
     "courierLine": "Livrée par {name}",

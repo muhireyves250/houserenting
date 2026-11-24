@@ -2,7 +2,7 @@
 
 import { Select } from "@/components/ui/Select";
 
-import { Bell, BedDouble, Bike, DoorOpen, CheckCircle2, Circle, MapPin, Navigation, Timer } from "lucide-react";
+import { Bell, BedDouble, PhoneCall, Bike, DoorOpen, CheckCircle2, Circle, MapPin, Navigation, Timer } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState, useTransition, type ReactNode } from "react";
 import { useRouter } from "@/i18n/navigation";
@@ -128,7 +128,8 @@ export function OrdersBoard({ orders, compact = false, staffDelete = false }: { 
             <span className="ml-auto text-[16px] font-bold text-ink tabular-nums">{formatRWF(o.total, locale)}</span>
           </div>
           {/* Who, from which kitchen, and what: one line. */}
-          <p className="truncate text-[13px] leading-5 text-ink">
+          {/* Phones: up to two lines (dishes stay readable); computers: one. */}
+          <p className="line-clamp-2 text-[13px] leading-5 text-ink sm:line-clamp-1">
             <b className="font-semibold">{o.customer}</b>{" "}
             <a href={`tel:${o.phone}`} className="text-primary hover:underline">
               {o.phone}
@@ -156,7 +157,7 @@ export function OrdersBoard({ orders, compact = false, staffDelete = false }: { 
                 )}
                 {o.location.title}
               </span>
-              <a href={o.location.mapUrl} target="_blank" rel="noopener noreferrer" aria-label={t("board.directions")} title={t("board.directions")} className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-white hover:bg-primary-hover">
+              <a href={o.location.mapUrl} target="_blank" rel="noopener noreferrer" aria-label={t("board.directions")} title={t("board.directions")} className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-white hover:bg-primary-hover sm:size-7">
                 <Navigation className="size-3.5" aria-hidden="true" />
               </a>
             </div>
@@ -177,8 +178,10 @@ export function OrdersBoard({ orders, compact = false, staffDelete = false }: { 
                     {i > 0 && " · "}
                     <b className="font-semibold text-ink">{p.name}</b> <span className="text-muted">({t(`board.kitchenRole.${p.role}`)})</span>
                     {p.phone && (
-                      <a href={`tel:${p.phone}`} className="ml-1 text-primary hover:underline">
-                        {p.phone}
+                      <a href={`tel:${p.phone}`} aria-label={t("board.call", { name: p.name })} className="ml-1 text-primary hover:underline">
+                        {/* Phones: a call button; computers: the number. */}
+                        <PhoneCall className="inline size-3.5 sm:hidden" aria-hidden="true" />
+                        <span className="max-sm:hidden">{p.phone}</span>
                       </a>
                     )}
                   </span>

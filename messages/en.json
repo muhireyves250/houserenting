@@ -3040,7 +3040,8 @@
         "tooSoon": "Already reminded a moment ago",
         "failed": "Couldn't send"
       },
-      "room": "Room"
+      "room": "Room",
+      "call": "Call {name}"
     },
     "waitingRestaurant": "The restaurant has until {time} to confirm. You pay only after it confirms.",
     "courierLine": "Brought by {name}",
