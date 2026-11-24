@@ -253,12 +253,13 @@ export function SearchBar({
         onChange={(value) => {
           setSearch({ kind: value, mode: "short" });
           setOpen(null);
-          // On the home page the rows follow the switch: lodges only, or apartments only.
+          // On the home page the rows follow the switch: guest houses, apartments or private houses only.
           if (onHome) router.replace({ pathname: "/", query: { kind: value } }, { scroll: false });
         }}
         options={[
           { value: "LODGE", label: t("lodge") },
           { value: "APARTMENT", label: t("apartment") },
+          { value: "HOUSE", label: t("house") },
         ]}
         // Pro edge matching the search bar: blue hairline, frosted halo, soft floating shadow.
         className="relative border border-primary/80 shadow-[0_12px_32px_-14px_rgba(0,30,80,0.55)] ring-[5px] ring-white/20 md:max-w-md md:self-center"

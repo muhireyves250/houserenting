@@ -83,12 +83,20 @@ describe("SearchBar", () => {
     expect(push).toHaveBeenCalledWith({ pathname: "/search", query: { mode: "short", checkIn: "2026-10-14", flex: "2", type: "GUEST_HOUSE" } });
   });
 
-  it("searches only the kind of place chosen with the switch (lodges or apartments)", async () => {
+  it("searches only the kind of place chosen with the switch (guest houses, apartments or private houses)", async () => {
     renderWithIntl(<SearchBar today={TODAY} />);
     await userEvent.click(screen.getByRole("radio", { name: "Apartments" }));
     await userEvent.type(screen.getByRole("combobox", { name: "Where" }), "Huye");
     await userEvent.click(screen.getByRole("button", { name: "Search" }));
-    expect(push).toHaveBeenCalledWith({ pathname: "/search", query: { mode: "short", location: "Huye", type: "APARTMENT,PRIVATE_HOUSE" } });
+    expect(push).toHaveBeenCalledWith({ pathname: "/search", query: { mode: "short", location: "Huye", type: "APARTMENT" } });
+  });
+
+  it("has a third choice for private houses", async () => {
+    renderWithIntl(<SearchBar today={TODAY} />);
+    await userEvent.click(screen.getByRole("radio", { name: "Private houses" }));
+    await userEvent.type(screen.getByRole("combobox", { name: "Where" }), "Huye");
+    await userEvent.click(screen.getByRole("button", { name: "Search" }));
+    expect(push).toHaveBeenCalledWith({ pathname: "/search", query: { mode: "short", location: "Huye", type: "PRIVATE_HOUSE" } });
   });
 
   it("lists the districts that have homes (with their town) and fills the field on pick", async () => {

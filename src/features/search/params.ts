@@ -5,12 +5,14 @@ export const PLACE_TYPES = ["APARTMENT", "PRIVATE_HOUSE", "GUEST_HOUSE"] as cons
 export type PlaceType = (typeof PLACE_TYPES)[number];
 
 /** The guest's main choice (the search switch): lodges, or apartments and other homes. Every type is in one of them. */
-export type PlaceKind = "LODGE" | "APARTMENT";
+/** The search switch: guest houses, apartments or private houses (LODGE is the guest-house switch, kept for links). */
+export type PlaceKind = "LODGE" | "APARTMENT" | "HOUSE";
 export const KIND_TYPES: Record<PlaceKind, readonly PlaceType[]> = {
   LODGE: ["GUEST_HOUSE"],
-  APARTMENT: ["APARTMENT", "PRIVATE_HOUSE"],
+  APARTMENT: ["APARTMENT"],
+  HOUSE: ["PRIVATE_HOUSE"],
 };
-export const kindOf = (value: unknown): PlaceKind | null => (value === "LODGE" || value === "APARTMENT" ? value : null);
+export const kindOf = (value: unknown): PlaceKind | null => (value === "LODGE" || value === "APARTMENT" || value === "HOUSE" ? value : null);
 
 /** Visible map area: [south, west, north, east] in degrees. */
 export type Bbox = [number, number, number, number];
