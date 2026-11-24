@@ -2379,7 +2379,10 @@
         "noAccount": "Shyiramo amakuru yo kwishyurwaho kandi utegereze ko VIIPA iyagenzura.",
         "already": "Wamaze gusaba: VIIPA izayohereza vuba."
       }
-    }
+    },
+    "hotDealAdd": "Shyira mu biciro byiza",
+    "hotDealRemove": "Kura mu biciro byiza",
+    "hotDealNotLive": "Inzu iri ku rubuga yonyine ni yo ishobora kujya mu biciro byiza."
   },
   "MyStay": {
     "title": "Aho ncumbitse",

@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "@/lib/session";
 import { canStaff } from "@/lib/roles";
-import { deleteSection, moveSection, pickableHouses, saveSection, type SectionInput } from "./sections-service";
+import { deleteSection, moveSection, pickableHouses, saveSection, setHotDeal, type SectionInput } from "./sections-service";
 
 const refresh = () => revalidatePath("/[locale]", "layout");
 
@@ -36,4 +36,13 @@ export async function pickHousesAction(q: string) {
   const user = await getCurrentUser();
   if (!user || !canStaff(user, "listings") || typeof q !== "string") return [];
   return pickableHouses(q);
+}
+
+/** Staff add a house to Hot deals, or take it out (from the houses list's Actions). */
+export async function setHotDealAction(listingId: string, on: boolean): Promise<{ ok: boolean; error?: string }> {
+  const user = await getCurrentUser();
+  if (!user || typeof listingId !== "string" || listingId.length > 64) return { ok: false, error: "notAllowed" };
+  const r = await setHotDeal(user, listingId, on === true);
+  if (r.ok) refresh();
+  return r;
 }

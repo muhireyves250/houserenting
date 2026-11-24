@@ -6,6 +6,8 @@ import { FillScreen, Toolbar } from "@/features/admin/components/kit";
 import { HostStatus } from "@/features/hosting/components/HostStatus";
 import { LISTING_MOVES, movesFrom } from "@/features/listings/lifecycle";
 import { ActionsMenu } from "@/features/admin/components/ActionsMenu";
+import { setHotDealAction } from "@/features/home/actions";
+import { hotDealIds } from "@/features/home/sections-service";
 import { deletePlaceAction, moveListingAction } from "@/features/places/actions";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
@@ -49,10 +51,11 @@ export default async function AdminListingsPage({ searchParams }: Props) {
     getTranslations("Places"),
   ]);
   // Only the filters that have places (with how many), so the row stays short.
-  const [counts, typeCounts, ending] = await Promise.all([
+  const [counts, typeCounts, ending, hot] = await Promise.all([
     db.listing.groupBy({ by: ["status"], where: type ? { type } : {}, _count: { _all: true } }),
     db.listing.groupBy({ by: ["type"], where: { status: status ?? { not: "ARCHIVED" } }, _count: { _all: true } }),
     contractsEnding(),
+    hotDealIds(),
   ]);
   const typeCount = (t: PlaceType) => typeCounts.find((c) => c.type === t)?._count._all ?? 0;
   const keep = (extra: Record<string, string | undefined>) =>
@@ -154,6 +157,14 @@ export default async function AdminListingsPage({ searchParams }: Props) {
                       danger: ["suspend", "archive", "reject", "hide"].includes(move),
                       errors: moveErrors,
                     })),
+                    // Live houses: put first in Hot deals on the home page, or take out.
+                    ...(listing.status === "PUBLISHED"
+                      ? [
+                          hot.has(listing.id)
+                            ? { kind: "run" as const, label: tPlaces("hotDealRemove"), action: setHotDealAction.bind(null, listing.id, false) }
+                            : { kind: "run" as const, label: tPlaces("hotDealAdd"), action: setHotDealAction.bind(null, listing.id, true), errors: { notLive: tPlaces("hotDealNotLive") } },
+                        ]
+                      : []),
                     ...(listing._count.bookings === 0
                       ? [{ kind: "run" as const, label: tPlaces("deleteShort"), action: deletePlaceAction.bind(null, listing.id), confirm: tPlaces("deletePlaceQuestion"), danger: true, errors: { hasBookings: tPlaces("deleteHasBookings"), notAllowed: tPlaces("deleteNotAllowed") } }]
                       : []),

@@ -143,3 +143,20 @@ export function pickableHouses(q = "", take = 30) {
     select: { id: true, title: true, city: true },
   });
 }
+
+/** The houses VIIPA put in Hot deals (shown first there). */
+export async function hotDealIds(): Promise<Set<string>> {
+  const hot = await db.homeSection.findFirst({ where: { kind: "HOT_DEALS" }, select: { houseIds: true } });
+  return new Set(hot?.houseIds ?? []);
+}
+
+/** Staff add a live house to Hot deals (at the end of their picks) or take it out. Logged. */
+export async function setHotDeal(actor: Actor, listingId: string, on: boolean): Promise<{ ok: boolean; error?: string }> {
+  if (!canStaff(actor, "listings")) return { ok: false, error: "notAllowed" };
+  if (on && !(await db.listing.findFirst({ where: { id: listingId, status: "PUBLISHED" }, select: { id: true } }))) return { ok: false, error: "notLive" };
+  const hot = (await db.homeSection.findFirst({ where: { kind: "HOT_DEALS" } })) ?? (await db.homeSection.create({ data: { kind: "HOT_DEALS", title: "Hot deals", subtitle: "The most booked places right now", position: 0 } }));
+  const ids = hot.houseIds.filter((id) => id !== listingId);
+  await db.homeSection.update({ where: { id: hot.id }, data: { houseIds: on ? [...ids, listingId].slice(0, 20) : ids } });
+  await audit(db, { actorId: actor.id, action: on ? "home.hotDealAdd" : "home.hotDealRemove", entityType: "listing", entityId: listingId });
+  return { ok: true };
+}

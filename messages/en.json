@@ -2379,7 +2379,10 @@
         "noAccount": "Add your payout details and wait for VIIPA to check them.",
         "already": "You already asked: VIIPA will send it soon."
       }
-    }
+    },
+    "hotDealAdd": "Add to Hot deals",
+    "hotDealRemove": "Remove from Hot deals",
+    "hotDealNotLive": "Only a live place can be a hot deal."
   },
   "MyStay": {
     "title": "My stay",

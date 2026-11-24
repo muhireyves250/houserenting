@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { db } from "@/lib/db";
 import { resetDb } from "@/test/db";
-import { deleteSection, homeRows, moveSection, saveSection } from "./sections-service";
+import { deleteSection, homeRows, hotDealIds, moveSection, saveSection, setHotDeal } from "./sections-service";
 
 const admin = { id: "admin", role: "ADMIN" };
 const house = (id: string, city: string, type: "APARTMENT" | "GUEST_HOUSE" = "APARTMENT") =>
@@ -50,5 +50,16 @@ describe("home page sections run by VIIPA", () => {
     const [row] = await homeRows();
     expect(row!.listings.map((l) => l.id)).toEqual(["m1", "k2", "k1"]);
     expect(await deleteSection(admin, hot.id)).toBe(false);
+  });
+
+  it("staff add a house to Hot deals from its Actions (first there), and take it out", async () => {
+    expect(await setHotDeal({ id: "g" }, "k1", true)).toEqual({ ok: false, error: "notAllowed" });
+    await db.listing.update({ where: { id: "m1" }, data: { status: "HIDDEN" } });
+    expect(await setHotDeal(admin, "m1", true)).toEqual({ ok: false, error: "notLive" });
+    expect(await setHotDeal(admin, "k3", true)).toEqual({ ok: true });
+    expect([...(await hotDealIds())]).toEqual(["k3"]);
+    expect((await homeRows())[0]!.listings[0]!.id).toBe("k3");
+    expect(await setHotDeal(admin, "k3", false)).toEqual({ ok: true });
+    expect((await hotDealIds()).size).toBe(0);
   });
 });

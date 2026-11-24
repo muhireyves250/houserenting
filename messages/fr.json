@@ -2379,7 +2379,10 @@
         "noAccount": "Ajoutez vos coordonnées de paiement et attendez la vérification de VIIPA.",
         "already": "Vous avez déjà demandé : VIIPA va l'envoyer bientôt."
       }
-    }
+    },
+    "hotDealAdd": "Ajouter aux bons plans",
+    "hotDealRemove": "Retirer des bons plans",
+    "hotDealNotLive": "Seul un logement en ligne peut être un bon plan."
   },
   "MyStay": {
     "title": "Mon séjour",
