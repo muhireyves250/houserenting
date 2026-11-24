@@ -45,12 +45,15 @@ export async function PlaceGlance({ overview }: { overview: Overview }) {
               return (
                 <li key={`${r.category}-${r.number ?? i}`} className={cn("flex items-start gap-2 rounded-xl px-3 py-2 text-[13px] ring-1", roomTone[r.state])}>
                   <Icon className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-                  <span className="min-w-0">
+                  <span className="min-w-0 flex-1">
                     <b className="block truncate font-semibold">
                       {r.category}
                       {r.number && ` · ${roomLabel(r.number, (n) => tRooms("roomNumber", { number: n }))}`}
                     </b>
-                    <span className="block">{r.state === "occupied" ? t("roomOccupied", { guest: r.guest ?? "", until: r.until ? when(r.until) : "" }) : t(`room.${r.state}`)}</span>
+                    <span className="block">{r.state === "occupied" ? t("roomBooked") : t(`room.${r.state}`)}</span>
+                    {/* The stay under way (who, reference, in and out, paid), then the next booking. */}
+                    {r.booking && <BookingLine b={r.booking} label={null} payLabel={t(`pay.${r.booking.pay}`)} inOut={t("inOut", { in: when(r.booking.startAt), out: when(r.booking.endAt) })} />}
+                    {r.next && <BookingLine b={r.next} label={t("roomNext")} payLabel={t(`pay.${r.next.pay}`)} inOut={t("inOut", { in: when(r.next.startAt), out: when(r.next.endAt) })} />}
                   </span>
                 </li>
               );
@@ -92,5 +95,21 @@ export async function PlaceGlance({ overview }: { overview: Overview }) {
         </p>
       </div>
     </section>
+  );
+}
+
+/** One booking on a room tile: guest and reference (opens it), check-in and check-out, and its payment. */
+function BookingLine({ b, label, payLabel, inOut }: { b: import("../overview").RoomBooking; label: string | null; payLabel: string; inOut: string }) {
+  const tone = b.pay === "paid" ? "bg-emerald-600 text-white" : b.pay === "waiting" ? "bg-amber-500 text-white" : "bg-red-600 text-white";
+  return (
+    <Link href={`/admin/bookings/${b.reference}`} className="mt-1.5 block rounded-lg bg-white/70 px-2 py-1.5 text-[12px] leading-[17px] text-ink ring-1 ring-black/5 hover:ring-primary/40">
+      {label && <span className="block text-[11px] font-semibold text-muted uppercase">{label}</span>}
+      <span className="flex items-center justify-between gap-2">
+        <b className="truncate font-semibold">{b.guest}</b>
+        <span className={cn("shrink-0 rounded-full px-1.5 py-px text-[10px] font-bold", tone)}>{payLabel}</span>
+      </span>
+      <span className="block font-mono text-[11px] text-primary">{b.reference}</span>
+      <span className="block text-muted">{inOut}</span>
+    </Link>
   );
 }

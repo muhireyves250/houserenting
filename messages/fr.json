@@ -2428,6 +2428,14 @@
         "noAgreement": "Pas encore d'accord de commission (nécessaire pour la mise en ligne)",
         "payout": "Les coordonnées de paiement du propriétaire ne sont pas vérifiées",
         "photos": "Pas encore de photos"
+      },
+      "roomBooked": "Réservée",
+      "roomNext": "Prochaine réservation",
+      "inOut": "Arrivée {in} · Départ {out}",
+      "pay": {
+        "paid": "Payée",
+        "waiting": "À confirmer",
+        "unpaid": "Non payée"
       }
     }
   },

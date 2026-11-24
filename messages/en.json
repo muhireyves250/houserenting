@@ -2428,6 +2428,14 @@
         "noAgreement": "No commission agreement yet (needed to go live)",
         "payout": "The owner's payout details aren't checked yet",
         "photos": "No photos yet"
+      },
+      "roomBooked": "Booked",
+      "roomNext": "Next booking",
+      "inOut": "In {in} · Out {out}",
+      "pay": {
+        "paid": "Paid",
+        "waiting": "To confirm",
+        "unpaid": "Not paid"
       }
     }
   },

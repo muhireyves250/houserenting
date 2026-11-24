@@ -2428,6 +2428,14 @@
         "noAgreement": "Nta masezerano ya komisiyo arajyaho (akenewe ngo ijye ku rubuga)",
         "payout": "Amakuru yo kwishyurwa ya nyirayo ntaragenzurwa",
         "photos": "Nta mafoto arajyaho"
+      },
+      "roomBooked": "Cyafashwe",
+      "roomNext": "Ifatwa rikurikira",
+      "inOut": "Yinjira {in} · Asohoka {out}",
+      "pay": {
+        "paid": "Yishyuwe",
+        "waiting": "Itegereje kwemezwa",
+        "unpaid": "Ntiyishyuwe"
       }
     }
   },
