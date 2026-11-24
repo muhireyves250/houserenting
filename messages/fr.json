@@ -2437,6 +2437,32 @@
         "waiting": "À confirmer",
         "unpaid": "Non payée"
       }
+    },
+    "services": {
+      "title": "Repas et blanchisserie ici",
+      "food": "Commandes de repas",
+      "laundry": "Blanchisserie",
+      "noFood": "Aucun repas commandé ici pour l'instant.",
+      "noLaundry": "Aucune blanchisserie ici pour l'instant.",
+      "by": "par {name}",
+      "confirmedBy": "Reçue, confirmée par {who}",
+      "party": {
+        "guest": "le client",
+        "courier": "le livreur",
+        "desk": "la réception"
+      },
+      "paidAt": "Payée le {when}",
+      "notPaid": "Pas encore payée",
+      "money": "VIIPA {commission} · restaurant {share}",
+      "deliveredBy": "Livrée par {name}",
+      "kitchenItself": "la cuisine elle-même",
+      "deskTook": "reçue à la réception par {name}, {when}",
+      "guestGot": "Le client l'a reçue : {when}",
+      "guestNotYet": "Le client n'a pas encore confirmé",
+      "weighed": "{kg} kg",
+      "notWeighed": "Pas encore pesée",
+      "paymentClaimed": "Le client dit avoir payé",
+      "paymentConfirmed": "Paiement confirmé"
     }
   },
   "MyStay": {

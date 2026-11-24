@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { db } from "@/lib/db";
 import { resetDb } from "@/test/db";
 import { placeOverview } from "./overview";
+import { placeServices } from "./services-history";
 
 const NOW = new Date("2026-11-10T10:00:00Z");
 
@@ -33,5 +34,22 @@ describe("a place at a glance", () => {
     expect(o.next).toMatchObject({ reference: "SR-GL0002" });
     expect(o.tasks.map((t) => t.key)).toEqual(expect.arrayContaining(["claims", "noAgreement", "payout", "photos"]));
     expect(o.tasks.find((t) => t.key === "claims")?.count).toBe(1);
+  });
+
+  it("lists the laundry here with its money and every step: who did it and when", async () => {
+    const b = await stay("SR-GL0003", "g1", "2", "2026-11-09T12:00:00Z", "2026-11-12T09:00:00Z");
+    await db.user.create({ data: { id: "desk", name: "Desk Dan", email: "desk@example.com" } });
+    await db.laundryOrder.create({ data: { reference: "LD-GL0001", bookingId: b.id, listingId: "gh", guestId: "g1", status: "RETURNED", pricePerKg: 1000, weightGrams: 3500, amount: 3500 } });
+    await db.auditLog.createMany({
+      data: [
+        { actorId: "desk", action: "laundry.picked_up", entityType: "laundry", entityId: "LD-GL0001", createdAt: new Date("2026-11-09T15:00:00Z") },
+        { actorId: "desk", action: "laundry.washed", entityType: "laundry", entityId: "LD-GL0001", data: { grams: 3500, amount: 3500 }, createdAt: new Date("2026-11-09T18:00:00Z") },
+        { actorId: "desk", action: "laundry.returned", entityType: "laundry", entityId: "LD-GL0001", createdAt: new Date("2026-11-10T08:00:00Z") },
+      ],
+    });
+    const { laundry, food } = await placeServices("gh");
+    expect(food).toEqual([]);
+    expect(laundry[0]).toMatchObject({ reference: "LD-GL0001", guest: "Ama", kg: 3.5, amount: 3500 });
+    expect(laundry[0]!.steps.map((x) => [x.what, x.who])).toEqual([["picked_up", "Desk Dan"], ["washed", "Desk Dan"], ["returned", "Desk Dan"]]);
   });
 });

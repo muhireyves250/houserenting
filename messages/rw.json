@@ -2437,6 +2437,32 @@
         "waiting": "Itegereje kwemezwa",
         "unpaid": "Ntiyishyuwe"
       }
+    },
+    "services": {
+      "title": "Ibiryo n'imyenda hano",
+      "food": "Komande z'ibiryo",
+      "laundry": "Imyenda yo kumesa",
+      "noFood": "Nta biryo biratumizwa hano.",
+      "noLaundry": "Nta myenda iramesherwa hano.",
+      "by": "na {name}",
+      "confirmedBy": "Byakiriwe, byemejwe na {who}",
+      "party": {
+        "guest": "umukiriya",
+        "courier": "ugeza ibiryo",
+        "desk": "ushinzwe kwakira"
+      },
+      "paidAt": "Byishyuwe {when}",
+      "notPaid": "Ntibirishyurwa",
+      "money": "VIIPA {commission} · resitora {share}",
+      "deliveredBy": "Byagejejwe na {name}",
+      "kitchenItself": "igikoni ubwacyo",
+      "deskTook": "byakiriwe ku ruganiriro na {name}, {when}",
+      "guestGot": "Umukiriya yabibonye: {when}",
+      "guestNotYet": "Umukiriya ntaremeza",
+      "weighed": "{kg} kg",
+      "notWeighed": "Ntiyapimwe",
+      "paymentClaimed": "Umukiriya avuga ko yishyuye",
+      "paymentConfirmed": "Kwishyura byemejwe"
     }
   },
   "MyStay": {

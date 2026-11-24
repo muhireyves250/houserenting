@@ -2437,6 +2437,32 @@
         "waiting": "To confirm",
         "unpaid": "Not paid"
       }
+    },
+    "services": {
+      "title": "Food and laundry here",
+      "food": "Food orders",
+      "laundry": "Laundry",
+      "noFood": "No food ordered here yet.",
+      "noLaundry": "No laundry here yet.",
+      "by": "by {name}",
+      "confirmedBy": "Received, confirmed by {who}",
+      "party": {
+        "guest": "the guest",
+        "courier": "the delivery person",
+        "desk": "the receptionist"
+      },
+      "paidAt": "Paid {when}",
+      "notPaid": "Not paid yet",
+      "money": "VIIPA {commission} · restaurant {share}",
+      "deliveredBy": "Delivered by {name}",
+      "kitchenItself": "the kitchen itself",
+      "deskTook": "received at the desk by {name}, {when}",
+      "guestGot": "The guest got it: {when}",
+      "guestNotYet": "The guest hasn't confirmed yet",
+      "weighed": "{kg} kg",
+      "notWeighed": "Not weighed yet",
+      "paymentClaimed": "Guest says they paid",
+      "paymentConfirmed": "Payment confirmed"
     }
   },
   "MyStay": {
