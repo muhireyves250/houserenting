@@ -12,12 +12,13 @@ const roomFields = z.object({
   name: z.string().trim().min(2).max(60),
   description: z.string().trim().max(500),
   maxGuests: z.number().int().min(1).max(50),
-  /** The room's own price for each way of booking it (at least one). */
+  /** The ways of booking this category (at least one), each with its own rules; prices are on its rooms. */
   rates: z
     .array(
       z.object({
         unit: z.enum(RATE_UNITS),
-        price: z.number().int().min(100).max(100_000_000),
+        // Prices are set on each room; the category keeps its cheapest room's (its "from" price), worked out on save.
+        price: z.number().int().min(0).max(100_000_000).default(0),
         // This category's own rules for the unit: shortest and longest stay, and times (empty = none).
         minUnits: z.number().int().min(1).max(1000).default(1),
         maxUnits: z.number().int().min(1).max(1000).nullable().default(null),
@@ -39,7 +40,15 @@ const roomFields = z.object({
   photos: z.array(photoUrl).max(12).default([]),
   /** Each room's own photos and description, by its name or number. */
   unitDetails: z
-    .record(z.string().trim().min(1).max(40), z.object({ photos: z.array(photoUrl).max(12).default([]), description: z.string().trim().max(500).default("") }))
+    .record(
+      z.string().trim().min(1).max(40),
+      z.object({
+        photos: z.array(photoUrl).max(12).default([]),
+        description: z.string().trim().max(500).default(""),
+        // The room's own price for each way of booking (the category has no price of its own).
+        prices: z.partialRecord(z.enum(RATE_UNITS), z.number().int().min(100).max(100_000_000)).default({}),
+      }),
+    )
     .default({}),
   numbers: z
     .array(z.string().trim().min(1).max(40))
@@ -49,12 +58,12 @@ const roomFields = z.object({
 });
 
 /** "101, 102 103" → ["101", "102", "103"] (commas, spaces or new lines). */
-export type UnitDetails = Record<string, { photos: string[]; description: string }>;
+export type UnitDetails = Record<string, { photos: string[]; description: string; prices: Partial<Record<(typeof RATE_UNITS)[number], number>> }>;
 
 /** A room type: its fields, keeping details only for rooms that are in it (and that have any). */
 export const roomInput = roomFields.transform((room) => ({
   ...room,
-  unitDetails: Object.fromEntries(Object.entries(room.unitDetails).filter(([n, d]) => room.numbers.includes(n) && (d.photos.length > 0 || d.description.length > 0))),
+  unitDetails: Object.fromEntries(Object.entries(room.unitDetails).filter(([n, d]) => room.numbers.includes(n) && (d.photos.length > 0 || d.description.length > 0 || Object.keys(d.prices).length > 0))),
 }));
 
 /** Rooms' own details as stored (JSON), read safely. */
@@ -63,8 +72,10 @@ export function unitDetailsMap(value: unknown): UnitDetails {
   const out: UnitDetails = {};
   for (const [n, d] of Object.entries(value as Record<string, unknown>)) {
     if (!d || typeof d !== "object") continue;
-    const { photos, description } = d as { photos?: unknown; description?: unknown };
-    out[n] = { photos: Array.isArray(photos) ? photos.filter((u): u is string => typeof u === "string") : [], description: typeof description === "string" ? description : "" };
+    const { photos, description, prices } = d as { photos?: unknown; description?: unknown; prices?: unknown };
+    const own: UnitDetails[string]["prices"] = {};
+    if (prices && typeof prices === "object") for (const u of RATE_UNITS) { const p = (prices as Record<string, unknown>)[u]; if (typeof p === "number" && Number.isInteger(p) && p > 0) own[u] = p; }
+    out[n] = { photos: Array.isArray(photos) ? photos.filter((u): u is string => typeof u === "string") : [], description: typeof description === "string" ? description : "", prices: own };
   }
   return out;
 }
@@ -93,5 +104,16 @@ export const roomUnitInput = z.object({
   name: z.string().trim().min(1).max(40),
   photos: z.array(photoUrl).max(12).default([]),
   description: z.string().trim().max(500).default(""),
+  /** The room's price for each way its category is booked. */
+  prices: z.partialRecord(z.enum(RATE_UNITS), z.number().int().min(100).max(100_000_000)).default({}),
 });
 export type RoomUnitInput = z.input<typeof roomUnitInput>;
+
+/**
+ * One room's price for a way of booking: its own (numbered rooms each have one), else the category's (a category
+ * that is a single room). Null when it isn't offered.
+ */
+export function priceOfRoom(room: { unitDetails: unknown; rates: { unit: string; price: number }[] }, number: string | null, unit: string): number | null {
+  const own = number ? unitDetailsMap(room.unitDetails)[number]?.prices[unit as (typeof RATE_UNITS)[number]] : undefined;
+  return own ?? room.rates.find((r) => r.unit === unit)?.price ?? null;
+}

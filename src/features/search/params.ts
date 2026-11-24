@@ -1,13 +1,14 @@
 export type SearchMode = "short" | "long";
 
-export const PLACE_TYPES = ["APARTMENT", "DUPLEX", "PRIVATE_HOUSE", "LODGE", "ROOM", "GUEST_HOUSE", "OTHER"] as const;
+// Duplex is no longer a type (those places are private houses now).
+export const PLACE_TYPES = ["APARTMENT", "PRIVATE_HOUSE", "LODGE", "ROOM", "GUEST_HOUSE", "OTHER"] as const;
 export type PlaceType = (typeof PLACE_TYPES)[number];
 
 /** The guest's main choice (the search switch): lodges, or apartments and other homes. Every type is in one of them. */
 export type PlaceKind = "LODGE" | "APARTMENT";
 export const KIND_TYPES: Record<PlaceKind, readonly PlaceType[]> = {
   LODGE: ["LODGE", "GUEST_HOUSE"],
-  APARTMENT: ["APARTMENT", "DUPLEX", "PRIVATE_HOUSE", "ROOM", "OTHER"],
+  APARTMENT: ["APARTMENT", "PRIVATE_HOUSE", "ROOM", "OTHER"],
 };
 export const kindOf = (value: unknown): PlaceKind | null => (value === "LODGE" || value === "APARTMENT" ? value : null);
 

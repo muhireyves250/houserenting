@@ -2,12 +2,17 @@ import "server-only";
 import { pathOfVillage } from "@/features/locations/rwanda";
 import { OWNER_EDITABLE } from "@/features/listings/lifecycle";
 import { audit } from "@/features/audit/service";
-import { notifyAdmins } from "@/features/notifications/service";
+import { notify, notifyAdmins } from "@/features/notifications/service";
+import { Prisma } from "@/generated/prisma/client";
 import { moveListing } from "@/features/places/status-service";
 import { db } from "@/lib/db";
+import { todayISO } from "@/features/search/date-range";
 import { listingInput, type ListingInput } from "./validation";
 
-export type SaveResult = { ok: true; id: string } | { ok: false; errors: Record<string, string> } | { ok: false; error: "notFound" | "locked" };
+export type SaveResult = { ok: true; id: string; pending?: boolean } | { ok: false; errors: Record<string, string> } | { ok: false; error: "notFound" | "locked" };
+
+/** Live places: the owner's edits wait for VIIPA's approval (the place stays live as it was meanwhile). */
+const LIVE: readonly string[] = ["PUBLISHED", "PAUSED"];
 
 const HOST_LIST_SELECT = {
   id: true,
@@ -64,8 +69,11 @@ export async function saveListing(
 
   return db.$transaction(async (tx) => {
     if (id === null) {
+      // Never a day already past: empty means from the day it is published.
+      const today = asDate(todayISO())!;
+      const from = fields.availableFrom && fields.availableFrom > today ? fields.availableFrom : null;
       const created = await tx.listing.create({
-        data: { ...fields, hostId, status: "DRAFT", operator: staff?.operator ?? "OWNER", rates: { create: rates } },
+        data: { ...fields, availableFrom: from, hostId, status: "DRAFT", operator: staff?.operator ?? "OWNER", rates: { create: rates } },
       });
       await tx.user.update({ where: { id: hostId }, data: { isHost: true } });
       await audit(tx, { actorId: staff?.staffId ?? hostId, action: "listing.create", entityType: "listing", entityId: created.id, data: staff ? { forHost: hostId } : undefined });
@@ -73,13 +81,19 @@ export async function saveListing(
     }
     const existing = await tx.listing.findFirst({ where: { id, hostId, status: { not: "ARCHIVED" } }, select: { status: true } });
     if (!existing) return { ok: false, error: "notFound" };
-    // Once sent for review (or live), only VIIPA changes the place.
-    if (!staff && !OWNER_EDITABLE.includes(existing.status)) return { ok: false, error: "locked" };
-    const status = existing.status === "PUBLISHED" && !staff ? "PENDING_REVIEW" : existing.status;
+    // A live place: the owner's changes are kept aside for VIIPA to approve; the place stays as it is until then.
+    if (!staff && LIVE.includes(existing.status)) {
+      await tx.listing.update({ where: { id }, data: { pendingChanges: parsed.data as Prisma.InputJsonValue, pendingChangesAt: new Date() } });
+      await audit(tx, { actorId: editorId ?? hostId, action: "listing.changesSubmitted", entityType: "listing", entityId: id });
+      await notifyAdmins(tx, "listingChangesSubmitted", { title: fields.title }, `/admin/listings/${id}`);
+      return { ok: true, id, pending: true };
+    }
+    // Hidden or suspended by VIIPA: only VIIPA changes it. Before it's live (draft, in review, sent back) the owner edits freely.
+    if (!staff && !OWNER_EDITABLE.includes(existing.status) && existing.status !== "PENDING_REVIEW") return { ok: false, error: "locked" };
+    const status = existing.status;
     await tx.rateOption.deleteMany({ where: { listingId: id } });
     await tx.listing.update({ where: { id }, data: { ...fields, status, rates: { create: rates } } });
     await audit(tx, { actorId: staff?.staffId ?? editorId ?? hostId, action: "listing.update", entityType: "listing", entityId: id, data: { from: existing.status, to: status } });
-    if (existing.status === "PUBLISHED" && !staff) await notifyAdmins(tx, "listingSubmitted", { title: fields.title }, `/admin/listings/${id}`);
     return { ok: true, id };
   });
 }
@@ -193,4 +207,25 @@ export async function hostDashboard(hostId: string, now: Date = new Date()) {
     upcomingByPlace: new Map(upcoming.map((r) => [r.listingId, r._count])),
     months,
   };
+}
+
+/**
+ * VIIPA answers an owner's changes to a live place: approve (they are saved and shown to guests) or decline with a
+ * reason (they are dropped; the place stays as it was). The owner is told either way.
+ */
+export async function decideListingChanges(staffId: string, listingId: string, approve: boolean, reason = ""): Promise<boolean> {
+  const listing = await db.listing.findUnique({ where: { id: listingId }, select: { hostId: true, title: true, pendingChanges: true } });
+  if (!listing?.pendingChanges) return false;
+  const why = reason.trim().slice(0, 300);
+  if (!approve && !why) return false;
+  if (approve) {
+    const saved = await saveListing(listing.hostId, listingId, listing.pendingChanges as unknown as ListingInput, { staffId });
+    if (!saved.ok) return false;
+  }
+  await db.$transaction(async (tx) => {
+    await tx.listing.update({ where: { id: listingId }, data: { pendingChanges: Prisma.DbNull, pendingChangesAt: null } });
+    await audit(tx, { actorId: staffId, action: approve ? "listing.changesApproved" : "listing.changesDeclined", entityType: "listing", entityId: listingId, ...(why ? { data: { reason: why } } : {}) });
+    await notify(tx, listing.hostId, approve ? "listingChangesApproved" : "listingChangesDeclined", { title: listing.title, reason: why }, `/host/listings/${listingId}`);
+  });
+  return true;
 }

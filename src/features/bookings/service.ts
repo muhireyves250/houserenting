@@ -5,6 +5,7 @@ import { discountedPrice } from "@/features/listings/pricing";
 import { nightsBetween } from "@/features/listings/quote";
 import { todayISO, type BookedRange, type ISODate } from "@/features/search/date-range";
 import { db } from "@/lib/db";
+import { priceOfRoom } from "@/features/rooms/validation";
 import { isCustomer } from "@/lib/customer";
 import { holdMinutesFrom, readSettings, type CancellationPolicy } from "@/features/settings/service";
 import { logger } from "@/lib/logger";
@@ -172,7 +173,7 @@ export async function createRentalBooking(request: RentalRequest, now: Date = ne
 
   // What is being booked: the whole place at its rate for this unit, or one available room at the room's rate.
   let base: number;
-  let room: { id: string; name: string; numbers: string[] } | null = null;
+  let room: { id: string; name: string; numbers: string[]; unitDetails: unknown; rates: { unit: string; price: number }[] } | null = null;
   // The rules for this unit: the room category's own when it has them, else the place's.
   let rules: { minUnits: number; maxUnits: number | null; dayStartTime: string | null; dayEndTime: string | null } | null = rate;
   let discount = listing.discountPercent;
@@ -199,7 +200,7 @@ export async function createRentalBooking(request: RentalRequest, now: Date = ne
     if (found.discountPercent !== null) discount = found.discountPercent;
     // A room number the guest picked must be one of this type's rooms.
     if (request.roomNumber && !found.numbers.includes(request.roomNumber)) return { ok: false, error: "unavailable" };
-    room = { id: found.id, name: found.name, numbers: found.numbers };
+    room = { id: found.id, name: found.name, numbers: found.numbers, unitDetails: found.unitDetails, rates: found.rates };
   }
   // Length and opening hours follow the place's rules for this unit (when set).
   if (rules && (quantity < rules.minUnits || (rules.maxUnits !== null && quantity > rules.maxUnits))) return { ok: false, error: "stayLength" };
@@ -209,6 +210,29 @@ export async function createRentalBooking(request: RentalRequest, now: Date = ne
   const span = periodFor(unit, start, quantity, startTime);
   // Hours that have already started can't be booked.
   if (unit === "HOUR" && span.startAt.getTime() < now.getTime()) return { ok: false, error: "pastTime" };
+  // Numbered rooms each have their own price: the guest gets the room they picked, else the cheapest one free for
+  // this time, and pays that room's price (it is then held for them).
+  let roomNumber = request.roomNumber ?? null;
+  if (room && room.numbers.length > 0) {
+    const clashes = await db.booking.findMany({
+      where: {
+        listingId,
+        startAt: { lt: span.endAt },
+        endAt: { gt: span.startAt },
+        OR: [{ roomId: room.id }, { roomId: null }],
+        AND: [{ OR: [{ status: { in: ["CONFIRMED", "CHECKED_IN"] } }, { status: "PENDING_PAYMENT", holdExpiresAt: { gt: now } }] }],
+      },
+      select: { roomId: true, roomNumber: true },
+    });
+    if (clashes.some((c) => c.roomId === null)) return { ok: false, error: "unavailable" };
+    const taken = new Set(clashes.map((c) => c.roomNumber));
+    const r = room;
+    const free = r.numbers.filter((n) => !taken.has(n) && (priceOfRoom(r, n, unit) ?? 0) > 0).sort((a, b) => priceOfRoom(r, a, unit)! - priceOfRoom(r, b, unit)!);
+    roomNumber = roomNumber ? (free.includes(roomNumber) ? roomNumber : null) : (free[0] ?? null);
+    if (!roomNumber) return { ok: false, error: "unavailable" };
+    base = priceOfRoom(r, roomNumber, unit)!;
+  }
+  if (!(base > 0)) return { ok: false, error: "notOffered" };
   const day = (d: Date | null) => d?.toISOString().slice(0, 10) ?? null;
   const window = bookableWindow({
     contractStart: day(listing.contractStart),
@@ -271,7 +295,7 @@ export async function createRentalBooking(request: RentalRequest, now: Date = ne
     endAt: period.endAt,
     roomId: room?.id ?? null,
     roomNumbers: room?.numbers ?? [],
-    preferredNumber: request.roomNumber ?? null,
+    preferredNumber: roomNumber,
     promoId: promo?.id ?? null,
     identity,
     now,

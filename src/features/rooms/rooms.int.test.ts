@@ -124,7 +124,7 @@ describe("room-by-room and whole-place bookings", () => {
   it("saves each room's own photos and description with its room type", async () => {
     const details = { "101": { photos: ["https://res.cloudinary.com/demo/101.jpg"], description: "Corner room" } };
     await saveRoom({ id: "admin", role: "ADMIN" }, "lodge", roomA, { ...room, name: "First floor", rates: [{ unit: "NIGHT", price: 40000 }], numbers: ["101", "102"], unitDetails: details });
-    expect((await db.room.findUnique({ where: { id: roomA }, select: { unitDetails: true } }))?.unitDetails).toEqual(details);
+    expect((await db.room.findUnique({ where: { id: roomA }, select: { unitDetails: true } }))?.unitDetails).toEqual({ "101": { ...details["101"], prices: {} } });
   });
 
   it("each room of a category is added, renamed (its bookings follow) and removed on its own", async () => {
@@ -132,16 +132,16 @@ describe("room-by-room and whole-place bookings", () => {
     await saveRoom(admin, "lodge", roomA, { ...room, name: "First floor", rates: [{ unit: "NIGHT", price: 40000 }], numbers: ["101"] });
     await saveRoom(admin, "lodge", roomB, { ...room, name: "Second floor", rates: [{ unit: "NIGHT", price: 40000 }], numbers: ["201"] });
     const photo = "https://res.cloudinary.com/demo/kivu.jpg";
-    expect(await saveRoomUnit(admin, roomA, null, { name: "102", photos: [], description: "" })).toEqual({ ok: true });
-    expect(await saveRoomUnit(admin, roomA, null, { name: "201", photos: [], description: "" })).toEqual({ ok: false, error: "taken" });
-    expect(await saveRoomUnit({ id: "g1" }, roomA, null, { name: "103", photos: [], description: "" })).toEqual({ ok: false, error: "notAllowed" });
+    expect(await saveRoomUnit(admin, roomA, null, { name: "102", photos: [], description: "", prices: { NIGHT: 40000 } })).toEqual({ ok: true });
+    expect(await saveRoomUnit(admin, roomA, null, { name: "201", photos: [], description: "", prices: { NIGHT: 40000 } })).toEqual({ ok: false, error: "taken" });
+    expect(await saveRoomUnit({ id: "g1" }, roomA, null, { name: "103", photos: [], description: "", prices: { NIGHT: 40000 } })).toEqual({ ok: false, error: "notAllowed" });
     const night = { listingId: "lodge", unit: "NIGHT" as const, start: "2026-11-01", quantity: 2, guests: 1, payment: pay, roomId: roomA };
     expect((await createRentalBooking({ ...night, guestId: "g1", roomNumber: "101" }, NOW)).ok).toBe(true);
     // Renaming 101 to "Kivu" (with its own photo and words) moves the booking too.
-    expect(await saveRoomUnit(admin, roomA, "101", { name: "Kivu", photos: [photo], description: "Corner room" })).toEqual({ ok: true });
+    expect(await saveRoomUnit(admin, roomA, "101", { name: "Kivu", photos: [photo], description: "Corner room", prices: { NIGHT: 40000 } })).toEqual({ ok: true });
     const a = await db.room.findUniqueOrThrow({ where: { id: roomA }, select: { numbers: true, unitDetails: true } });
     expect(a.numbers).toEqual(["Kivu", "102"]);
-    expect(a.unitDetails).toEqual({ Kivu: { photos: [photo], description: "Corner room" } });
+    expect(a.unitDetails).toMatchObject({ Kivu: { photos: [photo], description: "Corner room", prices: { NIGHT: 40000 } } });
     expect((await db.booking.findFirstOrThrow({ where: { roomId: roomA } })).roomNumber).toBe("Kivu");
     // A booked room can't be removed; a free one can.
     expect(await removeRoomUnit(admin, roomA, "Kivu", NOW)).toEqual({ ok: false, error: "booked" });
@@ -261,5 +261,28 @@ describe("fees and policy from settings", () => {
   it("rejects out-of-range settings", async () => {
     const result = await updateSettings("admin", { commissionPercent: 80, guestFeePercent: -1, holdMinutes: 2, monthlyDepositPercent: null, cancellationPolicy: { en: null, fr: null, rw: null } });
     expect(result.ok).toBe(false);
+  });
+});
+
+describe("each room has its own price", () => {
+  it("rooms are priced one by one; the category shows its cheapest; a guest gets the cheapest free room and pays its price", async () => {
+    const admin = { id: "admin", role: "ADMIN" };
+    // A new category with rooms listed: they all start at the price given.
+    const made = await saveRoom(admin, "lodge", null, { ...room, name: "Suites", numbers: ["S1", "S2"], rates: [{ unit: "NIGHT", price: 70000 }] });
+    if (!made.ok) throw new Error("save failed");
+    // A room needs a price for each way the category is booked.
+    expect(await saveRoomUnit(admin, made.id, null, { name: "S3", photos: [], description: "" })).toEqual({ ok: false, error: "price" });
+    expect(await saveRoomUnit(admin, made.id, null, { name: "S3", photos: [], description: "", prices: { NIGHT: 60000 } })).toEqual({ ok: true });
+    expect(await saveRoomUnit(admin, made.id, "S1", { name: "S1", photos: [], description: "", prices: { NIGHT: 90000 } })).toEqual({ ok: true });
+    // The category's "from" price is its cheapest room.
+    expect((await db.roomRate.findFirstOrThrow({ where: { roomId: made.id } })).price).toBe(60000);
+    const base = { guestId: "g1", listingId: "lodge", roomId: made.id, guests: 1, payment: pay, unit: "NIGHT" as const, start: "2026-11-10", quantity: 1 };
+    const first = await createRentalBooking(base, NOW);
+    if (!first.ok) throw new Error("booking failed");
+    expect(await db.booking.findUniqueOrThrow({ where: { reference: first.reference } })).toMatchObject({ roomNumber: "S3", nightlyPrice: 60000 });
+    // S3 is taken: the next cheapest free room (S2 at 70,000).
+    const second = await createRentalBooking({ ...base, guestId: "g2" }, NOW);
+    if (!second.ok) throw new Error("booking failed");
+    expect(await db.booking.findUniqueOrThrow({ where: { reference: second.reference } })).toMatchObject({ roomNumber: "S2", nightlyPrice: 70000 });
   });
 });

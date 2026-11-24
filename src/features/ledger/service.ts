@@ -1,7 +1,7 @@
 import "server-only";
 import { audit } from "@/features/audit/service";
 import { newReference } from "@/features/bookings/reference";
-import { notify } from "@/features/notifications/service";
+import { notify, notifyAdmins } from "@/features/notifications/service";
 import { db } from "@/lib/db";
 
 export type OwnerBalance = {
@@ -81,6 +81,35 @@ export async function placeEarnings(hostId: string, listingId: string) {
     }
   }
   return { earned, upcoming };
+}
+
+export type PayoutRequestResult = { ok: true } | { ok: false; error: "nothingDue" | "noAccount" | "already" };
+
+/** When the owner last asked VIIPA to pay them, if VIIPA hasn't paid them since (null: no request waiting). */
+export async function payoutRequestedAt(hostId: string): Promise<Date | null> {
+  const [request, paid] = await Promise.all([
+    db.auditLog.findFirst({ where: { actorId: hostId, action: "payout.request", entityId: hostId }, orderBy: { createdAt: "desc" }, select: { createdAt: true } }),
+    db.settlement.findFirst({ where: { hostId }, orderBy: { createdAt: "desc" }, select: { createdAt: true } }),
+  ]);
+  return request && (!paid || request.createdAt > paid.createdAt) ? request.createdAt : null;
+}
+
+/** The owner asks VIIPA to send what they're owed now (to their checked payout account); staff are told. */
+export async function requestPayout(hostId: string): Promise<PayoutRequestResult> {
+  const [earnings, account, waiting, user] = await Promise.all([
+    hostEarnings(hostId),
+    db.payoutAccount.findUnique({ where: { userId: hostId }, select: { verifiedAt: true } }),
+    payoutRequestedAt(hostId),
+    db.user.findUnique({ where: { id: hostId }, select: { name: true } }),
+  ]);
+  if (earnings.due <= 0) return { ok: false, error: "nothingDue" };
+  if (!account?.verifiedAt) return { ok: false, error: "noAccount" };
+  if (waiting) return { ok: false, error: "already" };
+  await db.$transaction(async (tx) => {
+    await audit(tx, { actorId: hostId, action: "payout.request", entityType: "user", entityId: hostId, data: { amount: earnings.due } });
+    await notifyAdmins(tx, "payoutRequested", { name: user?.name ?? "", amount: earnings.due }, `/admin/money/providers/${hostId}`);
+  });
+  return { ok: true };
 }
 
 export type SettlementResult = { ok: true; reference: string } | { ok: false; error: "invalid" | "tooMuch" };

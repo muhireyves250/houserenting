@@ -4,7 +4,7 @@ import { getPublishedListing } from "@/features/listings/service";
 import { db } from "@/lib/db";
 import { resetDb } from "@/test/db";
 import { validListing } from "./fixtures";
-import { addPhoto, archiveListing, getHostListing, hostDashboard, saveListing, submitForReview } from "./service";
+import { addPhoto, archiveListing, decideListingChanges, getHostListing, hostDashboard, saveListing, submitForReview } from "./service";
 
 const CLOUD = "https://res.cloudinary.com/demo/";
 
@@ -58,16 +58,27 @@ describe("hosting a place", () => {
     expect(await getPublishedListing(id)).not.toBeNull();
     expect(await db.notification.findFirst({ where: { userId: "host" } })).toMatchObject({ kind: "listingApproved", href: `/listings/${id}` });
 
-    // The owner can't change a live place; VIIPA can, and it stays live.
-    expect(await saveListing("host", id, { ...validListing, title: "Sunny studio, now with a view" })).toEqual({ ok: false, error: "locked" });
-    expect(await saveListing("host", id, { ...validListing, title: "Sunny studio, now with a view" }, { staffId: "admin" })).toEqual({ ok: true, id });
+    // Published: guests can book from that day on.
+    expect((await db.listing.findUniqueOrThrow({ where: { id } })).availableFrom).not.toBeNull();
+    // The owner changes a live place: the changes wait for VIIPA; guests still see it as it was.
+    expect(await saveListing("host", id, { ...validListing, title: "Sunny studio, now with a view" })).toEqual({ ok: true, id, pending: true });
+    expect((await getPublishedListing(id))?.title).not.toBe("Sunny studio, now with a view");
+    expect(await decideListingChanges("admin", id, false)).toBe(false); // declining needs a reason
+    expect(await decideListingChanges("admin", id, true)).toBe(true);
     expect((await getPublishedListing(id))?.title).toBe("Sunny studio, now with a view");
+    expect((await db.listing.findUniqueOrThrow({ where: { id } })).pendingChanges).toBeNull();
+    // VIIPA can change it directly, and it stays live.
+    expect(await saveListing("host", id, { ...validListing, title: "Sunny studio" }, { staffId: "admin" })).toEqual({ ok: true, id });
+    expect((await getPublishedListing(id))?.title).toBe("Sunny studio");
 
     const log = await db.auditLog.findMany({ where: { entityId: id }, orderBy: { createdAt: "asc" } });
     expect(log.map((l) => [l.action, l.actorId])).toEqual([
       ["listing.create", "host"],
       ["listing.submit", "host"],
       ["listing.approve", "admin"],
+      ["listing.changesSubmitted", "host"],
+      ["listing.update", "admin"],
+      ["listing.changesApproved", "admin"],
       ["listing.update", "admin"],
     ]);
   });

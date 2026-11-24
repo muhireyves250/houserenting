@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState, useTransition } from "react";
 import { PLACE_TYPES } from "@/features/search/params";
+import { todayISO } from "@/features/search/date-range";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { LocationPicker } from "@/features/locations/LocationPicker";
@@ -104,9 +105,11 @@ export function ListingForm({
   const tListings = useTranslations("Listings");
   const locale = useLocale();
   const router = useRouter();
+  // "Bookable from" can't be a day already past; empty = from the day VIIPA publishes the place.
+  const today = todayISO();
   const [form, setForm] = useState<ListingInput>(initial);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [status, setStatus] = useState<"idle" | "saved" | "failed" | "invalid">("idle");
+  const [status, setStatus] = useState<"idle" | "saved" | "sent" | "failed" | "invalid">("idle");
   const [saving, startSaving] = useTransition();
   // Lodges and guest houses have room categories. Rented room by room, their prices, rules and in-room amenities
   // belong to each category (set below the form), not to the place.
@@ -154,7 +157,8 @@ export function ListingForm({
       const result = staff ? await adminSaveListingAction(listingId, payload, staff.ownerId) : await saveListingAction(listingId, payload);
       if (result.ok) {
         setErrors({});
-        setStatus("saved");
+        // A live place: the changes went to VIIPA for approval.
+        setStatus("pending" in result && result.pending ? "sent" : "saved");
         // A new place with rooms: straight to adding its room categories.
         const toRooms = form.bookingModel !== "WHOLE_PROPERTY" ? "#rooms" : "";
         if (listingId === null) router.replace(`${staff ? `/admin/listings/${result.id}/edit` : `/host/listings/${result.id}`}${toRooms}`);
@@ -432,6 +436,7 @@ export function ListingForm({
           <Field
             label={t("fields.availableFrom")}
             type="date"
+            min={listingId === null ? today : undefined}
             value={form.availableFrom ?? ""}
             onChange={(e) => set("availableFrom", e.target.value || null)}
             error={err("availableFrom")}
@@ -445,6 +450,7 @@ export function ListingForm({
             error={errors.availableUntil === "untilBeforeFrom" ? t("errors.untilBeforeFrom") : err("availableUntil")}
           />
         </div>
+        <p className="mt-2 text-[12px] text-muted">{t("fromPublishHint")}</p>
         <p className="mt-4 mb-2 text-[13px] font-semibold text-ink">{t("fields.workingDays")}</p>
         <div className="flex flex-wrap gap-2">
           {WEEK.map((day) => {
@@ -498,7 +504,8 @@ export function ListingForm({
           "bottom-[calc(82px+env(safe-area-inset-bottom))]",
         )}
       >
-        <p role="status" className={cn("text-[13px]", status === "saved" ? "text-emerald-700" : status === "idle" ? "text-muted" : "font-medium text-danger")}>
+        <p role="status" className={cn("text-[13px]", status === "saved" ? "text-emerald-700" : status === "sent" ? "font-medium text-amber-800" : status === "idle" ? "text-muted" : "font-medium text-danger")}>
+          {status === "sent" && t("sentForApproval")}
           {status === "saved" && (
             <span className="inline-flex items-center gap-1.5">
               <Check className="size-4" aria-hidden="true" />

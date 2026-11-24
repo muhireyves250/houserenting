@@ -13,6 +13,8 @@ import { Link } from "@/i18n/navigation";
 import { uploadsEnabled } from "@/lib/cloudinary";
 import { requireUser } from "@/lib/session";
 import { OWNER_EDITABLE } from "@/features/listings/lifecycle";
+import type { ListingInput } from "@/features/hosting/validation";
+import { cn } from "@/lib/cn";
 import { BlocksPanel } from "@/features/places/components/BlocksPanel";
 import { DocumentsPanel } from "@/features/places/components/DocumentsPanel";
 import { Card } from "@/features/hosting/components/fields";
@@ -44,10 +46,12 @@ export default async function EditListingPage({ params }: Props) {
     owner ? listingDocuments(listing.id) : [],
     payoutAccountOf(hostId),
   ]);
-  // Owners add their place and change it until it's sent for review; after that VIIPA manages it.
-  const editable = OWNER_EDITABLE.includes(listing.status);
+  // Owners change their place freely before it's live; a live place's changes wait for VIIPA's approval.
+  const editable = OWNER_EDITABLE.includes(listing.status) || listing.status === "PENDING_REVIEW";
+  const live = listing.status === "PUBLISHED" || listing.status === "PAUSED";
 
-  const initial = toListingInput(listing);
+  // What they sent and VIIPA hasn't answered yet is what they see (and can change again).
+  const initial = live && listing.pendingChanges ? (listing.pendingChanges as unknown as ListingInput) : toListingInput(listing);
 
   // Photos are required before sending it for review.
   const canSubmit = (listing.status === "DRAFT" || listing.status === "REJECTED" || listing.status === "CHANGES_REQUESTED") && listing.photos.length > 0;
@@ -86,7 +90,13 @@ export default async function EditListingPage({ params }: Props) {
       {listing.status === "PENDING_REVIEW" && (
         <p className="mb-4 rounded-2xl bg-amber-50 px-5 py-3.5 text-sm text-amber-900 ring-1 ring-amber-200/70">{t("inReviewNote")}</p>
       )}
-      {!editable && (
+      {live && (
+        <div className={cn("mb-4 flex items-start gap-3 rounded-2xl px-5 py-4 text-[14px]", listing.pendingChanges ? "bg-amber-50 text-amber-900 ring-1 ring-amber-200/70" : "bg-primary-soft text-ink")}>
+          <ShieldCheck className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
+          <span>{listing.pendingChanges ? t("changesWaiting") : t("liveEditNote")}</span>
+        </div>
+      )}
+      {!editable && !live && (
         <div className="mb-4 flex items-start gap-3 rounded-2xl bg-primary-soft px-5 py-4 text-[14px] text-ink">
           <ShieldCheck className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />
           <span>
@@ -98,6 +108,8 @@ export default async function EditListingPage({ params }: Props) {
         </div>
       )}
       <div className="flex flex-col gap-4">
+        {/* A live place: its details (sent to VIIPA for approval); photos and rooms are changed through VIIPA. */}
+        {live && <ListingForm listingId={listing.id} initial={initial} live={false} />}
         {editable && (
           <>
             <ListingPhotosEditor listingId={listing.id} photos={listing.photos.map((p) => ({ id: p.id, url: p.url, kind: p.kind }))} enabled={uploadsEnabled()} />

@@ -3,7 +3,10 @@ import { audit } from "@/features/audit/service";
 import { checkMove, type ListingMove } from "@/features/listings/lifecycle";
 import { notify, notifyAdmins } from "@/features/notifications/service";
 import { db } from "@/lib/db";
+import { todayISO } from "@/features/search/date-range";
 import { canStaff } from "@/lib/roles";
+
+const laterOf = (a: Date | null, b: Date) => (a && a > b ? a : b);
 
 export type Actor = { id: string; role?: string | null };
 export type MoveResult = { ok: true } | { ok: false; error: "notFound" | "notAllowed" | "wrongStatus" | "reasonNeeded" | "payoutMissing" | "noPrices" | "noPhotos" | "noAgreement" };
@@ -21,7 +24,7 @@ export async function moveListing(actor: Actor, listingId: string, move: Listing
   return db.$transaction(async (tx) => {
     const listing = await tx.listing.findUnique({
       where: { id: listingId },
-      select: { status: true, hostId: true, title: true, operator: true, publishedAt: true, _count: { select: { rates: true, photos: true } } },
+      select: { status: true, hostId: true, title: true, operator: true, publishedAt: true, availableFrom: true, _count: { select: { rates: true, photos: true } } },
     });
     if (!listing) return { ok: false, error: "notFound" } as const;
     const check = checkMove(move, listing.status, { isStaff: canStaff(actor, "listings"), isOwner: listing.hostId === actor.id }, why);
@@ -44,6 +47,8 @@ export async function moveListing(actor: Actor, listingId: string, move: Listing
         status: check.to,
         rejectionReason: why || (check.to === "PUBLISHED" ? null : undefined),
         ...(check.to === "PUBLISHED" && !listing.publishedAt ? { publishedAt: now } : {}),
+        // Published for the first time: guests can book from that day on (or a later day the owner chose).
+        ...(check.to === "PUBLISHED" && !listing.publishedAt && FIRST_PUBLISH.includes(move) ? { availableFrom: laterOf(listing.availableFrom, new Date(`${todayISO(now)}T00:00:00Z`)) } : {}),
       },
     });
     await audit(tx, { actorId: actor.id, action: `listing.${move}`, entityType: "listing", entityId: listingId, data: { from: listing.status, to: check.to, ...(why ? { reason: why } : {}) } });

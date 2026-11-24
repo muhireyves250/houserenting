@@ -912,7 +912,11 @@
       "EXTERIOR": "Outside",
       "FACILITY": "Other facilities"
     },
-    "roomsAfterSave": "Save first: then you add the room categories (each with its rooms, prices and rules) right below."
+    "roomsAfterSave": "Save first: then you add the room categories (each with its rooms, prices and rules) right below.",
+    "fromPublishHint": "Empty: from the day the place is published.",
+    "sentForApproval": "Sent to VIIPA for approval. Your place stays as it is until then.",
+    "changesWaiting": "Your changes are waiting for VIIPA's approval. Guests still see your place as it was. You can change them again below.",
+    "liveEditNote": "Your place is live: when you save changes here, VIIPA checks them before guests see them. To change photos or rooms, ask VIIPA."
   },
   "Admin": {
     "title": "Admin",
@@ -1548,6 +1552,14 @@
       "RESTAURANT_OWNER": "Restaurant owner",
       "RESTAURANT_MANAGER": "Restaurant manager",
       "RESTAURANT_DELIVERY": "Delivery"
+    },
+    "listingChanges": {
+      "title": "The owner changed this live place: approve?",
+      "same": "Nothing different from what's live.",
+      "reason": "Why (the owner reads it)",
+      "approve": "Approve changes",
+      "decline": "Decline",
+      "failed": "Couldn't save — try again."
     }
   },
   "Questions": {
@@ -1676,7 +1688,11 @@
       "bookingCheckedOut": "Your stay at {title} ended and you were checked out ({reference}). Thank you for staying with VIIPA!",
       "kitchenRequest": "{title} applied to cook for guests at {place}.",
       "kitchenApproved": "{title} now cooks for guests at {place}.",
-      "kitchenDeclined": "VIIPA declined {title} cooking for {place}: {reason}"
+      "kitchenDeclined": "VIIPA declined {title} cooking for {place}: {reason}",
+      "listingChangesSubmitted": "{title}: the owner changed this live place. Check and approve.",
+      "listingChangesApproved": "Your changes to {title} were approved and are live.",
+      "listingChangesDeclined": "Your changes to {title} were not approved: {reason}",
+      "payoutRequested": "{name} asks to be paid {amount, number} RWF."
     },
     "filterLabel": "Show notifications",
     "filter": {
@@ -1771,7 +1787,11 @@
       "discount": "Discount (%)",
       "laundry": "Laundry price per kg (0 = free)",
       "placeDefault": "The place's"
-    }
+    },
+    "from": "from",
+    "noRoomPrices": "Add its rooms with their prices",
+    "startPrice": "Price for each room",
+    "noPrice": "no price"
   },
   "Settings": {
     "note": "Leave a field empty until the business decision is made: nothing is charged or promised for empty fields. Every change is recorded in the audit log, and bookings keep the settings they were made with.",
@@ -2310,6 +2330,16 @@
     "actions": {
       "open": "Open",
       "confirm": "{action}: {title}?"
+    },
+    "request": {
+      "button": "Request {amount}",
+      "requested": "You asked for your money on {date}. VIIPA will send it soon.",
+      "notReady": "VIIPA checks your payout details first.",
+      "error": {
+        "nothingDue": "Nothing is owed to you right now.",
+        "noAccount": "Add your payout details and wait for VIIPA to check them.",
+        "already": "You already asked: VIIPA will send it soon."
+      }
     }
   },
   "MyStay": {
@@ -2871,7 +2901,9 @@
       "applied": "{name} applied to cook here",
       "approve": "Approve",
       "decline": "Decline",
-      "declineReason": "Why (the owner reads it)"
+      "declineReason": "Why (the owner reads it)",
+      "wantsToCook": "Wants to cook for guests at {place}",
+      "applications": "{count, plural, one {# application to cook for a place} other {# applications to cook for places}}"
     },
     "confirm": {
       "title": "Delivered once they confirm",

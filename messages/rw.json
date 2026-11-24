@@ -912,7 +912,11 @@
       "EXTERIOR": "Hanze",
       "FACILITY": "Ibindi bikoresho"
     },
-    "roomsAfterSave": "Banza ubike: hanyuma wongeremo ibyiciro by'ibyumba (buri kimwe n'ibyumba byacyo, ibiciro n'amategeko) hepfo."
+    "roomsAfterSave": "Banza ubike: hanyuma wongeremo ibyiciro by'ibyumba (buri kimwe n'ibyumba byacyo, ibiciro n'amategeko) hepfo.",
+    "fromPublishHint": "Ubusa: guhera ku munsi inzu yashyiriweho ku rubuga.",
+    "sentForApproval": "Byoherejwe kuri VIIPA ngo byemezwe. Inzu yawe iguma uko yari kugeza icyo gihe.",
+    "changesWaiting": "Impinduka zawe zitegereje kwemezwa na VIIPA. Abashyitsi baracyabona inzu yawe uko yari. Ushobora kuzihindura hepfo.",
+    "liveEditNote": "Inzu yawe iri ku rubuga: ubitse impinduka hano, VIIPA irazigenzura mbere y'uko abashyitsi bazibona. Amafoto cyangwa ibyumba, saba VIIPA."
   },
   "Admin": {
     "title": "Ubuyobozi",
@@ -1548,6 +1552,14 @@
       "RESTAURANT_OWNER": "Nyiri resitora",
       "RESTAURANT_MANAGER": "Umuyobozi wa resitora",
       "RESTAURANT_DELIVERY": "Ugeza ibiryo"
+    },
+    "listingChanges": {
+      "title": "Nyirayo yahinduye iyi nzu iri ku rubuga: wemeze?",
+      "same": "Nta gitandukanye n'iri ku rubuga.",
+      "reason": "Impamvu (nyirayo arayisoma)",
+      "approve": "Emeza impinduka",
+      "decline": "Wanga",
+      "failed": "Ntibyakunze — ongera ugerageze."
     }
   },
   "Questions": {
@@ -1676,7 +1688,11 @@
       "bookingCheckedOut": "Igihe cyawe kuri {title} cyarangiye, wasohowe ({reference}). Murakoze kubana na VIIPA!",
       "kitchenRequest": "{title} yasabye gutekera abashyitsi ba {place}.",
       "kitchenApproved": "{title} ubu itekera abashyitsi ba {place}.",
-      "kitchenDeclined": "VIIPA yanze ko {title} itekera {place}: {reason}"
+      "kitchenDeclined": "VIIPA yanze ko {title} itekera {place}: {reason}",
+      "listingChangesSubmitted": "{title}: nyirayo yahinduye iyi nzu iri ku rubuga. Genzura wemeze.",
+      "listingChangesApproved": "Impinduka wakoze kuri {title} zemejwe kandi ziri ku rubuga.",
+      "listingChangesDeclined": "Impinduka wakoze kuri {title} ntizemejwe: {reason}",
+      "payoutRequested": "{name} arasaba kwishyurwa {amount, number} RWF."
     },
     "filterLabel": "Erekana imenyesha",
     "filter": {
@@ -1771,7 +1787,11 @@
       "discount": "Igabanywa (%)",
       "laundry": "Kumesa ku kilo (0 = ubuntu)",
       "placeDefault": "Iby'inzu"
-    }
+    },
+    "from": "guhera kuri",
+    "noRoomPrices": "Ongeraho ibyumba byayo n'ibiciro byabyo",
+    "startPrice": "Igiciro cya buri cyumba",
+    "noPrice": "nta giciro"
   },
   "Settings": {
     "note": "Siga ahantu ubusa kugeza icyemezo gifashwe: nta mafaranga yakwa kandi nta kintu gisezeranywa ku hasigaye ubusa. Buri mpinduka yandikwa mu nyandiko z'ibikorwa, kandi ibyabitswe bigumana igenamiterere ryariho.",
@@ -2310,6 +2330,16 @@
     "actions": {
       "open": "Fungura",
       "confirm": "{action}: {title}?"
+    },
+    "request": {
+      "button": "Saba {amount}",
+      "requested": "Wasabye amafaranga yawe ku wa {date}. VIIPA izayohereza vuba.",
+      "notReady": "VIIPA ibanza kugenzura amakuru yo kwishyurwaho.",
+      "error": {
+        "nothingDue": "Nta mafaranga ugomba guhabwa ubu.",
+        "noAccount": "Shyiramo amakuru yo kwishyurwaho kandi utegereze ko VIIPA iyagenzura.",
+        "already": "Wamaze gusaba: VIIPA izayohereza vuba."
+      }
     }
   },
   "MyStay": {
@@ -2871,7 +2901,9 @@
       "applied": "{name} yasabye gutekera hano",
       "approve": "Emeza",
       "decline": "Wanga",
-      "declineReason": "Impamvu (nyirayo arayisoma)"
+      "declineReason": "Impamvu (nyirayo arayisoma)",
+      "wantsToCook": "Irashaka gutekera abashyitsi ba {place}",
+      "applications": "{count, plural, one {Ubusabe # bwo gutekera inzu} other {Ubusabe # bwo gutekera inzu}}"
     },
     "confirm": {
       "title": "Igezwa iyo bemeje",

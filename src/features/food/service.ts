@@ -187,7 +187,7 @@ export async function applyToCook(actor: Actor, restaurantId: string, listingId:
   await db.$transaction(async (tx) => {
     const req = await tx.kitchenRequest.create({ data: { restaurantId, listingId, note: note.trim() || null, requestedById: actor.id } });
     await audit(tx, { actorId: actor.id, action: "restaurant.applyToCook", entityType: "restaurant", entityId: restaurantId, data: { listingId, request: req.id } });
-    await notifyAdmins(tx, "kitchenRequest", { title: r.name, place: listing.title }, `/admin/listings/${listingId}`);
+    await notifyAdmins(tx, "kitchenRequest", { title: r.name, place: listing.title }, `/admin/restaurants/${restaurantId}`);
   });
   return { ok: true };
 }
@@ -222,9 +222,9 @@ export function placesToApply(restaurantId: string) {
   return db.listing.findMany({ where: { status: "PUBLISHED", kitchens: { none: { restaurantId } } }, orderBy: [{ city: "asc" }, { title: "asc" }], select: { id: true, title: true, city: true }, take: 300 });
 }
 
-/** Staff: applications waiting for an answer (for one place, or all). */
-export function pendingKitchenRequests(listingId?: string) {
-  return db.kitchenRequest.findMany({ where: { status: "PENDING", ...(listingId ? { listingId } : {}) }, orderBy: { createdAt: "asc" }, select: { id: true, note: true, createdAt: true, restaurant: { select: { id: true, name: true, city: true } }, listing: { select: { id: true, title: true } } } });
+/** Staff: applications waiting for an answer (for one place, one restaurant, or all). */
+export function pendingKitchenRequests(listingId?: string, restaurantId?: string) {
+  return db.kitchenRequest.findMany({ where: { status: "PENDING", ...(listingId ? { listingId } : {}), ...(restaurantId ? { restaurantId } : {}) }, orderBy: { createdAt: "asc" }, select: { id: true, note: true, createdAt: true, restaurant: { select: { id: true, name: true, city: true } }, listing: { select: { id: true, title: true } } } });
 }
 
 /** Kigali day (UTC+2) of a moment, as YYYY-MM-DD. */
@@ -718,7 +718,7 @@ export function allRestaurants(status?: "DRAFT" | "PUBLISHED" | "HIDDEN") {
     where: status ? { status } : {},
     orderBy: { updatedAt: "desc" },
     take: 200,
-    select: { id: true, name: true, city: true, status: true, paused: true, owner: { select: { name: true } }, _count: { select: { menu: true, orders: true } } },
+    select: { id: true, name: true, city: true, status: true, paused: true, owner: { select: { name: true } }, _count: { select: { menu: true, orders: true, placeRequests: { where: { status: "PENDING" } } } } },
   });
 }
 

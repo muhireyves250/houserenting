@@ -282,6 +282,9 @@ model Listing {
   restaurants       Restaurant[]
   /// The restaurants VIIPA set to cook for guests staying here (one or more).
   kitchens          PlaceRestaurant[]
+  /// Changes the owner made to a live place, waiting for VIIPA's approval (the place stays live as it was meanwhile).
+  pendingChanges    Json?
+  pendingChangesAt  DateTime?
   kitchenRequests   KitchenRequest[]
   documents         ListingDocument[]
   /// Laundry for guests staying here: null = not offered, 0 = free, otherwise RWF per kilogram.

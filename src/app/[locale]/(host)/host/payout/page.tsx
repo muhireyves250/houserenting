@@ -3,7 +3,8 @@ import { requireWorkArea } from "@/features/hosting/work";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Chip, StatTiles } from "@/features/admin/components/kit";
 import { Panel } from "@/features/admin/components/ui";
-import { hostEarnings, placeEarnings } from "@/features/ledger/service";
+import { hostEarnings, payoutRequestedAt, placeEarnings } from "@/features/ledger/service";
+import { RequestPayoutButton } from "@/features/ledger/components/RequestPayoutButton";
 import { PlaceFilter, chosenPlace } from "@/features/hosting/place-filter";
 import { db } from "@/lib/db";
 import { PayoutForm } from "@/features/places/components/PayoutForm";
@@ -21,7 +22,7 @@ export async function generateMetadata() {
  */
 export default async function PayoutPage({ searchParams }: { searchParams: Promise<{ place?: string }> }) {
   const { user } = await requireWorkArea("payout", "/host/payout");
-  const [t, tDash, account, earnings, locale, places, { place }] = await Promise.all([
+  const [t, tDash, account, earnings, locale, places, { place }, requestedAt] = await Promise.all([
     getTranslations("Places"),
     getTranslations("Host.dash"),
     payoutAccountOf(user.id),
@@ -29,6 +30,7 @@ export default async function PayoutPage({ searchParams }: { searchParams: Promi
     getLocale(),
     db.listing.findMany({ where: { hostId: user.id, status: { not: "ARCHIVED" } }, orderBy: { title: "asc" }, select: { id: true, title: true } }),
     searchParams,
+    payoutRequestedAt(user.id),
   ]);
   // One house: what it earned and what's coming (payouts cover all their houses together).
   const chosen = chosenPlace(places, place);
@@ -50,14 +52,18 @@ export default async function PayoutPage({ searchParams }: { searchParams: Promi
           <p className="text-[12px] text-muted">{tDash("placePayoutNote")}</p>
         </div>
       ) : (
-        <StatTiles
-          format={rwf}
-          items={[
-            { label: tDash("due"), count: earnings.due, tone: "text-primary" },
-            { label: tDash("upcoming"), count: earnings.upcoming },
-            { label: tDash("paidOut"), count: earnings.paidOut, tone: "text-emerald-700" },
-          ]}
-        />
+        <div className="flex flex-col gap-3">
+          <StatTiles
+            format={rwf}
+            items={[
+              { label: tDash("due"), count: earnings.due, tone: "text-primary" },
+              { label: tDash("upcoming"), count: earnings.upcoming },
+              { label: tDash("paidOut"), count: earnings.paidOut, tone: "text-emerald-700" },
+            ]}
+          />
+          {/* Ask VIIPA to send what's owed now (to the checked payout account). */}
+          {earnings.due > 0 && <RequestPayoutButton due={rwf(earnings.due)} requestedOn={requestedAt ? date.format(requestedAt) : null} ready={Boolean(account?.verifiedAt)} />}
+        </div>
       )}
       <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
         <Panel title={t("payoutDetails")}>

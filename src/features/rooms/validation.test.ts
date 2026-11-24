@@ -37,7 +37,7 @@ describe("each room's own photos and description", () => {
 
   it("keeps details only for rooms that are in the type and have some", () => {
     const parsed = roomInput.parse({ ...base, unitDetails: { "101": { photos: [own], description: "" }, "999": { photos: [own], description: "x" }, "102": { photos: [], description: "" } } });
-    expect(parsed.unitDetails).toEqual({ "101": { photos: [own], description: "" } });
+    expect(parsed.unitDetails).toEqual({ "101": { photos: [own], description: "", prices: {} } });
   });
 
   it("refuses photos that are not ours", () => {

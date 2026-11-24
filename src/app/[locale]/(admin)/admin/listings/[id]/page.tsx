@@ -11,6 +11,9 @@ import {
 import { BlocksPanel } from "@/features/places/components/BlocksPanel";
 import { DocumentsPanel } from "@/features/places/components/DocumentsPanel";
 import { TeamPanel } from "@/features/places/components/TeamPanel";
+import { ListingChangesReview } from "@/features/hosting/components/ListingChangesReview";
+import { listingChanges, toListingInput } from "@/features/hosting/to-input";
+import type { ListingInput } from "@/features/hosting/validation";
 import { PlaceKitchens } from "@/features/food/components/PlaceKitchens";
 import { pendingKitchenRequests } from "@/features/food/service";
 import { db } from "@/lib/db";
@@ -98,6 +101,13 @@ export default async function AdminListingPage({ params }: Props) {
   return (
     <div className="flex flex-col gap-4">
       <PageIntro back={{ href: "/admin/listings", label: t("nav.listings") }} />
+      {/* The owner changed this live place: their changes wait here for approval. */}
+      {listing.pendingChanges && (
+        <ListingChangesReview
+          listingId={listing.id}
+          changes={listingChanges(toListingInput(listing), listing.pendingChanges as unknown as ListingInput).map((c) => ({ label: dynamicMessage(tHost, `fields.${c.key}`, c.key), before: c.before, after: c.after }))}
+        />
+      )}
       <div className="flex flex-wrap items-center gap-3">
         <h2 className="text-[22px] leading-7 font-bold text-ink">
           {listing.title}

@@ -52,6 +52,12 @@ export async function RestaurantsView({ searchParams, tabs }: { searchParams: Pr
                   <span className="block truncate text-[13px] text-muted">
                     {r.city} · {r.owner.name}
                   </span>
+                  {/* Its owner applied to cook for places: waiting for an answer on its page. */}
+                  {r._count.placeRequests > 0 && (
+                    <Link href={`/admin/restaurants/${r.id}`} className="mt-1 inline-flex rounded-full bg-amber-100 px-2.5 py-0.5 text-[12px] font-semibold text-amber-900 hover:bg-amber-200">
+                      {tFood("placeKitchens.applications", { count: r._count.placeRequests })}
+                    </Link>
+                  )}
                 </span>
                 <Chip tone={TONE[r.status]}>{tFood(`restaurantStatus.${r.status}`)}</Chip>
               </div>

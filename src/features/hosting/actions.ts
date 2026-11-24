@@ -10,7 +10,7 @@ import { canOn } from "@/features/places/access";
 import { canStaff } from "@/lib/roles";
 import type { SessionUser } from "@/lib/auth";
 import { getCurrentUser } from "@/lib/session";
-import { addPhoto, archiveListing, getHostListing, removePhoto, saveListing, submitForReview, type SaveResult, movePhoto, setPhotoKind, type PhotoKind } from "./service";
+import { addPhoto, archiveListing, decideListingChanges, getHostListing, removePhoto, saveListing, submitForReview, type SaveResult, movePhoto, setPhotoKind, type PhotoKind } from "./service";
 import type { ListingInput } from "./validation";
 
 const id = z.string().min(1).max(64);
@@ -138,4 +138,13 @@ export async function movePhotoAction(listingId: string, photoId: string, by: -1
   const ok = await movePhoto(await ownerFor(user, listingId), listingId, photoId, by);
   if (ok) refresh(listingId);
   return { ok };
+}
+
+/** Staff approve an owner's changes to a live place (they go live) or decline them with a reason. */
+export async function decideListingChangesAction(listingId: string, approve: boolean, reason: string): Promise<boolean> {
+  const user = await getCurrentUser();
+  if (!user || !canStaff(user, "listings") || !id.safeParse(listingId).success || typeof reason !== "string") return false;
+  const ok = await decideListingChanges(user.id, listingId, approve, reason);
+  if (ok) refresh(listingId);
+  return ok;
 }

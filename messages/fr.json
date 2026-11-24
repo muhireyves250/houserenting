@@ -912,7 +912,11 @@
       "EXTERIOR": "Extérieur",
       "FACILITY": "Autres équipements"
     },
-    "roomsAfterSave": "Enregistrez d'abord : vous ajouterez ensuite les catégories de chambres (avec leurs chambres, prix et règles) juste en dessous."
+    "roomsAfterSave": "Enregistrez d'abord : vous ajouterez ensuite les catégories de chambres (avec leurs chambres, prix et règles) juste en dessous.",
+    "fromPublishHint": "Vide : à partir du jour où le logement est publié.",
+    "sentForApproval": "Envoyé à VIIPA pour approbation. Votre logement reste tel quel d'ici là.",
+    "changesWaiting": "Vos modifications attendent l'approbation de VIIPA. Les clients voient encore votre logement tel qu'il était. Vous pouvez les modifier ci-dessous.",
+    "liveEditNote": "Votre logement est en ligne : quand vous enregistrez des modifications ici, VIIPA les vérifie avant que les clients les voient. Pour les photos ou les chambres, demandez à VIIPA."
   },
   "Admin": {
     "title": "Administration",
@@ -1548,6 +1552,14 @@
       "RESTAURANT_OWNER": "Propriétaire de restaurant",
       "RESTAURANT_MANAGER": "Gérant de restaurant",
       "RESTAURANT_DELIVERY": "Livreur"
+    },
+    "listingChanges": {
+      "title": "Le propriétaire a modifié ce logement en ligne : approuver ?",
+      "same": "Rien de différent de la version en ligne.",
+      "reason": "Pourquoi (le propriétaire le lit)",
+      "approve": "Approuver",
+      "decline": "Refuser",
+      "failed": "Échec — réessayez."
     }
   },
   "Questions": {
@@ -1676,7 +1688,11 @@
       "bookingCheckedOut": "Votre séjour à {title} est terminé et votre départ a été enregistré ({reference}). Merci d'avoir séjourné avec VIIPA !",
       "kitchenRequest": "{title} demande à cuisiner pour les clients de {place}.",
       "kitchenApproved": "{title} cuisine maintenant pour les clients de {place}.",
-      "kitchenDeclined": "VIIPA a refusé que {title} cuisine pour {place} : {reason}"
+      "kitchenDeclined": "VIIPA a refusé que {title} cuisine pour {place} : {reason}",
+      "listingChangesSubmitted": "{title} : le propriétaire a modifié ce logement en ligne. Vérifiez et approuvez.",
+      "listingChangesApproved": "Vos modifications de {title} ont été approuvées et sont en ligne.",
+      "listingChangesDeclined": "Vos modifications de {title} n'ont pas été approuvées : {reason}",
+      "payoutRequested": "{name} demande à être payé {amount, number} RWF."
     },
     "filterLabel": "Afficher les notifications",
     "filter": {
@@ -1771,7 +1787,11 @@
       "discount": "Réduction (%)",
       "laundry": "Blanchisserie par kg (0 = gratuit)",
       "placeDefault": "Celui du logement"
-    }
+    },
+    "from": "dès",
+    "noRoomPrices": "Ajoutez ses chambres avec leurs prix",
+    "startPrice": "Prix de chaque chambre",
+    "noPrice": "sans prix"
   },
   "Settings": {
     "note": "Laissez un champ vide tant que la décision n'est pas prise : rien n'est facturé ni promis pour un champ vide. Chaque modification est inscrite au journal d'audit, et les réservations gardent les paramètres en vigueur à leur création.",
@@ -2310,6 +2330,16 @@
     "actions": {
       "open": "Ouvrir",
       "confirm": "{action} : {title} ?"
+    },
+    "request": {
+      "button": "Demander {amount}",
+      "requested": "Vous avez demandé votre argent le {date}. VIIPA va l'envoyer bientôt.",
+      "notReady": "VIIPA vérifie d'abord vos coordonnées de paiement.",
+      "error": {
+        "nothingDue": "Rien ne vous est dû pour l'instant.",
+        "noAccount": "Ajoutez vos coordonnées de paiement et attendez la vérification de VIIPA.",
+        "already": "Vous avez déjà demandé : VIIPA va l'envoyer bientôt."
+      }
     }
   },
   "MyStay": {
@@ -2871,7 +2901,9 @@
       "applied": "{name} demande à cuisiner ici",
       "approve": "Approuver",
       "decline": "Refuser",
-      "declineReason": "Pourquoi (le propriétaire le lit)"
+      "declineReason": "Pourquoi (le propriétaire le lit)",
+      "wantsToCook": "Veut cuisiner pour les clients de {place}",
+      "applications": "{count, plural, one {# demande pour cuisiner pour un logement} other {# demandes pour cuisiner pour des logements}}"
     },
     "confirm": {
       "title": "Livrée quand ils confirment",

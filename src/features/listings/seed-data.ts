@@ -31,7 +31,7 @@ export type SeedListing = {
   id: string;
   title: string;
   description: string;
-  type: "APARTMENT" | "DUPLEX" | "PRIVATE_HOUSE" | "LODGE" | "ROOM";
+  type: "APARTMENT" | "PRIVATE_HOUSE" | "LODGE" | "ROOM";
   addressLine: string;
   district: string;
   city: string;
@@ -183,7 +183,7 @@ export const SEED_LISTINGS: SeedListing[] = [
     id: "seed-kicukiro-duplex",
     title: "Duplex with rooftop terrace in Kicukiro",
     description: "Two floors, three bedrooms and a rooftop terrace with sunset views over Kigali.",
-    type: "DUPLEX",
+    type: "PRIVATE_HOUSE",
     addressLine: "KK 15 Rd",
     district: "Kicukiro",
     city: "Kigali",

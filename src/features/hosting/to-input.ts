@@ -8,7 +8,8 @@ export function toListingInput(listing: HostListing): ListingInput {
   return {
     title: listing.title,
     description: listing.description,
-    type: listing.type,
+    // An old duplex is edited as a private house.
+    type: listing.type === "DUPLEX" ? "PRIVATE_HOUSE" : listing.type,
     bookingModel: listing.bookingModel,
     addressLine: listing.addressLine,
     district: listing.district,
@@ -47,4 +48,23 @@ export function toListingInput(listing: HostListing): ListingInput {
       dayEndTime,
     })),
   };
+}
+
+const shown = (v: unknown): string =>
+  v === null || v === undefined
+    ? ""
+    : Array.isArray(v)
+      ? v.map((x) => (x && typeof x === "object" && "unit" in x ? `${(x as { unit: string }).unit}: ${(x as { price?: number }).price ?? ""}` : shown(x))).join(", ")
+      : typeof v === "object"
+        ? JSON.stringify(v)
+        : String(v);
+
+/** What an owner changed on a place: each field that differs, before and after (as short text, for staff). */
+export function listingChanges(before: ListingInput, after: ListingInput): { key: string; before: string; after: string }[] {
+  const keys = [...new Set([...Object.keys(before), ...Object.keys(after)])] as (keyof ListingInput)[];
+  return keys.flatMap((key) => {
+    const a = shown(before[key]);
+    const b = shown(after[key]);
+    return a === b ? [] : [{ key, before: a, after: b }];
+  });
 }

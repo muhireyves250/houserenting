@@ -196,3 +196,22 @@ describe("referrals", () => {
     expect(await db.ledgerEntry.findFirst({ where: { kind: "REFERRAL_REWARD" } })).toMatchObject({ amount: 5000 });
   });
 });
+
+describe("asking to be paid", () => {
+  it("an owner with money owed and checked payout details asks once; VIIPA is told; a payout ends the request", async () => {
+    const { requestPayout, payoutRequestedAt, recordSettlement } = await import("@/features/ledger/service");
+    expect(await requestPayout("nobody")).toEqual({ ok: false, error: "nothingDue" });
+    const host = (await db.listing.findFirstOrThrow({ select: { hostId: true } })).hostId;
+    await db.ledgerEntry.create({ data: { kind: "HOST_PAYABLE", amount: 30000, hostId: host, note: "laundry LD-TEST01" } });
+    expect(await requestPayout(host)).toEqual({ ok: false, error: "noAccount" });
+    await db.payoutAccount.upsert({ where: { userId: host }, create: { userId: host, method: "MOBILE_MONEY", accountName: "Host", accountNumber: "0788000000", verifiedAt: new Date() }, update: { verifiedAt: new Date() } });
+    expect(await requestPayout(host)).toEqual({ ok: true });
+    expect(await requestPayout(host)).toEqual({ ok: false, error: "already" });
+    expect(await payoutRequestedAt(host)).not.toBeNull();
+    const admin = (await db.user.findFirstOrThrow({ where: { role: { in: ["ADMIN", "SUPER_ADMIN"] } }, select: { id: true } })).id;
+    expect(await db.notification.count({ where: { userId: admin, kind: "payoutRequested" } })).toBe(1);
+    await new Promise((r) => setTimeout(r, 5));
+    expect(await recordSettlement(admin, { hostId: host, amount: 30000, method: "MoMo", externalReference: "" })).toMatchObject({ ok: true });
+    expect(await payoutRequestedAt(host)).toBeNull();
+  });
+});

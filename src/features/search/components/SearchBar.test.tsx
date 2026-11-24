@@ -88,7 +88,7 @@ describe("SearchBar", () => {
     await userEvent.click(screen.getByRole("radio", { name: "Apartments" }));
     await userEvent.type(screen.getByRole("combobox", { name: "Where" }), "Huye");
     await userEvent.click(screen.getByRole("button", { name: "Search" }));
-    expect(push).toHaveBeenCalledWith({ pathname: "/search", query: { mode: "short", location: "Huye", type: "APARTMENT,DUPLEX,PRIVATE_HOUSE,ROOM,OTHER" } });
+    expect(push).toHaveBeenCalledWith({ pathname: "/search", query: { mode: "short", location: "Huye", type: "APARTMENT,PRIVATE_HOUSE,ROOM,OTHER" } });
   });
 
   it("lists the districts that have homes (with their town) and fills the field on pick", async () => {

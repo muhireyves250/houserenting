@@ -5,9 +5,10 @@ import { recentAudit } from "@/features/audit/service";
 import { formatKigaliDateTime } from "@/features/bookings/format";
 import { MenuEditor } from "@/features/food/components/MenuEditor";
 import { RestaurantStatusActions } from "@/features/food/components/RestaurantControls";
+import { KitchenRequests } from "@/features/food/components/KitchenRequests";
 import { RestaurantForm } from "@/features/food/components/RestaurantForm";
 import { RestaurantTeam } from "@/features/food/components/RestaurantTeam";
-import { restaurantForTeam, restaurantOrders } from "@/features/food/service";
+import { pendingKitchenRequests, restaurantForTeam, restaurantOrders } from "@/features/food/service";
 import { Link } from "@/i18n/navigation";
 import { db } from "@/lib/db";
 import { dynamicMessage } from "@/lib/dynamic-message";
@@ -24,18 +25,25 @@ export default async function AdminRestaurantPage({ params }: Props) {
   const [tAgree, agreement] = await Promise.all([getTranslations("Agreements"), agreementPanel("RESTAURANT", id)]);
   const r = await restaurantForTeam(id);
   if (!r) notFound();
-  const [t, tFood, locale, orders, places, history] = await Promise.all([
+  const [t, tFood, locale, orders, places, history, kitchenRequests] = await Promise.all([
     getTranslations("Admin"),
     getTranslations("Food"),
     getLocale(),
     restaurantOrders(id, 30),
     db.placeRestaurant.findMany({ where: { restaurantId: id }, orderBy: { createdAt: "asc" }, select: { listing: { select: { id: true, title: true } } } }),
     recentAudit({ entityType: "restaurant", entityId: id, take: 20 }),
+    pendingKitchenRequests(undefined, id),
   ]);
   return (
     <div className="flex flex-col gap-5">
       <PageIntro back={{ href: "/admin/restaurants", label: tFood("restaurantsTitle") }} />
       <h2 className="text-[22px] leading-7 font-bold text-ink">{r.name}</h2>
+      {/* Its owner applied to cook for places: answer here. */}
+      {kitchenRequests.length > 0 && (
+        <Panel title={tFood("placeKitchens.applications", { count: kitchenRequests.length })}>
+          <KitchenRequests requests={kitchenRequests} />
+        </Panel>
+      )}
       <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="flex flex-col gap-5">
           <Panel title={tFood("ordersTitle")} flush>

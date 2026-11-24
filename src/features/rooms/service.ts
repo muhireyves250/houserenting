@@ -34,6 +34,21 @@ export type SaveRoomResult = { ok: true; id: string } | { ok: false; errors?: Re
  * Adds or edits a room. Like listing edits, changes to a live place go back to staff review; day-to-day status
  * changes (cleaning, repairs) don't.
  */
+/**
+ * A category has no price of its own: for each way of booking it keeps its cheapest room's price (its "from" price,
+ * for cards and search). A category without numbered rooms (an older single room) keeps the price it has.
+ */
+async function syncCategoryPrices(tx: Prisma.TransactionClient, roomId: string) {
+  const room = await tx.room.findUnique({ where: { id: roomId }, select: { numbers: true, unitDetails: true, rates: { select: { id: true, unit: true } } } });
+  if (!room || room.numbers.length === 0) return;
+  const details = unitDetailsMap(room.unitDetails);
+  for (const rate of room.rates) {
+    const prices = room.numbers.map((n) => details[n]?.prices[rate.unit]).filter((p): p is number => typeof p === "number" && p > 0);
+    // No room priced for this yet: the category keeps the starting price it was given.
+    if (prices.length) await tx.roomRate.update({ where: { id: rate.id }, data: { price: Math.min(...prices) } });
+  }
+}
+
 export async function saveRoom(actor: Actor, listingId: string, roomId: string | null, raw: RoomInput): Promise<SaveRoomResult> {
   const parsed = roomInput.safeParse(raw);
   if (!parsed.success) {
@@ -44,7 +59,12 @@ export async function saveRoom(actor: Actor, listingId: string, roomId: string |
   return db.$transaction(async (tx) => {
     const listing = await managed(tx, actor, listingId);
     if (!listing) return { ok: false };
-    const { rates, ...fields } = parsed.data;
+    const { rates: given, ...fields } = parsed.data;
+    // Each way of booking needs a starting price when it's new (the rooms then have their own); one already there
+    // keeps the price it has.
+    const before = roomId ? await tx.roomRate.findMany({ where: { roomId }, select: { unit: true, price: true } }) : [];
+    const rates = given.map((r) => ({ ...r, price: r.price >= 100 ? r.price : (before.find((b) => b.unit === r.unit)?.price ?? 0) }));
+    if (rates.some((r) => r.price < 100)) return { ok: false, errors: { rates: "price" } as Record<string, string> };
     // Each room of the place has its own name or number: none may be in another room type too.
     const others = await tx.room.findMany({ where: { listingId, ...(roomId ? { id: { not: roomId } } : {}) }, select: { numbers: true } });
     const used = new Set(others.flatMap((r) => r.numbers.map((n) => n.toLowerCase())));
@@ -53,13 +73,18 @@ export async function saveRoom(actor: Actor, listingId: string, roomId: string |
     let id = roomId;
     if (roomId === null) {
       const count = await tx.room.count({ where: { listingId } });
-      id = (await tx.room.create({ data: { ...fields, listingId, position: count, rates: { create: rates } } })).id;
+      // A new category's rooms all start at the price given for each way of booking (each is changed on its own later).
+      const start = Object.fromEntries(rates.filter((r) => r.price >= 100).map((r) => [r.unit, r.price]));
+      const unitDetails = { ...fields.unitDetails };
+      for (const n of fields.numbers) unitDetails[n] = { photos: unitDetails[n]?.photos ?? [], description: unitDetails[n]?.description ?? "", prices: { ...start, ...(unitDetails[n]?.prices ?? {}) } };
+      id = (await tx.room.create({ data: { ...fields, unitDetails, listingId, position: count, rates: { create: rates } } })).id;
     } else {
       const { count } = await tx.room.updateMany({ where: { id: roomId, listingId }, data: fields });
       if (count !== 1) return { ok: false };
       await tx.roomRate.deleteMany({ where: { roomId } });
       await tx.roomRate.createMany({ data: rates.map((r) => ({ ...r, roomId })) });
     }
+    await syncCategoryPrices(tx, id!);
     await audit(tx, { actorId: actor.id, action: roomId ? "room.update" : "room.create", entityType: "listing", entityId: listingId, data: { room: parsed.data.name } });
     return { ok: true, id: id! };
   });
@@ -93,7 +118,7 @@ export async function removeRoom(actor: Actor, roomId: string): Promise<"deleted
   });
 }
 
-export type RoomUnitResult = { ok: true } | { ok: false; error: "notAllowed" | "notFound" | "name" | "taken" | "booked" };
+export type RoomUnitResult = { ok: true } | { ok: false; error: "notAllowed" | "notFound" | "name" | "taken" | "booked" | "price" };
 
 /**
  * Adds a room to a room type, or edits one (`previous` is its current name): its name or number, photos and
@@ -102,11 +127,13 @@ export type RoomUnitResult = { ok: true } | { ok: false; error: "notAllowed" | "
 export async function saveRoomUnit(actor: Actor, roomId: string, previous: string | null, raw: RoomUnitInput): Promise<RoomUnitResult> {
   const parsed = roomUnitInput.safeParse(raw);
   if (!parsed.success) return { ok: false, error: "name" };
-  const { name, photos, description } = parsed.data;
+  const { name, photos, description, prices } = parsed.data;
   return db.$transaction(async (tx) => {
-    const room = await tx.room.findUnique({ where: { id: roomId }, select: { listingId: true, name: true, numbers: true, unitDetails: true } });
+    const room = await tx.room.findUnique({ where: { id: roomId }, select: { listingId: true, name: true, numbers: true, unitDetails: true, rates: { select: { unit: true } } } });
     if (!room || !(await managed(tx, actor, room.listingId))) return { ok: false, error: "notAllowed" } as const;
     if (previous !== null && !room.numbers.includes(previous)) return { ok: false, error: "notFound" } as const;
+    // Every room has its own price for each way its category is booked.
+    if (room.rates.some((r) => !prices[r.unit])) return { ok: false, error: "price" } as const;
     const others = await tx.room.findMany({ where: { listingId: room.listingId, id: { not: roomId } }, select: { numbers: true } });
     const lower = name.toLowerCase();
     const clash = others.some((r) => r.numbers.some((n) => n.toLowerCase() === lower)) || room.numbers.some((n) => n !== previous && n.toLowerCase() === lower);
@@ -114,8 +141,9 @@ export async function saveRoomUnit(actor: Actor, roomId: string, previous: strin
     const numbers = previous === null ? [...room.numbers, name] : room.numbers.map((n) => (n === previous ? name : n));
     const details = unitDetailsMap(room.unitDetails);
     if (previous !== null) delete details[previous];
-    if (photos.length > 0 || description) details[name] = { photos, description };
+    details[name] = { photos, description, prices: Object.fromEntries(room.rates.map((r) => [r.unit, prices[r.unit]!])) };
     await tx.room.update({ where: { id: roomId }, data: { numbers, unitDetails: details } });
+    await syncCategoryPrices(tx, roomId);
     // The room's bookings follow its new name.
     if (previous !== null && previous !== name) await tx.booking.updateMany({ where: { roomId, roomNumber: previous }, data: { roomNumber: name } });
     await audit(tx, { actorId: actor.id, action: previous === null ? "room.unitAdd" : "room.unitUpdate", entityType: "listing", entityId: room.listingId, data: { room: room.name, unit: name, ...(previous && previous !== name ? { from: previous } : {}) } });
@@ -135,6 +163,7 @@ export async function removeRoomUnit(actor: Actor, roomId: string, name: string,
     const details = unitDetailsMap(room.unitDetails);
     delete details[name];
     await tx.room.update({ where: { id: roomId }, data: { numbers: room.numbers.filter((n) => n !== name), unitDetails: details } });
+    await syncCategoryPrices(tx, roomId);
     await audit(tx, { actorId: actor.id, action: "room.unitRemove", entityType: "listing", entityId: room.listingId, data: { room: room.name, unit: name } });
     return { ok: true } as const;
   });

@@ -68,7 +68,11 @@ export function RoomsEditor({ listingId, rooms, units }: { listingId: string; ro
                 <div className="min-w-0 flex-1">
                   <p className="text-[16px] font-bold text-ink">{room.name}</p>
                   <p className="text-[13px] text-muted">
-                    {room.rates.map((r) => `${formatRWF(r.price, locale)} ${tListings(`perUnit.${r.unit}`)}`).join(" · ")} · {t("guests", { count: room.maxGuests })}
+                    {/* No price of its own: from its cheapest room (or "add its rooms' prices"). */}
+                    {room.rates.some((r) => (r.price ?? 0) > 0)
+                      ? room.rates.filter((r) => (r.price ?? 0) > 0).map((r) => `${t("from")} ${formatRWF(r.price ?? 0, locale)} ${tListings(`perUnit.${r.unit}`)}`).join(" · ")
+                      : t("noRoomPrices")}{" "}
+                    · {t("guests", { count: room.maxGuests })}
                   </p>
                 </div>
                 <Select
@@ -156,7 +160,11 @@ function RoomForm({
   const [numbersText, setNumbersText] = useState((initial.numbers ?? []).join(", "));
   const set = <K extends keyof RoomInput>(key: K, value: RoomInput[K]) => setRoom((r) => ({ ...r, [key]: value }));
   const rates = room.rates ?? [];
-  const valid = room.name.trim().length >= 2 && rates.length > 0 && rates.every((r) => r.price >= 100) && room.maxGuests >= 1;
+  // The category has no price: rooms do. A new way of booking (or a new category) gets one starting price, given to
+  // each of its rooms; each room's own price is then changed on the room.
+  const existingUnits = new Set(isNew ? [] : initial.rates.map((r) => r.unit));
+  const startPrice = (unit: Unit) => !existingUnits.has(unit);
+  const valid = room.name.trim().length >= 2 && rates.length > 0 && room.maxGuests >= 1 && rates.every((r) => !startPrice(r.unit as Unit) || (r.price ?? 0) >= 100);
   const priceOf = (unit: Unit) => rates.find((r) => r.unit === unit);
   const toggleUnit = (unit: Unit) =>
     set("rates", priceOf(unit) ? rates.filter((r) => r.unit !== unit) : [...rates, { unit, price: 0 }]);
@@ -178,7 +186,7 @@ function RoomForm({
         />
       )}
       <Field label={t("maxGuests")} type="number" min={1} value={room.maxGuests || ""} onChange={(e) => set("maxGuests", Number(e.target.value) || 0)} />
-      {/* How this room is booked, each with its own price. */}
+      {/* How this category is booked (its rooms each have their own price). */}
       <p className="text-xs font-semibold text-muted">{t("howBooked")}</p>
       <div className="flex flex-wrap gap-2">
         {units.map((unit) => (
@@ -187,7 +195,7 @@ function RoomForm({
           </Chip>
         ))}
       </div>
-      {/* Each way of booking this category: its price and its own rules (shortest and longest stay, times). */}
+      {/* Each way of booking this category: its own rules (shortest and longest stay, times); a new one's starting room price. */}
       <div className="flex flex-col gap-3">
         {units
           .filter((unit) => priceOf(unit))
@@ -197,7 +205,7 @@ function RoomForm({
             return (
               <div key={unit} className="grid grid-cols-2 gap-3 rounded-xl bg-canvas p-3 sm:grid-cols-3">
                 <p className="col-span-full text-[13px] font-semibold text-ink">{tListings(`unitName.${unit}`)}</p>
-                <Field label={`${t("price")} ${tListings(`perUnit.${unit}`)}`} type="number" min={0} value={r.price || ""} onChange={(e) => setRate(unit, { price: Number(e.target.value) || 0 })} />
+                {startPrice(unit) && <Field label={`${t("startPrice")} ${tListings(`perUnit.${unit}`)}`} type="number" min={0} value={r.price || ""} onChange={(e) => setRate(unit, { price: Number(e.target.value) || 0 })} />}
                 <Field label={t("rules.min")} type="number" min={1} value={r.minUnits ?? 1} onChange={(e) => setRate(unit, { minUnits: Math.max(1, Number(e.target.value) || 1) })} />
                 <Field label={t("rules.max")} type="number" min={1} placeholder={t("rules.noMax")} value={r.maxUnits ?? ""} onChange={(e) => setRate(unit, { maxUnits: e.target.value ? Number(e.target.value) : null })} />
                 <Field label={byTime ? t("rules.openFrom") : t("rules.checkIn")} type="time" value={(byTime ? r.dayStartTime : r.checkInTime) ?? ""} onChange={(e) => setRate(unit, byTime ? { dayStartTime: e.target.value || null } : { checkInTime: e.target.value || null })} />
@@ -243,6 +251,7 @@ function RoomForm({
  */
 function CategoryRooms({ listingId, room }: { listingId: string; room: Room }) {
   const t = useTranslations("Rooms");
+  const locale = useLocale();
   const [open, setOpen] = useState<string | "new" | null>(null);
   const numbers = room.numbers ?? [];
   const details = room.unitDetails ?? {};
@@ -253,6 +262,9 @@ function CategoryRooms({ listingId, room }: { listingId: string; room: Room }) {
       <div className="flex flex-wrap gap-2">
         {numbers.map((n) => {
           const own = (details[n]?.photos?.length ?? 0) > 0 || Boolean(details[n]?.description);
+          // The room's own price (the first way of booking), or "no price" to fix.
+          const first = room.rates[0];
+          const price = first ? details[n]?.prices?.[first.unit] : undefined;
           return (
             <button
               key={n}
@@ -265,6 +277,7 @@ function CategoryRooms({ listingId, room }: { listingId: string; room: Room }) {
               )}
             >
               {label(n)}
+              <span className={cn("font-normal", open === n ? "text-white/80" : price ? "text-muted" : "text-amber-700")}>{price ? `· ${formatRWF(price, locale)}` : `· ${t("noPrice")}`}</span>
               {own && <span className={cn("size-1.5 rounded-full", open === n ? "bg-white" : "bg-primary")} aria-hidden="true" />}
               <Pencil className="size-3" aria-hidden="true" />
             </button>
@@ -285,7 +298,8 @@ function CategoryRooms({ listingId, room }: { listingId: string; room: Room }) {
           listingId={listingId}
           roomId={room.id}
           previous={open === "new" ? null : open}
-          initial={open === "new" ? { name: "", photos: [], description: "" } : { name: open, photos: details[open]?.photos ?? [], description: details[open]?.description ?? "" }}
+          units={room.rates.map((r) => r.unit)}
+          initial={open === "new" ? { name: "", photos: [], description: "", prices: {} } : { name: open, photos: details[open]?.photos ?? [], description: details[open]?.description ?? "", prices: details[open]?.prices ?? {} }}
           onDone={() => setOpen(null)}
         />
       )}
@@ -298,15 +312,19 @@ function RoomUnitForm({
   listingId,
   roomId,
   previous,
+  units,
   initial,
   onDone,
 }: {
   listingId: string;
   roomId: string;
   previous: string | null;
-  initial: { name: string; photos: string[]; description: string };
+  /** The ways its category is booked: the room has a price for each. */
+  units: Unit[];
+  initial: { name: string; photos: string[]; description: string; prices: Partial<Record<Unit, number>> };
   onDone: () => void;
 }) {
+  const tListings = useTranslations("Listings");
   const t = useTranslations("Rooms");
   const router = useRouter();
   const [unit, setUnit] = useState(initial);
@@ -325,6 +343,19 @@ function RoomUnitForm({
   return (
     <div className="flex flex-col gap-3 rounded-xl bg-canvas p-3">
       <Field label={t("unitName")} value={unit.name} maxLength={40} placeholder={t("unitNameHint")} onChange={(e) => setUnit({ ...unit, name: e.target.value })} />
+      {/* This room's own price for each way its category is booked. */}
+      <div className="grid grid-cols-2 gap-3">
+        {units.map((u) => (
+          <Field
+            key={u}
+            label={`${t("price")} ${tListings(`perUnit.${u}`)}`}
+            type="number"
+            min={0}
+            value={unit.prices[u] || ""}
+            onChange={(e) => setUnit({ ...unit, prices: { ...unit.prices, [u]: Number(e.target.value) || 0 } })}
+          />
+        ))}
+      </div>
       <RoomPhotos listingId={listingId} label={t("unitPhotos")} photos={unit.photos} onChange={(photos) => setUnit({ ...unit, photos })} />
       <AreaField label={t("unitAbout")} rows={2} maxLength={500} value={unit.description} onChange={(e) => setUnit({ ...unit, description: e.target.value })} />
       {error && (
@@ -357,7 +388,7 @@ function RoomUnitForm({
           <Button variant="ghost" onClick={onDone}>
             {t("cancel")}
           </Button>
-          <Button loading={pending} disabled={!unit.name.trim()} onClick={() => finish(() => saveRoomUnitAction(roomId, previous, unit))}>
+          <Button loading={pending} disabled={!unit.name.trim() || units.some((u) => (unit.prices[u] ?? 0) < 100)} onClick={() => finish(() => saveRoomUnitAction(roomId, previous, unit))}>
             {t("saveUnit")}
           </Button>
         </span>
