@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { db } from "@/lib/db";
 import { setAgreement } from "@/features/agreements/service";
 import { resetDb } from "@/test/db";
-import { addRestaurantMember, assignCourier, expireOrders, rateOrder, restaurantRole, claimOrderPayment, confirmOrderPayment, deleteFoodOrder, deleteRestaurant, hideMyOrder, myOrders, kitchenForPlace, confirmDelivery, findPersonByEmail, applyToCook, decideKitchenRequest, restaurantMoney, canAddRestaurant, moveOrder, ordersForHost, ordersLive, placeOrder, saveMenuItem, saveRestaurant, setPlaceKitchens, setRestaurantStatus } from "./service";
+import { addRestaurantMember, assignCourier, expireOrders, rateOrder, restaurantRole, claimOrderPayment, confirmOrderPayment, deleteFoodOrder, deleteRestaurant, hideMyOrder, myOrders, kitchenForPlace, confirmDelivery, remindRestaurant, findPersonByEmail, applyToCook, decideKitchenRequest, restaurantMoney, canAddRestaurant, moveOrder, ordersForHost, ordersLive, placeOrder, saveMenuItem, saveRestaurant, setPlaceKitchens, setRestaurantStatus } from "./service";
 
 const admin = { id: "admin", role: "ADMIN" };
 const NOW = new Date("2026-11-03T08:00:00Z");
@@ -313,5 +313,18 @@ describe("a restaurant's owner and managers", () => {
     expect(money.today).toEqual({ orders: 1, sales: 6000, commission: 600, share: 5400 });
     expect(money.days).toHaveLength(1);
     expect(money.orders[0]).toMatchObject({ reference: placed.reference, total: 6000, commission: 600, share: 5400 });
+  });
+
+  it("staff remind the restaurant's owner and managers about an order waiting for them (once a minute at most)", async () => {
+    const id = await liveKitchen();
+    await db.restaurant.update({ where: { id }, data: { ownerId: "owner" } });
+    await db.restaurantMember.create({ data: { restaurantId: id, userId: "cook", role: "MANAGER", addedById: "admin" } });
+    const dish = await db.menuItem.findFirstOrThrow();
+    const placed = await order(id, dish.id);
+    if (!placed.ok) throw new Error("order failed");
+    expect(await remindRestaurant({ id: "guest" }, placed.reference)).toEqual({ ok: false, error: "notAllowed" });
+    expect(await remindRestaurant(admin, placed.reference)).toEqual({ ok: true });
+    expect(await remindRestaurant(admin, placed.reference)).toEqual({ ok: false, error: "tooSoon" });
+    expect(await db.notification.count({ where: { kind: "orderReminder", userId: { in: ["owner", "cook"] } } })).toBe(2);
   });
 });

@@ -812,7 +812,14 @@ export async function allOrders(take = 150) {
       items: true,
       customer: { select: { name: true } },
       // Its delivery people (to assign a ready order).
-      restaurant: { select: { name: true, team: { where: { role: "DELIVERY" }, select: { userId: true, user: { select: { name: true } } } } } },
+      // Its delivery people (to assign a ready order), and who runs it (owner and managers: they process the order).
+      restaurant: {
+        select: {
+          name: true,
+          owner: { select: { name: true, phone: true } },
+          team: { select: { userId: true, role: true, user: { select: { name: true, phone: true } } } },
+        },
+      },
     },
   });
   return withDesk(orders);
@@ -832,6 +839,25 @@ export async function withStayLocation<T extends { bookingId: string | null }>(o
     ]),
   );
   return orders.map((o) => ({ ...o, location: (o.bookingId && byId.get(o.bookingId)) || null }));
+}
+
+/**
+ * Staff remind a restaurant's owner and managers about an order waiting for them (they may not have opened it).
+ * At most once a minute per order. Logged.
+ */
+export async function remindRestaurant(actor: Actor, reference: string, now: Date = new Date()): Promise<{ ok: boolean; error?: string }> {
+  if (!canStaff(actor, "food")) return { ok: false, error: "notAllowed" };
+  const order = await db.foodOrder.findUnique({ where: { reference }, select: { status: true, total: true, restaurantId: true, restaurant: { select: { name: true, ownerId: true, team: { where: { role: { in: ["MANAGER", "STAFF"] } }, select: { userId: true } } } } } });
+  if (!order || !["PLACED", "ACCEPTED", "PAID", "PREPARING", "READY"].includes(order.status)) return { ok: false, error: "notFound" };
+  const recent = await db.auditLog.findFirst({ where: { action: "order.remind", entityId: reference, createdAt: { gt: new Date(now.getTime() - 60_000) } }, select: { id: true } });
+  if (recent) return { ok: false, error: "tooSoon" };
+  await db.$transaction(async (tx) => {
+    for (const userId of new Set([order.restaurant.ownerId, ...order.restaurant.team.map((m) => m.userId)])) {
+      await notify(tx, userId, "orderReminder", { reference, title: order.restaurant.name, total: order.total }, `/host/restaurants/${order.restaurantId}`);
+    }
+    await audit(tx, { actorId: actor.id, action: "order.remind", entityType: "order", entityId: reference });
+  });
+  return { ok: true };
 }
 
 /** Marks each order whose guest's place has a receptionist (who confirms the food arrived too). */

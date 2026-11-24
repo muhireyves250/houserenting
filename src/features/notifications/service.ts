@@ -37,6 +37,7 @@ export type NotificationKind =
   | "rewardToCheck"
   | "payoutRecorded"
   | "payoutRequested"
+  | "orderReminder"
   | "newMessage"
   | "listingStatus"
   | "contractEnding"

@@ -2,14 +2,14 @@
 
 import { Select } from "@/components/ui/Select";
 
-import { BedDouble, Bike, CheckCircle2, Circle, MapPin, Navigation, Phone, Store, Timer } from "lucide-react";
+import { Bell, BedDouble, Bike, CheckCircle2, Circle, MapPin, Navigation, Phone, Store, Timer } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState, useTransition, type ReactNode } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { formatRWF } from "@/lib/format";
 import { ConfirmAction } from "@/features/admin/components/ConfirmAction";
-import { assignCourierAction, confirmDeliveryAction, deleteFoodOrderAction, moveOrderAction } from "../actions";
+import { assignCourierAction, confirmDeliveryAction, deleteFoodOrderAction, moveOrderAction, remindRestaurantAction } from "../actions";
 import type { Fulfilment, OrderStatus } from "../rules";
 
 export type BoardOrder = {
@@ -38,6 +38,9 @@ export type BoardOrder = {
   /** On its way: who has confirmed the guest got it, and whether this person still has to ("handed over"). */
   confirmations?: { who: "guest" | "courier" | "desk"; done: boolean }[];
   canConfirm?: boolean;
+  /** Staff: who processes it at the restaurant (owner, managers), and whether they can be reminded now. */
+  kitchenPeople?: { name: string; phone: string | null; role: "OWNER" | "MANAGER" }[];
+  canRemind?: boolean;
   /** The house it goes to, with a map link (for the delivery person). */
   location?: { title: string; address: string; mapUrl: string } | null;
 };
@@ -157,6 +160,27 @@ export function OrdersBoard({ orders, compact = false, staffDelete = false }: { 
                 <Navigation className="size-4" aria-hidden="true" />
                 {t("board.directions")}
               </a>
+            </div>
+          )}
+          {/* Staff: who handles it at the restaurant; call them, or send a reminder. */}
+          {o.kitchenPeople && o.kitchenPeople.length > 0 && (
+            <div className="flex flex-col gap-2 rounded-xl bg-canvas p-3">
+              <span className="text-[12px] font-semibold text-muted">{t("board.handledBy")}</span>
+              <ul className="flex flex-col gap-1">
+                {o.kitchenPeople.map((p, i) => (
+                  <li key={i} className="flex items-center justify-between gap-2 text-[13px]">
+                    <span className="min-w-0 truncate">
+                      <b className="font-semibold text-ink">{p.name}</b> <span className="text-muted">· {t(`board.kitchenRole.${p.role}`)}</span>
+                    </span>
+                    {p.phone && (
+                      <a href={`tel:${p.phone}`} className="shrink-0 text-primary hover:underline">
+                        {p.phone}
+                      </a>
+                    )}
+                  </li>
+                ))}
+              </ul>
+              {o.canRemind && <RemindButton reference={o.reference} />}
             </div>
           )}
           {o.status === "PLACED" && o.deadline && <Countdown until={o.deadline} />}
@@ -284,5 +308,31 @@ function Countdown({ until }: { until: Date }) {
       <Timer className="size-4" aria-hidden="true" />
       {left > 0 ? t("answerWithin", { time: mmss }) : t("timedOut")}
     </p>
+  );
+}
+
+/** Staff: notify the restaurant's owner and managers about this order (once a minute at most). */
+function RemindButton({ reference }: { reference: string }) {
+  const t = useTranslations("Food.board");
+  const [state, setState] = useState<"idle" | "sent" | "tooSoon" | "failed">("idle");
+  const [pending, start] = useTransition();
+  return (
+    <span className="flex items-center gap-2">
+      <button
+        type="button"
+        disabled={pending}
+        onClick={() =>
+          start(async () => {
+            const r = await remindRestaurantAction(reference);
+            setState(r.ok ? "sent" : r.error === "tooSoon" ? "tooSoon" : "failed");
+          })
+        }
+        className="inline-flex h-9 items-center gap-1.5 rounded-full bg-amber-500 px-3.5 text-[13px] font-semibold text-white hover:bg-amber-600 disabled:opacity-50"
+      >
+        <Bell className="size-4" aria-hidden="true" />
+        {t("remind")}
+      </button>
+      {state !== "idle" && <span className={state === "sent" ? "text-[12px] font-medium text-emerald-700" : "text-[12px] font-medium text-danger"}>{t(`remindState.${state}`)}</span>}
+    </span>
   );
 }

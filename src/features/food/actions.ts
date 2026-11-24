@@ -34,6 +34,7 @@ import {
   findPersonByEmail,
   type FoundPerson,
   applyToCook,
+  remindRestaurant,
   decideKitchenRequest,
   type KitchenApplyResult,
 } from "./service";
@@ -224,4 +225,11 @@ export async function decideKitchenRequestAction(requestId: string, approve: boo
   const ok = await decideKitchenRequest(user, requestId, approve, reason);
   if (ok) refresh();
   return ok;
+}
+
+/** Staff remind a restaurant's owner and managers about an order. */
+export async function remindRestaurantAction(reference: string): Promise<{ ok: boolean; error?: string }> {
+  const user = await getCurrentUser();
+  if (!user || typeof reference !== "string" || reference.length > 20) return { ok: false, error: "notAllowed" };
+  return remindRestaurant(user, reference);
 }

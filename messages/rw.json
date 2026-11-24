@@ -1739,7 +1739,8 @@
       "listingChangesSubmitted": "{title}: nyirayo yahinduye iyi nzu iri ku rubuga. Genzura wemeze.",
       "listingChangesApproved": "Impinduka wakoze kuri {title} zemejwe kandi ziri ku rubuga.",
       "listingChangesDeclined": "Impinduka wakoze kuri {title} ntizemejwe: {reason}",
-      "payoutRequested": "{name} arasaba kwishyurwa {amount, number} RWF."
+      "payoutRequested": "{name} arasaba kwishyurwa {amount, number} RWF.",
+      "orderReminder": "Kwibutsa: komande {reference} kuri {title} iragutegereje ({total, number} RWF)."
     },
     "filterLabel": "Erekana imenyesha",
     "filter": {
@@ -2991,7 +2992,18 @@
       "answerWithin": "Emera cyangwa wange mu {time}",
       "timedOut": "Igihe kirarangiye: ibyatumijwe biratakaza igihe",
       "deliverOurselves": "Turabyigereza ubwacu",
-      "directions": "Inzira"
+      "directions": "Inzira",
+      "handledBy": "Ikorwa muri resitora na",
+      "kitchenRole": {
+        "OWNER": "nyirayo",
+        "MANAGER": "umuyobozi"
+      },
+      "remind": "Bibutse",
+      "remindState": {
+        "sent": "Kwibutsa byoherejwe",
+        "tooSoon": "Bibukijwe vuba aha",
+        "failed": "Ntibyoherejwe"
+      }
     },
     "waitingRestaurant": "Resitora ifite kugeza {time} ngo yemeze. Wishyura ari uko imaze kwemeza.",
     "courierLine": "Bizanwa na {name}",

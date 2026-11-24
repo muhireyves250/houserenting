@@ -1739,7 +1739,8 @@
       "listingChangesSubmitted": "{title}: the owner changed this live place. Check and approve.",
       "listingChangesApproved": "Your changes to {title} were approved and are live.",
       "listingChangesDeclined": "Your changes to {title} were not approved: {reason}",
-      "payoutRequested": "{name} asks to be paid {amount, number} RWF."
+      "payoutRequested": "{name} asks to be paid {amount, number} RWF.",
+      "orderReminder": "Reminder: order {reference} at {title} is waiting for you ({total, number} RWF)."
     },
     "filterLabel": "Show notifications",
     "filter": {
@@ -2991,7 +2992,18 @@
       "answerWithin": "Accept or reject within {time}",
       "timedOut": "Time's up: the order will time out",
       "deliverOurselves": "We'll take it ourselves",
-      "directions": "Directions"
+      "directions": "Directions",
+      "handledBy": "Handled at the restaurant by",
+      "kitchenRole": {
+        "OWNER": "owner",
+        "MANAGER": "manager"
+      },
+      "remind": "Remind them",
+      "remindState": {
+        "sent": "Reminder sent",
+        "tooSoon": "Already reminded a moment ago",
+        "failed": "Couldn't send"
+      }
     },
     "waitingRestaurant": "The restaurant has until {time} to confirm. You pay only after it confirms.",
     "courierLine": "Brought by {name}",

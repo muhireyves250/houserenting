@@ -1739,7 +1739,8 @@
       "listingChangesSubmitted": "{title} : le propriétaire a modifié ce logement en ligne. Vérifiez et approuvez.",
       "listingChangesApproved": "Vos modifications de {title} ont été approuvées et sont en ligne.",
       "listingChangesDeclined": "Vos modifications de {title} n'ont pas été approuvées : {reason}",
-      "payoutRequested": "{name} demande à être payé {amount, number} RWF."
+      "payoutRequested": "{name} demande à être payé {amount, number} RWF.",
+      "orderReminder": "Rappel : la commande {reference} chez {title} vous attend ({total, number} RWF)."
     },
     "filterLabel": "Afficher les notifications",
     "filter": {
@@ -2991,7 +2992,18 @@
       "answerWithin": "Acceptez ou refusez dans {time}",
       "timedOut": "Temps écoulé : la commande va expirer",
       "deliverOurselves": "Nous le livrons nous-mêmes",
-      "directions": "Itinéraire"
+      "directions": "Itinéraire",
+      "handledBy": "Traitée au restaurant par",
+      "kitchenRole": {
+        "OWNER": "propriétaire",
+        "MANAGER": "gérant"
+      },
+      "remind": "Leur rappeler",
+      "remindState": {
+        "sent": "Rappel envoyé",
+        "tooSoon": "Déjà rappelé il y a un instant",
+        "failed": "Échec de l'envoi"
+      }
     },
     "waitingRestaurant": "Le restaurant a jusqu'à {time} pour confirmer. Vous ne payez qu'après sa confirmation.",
     "courierLine": "Livrée par {name}",

@@ -49,8 +49,14 @@ export async function FoodOrdersView({ tabs }: { tabs?: ReactNode }) {
       createdAt: o.createdAt,
       items: o.items.map((i) => ({ name: i.name, quantity: i.quantity })),
       deadline: o.status === "PLACED" ? acceptDeadline(o.createdAt) : null,
-      couriers: o.restaurant.team.map((m) => ({ id: m.userId, name: m.user.name })),
+      couriers: o.restaurant.team.filter((m) => m.role === "DELIVERY").map((m) => ({ id: m.userId, name: m.user.name })),
       courier: o.restaurant.team.find((m) => m.userId === o.courierId)?.user.name ?? null,
+      // Who processes it at the restaurant (to call, or remind from here).
+      kitchenPeople: [
+        { name: o.restaurant.owner.name, phone: o.restaurant.owner.phone, role: "OWNER" as const },
+        ...o.restaurant.team.filter((m) => m.role !== "DELIVERY").map((m) => ({ name: m.user.name, phone: m.user.phone, role: "MANAGER" as const })),
+      ],
+      canRemind: ["PLACED", "ACCEPTED", "PAID", "PREPARING", "READY"].includes(o.status),
       confirmations: confirmationsOf(o, o.hasDesk),
       location: o.location,
       steps: [...new Set((["kitchen", "courier"] as const).flatMap((a) => nextOrderSteps(o.status, o.fulfilment, a, Boolean(o.paidAt) || o.total <= 0)))],
