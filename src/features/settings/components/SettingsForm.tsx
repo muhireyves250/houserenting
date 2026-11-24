@@ -48,18 +48,9 @@ export function SettingsForm({ initial, envHoldMinutes }: { initial: SettingsInp
         <p className="mt-3 text-[13px] text-muted">{t("moneyHint")}</p>
       </Card>
       <Card title={t("monthly")}>
-        <Field
-          label={t("upfrontMonths")}
-          type="number"
-          min={1}
-          max={24}
-          value={show(form.monthlyUpfrontMonths ?? null)}
-          onChange={(e) => set("monthlyUpfrontMonths", num(e.target.value))}
-          error={err("monthlyUpfrontMonths")}
-        />
+        {/* Guests pay every month they choose when booking (no part payment). */}
         <SelectField
           label={t("identity")}
-          className="mt-3"
           value={form.monthlyIdentity ?? "NONE"}
           onChange={(e) => set("monthlyIdentity", e.target.value as "NONE" | "ID" | "ID_NATIONALITY")}
         >

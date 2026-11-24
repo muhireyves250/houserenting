@@ -233,7 +233,8 @@ function useQuote(rates: BookingRate[], discountPercent: number | null) {
   if (!ready || !start) return { current, room, ready: false as const };
   const long = LONG_UNITS.includes(unit);
   // Monthly: every chosen month now unless staff set fewer upfront.
-  const paidQuantity = unit === "MONTH" ? Math.min(longStay?.upfrontMonths ?? quantity, quantity) : quantity;
+  // Every chosen month is paid when booking.
+  const paidQuantity = quantity;
   // Deposit for long stays: a percent of one month's rent (a year's rent / 12).
   const monthRent = unit === "MONTH" ? unitPrice : unit === "YEAR" ? Math.round(unitPrice / 12) : 0;
   const deposit = long && longStay?.depositPercent ? Math.round((monthRent * longStay.depositPercent) / 100) : 0;

@@ -258,7 +258,8 @@ export async function createRentalBooking(request: RentalRequest, now: Date = ne
 
   const unitPrice = discountedPrice(base, discount);
   // Monthly: all chosen months now unless staff set fewer upfront. Everything else is paid in full.
-  const paidUnits = unit === "MONTH" ? Math.min(settings.monthlyUpfrontMonths ?? quantity, quantity) : quantity;
+  // Every chosen month is paid when booking (6 months: 6 now; 8: 8 now), plus any deposit.
+  const paidUnits = quantity;
   // Deposit for long stays: a percent of one month's rent (a year's rent / 12).
   const monthRent = unit === "MONTH" ? unitPrice : unit === "YEAR" ? Math.round(unitPrice / 12) : 0;
   const deposit = long && settings.monthlyDepositPercent ? Math.round((monthRent * settings.monthlyDepositPercent) / 100) : 0;

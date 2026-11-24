@@ -145,13 +145,13 @@ describe("monthly rentals", () => {
     expect(await monthly()).toMatchObject({ ok: true });
   });
 
-  it("hold the whole period, charge the upfront months plus any deposit, and follow the month limits", async () => {
+  it("hold the whole period, charge every chosen month plus any deposit (an old upfront setting is ignored), and follow the month limits", async () => {
     await settings({ commissionPercent: null, monthlyDepositPercent: 100, monthlyUpfrontMonths: 1 });
     expect(await monthly({ months: 2 })).toEqual({ ok: false, error: "stayLength" });
     const r = await monthly();
     expect(r.ok).toBe(true);
     const b = await db.booking.findFirstOrThrow({ where: { rentalMode: "MONTHLY" } });
-    expect(b).toMatchObject({ months: 6, upfrontMonths: 1, subtotal: 600000, deposit: 600000, total: 1200000 });
+    expect(b).toMatchObject({ months: 6, upfrontMonths: 6, subtotal: 3600000, deposit: 600000, total: 4200000 });
     expect(b.checkOut.toISOString().slice(0, 10)).toBe("2027-06-01");
     // Nights inside the rental can't be booked.
     expect(await createBooking({ guestId: "g2", listingId: "flat", checkIn: "2027-01-10", checkOut: "2027-01-12", guests: 1, payment: pay }, NOW)).toEqual({ ok: false, error: "unavailable" });
