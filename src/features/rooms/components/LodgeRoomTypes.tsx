@@ -45,7 +45,7 @@ export async function LodgeRoomTypes({
         {types.map((type) => {
           const total = Math.max(1, type.numbers.length);
           const free = freeRoomsOn(type, booked, numbers, today);
-          const cheapest = [...type.rates].sort((a, b) => a.price - b.price)[0];
+          const cheapest = type.rates.filter((r) => r.price > 0).sort((a, b) => a.price - b.price)[0]; // its cheapest priced room
           const photo = type.photos[0] ?? fallbackPhoto;
           return (
             <li key={type.id}>

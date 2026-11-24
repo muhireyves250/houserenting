@@ -1,5 +1,5 @@
 import { ArrowLeft, ChevronLeft, MessageCircle, ShieldCheck } from "lucide-react";
-import { descriptionOfRoom, photosOfRoom } from "@/features/rooms/validation";
+import { descriptionOfRoom, photosOfRoom, priceOfRoom } from "@/features/rooms/validation";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { PageContainer } from "@/components/ui/PageContainer";
@@ -61,7 +61,9 @@ export async function RoomBookingView({ listingId, roomId, number: asked }: { li
   // Every way this room has a price for (hourly, daily, nightly…) can be booked; the place's rules for it (hours,
   // check-in, shortest/longest) apply when set, otherwise sensible defaults.
   const DEFAULT_RULES = { minUnits: 1, maxUnits: null, checkInTime: "14:00", checkOutTime: "11:00", dayStartTime: "08:00", dayEndTime: "20:00" };
-  const rates = [...room.rates]
+  // This room's own prices (each room has its own; an older single room uses its category's), only those set.
+  const ownRates = room.rates.map((r) => ({ ...r, price: priceOfRoom(room, number, r.unit) ?? 0 })).filter((r) => r.price > 0);
+  const rates = [...ownRates]
     .sort((a, b) => UNIT_ORDER.indexOf(a.unit) - UNIT_ORDER.indexOf(b.unit))
     .map(({ unit, price }) => {
       const rule = listing.rates.find((r) => r.unit === unit);
@@ -82,7 +84,7 @@ export async function RoomBookingView({ listingId, roomId, number: asked }: { li
     description: room.description,
     maxGuests: guestLimit,
     facilities: room.facilities,
-    rates: room.rates.map((r) => ({ unit: r.unit, price: r.price })),
+    rates: ownRates.map((r) => ({ unit: r.unit, price: r.price })),
     numbers: room.numbers,
   };
   const preview = { title: `${listing.title} · ${title}`, subtitle: `${tType(listing.type)} · ${listing.district}, ${listing.city}`, photo: photos[0]?.url ?? null };

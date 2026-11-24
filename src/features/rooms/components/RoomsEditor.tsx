@@ -32,7 +32,6 @@ const STATUS_TONE: Record<RoomStatus, string> = {
 export function RoomsEditor({ listingId, rooms, units }: { listingId: string; rooms: Room[]; units: readonly Unit[] }) {
   const t = useTranslations("Rooms");
   const tListings = useTranslations("Listings");
-  const locale = useLocale();
   const router = useRouter();
   const [editing, setEditing] = useState<string | "new" | null>(rooms.length === 0 ? "new" : null);
   const [pending, start] = useTransition();
@@ -68,11 +67,8 @@ export function RoomsEditor({ listingId, rooms, units }: { listingId: string; ro
                 <div className="min-w-0 flex-1">
                   <p className="text-[16px] font-bold text-ink">{room.name}</p>
                   <p className="text-[13px] text-muted">
-                    {/* No price of its own: from its cheapest room (or "add its rooms' prices"). */}
-                    {room.rates.some((r) => (r.price ?? 0) > 0)
-                      ? room.rates.filter((r) => (r.price ?? 0) > 0).map((r) => `${t("from")} ${formatRWF(r.price ?? 0, locale)} ${tListings(`perUnit.${r.unit}`)}`).join(" · ")
-                      : t("noRoomPrices")}{" "}
-                    · {t("guests", { count: room.maxGuests })}
+                    {/* No price on the category: each room shows its own below. */}
+                    {room.rates.map((r) => tListings(`unitName.${r.unit}`)).join(" · ")} · {t("guests", { count: room.maxGuests })}
                   </p>
                 </div>
                 <Select
@@ -160,11 +156,8 @@ function RoomForm({
   const [numbersText, setNumbersText] = useState((initial.numbers ?? []).join(", "));
   const set = <K extends keyof RoomInput>(key: K, value: RoomInput[K]) => setRoom((r) => ({ ...r, [key]: value }));
   const rates = room.rates ?? [];
-  // The category has no price: rooms do. A new way of booking (or a new category) gets one starting price, given to
-  // each of its rooms; each room's own price is then changed on the room.
-  const existingUnits = new Set(isNew ? [] : initial.rates.map((r) => r.unit));
-  const startPrice = (unit: Unit) => !existingUnits.has(unit);
-  const valid = room.name.trim().length >= 2 && rates.length > 0 && room.maxGuests >= 1 && rates.every((r) => !startPrice(r.unit as Unit) || (r.price ?? 0) >= 100);
+  // The category has no price: each of its rooms has its own (set on the room).
+  const valid = room.name.trim().length >= 2 && rates.length > 0 && room.maxGuests >= 1;
   const priceOf = (unit: Unit) => rates.find((r) => r.unit === unit);
   const toggleUnit = (unit: Unit) =>
     set("rates", priceOf(unit) ? rates.filter((r) => r.unit !== unit) : [...rates, { unit, price: 0 }]);
@@ -205,7 +198,6 @@ function RoomForm({
             return (
               <div key={unit} className="grid grid-cols-2 gap-3 rounded-xl bg-canvas p-3 sm:grid-cols-3">
                 <p className="col-span-full text-[13px] font-semibold text-ink">{tListings(`unitName.${unit}`)}</p>
-                {startPrice(unit) && <Field label={`${t("startPrice")} ${tListings(`perUnit.${unit}`)}`} type="number" min={0} value={r.price || ""} onChange={(e) => setRate(unit, { price: Number(e.target.value) || 0 })} />}
                 <Field label={t("rules.min")} type="number" min={1} value={r.minUnits ?? 1} onChange={(e) => setRate(unit, { minUnits: Math.max(1, Number(e.target.value) || 1) })} />
                 <Field label={t("rules.max")} type="number" min={1} placeholder={t("rules.noMax")} value={r.maxUnits ?? ""} onChange={(e) => setRate(unit, { maxUnits: e.target.value ? Number(e.target.value) : null })} />
                 <Field label={byTime ? t("rules.openFrom") : t("rules.checkIn")} type="time" value={(byTime ? r.dayStartTime : r.checkInTime) ?? ""} onChange={(e) => setRate(unit, byTime ? { dayStartTime: e.target.value || null } : { checkInTime: e.target.value || null })} />

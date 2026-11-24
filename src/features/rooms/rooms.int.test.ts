@@ -267,9 +267,10 @@ describe("fees and policy from settings", () => {
 describe("each room has its own price", () => {
   it("rooms are priced one by one; the category shows its cheapest; a guest gets the cheapest free room and pays its price", async () => {
     const admin = { id: "admin", role: "ADMIN" };
-    // A new category with rooms listed: they all start at the price given.
-    const made = await saveRoom(admin, "lodge", null, { ...room, name: "Suites", numbers: ["S1", "S2"], rates: [{ unit: "NIGHT", price: 70000 }] });
+    // A new category with rooms listed (no price of its own): each room is priced on its own.
+    const made = await saveRoom(admin, "lodge", null, { ...room, name: "Suites", numbers: ["S1", "S2"], rates: [{ unit: "NIGHT", price: 0 }] });
     if (!made.ok) throw new Error("save failed");
+    expect(await saveRoomUnit(admin, made.id, "S2", { name: "S2", photos: [], description: "", prices: { NIGHT: 70000 } })).toEqual({ ok: true });
     // A room needs a price for each way the category is booked.
     expect(await saveRoomUnit(admin, made.id, null, { name: "S3", photos: [], description: "" })).toEqual({ ok: false, error: "price" });
     expect(await saveRoomUnit(admin, made.id, null, { name: "S3", photos: [], description: "", prices: { NIGHT: 60000 } })).toEqual({ ok: true });

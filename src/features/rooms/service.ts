@@ -60,11 +60,11 @@ export async function saveRoom(actor: Actor, listingId: string, roomId: string |
     const listing = await managed(tx, actor, listingId);
     if (!listing) return { ok: false };
     const { rates: given, ...fields } = parsed.data;
-    // Each way of booking needs a starting price when it's new (the rooms then have their own); one already there
-    // keeps the price it has.
+    // The category has no price of its own: it keeps what it has (its cheapest room's, set from its rooms), 0 for a
+    // new way of booking until its rooms are priced.
     const before = roomId ? await tx.roomRate.findMany({ where: { roomId }, select: { unit: true, price: true } }) : [];
+    // (The form never sends a price; demo data and older single rooms may.)
     const rates = given.map((r) => ({ ...r, price: r.price >= 100 ? r.price : (before.find((b) => b.unit === r.unit)?.price ?? 0) }));
-    if (rates.some((r) => r.price < 100)) return { ok: false, errors: { rates: "price" } as Record<string, string> };
     // Each room of the place has its own name or number: none may be in another room type too.
     const others = await tx.room.findMany({ where: { listingId, ...(roomId ? { id: { not: roomId } } : {}) }, select: { numbers: true } });
     const used = new Set(others.flatMap((r) => r.numbers.map((n) => n.toLowerCase())));
@@ -73,11 +73,7 @@ export async function saveRoom(actor: Actor, listingId: string, roomId: string |
     let id = roomId;
     if (roomId === null) {
       const count = await tx.room.count({ where: { listingId } });
-      // A new category's rooms all start at the price given for each way of booking (each is changed on its own later).
-      const start = Object.fromEntries(rates.filter((r) => r.price >= 100).map((r) => [r.unit, r.price]));
-      const unitDetails = { ...fields.unitDetails };
-      for (const n of fields.numbers) unitDetails[n] = { photos: unitDetails[n]?.photos ?? [], description: unitDetails[n]?.description ?? "", prices: { ...start, ...(unitDetails[n]?.prices ?? {}) } };
-      id = (await tx.room.create({ data: { ...fields, unitDetails, listingId, position: count, rates: { create: rates } } })).id;
+      id = (await tx.room.create({ data: { ...fields, listingId, position: count, rates: { create: rates } } })).id;
     } else {
       const { count } = await tx.room.updateMany({ where: { id: roomId, listingId }, data: fields });
       if (count !== 1) return { ok: false };
