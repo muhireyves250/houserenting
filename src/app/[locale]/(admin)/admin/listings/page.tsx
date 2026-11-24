@@ -154,6 +154,9 @@ export default async function AdminListingsPage({ searchParams }: Props) {
                           </>
                         );
                       })()}
+                      {listing.roomUnits.length > 0 && (
+                        <span className="rounded-full bg-violet-50 px-2 py-0.5 font-semibold text-violet-800">{tPlaces("row.categories", { names: listing.roomUnits.map((r) => r.name).join(", ") })}</span>
+                      )}
                       {listing.kitchens.length > 0 && (
                         <span className="rounded-full bg-amber-50 px-2 py-0.5 font-semibold text-amber-900">
                           {tPlaces("row.food", { names: listing.kitchens.map((k) => k.restaurant.name).join(", ") })}

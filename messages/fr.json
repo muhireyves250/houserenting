@@ -2388,7 +2388,8 @@
       "bookedNow": "Occupé",
       "freeNow": "Libre",
       "coming": "{count, plural, one {# réservation à venir} other {# réservations à venir}}",
-      "food": "Repas : {names}"
+      "food": "Repas : {names}",
+      "categories": "Catégories : {names}"
     }
   },
   "MyStay": {

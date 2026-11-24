@@ -114,6 +114,8 @@ export function allListings(status?: ListingStatus, type?: PlaceType, villageCod
       photos: { select: { url: true }, orderBy: { position: "asc" }, take: 1 },
       // The restaurants cooking for it, and its paid stays from today on (to say booked now or free, and what's coming).
       kitchens: { select: { restaurant: { select: { name: true } } } },
+      // Its room categories (guest houses), in order.
+      roomUnits: { orderBy: { position: "asc" }, select: { name: true } },
       bookings: { where: { status: { in: ["CONFIRMED", "CHECKED_IN"] }, endAt: { gt: new Date() } }, select: { startAt: true, endAt: true }, take: 50 },
     },
   });

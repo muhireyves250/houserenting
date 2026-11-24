@@ -2388,7 +2388,8 @@
       "bookedNow": "Irimo umushyitsi",
       "freeNow": "Irimo ubusa",
       "coming": "{count, plural, one {Ifatwa # riri imbere} other {Ifatwa # ziri imbere}}",
-      "food": "Ibiryo: {names}"
+      "food": "Ibiryo: {names}",
+      "categories": "Ibyiciro: {names}"
     }
   },
   "MyStay": {

@@ -2388,7 +2388,8 @@
       "bookedNow": "Booked now",
       "freeNow": "Free now",
       "coming": "{count, plural, one {# booking coming} other {# bookings coming}}",
-      "food": "Food: {names}"
+      "food": "Food: {names}",
+      "categories": "Categories: {names}"
     }
   },
   "MyStay": {
