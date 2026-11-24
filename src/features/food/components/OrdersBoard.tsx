@@ -2,7 +2,7 @@
 
 import { Select } from "@/components/ui/Select";
 
-import { Bell, BedDouble, Bike, DoorOpen, CheckCircle2, Circle, MapPin, Navigation, Phone, Timer } from "lucide-react";
+import { Bell, BedDouble, Bike, DoorOpen, CheckCircle2, Circle, MapPin, Navigation, Timer } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState, useTransition, type ReactNode } from "react";
 import { useRouter } from "@/i18n/navigation";
@@ -119,7 +119,7 @@ export function OrdersBoard({ orders, compact = false, staffDelete = false }: { 
   return (
     <ul className="grid gap-3 lg:grid-cols-2">
       {orders.map((o) => (
-        <li key={o.reference} className="flex flex-col gap-2.5 rounded-2xl bg-surface p-3.5 ring-1 ring-line">
+        <li key={o.reference} className="flex flex-col gap-2 rounded-2xl bg-surface p-3 ring-1 ring-line">
           {/* Reference, status, time and total on one line. */}
           <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
             <span className="font-mono text-[15px] font-bold text-ink">{o.reference}</span>
@@ -127,41 +127,37 @@ export function OrdersBoard({ orders, compact = false, staffDelete = false }: { 
             <span className="text-[12px] text-muted">{time.format(o.createdAt)}</span>
             <span className="ml-auto text-[16px] font-bold text-ink tabular-nums">{formatRWF(o.total, locale)}</span>
           </div>
-          {/* Who, from which kitchen, and what. */}
-          <p className="text-[13px] leading-5 text-ink">
-            <Phone className="mr-1 inline size-3.5 text-primary" aria-hidden="true" />
-            <b className="font-semibold">{o.customer}</b> ·{" "}
+          {/* Who, from which kitchen, and what: one line. */}
+          <p className="truncate text-[13px] leading-5 text-ink">
+            <b className="font-semibold">{o.customer}</b>{" "}
             <a href={`tel:${o.phone}`} className="text-primary hover:underline">
               {o.phone}
             </a>
             {o.kitchen && <span className="text-muted"> · {o.kitchen}</span>}
-          </p>
-          <p className="text-[13px] leading-5 text-ink">
+            <span className="text-muted"> · </span>
             {o.items.map((i, n) => (
               <span key={n}>
-                {n > 0 && <span className="text-muted"> · </span>}
-                <b className="font-semibold tabular-nums">{i.quantity} ×</b> {i.name}
+                {n > 0 && ", "}
+                <b className="font-semibold tabular-nums">{i.quantity}×</b> {i.name}
               </span>
             ))}
           </p>
           {o.note && <p className="rounded-lg bg-amber-50 px-2.5 py-1.5 text-[13px] text-amber-900">{t("customerNote", { note: o.note })}</p>}
           {/* Where it goes: the exact room (bold) and the place, with directions; one strip. */}
           {o.location ? (
-            <div className="flex items-center gap-2.5 rounded-xl bg-amber-50 px-3 py-2 ring-1 ring-amber-200">
-              {o.location.room ? <DoorOpen className="size-5 shrink-0 text-amber-700" aria-hidden="true" /> : <MapPin className="size-5 shrink-0 text-amber-700" aria-hidden="true" />}
-              <span className="min-w-0 flex-1 text-[13px] leading-[18px]">
+            <div className="flex items-center gap-2 rounded-lg bg-amber-50 px-2.5 py-1.5 ring-1 ring-amber-200" title={o.location.address}>
+              {o.location.room ? <DoorOpen className="size-4 shrink-0 text-amber-700" aria-hidden="true" /> : <MapPin className="size-4 shrink-0 text-amber-700" aria-hidden="true" />}
+              <span className="min-w-0 flex-1 truncate text-[13px] text-amber-900">
                 {o.location.room && (
-                  <b className="block truncate text-[15px] font-bold text-amber-950">
+                  <b className="font-bold text-amber-950">
                     {o.location.room.number ? `${roomLabel(o.location.room.number, (n) => tRooms("roomNumber", { number: n }))} · ${o.location.room.name}` : o.location.room.name}
+                    {" · "}
                   </b>
                 )}
-                <span className="block truncate text-amber-900">
-                  {o.location.title} · {o.location.address}
-                </span>
+                {o.location.title}
               </span>
-              <a href={o.location.mapUrl} target="_blank" rel="noopener noreferrer" aria-label={t("board.directions")} className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-primary-hover">
+              <a href={o.location.mapUrl} target="_blank" rel="noopener noreferrer" aria-label={t("board.directions")} title={t("board.directions")} className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-white hover:bg-primary-hover">
                 <Navigation className="size-3.5" aria-hidden="true" />
-                <span className="max-sm:hidden">{t("board.directions")}</span>
               </a>
             </div>
           ) : (
@@ -174,23 +170,21 @@ export function OrdersBoard({ orders, compact = false, staffDelete = false }: { 
           )}
           {/* Staff: who handles it at the restaurant (call them), and Remind. */}
           {o.kitchenPeople && o.kitchenPeople.length > 0 && (
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl bg-canvas px-3 py-2 text-[13px]">
-              <span className="text-[12px] font-semibold text-muted">{t("board.handledBy")}</span>
-              {o.kitchenPeople.map((p, i) => (
-                <span key={i} className="min-w-0">
-                  <b className="font-semibold text-ink">{p.name}</b> <span className="text-muted">({t(`board.kitchenRole.${p.role}`)})</span>
-                  {p.phone && (
-                    <a href={`tel:${p.phone}`} className="ml-1 text-primary hover:underline">
-                      {p.phone}
-                    </a>
-                  )}
-                </span>
-              ))}
-              {o.canRemind && (
-                <span className="ml-auto">
-                  <RemindButton reference={o.reference} />
-                </span>
-              )}
+            <div className="flex items-center gap-2 rounded-lg bg-canvas px-2.5 py-1.5 text-[12px]">
+              <span className="min-w-0 flex-1 truncate">
+                {o.kitchenPeople.map((p, i) => (
+                  <span key={i}>
+                    {i > 0 && " · "}
+                    <b className="font-semibold text-ink">{p.name}</b> <span className="text-muted">({t(`board.kitchenRole.${p.role}`)})</span>
+                    {p.phone && (
+                      <a href={`tel:${p.phone}`} className="ml-1 text-primary hover:underline">
+                        {p.phone}
+                      </a>
+                    )}
+                  </span>
+                ))}
+              </span>
+              {o.canRemind && <RemindButton reference={o.reference} />}
             </div>
           )}
           {o.status === "PLACED" && o.deadline && <Countdown until={o.deadline} />}
@@ -234,7 +228,7 @@ export function OrdersBoard({ orders, compact = false, staffDelete = false }: { 
               {o.steps
                 .filter((s) => !["CANCELLED", "REJECTED", "COURIER_ASSIGNED"].includes(s) && !(s === "READY" && o.status === "OUT_FOR_DELIVERY"))
                 .map((step) => (
-                  <button key={step} type="button" disabled={pending} onClick={() => move(o.reference, step)} className="flex-1 rounded-full bg-primary px-4 py-2.5 text-[14px] font-semibold text-white hover:bg-primary-hover disabled:opacity-50">
+                  <button key={step} type="button" disabled={pending} onClick={() => move(o.reference, step)} className="flex-1 rounded-full bg-primary px-4 py-2 text-[13px] font-semibold text-white hover:bg-primary-hover disabled:opacity-50">
                     {o.status === "READY" && step === "OUT_FOR_DELIVERY" ? t("board.deliverOurselves") : t(`board.step.${step as "ACCEPTED"}`)}
                   </button>
                 ))}
@@ -272,12 +266,12 @@ export function OrdersBoard({ orders, compact = false, staffDelete = false }: { 
               {(["REJECTED", "CANCELLED"] as const)
                 .filter((s) => o.steps.includes(s))
                 .map((s) => (
-                  <button key={s} type="button" disabled={pending} onClick={() => setCancelling(cancelling?.ref === o.reference ? null : { ref: o.reference, to: s })} className="rounded-full border border-line px-4 py-2.5 text-[14px] font-semibold text-danger disabled:opacity-50">
+                  <button key={s} type="button" disabled={pending} onClick={() => setCancelling(cancelling?.ref === o.reference ? null : { ref: o.reference, to: s })} className="rounded-full border border-line px-4 py-2 text-[13px] font-semibold text-danger disabled:opacity-50">
                     {t(`board.step.${s}`)}
                   </button>
                 ))}
               {o.status === "OUT_FOR_DELIVERY" && o.steps.includes("READY") && (
-                <button type="button" disabled={pending} onClick={() => setCancelling(cancelling?.ref === o.reference ? null : { ref: o.reference, to: "READY" })} className="rounded-full border border-line px-4 py-2.5 text-[14px] font-semibold text-danger disabled:opacity-50">
+                <button type="button" disabled={pending} onClick={() => setCancelling(cancelling?.ref === o.reference ? null : { ref: o.reference, to: "READY" })} className="rounded-full border border-line px-4 py-2 text-[13px] font-semibold text-danger disabled:opacity-50">
                   {t("board.failed")}
                 </button>
               )}
@@ -337,7 +331,7 @@ function RemindButton({ reference }: { reference: string }) {
             setState(r.ok ? "sent" : r.error === "tooSoon" ? "tooSoon" : "failed");
           })
         }
-        className="inline-flex h-8 items-center gap-1.5 rounded-full bg-amber-500 px-3 text-[12px] font-semibold text-white hover:bg-amber-600 disabled:opacity-50"
+        className="inline-flex h-7 shrink-0 items-center gap-1 rounded-full bg-amber-500 px-2.5 text-[12px] font-semibold text-white hover:bg-amber-600 disabled:opacity-50"
       >
         <Bell className="size-4" aria-hidden="true" />
         {t("remind")}
