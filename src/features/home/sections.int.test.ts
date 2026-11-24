@@ -62,4 +62,16 @@ describe("home page sections run by VIIPA", () => {
     expect(await setHotDeal(admin, "k3", false)).toEqual({ ok: true });
     expect((await hotDealIds()).size).toBe(0);
   });
+
+  it("a picked house always shows, even one rented only by the month, with its monthly price", async () => {
+    await db.listing.create({
+      data: { id: "villa", hostId: "host", title: "Villa", description: "Nice", type: "PRIVATE_HOUSE", status: "PUBLISHED", publishedAt: new Date(), addressLine: "KG 1", district: "Gasabo", city: "Kigali", lat: -1.95, lng: 30.06, sizeM2: 200, rooms: 6, bedrooms: 4, bathrooms: 3, maxGuests: 8, rates: { create: [{ unit: "MONTH", price: 900000 }] } },
+    });
+    await db.homeSection.create({ data: { kind: "HOT_DEALS", title: "Hot deals", position: 0, houseIds: ["villa"] } });
+    const [row] = await homeRows();
+    expect(row!.listings[0]!.id).toBe("villa");
+    expect(row!.cardMode.villa).toBe("long");
+    // The guest chose apartments: the villa (a private house) isn't shown.
+    expect((await homeRows(["APARTMENT"]))[0]?.listings.some((l) => l.id === "villa") ?? false).toBe(false);
+  });
 });

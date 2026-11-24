@@ -150,7 +150,7 @@ export async function HomeContent({ type = null, kind = null }: { type?: PlaceTy
                   <CompactListingCard
                     key={listing.id}
                     listing={listing}
-                    mode={section.mode}
+                    mode={section.cardMode[listing.id] ?? section.mode}
                     signedIn={user !== null}
                     saved={saved.has(listing.id)}
                   />

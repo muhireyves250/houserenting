@@ -13,7 +13,17 @@ const LONG_UNITS = ["MONTH", "YEAR"] as const;
 /** Bookings that count for Hot deals: paid ones in the last 90 days. */
 const HOT_DAYS = 90;
 
-export type HomeRow = { id: string; kind: "CUSTOM" | "HOT_DEALS"; title: string; subtitle: string; mode: "short" | "long"; query: Record<string, string>; listings: ListingCardData[] };
+export type HomeRow = {
+  id: string;
+  kind: "CUSTOM" | "HOT_DEALS";
+  title: string;
+  subtitle: string;
+  mode: "short" | "long";
+  query: Record<string, string>;
+  listings: ListingCardData[];
+  /** The price each card shows: the row's kind of stay, or the house's own when it only has the other (a house VIIPA picked). */
+  cardMode: Record<string, "short" | "long">;
+};
 
 /** Published houses by id, in the order given. */
 async function cardsInOrder(ids: string[], where: Prisma.ListingWhereInput = {}): Promise<ListingCardData[]> {
@@ -40,7 +50,8 @@ export async function homeRows(only: readonly string[] | null = null, now: Date 
       ...(types.length ? { type: { in: types as (typeof PLACE_TYPES)[number][] } } : {}),
       rates: { some: { unit: { in: mode === "long" ? [...LONG_UNITS] : [...SHORT_UNITS] } } },
     };
-    const picked = await cardsInOrder(s.houseIds, where);
+    // Houses VIIPA picked always show (only the guest's own choice of kind narrows them), whatever stay they offer.
+    const picked = await cardsInOrder(s.houseIds, only ? { type: { in: only as (typeof PLACE_TYPES)[number][] } } : {});
     let rest: ListingCardData[] = [];
     if (s.kind === "HOT_DEALS") {
       const booked = await db.booking.groupBy({
@@ -64,7 +75,9 @@ export async function homeRows(only: readonly string[] | null = null, now: Date 
     const listings = [...picked, ...rest].filter((l) => !seen.has(l.id) && seen.add(l.id)).slice(0, ROW_LIMIT);
     if (listings.length === 0) continue;
     const query: Record<string, string> = { mode, ...(s.places[0] ? { location: s.places[0] } : {}), ...(types.length ? { type: types.join(",") } : {}) };
-    rows.push({ id: s.id, kind: s.kind, title: s.title, subtitle: s.subtitle, mode, query, listings });
+    const units = mode === "long" ? (LONG_UNITS as readonly string[]) : (SHORT_UNITS as readonly string[]);
+    const cardMode = Object.fromEntries(listings.map((l) => [l.id, l.rates.some((r) => units.includes(r.unit)) ? mode : mode === "long" ? "short" : "long"])) as Record<string, "short" | "long">;
+    rows.push({ id: s.id, kind: s.kind, title: s.title, subtitle: s.subtitle, mode, query, listings, cardMode });
   }
   return rows;
 }
