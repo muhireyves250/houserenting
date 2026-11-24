@@ -117,9 +117,10 @@ export function OrdersBoard({ orders, compact = false, staffDelete = false }: { 
     );
 
   return (
-    <ul className="grid gap-3 lg:grid-cols-2">
+    // minmax(0, 1fr): a column never grows wider than the screen; long lines shorten instead.
+    <ul className="grid grid-cols-[minmax(0,1fr)] gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
       {orders.map((o) => (
-        <li key={o.reference} className="flex flex-col gap-2 rounded-2xl bg-surface p-3 ring-1 ring-line">
+        <li key={o.reference} className="flex min-w-0 flex-col gap-2 overflow-hidden rounded-2xl bg-surface p-3 ring-1 ring-line">
           {/* Reference, status, time and total on one line. */}
           <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
             <span className="font-mono text-[15px] font-bold text-ink">{o.reference}</span>
@@ -227,7 +228,7 @@ export function OrdersBoard({ orders, compact = false, staffDelete = false }: { 
             </div>
           )}
           {o.steps.length > 0 && (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex min-w-0 flex-wrap gap-2">
               {o.steps
                 .filter((s) => !["CANCELLED", "REJECTED", "COURIER_ASSIGNED"].includes(s) && !(s === "READY" && o.status === "OUT_FOR_DELIVERY"))
                 .map((step) => (

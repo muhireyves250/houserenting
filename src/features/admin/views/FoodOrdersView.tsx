@@ -16,7 +16,7 @@ import { formatRWF } from "@/lib/format";
 /** One group of orders: a title with its count, then the orders (or a short "nothing"). */
 function Group({ id, title, count, tone, children }: { id: string; title: string; count: number; tone: string; children: ReactNode }) {
   return (
-    <section id={id} className="scroll-mt-24">
+    <section id={id} className="min-w-0 scroll-mt-24">
       <h2 className="mb-3 flex items-center gap-2 text-[17px] font-bold text-ink">
         {title}
         <span className={cn("rounded-full px-2 py-0.5 text-[12px] font-bold tabular-nums", count > 0 ? tone : "bg-canvas text-muted")}>{count}</span>

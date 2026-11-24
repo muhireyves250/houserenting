@@ -153,7 +153,7 @@ export function HostShell({
             <Avatar name={user.name} className="size-9 text-sm" />
           </Link>
         </header>
-        <main className="admin-cards px-7 py-6 pb-24 md:px-20 md:py-8 lg:pb-8">{children}</main>
+        <main className="admin-cards min-w-0 overflow-x-clip px-7 py-6 pb-24 md:px-20 md:py-8 lg:pb-8">{children}</main>
       </div>
 
       {/* Phones and tablets: the owner's pages one tap away, and Menu for the rest. */}

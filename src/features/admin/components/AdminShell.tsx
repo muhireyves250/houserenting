@@ -258,7 +258,7 @@ export function AdminShell({
           </Link>
         </header>
         {/* Phones: room under the page for the bottom bar. */}
-        <main className={cn("admin-cards px-7 py-6 md:px-20 md:py-8 lg:pb-8", bottomBar ? "pb-24" : "pb-6")}>{children}</main>
+        <main className={cn("admin-cards min-w-0 overflow-x-clip px-7 py-6 md:px-20 md:py-8 lg:pb-8", bottomBar ? "pb-24" : "pb-6")}>{children}</main>
       </div>
 
       {/* Phones and tablets: the main admin pages one tap away, and Menu for everything else. */}

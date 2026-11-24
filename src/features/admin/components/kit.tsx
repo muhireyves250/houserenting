@@ -147,7 +147,8 @@ export function FillScreen({
   className?: string;
 }) {
   return (
-    <div className={cn("admin-fill flex flex-col gap-4", className)}>
+    // min-w-0: never wider than the screen (long lines shorten instead).
+    <div className={cn("admin-fill flex min-w-0 flex-col gap-4", className)}>
       {children}
     </div>
   );
@@ -185,7 +186,7 @@ export function ScrollArea({
   return (
     <div
       className={cn(
-        "no-scrollbar -mx-1 min-h-0 flex-1 overflow-y-auto overscroll-contain px-1 pt-1 pb-3",
+        "no-scrollbar -mx-1 min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain px-1 pt-1 pb-3",
         className,
       )}
     >
