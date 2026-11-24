@@ -2382,7 +2382,14 @@
     },
     "hotDealAdd": "Add to Hot deals",
     "hotDealRemove": "Remove from Hot deals",
-    "hotDealNotLive": "Only a live place can be a hot deal."
+    "hotDealNotLive": "Only a live place can be a hot deal.",
+    "row": {
+      "owner": "Owner: {name}",
+      "bookedNow": "Booked now",
+      "freeNow": "Free now",
+      "coming": "{count, plural, one {# booking coming} other {# bookings coming}}",
+      "food": "Food: {names}"
+    }
   },
   "MyStay": {
     "title": "My stay",

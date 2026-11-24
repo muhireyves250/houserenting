@@ -2382,7 +2382,14 @@
     },
     "hotDealAdd": "Ajouter aux bons plans",
     "hotDealRemove": "Retirer des bons plans",
-    "hotDealNotLive": "Seul un logement en ligne peut être un bon plan."
+    "hotDealNotLive": "Seul un logement en ligne peut être un bon plan.",
+    "row": {
+      "owner": "Propriétaire : {name}",
+      "bookedNow": "Occupé",
+      "freeNow": "Libre",
+      "coming": "{count, plural, one {# réservation à venir} other {# réservations à venir}}",
+      "food": "Repas : {names}"
+    }
   },
   "MyStay": {
     "title": "Mon séjour",

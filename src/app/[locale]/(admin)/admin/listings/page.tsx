@@ -139,7 +139,26 @@ export default async function AdminListingsPage({ searchParams }: Props) {
                       <HostStatus status={listing.status} label={tHost(`status.${listing.status}`)} />
                     </span>
                     <span className="truncate text-[13px] text-muted">
-                      {tType(listing.type)} · {listing.district === listing.city ? listing.city : `${listing.district}, ${listing.city}`} · {listing.host.name}
+                      {tType(listing.type)} · {listing.district === listing.city ? listing.city : `${listing.district}, ${listing.city}`} · {tPlaces("row.owner", { name: listing.host.name })}
+                    </span>
+                    {/* Who cooks for it, and whether a guest is staying now (or bookings coming). */}
+                    <span className="flex flex-wrap items-center gap-1.5 text-[12px]">
+                      {(() => {
+                        const now = new Date();
+                        const staying = listing.bookings.some((b) => b.startAt <= now && b.endAt > now);
+                        const coming = listing.bookings.filter((b) => b.startAt > now).length;
+                        return (
+                          <>
+                            <span className={staying ? "rounded-full bg-emerald-50 px-2 py-0.5 font-semibold text-emerald-800" : "rounded-full bg-canvas px-2 py-0.5 font-semibold text-muted"}>{staying ? tPlaces("row.bookedNow") : tPlaces("row.freeNow")}</span>
+                            {coming > 0 && <span className="rounded-full bg-primary/10 px-2 py-0.5 font-semibold text-primary">{tPlaces("row.coming", { count: coming })}</span>}
+                          </>
+                        );
+                      })()}
+                      {listing.kitchens.length > 0 && (
+                        <span className="rounded-full bg-amber-50 px-2 py-0.5 font-semibold text-amber-900">
+                          {tPlaces("row.food", { names: listing.kitchens.map((k) => k.restaurant.name).join(", ") })}
+                        </span>
+                      )}
                     </span>
                   </span>
                 </Link>

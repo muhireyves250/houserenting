@@ -2382,7 +2382,14 @@
     },
     "hotDealAdd": "Shyira mu biciro byiza",
     "hotDealRemove": "Kura mu biciro byiza",
-    "hotDealNotLive": "Inzu iri ku rubuga yonyine ni yo ishobora kujya mu biciro byiza."
+    "hotDealNotLive": "Inzu iri ku rubuga yonyine ni yo ishobora kujya mu biciro byiza.",
+    "row": {
+      "owner": "Nyirayo: {name}",
+      "bookedNow": "Irimo umushyitsi",
+      "freeNow": "Irimo ubusa",
+      "coming": "{count, plural, one {Ifatwa # riri imbere} other {Ifatwa # ziri imbere}}",
+      "food": "Ibiryo: {names}"
+    }
   },
   "MyStay": {
     "title": "Aho ncumbitse",
