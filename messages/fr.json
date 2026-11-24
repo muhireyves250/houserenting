@@ -1604,7 +1604,10 @@
       "paid": "Payée",
       "waiting": "En attente de confirmation",
       "unpaid": "Non payée"
-    }
+    },
+    "monthsSplit": "Payé maintenant : {paid} mois sur {all} (Réglages : mois payés d'avance). Reste à payer : {left} mois ({amount}) — VIIPA ne les encaisse pas encore.",
+    "roomBooked": "Chambre : {room}",
+    "checkOutAt": "Départ : {when}"
   },
   "Questions": {
     "title": "Questions et réponses",
@@ -2403,7 +2406,7 @@
       "roomsSummary": "{free} chambres libres sur {all} aujourd'hui · {staying, plural, =0 {aucun séjour en cours} one {# séjour en cours} other {# séjours en cours}}",
       "next": "Prochain : {guest}, {when} ({reference})",
       "noNext": "Aucune réservation à venir.",
-      "roomOccupied": "{guest} jusqu'au {until}",
+      "roomOccupied": "Réservée : {guest}, départ {until}",
       "room": {
         "free": "Libre",
         "MAINTENANCE": "En réparation",

@@ -8,7 +8,7 @@ import { roomLabel } from "@/features/rooms/links";
 import { todayISO } from "@/features/search/date-range";
 import { BOOKING_STATUSES, searchBookings, type BookingStatusFilter } from "@/features/admin/queries";
 import { StatusBadge } from "@/features/bookings/components/StatusBadge";
-import { formatStayDates } from "@/features/bookings/format";
+import { formatKigaliDateTime, formatStayDates } from "@/features/bookings/format";
 import { GuestRequests } from "@/features/stay/components/GuestRequests";
 import { Link } from "@/i18n/navigation";
 import { formatRWF } from "@/lib/format";
@@ -87,11 +87,13 @@ export default async function AdminBookingsPage({ searchParams }: Props) {
                 <div className="min-w-0 text-[14px]">
                   <span className="block truncate font-semibold text-ink">{b.listing.title}</span>
                   <span className="block truncate text-[12px] text-muted">{tType(b.listing.type)}</span>
+                  {/* The room booked (guest houses: category and room) and when the guest leaves. */}
                   {b.room && (
-                    <span className="block truncate text-[12px] text-muted">
-                      {[b.room.name, b.roomNumber && roomLabel(b.roomNumber, (number) => tRooms("roomNumber", { number }))].filter(Boolean).join(" · ")}
+                    <span className="block truncate text-[12px] font-semibold text-ink">
+                      {t("roomBooked", { room: [b.room.name, b.roomNumber && roomLabel(b.roomNumber, (number) => tRooms("roomNumber", { number }))].filter(Boolean).join(" · ") })}
                     </span>
                   )}
+                  <span className="block truncate text-[12px] text-muted">{t("checkOutAt", { when: formatKigaliDateTime(locale, b.endAt) })}</span>
                 </div>
                 <div className="min-w-0 text-[14px]">
                   <Link href={`/admin/users/${b.guest.id}`} className="block truncate text-ink hover:text-primary">

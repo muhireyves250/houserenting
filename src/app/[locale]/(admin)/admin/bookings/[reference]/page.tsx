@@ -378,6 +378,12 @@ export default async function AdminBookingPage({ params }: Props) {
             <StaffInvoices reference={b.reference} invoices={invoiceList} />
           </Panel>
           <Panel title={t("moneySplit")}>
+            {/* Monthly rentals paid in part: say plainly what's paid now and what's still to pay (not collected by VIIPA yet). */}
+            {b.unit === "MONTH" && b.upfrontMonths !== null && b.upfrontMonths < b.quantity && (
+              <p className="mb-3 rounded-xl bg-amber-50 px-3 py-2.5 text-[13px] text-amber-950 ring-1 ring-amber-200">
+                {t("monthsSplit", { paid: b.upfrontMonths, all: b.quantity, left: b.quantity - b.upfrontMonths, amount: rwf((b.quantity - b.upfrontMonths) * b.nightlyPrice) })}
+              </p>
+            )}
             <Facts
               rows={[
                 {

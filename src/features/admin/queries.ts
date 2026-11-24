@@ -51,6 +51,7 @@ const BOOKING_ROW = {
   checkIn: true,
   checkOut: true,
   startAt: true,
+  endAt: true,
   total: true,
   commission: true,
   hostPayout: true,

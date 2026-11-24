@@ -1604,7 +1604,10 @@
       "paid": "Yishyuwe",
       "waiting": "Itegereje kwemezwa",
       "unpaid": "Ntiyishyuwe"
-    }
+    },
+    "monthsSplit": "Byishyuwe ubu: amezi {paid} kuri {all} (Igenamiterere: amezi yishyurwa mbere). Bisigaye kwishyurwa: amezi {left} ({amount}) — VIIPA ntirabyakira.",
+    "roomBooked": "Icyumba: {room}",
+    "checkOutAt": "Gusohoka: {when}"
   },
   "Questions": {
     "title": "Ibibazo n'ibisubizo",
@@ -2403,7 +2406,7 @@
       "roomsSummary": "Ibyumba {free} kuri {all} birimo ubusa uyu munsi · {staying, plural, =0 {nta mushyitsi urimo} other {abashyitsi # barimo}}",
       "next": "Ukurikiraho: {guest}, {when} ({reference})",
       "noNext": "Nta ifatwa riri imbere.",
-      "roomOccupied": "{guest} kugeza {until}",
+      "roomOccupied": "Cyafashwe: {guest}, asohoka {until}",
       "room": {
         "free": "Kirimo ubusa",
         "MAINTENANCE": "Kirimo gusanwa",

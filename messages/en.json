@@ -1604,7 +1604,10 @@
       "paid": "Paid",
       "waiting": "Waiting for confirmation",
       "unpaid": "Not paid"
-    }
+    },
+    "monthsSplit": "Paid now: {paid} of {all} months (Settings: months paid upfront). Still to pay: {left} months ({amount}) — VIIPA doesn't collect these yet.",
+    "roomBooked": "Room: {room}",
+    "checkOutAt": "Check-out: {when}"
   },
   "Questions": {
     "title": "Questions and answers",
@@ -2403,7 +2406,7 @@
       "roomsSummary": "{free} of {all} rooms free today · {staying, plural, =0 {no guests staying} one {# stay under way} other {# stays under way}}",
       "next": "Next: {guest}, {when} ({reference})",
       "noNext": "No booking coming yet.",
-      "roomOccupied": "{guest} until {until}",
+      "roomOccupied": "Booked: {guest}, check-out {until}",
       "room": {
         "free": "Free",
         "MAINTENANCE": "Under repair",
