@@ -13,6 +13,7 @@ import { PendingArea, RowsSkeleton } from "@/components/ui/Skeletons";
 import { House, UtensilsCrossed, ChevronRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { highlightedListings } from "@/features/listings/service";
+import { RecentCard } from "@/features/listings/components/RecentlyViewed";
 import { ordersLive } from "@/features/food/service";
 import { HERO_SEARCH_ID, SearchBar } from "@/features/search/components/SearchBar";
 import { getCurrentUser } from "@/lib/session";
@@ -139,6 +140,15 @@ export async function HomeContent({ type = null, kind = null }: { type?: PlaceTy
             </HomeRow>
           )}
           {sections.map((section) => {
+            // Hot deals: the small square cards Recently viewed had.
+            if (section.kind === "HOT_DEALS")
+              return (
+                <HomeRow key={section.id} title={section.title} subtitle={section.subtitle} query={section.query} size="small">
+                  {section.listings.map((l) => (
+                    <RecentCard key={l.id} item={{ id: l.id, title: l.title, type: l.type, city: l.city, photo: l.photos[0]?.url ?? null, bedrooms: l.bedrooms, ratingAvg: l.ratingAvg, ratingCount: l.ratingCount }} />
+                  ))}
+                </HomeRow>
+              );
             return (
               <HomeRow
                 key={section.id}

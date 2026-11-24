@@ -41,7 +41,8 @@ export function TrackView({ listing }: { listing: RecentListing }) {
   return null;
 }
 
-function RecentCard({ item }: { item: RecentListing }) {
+/** A small home card (square photo, town, beds and rating): Recently viewed used it, Hot deals uses it now. */
+export function RecentCard({ item }: { item: RecentListing }) {
   const tType = useTranslations("ListingType");
   const t = useTranslations("Listings");
   // Stored data is untrusted: only translate known types.

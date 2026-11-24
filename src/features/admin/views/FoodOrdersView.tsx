@@ -7,6 +7,8 @@ import { ConfirmOrderPayment } from "@/features/food/components/ConfirmOrderPaym
 import { OrdersBoard, type BoardOrder } from "@/features/food/components/OrdersBoard";
 import { StaffDeclineOrder } from "@/features/food/components/StaffDeclineOrder";
 import { ORDER_STATUSES, acceptDeadline, nextOrderSteps } from "@/features/food/rules";
+import { FoodOrderList } from "@/features/places/components/PlaceServices";
+import { foodHistories } from "@/features/places/services-history";
 import { allOrders, confirmationsOf, ordersAwaitingPayment, withStayLocation } from "@/features/food/service";
 import { cn } from "@/lib/cn";
 import { formatRWF } from "@/lib/format";
@@ -56,6 +58,7 @@ export async function FoodOrdersView({ tabs }: { tabs?: ReactNode }) {
   const toSend = board.filter((o) => ["PLACED", "ACCEPTED", "PAID", "PREPARING", "READY", "COURIER_ASSIGNED"].includes(o.status));
   const sent = board.filter((o) => o.status === "OUT_FOR_DELIVERY");
   const done = board.filter((o) => ["DELIVERED", "FINISHED", "REJECTED", "TIMED_OUT", "CANCELLED"].includes(o.status)).slice(0, 40);
+  const finished = done.length ? await foodHistories({ reference: { in: done.map((o) => o.reference) } }, 40) : [];
   // The number of orders in each classification (requirements 3.6); "payment not confirmed" = the guest says they paid.
   const classes: { key: string; label: string; n: number }[] = [
     { key: "claim", label: t("staffOrders.paymentNotConfirmed"), n: orders.filter((o) => o.paymentClaim && !o.paidAt && o.status === "ACCEPTED").length },
@@ -160,7 +163,10 @@ export async function FoodOrdersView({ tabs }: { tabs?: ReactNode }) {
             {t("staffOrders.done")} <span className="text-muted tabular-nums">({done.length})</span>
           </summary>
           <div className="border-t border-line pb-2">
-            <OrdersBoard orders={done} compact staffDelete />
+            {/* Each finished order opens to its details: money, who delivered, the desk, the guest, every step. */}
+            <div className="pt-2">
+              <FoodOrderList orders={finished} deletable />
+            </div>
           </div>
         </details>
       )}
