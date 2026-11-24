@@ -30,9 +30,9 @@ describe("listingInput", () => {
 });
 
 describe("ways of booking by type of place", () => {
-  it("every kind of place may offer any unit, lodges included (months and years too)", () => {
+  it("every kind of place may offer any unit, guest houses included (months and years too)", () => {
     expect(listingInput.safeParse({ ...validListing, rates: [{ unit: "WEEK", price: 200000 }, { unit: "YEAR", price: 6000000 }] }).success).toBe(true);
-    const lodge = { ...validListing, type: "LODGE" as const };
+    const lodge = { ...validListing, type: "GUEST_HOUSE" as const };
     expect(listingInput.safeParse({ ...lodge, rates: [{ unit: "NIGHT", price: 40000 }, { unit: "DAY", price: 30000 }] }).success).toBe(true);
     expect(listingInput.safeParse({ ...lodge, rates: [{ unit: "MONTH", price: 400000 }] }).success).toBe(true);
   });

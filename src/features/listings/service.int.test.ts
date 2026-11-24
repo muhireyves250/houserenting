@@ -160,10 +160,10 @@ describe("type and price filters", () => {
   }
 
   it("only returns the chosen types of place", async () => {
-    const lodge = await listing({ type: "LODGE" });
-    const room = await listing({ type: "ROOM" });
+    const lodge = await listing({ type: "GUEST_HOUSE" });
+    const room = await listing({ type: "PRIVATE_HOUSE" });
     await listing({ type: "APARTMENT" });
-    const ids = (await searchListings({ mode: "short", types: ["LODGE", "ROOM"] })).map((r) => r.id);
+    const ids = (await searchListings({ mode: "short", types: ["GUEST_HOUSE", "PRIVATE_HOUSE"] })).map((r) => r.id);
     expect(ids.sort()).toEqual([lodge.id, room.id].sort());
   });
 

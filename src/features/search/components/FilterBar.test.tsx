@@ -16,23 +16,23 @@ describe("FilterBar", () => {
   it("filters by type of place, keeping the rest of the search", async () => {
     renderWithIntl(<FilterBar base={base} mode="short" filters={{}} />);
     await userEvent.click(screen.getByRole("button", { name: "Type of place" }));
-    await userEvent.click(screen.getByRole("checkbox", { name: "Lodge" }));
-    await userEvent.click(screen.getByRole("checkbox", { name: "Room" }));
+    await userEvent.click(screen.getByRole("checkbox", { name: "Guest house" }));
+    await userEvent.click(screen.getByRole("checkbox", { name: "Apartment" }));
     await userEvent.click(screen.getByRole("button", { name: "Show results" }));
-    expect(push).toHaveBeenCalledWith({ pathname: "/search", query: { ...base, type: "LODGE,ROOM" } });
+    expect(push).toHaveBeenCalledWith({ pathname: "/search", query: { ...base, type: "APARTMENT,GUEST_HOUSE" } });
   });
 
   it("filters by price range", async () => {
-    renderWithIntl(<FilterBar base={base} mode="short" filters={{ types: ["ROOM"] }} />);
+    renderWithIntl(<FilterBar base={base} mode="short" filters={{ types: ["APARTMENT"] }} />);
     await userEvent.click(screen.getByRole("button", { name: "Price" }));
     await userEvent.type(screen.getByLabelText("Minimum"), "20000");
     await userEvent.type(screen.getByLabelText("Maximum"), "90000");
     await userEvent.click(screen.getByRole("button", { name: "Show results" }));
-    expect(push).toHaveBeenCalledWith({ pathname: "/search", query: { ...base, type: "ROOM", minPrice: "20000", maxPrice: "90000" } });
+    expect(push).toHaveBeenCalledWith({ pathname: "/search", query: { ...base, type: "APARTMENT", minPrice: "20000", maxPrice: "90000" } });
   });
 
   it("shows active filters and clears them all", async () => {
-    renderWithIntl(<FilterBar base={base} mode="short" filters={{ types: ["ROOM", "LODGE"], maxPrice: 50000 }} />);
+    renderWithIntl(<FilterBar base={base} mode="short" filters={{ types: ["APARTMENT", "GUEST_HOUSE"], maxPrice: 50000 }} />);
     expect(screen.getByRole("button", { name: /Type of place/ })).toHaveTextContent("2");
     await userEvent.click(screen.getByRole("button", { name: "Clear filters" }));
     expect(push).toHaveBeenCalledWith({ pathname: "/search", query: base });

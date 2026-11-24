@@ -19,8 +19,7 @@ const CATEGORIES = [
   { key: "catAll", type: null, icon: LayoutGrid, tint: "text-amber-500" },
   { key: "catApartments", type: "APARTMENT", icon: Building2, tint: "text-sky-600" },
   { key: "catHouses", type: "PRIVATE_HOUSE", icon: House, tint: "text-rose-500" },
-  { key: "catLodges", type: "LODGE", icon: Trees, tint: "text-emerald-600" },
-  { key: "catRooms", type: "ROOM", icon: BedSingle, tint: "text-violet-600" },
+  { key: "catLodges", type: "GUEST_HOUSE", icon: Trees, tint: "text-emerald-600" },
 ] as const;
 
 /** Height of the home bar (search pill + category chips); the results bar is 80px. */

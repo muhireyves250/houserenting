@@ -31,7 +31,7 @@ export type SeedListing = {
   id: string;
   title: string;
   description: string;
-  type: "APARTMENT" | "PRIVATE_HOUSE" | "LODGE" | "ROOM";
+  type: "APARTMENT" | "PRIVATE_HOUSE" | "GUEST_HOUSE";
   addressLine: string;
   district: string;
   city: string;
@@ -155,7 +155,7 @@ export const SEED_LISTINGS: SeedListing[] = [
     id: "seed-kacyiru-studio",
     title: "Modern studio near Kigali Convention Centre",
     description: "Compact studio for business travellers. Book by the hour for meetings, or stay the night.",
-    type: "ROOM",
+    type: "APARTMENT",
     addressLine: "KG 7 Ave",
     district: "Gasabo",
     city: "Kigali",
@@ -237,7 +237,7 @@ export const SEED_LISTINGS: SeedListing[] = [
     title: "Volcano-view lodge in Kinigi",
     description:
       "A cosy stone lodge at the foot of the Virunga volcanoes — the perfect base for gorilla trekking in Volcanoes National Park.",
-    type: "LODGE",
+    type: "GUEST_HOUSE",
     addressLine: "Kinigi Road",
     district: "Musanze",
     city: "Musanze",
@@ -323,7 +323,7 @@ export const SEED_LISTINGS: SeedListing[] = [
     id: "seed-rubavu-room",
     title: "Day-use room near Rubavu beach",
     description: "Freshen up between bus connections or enjoy a day at the lake. Hourly and day-use bookings.",
-    type: "ROOM",
+    type: "APARTMENT",
     addressLine: "RN 4",
     district: "Rubavu",
     city: "Rubavu",
@@ -375,7 +375,7 @@ export const SEED_LISTINGS: SeedListing[] = [
     id: "seed-karongi-cottage",
     title: "Lakeside cottage in Karongi (Kibuye)",
     description: "Peaceful cottage among the hills of Lake Kivu. Kayaks available for guests.",
-    type: "LODGE",
+    type: "GUEST_HOUSE",
     addressLine: "Kibuye Lakeside",
     district: "Karongi",
     city: "Karongi",

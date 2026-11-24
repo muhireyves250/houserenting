@@ -1,14 +1,14 @@
 export type SearchMode = "short" | "long";
 
-// Duplex is no longer a type (those places are private houses now).
-export const PLACE_TYPES = ["APARTMENT", "PRIVATE_HOUSE", "LODGE", "ROOM", "GUEST_HOUSE", "OTHER"] as const;
+// The kinds of place VIIPA lists (lodges, rooms, duplexes and "other" were folded into these).
+export const PLACE_TYPES = ["APARTMENT", "PRIVATE_HOUSE", "GUEST_HOUSE"] as const;
 export type PlaceType = (typeof PLACE_TYPES)[number];
 
 /** The guest's main choice (the search switch): lodges, or apartments and other homes. Every type is in one of them. */
 export type PlaceKind = "LODGE" | "APARTMENT";
 export const KIND_TYPES: Record<PlaceKind, readonly PlaceType[]> = {
-  LODGE: ["LODGE", "GUEST_HOUSE"],
-  APARTMENT: ["APARTMENT", "PRIVATE_HOUSE", "ROOM", "OTHER"],
+  LODGE: ["GUEST_HOUSE"],
+  APARTMENT: ["APARTMENT", "PRIVATE_HOUSE"],
 };
 export const kindOf = (value: unknown): PlaceKind | null => (value === "LODGE" || value === "APARTMENT" ? value : null);
 

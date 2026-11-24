@@ -102,7 +102,7 @@
     "catAll": "Byose",
     "catApartments": "Apartema",
     "catHouses": "Amazu",
-    "catLodges": "Lodges",
+    "catLodges": "Amacumbi",
     "catRooms": "Ibyumba",
     "categories": "Ibyiciro",
     "noTypeTitle": "Nta macumbi y'ubu bwoko aragera",
@@ -114,7 +114,7 @@
     "freeDay": "Biri ubusa",
     "placeByName": "Inzu",
     "districtsAndPlaces": "Uturere n'amazu",
-    "lodge": "Amacumbi (Lodge)",
+    "lodge": "Amacumbi",
     "apartment": "Amazu (Apartment)"
   },
   "Search": {
@@ -549,7 +549,8 @@
     "availabilityTitle": "Igihe kiri ubusa",
     "availabilityHint": "Iminsi yafashwe iri mu mutuku. Kanda umunsi uri ubusa uwuhitemo.",
     "previousPhoto": "Ifoto ibanza",
-    "nextPhoto": "Ifoto ikurikira"
+    "nextPhoto": "Ifoto ikurikira",
+    "anyTime": "Kwinjira no gusohoka igihe icyo ari cyo cyose (amasaha 24)"
   },
   "Facility": {
     "KITCHEN": "Igikoni",
@@ -916,7 +917,12 @@
     "fromPublishHint": "Ubusa: guhera ku munsi inzu yashyiriweho ku rubuga.",
     "sentForApproval": "Byoherejwe kuri VIIPA ngo byemezwe. Inzu yawe iguma uko yari kugeza icyo gihe.",
     "changesWaiting": "Impinduka zawe zitegereje kwemezwa na VIIPA. Abashyitsi baracyabona inzu yawe uko yari. Ushobora kuzihindura hepfo.",
-    "liveEditNote": "Inzu yawe iri ku rubuga: ubitse impinduka hano, VIIPA irazigenzura mbere y'uko abashyitsi bazibona. Amafoto cyangwa ibyumba, saba VIIPA."
+    "liveEditNote": "Inzu yawe iri ku rubuga: ubitse impinduka hano, VIIPA irazigenzura mbere y'uko abashyitsi bazibona. Amafoto cyangwa ibyumba, saba VIIPA.",
+    "extraAmenities": "Ibindi bihari",
+    "extraAmenitiesHint": "urugero: Ubusitani, Siporo, Itanura",
+    "addAmenity": "Ongeraho",
+    "removeAmenity": "Kuraho {name}",
+    "open24h": "Bifungura amasaha 24"
   },
   "Admin": {
     "title": "Ubuyobozi",

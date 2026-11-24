@@ -8,8 +8,8 @@ export function toListingInput(listing: HostListing): ListingInput {
   return {
     title: listing.title,
     description: listing.description,
-    // An old duplex is edited as a private house.
-    type: listing.type === "DUPLEX" ? "PRIVATE_HOUSE" : listing.type,
+    // Older kinds are edited as today's: a lodge as a guest house, a room as an apartment, the rest as a house.
+    type: listing.type === "LODGE" ? "GUEST_HOUSE" : listing.type === "ROOM" ? "APARTMENT" : listing.type === "DUPLEX" || listing.type === "OTHER" ? "PRIVATE_HOUSE" : listing.type,
     bookingModel: listing.bookingModel,
     addressLine: listing.addressLine,
     district: listing.district,
@@ -28,6 +28,7 @@ export function toListingInput(listing: HostListing): ListingInput {
     maxGuests: listing.maxGuests,
     petsAllowed: listing.petsAllowed,
     facilities: listing.facilities,
+    extraAmenities: listing.extraAmenities,
     characteristics: listing.characteristics,
     termsOfRent: listing.termsOfRent,
     depositMonths: listing.depositMonths,

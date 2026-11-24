@@ -13,6 +13,8 @@ import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { formatRWF } from "@/lib/format";
 import { removeRoomAction, removeRoomUnitAction, saveRoomAction, saveRoomUnitAction, setRoomStatusAction } from "../actions";
+import { Open24h } from "@/features/hosting/components/ListingForm";
+import { OPEN_FROM, OPEN_UNTIL, isOpen24h } from "@/features/hosting/open-24h";
 import { roomLabel } from "../links";
 import { parseRoomNumbers, ROOM_STATUSES, type RoomInput, type RoomStatus } from "../validation";
 
@@ -152,6 +154,7 @@ function RoomForm({
   const t = useTranslations("Rooms");
   const tListings = useTranslations("Listings");
   const tFacility = useTranslations("Facility");
+  const tHost = useTranslations("Host");
   const [room, setRoom] = useState<RoomInput>(initial);
   const [numbersText, setNumbersText] = useState((initial.numbers ?? []).join(", "));
   const set = <K extends keyof RoomInput>(key: K, value: RoomInput[K]) => setRoom((r) => ({ ...r, [key]: value }));
@@ -200,8 +203,18 @@ function RoomForm({
                 <p className="col-span-full text-[13px] font-semibold text-ink">{tListings(`unitName.${unit}`)}</p>
                 <Field label={t("rules.min")} type="number" min={1} value={r.minUnits ?? 1} onChange={(e) => setRate(unit, { minUnits: Math.max(1, Number(e.target.value) || 1) })} />
                 <Field label={t("rules.max")} type="number" min={1} placeholder={t("rules.noMax")} value={r.maxUnits ?? ""} onChange={(e) => setRate(unit, { maxUnits: e.target.value ? Number(e.target.value) : null })} />
-                <Field label={byTime ? t("rules.openFrom") : t("rules.checkIn")} type="time" value={(byTime ? r.dayStartTime : r.checkInTime) ?? ""} onChange={(e) => setRate(unit, byTime ? { dayStartTime: e.target.value || null } : { checkInTime: e.target.value || null })} />
-                <Field label={byTime ? t("rules.openUntil") : t("rules.checkOut")} type="time" value={(byTime ? r.dayEndTime : r.checkOutTime) ?? ""} onChange={(e) => setRate(unit, byTime ? { dayEndTime: e.target.value || null } : { checkOutTime: e.target.value || null })} />
+                {/* Open 24 hours: any time (the times are then hidden). */}
+                <Open24h
+                  on={byTime ? isOpen24h(r.dayStartTime, r.dayEndTime) : isOpen24h(r.checkInTime, r.checkOutTime)}
+                  label={tHost("open24h")}
+                  onChange={(on) => setRate(unit, byTime ? (on ? { dayStartTime: OPEN_FROM, dayEndTime: OPEN_UNTIL } : { dayStartTime: null, dayEndTime: null }) : on ? { checkInTime: OPEN_FROM, checkOutTime: OPEN_UNTIL } : { checkInTime: null, checkOutTime: null })}
+                />
+                {!(byTime ? isOpen24h(r.dayStartTime, r.dayEndTime) : isOpen24h(r.checkInTime, r.checkOutTime)) && (
+                  <>
+                    <Field label={byTime ? t("rules.openFrom") : t("rules.checkIn")} type="time" value={(byTime ? r.dayStartTime : r.checkInTime) ?? ""} onChange={(e) => setRate(unit, byTime ? { dayStartTime: e.target.value || null } : { checkInTime: e.target.value || null })} />
+                    <Field label={byTime ? t("rules.openUntil") : t("rules.checkOut")} type="time" value={(byTime ? r.dayEndTime : r.checkOutTime) ?? ""} onChange={(e) => setRate(unit, byTime ? { dayEndTime: e.target.value || null } : { checkOutTime: e.target.value || null })} />
+                  </>
+                )}
               </div>
             );
           })}

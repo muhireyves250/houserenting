@@ -282,6 +282,8 @@ model Listing {
   restaurants       Restaurant[]
   /// The restaurants VIIPA set to cook for guests staying here (one or more).
   kitchens          PlaceRestaurant[]
+  /// Amenities the owner or VIIPA added in their own words (beyond the standard list).
+  extraAmenities    String[]            @default([])
   /// Changes the owner made to a live place, waiting for VIIPA's approval (the place stays live as it was meanwhile).
   pendingChanges    Json?
   pendingChangesAt  DateTime?

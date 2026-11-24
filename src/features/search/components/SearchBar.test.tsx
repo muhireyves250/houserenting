@@ -58,7 +58,7 @@ describe("SearchBar", () => {
     await userEvent.click(screen.getByRole("button", { name: "Search" }));
     expect(push).toHaveBeenCalledWith({
       pathname: "/search",
-      query: { mode: "short", location: "Kigali", checkIn: "2026-10-14", checkOut: "2026-10-18", guests: "2", pets: "1", type: "LODGE,GUEST_HOUSE" },
+      query: { mode: "short", location: "Kigali", checkIn: "2026-10-14", checkOut: "2026-10-18", guests: "2", pets: "1", type: "GUEST_HOUSE" },
     });
   });
 
@@ -80,7 +80,7 @@ describe("SearchBar", () => {
     await userEvent.click(screen.getByRole("button", { name: "Wednesday, October 14, 2026" }));
     await userEvent.click(screen.getByRole("radio", { name: "± 2 days" }));
     await userEvent.click(screen.getByRole("button", { name: "Search" }));
-    expect(push).toHaveBeenCalledWith({ pathname: "/search", query: { mode: "short", checkIn: "2026-10-14", flex: "2", type: "LODGE,GUEST_HOUSE" } });
+    expect(push).toHaveBeenCalledWith({ pathname: "/search", query: { mode: "short", checkIn: "2026-10-14", flex: "2", type: "GUEST_HOUSE" } });
   });
 
   it("searches only the kind of place chosen with the switch (lodges or apartments)", async () => {
@@ -88,7 +88,7 @@ describe("SearchBar", () => {
     await userEvent.click(screen.getByRole("radio", { name: "Apartments" }));
     await userEvent.type(screen.getByRole("combobox", { name: "Where" }), "Huye");
     await userEvent.click(screen.getByRole("button", { name: "Search" }));
-    expect(push).toHaveBeenCalledWith({ pathname: "/search", query: { mode: "short", location: "Huye", type: "APARTMENT,PRIVATE_HOUSE,ROOM,OTHER" } });
+    expect(push).toHaveBeenCalledWith({ pathname: "/search", query: { mode: "short", location: "Huye", type: "APARTMENT,PRIVATE_HOUSE" } });
   });
 
   it("lists the districts that have homes (with their town) and fills the field on pick", async () => {

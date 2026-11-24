@@ -31,8 +31,8 @@ export default async function AdminEditListingPage({ params }: Props) {
   const sections = [
     // A lodge's size and prices are on its rooms: no "space" part, and "prices" are its booking rules.
     ...(["photos", "basics", "location", "space", "amenities", "prices", "availability", "extras"] as const)
-      .filter((id) => !(listing.type === "LODGE" && id === "space"))
-      .map((id) => ({ id, label: listing.type === "LODGE" && id === "prices" ? tHost("lodge.rulesTitle") : tHost(`sections.${id}`) })),
+      .filter((id) => !(listing.type === "GUEST_HOUSE" && id === "space"))
+      .map((id) => ({ id, label: listing.type === "GUEST_HOUSE" && id === "prices" ? tHost("lodge.rulesTitle") : tHost(`sections.${id}`) })),
     ...(hasRooms ? [{ id: "rooms", label: tRooms("title") }] : []),
   ];
   return (

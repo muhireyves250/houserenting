@@ -50,8 +50,7 @@ export async function RoomBookingView({ listingId, roomId, number: asked }: { li
   ]);
   const label = number ? roomLabel(number, (n) => tRooms("roomNumber", { number: n })) : null;
   const title = label ? `${room.name} · ${label}` : room.name;
-  // Lodge rooms have one bed: no guests to choose.
-  const guestLimit = listing.type === "LODGE" ? 1 : room.maxGuests;
+  const guestLimit = room.maxGuests;
   const typePath = `${listingPath(listing.id, listing.title)}/rooms/${room.id}`;
   const about = descriptionOfRoom(room, number);
   // This room's own photos, else its type's, else the place's.

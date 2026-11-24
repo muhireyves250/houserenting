@@ -89,6 +89,12 @@ export const listingInput = z
     maxGuests: z.number().int().min(1).max(100),
     petsAllowed: z.boolean(),
     facilities: z.array(z.enum(FACILITIES)).max(FACILITIES.length).transform((f) => [...new Set(f)]),
+    /** Other amenities in the owner's own words ("Garden", "Gym"…). */
+    extraAmenities: z
+      .array(z.string().trim().min(2).max(40))
+      .max(20)
+      .default([])
+      .transform((list) => [...new Map(list.map((a) => [a.toLowerCase(), a])).values()]),
     characteristics: list(12, 40),
     termsOfRent: list(12, 160),
     depositMonths: z.number().int().min(0).max(12).nullable(),

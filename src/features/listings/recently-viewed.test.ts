@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { addRecent, readRecent, rememberView, type RecentListing } from "./recently-viewed";
 
-const item = (id: string): RecentListing => ({ id, title: `Home ${id}`, type: "ROOM", city: "Kigali", photo: null, ratingAvg: 4.5, ratingCount: 3 });
+const item = (id: string): RecentListing => ({ id, title: `Home ${id}`, type: "APARTMENT", city: "Kigali", photo: null, ratingAvg: 4.5, ratingCount: 3 });
 
 describe("addRecent", () => {
   it("puts the newest first, without duplicates, capped", () => {

@@ -1,6 +1,7 @@
 import { LogoWordmark } from "@/components/ui/Logo";
 import { MessageCircle, ArrowLeft, CalendarClock, ChevronLeft, KeyRound, Laptop, type LucideIcon, PawPrint, ShieldCheck, SquareParking, Star, WavesLadder, UtensilsCrossed } from "lucide-react";
 import type { Metadata } from "next";
+import { isOpen24h } from "@/features/hosting/open-24h";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Avatar } from "@/components/ui/Avatar";
@@ -106,8 +107,8 @@ export default async function ListingPage({ params, searchParams }: Props) {
             rates: roomRates.map((r) => ({ unit: r.unit, price: r.price })),
             facilities,
           }));
-  // Lodges are booked room by room from their own pages (room type → room); the lodge page shows the types.
-  const lodge = listing.type === "LODGE" && rooms.length > 0;
+  // Guest houses are booked room by room from their own pages (category → room); the place page shows the categories.
+  const lodge = listing.type === "GUEST_HOUSE" && rooms.length > 0;
   const roomTypes = allRooms.filter((r) => r.status === "AVAILABLE").map(({ id, name, description, maxGuests, photos, numbers, rates: rr }) => ({ id, name, description, maxGuests, photos, numbers, rates: rr.map((x) => ({ unit: x.unit, price: x.price })) }));
   const tRooms = await getTranslations("Rooms");
   const monthYear = new Intl.DateTimeFormat(locale, { month: "long", year: "numeric", timeZone: "Africa/Kigali" });
@@ -154,8 +155,10 @@ export default async function ListingPage({ params, searchParams }: Props) {
   const houseRules = [
     ...new Set(
       [
-        night?.checkInTime && t("checkIn", { time: night.checkInTime }),
-        night?.checkOutTime && t("checkOut", { time: night.checkOutTime }),
+        // Open 24 hours: check in and out any time.
+        isOpen24h(night?.checkInTime, night?.checkOutTime) && t("anyTime"),
+        !isOpen24h(night?.checkInTime, night?.checkOutTime) && night?.checkInTime && t("checkIn", { time: night.checkInTime }),
+        !isOpen24h(night?.checkInTime, night?.checkOutTime) && night?.checkOutTime && t("checkOut", { time: night.checkOutTime }),
         !lodge && t("maxGuests", { count: listing.maxGuests }),
         listing.petsAllowed ? t("petsAllowed") : t("noPets"),
         listing.guestIdPolicy === "UPLOAD_ONLINE" && t("idUploadOnline"),
@@ -188,9 +191,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
       guestFeeBps={feesFor(settings, listing.type).guestFeeBps}
       cancellationPolicy={policyText(settings.cancellationPolicy, locale)}
       longStay={
-        listing.type === "LODGE"
-          ? null
-          : { upfrontMonths: settings.monthlyUpfrontMonths, depositPercent: settings.monthlyDepositPercent, identity: settings.monthlyIdentity }
+{ upfrontMonths: settings.monthlyUpfrontMonths, depositPercent: settings.monthlyDepositPercent, identity: settings.monthlyIdentity }
       }
       defaultUnit={rates.some((r) => r.unit === "NIGHT") ? "NIGHT" : (rates[0]?.unit ?? "NIGHT")}
       window={bookableWindow({
@@ -345,9 +346,16 @@ export default async function ListingPage({ params, searchParams }: Props) {
                   )}
                 </Section>
 
-                {listing.facilities.length > 0 && (
+                {listing.facilities.length + listing.extraAmenities.length > 0 && (
                   <Section title={t("offers")}>
                     <ul className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
+                      {/* Those the owner added in their own words. */}
+                      {listing.extraAmenities.map((name) => (
+                        <li key={`extra-${name}`} className="flex items-center gap-4 text-[15px] text-ink">
+                          <ShieldCheck className="size-6 shrink-0" strokeWidth={1.6} aria-hidden="true" />
+                          {name}
+                        </li>
+                      ))}
                       {listing.facilities.map((facility) => {
                         const Icon = FACILITY_ICONS[facility] ?? ShieldCheck;
                         return (

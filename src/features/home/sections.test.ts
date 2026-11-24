@@ -64,8 +64,8 @@ describe("isGuestFavorite", () => {
 
 describe("homeTypeFilter", () => {
   it("accepts one known type of place and ignores anything else", () => {
-    expect(homeTypeFilter("LODGE")).toBe("LODGE");
-    expect(homeTypeFilter(["ROOM", "LODGE"])).toBe("ROOM");
+    expect(homeTypeFilter("GUEST_HOUSE")).toBe("GUEST_HOUSE");
+    expect(homeTypeFilter(["APARTMENT", "GUEST_HOUSE"])).toBe("APARTMENT");
     expect(homeTypeFilter("CASTLE")).toBeNull();
     expect(homeTypeFilter(undefined)).toBeNull();
   });

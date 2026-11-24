@@ -102,7 +102,7 @@
     "catAll": "All",
     "catApartments": "Apartments",
     "catHouses": "Houses",
-    "catLodges": "Lodges",
+    "catLodges": "Guest houses",
     "catRooms": "Rooms",
     "categories": "Categories",
     "noTypeTitle": "No homes of this type yet",
@@ -114,7 +114,7 @@
     "freeDay": "Free",
     "placeByName": "Place",
     "districtsAndPlaces": "Districts and places",
-    "lodge": "Lodges",
+    "lodge": "Guest houses",
     "apartment": "Apartments"
   },
   "Search": {
@@ -549,7 +549,8 @@
     "availabilityTitle": "When it's free",
     "availabilityHint": "Booked days are marked in red. Tap a free day to choose it.",
     "previousPhoto": "Previous photo",
-    "nextPhoto": "Next photo"
+    "nextPhoto": "Next photo",
+    "anyTime": "Check-in and check-out any time (open 24 hours)"
   },
   "Facility": {
     "KITCHEN": "Kitchen",
@@ -916,7 +917,12 @@
     "fromPublishHint": "Empty: from the day the place is published.",
     "sentForApproval": "Sent to VIIPA for approval. Your place stays as it is until then.",
     "changesWaiting": "Your changes are waiting for VIIPA's approval. Guests still see your place as it was. You can change them again below.",
-    "liveEditNote": "Your place is live: when you save changes here, VIIPA checks them before guests see them. To change photos or rooms, ask VIIPA."
+    "liveEditNote": "Your place is live: when you save changes here, VIIPA checks them before guests see them. To change photos or rooms, ask VIIPA.",
+    "extraAmenities": "Other amenities",
+    "extraAmenitiesHint": "e.g. Garden, Gym, Fireplace",
+    "addAmenity": "Add",
+    "removeAmenity": "Remove {name}",
+    "open24h": "Open 24 hours"
   },
   "Admin": {
     "title": "Admin",

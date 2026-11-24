@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState, useTransition } from "react";
 import { PLACE_TYPES } from "@/features/search/params";
 import { todayISO } from "@/features/search/date-range";
+import { OPEN_FROM, OPEN_UNTIL, isOpen24h } from "../open-24h";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { LocationPicker } from "@/features/locations/LocationPicker";
@@ -47,6 +48,7 @@ export const EMPTY_LISTING: ListingInput = {
   maxGuests: 2,
   petsAllowed: false,
   facilities: [],
+  extraAmenities: [],
   characteristics: [],
   termsOfRent: [],
   depositMonths: null,
@@ -113,7 +115,7 @@ export function ListingForm({
   const [saving, startSaving] = useTransition();
   // Lodges and guest houses have room categories. Rented room by room, their prices, rules and in-room amenities
   // belong to each category (set below the form), not to the place.
-  const categories = form.type === "LODGE" || form.type === "GUEST_HOUSE";
+  const categories = form.type === "GUEST_HOUSE";
   const lodge = categories && form.bookingModel === "ROOM_BY_ROOM";
 
   const set = <K extends keyof ListingInput>(key: K, value: ListingInput[K]) => {
@@ -189,7 +191,7 @@ export function ListingForm({
             onChange={(e) => {
               const type = e.target.value as ListingInput["type"];
               // Lodges and guest houses start room by room (their categories hold the rooms); it can be changed below.
-              setForm((f) => ({ ...f, type, ...((type === "LODGE" || type === "GUEST_HOUSE") && f.type !== "LODGE" && f.type !== "GUEST_HOUSE" ? { bookingModel: "ROOM_BY_ROOM" as const } : {}) }));
+              setForm((f) => ({ ...f, type, ...(type === "GUEST_HOUSE" && f.type !== "GUEST_HOUSE" ? { bookingModel: "ROOM_BY_ROOM" as const } : {}) }));
               setStatus("idle");
             }}
           >
@@ -302,6 +304,8 @@ export function ListingForm({
             );
           })}
         </div>
+        {/* Other amenities, in their own words. */}
+        <ExtraAmenities value={form.extraAmenities ?? []} onChange={(list) => set("extraAmenities", list)} label={t("extraAmenities")} placeholder={t("extraAmenitiesHint")} addLabel={t("addAmenity")} removeLabel={(name) => t("removeAmenity", { name })} />
       </Card>
 
       {/* A new place with rooms: say that room categories come right after saving. */}
@@ -365,14 +369,33 @@ export function ListingForm({
                   />
                   {unit === "NIGHT" && (
                     <>
-                      <Field label={t("fields.checkIn")} type="time" value={rate.checkInTime ?? ""} onChange={(ev) => setRate(unit, { checkInTime: ev.target.value || null })} error={e("checkInTime")} />
-                      <Field label={t("fields.checkOut")} type="time" value={rate.checkOutTime ?? ""} onChange={(ev) => setRate(unit, { checkOutTime: ev.target.value || null })} error={e("checkOutTime")} />
+                      {/* Open 24 hours: check in and out any time (the times are then hidden). */}
+                      <Open24h
+                        on={isOpen24h(rate.checkInTime, rate.checkOutTime)}
+                        label={t("open24h")}
+                        onChange={(on) => setRate(unit, on ? { checkInTime: OPEN_FROM, checkOutTime: OPEN_UNTIL } : { checkInTime: "14:00", checkOutTime: "11:00" })}
+                      />
+                      {!isOpen24h(rate.checkInTime, rate.checkOutTime) && (
+                        <>
+                          <Field label={t("fields.checkIn")} type="time" value={rate.checkInTime ?? ""} onChange={(ev) => setRate(unit, { checkInTime: ev.target.value || null })} error={e("checkInTime")} />
+                          <Field label={t("fields.checkOut")} type="time" value={rate.checkOutTime ?? ""} onChange={(ev) => setRate(unit, { checkOutTime: ev.target.value || null })} error={e("checkOutTime")} />
+                        </>
+                      )}
                     </>
                   )}
                   {(unit === "HOUR" || unit === "DAY") && (
                     <>
-                      <Field label={t("fields.dayStart")} type="time" value={rate.dayStartTime ?? ""} onChange={(ev) => setRate(unit, { dayStartTime: ev.target.value || null })} error={e("dayStartTime")} />
-                      <Field label={t("fields.dayEnd")} type="time" value={rate.dayEndTime ?? ""} onChange={(ev) => setRate(unit, { dayEndTime: ev.target.value || null })} error={e("dayEndTime")} />
+                      <Open24h
+                        on={isOpen24h(rate.dayStartTime, rate.dayEndTime)}
+                        label={t("open24h")}
+                        onChange={(on) => setRate(unit, on ? { dayStartTime: OPEN_FROM, dayEndTime: OPEN_UNTIL } : { dayStartTime: "08:00", dayEndTime: "20:00" })}
+                      />
+                      {!isOpen24h(rate.dayStartTime, rate.dayEndTime) && (
+                        <>
+                          <Field label={t("fields.dayStart")} type="time" value={rate.dayStartTime ?? ""} onChange={(ev) => setRate(unit, { dayStartTime: ev.target.value || null })} error={e("dayStartTime")} />
+                          <Field label={t("fields.dayEnd")} type="time" value={rate.dayEndTime ?? ""} onChange={(ev) => setRate(unit, { dayEndTime: ev.target.value || null })} error={e("dayEndTime")} />
+                        </>
+                      )}
                     </>
                   )}
                 </div>
@@ -526,5 +549,70 @@ export function ListingForm({
         </button>
       </div>
     </div>
+  );
+}
+
+/** Amenities typed by the owner or VIIPA: each shows as a chip (× removes it); type one and press Add (or Enter). */
+function ExtraAmenities({ value, onChange, label, placeholder, addLabel, removeLabel }: { value: string[]; onChange: (list: string[]) => void; label: string; placeholder: string; addLabel: string; removeLabel: (name: string) => string }) {
+  const [draft, setDraft] = useState("");
+  const add = () => {
+    const name = draft.trim().slice(0, 40);
+    if (name.length < 2 || value.some((v) => v.toLowerCase() === name.toLowerCase()) || value.length >= 20) return;
+    onChange([...value, name]);
+    setDraft("");
+  };
+  return (
+    <div className="mt-4 flex flex-col gap-2 border-t border-line pt-4">
+      <span className="text-xs font-semibold text-muted">{label}</span>
+      {value.length > 0 && (
+        <ul className="flex flex-wrap gap-2">
+          {value.map((name) => (
+            <li key={name} className="inline-flex items-center gap-1 rounded-full bg-primary/10 py-1 pr-1 pl-3 text-[13px] font-semibold text-primary">
+              {name}
+              <button type="button" aria-label={removeLabel(name)} onClick={() => onChange(value.filter((v) => v !== name))} className="flex size-6 items-center justify-center rounded-full hover:bg-primary/15">
+                ×
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      <div className="flex gap-2">
+        <input
+          value={draft}
+          maxLength={40}
+          placeholder={placeholder}
+          aria-label={label}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              add();
+            }
+          }}
+          className="h-11 min-w-0 flex-1 rounded-xl border border-line-strong bg-surface px-3 text-[14px] text-ink outline-none focus:border-primary"
+        />
+        <button type="button" onClick={add} disabled={draft.trim().length < 2} className="h-11 rounded-xl bg-primary px-4 text-[14px] font-semibold text-white disabled:opacity-50">
+          {addLabel}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** A switch: "Open 24 hours" (check in and out, or book, at any time). */
+export function Open24h({ on, label, onChange }: { on: boolean; label: string; onChange: (on: boolean) => void }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      onClick={() => onChange(!on)}
+      className={cn("col-span-full inline-flex h-11 items-center justify-between gap-3 rounded-xl px-4 text-[14px] font-semibold ring-1 transition-colors", on ? "bg-emerald-50 text-emerald-800 ring-emerald-200" : "bg-surface text-ink ring-line hover:ring-primary/40")}
+    >
+      {label}
+      <span className={cn("relative h-6 w-10 shrink-0 rounded-full transition-colors", on ? "bg-emerald-600" : "bg-line-strong")}>
+        <span className={cn("absolute top-0.5 size-5 rounded-full bg-white shadow transition-all", on ? "left-[18px]" : "left-0.5")} />
+      </span>
+    </button>
   );
 }

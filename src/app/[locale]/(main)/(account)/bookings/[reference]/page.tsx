@@ -2,6 +2,7 @@ import { PageHero } from "@/components/shell/PageHero";
 import { ChevronLeft, ChevronRight, House, LifeBuoy, MessageSquare, Navigation, Receipt } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
+import { isOpen24h } from "@/features/hosting/open-24h";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
@@ -175,11 +176,11 @@ export default async function BookingPage({ params }: Props) {
           )}
           <Row label={tListings("checkInLabel")}>
             {formatDay(locale, booking.checkIn)}
-            {policy.checkInTime && <span className="block text-[13px] font-normal text-muted">{tListings("checkIn", { time: policy.checkInTime })}</span>}
+            {policy.checkInTime && <span className="block text-[13px] font-normal text-muted">{isOpen24h(policy.checkInTime, policy.checkOutTime) ? tListings("anyTime") : tListings("checkIn", { time: policy.checkInTime })}</span>}
           </Row>
           <Row label={tListings("checkOutLabel")}>
             {formatDay(locale, booking.checkOut)}
-            {policy.checkOutTime && <span className="block text-[13px] font-normal text-muted">{tListings("checkOut", { time: policy.checkOutTime })}</span>}
+            {policy.checkOutTime && !isOpen24h(policy.checkInTime, policy.checkOutTime) && <span className="block text-[13px] font-normal text-muted">{tListings("checkOut", { time: policy.checkOutTime })}</span>}
           </Row>
           <Row label={tListings("guestsLabel")}>{tListings("statGuests", { count: booking.guests })}</Row>
         </dl>
@@ -264,8 +265,8 @@ export default async function BookingPage({ params }: Props) {
         <div className="mt-3">
         <h3 className="mb-1.5 text-[15px] font-semibold text-ink">{tListings("houseRules")}</h3>
         <ul className="mb-4 flex flex-col gap-1 text-[15px] text-ink/80">
-          {policy.checkInTime && <li>{tListings("checkIn", { time: policy.checkInTime })}</li>}
-          {policy.checkOutTime && <li>{tListings("checkOut", { time: policy.checkOutTime })}</li>}
+          {policy.checkInTime && <li>{isOpen24h(policy.checkInTime, policy.checkOutTime) ? tListings("anyTime") : tListings("checkIn", { time: policy.checkInTime })}</li>}
+          {policy.checkOutTime && !isOpen24h(policy.checkInTime, policy.checkOutTime) && <li>{tListings("checkOut", { time: policy.checkOutTime })}</li>}
           {policy.houseRules.map((rule) => (
             <li key={rule}>{rule}</li>
           ))}

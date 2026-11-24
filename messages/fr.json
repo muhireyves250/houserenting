@@ -102,7 +102,7 @@
     "catAll": "Tout",
     "catApartments": "Appartements",
     "catHouses": "Maisons",
-    "catLodges": "Lodges",
+    "catLodges": "Maisons d'hôtes",
     "catRooms": "Chambres",
     "categories": "Catégories",
     "noTypeTitle": "Pas encore de logement de ce type",
@@ -114,7 +114,7 @@
     "freeDay": "Libre",
     "placeByName": "Logement",
     "districtsAndPlaces": "Districts et logements",
-    "lodge": "Lodges",
+    "lodge": "Maisons d'hôtes",
     "apartment": "Appartements"
   },
   "Search": {
@@ -549,7 +549,8 @@
     "availabilityTitle": "Disponibilités",
     "availabilityHint": "Les jours réservés sont en rouge. Touchez un jour libre pour le choisir.",
     "previousPhoto": "Photo précédente",
-    "nextPhoto": "Photo suivante"
+    "nextPhoto": "Photo suivante",
+    "anyTime": "Arrivée et départ à toute heure (ouvert 24 h/24)"
   },
   "Facility": {
     "KITCHEN": "Cuisine",
@@ -916,7 +917,12 @@
     "fromPublishHint": "Vide : à partir du jour où le logement est publié.",
     "sentForApproval": "Envoyé à VIIPA pour approbation. Votre logement reste tel quel d'ici là.",
     "changesWaiting": "Vos modifications attendent l'approbation de VIIPA. Les clients voient encore votre logement tel qu'il était. Vous pouvez les modifier ci-dessous.",
-    "liveEditNote": "Votre logement est en ligne : quand vous enregistrez des modifications ici, VIIPA les vérifie avant que les clients les voient. Pour les photos ou les chambres, demandez à VIIPA."
+    "liveEditNote": "Votre logement est en ligne : quand vous enregistrez des modifications ici, VIIPA les vérifie avant que les clients les voient. Pour les photos ou les chambres, demandez à VIIPA.",
+    "extraAmenities": "Autres équipements",
+    "extraAmenitiesHint": "ex. Jardin, Salle de sport, Cheminée",
+    "addAmenity": "Ajouter",
+    "removeAmenity": "Retirer {name}",
+    "open24h": "Ouvert 24 h/24"
   },
   "Admin": {
     "title": "Administration",
