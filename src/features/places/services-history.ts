@@ -28,7 +28,8 @@ export async function foodHistories(where: Prisma.FoodOrderWhereInput, take = 30
     },
   });
   const ledger = food.length ? await db.ledgerEntry.findMany({ where: { note: { in: food.map((o) => `food ${o.reference}`) }, kind: { in: ["COMMISSION", "HOST_PAYABLE"] } }, select: { kind: true, amount: true, note: true } }) : [];
-  const ids = [...new Set(food.flatMap((o) => [...o.events.map((e) => e.actorId), o.courierId, o.deskConfirmedById]).filter((x): x is string => Boolean(x)))];
+  // Everyone named: who did each step, the delivery person given the order (the step's note keeps their id), the desk.
+  const ids = [...new Set(food.flatMap((o) => [...o.events.flatMap((e) => [e.actorId, e.to === "COURIER_ASSIGNED" ? e.note : null]), o.courierId, o.deskConfirmedById]).filter((x): x is string => Boolean(x)))];
   const names = new Map((ids.length ? await db.user.findMany({ where: { id: { in: ids } }, select: { id: true, name: true } }) : []).map((u) => [u.id, u.name]));
   const who = (id: string | null | undefined) => (id ? (names.get(id) ?? null) : null);
   const sum = (ref: string, kind: string) => ledger.filter((e) => e.note === `food ${ref}` && e.kind === kind).reduce((n, e) => n + e.amount, 0);
@@ -47,7 +48,13 @@ export async function foodHistories(where: Prisma.FoodOrderWhereInput, take = 30
     paidAt: o.paidAt,
     courier: who(o.courierId),
     confirmed: { guest: o.guestConfirmedAt, courier: o.courierConfirmedAt, desk: o.deskConfirmedAt, deskBy: who(o.deskConfirmedById) },
-    steps: o.events.map((e): Step => ({ at: e.createdAt, what: e.to, who: who(e.actorId), note: e.note })),
+    // Each step as it happened; a failed delivery (back to ready) and the confirmations are told apart by their note.
+    steps: o.events.map((e, i): Step => {
+      const from = i > 0 ? o.events[i - 1]!.to : null;
+      const what = e.note?.startsWith("confirmed by ") ? `CONFIRMED:${e.note.replace("confirmed by ", "")}` : e.to === "READY" && from === "OUT_FOR_DELIVERY" ? "DELIVERY_FAILED" : e.to;
+      const note = e.to === "COURIER_ASSIGNED" ? who(e.note) : e.note?.startsWith("confirmed by ") ? null : e.note?.replace(/^delivery failed: /, "") ?? null;
+      return { at: e.createdAt, what, who: who(e.actorId), note };
+    }),
   }));
 }
 export type FoodHistory = Awaited<ReturnType<typeof foodHistories>>[number];

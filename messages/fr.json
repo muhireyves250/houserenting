@@ -2463,7 +2463,43 @@
       "weighed": "{kg} kg",
       "notWeighed": "Pas encore pesée",
       "paymentClaimed": "Le client dit avoir payé",
-      "paymentConfirmed": "Paiement confirmé"
+      "paymentConfirmed": "Paiement confirmé",
+      "open": "Détails",
+      "deliverTo": "Livrée à : {place}",
+      "what": "Commande",
+      "moneyTitle": "Argent",
+      "guestPaid": "Payé par le client",
+      "viipa": "Commission VIIPA",
+      "restaurantShare": "Part du restaurant",
+      "people": "Personnes",
+      "p": {
+        "guest": "Client :",
+        "restaurant": "Restaurant :",
+        "courier": "Livrée par :",
+        "desk": "Reçue à la réception par :"
+      },
+      "why": "Motif : {reason}",
+      "timeline": "Ce qui s'est passé",
+      "step": {
+        "PLACED": "Commande passée",
+        "ACCEPTED": "Acceptée",
+        "PAID": "Paiement confirmé",
+        "PREPARING": "Préparation commencée",
+        "READY": "Prête",
+        "COURIER_ASSIGNED": "Confiée à {name} pour la livraison",
+        "OUT_FOR_DELIVERY": "En route vers le client",
+        "DELIVERED": "Livrée",
+        "FINISHED": "Le client l'a notée",
+        "REJECTED": "Refusée par le restaurant",
+        "CANCELLED": "Annulée",
+        "TIMED_OUT": "Pas de réponse du restaurant en 5 minutes",
+        "DELIVERY_FAILED": "Livraison échouée : de nouveau prête"
+      },
+      "said": {
+        "guest": "Le client a confirmé l'avoir reçue",
+        "courier": "Le livreur a confirmé l'avoir remise",
+        "desk": "La réception a confirmé l'avoir reçue"
+      }
     }
   },
   "MyStay": {

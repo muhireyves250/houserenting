@@ -2463,7 +2463,43 @@
       "weighed": "{kg} kg",
       "notWeighed": "Ntiyapimwe",
       "paymentClaimed": "Umukiriya avuga ko yishyuye",
-      "paymentConfirmed": "Kwishyura byemejwe"
+      "paymentConfirmed": "Kwishyura byemejwe",
+      "open": "Ibisobanuro",
+      "deliverTo": "Byagejejwe kuri: {place}",
+      "what": "Ibyatumijwe",
+      "moneyTitle": "Amafaranga",
+      "guestPaid": "Umukiriya yishyuye",
+      "viipa": "Komisiyo ya VIIPA",
+      "restaurantShare": "Umugabane wa resitora",
+      "people": "Abantu",
+      "p": {
+        "guest": "Umukiriya:",
+        "restaurant": "Resitora:",
+        "courier": "Byagejejwe na:",
+        "desk": "Byakiriwe ku ruganiriro na:"
+      },
+      "why": "Impamvu: {reason}",
+      "timeline": "Ibyabaye",
+      "step": {
+        "PLACED": "Komande yatanzwe",
+        "ACCEPTED": "Yemewe",
+        "PAID": "Kwishyura byemejwe",
+        "PREPARING": "Gutekwa byatangiye",
+        "READY": "Biriteguye",
+        "COURIER_ASSIGNED": "Byahawe {name} ngo abigeze",
+        "OUT_FOR_DELIVERY": "Biri mu nzira ku mukiriya",
+        "DELIVERED": "Byagejejwe",
+        "FINISHED": "Umukiriya yatanze amanota",
+        "REJECTED": "Resitora yanze",
+        "CANCELLED": "Byahagaritswe",
+        "TIMED_OUT": "Resitora ntiyasubije mu minota 5",
+        "DELIVERY_FAILED": "Kugeza byanze: byasubiye kuba biteguye"
+      },
+      "said": {
+        "guest": "Umukiriya yemeje ko yabibonye",
+        "courier": "Ugeza ibiryo yemeje ko yabitanze",
+        "desk": "Ushinzwe kwakira yemeje ko yabyakiriye"
+      }
     }
   },
   "MyStay": {

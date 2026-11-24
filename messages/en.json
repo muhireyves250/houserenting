@@ -2463,7 +2463,43 @@
       "weighed": "{kg} kg",
       "notWeighed": "Not weighed yet",
       "paymentClaimed": "Guest says they paid",
-      "paymentConfirmed": "Payment confirmed"
+      "paymentConfirmed": "Payment confirmed",
+      "open": "Details",
+      "deliverTo": "Brought to: {place}",
+      "what": "What",
+      "moneyTitle": "Money",
+      "guestPaid": "Guest paid",
+      "viipa": "VIIPA commission",
+      "restaurantShare": "Restaurant's share",
+      "people": "People",
+      "p": {
+        "guest": "Guest:",
+        "restaurant": "Restaurant:",
+        "courier": "Delivered by:",
+        "desk": "Received at the desk by:"
+      },
+      "why": "Reason: {reason}",
+      "timeline": "What happened",
+      "step": {
+        "PLACED": "Order placed",
+        "ACCEPTED": "Accepted",
+        "PAID": "Payment confirmed",
+        "PREPARING": "Cooking started",
+        "READY": "Ready",
+        "COURIER_ASSIGNED": "Given to {name} to deliver",
+        "OUT_FOR_DELIVERY": "On the way to the guest",
+        "DELIVERED": "Delivered",
+        "FINISHED": "The guest rated it",
+        "REJECTED": "Rejected by the restaurant",
+        "CANCELLED": "Cancelled",
+        "TIMED_OUT": "No answer from the restaurant in 5 minutes",
+        "DELIVERY_FAILED": "Delivery failed: back to ready"
+      },
+      "said": {
+        "guest": "The guest confirmed they got it",
+        "courier": "The delivery person confirmed handing it over",
+        "desk": "The receptionist confirmed receiving it"
+      }
     }
   },
   "MyStay": {
