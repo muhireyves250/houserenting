@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, ChefHat, ClipboardList, ConciergeBell, Shirt, House, LayoutDashboard, Menu, Settings, UtensilsCrossed, Wallet, X, type LucideIcon } from "lucide-react";
+import { Bell, ChefHat, ClipboardList, ConciergeBell, Shirt, House, LayoutDashboard, Menu, Settings, UtensilsCrossed, Wallet, X, type LucideIcon, CalendarDays } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, type ReactNode } from "react";
 import { Avatar } from "@/components/ui/Avatar";
@@ -8,11 +8,12 @@ import { Logo } from "@/components/ui/Logo";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 
-type Key = "overview" | "desk" | "places" | "orders" | "laundry" | "payout" | "restaurants" | "account" | "notifications";
+type Key = "overview" | "desk" | "bookings" | "places" | "orders" | "laundry" | "payout" | "restaurants" | "account" | "notifications";
 
 const NAV: { key: Key; href: string; icon: LucideIcon }[] = [
   { key: "overview", href: "/host", icon: LayoutDashboard },
   { key: "desk", href: "/host/desk", icon: ConciergeBell },
+  { key: "bookings", href: "/host/bookings", icon: CalendarDays },
   { key: "places", href: "/host/places", icon: House },
   { key: "orders", href: "/host/orders", icon: UtensilsCrossed },
   { key: "laundry", href: "/host/laundry", icon: Shirt },

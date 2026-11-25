@@ -527,6 +527,10 @@ const GUEST_SELECT = {
   rentalMode: true,
   months: true,
   upfrontMonths: true,
+  // Checked out early: when, why, and the guest's appeal.
+  checkedOutEarlyAt: true,
+  earlyCheckoutReason: true,
+  earlyCheckoutAppealAt: true,
   total: true,
   currency: true,
   room: { select: { name: true } },
@@ -603,28 +607,74 @@ export async function cancelPendingBooking(guestId: string, reference: string, n
 export { BLOCKING_STATUSES };
 
 /** Reception: check a paid guest in (from the check-in day), then out. Every move is logged with who made it. */
+/** More than this before the stay's end, a check-out is early (a reason is needed and the guest is told). */
+const EARLY_GRACE_MS = 60 * 60 * 1000;
+
 export async function staffMoveBooking(
   staffId: string,
   reference: string,
   to: "CHECKED_IN" | "COMPLETED",
   now: Date = new Date(),
+  /** Checking out before the stay's end: why (the guest reads it). */
+  reason = "",
 ): Promise<boolean> {
+  const why = reason.trim().slice(0, 300);
   return db.$transaction(async (tx) => {
-    const booking = await tx.booking.findUnique({ where: { reference }, select: { id: true, status: true, checkIn: true, guestId: true } });
+    const booking = await tx.booking.findUnique({ where: { reference }, select: { id: true, status: true, checkIn: true, endAt: true, guestId: true, listing: { select: { title: true } } } });
     if (!booking || !canTransition(booking.status, to)) return false;
     if (to === "CHECKED_IN" && asISO(booking.checkIn) > todayISO(now)) return false;
-    const { count } = await tx.booking.updateMany({ where: { id: booking.id, status: booking.status }, data: { status: to } });
+    // Before the stay's end: an early check-out, only with a reason (kept, and told to the guest).
+    const early = to === "COMPLETED" && booking.endAt.getTime() - now.getTime() > EARLY_GRACE_MS;
+    if (early && !why) return false;
+    const { count } = await tx.booking.updateMany({
+      where: { id: booking.id, status: booking.status },
+      data: { status: to, ...(early ? { checkedOutEarlyAt: now, earlyCheckoutById: staffId, earlyCheckoutReason: why, earlyCheckoutAppeal: null, earlyCheckoutAppealAt: null } : {}) },
+    });
     if (count !== 1) return false;
     await tx.bookingEvent.create({
-      data: { bookingId: booking.id, fromStatus: booking.status, toStatus: to, actorId: staffId, reason: to === "CHECKED_IN" ? "checked in" : "checked out" },
+      data: { bookingId: booking.id, fromStatus: booking.status, toStatus: to, actorId: staffId, reason: to === "CHECKED_IN" ? "checked in" : early ? `checked out early: ${why}` : "checked out" },
     });
-    await audit(tx, { actorId: staffId, action: to === "CHECKED_IN" ? "booking.checkIn" : "booking.checkOut", entityType: "booking", entityId: reference });
+    await audit(tx, { actorId: staffId, action: to === "CHECKED_IN" ? "booking.checkIn" : early ? "booking.checkOutEarly" : "booking.checkOut", entityType: "booking", entityId: reference, ...(early ? { data: { reason: why } } : {}) });
+    if (early) await notify(tx, booking.guestId, "checkedOutEarly", { reference, title: booking.listing.title, reason: why }, `/bookings/${reference}`);
     if (to === "COMPLETED") {
       await maybeCreateReward(tx, booking.id);
       await maybePromoterReward(tx, booking.id, now);
     }
     return true;
   });
+}
+
+/** An early check-out undone (VIIPA or the place's team): the guest is checked in again for the rest of their stay. */
+export async function undoEarlyCheckout(actorId: string, reference: string, now: Date = new Date()): Promise<boolean> {
+  return db.$transaction(async (tx) => {
+    const booking = await tx.booking.findUnique({ where: { reference }, select: { id: true, status: true, endAt: true, checkedOutEarlyAt: true, guestId: true, listing: { select: { title: true } } } });
+    if (!booking || booking.status !== "COMPLETED" || !booking.checkedOutEarlyAt || booking.endAt <= now) return false;
+    const { count } = await tx.booking.updateMany({ where: { id: booking.id, status: "COMPLETED" }, data: { status: "CHECKED_IN", checkedOutEarlyAt: null, earlyCheckoutById: null, earlyCheckoutReason: null } });
+    if (count !== 1) return false;
+    await tx.bookingEvent.create({ data: { bookingId: booking.id, fromStatus: "COMPLETED", toStatus: "CHECKED_IN", actorId, reason: "early check-out undone" } });
+    await audit(tx, { actorId, action: "booking.undoEarlyCheckout", entityType: "booking", entityId: reference });
+    await notify(tx, booking.guestId, "checkInRestored", { reference, title: booking.listing.title }, `/bookings/${reference}`);
+    return true;
+  });
+}
+
+/** The guest disagrees with an early check-out: their appeal goes to VIIPA and the place's team. */
+export async function appealEarlyCheckout(guestId: string, reference: string, text: string, now: Date = new Date()): Promise<boolean> {
+  const appeal = text.trim().slice(0, 1000);
+  if (appeal.length < 5) return false;
+  const booking = await db.booking.findFirst({
+    where: { reference, guestId, status: "COMPLETED", checkedOutEarlyAt: { not: null }, earlyCheckoutAppealAt: null },
+    select: { id: true, listing: { select: { hostId: true, title: true, team: { where: { role: { in: ["MANAGER", "RECEPTIONIST"] } }, select: { userId: true } } } } },
+  });
+  if (!booking) return false;
+  await db.$transaction(async (tx) => {
+    await tx.booking.update({ where: { id: booking.id }, data: { earlyCheckoutAppeal: appeal, earlyCheckoutAppealAt: now } });
+    await audit(tx, { actorId: guestId, action: "booking.earlyCheckoutAppeal", entityType: "booking", entityId: reference });
+    const { notifyAdmins } = await import("@/features/notifications/service");
+    await notifyAdmins(tx, "earlyCheckoutAppeal", { reference, title: booking.listing.title }, `/admin/bookings/${reference}`);
+    for (const userId of new Set([booking.listing.hostId, ...booking.listing.team.map((m) => m.userId)])) await notify(tx, userId, "earlyCheckoutAppeal", { reference, title: booking.listing.title }, "/host/bookings");
+  });
+  return true;
 }
 
 /** Staff list: bookings that are live or coming up first. */

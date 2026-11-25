@@ -33,6 +33,7 @@ const STAY_SELECT = {
   refundAmount: true,
   holdExpiresAt: true,
   room: { select: { name: true, laundryPricePerKg: true } },
+  roomId: true,
   roomNumber: true,
   policySnapshot: true,
   listing: {
@@ -89,9 +90,11 @@ export type RequestResult = { ok: true } | { ok: false; error: RequestProblem | 
 export async function requestStayChange(guestId: string, reference: string, input: RequestInput, now: Date = new Date()): Promise<RequestResult> {
   const booking = await db.booking.findFirst({
     where: { guestId, reference },
-    select: { id: true, status: true, checkIn: true, checkOut: true, listing: { select: { hostId: true, title: true } } },
+    select: { id: true, status: true, checkIn: true, checkOut: true, listing: { select: { hostId: true, title: true, team: { where: { role: { in: ["MANAGER", "RECEPTIONIST"] } }, select: { userId: true } } } } },
   });
   if (!booking) return { ok: false, error: "notFound" };
+  // Staying longer is a new booking (book again); moving places isn't offered.
+  if (input.kind === "EXTEND" || input.kind === "TRANSFER") return { ok: false, error: "notFound" };
   const problem = checkRequest({ status: booking.status, checkIn: iso(booking.checkIn), checkOut: iso(booking.checkOut) }, input, todayISO(now));
   if (problem) return { ok: false, error: problem };
   if (await db.stayRequest.findFirst({ where: { bookingId: booking.id, status: "PENDING" }, select: { id: true } })) return { ok: false, error: "pending" };
@@ -108,6 +111,8 @@ export async function requestStayChange(guestId: string, reference: string, inpu
     await audit(tx, { actorId: guestId, action: "stay.request", entityType: "booking", entityId: reference, data: { request: request.id, kind: input.kind } });
     const data = { reference, title: booking.listing.title, kindLabel: input.kind };
     await notifyAdmins(tx, "stayRequest", data, `/admin/bookings/${reference}`);
+    // The place's owner and its team are told too (leaving early frees the room).
+    for (const userId of new Set([booking.listing.hostId, ...booking.listing.team.map((m) => m.userId)])) await notify(tx, userId, "stayRequest", data, "/host/bookings");
   });
   return { ok: true };
 }

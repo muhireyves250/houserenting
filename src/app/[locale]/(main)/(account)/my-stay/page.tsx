@@ -1,7 +1,8 @@
 import { ReviewForm } from "@/features/reviews/components/ReviewForm";
 import { canReview } from "@/features/reviews/service";
 import { PageHero } from "@/components/shell/PageHero";
-import { roomLabel } from "@/features/rooms/links";
+import { listingPath } from "@/features/listings/links";
+import { ONLY_ROOM, roomLabel } from "@/features/rooms/links";
 import {
   BedDouble,
   CalendarClock,
@@ -291,6 +292,7 @@ export default async function MyStayPage() {
             paid={paid}
             canCancel={current.status === "CONFIRMED" && current.checkIn > today}
             requests={current.requests}
+            bookAgainHref={current.roomId ? `${listingPath(listing.id, listing.title)}/rooms/${current.roomId}/${current.roomNumber ?? ONLY_ROOM}` : listingPath(listing.id, listing.title)}
           />
         </Section>
 

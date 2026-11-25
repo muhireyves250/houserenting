@@ -876,7 +876,8 @@
         "account": "Your account",
         "notifications": "Notifications",
         "laundry": "Laundry",
-        "desk": "Front desk"
+        "desk": "Front desk",
+        "bookings": "Bookings"
       },
       "short": {
         "overview": "Overview",
@@ -885,7 +886,8 @@
         "payout": "Payouts",
         "restaurants": "Kitchens",
         "menu": "Menu",
-        "laundry": "Laundry"
+        "laundry": "Laundry",
+        "bookings": "Bookings"
       },
       "backToSite": "Back to VIIPA",
       "openMenu": "Open menu",
@@ -928,7 +930,9 @@
         "title": "EBM to upload",
         "company": "Company: TIN {tin} · purchase code {code}",
         "phone": "No company: EBM to the guest's phone number"
-      }
+      },
+      "earlyQuestion": "Why are they leaving early? (the guest reads it)",
+      "earlyConfirm": "Check out early"
     },
     "photosRequired": "Photos are required: add at least one (rooms, bathroom, kitchen, living room, outside).",
     "photoKindLabel": "What this photo shows",
@@ -954,7 +958,22 @@
     "addAmenity": "Add",
     "removeAmenity": "Remove {name}",
     "open24h": "Open 24 hours",
-    "tinHint": "The TIN on your guests' EBM invoices (VIIPA's TIN for the places VIIPA runs). Needed before the place goes live."
+    "tinHint": "The TIN on your guests' EBM invoices (VIIPA's TIN for the places VIIPA runs). Needed before the place goes live.",
+    "bookings": {
+      "intro": "Your places' bookings: check guests in and out here. Payments and money are handled by VIIPA.",
+      "empty": "No bookings yet.",
+      "guests": "{count, plural, one {# guest} other {# guests}}",
+      "request": {
+        "SHORTEN": "Asks to leave early",
+        "CANCEL": "Asks to cancel",
+        "EXTEND": "Asks to stay longer",
+        "TRANSFER": "Asks to move"
+      },
+      "early": "Checked out early {when}: {reason}",
+      "appeal": "Guest's appeal: {text}",
+      "undo": "Undo early check-out",
+      "undoQuestion": "Check this guest in again for the rest of their stay?"
+    }
   },
   "Admin": {
     "title": "Admin",
@@ -1641,7 +1660,9 @@
     "checkOutAt": "Check-out: {when}",
     "ebm": "EBM invoice",
     "ebmCompany": "Company · TIN {tin} · purchase code {code}",
-    "ebmPhone": "To the payer's phone number"
+    "ebmPhone": "To the payer's phone number",
+    "undoEarly": "Undo early check-out",
+    "undoEarlyQuestion": "Check this guest in again for the rest of their stay?"
   },
   "Questions": {
     "title": "Questions and answers",
@@ -1780,7 +1801,10 @@
       "orderReminder": "Reminder: order {reference} at {title} is waiting for you ({total, number} RWF).",
       "cleaningRequested": "{name} asks for cleaning: {where}.",
       "cleaningDone": "Your room has been cleaned ({reference}).",
-      "ebmReady": "Your EBM receipt for {reference} is ready: download it from your booking."
+      "ebmReady": "Your EBM receipt for {reference} is ready: download it from your booking.",
+      "checkedOutEarly": "You were checked out of {title} early ({reference}): {reason}. See your booking to appeal.",
+      "checkInRestored": "Your early check-out at {title} was undone: you're checked in again ({reference}).",
+      "earlyCheckoutAppeal": "The guest appeals their early check-out at {title} ({reference})."
     },
     "filterLabel": "Show notifications",
     "filter": {
@@ -2702,6 +2726,20 @@
         "waiting": "You already asked: the reception will come.",
         "invalid": "Keep the note short."
       }
+    },
+    "stayLonger": "Stay longer",
+    "stayLongerHint": "Book the open days after your stay: booked days are marked.",
+    "bookAgain": "Book again",
+    "early": {
+      "title": "You were checked out early",
+      "when": "Checked out: {when}",
+      "reason": "Why: {reason}",
+      "left": "Time that was left: {days, plural, =0 {} one {# day} other {# days}} {hours, plural, =0 {} one {# hour} other {# hours}}",
+      "appeal": "Appeal",
+      "appealPlaceholder": "Tell us why you disagree",
+      "send": "Send appeal",
+      "failed": "Couldn't send — try again.",
+      "appealSent": "Appeal sent {when}: VIIPA will answer you."
     }
   },
   "Portal": {

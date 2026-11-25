@@ -3,7 +3,7 @@ import { cache } from "react";
 import { db } from "@/lib/db";
 
 /** The parts of the work dashboard someone may open (each role sees only its own pages). */
-export type WorkArea = "overview" | "desk" | "places" | "orders" | "laundry" | "payout" | "restaurants";
+export type WorkArea = "overview" | "desk" | "bookings" | "places" | "orders" | "laundry" | "payout" | "restaurants";
 
 export type WorkRoles = {
   /** Owns places (or was made a place owner by VIIPA). */
@@ -40,6 +40,8 @@ export const workRoles = cache(async (userId: string): Promise<WorkRoles> => {
   if (owner || manager) areas.push("overview");
   // The front desk: receptionists and managers, and owners for their own places.
   if (desk || owned > 0) areas.push("desk");
+  // Their places' bookings (no money): owners and managers.
+  if (owner || manager) areas.push("bookings");
   if (owner || manager) areas.push("places", "orders", "laundry");
   // Receptionists: the food arriving for guests (they confirm it at the desk) and the laundry.
   else if (desk) areas.push("orders", "laundry");

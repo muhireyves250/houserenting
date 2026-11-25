@@ -148,7 +148,7 @@ export default async function FrontDeskPage() {
                     )}
                     {canIn && <DeskButton reference={b.reference} to="CHECKED_IN" label={t("checkIn")} failed={t("failed")} />}
                     {b.status === "CONFIRMED" && !canIn && <span className="text-[12px] font-semibold text-muted">{t("tomorrow")}</span>}
-                    {b.status === "CHECKED_IN" && <DeskButton reference={b.reference} to="COMPLETED" label={t("checkOut")} failed={t("failed")} />}
+                    {b.status === "CHECKED_IN" && <DeskButton reference={b.reference} to="COMPLETED" label={t("checkOut")} failed={t("failed")} early={b.out > today ? { question: t("earlyQuestion"), confirm: t("earlyConfirm") } : undefined} />}
                     {/* The booking's EBM receipt: upload (or replace) and download. */}
                     <div className="w-full">
                       <EbmUpload reference={b.reference} uploadedAt={b.ebm ? formatKigaliTime(locale, b.ebm.createdAt) : null} />

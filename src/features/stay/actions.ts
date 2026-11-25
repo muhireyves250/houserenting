@@ -96,10 +96,10 @@ async function frontDesk(reference: string) {
 }
 
 /** Check a guest in or out from the place's front desk. */
-export async function frontDeskMoveAction(reference: string, to: "CHECKED_IN" | "COMPLETED"): Promise<{ ok: boolean }> {
+export async function frontDeskMoveAction(reference: string, to: "CHECKED_IN" | "COMPLETED", reason = ""): Promise<{ ok: boolean }> {
   const user = await frontDesk(reference);
   if (!user || (to !== "CHECKED_IN" && to !== "COMPLETED")) return { ok: false };
-  const ok = await staffMoveBooking(user.id, reference, to);
+  const ok = await staffMoveBooking(user.id, reference, to, new Date(), typeof reason === "string" ? reason : "");
   if (ok) revalidatePath("/[locale]", "layout");
   return { ok };
 }
@@ -130,4 +130,24 @@ export async function markCleaningDoneAction(id: string): Promise<boolean> {
   const ok = await markCleaningDone(user, id);
   if (ok) revalidatePath("/[locale]", "layout");
   return ok;
+}
+
+/** VIIPA or the place's team undo an early check-out: the guest is checked in again for the rest of their stay. */
+export async function undoEarlyCheckoutAction(reference: string): Promise<{ ok: boolean }> {
+  const user = await frontDesk(reference);
+  if (!user) return { ok: false };
+  const { undoEarlyCheckout } = await import("@/features/bookings/service");
+  const ok = await undoEarlyCheckout(user.id, reference);
+  if (ok) revalidatePath("/[locale]", "layout");
+  return { ok };
+}
+
+/** The guest appeals an early check-out. */
+export async function appealEarlyCheckoutAction(reference: string, text: string): Promise<{ ok: boolean }> {
+  const user = await getCurrentUser();
+  if (!user || !isBookingReference(reference) || typeof text !== "string") return { ok: false };
+  const { appealEarlyCheckout } = await import("@/features/bookings/service");
+  const ok = await appealEarlyCheckout(user.id, reference, text);
+  if (ok) revalidatePath("/[locale]", "layout");
+  return { ok };
 }

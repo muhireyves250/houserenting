@@ -1,4 +1,5 @@
 import { getLocale, getTranslations } from "next-intl/server";
+import { undoEarlyCheckoutAction } from "@/features/stay/actions";
 import { ActionsMenu } from "@/features/admin/components/ActionsMenu";
 import { moveBookingAction } from "@/features/admin/moderation-actions";
 import { markNoShowAction } from "@/features/stay/actions";
@@ -113,7 +114,10 @@ export default async function AdminBookingsPage({ searchParams }: Props) {
                     items={[
                       { kind: "link", label: t("openToAnswer"), href: `/admin/bookings/${b.reference}` },
                       ...(b.status === "CONFIRMED" && started ? [{ kind: "run" as const, label: t("checkIn"), action: moveBookingAction.bind(null, b.reference, "CHECKED_IN") }] : []),
-                      ...(b.status === "CHECKED_IN" ? [{ kind: "run" as const, label: t("checkOut"), action: moveBookingAction.bind(null, b.reference, "COMPLETED") }] : []),
+                      // Before the stay's end, checking out asks why (the guest reads it).
+                      ...(b.status === "CHECKED_IN" ? [{ kind: "run" as const, label: t("checkOut"), action: moveBookingAction.bind(null, b.reference, "COMPLETED"), reason: iso(b.checkOut) > today }] : []),
+                      // An early check-out can be undone while the stay hasn't ended.
+                      ...(b.status === "COMPLETED" && b.checkedOutEarlyAt && iso(b.checkOut) > today ? [{ kind: "run" as const, label: t("undoEarly"), action: undoEarlyCheckoutAction.bind(null, b.reference), confirm: t("undoEarlyQuestion") }] : []),
                       ...(b.status === "CONFIRMED" && iso(b.checkIn) < today ? [{ kind: "run" as const, label: t("noShow"), action: markNoShowAction.bind(null, b.reference), confirm: t("noShowQuestion"), danger: true }] : []),
                     ]}
                   />

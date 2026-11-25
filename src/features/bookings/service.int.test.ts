@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { db } from "@/lib/db";
 import { resetDb } from "@/test/db";
-import { autoCheckOut, bookedRanges, createRentalBooking, cancelPendingBooking, createBooking, getGuestBooking, guestBookings, staffMoveBooking } from "./service";
+import { appealEarlyCheckout, autoCheckOut, bookedRanges, createRentalBooking, cancelPendingBooking, createBooking, getGuestBooking, guestBookings, staffMoveBooking, undoEarlyCheckout } from "./service";
 
 const NOW = new Date("2026-10-14T08:00:00Z");
 
@@ -157,6 +157,32 @@ describe("staffMoveBooking", () => {
       ["CONFIRMED", "CHECKED_IN", "host"],
       ["CHECKED_IN", "COMPLETED", "host"],
     ]);
+  });
+});
+
+describe("checking a guest out early", () => {
+  it("needs a reason, shows on the booking, lets the guest appeal, and can be undone while the stay lasts", async () => {
+    const result = await createBooking(stay(), NOW);
+    const reference = result.ok ? result.reference : "";
+    await db.booking.update({ where: { reference }, data: { status: "CONFIRMED" } });
+    expect(await staffMoveBooking("host", reference, "CHECKED_IN", new Date("2026-10-20T10:00:00Z"))).toBe(true);
+    const early = new Date("2026-10-21T10:00:00Z");
+    expect(await staffMoveBooking("host", reference, "COMPLETED", early)).toBe(false); // no reason
+    expect(await staffMoveBooking("host", reference, "COMPLETED", early, "Broke the house rules")).toBe(true);
+    const out = await db.booking.findUniqueOrThrow({ where: { reference } });
+    expect([out.status, out.earlyCheckoutReason, out.earlyCheckoutById]).toEqual(["COMPLETED", "Broke the house rules", "host"]);
+    expect(await db.notification.count({ where: { userId: "u1", kind: "checkedOutEarly" } })).toBe(1);
+
+    expect(await appealEarlyCheckout("someone-else", reference, "That is not fair", early)).toBe(false);
+    expect(await appealEarlyCheckout("u1", reference, "no", early)).toBe(false); // too short
+    expect(await appealEarlyCheckout("u1", reference, "I did nothing wrong", early)).toBe(true);
+    expect((await db.booking.findUniqueOrThrow({ where: { reference } })).earlyCheckoutAppeal).toBe("I did nothing wrong");
+
+    expect(await undoEarlyCheckout("host", reference, new Date("2026-10-24T10:00:00Z"))).toBe(false); // the stay is over
+    expect(await undoEarlyCheckout("host", reference, new Date("2026-10-21T12:00:00Z"))).toBe(true);
+    const back = await db.booking.findUniqueOrThrow({ where: { reference } });
+    expect([back.status, back.checkedOutEarlyAt, back.earlyCheckoutReason]).toEqual(["CHECKED_IN", null, null]);
+    expect(await db.notification.count({ where: { userId: "u1", kind: "checkInRestored" } })).toBe(1);
   });
 });
 

@@ -78,28 +78,12 @@ describe("MY STAY", () => {
     expect((await myStay("guest", NOW)).current?.reference).toBe(ref);
   });
 
-  it("extends a stay when the dates are free, and says what's left to pay", async () => {
+  it("staying longer or moving is booked again, never asked for; leaving early is asked for and tells VIIPA", async () => {
     const ref = await booking();
-    expect(await requestStayChange("guest", ref, { kind: "EXTEND", reason: "Loving it", newCheckOut: "2026-11-17" }, NOW)).toEqual({ ok: true });
-    expect(await requestStayChange("guest", ref, { kind: "EXTEND", reason: "Again", newCheckOut: "2026-11-18" }, NOW)).toEqual({ ok: false, error: "pending" });
-    const request = await db.stayRequest.findFirstOrThrow();
-    expect(await decideStayRequest({ id: "guest" }, request.id, { approve: true, response: "" }, NOW)).toEqual({ ok: false, error: "notAllowed" });
-    expect(await decideStayRequest(admin, request.id, { approve: true, response: "Enjoy!" }, NOW)).toEqual({ ok: true });
-    const after = await db.booking.findUniqueOrThrow({ where: { reference: ref } });
-    expect(after.checkOut.toISOString().slice(0, 10)).toBe("2026-11-17");
-    expect(after.nights).toBe(7);
-    expect((await db.stayRequest.findUniqueOrThrow({ where: { id: request.id } })).priceChange).toBe(200_000);
-  });
-
-  it("won't extend into someone else's booking", async () => {
-    const mine = await booking();
-    // Another guest's stay right after.
-    await db.user.create({ data: { id: "g2", name: "Other", email: "g2@example.com" } });
-    const other = await booking({ checkIn: "2026-11-15", checkOut: "2026-11-20" });
-    await db.booking.update({ where: { reference: other }, data: { guestId: "g2" } });
-    await requestStayChange("guest", mine, { kind: "EXTEND", reason: "More time", newCheckOut: "2026-11-17" }, NOW);
-    const request = await db.stayRequest.findFirstOrThrow();
-    expect(await decideStayRequest(admin, request.id, { approve: true, response: "" }, NOW)).toEqual({ ok: false, error: "datesTaken" });
+    expect(await requestStayChange("guest", ref, { kind: "EXTEND", reason: "Loving it", newCheckOut: "2026-11-17" }, NOW)).toEqual({ ok: false, error: "notFound" });
+    expect(await requestStayChange("guest", ref, { kind: "TRANSFER", reason: "Closer to work", transferTo: "Rusizi" }, NOW)).toEqual({ ok: false, error: "notFound" });
+    expect(await requestStayChange("guest", ref, { kind: "SHORTEN", reason: "Work trip ended", newCheckOut: "2026-11-12" }, NOW)).toEqual({ ok: true });
+    expect(await db.notification.count({ where: { kind: "stayRequest" } })).toBeGreaterThan(0);
   });
 
   it("cancels a paid stay with a refund that staff then send", async () => {
@@ -115,11 +99,10 @@ describe("MY STAY", () => {
     expect(await db.notification.findFirst({ where: { userId: "guest", kind: "refundSent" } })).not.toBeNull();
   });
 
-  it("lets the guest withdraw a waiting request, and transfers record where to", async () => {
+  it("lets the guest withdraw a waiting request", async () => {
     const ref = await booking();
-    await requestStayChange("guest", ref, { kind: "TRANSFER", reason: "Closer to work", transferTo: "Rusizi" }, NOW);
+    await requestStayChange("guest", ref, { kind: "SHORTEN", reason: "Work trip ended", newCheckOut: "2026-11-12" }, NOW);
     const request = await db.stayRequest.findFirstOrThrow();
-    expect(request.transferTo).toBe("Rusizi");
     expect(await withdrawStayRequest("other", request.id)).toBe(false);
     expect(await withdrawStayRequest("guest", request.id)).toBe(true);
   });

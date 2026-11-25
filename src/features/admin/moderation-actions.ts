@@ -49,6 +49,8 @@ export async function moderateReviewAction(
 export async function moveBookingAction(
   reference: string,
   to: "CHECKED_IN" | "COMPLETED",
+  /** Checking out before the stay's end: why (the guest reads it). */
+  reason = "",
 ): Promise<{ ok: boolean }> {
   const admin = await staff("bookings");
   if (
@@ -58,7 +60,7 @@ export async function moveBookingAction(
     (to !== "CHECKED_IN" && to !== "COMPLETED")
   )
     return { ok: false };
-  const ok = await staffMoveBooking(admin.id, reference, to);
+  const ok = await staffMoveBooking(admin.id, reference, to, new Date(), typeof reason === "string" ? reason : "");
   // Bookings, the overview's front desk and the menu counts all change.
   if (ok) revalidatePath("/[locale]/admin", "layout");
   return { ok };

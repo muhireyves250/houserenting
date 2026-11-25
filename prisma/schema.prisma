@@ -422,6 +422,12 @@ model Booking {
   /// EBM goes to the payer's phone number).
   buyerTin          String?
   purchaseCode      String?
+  /// Checked out before the stay's end by the place or VIIPA: when, who and why; the guest may appeal.
+  checkedOutEarlyAt   DateTime?
+  earlyCheckoutById   String?
+  earlyCheckoutReason String?
+  earlyCheckoutAppeal   String?
+  earlyCheckoutAppealAt DateTime?
   /// What the guest saw and agreed to: check-in/out times, house rules, cancellation terms.
   policySnapshot Json
   holdExpiresAt  DateTime?

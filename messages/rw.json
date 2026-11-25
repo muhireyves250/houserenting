@@ -876,7 +876,8 @@
         "account": "Konti yawe",
         "notifications": "Imenyesha",
         "laundry": "Kumesa",
-        "desk": "Kwakira abashyitsi"
+        "desk": "Kwakira abashyitsi",
+        "bookings": "Ibyafashwe"
       },
       "short": {
         "overview": "Incamake",
@@ -885,7 +886,8 @@
         "payout": "Kwishyurwa",
         "restaurants": "Igikoni",
         "menu": "Menu",
-        "laundry": "Kumesa"
+        "laundry": "Kumesa",
+        "bookings": "Ibyafashwe"
       },
       "backToSite": "Subira kuri VIIPA",
       "openMenu": "Fungura menu",
@@ -928,7 +930,9 @@
         "title": "EBM zo gushyiraho",
         "company": "Kompanyi: TIN {tin} · kode yo kugura {code}",
         "phone": "Nta kompanyi: EBM kuri nimero y'umukiriya"
-      }
+      },
+      "earlyQuestion": "Kuki asohoka mbere y'igihe? (umushyitsi arabisoma)",
+      "earlyConfirm": "Sohora mbere y'igihe"
     },
     "photosRequired": "Amafoto arakenewe: shyiramo nibura imwe (ibyumba, ubwiherero, igikoni, uruganiriro, hanze).",
     "photoKindLabel": "Iyi foto yerekana iki",
@@ -954,7 +958,22 @@
     "addAmenity": "Ongeraho",
     "removeAmenity": "Kuraho {name}",
     "open24h": "Bifungura amasaha 24",
-    "tinHint": "TIN iri ku nyemezabuguzi za EBM z'abashyitsi (iya VIIPA ku nzu VIIPA icunga). Irakenewe mbere y'uko inzu ijya ku rubuga."
+    "tinHint": "TIN iri ku nyemezabuguzi za EBM z'abashyitsi (iya VIIPA ku nzu VIIPA icunga). Irakenewe mbere y'uko inzu ijya ku rubuga.",
+    "bookings": {
+      "intro": "Ibyafashwe ku nzu zawe: injiza no gusohora abashyitsi hano. Kwishyura n'amafaranga bicungwa na VIIPA.",
+      "empty": "Nta byafashwe biraboneka.",
+      "guests": "{count, plural, other {abashyitsi #}}",
+      "request": {
+        "SHORTEN": "Arasaba kugenda kare",
+        "CANCEL": "Arasaba guhagarika",
+        "EXTEND": "Arasaba kongera igihe",
+        "TRANSFER": "Arasaba kwimuka"
+      },
+      "early": "Yasohowe mbere y'igihe {when}: {reason}",
+      "appeal": "Ubujurire bw'umushyitsi: {text}",
+      "undo": "Kuraho gusohorwa mbere y'igihe",
+      "undoQuestion": "Ongera winjize uyu mushyitsi ku gihe gisigaye?"
+    }
   },
   "Admin": {
     "title": "Ubuyobozi",
@@ -1641,7 +1660,9 @@
     "checkOutAt": "Gusohoka: {when}",
     "ebm": "Inyemezabuguzi ya EBM",
     "ebmCompany": "Kompanyi · TIN {tin} · kode yo kugura {code}",
-    "ebmPhone": "Kuri nimero ya telefone y'uwishyuye"
+    "ebmPhone": "Kuri nimero ya telefone y'uwishyuye",
+    "undoEarly": "Kuraho gusohorwa mbere y'igihe",
+    "undoEarlyQuestion": "Ongera winjize uyu mushyitsi ku gihe gisigaye?"
   },
   "Questions": {
     "title": "Ibibazo n'ibisubizo",
@@ -1780,7 +1801,10 @@
       "orderReminder": "Kwibutsa: komande {reference} kuri {title} iragutegereje ({total, number} RWF).",
       "cleaningRequested": "{name} arasaba isuku: {where}.",
       "cleaningDone": "Icyumba cyawe cyakorewe isuku ({reference}).",
-      "ebmReady": "Inyemezabuguzi ya EBM ya {reference} irateguye: yikuremo ku ifatwa ryawe."
+      "ebmReady": "Inyemezabuguzi ya EBM ya {reference} irateguye: yikuremo ku ifatwa ryawe.",
+      "checkedOutEarly": "Wasohowe kuri {title} mbere y'igihe ({reference}): {reason}. Reba ifatwa ryawe ujurire.",
+      "checkInRestored": "Gusohorwa kwawe mbere y'igihe kuri {title} kwakuweho: wongeye kwinjizwa ({reference}).",
+      "earlyCheckoutAppeal": "Umushyitsi arajuririra gusohorwa mbere y'igihe kuri {title} ({reference})."
     },
     "filterLabel": "Erekana imenyesha",
     "filter": {
@@ -2702,6 +2726,20 @@
         "waiting": "Wamaze gusaba: ushinzwe kwakira araza.",
         "invalid": "Andika ubutumwa bugufi."
       }
+    },
+    "stayLonger": "Kongera igihe",
+    "stayLongerHint": "Fata iminsi ifunguye nyuma y'igihe cyawe: iminsi yafashwe iragaragara.",
+    "bookAgain": "Ongera ufate",
+    "early": {
+      "title": "Wasohowe mbere y'igihe",
+      "when": "Wasohowe: {when}",
+      "reason": "Impamvu: {reason}",
+      "left": "Igihe cyari gisigaye: {days, plural, =0 {} other {iminsi #}} {hours, plural, =0 {} other {amasaha #}}",
+      "appeal": "Jurira",
+      "appealPlaceholder": "Tubwire impamvu utabyemera",
+      "send": "Ohereza ubujurire",
+      "failed": "Ntibyoherejwe — ongera ugerageze.",
+      "appealSent": "Ubujurire bwoherejwe {when}: VIIPA izagusubiza."
     }
   },
   "Portal": {

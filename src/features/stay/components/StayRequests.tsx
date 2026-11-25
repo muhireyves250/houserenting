@@ -3,7 +3,7 @@
 import { CalendarMinus, CalendarPlus, MapPinned, XCircle } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
-import { useRouter } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { formatRWF } from "@/lib/format";
 import { requestStayChangeAction, withdrawStayRequestAction } from "../actions";
@@ -23,6 +23,7 @@ export function StayRequests({
   canCancel,
   paid,
   requests,
+  bookAgainHref,
 }: {
   reference: string;
   checkIn: string;
@@ -31,11 +32,14 @@ export function StayRequests({
   canCancel: boolean;
   paid: boolean;
   requests: Request[];
+  /** Staying longer = booking again: the place's (or room's) page, where booked days are marked. */
+  bookAgainHref: string;
 }) {
   const t = useTranslations("MyStay");
   const locale = useLocale();
   const router = useRouter();
-  const kinds: StayRequestKind[] = ["EXTEND", "SHORTEN", "TRANSFER", ...(canCancel ? (["CANCEL"] as const) : [])];
+  // Leaving early, or cancelling before arrival. (Staying longer is booking again; moving places isn't offered.)
+  const kinds: StayRequestKind[] = ["SHORTEN", ...(canCancel ? (["CANCEL"] as const) : [])];
   const [kind, setKind] = useState<StayRequestKind | null>(null);
   const [form, setForm] = useState({ reason: "", newCheckOut: "", transferTo: "" });
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
@@ -64,7 +68,18 @@ export function StayRequests({
         <p className="rounded-xl bg-amber-50 px-4 py-3 text-[14px] text-amber-900">{t("requestWaiting")}</p>
       ) : (
         <>
-          <div className={cn("grid gap-2", kinds.length === 3 ? "grid-cols-3" : "grid-cols-2 sm:grid-cols-4")}>
+          {/* Stay longer: book the open days after this stay, as any booking. */}
+          <Link href={bookAgainHref} className="flex items-center justify-between gap-3 rounded-2xl bg-primary/[0.06] px-4 py-3 ring-1 ring-primary/30 hover:ring-primary">
+            <span className="flex items-center gap-3">
+              <CalendarPlus className="size-5 text-primary" aria-hidden="true" />
+              <span>
+                <b className="block text-[15px] font-semibold text-ink">{t("stayLonger")}</b>
+                <span className="block text-[13px] text-muted">{t("stayLongerHint")}</span>
+              </span>
+            </span>
+            <span className="rounded-full bg-primary px-3.5 py-1.5 text-[13px] font-semibold text-white">{t("bookAgain")}</span>
+          </Link>
+          <div className="grid grid-cols-2 gap-2">
             {kinds.map((k) => {
               const Icon = ICONS[k];
               return (

@@ -876,7 +876,8 @@
         "account": "Votre compte",
         "notifications": "Notifications",
         "laundry": "Blanchisserie",
-        "desk": "Réception"
+        "desk": "Réception",
+        "bookings": "Réservations"
       },
       "short": {
         "overview": "Aperçu",
@@ -885,7 +886,8 @@
         "payout": "Paiements",
         "restaurants": "Cuisines",
         "menu": "Menu",
-        "laundry": "Blanchisserie"
+        "laundry": "Blanchisserie",
+        "bookings": "Résas"
       },
       "backToSite": "Retour à VIIPA",
       "openMenu": "Ouvrir le menu",
@@ -928,7 +930,9 @@
         "title": "EBM à téléverser",
         "company": "Entreprise : TIN {tin} · code d'achat {code}",
         "phone": "Sans entreprise : EBM au numéro du client"
-      }
+      },
+      "earlyQuestion": "Pourquoi part-il plus tôt ? (le client le lit)",
+      "earlyConfirm": "Faire partir plus tôt"
     },
     "photosRequired": "Les photos sont obligatoires : ajoutez-en au moins une (chambres, salle de bain, cuisine, salon, extérieur).",
     "photoKindLabel": "Ce que montre la photo",
@@ -954,7 +958,22 @@
     "addAmenity": "Ajouter",
     "removeAmenity": "Retirer {name}",
     "open24h": "Ouvert 24 h/24",
-    "tinHint": "Le TIN sur les factures EBM des clients (celui de VIIPA pour les logements qu'il gère). Nécessaire avant la mise en ligne."
+    "tinHint": "Le TIN sur les factures EBM des clients (celui de VIIPA pour les logements qu'il gère). Nécessaire avant la mise en ligne.",
+    "bookings": {
+      "intro": "Les réservations de vos logements : enregistrez les arrivées et départs ici. Les paiements et l'argent sont gérés par VIIPA.",
+      "empty": "Pas encore de réservations.",
+      "guests": "{count, plural, one {# voyageur} other {# voyageurs}}",
+      "request": {
+        "SHORTEN": "Demande à partir plus tôt",
+        "CANCEL": "Demande à annuler",
+        "EXTEND": "Demande à rester plus longtemps",
+        "TRANSFER": "Demande à changer"
+      },
+      "early": "Départ anticipé {when} : {reason}",
+      "appeal": "Contestation du client : {text}",
+      "undo": "Annuler le départ anticipé",
+      "undoQuestion": "Réenregistrer ce client pour le reste de son séjour ?"
+    }
   },
   "Admin": {
     "title": "Administration",
@@ -1641,7 +1660,9 @@
     "checkOutAt": "Départ : {when}",
     "ebm": "Facture EBM",
     "ebmCompany": "Entreprise · TIN {tin} · code d'achat {code}",
-    "ebmPhone": "Au numéro de téléphone du payeur"
+    "ebmPhone": "Au numéro de téléphone du payeur",
+    "undoEarly": "Annuler le départ anticipé",
+    "undoEarlyQuestion": "Réenregistrer ce client pour le reste de son séjour ?"
   },
   "Questions": {
     "title": "Questions et réponses",
@@ -1780,7 +1801,10 @@
       "orderReminder": "Rappel : la commande {reference} chez {title} vous attend ({total, number} RWF).",
       "cleaningRequested": "{name} demande un nettoyage : {where}.",
       "cleaningDone": "Votre chambre a été nettoyée ({reference}).",
-      "ebmReady": "Votre reçu EBM pour {reference} est prêt : téléchargez-le depuis votre réservation."
+      "ebmReady": "Votre reçu EBM pour {reference} est prêt : téléchargez-le depuis votre réservation.",
+      "checkedOutEarly": "Votre départ de {title} a été avancé ({reference}) : {reason}. Voir votre réservation pour contester.",
+      "checkInRestored": "Votre départ anticipé de {title} a été annulé : vous êtes de nouveau enregistré ({reference}).",
+      "earlyCheckoutAppeal": "Le client conteste son départ anticipé à {title} ({reference})."
     },
     "filterLabel": "Afficher les notifications",
     "filter": {
@@ -2702,6 +2726,20 @@
         "waiting": "Vous l'avez déjà demandé : la réception va passer.",
         "invalid": "Gardez la note courte."
       }
+    },
+    "stayLonger": "Rester plus longtemps",
+    "stayLongerHint": "Réservez les jours libres après votre séjour : les jours pris sont marqués.",
+    "bookAgain": "Réserver à nouveau",
+    "early": {
+      "title": "Votre départ a été avancé",
+      "when": "Départ : {when}",
+      "reason": "Motif : {reason}",
+      "left": "Temps restant : {days, plural, =0 {} one {# jour} other {# jours}} {hours, plural, =0 {} one {# heure} other {# heures}}",
+      "appeal": "Contester",
+      "appealPlaceholder": "Dites-nous pourquoi vous n'êtes pas d'accord",
+      "send": "Envoyer la contestation",
+      "failed": "Échec — réessayez.",
+      "appealSent": "Contestation envoyée {when} : VIIPA vous répondra."
     }
   },
   "Portal": {

@@ -24,6 +24,7 @@ import { requireUser } from "@/lib/session";
 import { ClientInvoice } from "@/features/invoices/components/ClientInvoice";
 import { currentInvoiceFor, invoiceView } from "@/features/invoices/service";
 import { ebmOf } from "@/features/invoices/ebm";
+import { EarlyCheckoutAppeal } from "@/features/stay/components/EarlyCheckoutAppeal";
 import { ReviewForm } from "@/features/reviews/components/ReviewForm";
 import { canReview } from "@/features/reviews/service";
 import { getSettings, policyText } from "@/features/settings/service";
@@ -72,6 +73,7 @@ export default async function BookingPage({ params }: Props) {
   const invoice = invoiceRow ? await invoiceView(invoiceRow.id) : null;
   // The EBM receipt, once the place (or VIIPA) uploaded it.
   const ebm = await ebmOf(booking.reference);
+  const tEarly = await getTranslations("MyStay.early");
   const { listing, policySnapshot: policy } = booking;
   const holding = isHoldActive(booking, now);
   const [settings, claim] = await Promise.all([
@@ -188,6 +190,19 @@ export default async function BookingPage({ params }: Props) {
           <Row label={tListings("guestsLabel")}>{tListings("statGuests", { count: booking.guests })}</Row>
         </dl>
       </section>
+
+      {/* Checked out early by the place or VIIPA: when, why, the time that was left, and an appeal. */}
+      {booking.checkedOutEarlyAt && (
+        <section className="mt-4 flex flex-col gap-2 rounded-3xl bg-red-50 p-5 ring-1 ring-red-200">
+          <h2 className="text-[16px] font-bold text-red-900">{tEarly("title")}</h2>
+          <p className="text-[14px] text-red-900">{tEarly("when", { when: formatKigaliDateTime(locale, booking.checkedOutEarlyAt) })}</p>
+          {booking.earlyCheckoutReason && <p className="text-[14px] text-red-900">{tEarly("reason", { reason: booking.earlyCheckoutReason })}</p>}
+          <p className="text-[14px] font-semibold text-red-900">
+            {tEarly("left", { days: Math.max(0, Math.floor((booking.endAt.getTime() - booking.checkedOutEarlyAt.getTime()) / 86_400_000)), hours: Math.max(0, Math.floor(((booking.endAt.getTime() - booking.checkedOutEarlyAt.getTime()) % 86_400_000) / 3_600_000)) })}
+          </p>
+          {booking.earlyCheckoutAppealAt ? <p className="text-[13px] text-red-900">{tEarly("appealSent", { when: formatKigaliDateTime(locale, booking.earlyCheckoutAppealAt) })}</p> : <EarlyCheckoutAppeal reference={booking.reference} />}
+        </section>
+      )}
 
       {/* The invoice (unpaid until paid) and the EBM receipt: download it, or ask for it. */}
       {booking.total > 0 ? (
