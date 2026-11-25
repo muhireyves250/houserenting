@@ -416,6 +416,10 @@ model Booking {
   paymentMethod  String?
   /// Masked payer number ("078 ••• 4567"); the full number is not stored.
   payerPhone     String?
+  /// The guest's company, when they book for one: its TIN and the purchase code, for the EBM invoice (otherwise the
+  /// EBM goes to the payer's phone number).
+  buyerTin          String?
+  purchaseCode      String?
   /// What the guest saw and agreed to: check-in/out times, house rules, cancellation terms.
   policySnapshot Json
   holdExpiresAt  DateTime?

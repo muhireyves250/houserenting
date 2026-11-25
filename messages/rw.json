@@ -551,7 +551,24 @@
     "availabilityHint": "Iminsi yafashwe iri mu mutuku. Kanda umunsi uri ubusa uwuhitemo.",
     "previousPhoto": "Ifoto ibanza",
     "nextPhoto": "Ifoto ikurikira",
-    "anyTime": "Kwinjira no gusohoka igihe icyo ari cyo cyose (amasaha 24)"
+    "anyTime": "Kwinjira no gusohoka igihe icyo ari cyo cyose (amasaha 24)",
+    "pay": {
+      "detailsTitle": "Ibyo wafashe",
+      "payTitle": "Kwishyura",
+      "stepOf": "Intambwe {step} kuri 2",
+      "backToDetails": "Subira ku byo wafashe",
+      "continue": "Komeza ujye kwishyura",
+      "method": "Uburyo bwo kwishyura",
+      "promoApplied": "{code} yakoreshejwe: −{amount}",
+      "company": "Gufata ku izina rya kompanyi (si ngombwa)",
+      "ebmPhone": "Nta kompanyi: inyemezabuguzi ya EBM yoherezwa kuri nimero yawe ya telefone.",
+      "companyHint": "Inyemezabuguzi ya EBM ya kompanyi ikoresha TIN yayo na kode yo kugura.",
+      "tin": "TIN (imibare 9)",
+      "tinInvalid": "TIN igira imibare 9.",
+      "purchaseCode": "Kode yo kugura * ni ngombwa",
+      "sellerTin": "TIN ya {name}",
+      "payButton": "Ishyura {amount}"
+    }
   },
   "Facility": {
     "KITCHEN": "Igikoni",
@@ -1607,7 +1624,10 @@
     },
     "monthsSplit": "Byishyuwe ubu: amezi {paid} kuri {all} (Igenamiterere: amezi yishyurwa mbere). Bisigaye kwishyurwa: amezi {left} ({amount}) — VIIPA ntirabyakira.",
     "roomBooked": "Icyumba: {room}",
-    "checkOutAt": "Gusohoka: {when}"
+    "checkOutAt": "Gusohoka: {when}",
+    "ebm": "Inyemezabuguzi ya EBM",
+    "ebmCompany": "Kompanyi · TIN {tin} · kode yo kugura {code}",
+    "ebmPhone": "Kuri nimero ya telefone y'uwishyuye"
   },
   "Questions": {
     "title": "Ibibazo n'ibisubizo",

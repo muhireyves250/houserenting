@@ -551,7 +551,24 @@
     "availabilityHint": "Les jours réservés sont en rouge. Touchez un jour libre pour le choisir.",
     "previousPhoto": "Photo précédente",
     "nextPhoto": "Photo suivante",
-    "anyTime": "Arrivée et départ à toute heure (ouvert 24 h/24)"
+    "anyTime": "Arrivée et départ à toute heure (ouvert 24 h/24)",
+    "pay": {
+      "detailsTitle": "Votre réservation",
+      "payTitle": "Paiement",
+      "stepOf": "Étape {step} sur 2",
+      "backToDetails": "Retour à votre réservation",
+      "continue": "Continuer vers le paiement",
+      "method": "Moyen de paiement",
+      "promoApplied": "{code} appliqué : −{amount}",
+      "company": "Réservation pour une entreprise (facultatif)",
+      "ebmPhone": "Sans entreprise : votre reçu EBM est envoyé à votre numéro de téléphone.",
+      "companyHint": "La facture EBM de votre entreprise utilise son TIN et son code d'achat.",
+      "tin": "TIN (9 chiffres)",
+      "tinInvalid": "Un TIN a 9 chiffres.",
+      "purchaseCode": "Code d'achat * obligatoire",
+      "sellerTin": "TIN de {name}",
+      "payButton": "Payer {amount}"
+    }
   },
   "Facility": {
     "KITCHEN": "Cuisine",
@@ -1607,7 +1624,10 @@
     },
     "monthsSplit": "Payé maintenant : {paid} mois sur {all} (Réglages : mois payés d'avance). Reste à payer : {left} mois ({amount}) — VIIPA ne les encaisse pas encore.",
     "roomBooked": "Chambre : {room}",
-    "checkOutAt": "Départ : {when}"
+    "checkOutAt": "Départ : {when}",
+    "ebm": "Facture EBM",
+    "ebmCompany": "Entreprise · TIN {tin} · code d'achat {code}",
+    "ebmPhone": "Au numéro de téléphone du payeur"
   },
   "Questions": {
     "title": "Questions et réponses",

@@ -37,6 +37,8 @@ export type BookingModel = "WHOLE_PROPERTY" | "ROOM_BY_ROOM" | "BOTH";
 /** "whole" = the whole place; a room id; null = a room still has to be chosen. */
 export type StayChoice = "whole" | string | null;
 /** Long stays (month/year): upfront months, deposit and identity rules set by staff. Null for lodges. */
+/** Who sells the stay, as printed on the EBM invoice (empty until set in Settings → Receipts). */
+export type Seller = { name: string | null; tin: string | null } | null;
 export type LongStayConfig = { upfrontMonths: number | null; depositPercent: number | null; identity?: "NONE" | "ID" | "ID_NATIONALITY" } | null;
 type Plan = { start: string; quantity: number; startTime: string };
 
@@ -63,6 +65,8 @@ type Stay = {
   guestFeeBps: number | null;
   /** Published cancellation terms in the reader's language. */
   cancellationPolicy: string | null;
+  /** Who sells the stay (on the EBM invoice): VIIPA's business name and TIN. */
+  seller: Seller;
   longStay: LongStayConfig;
   /** How the client books: by the hour, day, night, week, month or year. */
   unit: BookingUnit;
@@ -98,6 +102,7 @@ export function StayProvider({
   bookingModel = "WHOLE_PROPERTY",
   guestFeeBps = null,
   cancellationPolicy = null,
+  seller = null,
   longStay = null,
   defaultUnit = "NIGHT",
   window = {},
@@ -118,6 +123,7 @@ export function StayProvider({
   bookingModel?: BookingModel;
   guestFeeBps?: number | null;
   cancellationPolicy?: string | null;
+  seller?: Seller;
   longStay?: LongStayConfig;
   defaultUnit?: BookingUnit;
   window?: Window;
@@ -154,6 +160,7 @@ export function StayProvider({
         numberBookings,
         guestFeeBps,
         cancellationPolicy,
+        seller,
         longStay,
         unit,
         setUnit,
@@ -486,7 +493,7 @@ function ReserveButton({
 }) {
   const t = useTranslations("Listings");
   const pathname = usePathname();
-  const { guests, listingId, holdMinutes, choice, guestFeeBps, cancellationPolicy, roomNumber } = useStay();
+  const { guests, listingId, holdMinutes, choice, guestFeeBps, cancellationPolicy, seller, roomNumber } = useStay();
   const quote = useQuote(rates, discountPercent);
   const [open, setOpen] = useState(false);
 
@@ -527,6 +534,7 @@ function ReserveButton({
           room={quote.room ? { id: quote.room.id, name: quote.room.name, number: roomNumber } : null}
           guestFeeBps={guestFeeBps}
           cancellationPolicy={cancellationPolicy}
+          seller={seller}
           place={place}
           plan={quote.plan}
           guests={guests}

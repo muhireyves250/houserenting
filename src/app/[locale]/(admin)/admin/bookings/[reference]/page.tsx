@@ -566,6 +566,11 @@ export default async function AdminBookingPage({ params }: Props) {
                       },
                     ]
                   : []),
+                // The EBM invoice: to the guest's company (TIN and purchase code), or to the payer's phone.
+                {
+                  label: t("ebm"),
+                  value: b.buyerTin ? t("ebmCompany", { tin: b.buyerTin, code: b.purchaseCode ?? "—" }) : t("ebmPhone"),
+                },
               ]}
             />
           </Panel>

@@ -91,27 +91,28 @@ describe("Confirm and pay", () => {
     setup();
     await pickDates();
     await userEvent.click(screen.getByRole("button", { name: "Reserve" }));
-    const dialog = screen.getByRole("dialog", { name: "Confirm and pay" });
+    const dialog = screen.getByRole("dialog", { name: "Your reservation" });
 
     // Summary: the place, dates, guests, nights × price and total (and the saving from the discount).
     expect(dialog).toHaveTextContent("Sunny studio");
     expect(dialog).toHaveTextContent("RWF 22,500 × 2 nights");
     expect(dialog).toHaveTextContent("You save RWF 45,000 on this stay");
 
-    // Step 1: MTN chosen by default; an Airtel number is refused, an MTN one accepted.
+    // Screen 1: the reservation (cancellation terms included); then on to payment.
+    expect(dialog).toHaveTextContent("Free to cancel while the booking is unpaid.");
+    await userEvent.click(within(dialog).getByRole("button", { name: "Continue to payment" }));
+    expect(dialog).toHaveTextContent("Step 2 of 2");
+
+    // Screen 2: MTN chosen by default; an Airtel number is refused, an MTN one accepted; no company (EBM by phone).
+    expect(dialog).toHaveTextContent("your EBM receipt is sent to your phone number");
     const number = within(dialog).getByLabelText("Mobile money number");
     await userEvent.type(number, "0731234567");
-    await userEvent.click(within(dialog).getByRole("button", { name: "Next" }));
+    await userEvent.click(within(dialog).getByRole("button", { name: /^Pay/ }));
     expect(within(dialog).getByRole("alert")).toHaveTextContent("MTN Mobile Money numbers start with 078 or 079.");
     await userEvent.clear(number);
     await userEvent.type(number, "078 812 3456");
-    await userEvent.click(within(dialog).getByRole("button", { name: "Next" }));
-
-    // Step 2: review, with the chosen method summarised; booking holds the dates and nothing is charged yet.
-    expect(dialog).toHaveTextContent("MTN Mobile Money · 078 ••• 3456");
-    expect(dialog).toHaveTextContent("Free to cancel while the booking is unpaid.");
-    expect(dialog).toHaveTextContent("We hold your dates for 30 minutes. Mobile money payment isn't connected yet, so you won't be charged.");
-    await userEvent.click(within(dialog).getByRole("button", { name: "Book and hold these dates" }));
+    expect(dialog).toHaveTextContent("We hold your dates for 30 minutes.");
+    await userEvent.click(within(dialog).getByRole("button", { name: /^Pay/ }));
     expect(bookRentalAction).toHaveBeenCalledWith({
       listingId: "abc",
       unit: "NIGHT",
@@ -124,6 +125,7 @@ describe("Confirm and pay", () => {
       promoCode: null,
       payment: { method: "mtn", phone: "078 812 3456" },
       identity: null,
+      company: null,
     });
     expect(push).toHaveBeenCalledWith("/bookings/SR-7K2M9Q");
   });
@@ -134,9 +136,9 @@ describe("Confirm and pay", () => {
     await pickDates();
     await userEvent.click(screen.getByRole("button", { name: "Reserve" }));
     const dialog = screen.getByRole("dialog");
+    await userEvent.click(within(dialog).getByRole("button", { name: "Continue to payment" }));
     await userEvent.type(within(dialog).getByLabelText("Mobile money number"), "0788123456");
-    await userEvent.click(within(dialog).getByRole("button", { name: "Next" }));
-    await userEvent.click(within(dialog).getByRole("button", { name: "Book and hold these dates" }));
+    await userEvent.click(within(dialog).getByRole("button", { name: /^Pay/ }));
     expect(await within(dialog).findByRole("alert")).toHaveTextContent("Some of these dates aren't available any more. Choose other dates.");
   });
 
@@ -199,14 +201,14 @@ describe("Promo codes in the Reserve window", () => {
     await pickDates();
     await userEvent.click(screen.getByRole("button", { name: "Reserve" }));
     const dialog = screen.getByRole("dialog");
+    await userEvent.click(within(dialog).getByRole("button", { name: "Continue to payment" }));
     await userEvent.type(within(dialog).getByLabelText("Promo code"), "welcome");
     await userEvent.click(within(dialog).getByRole("button", { name: "Apply" }));
     expect(await within(dialog).findByText("Promo WELCOME")).toBeInTheDocument();
     // 2 nights × 22,500 = 45,000, less 4,500.
-    expect(within(dialog).getByText("Total (RWF)").nextSibling).toHaveTextContent("RWF 40,500");
+    expect(within(dialog).getByText("Total").nextSibling).toHaveTextContent("RWF 40,500");
     await userEvent.type(within(dialog).getByLabelText("Mobile money number"), "0788123456");
-    await userEvent.click(within(dialog).getByRole("button", { name: "Next" }));
-    await userEvent.click(within(dialog).getByRole("button", { name: "Book and hold these dates" }));
+    await userEvent.click(within(dialog).getByRole("button", { name: /^Pay/ }));
     expect(bookStayAction).toHaveBeenLastCalledWith(expect.objectContaining({ promoCode: "WELCOME" }));
   });
 });
@@ -233,9 +235,28 @@ describe("Booking by the hour", () => {
     await userEvent.click(screen.getByRole("button", { name: "Reserve" }));
     const dialog = screen.getByRole("dialog");
     expect(dialog).toHaveTextContent("Oct 20, 2026 · 9:00");
+    await userEvent.click(within(dialog).getByRole("button", { name: "Continue to payment" }));
     await userEvent.type(within(dialog).getByLabelText("Mobile money number"), "0788123456");
-    await userEvent.click(within(dialog).getByRole("button", { name: "Next" }));
-    await userEvent.click(within(dialog).getByRole("button", { name: "Book and hold these dates" }));
+    await userEvent.click(within(dialog).getByRole("button", { name: /^Pay/ }));
     expect(bookRentalAction).toHaveBeenLastCalledWith(expect.objectContaining({ unit: "HOUR", start: "2026-10-20", startTime: "09:00", quantity: 3 }));
+  });
+});
+
+describe("Booking for a company", () => {
+  it("asks the TIN, then the purchase code, and sends them for the EBM invoice", async () => {
+    bookStayAction.mockResolvedValueOnce({ reference: "SR-CO1234" });
+    setup();
+    await pickDates();
+    await userEvent.click(screen.getByRole("button", { name: "Reserve" }));
+    const dialog = screen.getByRole("dialog");
+    await userEvent.click(within(dialog).getByRole("button", { name: "Continue to payment" }));
+    await userEvent.type(within(dialog).getByLabelText("Mobile money number"), "0788123456");
+    await userEvent.click(within(dialog).getByRole("checkbox", { name: /Booking for a company/ }));
+    await userEvent.type(within(dialog).getByLabelText("TIN (9 digits)"), "111122233");
+    // TIN given: the purchase code is required before paying.
+    expect(within(dialog).getByRole("button", { name: /^Pay/ })).toBeDisabled();
+    await userEvent.type(within(dialog).getByLabelText("Purchase code * required"), "PC-98234");
+    await userEvent.click(within(dialog).getByRole("button", { name: /^Pay/ }));
+    expect(bookStayAction).toHaveBeenLastCalledWith(expect.objectContaining({ company: { tin: "111122233", purchaseCode: "PC-98234" } }));
   });
 });

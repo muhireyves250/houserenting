@@ -2,6 +2,7 @@ import { LogoWordmark } from "@/components/ui/Logo";
 import { MessageCircle, ArrowLeft, CalendarClock, ChevronLeft, KeyRound, Laptop, type LucideIcon, PawPrint, ShieldCheck, SquareParking, Star, WavesLadder, UtensilsCrossed } from "lucide-react";
 import type { Metadata } from "next";
 import { isOpen24h } from "@/features/hosting/open-24h";
+import { getReceiptDetails } from "@/features/receipt/service";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Avatar } from "@/components/ui/Avatar";
@@ -168,6 +169,8 @@ export default async function ListingPage({ params, searchParams }: Props) {
     ),
   ];
 
+  // VIIPA's business name and TIN (the seller on the EBM invoice), shown on the payment step.
+  const receipt = await getReceiptDetails();
   const bookingRates = rates.map(({ unit, price, minUnits, maxUnits, checkInTime, checkOutTime, dayStartTime, dayEndTime }) => ({
     unit,
     price,
@@ -190,6 +193,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
       bookingModel={listing.bookingModel}
       guestFeeBps={feesFor(settings, listing.type).guestFeeBps}
       cancellationPolicy={policyText(settings.cancellationPolicy, locale)}
+      seller={receipt.tin ? { name: receipt.businessName, tin: receipt.tin } : null}
       longStay={
 { upfrontMonths: settings.monthlyUpfrontMonths, depositPercent: settings.monthlyDepositPercent, identity: settings.monthlyIdentity }
       }

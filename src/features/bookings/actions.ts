@@ -119,6 +119,8 @@ const rentalInput = z.object({
   promoCode: z.string().max(40).nullable().optional(),
   payment: z.object({ method: z.enum(["mtn", "airtel"]), phone: z.string().max(20) }),
   identity: z.object({ idNumber: z.string().trim().max(40), nationality: z.string().trim().max(60).nullable() }).nullable().optional(),
+  /** Booking for a company (optional): its TIN (9 digits) and the purchase code, for the EBM invoice. */
+  company: z.object({ tin: z.string().trim().regex(/^\d{9}$/), purchaseCode: z.string().trim().min(3).max(40) }).nullable().optional(),
 });
 
 /** Books by the hour, day, night, week, month or year (whatever the place or room offers). */

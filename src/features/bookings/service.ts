@@ -127,6 +127,8 @@ export type RentalRequest = {
   payment: { method: MoMoProvider; phone: string };
   /** Long stays: only the details staff have said the business needs (Admin → Settings). */
   identity?: { idNumber: string; nationality: string | null } | null;
+  /** Booking for a company: its TIN and purchase code (EBM invoice); none = the EBM goes to the payer's phone. */
+  company?: { tin: string; purchaseCode: string } | null;
 };
 
 const MAX_QUANTITY: Record<BookingUnit, number> = { HOUR: 24, DAY: 365, NIGHT: 365, WEEK: 104, MONTH: 60, YEAR: 10 };
@@ -315,6 +317,8 @@ export async function createRentalBooking(request: RentalRequest, now: Date = ne
       promoCodeId: promo?.id ?? null,
       paymentMethod: request.payment.method,
       payerPhone: maskPhone(phone.number),
+      buyerTin: request.company?.tin ?? null,
+      purchaseCode: request.company?.purchaseCode ?? null,
       policySnapshot,
       holdExpiresAt: new Date(now.getTime() + holdMinutesFrom(settings) * 60_000),
     },

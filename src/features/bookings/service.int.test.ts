@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { db } from "@/lib/db";
 import { resetDb } from "@/test/db";
-import { autoCheckOut, bookedRanges, cancelPendingBooking, createBooking, getGuestBooking, guestBookings, staffMoveBooking } from "./service";
+import { autoCheckOut, bookedRanges, createRentalBooking, cancelPendingBooking, createBooking, getGuestBooking, guestBookings, staffMoveBooking } from "./service";
 
 const NOW = new Date("2026-10-14T08:00:00Z");
 
@@ -184,5 +184,17 @@ describe("checking out when the stay is over", () => {
     expect(await db.bookingEvent.findFirst({ where: { booking: { reference: "SR-OUT001" } }, select: { actorId: true, toStatus: true } })).toEqual({ actorId: null, toStatus: "COMPLETED" });
     // Running again does nothing more.
     expect(await autoCheckOut(NOW)).toBe(0);
+  });
+});
+
+describe("booking for a company", () => {
+  it("keeps the company's TIN and purchase code for the EBM invoice (none: EBM to the phone)", async () => {
+    const base = { guestId: "u1", listingId: "a", unit: "NIGHT" as const, start: "2026-11-01", quantity: 2, guests: 1, payment: { method: "mtn" as const, phone: "0788123456" } };
+    const company = await createRentalBooking({ ...base, company: { tin: "111122233", purchaseCode: "PC-98234" } }, NOW);
+    if (!company.ok) throw new Error("booking failed");
+    expect(await db.booking.findUniqueOrThrow({ where: { reference: company.reference }, select: { buyerTin: true, purchaseCode: true } })).toEqual({ buyerTin: "111122233", purchaseCode: "PC-98234" });
+    const plain = await createRentalBooking({ ...base, guestId: "u2", start: "2026-11-10" }, NOW);
+    if (!plain.ok) throw new Error("booking failed");
+    expect(await db.booking.findUniqueOrThrow({ where: { reference: plain.reference }, select: { buyerTin: true } })).toEqual({ buyerTin: null });
   });
 });
