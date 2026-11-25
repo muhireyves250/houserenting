@@ -62,7 +62,8 @@ describe("place teams", () => {
     expect(await canOn({ id: "manager" }, "a", "money")).toBe(false);
     expect(await canOn({ id: "desk" }, "a", "checkIn")).toBe(true);
     expect(await canOn({ id: "desk" }, "b", "checkIn")).toBe(false);
-    expect(await canOn({ id: "owner" }, "a", "bookings")).toBe(false);
+    // The owner runs the front desk of their own place.
+    expect(await canOn({ id: "owner" }, "a", "checkIn")).toBe(true);
     expect(await canOn({ id: "desk" }, "a", "edit")).toBe(false);
 
     const block = { roomId: null, kind: "MAINTENANCE" as const, startsAt: new Date("2026-12-01T00:00:00Z"), endsAt: null, reason: "Paint" };

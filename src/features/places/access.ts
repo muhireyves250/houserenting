@@ -9,9 +9,10 @@ export type PlaceAction = "edit" | "status" | "blocks" | "rooms" | "documents" |
 const ALLOWED: Record<PlaceRole, readonly PlaceAction[]> = {
   staff: ["edit", "status", "blocks", "rooms", "documents", "team", "money", "bookings", "checkIn", "requests", "guestId", "laundry"],
   // Owners add places (editing until sent for review), block dates, upload papers and see their earnings.
-  // Bookings, guests and the front desk are VIIPA's alone.
+  // The owner also runs the front desk of their own places (their bookings, checking guests in and out); guests' ID
+  // documents stay with VIIPA and the front desk team, never the owner.
   // Once VIIPA accepts a guest's laundry, the place's owner (or manager) collects, washes and returns it.
-  owner: ["edit", "blocks", "rooms", "documents", "money", "laundry"],
+  owner: ["edit", "blocks", "rooms", "documents", "money", "laundry", "bookings", "checkIn"],
   // The place's front desk (requirements: reception confirms the guest's arrival and keeps their ID): the property
   // manager and the receptionist see the place's bookings, check guests in and out and record their ID.
   manager: ["edit", "blocks", "rooms", "laundry", "bookings", "checkIn", "guestId"],
