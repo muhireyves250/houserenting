@@ -920,6 +920,11 @@
         "title": "Cleaning to do",
         "asked": "asked at {time}",
         "done": "Done"
+      },
+      "ebm": {
+        "title": "EBM to upload",
+        "company": "Company: TIN {tin} · purchase code {code}",
+        "phone": "No company: EBM to the guest's phone number"
       }
     },
     "photosRequired": "Photos are required: add at least one (rooms, bathroom, kitchen, living room, outside).",
@@ -2531,7 +2536,9 @@
         "courier": "The delivery person confirmed handing it over",
         "desk": "The receptionist confirmed receiving it"
       }
-    }
+    },
+    "payoutTin": "Your TIN (for guests' EBM invoices, optional)",
+    "tinInvalid": "A TIN has 9 digits."
   },
   "MyStay": {
     "title": "My stay",

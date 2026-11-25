@@ -10,6 +10,8 @@ export const payoutInput = z
     accountName: z.string().trim().min(2).max(100),
     accountNumber: z.string().trim().min(5).max(40),
     bankName: z.string().trim().max(80).nullable().optional(),
+    /** The owner's TIN (9 digits), the seller on their guests' EBM invoices; optional. */
+    tin: z.string().trim().regex(/^\d{9}$/).nullable().optional().or(z.literal("").transform(() => null)),
   })
   .refine((v) => v.method !== "BANK" || Boolean(v.bankName), { path: ["bankName"], message: "bankRequired" });
 
@@ -30,7 +32,7 @@ export async function savePayoutAccount(userId: string, raw: PayoutInput): Promi
     for (const issue of parsed.error.issues) errors[issue.path.join(".") || "form"] ??= issue.message;
     return { ok: false, errors };
   }
-  const data = { ...parsed.data, bankName: parsed.data.method === "BANK" ? (parsed.data.bankName ?? null) : null, verifiedAt: null, verifiedById: null };
+  const data = { ...parsed.data, tin: parsed.data.tin ?? null, bankName: parsed.data.method === "BANK" ? (parsed.data.bankName ?? null) : null, verifiedAt: null, verifiedById: null };
   await db.$transaction(async (tx) => {
     await tx.payoutAccount.upsert({ where: { userId }, create: { userId, ...data }, update: data });
     await audit(tx, { actorId: userId, action: "payout.update", entityType: "user", entityId: userId, data: { method: data.method } });

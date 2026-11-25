@@ -80,7 +80,7 @@ export default async function PayoutPage({ searchParams }: { searchParams: Promi
             )}
           </div>
           <p className="mb-4 text-[13px] text-muted">{t("payoutIntro")}</p>
-          <PayoutForm initial={account && { method: account.method, accountName: account.accountName, accountNumber: account.accountNumber, bankName: account.bankName }} />
+          <PayoutForm initial={account && { method: account.method, accountName: account.accountName, accountNumber: account.accountNumber, bankName: account.bankName, tin: account.tin }} />
         </Panel>
         <Panel title={tDash("recentPayouts")} flush>
           {earnings.payouts.length === 0 ? (

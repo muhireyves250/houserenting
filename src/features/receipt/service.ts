@@ -40,3 +40,17 @@ export async function saveReceiptDetails(actor: { id: string; role?: string | nu
   });
   return { ok: true };
 }
+
+/**
+ * The seller on a guest's EBM invoice for a place: VIIPA when it manages the place, otherwise the owner (their TIN from
+ * their payout details). Null when that TIN isn't set yet.
+ */
+export async function sellerFor(listing: { operator: string; hostId: string }): Promise<{ name: string | null; tin: string } | null> {
+  if (listing.operator === "VIIPA") {
+    const viipa = await getReceiptDetails();
+    return viipa.tin ? { name: viipa.businessName ?? "VIIPA", tin: viipa.tin } : null;
+  }
+  const owner = await db.user.findUnique({ where: { id: listing.hostId }, select: { name: true, payoutAccount: { select: { tin: true, accountName: true } } } });
+  const tin = owner?.payoutAccount?.tin;
+  return tin ? { name: owner?.name ?? owner?.payoutAccount?.accountName ?? null, tin } : null;
+}

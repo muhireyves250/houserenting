@@ -920,6 +920,11 @@
         "title": "Ménage à faire",
         "asked": "demandé à {time}",
         "done": "Fait"
+      },
+      "ebm": {
+        "title": "EBM à téléverser",
+        "company": "Entreprise : TIN {tin} · code d'achat {code}",
+        "phone": "Sans entreprise : EBM au numéro du client"
       }
     },
     "photosRequired": "Les photos sont obligatoires : ajoutez-en au moins une (chambres, salle de bain, cuisine, salon, extérieur).",
@@ -2531,7 +2536,9 @@
         "courier": "Le livreur a confirmé l'avoir remise",
         "desk": "La réception a confirmé l'avoir reçue"
       }
-    }
+    },
+    "payoutTin": "Votre TIN (pour les factures EBM des clients, facultatif)",
+    "tinInvalid": "Un TIN a 9 chiffres."
   },
   "MyStay": {
     "title": "Mon séjour",

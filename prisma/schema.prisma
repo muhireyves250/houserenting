@@ -997,6 +997,8 @@ model PayoutAccount {
   accountName   String
   accountNumber String
   bankName      String?
+  /// The owner's TIN: the seller on guests' EBM invoices for the places they run themselves.
+  tin           String?
   verifiedAt    DateTime?
   verifiedById  String?
   updatedAt     DateTime     @updatedAt

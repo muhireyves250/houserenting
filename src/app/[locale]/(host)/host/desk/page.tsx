@@ -1,4 +1,4 @@
-import { ConciergeBell, Phone, Sparkles } from "lucide-react";
+import { ConciergeBell, Phone, ReceiptText, Sparkles } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { formatKigaliTime, formatStayDates } from "@/features/bookings/format";
 import { DeskButton } from "@/features/hosting/components/DeskButton";
@@ -10,6 +10,7 @@ import { requireWorkArea } from "@/features/hosting/work";
 import { todayISO } from "@/features/search/date-range";
 import { roomLabel } from "@/features/rooms/links";
 import { db } from "@/lib/db";
+import { formatRWF } from "@/lib/format";
 
 const iso = (d: Date) => d.toISOString().slice(0, 10);
 
@@ -26,7 +27,7 @@ export default async function FrontDeskPage() {
   const listingIds = [...new Set([...work.places.map((p) => p.listingId), ...owned.map((l) => l.id)])];
   const today = todayISO();
   const tomorrow = iso(new Date(Date.parse(`${today}T00:00:00Z`) + 86_400_000));
-  const [t, tRooms, locale, rows, cleaning] = await Promise.all([
+  const [t, tRooms, locale, rows, cleaning, noEbm] = await Promise.all([
     getTranslations("Host.desk"),
     getTranslations("Rooms"),
     getLocale(),
@@ -55,6 +56,13 @@ export default async function FrontDeskPage() {
     }),
     // Rooms guests asked to have cleaned, oldest first.
     cleaningToDo(listingIds),
+    // Paid bookings still without their EBM receipt (newest first): upload it as soon as a booking is paid.
+    db.booking.findMany({
+      where: { listingId: { in: listingIds }, status: { in: ["CONFIRMED", "CHECKED_IN", "COMPLETED"] }, ebm: null, createdAt: { gte: new Date(Date.parse(`${today}T00:00:00Z`) - 90 * 86_400_000) } },
+      orderBy: { createdAt: "desc" },
+      take: 50,
+      select: { reference: true, checkIn: true, checkOut: true, total: true, buyerTin: true, purchaseCode: true, roomNumber: true, room: { select: { name: true } }, guest: { select: { name: true } }, listing: { select: { title: true } } },
+    }),
   ]);
   const stays = rows.map((b) => ({ ...b, in: iso(b.checkIn), out: iso(b.checkOut) }));
   const groups = [
@@ -72,6 +80,36 @@ export default async function FrontDeskPage() {
           </span>
         ))}
       </div>
+      {/* Paid bookings without their EBM receipt yet: upload it here (the guest downloads it from their booking). */}
+      {noEbm.length > 0 && (
+        <section className="flex flex-col gap-2">
+          <h2 className="flex items-center gap-2 text-[15px] font-bold text-ink">
+            <ReceiptText className="size-4 text-primary" aria-hidden="true" />
+            {t("ebm.title")}
+            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[12px] text-amber-900 tabular-nums">{noEbm.length}</span>
+          </h2>
+          <ul className="flex flex-col gap-2">
+            {noEbm.map((b) => (
+              <li key={b.reference} className="flex flex-col gap-2 rounded-2xl bg-surface p-3 ring-1 ring-line">
+                <span className="flex flex-wrap items-baseline gap-x-2 text-[13px]">
+                  <span className="font-mono font-bold text-ink">{b.reference}</span>
+                  <b className="font-semibold text-ink">{b.guest.name}</b>
+                  <span className="text-muted">
+                    {b.listing.title}
+                    {b.room && ` · ${b.room.name}`}
+                    {b.roomNumber && ` · ${roomLabel(b.roomNumber, (number) => tRooms("roomNumber", { number }))}`} · {formatStayDates(locale, iso(b.checkIn), iso(b.checkOut))}
+                  </span>
+                  <span className="ml-auto font-semibold text-ink tabular-nums">{formatRWF(b.total, locale)}</span>
+                </span>
+                {/* For a company: its TIN and purchase code go on the EBM; otherwise the guest's phone. */}
+                <span className="text-[12px] text-muted">{b.buyerTin ? t("ebm.company", { tin: b.buyerTin, code: b.purchaseCode ?? "—" }) : t("ebm.phone")}</span>
+                <EbmUpload reference={b.reference} uploadedAt={null} compact />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       {/* Cleaning guests asked for: the room, who, their note and when; Done tells the guest. */}
       {cleaning.length > 0 && (
         <section className="flex flex-col gap-2">

@@ -6,6 +6,12 @@ import { DOCUMENT_MAX_BYTES, sniffType } from "@/features/places/documents-servi
 import { db } from "@/lib/db";
 
 type Actor = { id: string; role?: string | null; staffAreas?: readonly string[] | null };
+
+/** VIIPA staff, the place's owner, its managers and receptionists. */
+async function runsPlace(actor: Actor, listingId: string) {
+  if (await canOn(actor, listingId, "bookings")) return true;
+  return Boolean(await db.listing.findFirst({ where: { id: listingId, hostId: actor.id }, select: { id: true } }));
+}
 export type EbmUploadResult = { ok: true } | { ok: false; error: "notAllowed" | "notFound" | "tooLarge" | "badType" };
 
 /**
@@ -15,7 +21,7 @@ export type EbmUploadResult = { ok: true } | { ok: false; error: "notAllowed" | 
 export async function uploadEbm(actor: Actor, reference: string, filename: string, bytes: Uint8Array): Promise<EbmUploadResult> {
   const booking = await db.booking.findUnique({ where: { reference }, select: { id: true, listingId: true, guestId: true } });
   if (!booking) return { ok: false, error: "notFound" };
-  if (!(await canOn(actor, booking.listingId, "bookings"))) return { ok: false, error: "notAllowed" };
+  if (!(await runsPlace(actor, booking.listingId))) return { ok: false, error: "notAllowed" };
   if (bytes.byteLength > DOCUMENT_MAX_BYTES) return { ok: false, error: "tooLarge" };
   const mimeType = sniffType(bytes);
   if (!mimeType) return { ok: false, error: "badType" };
@@ -32,7 +38,7 @@ export async function uploadEbm(actor: Actor, reference: string, filename: strin
 export async function readEbm(actor: Actor, reference: string) {
   const booking = await db.booking.findUnique({ where: { reference }, select: { guestId: true, listingId: true, ebm: true } });
   if (!booking?.ebm) return null;
-  if (booking.guestId !== actor.id && !(await canOn(actor, booking.listingId, "bookings"))) return null;
+  if (booking.guestId !== actor.id && !(await runsPlace(actor, booking.listingId))) return null;
   return booking.ebm;
 }
 

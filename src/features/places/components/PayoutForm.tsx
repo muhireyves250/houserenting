@@ -12,7 +12,7 @@ import type { PayoutInput } from "../payout-service";
 export function PayoutForm({ initial }: { initial: PayoutInput | null }) {
   const t = useTranslations("Places");
   const router = useRouter();
-  const [form, setForm] = useState<PayoutInput>(initial ?? { method: "MOBILE_MONEY", accountName: "", accountNumber: "", bankName: null });
+  const [form, setForm] = useState<PayoutInput>(initial ?? { method: "MOBILE_MONEY", accountName: "", accountNumber: "", bankName: null, tin: null });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saved, setSaved] = useState(false);
   const [pending, start] = useTransition();
@@ -38,6 +38,8 @@ export function PayoutForm({ initial }: { initial: PayoutInput | null }) {
       {form.method === "BANK" && (
         <Field label={t("bankName")} value={form.bankName ?? ""} maxLength={80} onChange={(e) => set("bankName", e.target.value)} error={errors.bankName ? t("checkField") : undefined} />
       )}
+      {/* The owner's TIN: shown to guests as the seller on their EBM invoice. */}
+      <Field label={t("payoutTin")} value={form.tin ?? ""} maxLength={9} inputMode="numeric" placeholder="111122233" onChange={(e) => set("tin", e.target.value.replace(/\D/g, ""))} error={errors.tin ? t("tinInvalid") : undefined} />
       <p className="text-[13px] text-muted">{t("payoutPrivate")}</p>
       <div className="flex items-center justify-end gap-3">
         {saved && <span className="text-[13px] text-emerald-700">{t("payoutSaved")}</span>}

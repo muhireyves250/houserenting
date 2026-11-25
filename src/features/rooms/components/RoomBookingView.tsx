@@ -1,6 +1,6 @@
 import { ArrowLeft, ChevronLeft, MessageCircle, ShieldCheck } from "lucide-react";
 import { descriptionOfRoom, photosOfRoom, priceOfRoom } from "@/features/rooms/validation";
-import { getReceiptDetails } from "@/features/receipt/service";
+import { sellerFor } from "@/features/receipt/service";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { PageContainer } from "@/components/ui/PageContainer";
@@ -78,8 +78,8 @@ export async function RoomBookingView({ listingId, roomId, number: asked }: { li
         dayEndTime: rule?.dayEndTime ?? DEFAULT_RULES.dayEndTime,
       };
     });
-  // VIIPA's business name and TIN (the seller on the EBM invoice), shown on the payment step.
-  const receipt = await getReceiptDetails();
+  // The seller on the EBM invoice, shown on the payment step: VIIPA when it manages the place, else the owner.
+  const seller = await sellerFor(listing);
   const publicRoom = {
     id: room.id,
     name: room.name,
@@ -102,7 +102,7 @@ export async function RoomBookingView({ listingId, roomId, number: asked }: { li
       bookingModel="ROOM_BY_ROOM"
       guestFeeBps={feesFor(settings, listing.type).guestFeeBps}
       cancellationPolicy={policyText(settings.cancellationPolicy, locale)}
-      seller={receipt.tin ? { name: receipt.businessName, tin: receipt.tin } : null}
+      seller={seller}
       longStay={null}
       defaultUnit={rates.some((r) => r.unit === "NIGHT") ? "NIGHT" : (rates[0]?.unit ?? "NIGHT")}
       window={bookableWindow({

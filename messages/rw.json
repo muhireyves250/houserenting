@@ -920,6 +920,11 @@
         "title": "Isuku igomba gukorwa",
         "asked": "yasabwe saa {time}",
         "done": "Byakozwe"
+      },
+      "ebm": {
+        "title": "EBM zo gushyiraho",
+        "company": "Kompanyi: TIN {tin} · kode yo kugura {code}",
+        "phone": "Nta kompanyi: EBM kuri nimero y'umukiriya"
       }
     },
     "photosRequired": "Amafoto arakenewe: shyiramo nibura imwe (ibyumba, ubwiherero, igikoni, uruganiriro, hanze).",
@@ -2531,7 +2536,9 @@
         "courier": "Ugeza ibiryo yemeje ko yabitanze",
         "desk": "Ushinzwe kwakira yemeje ko yabyakiriye"
       }
-    }
+    },
+    "payoutTin": "TIN yawe (ku nyemezabuguzi za EBM z'abashyitsi, si ngombwa)",
+    "tinInvalid": "TIN igira imibare 9."
   },
   "MyStay": {
     "title": "Aho ncumbitse",
