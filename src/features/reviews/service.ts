@@ -35,7 +35,8 @@ export async function submitReview(
     !Number.isInteger(rating) ||
     rating < 1 ||
     rating > 5 ||
-    comment.length < 10 ||
+    // Stars alone are fine (no text); words, when given, at least 10 characters.
+    (comment.length > 0 && comment.length < 10) ||
     comment.length > 2000
   )
     return { ok: false, error: "invalid" };

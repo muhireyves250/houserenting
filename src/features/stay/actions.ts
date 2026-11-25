@@ -111,3 +111,23 @@ export async function markNoShowAction(reference: string): Promise<{ ok: boolean
   if (ok) revalidatePath("/[locale]/admin", "layout");
   return { ok };
 }
+
+/** The guest asks for their room to be cleaned. */
+export async function requestCleaningAction(reference: string, note: string) {
+  const user = await getCurrentUser();
+  if (!user || typeof reference !== "string" || reference.length > 20) return { ok: false as const, error: "notFound" as const };
+  const { requestCleaning } = await import("./cleaning");
+  const r = await requestCleaning(user.id, reference, typeof note === "string" ? note : "");
+  if (r.ok) revalidatePath("/[locale]", "layout");
+  return r;
+}
+
+/** Someone at the place marks a cleaning done. */
+export async function markCleaningDoneAction(id: string): Promise<boolean> {
+  const user = await getCurrentUser();
+  if (!user || typeof id !== "string" || id.length > 64) return false;
+  const { markCleaningDone } = await import("./cleaning");
+  const ok = await markCleaningDone(user, id);
+  if (ok) revalidatePath("/[locale]", "layout");
+  return ok;
+}

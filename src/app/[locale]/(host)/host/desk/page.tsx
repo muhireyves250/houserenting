@@ -1,8 +1,10 @@
-import { ConciergeBell, Phone } from "lucide-react";
+import { ConciergeBell, Phone, Sparkles } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
-import { formatStayDates } from "@/features/bookings/format";
+import { formatKigaliTime, formatStayDates } from "@/features/bookings/format";
 import { DeskButton } from "@/features/hosting/components/DeskButton";
 import { autoCheckOut } from "@/features/bookings/service";
+import { cleaningToDo } from "@/features/stay/cleaning";
+import { CleaningDoneButton } from "@/features/stay/components/CleaningDoneButton";
 import { requireWorkArea } from "@/features/hosting/work";
 import { todayISO } from "@/features/search/date-range";
 import { roomLabel } from "@/features/rooms/links";
@@ -21,7 +23,7 @@ export default async function FrontDeskPage() {
   const listingIds = work.places.map((p) => p.listingId);
   const today = todayISO();
   const tomorrow = iso(new Date(Date.parse(`${today}T00:00:00Z`) + 86_400_000));
-  const [t, tRooms, locale, rows] = await Promise.all([
+  const [t, tRooms, locale, rows, cleaning] = await Promise.all([
     getTranslations("Host.desk"),
     getTranslations("Rooms"),
     getLocale(),
@@ -47,6 +49,8 @@ export default async function FrontDeskPage() {
         listing: { select: { title: true } },
       },
     }),
+    // Rooms guests asked to have cleaned, oldest first.
+    cleaningToDo(listingIds),
   ]);
   const stays = rows.map((b) => ({ ...b, in: iso(b.checkIn), out: iso(b.checkOut) }));
   const groups = [
@@ -64,6 +68,43 @@ export default async function FrontDeskPage() {
           </span>
         ))}
       </div>
+      {/* Cleaning guests asked for: the room, who, their note and when; Done tells the guest. */}
+      {cleaning.length > 0 && (
+        <section className="flex flex-col gap-2">
+          <h2 className="flex items-center gap-2 text-[15px] font-bold text-ink">
+            <Sparkles className="size-4 text-primary" aria-hidden="true" />
+            {t("cleaning.title")}
+            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[12px] text-amber-900 tabular-nums">{cleaning.length}</span>
+          </h2>
+          <ul className="flex flex-col gap-2">
+            {cleaning.map((c) => (
+              <li key={c.id} className="flex items-center gap-3 rounded-2xl bg-amber-50 p-3 ring-1 ring-amber-200">
+                <span className="min-w-0 flex-1 text-[13px] leading-5">
+                  <b className="block text-[15px] font-bold text-amber-950">
+                    {c.booking.roomNumber ? roomLabel(c.booking.roomNumber, (number) => tRooms("roomNumber", { number })) : (c.booking.room?.name ?? c.booking.listing.title)}
+                    {c.booking.roomNumber && c.booking.room && <span className="font-medium"> · {c.booking.room.name}</span>}
+                  </b>
+                  <span className="text-amber-900">
+                    {c.booking.guest.name}
+                    {c.booking.guest.phone && (
+                      <>
+                        {" · "}
+                        <a href={`tel:${c.booking.guest.phone}`} className="underline">
+                          {c.booking.guest.phone}
+                        </a>
+                      </>
+                    )}
+                    {" · "}
+                    {t("cleaning.asked", { time: formatKigaliTime(locale, c.createdAt) })}
+                  </span>
+                  {c.note && <span className="block text-amber-950">“{c.note}”</span>}
+                </span>
+                <CleaningDoneButton id={c.id} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
       {groups.map(({ key, items }) => (
         <section key={key} className="flex flex-col gap-2">
           <h2 className="flex items-center gap-2 text-[15px] font-bold text-ink">

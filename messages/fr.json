@@ -915,7 +915,12 @@
       "checkOut": "Enregistrer le départ",
       "tomorrow": "Demain",
       "failed": "Échec — réessayez.",
-      "idNote": "Vérifiez la pièce d'identité du client avant d'enregistrer son arrivée."
+      "idNote": "Vérifiez la pièce d'identité du client avant d'enregistrer son arrivée.",
+      "cleaning": {
+        "title": "Ménage à faire",
+        "asked": "demandé à {time}",
+        "done": "Fait"
+      }
     },
     "photosRequired": "Les photos sont obligatoires : ajoutez-en au moins une (chambres, salle de bain, cuisine, salon, extérieur).",
     "photoKindLabel": "Ce que montre la photo",
@@ -1657,10 +1662,13 @@
     "moderationNote": "Notre équipe vérifie les avis avant leur publication.",
     "send": "Envoyer l'avis",
     "error": {
-      "invalid": "Choisissez une note et écrivez au moins 10 caractères.",
+      "invalid": "Choisissez une note (et, si vous écrivez, au moins 10 caractères).",
       "notAllowed": "Les avis sont réservés aux séjours terminés, un par réservation.",
       "auth": "Reconnectez-vous pour envoyer un avis."
-    }
+    },
+    "tapToRate": "Notez votre séjour :",
+    "thanks": "Merci !",
+    "rateFailed": "Échec — réessayez."
   },
   "Support": {
     "title": "Aide et assistance",
@@ -1760,7 +1768,9 @@
       "listingChangesApproved": "Vos modifications de {title} ont été approuvées et sont en ligne.",
       "listingChangesDeclined": "Vos modifications de {title} n'ont pas été approuvées : {reason}",
       "payoutRequested": "{name} demande à être payé {amount, number} RWF.",
-      "orderReminder": "Rappel : la commande {reference} chez {title} vous attend ({total, number} RWF)."
+      "orderReminder": "Rappel : la commande {reference} chez {title} vous attend ({total, number} RWF).",
+      "cleaningRequested": "{name} demande un nettoyage : {where}.",
+      "cleaningDone": "Votre chambre a été nettoyée ({reference})."
     },
     "filterLabel": "Afficher les notifications",
     "filter": {
@@ -2668,7 +2678,18 @@
     "rulesTitle": "Règlement intérieur",
     "cancellationTerms": "Conditions d'annulation",
     "checkInLabel": "Arrivée",
-    "checkOutLabel": "Départ"
+    "checkOutLabel": "Départ",
+    "cleaning": {
+      "button": "Demander le ménage",
+      "notePlaceholder": "Une précision ? (facultatif) ex. après 14 h, serviettes propres",
+      "send": "Envoyer la demande",
+      "waiting": "Ménage demandé à {time} : la réception va passer.",
+      "error": {
+        "notFound": "Le ménage se demande pendant votre séjour.",
+        "waiting": "Vous l'avez déjà demandé : la réception va passer.",
+        "invalid": "Gardez la note courte."
+      }
+    }
   },
   "Portal": {
     "title": "Réservations de vos logements",

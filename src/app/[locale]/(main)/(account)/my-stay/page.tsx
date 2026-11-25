@@ -4,14 +4,12 @@ import { PageHero } from "@/components/shell/PageHero";
 import { roomLabel } from "@/features/rooms/links";
 import {
   BedDouble,
-  CalendarCheck,
   CalendarClock,
   ChevronRight,
   CircleAlert,
   Clock,
   KeyRound,
   LogOut,
-  MapPin,
   MessageSquare,
   Navigation,
   LifeBuoy,
@@ -36,6 +34,8 @@ import { GuestIdUpload } from "@/features/stay/components/GuestIdUpload";
 import { ReportIssue } from "@/features/stay/components/ReportIssue";
 import { StayFeedback } from "@/features/stay/components/StayFeedback";
 import { LaundryCard } from "@/features/laundry/components/LaundryCard";
+import { StayActions } from "@/features/stay/components/StayActions";
+import { waitingCleaning } from "@/features/stay/cleaning";
 import { stayLaundry } from "@/features/laundry/service";
 import { getSettings } from "@/features/settings/service";
 import { StayRequests } from "@/features/stay/components/StayRequests";
@@ -107,6 +107,8 @@ export default async function MyStayPage() {
   const laundryPrice = current.room?.laundryPricePerKg ?? current.listing.laundryPricePerKg;
   const laundryOn = paid && laundryPrice !== null && current.checkIn <= today;
   const [laundry, settings] = laundryOn ? await Promise.all([stayLaundry(current.id), getSettings()]) : [[], null];
+  // A cleaning the guest asked for that isn't done yet.
+  const cleaning = await waitingCleaning(current.id);
   const [reviewable, tReviews, tRooms] = await Promise.all([canReview(user.id, current.reference), getTranslations("Reviews"), getTranslations("Rooms")]);
   const moment = stayMoment(current, today);
   const underWay = moment.kind === "during" || moment.kind === "departure" || (paid && moment.kind === "arrival");
@@ -226,70 +228,17 @@ export default async function MyStayPage() {
           )}
         </nav>
 
-        {/* The booking at a glance */}
-        <Section title={t("yourBooking")} icon={CalendarCheck}>
-          <dl className="divide-y divide-line text-[14px]">
-            <div className="flex items-start justify-between gap-4 py-2.5">
-              <dt className="text-muted">{t("checkInLabel")}</dt>
-              <dd className="text-right font-semibold text-ink">
-                {day(current.checkIn)}
-                {inTime && <span className="block text-[13px] font-normal text-muted">{t("moment.fromTime", { time: inTime })}</span>}
-              </dd>
-            </div>
-            <div className="flex items-start justify-between gap-4 py-2.5">
-              <dt className="text-muted">{t("checkOutLabel")}</dt>
-              <dd className="text-right font-semibold text-ink">
-                {day(current.checkOut)}
-                {outTime && <span className="block text-[13px] font-normal text-muted">{t("moment.byTime", { time: outTime })}</span>}
-              </dd>
-            </div>
-            <div className="flex justify-between gap-4 py-2.5">
-              <dt className="text-muted">{t("guests")}</dt>
-              <dd className="font-semibold text-ink">{current.guests}</dd>
-            </div>
-            {current.room && (
-              <div className="flex justify-between gap-4 py-2.5">
-                <dt className="text-muted">{tRooms("yourRoom")}</dt>
-                <dd className="text-right font-semibold text-ink">
-                  {current.room.name}
-                  {paid && current.roomNumber && <span className="ml-2 rounded-full bg-primary px-2.5 py-0.5 text-[12px] font-bold text-white">{roomLabel(current.roomNumber, (number) => tRooms("roomNumber", { number }))}</span>}
-                </dd>
-              </div>
-            )}
-            <div className="flex justify-between gap-4 py-2.5">
-              <dt className="text-muted">{t("reference")}</dt>
-              <dd className="font-mono font-semibold text-ink">{current.reference}</dd>
-            </div>
-            <div className="flex items-center justify-between gap-4 py-2.5">
-              <dt className="text-muted">{t("total")}</dt>
-              <dd className="flex items-center gap-2 font-semibold text-ink tabular-nums">
-                {formatRWF(current.total, locale)}
-                <span className={cn("rounded-full px-2 py-0.5 text-[11px] font-bold", paid ? "bg-emerald-50 text-emerald-800" : "bg-amber-50 text-amber-800")}>{paid ? t("paid") : t("unpaid")}</span>
-              </dd>
-            </div>
-            <div className="flex items-start justify-between gap-4 py-2.5">
-              <dt className="text-muted">{t("address")}</dt>
-              <dd className="text-right text-ink">
-                <a href={directionsUrl(listing.lat, listing.lng)} target="_blank" rel="noopener" className="inline-flex items-start gap-1 hover:text-primary">
-                  <MapPin className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
-                  {listing.addressLine}, {listing.district}
-                </a>
-              </dd>
-            </div>
-          </dl>
-          {current.refundStatus !== "NONE" && (
-            <p className="mt-3 rounded-xl bg-primary-soft px-4 py-3 text-[14px] text-ink">{t(`refund.${current.refundStatus}`, { amount: formatRWF(current.refundAmount ?? 0, locale) })}</p>
-          )}
-          <Link href={`/bookings/${current.reference}`} className="mt-3 inline-flex items-center gap-1 text-[14px] font-semibold text-primary hover:underline">
-            {t("bookingDetails")}
-            <ChevronRight className="size-4" aria-hidden="true" />
-          </Link>
-        </Section>
 
         {laundryOn && (
           <Section title={tLaundry("title")} icon={Shirt}>
             <LaundryCard booking={current.reference} pricePerKg={laundryPrice ?? 0} orders={laundry} instructions={settings?.paymentInstructions ?? null} />
           </Section>
+        )}
+
+        {/* The booking's details (a button), and asking for the room to be cleaned. */}
+        <StayActions reference={current.reference} cleaningAskedAt={cleaning ? formatKigaliTime(locale, cleaning.createdAt) : null} />
+        {current.refundStatus !== "NONE" && (
+          <p className="rounded-xl bg-primary-soft px-4 py-3 text-[14px] text-ink">{t(`refund.${current.refundStatus}`, { amount: formatRWF(current.refundAmount ?? 0, locale) })}</p>
         )}
 
         {listing.guestIdPolicy !== "NONE" && (

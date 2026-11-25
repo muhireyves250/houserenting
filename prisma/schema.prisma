@@ -446,6 +446,7 @@ model Booking {
   refundStatus   RefundStatus     @default(NONE)
   refundAmount   Int?
   requests       StayRequest[]
+  cleanings      CleaningRequest[]
   feedback       StayFeedback?
   guestDocument  GuestDocument?
   /// The promoter whose QR link brought this guest (set on the server from their link, never by the guest).
@@ -1017,6 +1018,23 @@ enum StayRequestStatus {
 }
 
 /// A guest asks to change a paid stay: stay longer, leave earlier, move to another place, or cancel.
+/// A guest staying asks for their room to be cleaned; the place's receptionist (or team) does it and marks it done.
+model CleaningRequest {
+  id        String    @id @default(cuid())
+  bookingId String
+  booking   Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  listingId String
+  note      String?
+  /// Waiting until someone at the place marks it done.
+  doneAt    DateTime?
+  doneById  String?
+  createdAt DateTime  @default(now())
+
+  @@index([listingId, doneAt])
+  @@index([bookingId])
+  @@map("cleaningRequest")
+}
+
 model StayRequest {
   id          String            @id @default(cuid())
   bookingId   String

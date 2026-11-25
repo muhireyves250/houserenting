@@ -915,7 +915,12 @@
       "checkOut": "Andika ko yagiye",
       "tomorrow": "Ejo",
       "failed": "Ntibyakunze — ongera ugerageze.",
-      "idNote": "Reba indangamuntu y'umushyitsi mbere yo kwandika ko yageze."
+      "idNote": "Reba indangamuntu y'umushyitsi mbere yo kwandika ko yageze.",
+      "cleaning": {
+        "title": "Isuku igomba gukorwa",
+        "asked": "yasabwe saa {time}",
+        "done": "Byakozwe"
+      }
     },
     "photosRequired": "Amafoto arakenewe: shyiramo nibura imwe (ibyumba, ubwiherero, igikoni, uruganiriro, hanze).",
     "photoKindLabel": "Iyi foto yerekana iki",
@@ -1657,10 +1662,13 @@
     "moderationNote": "Itsinda ryacu rigenzura ibitekerezo mbere y'uko bigaragara.",
     "send": "Ohereza igitekerezo",
     "error": {
-      "invalid": "Hitamo amanota kandi wandike nibura inyuguti 10.",
+      "invalid": "Hitamo amanota (niba wanditse, nibura inyuguti 10).",
       "notAllowed": "Igitekerezo gitangwa nyuma yo kurangiza, rimwe kuri buri gikorwa.",
       "auth": "Ongera winjire kugira ngo wohereze."
-    }
+    },
+    "tapToRate": "Tanga amanota:",
+    "thanks": "Murakoze!",
+    "rateFailed": "Ntibyoherejwe — ongera ugerageze."
   },
   "Support": {
     "title": "Ubufasha",
@@ -1760,7 +1768,9 @@
       "listingChangesApproved": "Impinduka wakoze kuri {title} zemejwe kandi ziri ku rubuga.",
       "listingChangesDeclined": "Impinduka wakoze kuri {title} ntizemejwe: {reason}",
       "payoutRequested": "{name} arasaba kwishyurwa {amount, number} RWF.",
-      "orderReminder": "Kwibutsa: komande {reference} kuri {title} iragutegereje ({total, number} RWF)."
+      "orderReminder": "Kwibutsa: komande {reference} kuri {title} iragutegereje ({total, number} RWF).",
+      "cleaningRequested": "{name} arasaba isuku: {where}.",
+      "cleaningDone": "Icyumba cyawe cyakorewe isuku ({reference})."
     },
     "filterLabel": "Erekana imenyesha",
     "filter": {
@@ -2668,7 +2678,18 @@
     "rulesTitle": "Amabwiriza y'inzu",
     "cancellationTerms": "Amabwiriza yo guhagarika",
     "checkInLabel": "Kwinjira",
-    "checkOutLabel": "Gusohoka"
+    "checkOutLabel": "Gusohoka",
+    "cleaning": {
+      "button": "Saba isuku",
+      "notePlaceholder": "Hari icyo twamenya? (si ngombwa) urugero: nyuma ya saa munani, amasume mashya",
+      "send": "Ohereza",
+      "waiting": "Isuku yasabwe saa {time}: ushinzwe kwakira araza.",
+      "error": {
+        "notFound": "Isuku isabwa uri mu gihe cyawe.",
+        "waiting": "Wamaze gusaba: ushinzwe kwakira araza.",
+        "invalid": "Andika ubutumwa bugufi."
+      }
+    }
   },
   "Portal": {
     "title": "Amafatwa y'inzu zawe",

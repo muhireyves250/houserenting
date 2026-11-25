@@ -38,6 +38,8 @@ export type NotificationKind =
   | "payoutRecorded"
   | "payoutRequested"
   | "orderReminder"
+  | "cleaningRequested"
+  | "cleaningDone"
   | "newMessage"
   | "listingStatus"
   | "contractEnding"
