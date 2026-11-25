@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Building2, ChevronRight, House, LoaderCircle, ReceiptText, Smartphone, Tag } from "lucide-react";
+import { ArrowLeft, Building2, ChevronRight, House, LoaderCircle, ReceiptText, Smartphone, Tag, X } from "lucide-react";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { useId, useRef, useState, useTransition, type ReactNode } from "react";
@@ -179,7 +179,8 @@ export function ReserveDialog({
     });
   }
 
-  const card = "rounded-2xl border border-line/80 bg-surface p-5 md:p-6";
+  // Phones: soft grey blocks on the white sheet (like Log in's fields); computers: white cards.
+  const card = "rounded-2xl bg-canvas p-4 md:border md:border-line/80 md:bg-surface md:p-6";
   const changeButton =
     "rounded-lg bg-canvas px-3.5 py-1.5 text-[13px] font-semibold text-ink transition-colors hover:bg-line/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
   const field = "flex flex-col gap-0.5 rounded-xl border border-line-strong bg-surface px-4 py-2.5 focus-within:border-ink max-md:focus-within:border-primary";
@@ -214,32 +215,45 @@ export function ReserveDialog({
   );
 
   return createPortal(
-    <div data-lenis-prevent className="fixed inset-0 z-[60] overflow-y-auto">
-      <div aria-hidden="true" onClick={onClose} className="fixed inset-0 bg-[#00142e]/40 backdrop-blur-[8px] motion-safe:animate-[fade-in_300ms_ease-out]" />
-      <div className="relative flex min-h-full items-start justify-center p-0 md:p-8">
+    // Phones: a sheet rising from the bottom, like Log in. Computers: a large window in the middle.
+    <div data-lenis-prevent className="fixed inset-0 z-[60] max-md:flex max-md:items-end md:overflow-y-auto">
+      <div aria-hidden="true" onClick={onClose} className="fixed inset-0 bg-[#00142e]/45 backdrop-blur-[6px] motion-safe:animate-[fade-in_300ms_ease-out]" />
+      <div className="relative flex w-full justify-center md:min-h-full md:items-start md:p-8">
         <div
           ref={ref}
           role="dialog"
           aria-modal="true"
           aria-labelledby={titleId}
-          className="relative w-full max-w-5xl bg-canvas px-4 py-5 shadow-[0_30px_80px_-20px_rgba(0,20,60,0.55)] motion-safe:animate-pop-in md:rounded-[2rem] md:px-10 md:py-10"
+          className={cn(
+            "relative w-full shadow-[0_30px_80px_-20px_rgba(0,20,60,0.55)]",
+            "max-md:max-h-[92dvh] max-md:overflow-y-auto max-md:overscroll-contain max-md:rounded-t-[2rem] max-md:bg-surface max-md:px-5 max-md:pt-5 max-md:pb-[calc(1.25rem+env(safe-area-inset-bottom))] max-md:motion-safe:animate-sheet-up",
+            "md:max-w-5xl md:rounded-[2rem] md:bg-canvas md:px-10 md:py-10 md:motion-safe:animate-pop-in",
+          )}
         >
-          {/* Title and where we are: 1. Reservation, 2. Payment. */}
-          <div className="mb-6 flex items-center gap-3 md:mb-8">
+          {/* Phones: a grab handle, the title centred with ✕ (and ← on the payment step), as on Log in. */}
+          <span aria-hidden="true" className="mx-auto mb-3 block h-1.5 w-10 rounded-full bg-line-strong md:hidden" />
+          <div className="relative mb-5 flex items-center gap-3 max-md:justify-center max-md:text-center md:mb-8">
             <button
               type="button"
               onClick={() => (screen === "pay" ? setScreen("details") : onClose())}
               aria-label={screen === "pay" ? tPay("backToDetails") : t("goBack")}
-              className="flex size-11 shrink-0 items-center justify-center rounded-full bg-surface text-ink shadow-sm transition-[background-color,transform] duration-300 hover:bg-line/60 active:scale-90"
+              className={cn(
+                "flex size-10 shrink-0 items-center justify-center rounded-full text-ink transition-[background-color,transform] duration-300 hover:bg-primary/10 active:scale-90 md:size-11 md:bg-surface md:shadow-sm",
+                "max-md:absolute max-md:top-0 max-md:left-0",
+                screen === "details" && "max-md:hidden",
+              )}
             >
               <ArrowLeft className="size-5" aria-hidden="true" />
             </button>
-            <div className="min-w-0">
-              <h2 id={titleId} className="text-[22px] font-bold tracking-[-0.02em] text-ink md:text-[30px]">
+            <div className="min-w-0 max-md:px-10">
+              <h2 id={titleId} className="text-[24px] leading-tight font-bold tracking-[-0.02em] text-ink md:text-[30px]">
                 {screen === "details" ? tPay("detailsTitle") : tPay("payTitle")}
               </h2>
               <p className="text-[13px] font-semibold text-muted">{tPay("stepOf", { step: screen === "details" ? 1 : 2 })}</p>
             </div>
+            <button type="button" onClick={onClose} aria-label={t("goBack")} className="flex size-10 items-center justify-center rounded-full text-ink hover:bg-primary/10 max-md:absolute max-md:top-0 max-md:right-0 md:hidden">
+              <X className="size-5" aria-hidden="true" />
+            </button>
           </div>
 
           {screen === "details" ? (
@@ -316,7 +330,7 @@ export function ReserveDialog({
                   type="button"
                   disabled={identityMissing}
                   onClick={() => setScreen("pay")}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-[16px] font-semibold text-white shadow-[0_10px_24px_-10px_rgba(0,87,184,0.8)] transition-[filter,transform] duration-300 hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
+                  className="max-md:sticky max-md:bottom-0 flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-[16px] font-semibold text-white shadow-[0_10px_24px_-10px_rgba(0,87,184,0.8)] transition-[filter,transform] duration-300 hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
                 >
                   {tPay("continue")}
                   <ChevronRight className="size-5" aria-hidden="true" />
@@ -431,7 +445,7 @@ export function ReserveDialog({
                   type="button"
                   onClick={pay}
                   disabled={booking || identityMissing || companyMissing || number.trim().length < 9}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-[16px] font-semibold text-white shadow-[0_10px_24px_-10px_rgba(0,87,184,0.8)] transition-[filter,transform] duration-300 hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
+                  className="max-md:sticky max-md:bottom-0 flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-[16px] font-semibold text-white shadow-[0_10px_24px_-10px_rgba(0,87,184,0.8)] transition-[filter,transform] duration-300 hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
                 >
                   {booking && <LoaderCircle className="size-4 animate-spin" aria-hidden="true" />}
                   {tPay("payButton", { amount: formatRWF(dueNow, locale) })}
