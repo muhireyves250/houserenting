@@ -178,10 +178,13 @@ describe("documents", () => {
     expect(await db.auditLog.count({ where: { action: "document.view" } })).toBe(1);
   });
 
-  it("a place its owner runs goes live only with its business TIN (for guests' EBM)", async () => {
+  it("a place goes live only with its business TIN (for guests' EBM)", async () => {
     const { moveListing } = await import("./status-service");
-    await db.listing.update({ where: { id: "house" }, data: { tin: null, status: "PENDING_REVIEW", operator: "OWNER" } });
-    const r = await moveListing({ id: "admin", role: "ADMIN" }, "house", "approve");
-    expect(r.ok === false && ["noTin", "noPhotos", "noAgreement", "payoutMissing"].includes(r.error)).toBe(true);
+    await place();
+    // Everything else ready (photo, agreement, checked payout); only the TIN is missing.
+    await db.listing.update({ where: { id: "house" }, data: { tin: null, status: "PENDING_REVIEW", operator: "VIIPA" } });
+    expect(await moveListing({ id: "admin", role: "ADMIN" }, "house", "approve")).toEqual({ ok: false, error: "noTin" });
+    await db.listing.update({ where: { id: "house" }, data: { tin: "123456789" } });
+    expect(await moveListing({ id: "admin", role: "ADMIN" }, "house", "approve")).toEqual({ ok: true });
   });
 });
