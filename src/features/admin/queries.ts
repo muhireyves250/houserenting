@@ -104,6 +104,7 @@ export function bookingForStaff(reference: string) {
   return db.booking.findUnique({
     where: { reference },
     include: {
+      ebm: { select: { createdAt: true } },
       listing: {
         select: {
           id: true,

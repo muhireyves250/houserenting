@@ -40,6 +40,7 @@ export type NotificationKind =
   | "orderReminder"
   | "cleaningRequested"
   | "cleaningDone"
+  | "ebmReady"
   | "newMessage"
   | "listingStatus"
   | "contractEnding"

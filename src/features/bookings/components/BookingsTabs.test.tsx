@@ -6,12 +6,16 @@ import { renderWithIntl } from "@/test/render";
 import type { BookingTileData } from "./BookingTile";
 import { BookingsTabs } from "./BookingsTabs";
 
+// Rating a past stay calls a server action: a stand-in here.
+vi.mock("@/features/reviews/actions", () => ({ submitReviewAction: vi.fn(async () => ({ ok: true })) }));
+
 vi.mock("@/i18n/navigation", () => ({
   Link: ({ href, children, ...rest }: { href: string; children: ReactNode }) => (
     <a href={href} {...rest}>
       {children}
     </a>
   ),
+  useRouter: () => ({ refresh: vi.fn(), push: vi.fn() }),
 }));
 
 const tile = (reference: string, title: string, status: BookingTileData["status"], statusLabel: string): BookingTileData => ({

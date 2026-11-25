@@ -1,3 +1,4 @@
+import { EbmUpload } from "@/features/invoices/components/EbmUpload";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { CheckInOut } from "@/features/admin/components/StaffButtons";
@@ -375,6 +376,10 @@ export default async function AdminBookingPage({ params }: Props) {
             />
           </Panel>
           <Panel title={tInvoiceStaff("title")}>
+            {/* The EBM receipt: upload (or replace) it; the guest downloads it from their booking. */}
+            <div className="mb-3 rounded-xl bg-canvas p-3">
+              <EbmUpload reference={b.reference} uploadedAt={b.ebm ? formatKigaliDateTime(locale, b.ebm.createdAt) : null} />
+            </div>
             <StaffInvoices reference={b.reference} invoices={invoiceList} />
           </Panel>
           <Panel title={t("moneySplit")}>

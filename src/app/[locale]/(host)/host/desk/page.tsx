@@ -5,6 +5,7 @@ import { DeskButton } from "@/features/hosting/components/DeskButton";
 import { autoCheckOut } from "@/features/bookings/service";
 import { cleaningToDo } from "@/features/stay/cleaning";
 import { CleaningDoneButton } from "@/features/stay/components/CleaningDoneButton";
+import { EbmUpload } from "@/features/invoices/components/EbmUpload";
 import { requireWorkArea } from "@/features/hosting/work";
 import { todayISO } from "@/features/search/date-range";
 import { roomLabel } from "@/features/rooms/links";
@@ -17,10 +18,12 @@ const iso = (d: Date) => d.toISOString().slice(0, 10);
  * who is in, who leaves today. Check guests in once they've arrived and shown their ID, and out when they leave.
  */
 export default async function FrontDeskPage() {
-  const { work } = await requireWorkArea("desk", "/host/desk");
+  const { user, work } = await requireWorkArea("desk", "/host/desk");
   // Guests whose stay ended are checked out before the desk is shown.
   await autoCheckOut();
-  const listingIds = work.places.map((p) => p.listingId);
+  // The places they work the desk at, and the ones they own.
+  const owned = await db.listing.findMany({ where: { hostId: user.id, status: { not: "ARCHIVED" } }, select: { id: true } });
+  const listingIds = [...new Set([...work.places.map((p) => p.listingId), ...owned.map((l) => l.id)])];
   const today = todayISO();
   const tomorrow = iso(new Date(Date.parse(`${today}T00:00:00Z`) + 86_400_000));
   const [t, tRooms, locale, rows, cleaning] = await Promise.all([
@@ -47,6 +50,7 @@ export default async function FrontDeskPage() {
         room: { select: { name: true } },
         guest: { select: { name: true, phone: true } },
         listing: { select: { title: true } },
+        ebm: { select: { createdAt: true } },
       },
     }),
     // Rooms guests asked to have cleaned, oldest first.
@@ -137,6 +141,10 @@ export default async function FrontDeskPage() {
                     {canIn && <DeskButton reference={b.reference} to="CHECKED_IN" label={t("checkIn")} failed={t("failed")} />}
                     {b.status === "CONFIRMED" && !canIn && <span className="text-[12px] font-semibold text-muted">{t("tomorrow")}</span>}
                     {b.status === "CHECKED_IN" && <DeskButton reference={b.reference} to="COMPLETED" label={t("checkOut")} failed={t("failed")} />}
+                    {/* The booking's EBM receipt: upload (or replace) and download. */}
+                    <div className="w-full">
+                      <EbmUpload reference={b.reference} uploadedAt={b.ebm ? formatKigaliTime(locale, b.ebm.createdAt) : null} />
+                    </div>
                   </li>
                 );
               })}

@@ -1770,7 +1770,8 @@
       "payoutRequested": "{name} demande à être payé {amount, number} RWF.",
       "orderReminder": "Rappel : la commande {reference} chez {title} vous attend ({total, number} RWF).",
       "cleaningRequested": "{name} demande un nettoyage : {where}.",
-      "cleaningDone": "Votre chambre a été nettoyée ({reference})."
+      "cleaningDone": "Votre chambre a été nettoyée ({reference}).",
+      "ebmReady": "Votre reçu EBM pour {reference} est prêt : téléchargez-le depuis votre réservation."
     },
     "filterLabel": "Afficher les notifications",
     "filter": {
@@ -3683,7 +3684,8 @@
       "companySave": "Émettre la facture société",
       "ebm": "Demander une facture EBM",
       "ebmRequested": "Facture EBM demandée",
-      "failed": "Échec — vérifiez les informations et réessayez."
+      "failed": "Échec — vérifiez les informations et réessayez.",
+      "ebmDownload": "Télécharger le reçu EBM"
     },
     "staff": {
       "title": "Factures",
@@ -3702,6 +3704,21 @@
       "correctHint": "La correction est une nouvelle version ; l'originale reste enregistrée.",
       "saveCorrection": "Enregistrer une nouvelle version",
       "failed": "Échec — vérifiez les informations."
+    },
+    "ebmUpload": {
+      "title": "Reçu EBM",
+      "uploaded": "Téléversé {when}",
+      "missing": "Pas encore téléversé",
+      "download": "Télécharger",
+      "upload": "Téléverser l'EBM",
+      "replace": "Remplacer",
+      "uploading": "Envoi…",
+      "error": {
+        "tooLarge": "Fichier trop lourd (8 Mo maximum).",
+        "badType": "Utilisez un PDF ou une photo (JPG, PNG).",
+        "notAllowed": "Vous ne pouvez pas téléverser pour cette réservation.",
+        "failed": "Échec — réessayez."
+      }
     }
   },
   "Agreements": {

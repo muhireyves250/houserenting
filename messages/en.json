@@ -1770,7 +1770,8 @@
       "payoutRequested": "{name} asks to be paid {amount, number} RWF.",
       "orderReminder": "Reminder: order {reference} at {title} is waiting for you ({total, number} RWF).",
       "cleaningRequested": "{name} asks for cleaning: {where}.",
-      "cleaningDone": "Your room has been cleaned ({reference})."
+      "cleaningDone": "Your room has been cleaned ({reference}).",
+      "ebmReady": "Your EBM receipt for {reference} is ready: download it from your booking."
     },
     "filterLabel": "Show notifications",
     "filter": {
@@ -3683,7 +3684,8 @@
       "companySave": "Issue the company invoice",
       "ebm": "Request an EBM invoice",
       "ebmRequested": "EBM invoice requested",
-      "failed": "Couldn't do that — check the details and try again."
+      "failed": "Couldn't do that — check the details and try again.",
+      "ebmDownload": "Download EBM receipt"
     },
     "staff": {
       "title": "Invoices",
@@ -3702,6 +3704,21 @@
       "correctHint": "The correction is a new version; the original stays on record.",
       "saveCorrection": "Save as a new version",
       "failed": "Couldn't save — check the details."
+    },
+    "ebmUpload": {
+      "title": "EBM receipt",
+      "uploaded": "Uploaded {when}",
+      "missing": "Not uploaded yet",
+      "download": "Download",
+      "upload": "Upload EBM",
+      "replace": "Replace",
+      "uploading": "Uploading…",
+      "error": {
+        "tooLarge": "The file is too big (8 MB at most).",
+        "badType": "Use a PDF or a photo (JPG, PNG).",
+        "notAllowed": "You can't upload for this booking.",
+        "failed": "Couldn't upload — try again."
+      }
     }
   },
   "Agreements": {

@@ -447,6 +447,7 @@ model Booking {
   refundAmount   Int?
   requests       StayRequest[]
   cleanings      CleaningRequest[]
+  ebm            EbmReceipt?
   feedback       StayFeedback?
   guestDocument  GuestDocument?
   /// The promoter whose QR link brought this guest (set on the server from their link, never by the guest).
@@ -1019,6 +1020,21 @@ enum StayRequestStatus {
 
 /// A guest asks to change a paid stay: stay longer, leave earlier, move to another place, or cancel.
 /// A guest staying asks for their room to be cleaned; the place's receptionist (or team) does it and marks it done.
+/// The EBM receipt for a booking (PDF or photo), uploaded by VIIPA or the place's team; the guest downloads it.
+model EbmReceipt {
+  id           String   @id @default(cuid())
+  bookingId    String   @unique
+  booking      Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  filename     String
+  mimeType     String
+  size         Int
+  data         Bytes
+  uploadedById String
+  createdAt    DateTime @default(now())
+
+  @@map("ebmReceipt")
+}
+
 model CleaningRequest {
   id        String    @id @default(cuid())
   bookingId String

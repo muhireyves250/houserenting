@@ -1770,7 +1770,8 @@
       "payoutRequested": "{name} arasaba kwishyurwa {amount, number} RWF.",
       "orderReminder": "Kwibutsa: komande {reference} kuri {title} iragutegereje ({total, number} RWF).",
       "cleaningRequested": "{name} arasaba isuku: {where}.",
-      "cleaningDone": "Icyumba cyawe cyakorewe isuku ({reference})."
+      "cleaningDone": "Icyumba cyawe cyakorewe isuku ({reference}).",
+      "ebmReady": "Inyemezabuguzi ya EBM ya {reference} irateguye: yikuremo ku ifatwa ryawe."
     },
     "filterLabel": "Erekana imenyesha",
     "filter": {
@@ -3683,7 +3684,8 @@
       "companySave": "Tanga fagitire y'ikigo",
       "ebm": "Saba fagitire ya EBM",
       "ebmRequested": "Fagitire ya EBM yasabwe",
-      "failed": "Ntibyakunze — reba amakuru wongere ugerageze."
+      "failed": "Ntibyakunze — reba amakuru wongere ugerageze.",
+      "ebmDownload": "Kuramo inyemezabuguzi ya EBM"
     },
     "staff": {
       "title": "Fagitire",
@@ -3702,6 +3704,21 @@
       "correctHint": "Ikosorwa ni verisiyo nshya; iya mbere iguma ibitswe.",
       "saveCorrection": "Bika nka verisiyo nshya",
       "failed": "Ntibyakunze — reba amakuru."
+    },
+    "ebmUpload": {
+      "title": "Inyemezabuguzi ya EBM",
+      "uploaded": "Yashyizweho {when}",
+      "missing": "Ntirashyirwaho",
+      "download": "Kuramo",
+      "upload": "Shyiraho EBM",
+      "replace": "Simbuza",
+      "uploading": "Birimo koherezwa…",
+      "error": {
+        "tooLarge": "Dosiye ni nini cyane (8 MB ntarengwa).",
+        "badType": "Koresha PDF cyangwa ifoto (JPG, PNG).",
+        "notAllowed": "Ntushobora gushyiraho kuri iri fatwa.",
+        "failed": "Ntibyakunze — ongera ugerageze."
+      }
     }
   },
   "Agreements": {

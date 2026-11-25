@@ -165,8 +165,11 @@ export async function requestEbm(actor: Actor, reference: string): Promise<boole
   if (!issued.ok) return false;
   const { count } = await db.invoice.updateMany({ where: { id: issued.id, ebmRequested: false }, data: { ebmRequested: true } });
   if (count === 1) {
-    const { notifyAdmins } = await import("@/features/notifications/service");
+    const { notify, notifyAdmins } = await import("@/features/notifications/service");
     await notifyAdmins(db, "ebmRequested", { reference }, `/admin/bookings/${reference}`);
+    // The place's owner, managers and receptionists upload it from their front desk.
+    const place = await db.booking.findUnique({ where: { reference }, select: { listing: { select: { hostId: true, team: { where: { role: { in: ["MANAGER", "RECEPTIONIST"] } }, select: { userId: true } } } } } });
+    if (place) for (const userId of new Set([place.listing.hostId, ...place.listing.team.map((m) => m.userId)])) await notify(db, userId, "ebmRequested", { reference }, "/host/desk");
   }
   return true;
 }

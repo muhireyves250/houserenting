@@ -38,7 +38,8 @@ export const workRoles = cache(async (userId: string): Promise<WorkRoles> => {
   const desk = placeJobs.length > 0;
   const areas: WorkArea[] = [];
   if (owner || manager) areas.push("overview");
-  if (desk) areas.push("desk");
+  // The front desk: receptionists and managers, and owners for their own places.
+  if (desk || owned > 0) areas.push("desk");
   if (owner || manager) areas.push("places", "orders", "laundry");
   // Receptionists: the food arriving for guests (they confirm it at the desk) and the laundry.
   else if (desk) areas.push("orders", "laundry");
