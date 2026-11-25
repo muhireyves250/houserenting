@@ -225,7 +225,13 @@ describe("Booking by the hour", () => {
     await userEvent.click(screen.getByRole("radio", { name: "By the hour" }));
     // The night calendar goes away; the card asks for a date, a time and hours.
     expect(screen.queryByRole("button", { name: /October 14, 2026/ })).not.toBeInTheDocument();
-    await userEvent.type(screen.getByLabelText("Date"), "2026-10-20");
+    // The date: our calendar opens (booked and closed days can't be picked); a day a week ahead.
+    const ahead = new Date(Date.now() + 7 * 86_400_000);
+    const dayName = ahead.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "Africa/Kigali" });
+    await userEvent.click(screen.getByRole("button", { name: /^Date/ }));
+    // Move to its month if needed, then tap it.
+    for (let i = 0; i < 2 && !screen.queryByRole("button", { name: new RegExp(dayName) }); i++) await userEvent.click(screen.getAllByRole("button", { name: /next month/i })[0]!);
+    await userEvent.click(screen.getByRole("button", { name: new RegExp(dayName) }));
     // VIIPA's own dropdowns: open, then pick.
     await userEvent.click(screen.getByRole("combobox", { name: "Start time" }));
     await userEvent.click(screen.getByRole("option", { name: "09:00" }));
@@ -234,11 +240,11 @@ describe("Booking by the hour", () => {
     expect(screen.getByText("RWF 9,000 × 3 hours")).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Reserve" }));
     const dialog = screen.getByRole("dialog");
-    expect(dialog).toHaveTextContent("Oct 20, 2026 · 9:00");
+    expect(dialog).toHaveTextContent(`${ahead.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "Africa/Kigali" })} · 9:00`);
     await userEvent.click(within(dialog).getByRole("button", { name: "Continue to payment" }));
     await userEvent.type(within(dialog).getByLabelText("Mobile money number"), "0788123456");
     await userEvent.click(within(dialog).getByRole("button", { name: /^Pay/ }));
-    expect(bookRentalAction).toHaveBeenLastCalledWith(expect.objectContaining({ unit: "HOUR", start: "2026-10-20", startTime: "09:00", quantity: 3 }));
+    expect(bookRentalAction).toHaveBeenLastCalledWith(expect.objectContaining({ unit: "HOUR", start: new Date(ahead.getTime() + 2 * 3_600_000).toISOString().slice(0, 10), startTime: "09:00", quantity: 3 }));
   });
 });
 

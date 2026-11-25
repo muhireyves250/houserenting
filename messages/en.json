@@ -568,7 +568,8 @@
       "purchaseCode": "Purchase code * required",
       "sellerTin": "{name} TIN",
       "payButton": "Pay {amount}"
-    }
+    },
+    "chooseDay": "Choose a day"
   },
   "Facility": {
     "KITCHEN": "Kitchen",

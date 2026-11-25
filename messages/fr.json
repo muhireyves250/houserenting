@@ -568,7 +568,8 @@
       "purchaseCode": "Code d'achat * obligatoire",
       "sellerTin": "TIN de {name}",
       "payButton": "Payer {amount}"
-    }
+    },
+    "chooseDay": "Choisir un jour"
   },
   "Facility": {
     "KITCHEN": "Cuisine",

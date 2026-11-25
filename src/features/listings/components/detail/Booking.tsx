@@ -725,7 +725,11 @@ export function BookingCard({
 /** Start (and start time for hours) and how many, for every way of booking except nights. */
 function PlanFields({ rate }: { rate: BookingRate }) {
   const t = useTranslations("Listings");
-  const { plan, setPlan, window: bookable } = useStay();
+  const { plan, setPlan, window: bookable, booked: allBooked, choice, workingDays } = useStay();
+  // Days already booked (for this room or the whole place) and days the place is closed can't be picked.
+  const takenDays = takenFor(allBooked, choice);
+  const [picking, setPicking] = useState(false);
+  const dateFmt = new Intl.DateTimeFormat(useLocale(), { weekday: "short", month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
   const startId = useId();
   const timeId = useId();
   const countId = useId();
@@ -744,18 +748,31 @@ function PlanFields({ rate }: { rate: BookingRate }) {
 
   return (
     <>
-      <label htmlFor={startId} className="flex flex-col gap-0.5 px-3.5 py-2.5 transition-colors hover:bg-canvas">
-        <span className="text-xs font-semibold text-ink">{LONG_UNITS.includes(unit) ? t("moveIn") : t("startDate")}</span>
-        <input
-          id={startId}
-          type="date"
-          min={bookable.from && bookable.from > todayISO() ? bookable.from : todayISO()}
-          max={bookable.until}
-          value={plan.start}
-          onChange={(e) => setPlan({ ...plan, start: e.target.value })}
-          className="bg-transparent text-sm text-ink outline-none"
-        />
-      </label>
+      {/* The start: our calendar, where booked and closed days are marked and can't be picked. */}
+      <div className="relative">
+        <button id={startId} type="button" onClick={() => setPicking((v) => !v)} aria-expanded={picking} className="flex w-full flex-col gap-0.5 px-3.5 py-2.5 text-left transition-colors hover:bg-canvas">
+          <span className="text-xs font-semibold text-ink">{LONG_UNITS.includes(unit) ? t("moveIn") : t("startDate")}</span>
+          <span className={cn("text-sm", plan.start ? "text-ink" : "text-muted")}>{plan.start ? dateFmt.format(new Date(`${plan.start}T00:00:00Z`)) : t("chooseDay")}</span>
+        </button>
+        {picking && (
+          <div className="absolute inset-x-0 top-full z-30 mt-1 rounded-2xl border border-line bg-surface p-3 shadow-[0_18px_40px_-16px_rgba(16,24,40,0.45)] max-sm:fixed max-sm:inset-x-3 max-sm:top-auto max-sm:bottom-3">
+            <DatePanel
+              today={todayISO()}
+              range={plan.start ? { checkIn: plan.start } : {}}
+              flex={0}
+              onRangeChange={(r) => {
+                const day = r.checkOut && r.checkIn === plan.start ? r.checkOut : r.checkIn;
+                if (!day) return;
+                setPlan({ ...plan, start: day });
+                setPicking(false);
+              }}
+              onFlexChange={() => {}}
+              showFlex={false}
+              isBlocked={(day) => dayClosed(day, bookable, workingDays) || takenDays.some((b) => b.checkIn <= day && day < b.checkOut)}
+            />
+          </div>
+        )}
+      </div>
       {unit === "DAY" && quantity === 1 && <p className="border-t border-line-strong px-3.5 py-2 text-[12px] text-muted">{t("dayUseHint")}</p>}
       {unit === "HOUR" && (
         <label htmlFor={timeId} className="flex flex-col gap-0.5 border-t border-line-strong px-3.5 py-2.5 transition-colors hover:bg-canvas">

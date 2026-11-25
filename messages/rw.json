@@ -568,7 +568,8 @@
       "purchaseCode": "Kode yo kugura * ni ngombwa",
       "sellerTin": "TIN ya {name}",
       "payButton": "Ishyura {amount}"
-    }
+    },
+    "chooseDay": "Hitamo umunsi"
   },
   "Facility": {
     "KITCHEN": "Igikoni",
