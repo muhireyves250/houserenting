@@ -80,36 +80,6 @@ export default async function FrontDeskPage() {
           </span>
         ))}
       </div>
-      {/* Paid bookings without their EBM receipt yet: upload it here (the guest downloads it from their booking). */}
-      {noEbm.length > 0 && (
-        <section className="flex flex-col gap-2">
-          <h2 className="flex items-center gap-2 text-[15px] font-bold text-ink">
-            <ReceiptText className="size-4 text-primary" aria-hidden="true" />
-            {t("ebm.title")}
-            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[12px] text-amber-900 tabular-nums">{noEbm.length}</span>
-          </h2>
-          <ul className="flex flex-col gap-2">
-            {noEbm.map((b) => (
-              <li key={b.reference} className="flex flex-col gap-2 rounded-2xl bg-surface p-3 ring-1 ring-line">
-                <span className="flex flex-wrap items-baseline gap-x-2 text-[13px]">
-                  <span className="font-mono font-bold text-ink">{b.reference}</span>
-                  <b className="font-semibold text-ink">{b.guest.name}</b>
-                  <span className="text-muted">
-                    {b.listing.title}
-                    {b.room && ` · ${b.room.name}`}
-                    {b.roomNumber && ` · ${roomLabel(b.roomNumber, (number) => tRooms("roomNumber", { number }))}`} · {formatStayDates(locale, iso(b.checkIn), iso(b.checkOut))}
-                  </span>
-                  <span className="ml-auto font-semibold text-ink tabular-nums">{formatRWF(b.total, locale)}</span>
-                </span>
-                {/* For a company: its TIN and purchase code go on the EBM; otherwise the guest's phone. */}
-                <span className="text-[12px] text-muted">{b.buyerTin ? t("ebm.company", { tin: b.buyerTin, code: b.purchaseCode ?? "—" }) : t("ebm.phone")}</span>
-                <EbmUpload reference={b.reference} uploadedAt={null} compact />
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
       {/* Cleaning guests asked for: the room, who, their note and when; Done tells the guest. */}
       {cleaning.length > 0 && (
         <section className="flex flex-col gap-2">
@@ -194,6 +164,35 @@ export default async function FrontDeskPage() {
         <ConciergeBell className="size-4" aria-hidden="true" />
         {t("idNote")}
       </p>
+      {/* Paid bookings without their EBM receipt yet: upload it here (the guest downloads it from their booking). */}
+      {noEbm.length > 0 && (
+        <section className="flex flex-col gap-2">
+          <h2 className="flex items-center gap-2 text-[15px] font-bold text-ink">
+            <ReceiptText className="size-4 text-primary" aria-hidden="true" />
+            {t("ebm.title")}
+            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[12px] text-amber-900 tabular-nums">{noEbm.length}</span>
+          </h2>
+          <ul className="flex flex-col gap-2">
+            {noEbm.map((b) => (
+              <li key={b.reference} className="flex flex-col gap-2 rounded-2xl bg-surface p-3 ring-1 ring-line">
+                <span className="flex flex-wrap items-baseline gap-x-2 text-[13px]">
+                  <span className="font-mono font-bold text-ink">{b.reference}</span>
+                  <b className="font-semibold text-ink">{b.guest.name}</b>
+                  <span className="text-muted">
+                    {b.listing.title}
+                    {b.room && ` · ${b.room.name}`}
+                    {b.roomNumber && ` · ${roomLabel(b.roomNumber, (number) => tRooms("roomNumber", { number }))}`} · {formatStayDates(locale, iso(b.checkIn), iso(b.checkOut))}
+                  </span>
+                  <span className="ml-auto font-semibold text-ink tabular-nums">{formatRWF(b.total, locale)}</span>
+                </span>
+                {/* For a company: its TIN and purchase code go on the EBM; otherwise the guest's phone. */}
+                <span className="text-[12px] text-muted">{b.buyerTin ? t("ebm.company", { tin: b.buyerTin, code: b.purchaseCode ?? "—" }) : t("ebm.phone")}</span>
+                <EbmUpload reference={b.reference} uploadedAt={null} compact />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </div>
   );
 }
