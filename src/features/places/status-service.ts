@@ -9,7 +9,7 @@ import { canStaff } from "@/lib/roles";
 const laterOf = (a: Date | null, b: Date) => (a && a > b ? a : b);
 
 export type Actor = { id: string; role?: string | null };
-export type MoveResult = { ok: true } | { ok: false; error: "notFound" | "notAllowed" | "wrongStatus" | "reasonNeeded" | "payoutMissing" | "noPrices" | "noPhotos" | "noAgreement" };
+export type MoveResult = { ok: true } | { ok: false; error: "notFound" | "notAllowed" | "wrongStatus" | "reasonNeeded" | "payoutMissing" | "noPrices" | "noPhotos" | "noAgreement" | "noTin" };
 
 const GOES_LIVE: ListingMove[] = ["approve", "publishDirect", "unhide", "resume", "reinstate"];
 // Checked payout details are needed the first time a place is published; restoring a place that was live doesn't ask again.
@@ -24,7 +24,7 @@ export async function moveListing(actor: Actor, listingId: string, move: Listing
   return db.$transaction(async (tx) => {
     const listing = await tx.listing.findUnique({
       where: { id: listingId },
-      select: { status: true, hostId: true, title: true, operator: true, publishedAt: true, availableFrom: true, _count: { select: { rates: true, photos: true } } },
+      select: { status: true, hostId: true, title: true, operator: true, publishedAt: true, availableFrom: true, tin: true, _count: { select: { rates: true, photos: true } } },
     });
     if (!listing) return { ok: false, error: "notFound" } as const;
     const check = checkMove(move, listing.status, { isStaff: canStaff(actor, "listings"), isOwner: listing.hostId === actor.id }, why);
@@ -35,6 +35,8 @@ export async function moveListing(actor: Actor, listingId: string, move: Listing
       if (listing._count.rates === 0) return { ok: false, error: "noPrices" } as const;
       // VIIPA's commission is agreed per place: no agreement, no going live.
       if (!(await tx.commissionAgreement.findFirst({ where: { subject: "PLACE", subjectId: listingId }, select: { id: true } }))) return { ok: false, error: "noAgreement" } as const;
+      // Every place needs its business TIN (set in its details) for its guests' EBM invoices.
+      if (!listing.tin) return { ok: false, error: "noTin" } as const;
       // Owners must be payable before their place takes bookings; places VIIPA runs itself don't need this.
       if (FIRST_PUBLISH.includes(move) && listing.operator === "OWNER") {
         const payout = await tx.payoutAccount.findUnique({ where: { userId: listing.hostId }, select: { verifiedAt: true } });

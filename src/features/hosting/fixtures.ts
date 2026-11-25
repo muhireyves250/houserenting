@@ -5,6 +5,7 @@ export const validListing: ListingInput = {
   title: "Sunny studio in Kimihurura",
   description: "A bright studio close to the city centre, quiet street, fast Wi-Fi.",
   type: "APARTMENT",
+  tin: "123456789",
   addressLine: "KG 7 Ave",
   district: "Gasabo",
   city: "Kigali",

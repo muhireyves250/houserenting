@@ -21,6 +21,7 @@ async function place(status: "DRAFT" | "PUBLISHED" = "PUBLISHED") {
       id: "house",
       hostId: "host",
       title: "Lake house",
+      tin: "123456789",
       description: "Nice",
       type: "PRIVATE_HOUSE",
       status,
@@ -175,5 +176,12 @@ describe("documents", () => {
     expect(await readDocument({ id: "guest" }, up.id)).toBeNull();
     expect((await readDocument(admin, up.id))?.mimeType).toBe("application/pdf");
     expect(await db.auditLog.count({ where: { action: "document.view" } })).toBe(1);
+  });
+
+  it("a place its owner runs goes live only with its business TIN (for guests' EBM)", async () => {
+    const { moveListing } = await import("./status-service");
+    await db.listing.update({ where: { id: "house" }, data: { tin: null, status: "PENDING_REVIEW", operator: "OWNER" } });
+    const r = await moveListing({ id: "admin", role: "ADMIN" }, "house", "approve");
+    expect(r.ok === false && ["noTin", "noPhotos", "noAgreement", "payoutMissing"].includes(r.error)).toBe(true);
   });
 });

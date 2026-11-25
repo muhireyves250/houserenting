@@ -707,7 +707,8 @@
       "prices": "Ibiciro",
       "extras": "Ibyiza n'amabwiriza",
       "photos": "Amafoto",
-      "availability": "Igihe iboneka no kwakira"
+      "availability": "Igihe iboneka no kwakira",
+      "business": "Ubucuruzi (EBM)"
     },
     "fields": {
       "title": "Umutwe",
@@ -752,7 +753,8 @@
       "availableFrom": "Ifatwa guhera",
       "availableUntil": "Ifatwa kugeza",
       "workingDays": "Iminsi ishobora gufatwa",
-      "guestIdPolicy": "Indangamuntu y'umushyitsi"
+      "guestIdPolicy": "Indangamuntu y'umushyitsi",
+      "tin": "TIN y'ubucuruzi (imibare 9)"
     },
     "pricesHint": "Hitamo uko abashyitsi babika: ku isaha, ku munsi, ku ijoro, ku cyumweru, ku kwezi cyangwa ku mwaka (lodge: ijoro cyangwa umunsi).",
     "errors": {
@@ -951,7 +953,8 @@
     "extraAmenitiesHint": "urugero: Ubusitani, Siporo, Itanura",
     "addAmenity": "Ongeraho",
     "removeAmenity": "Kuraho {name}",
-    "open24h": "Bifungura amasaha 24"
+    "open24h": "Bifungura amasaha 24",
+    "tinHint": "TIN iri ku nyemezabuguzi za EBM z'abashyitsi (iya VIIPA ku nzu VIIPA icunga). Irakenewe mbere y'uko inzu ijya ku rubuga."
   },
   "Admin": {
     "title": "Ubuyobozi",
@@ -2274,7 +2277,8 @@
       "noPrices": "Banza ushyireho nibura igiciro kimwe.",
       "auth": "Ongera winjire.",
       "noPhotos": "Banza ushyiremo nibura ifoto imwe.",
-      "noAgreement": "Banza ushyireho amasezerano ya komisiyo ya VIIPA kuri iyi nzu."
+      "noAgreement": "Banza ushyireho amasezerano ya komisiyo ya VIIPA kuri iyi nzu.",
+      "noTin": "Banza ushyireho TIN y'ubucuruzi bw'iyi nzu (mu makuru yayo)."
     },
     "blocksTitle": "Iminsi ifunze n'isanwa",
     "noBlocks": "Nta minsi ifunze. Abashyitsi bashobora gufata iminsi yose ifunguye.",

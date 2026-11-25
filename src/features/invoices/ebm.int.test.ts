@@ -40,12 +40,11 @@ describe("EBM receipts", () => {
     expect(await db.notification.count({ where: { userId: "guest", kind: "ebmReady" } })).toBe(2);
   });
 
-  it("the seller is VIIPA when it runs the place, else the owner (their TIN)", async () => {
-    expect(await sellerFor({ operator: "OWNER", hostId: "host" })).toBeNull();
-    await db.payoutAccount.create({ data: { userId: "host", method: "MOBILE_MONEY", accountName: "Hana", accountNumber: "0788000000", tin: "123456789" } });
-    expect(await sellerFor({ operator: "OWNER", hostId: "host" })).toEqual({ name: "Host Hana", tin: "123456789" });
-    await db.platformConfig.upsert({ where: { id: 1 }, create: { id: 1, receiptBusinessName: "VIIPA Ltd", receiptTin: "987654321" }, update: { receiptBusinessName: "VIIPA Ltd", receiptTin: "987654321" } });
-    expect(await sellerFor({ operator: "VIIPA", hostId: "host" })).toEqual({ name: "VIIPA Ltd", tin: "987654321" });
+  it("the seller TIN is the one set in the place's details (VIIPA's name for the places it runs)", async () => {
+    expect(await sellerFor({ operator: "OWNER", hostId: "host", tin: null })).toBeNull();
+    expect(await sellerFor({ operator: "OWNER", hostId: "host", tin: "123456789" })).toEqual({ name: "Host Hana", tin: "123456789" });
+    await db.platformConfig.upsert({ where: { id: 1 }, create: { id: 1, receiptBusinessName: "VIIPA Ltd" }, update: { receiptBusinessName: "VIIPA Ltd" } });
+    expect(await sellerFor({ operator: "VIIPA", hostId: "host", tin: "987654321" })).toEqual({ name: "VIIPA Ltd", tin: "987654321" });
   });
 });
 

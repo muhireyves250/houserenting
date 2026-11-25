@@ -707,7 +707,8 @@
       "prices": "Prices",
       "extras": "Highlights and house rules",
       "photos": "Photos",
-      "availability": "Availability and check-in"
+      "availability": "Availability and check-in",
+      "business": "Business (EBM)"
     },
     "fields": {
       "title": "Title",
@@ -752,7 +753,8 @@
       "availableFrom": "Bookable from",
       "availableUntil": "Bookable until",
       "workingDays": "Days guests can book",
-      "guestIdPolicy": "Guest ID"
+      "guestIdPolicy": "Guest ID",
+      "tin": "Business TIN (9 digits)"
     },
     "pricesHint": "Choose how guests can book: by the hour, day, night, week, month or year (lodges: night or day).",
     "errors": {
@@ -951,7 +953,8 @@
     "extraAmenitiesHint": "e.g. Garden, Gym, Fireplace",
     "addAmenity": "Add",
     "removeAmenity": "Remove {name}",
-    "open24h": "Open 24 hours"
+    "open24h": "Open 24 hours",
+    "tinHint": "The TIN on your guests' EBM invoices (VIIPA's TIN for the places VIIPA runs). Needed before the place goes live."
   },
   "Admin": {
     "title": "Admin",
@@ -2274,7 +2277,8 @@
       "noPrices": "Add at least one price first.",
       "auth": "Please sign in again.",
       "noPhotos": "Add at least one photo first.",
-      "noAgreement": "Set VIIPA's commission agreement for this place first."
+      "noAgreement": "Set VIIPA's commission agreement for this place first.",
+      "noTin": "Set the business TIN for this place first (in its details)."
     },
     "blocksTitle": "Closed dates and maintenance",
     "noBlocks": "Nothing is blocked. Guests can book every open date.",

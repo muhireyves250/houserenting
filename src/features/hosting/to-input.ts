@@ -29,6 +29,7 @@ export function toListingInput(listing: HostListing): ListingInput {
     petsAllowed: listing.petsAllowed,
     facilities: listing.facilities,
     extraAmenities: listing.extraAmenities,
+    tin: listing.tin,
     characteristics: listing.characteristics,
     termsOfRent: listing.termsOfRent,
     depositMonths: listing.depositMonths,

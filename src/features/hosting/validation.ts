@@ -89,6 +89,8 @@ export const listingInput = z
     maxGuests: z.number().int().min(1).max(100),
     petsAllowed: z.boolean(),
     facilities: z.array(z.enum(FACILITIES)).max(FACILITIES.length).transform((f) => [...new Set(f)]),
+    /** The business TIN for this place's EBM invoices (9 digits); needed before an owner-run place goes live. */
+    tin: z.string().trim().regex(/^\d{9}$/).nullable().optional().or(z.literal("").transform(() => null)),
     /** Other amenities in the owner's own words ("Garden", "Gym"…). */
     extraAmenities: z
       .array(z.string().trim().min(2).max(40))

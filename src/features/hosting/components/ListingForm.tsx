@@ -49,6 +49,7 @@ export const EMPTY_LISTING: ListingInput = {
   petsAllowed: false,
   facilities: [],
   extraAmenities: [],
+  tin: null,
   characteristics: [],
   termsOfRent: [],
   depositMonths: null,
@@ -306,6 +307,20 @@ export function ListingForm({
         </div>
         {/* Other amenities, in their own words. */}
         <ExtraAmenities value={form.extraAmenities ?? []} onChange={(list) => set("extraAmenities", list)} label={t("extraAmenities")} placeholder={t("extraAmenitiesHint")} addLabel={t("addAmenity")} removeLabel={(name) => t("removeAmenity", { name })} />
+      </Card>
+
+      {/* The business TIN for this place's guests' EBM invoices (needed before an owner-run place goes live). */}
+      <Card title={t("sections.business")} id="business">
+        <Field
+          label={t("fields.tin")}
+          value={form.tin ?? ""}
+          maxLength={9}
+          inputMode="numeric"
+          placeholder="111122233"
+          onChange={(e) => set("tin", e.target.value.replace(/\D/g, "") || null)}
+          error={err("tin")}
+        />
+        <p className="mt-2 text-[12px] text-muted">{t("tinHint")}</p>
       </Card>
 
       {/* A new place with rooms: say that room categories come right after saving. */}

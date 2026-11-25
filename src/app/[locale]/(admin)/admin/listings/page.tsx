@@ -61,7 +61,7 @@ export default async function AdminListingsPage({ searchParams }: Props) {
   const keep = (extra: Record<string, string | undefined>) =>
     Object.fromEntries(Object.entries({ status: endingSoon ? "ending" : (status ?? (raw === "all" ? "all" : undefined)), type, loc: loc ?? undefined, ...extra }).filter(([, v]) => v)) as Record<string, string>;
   // Wording for what a status change may answer (shown under the Actions button).
-  const moveErrors = Object.fromEntries(["notFound", "notAllowed", "wrongStatus", "reasonNeeded", "payoutMissing", "noPrices", "noPhotos", "noAgreement"].map((k) => [k, tPlaces(`moveError.${k as "notFound"}`)]));
+  const moveErrors = Object.fromEntries(["notFound", "notAllowed", "wrongStatus", "reasonNeeded", "payoutMissing", "noPrices", "noPhotos", "noAgreement", "noTin"].map((k) => [k, tPlaces(`moveError.${k as "notFound"}`)]));
   const countOf = (s: Status) => counts.find((c) => c.status === s)?._count._all ?? 0;
   const total = counts.filter((c) => c.status !== "ARCHIVED").reduce((n, c) => n + c._count._all, 0);
   type Filter = { value: Status | "ending" | "all"; label: string; count: number };

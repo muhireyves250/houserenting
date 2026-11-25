@@ -284,6 +284,8 @@ model Listing {
   kitchens          PlaceRestaurant[]
   /// Amenities the owner or VIIPA added in their own words (beyond the standard list).
   extraAmenities    String[]            @default([])
+  /// The business TIN on this place's guests' EBM invoices (the owner's business); VIIPA's when VIIPA runs it.
+  tin               String?
   /// Changes the owner made to a live place, waiting for VIIPA's approval (the place stays live as it was meanwhile).
   pendingChanges    Json?
   pendingChangesAt  DateTime?

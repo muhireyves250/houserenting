@@ -707,7 +707,8 @@
       "prices": "Prix",
       "extras": "Points forts et règlement",
       "photos": "Photos",
-      "availability": "Disponibilité et arrivée"
+      "availability": "Disponibilité et arrivée",
+      "business": "Entreprise (EBM)"
     },
     "fields": {
       "title": "Titre",
@@ -752,7 +753,8 @@
       "availableFrom": "Réservable à partir du",
       "availableUntil": "Réservable jusqu'au",
       "workingDays": "Jours réservables",
-      "guestIdPolicy": "Pièce d'identité du voyageur"
+      "guestIdPolicy": "Pièce d'identité du voyageur",
+      "tin": "TIN de l'entreprise (9 chiffres)"
     },
     "pricesHint": "Choisissez comment réserver : à l'heure, à la journée, à la nuit, à la semaine, au mois ou à l'année (lodges : nuit ou journée).",
     "errors": {
@@ -951,7 +953,8 @@
     "extraAmenitiesHint": "ex. Jardin, Salle de sport, Cheminée",
     "addAmenity": "Ajouter",
     "removeAmenity": "Retirer {name}",
-    "open24h": "Ouvert 24 h/24"
+    "open24h": "Ouvert 24 h/24",
+    "tinHint": "Le TIN sur les factures EBM des clients (celui de VIIPA pour les logements qu'il gère). Nécessaire avant la mise en ligne."
   },
   "Admin": {
     "title": "Administration",
@@ -2274,7 +2277,8 @@
       "noPrices": "Ajoutez d'abord au moins un prix.",
       "auth": "Veuillez vous reconnecter.",
       "noPhotos": "Ajoutez d'abord au moins une photo.",
-      "noAgreement": "Réglez d'abord l'accord de commission de VIIPA pour ce logement."
+      "noAgreement": "Réglez d'abord l'accord de commission de VIIPA pour ce logement.",
+      "noTin": "Indiquez d'abord le TIN de l'entreprise pour ce logement (dans ses détails)."
     },
     "blocksTitle": "Dates fermées et maintenance",
     "noBlocks": "Rien n'est bloqué. Les voyageurs peuvent réserver toutes les dates ouvertes.",
