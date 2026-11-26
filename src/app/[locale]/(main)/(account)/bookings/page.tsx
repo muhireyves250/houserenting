@@ -11,7 +11,7 @@ import { againParam } from "@/features/bookings/again";
 import { BookingsTabs } from "@/features/bookings/components/BookingsTabs";
 import { StatusBadge } from "@/features/bookings/components/StatusBadge";
 import { directionsUrl, formatKigaliTime, formatStayDates } from "@/features/bookings/format";
-import { guestBookings, type GuestBooking } from "@/features/bookings/service";
+import { bookableAgain, guestBookings, type GuestBooking } from "@/features/bookings/service";
 import { stayPhase } from "@/features/bookings/status";
 import { todayISO } from "@/features/search/date-range";
 import { Link } from "@/i18n/navigation";
@@ -21,6 +21,8 @@ import { requireUser } from "@/lib/session";
 const card = "rounded-3xl bg-surface shadow-[0_10px_30px_-14px_rgba(16,24,40,0.3)] ring-1 ring-black/[0.04] max-md:ring-line";
 const pillLink =
   "inline-flex items-center gap-2 rounded-full border border-line bg-surface px-4 py-2 text-[13px] font-semibold text-ink transition-[background-color,transform] duration-300 hover:bg-canvas active:scale-95 max-md:border-primary max-md:text-primary";
+
+const ENDED: string[] = ["COMPLETED", "CANCELLED", "EXPIRED", "NO_SHOW"];
 
 export default async function BookingsPage() {
   const user = await requireUser("/bookings");
@@ -37,6 +39,11 @@ export default async function BookingsPage() {
   const now = new Date();
   const today = todayISO(now);
   const bookings = await guestBookings(user.id, now);
+  // Which of them can be booked again now (the others still show Book again, which then says it isn't available).
+  const again = await bookableAgain(
+    bookings.filter((b) => ENDED.includes(b.status)).map((b) => ({ reference: b.reference, listingId: b.listing.id, roomId: b.roomId, roomNumber: b.roomNumber, unit: b.unit, nights: b.nights })),
+    now,
+  );
 
   const tile = (b: GuestBooking): BookingTileData => ({
     reference: b.reference,
@@ -53,11 +60,14 @@ export default async function BookingsPage() {
     note: b.status === "PENDING_PAYMENT" && b.holdExpiresAt ? t("heldUntil", { time: formatKigaliTime(locale, b.holdExpiresAt) }) : null,
     total: formatRWF(b.total, locale),
     review: (b.status === "COMPLETED" || b.status === "CHECKED_IN") && !b.review ? tReviews("leave") : null,
-    // Done or called off: book the same again (the same room, guests and length on the soonest free dates).
-    again: ["COMPLETED", "CANCELLED", "EXPIRED", "NO_SHOW"].includes(b.status)
+    // Done or called off: book the same again (same room, guests and length on the soonest free dates), or say it can't be.
+    again: ENDED.includes(b.status)
       ? {
-          href: `${b.roomId ? `${listingPath(b.listing.id, b.listing.title)}/rooms/${b.roomId}/${encodeURIComponent(b.roomNumber ?? ONLY_ROOM)}` : listingPath(b.listing.id, b.listing.title)}?again=${againParam(b)}`,
+          href: again.has(b.reference)
+            ? `${b.roomId ? `${listingPath(b.listing.id, b.listing.title)}/rooms/${b.roomId}/${encodeURIComponent(b.roomNumber ?? ONLY_ROOM)}` : listingPath(b.listing.id, b.listing.title)}?again=${againParam(b)}`
+            : null,
           label: t("bookAgain"),
+          unavailable: t("bookAgainUnavailable"),
         }
       : null,
   });

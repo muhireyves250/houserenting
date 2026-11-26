@@ -1,8 +1,9 @@
-import { ChevronRight, House, RotateCcw } from "lucide-react";
+import { ChevronRight, House } from "lucide-react";
 import { QuickRate } from "@/features/reviews/components/QuickRate";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import type { BookingStatus } from "../status";
+import { BookAgain } from "./BookAgain";
 import { StatusBadge } from "./StatusBadge";
 
 /** Everything a booking card shows, already worded and formatted on the server. */
@@ -21,7 +22,7 @@ export type BookingTileData = {
   /** "Write a review" when the stay can be reviewed and hasn't been. */
   review?: string | null;
   /** Book again: the same place (and room), guests and length, straight on to reserve and pay. */
-  again?: { href: string; label: string } | null;
+  again?: { href: string | null; label: string; unavailable: string } | null;
 };
 
 export function BookingTile({ booking }: { booking: BookingTileData }) {
@@ -49,14 +50,7 @@ export function BookingTile({ booking }: { booking: BookingTileData }) {
       <ChevronRight className="size-4 shrink-0 self-center text-ink/40" aria-hidden="true" />
     </Link>
     {/* A stay to rate: stars right on the card (tap one; no text needed). */}
-    {booking.again && (
-      <div className="flex justify-end border-t border-line px-3 py-2">
-        <Link href={booking.again.href} className="inline-flex items-center gap-1.5 rounded-full bg-primary/[0.08] px-3.5 py-2 text-[13px] font-semibold text-primary hover:bg-primary/15">
-          <RotateCcw className="size-4" aria-hidden="true" />
-          {booking.again.label}
-        </Link>
-      </div>
-    )}
+    {booking.again && <BookAgain {...booking.again} />}
     {booking.review && (
       <div className="border-t border-line px-4 py-2">
         <QuickRate reference={booking.reference} />

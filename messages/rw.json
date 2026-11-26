@@ -677,7 +677,8 @@
     "openMyStay": "Fungura Aho ncumbitse",
     "messageShort": "Ubutumwa",
     "placeShort": "Inzu",
-    "bookAgain": "Ongera ufate"
+    "bookAgain": "Ongera ufate",
+    "bookAgainUnavailable": "Iri cumbi ntirishobora gufatwa ubu: inzu cyangwa icyumba ntibihari. Shaka ahandi ho kuba."
   },
   "Host": {
     "title": "Aho wakira abashyitsi",

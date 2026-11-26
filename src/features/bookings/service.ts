@@ -18,6 +18,7 @@ import { maybePromoterReward } from "@/features/promoters/service";
 import { feesFor, priceBreakdown } from "./money";
 import { agreementAt } from "@/features/agreements/service";
 import { bookableWindow, insideWindow, onWorkingDays } from "./availability";
+import { soonestFree } from "./again";
 import { BOOKING_UNITS, LONG_UNITS, periodFor, unitsAllowedFor, withinHours, type BookingUnit } from "./period";
 import { BLOCKING_STATUSES, canTransition } from "./status";
 
@@ -457,6 +458,37 @@ export function createMonthlyBooking(request: MonthlyRequest, now: Date = new Da
 }
 
 /** Nights taken from today on (paid stays and live holds); `roomId` null = a whole-place stay. Dates only, no guest data. */
+/**
+ * Which earlier bookings can be booked again now: the place is still published, the room is still offered (and its
+ * number still exists), the same way of booking is still priced, and there are free dates within a year.
+ */
+export async function bookableAgain(
+  bookings: { reference: string; listingId: string; roomId: string | null; roomNumber: string | null; unit: string; nights: number }[],
+  now: Date = new Date(),
+): Promise<Set<string>> {
+  const ok = new Set<string>();
+  if (bookings.length === 0) return ok;
+  const listingIds = [...new Set(bookings.map((b) => b.listingId))];
+  const roomIds = [...new Set(bookings.flatMap((b) => (b.roomId ? [b.roomId] : [])))];
+  const [listings, rooms] = await Promise.all([
+    db.listing.findMany({ where: { id: { in: listingIds }, status: "PUBLISHED" }, select: { id: true, rates: { select: { unit: true } } } }),
+    db.room.findMany({ where: { id: { in: roomIds }, status: "AVAILABLE" }, select: { id: true, numbers: true, rates: { select: { unit: true } } } }),
+  ]);
+  const booked = new Map(await Promise.all(listings.map(async (l) => [l.id, await bookedRanges(l.id, now)] as const)));
+  const today = todayISO(now);
+  for (const b of bookings) {
+    const listing = listings.find((l) => l.id === b.listingId);
+    if (!listing) continue;
+    const room = b.roomId ? rooms.find((r) => r.id === b.roomId) : null;
+    if (b.roomId && !room) continue;
+    if (room && b.roomNumber && room.numbers.length > 0 && !room.numbers.includes(b.roomNumber)) continue;
+    if (!(room ? room.rates : listing.rates).some((r) => r.unit === b.unit)) continue;
+    if (!soonestFree(booked.get(listing.id) ?? [], b.roomId, b.unit === "NIGHT" ? Math.max(1, b.nights) : 1, today).checkIn) continue;
+    ok.add(b.reference);
+  }
+  return ok;
+}
+
 export async function bookedRanges(listingId: string, now: Date = new Date()): Promise<(BookedRange & { roomId: string | null })[]> {
   const rows = await db.booking.findMany({
     where: {

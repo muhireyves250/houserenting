@@ -677,7 +677,8 @@
     "openMyStay": "Open My stay",
     "messageShort": "Message",
     "placeShort": "Place",
-    "bookAgain": "Book again"
+    "bookAgain": "Book again",
+    "bookAgainUnavailable": "This stay can't be booked right now: the place or room isn't available. Find another place to stay."
   },
   "Host": {
     "title": "Your listings",

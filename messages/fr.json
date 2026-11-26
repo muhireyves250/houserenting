@@ -677,7 +677,8 @@
     "openMyStay": "Ouvrir Mon séjour",
     "messageShort": "Message",
     "placeShort": "Logement",
-    "bookAgain": "Réserver à nouveau"
+    "bookAgain": "Réserver à nouveau",
+    "bookAgainUnavailable": "Ce séjour ne peut pas être réservé pour le moment : le logement ou la chambre n'est pas disponible. Trouvez un autre logement."
   },
   "Host": {
     "title": "Vos annonces",

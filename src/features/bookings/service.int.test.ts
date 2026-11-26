@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { db } from "@/lib/db";
 import { resetDb } from "@/test/db";
-import { appealEarlyCheckout, autoCheckOut, bookedRanges, createRentalBooking, cancelPendingBooking, createBooking, getGuestBooking, guestBookings, staffMoveBooking, undoEarlyCheckout } from "./service";
+import { appealEarlyCheckout, autoCheckOut, bookableAgain, bookedRanges, createRentalBooking, cancelPendingBooking, createBooking, getGuestBooking, guestBookings, staffMoveBooking, undoEarlyCheckout } from "./service";
 
 const NOW = new Date("2026-10-14T08:00:00Z");
 
@@ -157,6 +157,23 @@ describe("staffMoveBooking", () => {
       ["CONFIRMED", "CHECKED_IN", "host"],
       ["CHECKED_IN", "COMPLETED", "host"],
     ]);
+  });
+});
+
+describe("book again", () => {
+  it("is offered only while the same stay can still be booked", async () => {
+    const result = await createBooking(stay(), NOW);
+    const reference = result.ok ? result.reference : "";
+    await db.booking.update({ where: { reference }, data: { status: "COMPLETED" } });
+    const row = { reference, listingId: "a", roomId: null, roomNumber: null, unit: "NIGHT", nights: 2 };
+    expect((await bookableAgain([row], NOW)).has(reference)).toBe(true);
+    expect((await bookableAgain([{ ...row, unit: "YEAR" }], NOW)).has(reference)).toBe(false); // not priced that way any more
+    // Closed with no end date: no free dates.
+    await db.availabilityBlock.create({ data: { listingId: "a", kind: "MAINTENANCE", startsAt: NOW, reason: "Repairs", createdById: "u1" } });
+    expect((await bookableAgain([row], NOW)).has(reference)).toBe(false);
+    await db.availabilityBlock.deleteMany();
+    await db.listing.update({ where: { id: "a" }, data: { status: "DRAFT" } });
+    expect((await bookableAgain([row], NOW)).has(reference)).toBe(false);
   });
 });
 
