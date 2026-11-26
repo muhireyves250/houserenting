@@ -3297,7 +3297,7 @@
         "day": "Jour"
       }
     },
-    "hereTitle": "Restaurant sur place : {names}",
+    "hereTitle": "Ce logement a un restaurant",
     "placeMenuTitle": "Menu à {place}",
     "placeMenu": {
       "title": "Le menu à {place}",

@@ -311,7 +311,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
                   <UtensilsCrossed className="size-5" aria-hidden="true" />
                 </span>
                 <span className="min-w-0 flex-1 text-left text-[13px] leading-[18px]">
-                  <b className="block truncate text-[15px] font-semibold text-ink">{tFood("hereTitle", { names: food.map((r) => r.name).join(" · ") })}</b>
+                  <b className="block truncate text-[15px] font-semibold text-ink">{tFood("hereTitle")}</b>
                   <span className="text-muted">{tFood("mealsBody")}</span>
                 </span>
                 <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary px-3 py-2 text-[13px] font-semibold text-white group-hover:bg-primary-hover sm:px-4">
