@@ -1,5 +1,5 @@
 import { LogoWordmark } from "@/components/ui/Logo";
-import { MessageCircle, ArrowLeft, CalendarClock, ChevronLeft, KeyRound, Laptop, type LucideIcon, PawPrint, ShieldCheck, SquareParking, Star, WavesLadder, UtensilsCrossed } from "lucide-react";
+import { MessageCircle, ArrowLeft, CalendarClock, ChevronLeft, KeyRound, Laptop, type LucideIcon, PawPrint, ShieldCheck, SquareParking, Star, WavesLadder, UtensilsCrossed, ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
 import { isOpen24h } from "@/features/hosting/open-24h";
 import { sellerFor } from "@/features/receipt/service";
@@ -26,7 +26,7 @@ import { currentWholeBlock, getPublishedListingByParam, listingNotice, nearbyLis
 import { ListingNotice } from "@/features/listings/components/detail/ListingNotice";
 import { bookedRanges, bookedRoomNumbers } from "@/features/bookings/service";
 import { getEnv } from "@/lib/env";
-import { db } from "@/lib/db";
+import { placeRestaurants } from "@/features/food/service";
 import { feesFor } from "@/features/bookings/money";
 import { bookableWindow } from "@/features/bookings/availability";
 import QRCode from "qrcode";
@@ -89,7 +89,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
     getTranslations("Reviews"),
     listingRooms(listing.id),
     getSettings(),
-    db.restaurant.findMany({ where: { listingId: listing.id, status: "PUBLISHED" }, select: { id: true } }),
+    placeRestaurants(listing.id),
     getTranslations("Food"),
   ]);
   const tLaundry = await getTranslations("Laundry");
@@ -301,6 +301,26 @@ export default async function ListingPage({ params, searchParams }: Props) {
               )}
             </div>
 
+            {/* A restaurant cooks for this place: say so first, and open its menu. */}
+            {food.length > 0 && (
+              <Link
+                href={`/food?place=${listing.id}`}
+                className="group mb-6 flex items-center gap-3 rounded-2xl bg-primary-soft p-3 pr-4 ring-1 ring-primary/15 transition-[box-shadow,transform] duration-200 hover:ring-primary/40 active:scale-[0.99]"
+              >
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary text-white">
+                  <UtensilsCrossed className="size-5" aria-hidden="true" />
+                </span>
+                <span className="min-w-0 flex-1 text-left text-[13px] leading-[18px]">
+                  <b className="block truncate text-[15px] font-semibold text-ink">{tFood("hereTitle", { names: food.map((r) => r.name).join(" · ") })}</b>
+                  <span className="text-muted">{tFood("mealsBody")}</span>
+                </span>
+                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary px-3 py-2 text-[13px] font-semibold text-white group-hover:bg-primary-hover sm:px-4">
+                  <span className="max-sm:hidden">{tFood("seeMenu")}</span>
+                  <ArrowRight className="size-4" aria-hidden="true" />
+                </span>
+              </Link>
+            )}
+
             {/* A lodge page shows its rooms only. */}
             {!lodge && (
               <>
@@ -485,16 +505,6 @@ export default async function ListingPage({ params, searchParams }: Props) {
         )}
 
         {/* Things to know */}
-        {/* Meals to the room (the kitchen itself isn't shown to guests) */}
-        {!lodge && food.length > 0 && (
-          <Section title={tFood("mealsTitle")}>
-            <p className="-mt-3 flex max-w-2xl items-start gap-3 text-[15px] text-ink">
-              <UtensilsCrossed className="mt-0.5 size-6 shrink-0 text-primary" aria-hidden="true" />
-              {tFood("mealsBody")}
-            </p>
-          </Section>
-        )}
-
         <Section title={t("thingsToKnow")}>
           <div className="grid gap-10 md:grid-cols-2 lg:max-w-4xl">
             <div>

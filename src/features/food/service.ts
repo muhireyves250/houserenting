@@ -340,6 +340,11 @@ function kitchensForPlace(listingId: string) {
  * (no restaurant names), ready in the slowest one's time. Only assigned restaurants: a nearby one is never offered
  * instead, and with none the guest is told no restaurant serves the place.
  */
+/** The restaurants cooking for a place, for its page (names only; the menu is on /food?place=). */
+export async function placeRestaurants(listingId: string): Promise<{ id: string; name: string }[]> {
+  return (await kitchensForPlace(listingId)).map(({ id, name }) => ({ id, name }));
+}
+
 export async function kitchenForPlace(listingId: string) {
   const kitchens = await kitchensForPlace(listingId);
   if (kitchens.length === 0) return null;

@@ -2924,7 +2924,7 @@
     "publishFailed": "Ntibyakunze. Resitora ikenera nibura ibiryo kimwe mbere yo kujya ku rubuga.",
     "viewOrder": "Reba ibyo watumije ({count})",
     "atThisPlace": "Resitora ziri aha",
-    "seeMenu": "Reba urutonde rw'ibiryo",
+    "seeMenu": "Reba menu",
     "homeBanner": "Ushonje? Tumiza ibiryo",
     "homeBannerSub": "Igikoni cy'aho ucumbitse kibikuzanira mu cyumba.",
     "chefPicks": "Ibyo umutetsi agusabira",
@@ -3296,6 +3296,13 @@
         "amount": "Amafaranga",
         "day": "Umunsi"
       }
+    },
+    "hereTitle": "Resitora ihari: {names}",
+    "placeMenuTitle": "Menu ya {place}",
+    "placeMenu": {
+      "title": "Menu ya {place}",
+      "body": "Fata icumbi hano kugira ngo utumize ibi biryo bikakugeraho mu cyumba.",
+      "back": "Subira ku nzu"
     }
   },
   "Promoters": {
