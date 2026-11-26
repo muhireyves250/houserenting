@@ -2,6 +2,7 @@ import { ChevronRight, House } from "lucide-react";
 import { QuickRate } from "@/features/reviews/components/QuickRate";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
+import { cn } from "@/lib/cn";
 import type { BookingStatus } from "../status";
 import { BookAgain } from "./BookAgain";
 import { StatusBadge } from "./StatusBadge";
@@ -26,8 +27,7 @@ export type BookingTileData = {
 };
 
 export function BookingTile({ booking }: { booking: BookingTileData }) {
-  return (
-    <div className="flex flex-col rounded-3xl bg-surface shadow-[0_10px_30px_-14px_rgba(16,24,40,0.3)] ring-1 ring-black/[0.04] transition-shadow duration-300 hover:shadow-[0_16px_36px_-14px_rgba(16,24,40,0.4)] max-md:ring-line">
+  const card = (
     <Link href={`/bookings/${booking.reference}`} className="group flex gap-4 rounded-3xl p-3 transition-transform duration-300 active:scale-[0.98]">
       <span className="relative flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-primary-soft text-primary">
         {booking.photo ? (
@@ -41,16 +41,19 @@ export function BookingTile({ booking }: { booking: BookingTileData }) {
         <span className="line-clamp-2 text-[15px] leading-5 font-semibold text-ink">{booking.title}</span>
         <span className="truncate text-[13px] text-muted">{booking.place}</span>
         <span className="text-[13px] text-ink/80">{booking.dates}</span>
-        <span className="text-[13px] text-ink/80">
+        <span className={cn("text-[13px] text-ink/80", booking.again && "pr-24")}>
           {booking.meta}
           {booking.total && <b className="font-semibold text-ink"> · {booking.total}</b>}
         </span>
-        {booking.note && <span className="text-xs font-medium text-amber-800">{booking.note}</span>}
+        {booking.note && <span className={cn("text-xs font-medium text-amber-800", booking.again && "pr-24")}>{booking.note}</span>}
       </span>
-      <ChevronRight className="size-4 shrink-0 self-center text-ink/40" aria-hidden="true" />
+      <ChevronRight className={cn("size-4 shrink-0 text-ink/40", booking.again ? "mt-2 self-start" : "self-center")} aria-hidden="true" />
     </Link>
+  );
+  return (
+    <div className="flex flex-col rounded-3xl bg-surface shadow-[0_10px_30px_-14px_rgba(16,24,40,0.3)] ring-1 ring-black/[0.04] transition-shadow duration-300 hover:shadow-[0_16px_36px_-14px_rgba(16,24,40,0.4)] max-md:ring-line">
+    {booking.again ? <BookAgain {...booking.again}>{card}</BookAgain> : card}
     {/* A stay to rate: stars right on the card (tap one; no text needed). */}
-    {booking.again && <BookAgain {...booking.again} />}
     {booking.review && (
       <div className="border-t border-line px-4 py-2">
         <QuickRate reference={booking.reference} />

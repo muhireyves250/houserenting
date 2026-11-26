@@ -8,12 +8,12 @@ vi.mock("@/i18n/navigation", () => ({ Link: ({ href, children, className }: { hr
 
 describe("Book again", () => {
   it("opens the same stay when it can be booked", () => {
-    renderWithIntl(<BookAgain href="/listings/a?again=2.NIGHT.3" label="Book again" unavailable="Not available" />);
+    renderWithIntl(<BookAgain href="/listings/a?again=2.NIGHT.3" label="Book again" unavailable="Not available"><span>card</span></BookAgain>);
     expect(screen.getByRole("link", { name: "Book again" })).toHaveAttribute("href", "/listings/a?again=2.NIGHT.3");
   });
 
   it("still shows when it can't, and says so when tapped", async () => {
-    renderWithIntl(<BookAgain href={null} label="Book again" unavailable="This stay can't be booked right now" />);
+    renderWithIntl(<BookAgain href={null} label="Book again" unavailable="This stay can't be booked right now"><span>card</span></BookAgain>);
     expect(screen.queryByRole("status")).toBeNull();
     await userEvent.click(screen.getByRole("button", { name: "Book again" }));
     expect(screen.getByRole("status")).toHaveTextContent("This stay can't be booked right now");
