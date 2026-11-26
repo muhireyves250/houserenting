@@ -27,6 +27,8 @@ export type BookingTileData = {
 };
 
 export function BookingTile({ booking }: { booking: BookingTileData }) {
+  // Book again sits over the card (bottom right, under the arrow) without making it any taller: the lines beside it
+  // stay on one line.
   const card = (
     <Link href={`/bookings/${booking.reference}`} className="group flex gap-4 rounded-3xl p-3 transition-transform duration-300 active:scale-[0.98]">
       <span className="relative flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-primary-soft text-primary">
@@ -41,11 +43,11 @@ export function BookingTile({ booking }: { booking: BookingTileData }) {
         <span className="line-clamp-2 text-[15px] leading-5 font-semibold text-ink">{booking.title}</span>
         <span className="truncate text-[13px] text-muted">{booking.place}</span>
         <span className="text-[13px] text-ink/80">{booking.dates}</span>
-        <span className={cn("text-[13px] text-ink/80", booking.again && "pr-24")}>
+        <span className={cn("text-[13px] text-ink/80", booking.again && "truncate pr-24")}>
           {booking.meta}
           {booking.total && <b className="font-semibold text-ink"> · {booking.total}</b>}
         </span>
-        {booking.note && <span className={cn("text-xs font-medium text-amber-800", booking.again && "pr-24")}>{booking.note}</span>}
+        {booking.note && <span className={cn("text-xs font-medium text-amber-800", booking.again && "truncate pr-24")}>{booking.note}</span>}
       </span>
       <ChevronRight className={cn("size-4 shrink-0 text-ink/40", booking.again ? "mt-2 self-start" : "self-center")} aria-hidden="true" />
     </Link>
