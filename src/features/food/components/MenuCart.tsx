@@ -63,6 +63,8 @@ export function MenuCart({
   const [query, setQuery] = useState("");
   const [active, setActive] = useState<string | null>(null);
   const [sheet, setSheet] = useState(false);
+  // From Order again: the note to fill in, and how many of the dishes are no longer served.
+  const [again, setAgain] = useState<{ note: string; missing: number } | null>(null);
   const tabs = useRef<HTMLDivElement>(null);
 
   // Restore the cart saved in this browser (after the first paint, so server and client markup match).
@@ -72,8 +74,19 @@ export function MenuCart({
       saved = JSON.parse(localStorage.getItem(CART_KEY(restaurant.id)) ?? "{}") as Record<string, number>;
     } catch {}
     const known = Object.fromEntries(Object.entries(saved).filter(([id, q]) => menu.some((m) => m.id === id) && q > 0));
-    if (Object.keys(known).length > 0) queueMicrotask(() => setCart(known));
-  }, [restaurant.id, menu]);
+    let reorder: { dishes: number; note: string } | null = null;
+    try {
+      reorder = browseOnly ? null : (JSON.parse(sessionStorage.getItem(`sr_again_${restaurant.id}`) ?? "null") as { dishes: number; note: string } | null);
+      sessionStorage.removeItem(`sr_again_${restaurant.id}`);
+    } catch {}
+    queueMicrotask(() => {
+      if (Object.keys(known).length > 0) setCart(known);
+      if (reorder) {
+        setAgain({ note: reorder.note, missing: Math.max(0, reorder.dishes - Object.keys(known).length) });
+        if (Object.keys(known).length > 0) setSheet(true);
+      }
+    });
+  }, [restaurant.id, menu, browseOnly]);
 
   const update = (id: string, delta: number) =>
     setCart((c) => {
@@ -129,6 +142,7 @@ export function MenuCart({
       stay={stay}
       defaultPhone={defaultPhone}
       checkoutPath={checkoutPath ?? `/restaurants/${restaurant.id}`}
+      again={again}
     />
   );
 
@@ -330,6 +344,7 @@ function Checkout({
   stay,
   defaultPhone,
   checkoutPath,
+  again,
 }: {
   restaurant: Restaurant;
   menu: Dish[];
@@ -340,6 +355,7 @@ function Checkout({
   stay: { reference: string; label: string; free: boolean } | null;
   defaultPhone: string | null;
   checkoutPath: string;
+  again: { note: string; missing: number } | null;
 }) {
   const t = useTranslations("Food");
   const locale = useLocale();
@@ -348,7 +364,13 @@ function Checkout({
   const [fulfilment, setFulfilment] = useState<Fulfilment>(options[0] ?? "PICKUP");
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState(defaultPhone ?? "");
-  const [note, setNote] = useState("");
+  const [note, setNote] = useState(again?.note ?? "");
+  // Order again fills the note once it's known (the cart is restored after the first paint).
+  const [noteFrom, setNoteFrom] = useState(again);
+  if (again !== noteFrom) {
+    setNoteFrom(again);
+    if (again?.note && !note) setNote(again.note);
+  }
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
@@ -393,6 +415,7 @@ function Checkout({
         {t("yourOrderTitle")}
       </h2>
       {restaurant.paused && <p className="rounded-xl bg-amber-50 px-3 py-2 text-[13px] text-amber-900">{t("pausedNow")}</p>}
+      {again && again.missing > 0 && <p className="rounded-xl bg-amber-50 px-3 py-2 text-[13px] text-amber-900">{t("againMissing", { count: again.missing })}</p>}
 
       {lines.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-6 text-center">

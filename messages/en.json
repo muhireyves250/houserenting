@@ -3303,7 +3303,8 @@
       "title": "The menu at {place}",
       "body": "Book a stay here to order these meals to your room.",
       "back": "Back to the place"
-    }
+    },
+    "againMissing": "{count, plural, one {# dish from that order is} other {# dishes from that order are}} no longer on the menu."
   },
   "Promoters": {
     "title": "Promote and earn",

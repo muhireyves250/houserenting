@@ -3303,7 +3303,8 @@
       "title": "Le menu à {place}",
       "body": "Réservez un séjour ici pour commander ces plats dans votre chambre.",
       "back": "Retour au logement"
-    }
+    },
+    "againMissing": "{count, plural, one {# plat de cette commande n'est} other {# plats de cette commande ne sont}} plus au menu."
   },
   "Promoters": {
     "title": "Promouvoir et gagner",

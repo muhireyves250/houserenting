@@ -3303,7 +3303,8 @@
       "title": "Menu ya {place}",
       "body": "Fata icumbi hano kugira ngo utumize ibi biryo bikakugeraho mu cyumba.",
       "back": "Subira ku nzu"
-    }
+    },
+    "againMissing": "{count, plural, other {Ibiryo # byo kuri iyo komande}} ntibikiri kuri menu."
   },
   "Promoters": {
     "title": "Kwamamaza no kwinjiza",

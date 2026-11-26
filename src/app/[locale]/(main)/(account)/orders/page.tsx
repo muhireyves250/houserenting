@@ -167,7 +167,7 @@ export default async function OrdersPage() {
                     <span className="text-[14px] font-bold text-ink tabular-nums">{formatRWF(o.total, locale)}</span>
                     <span className="flex items-center gap-1">
                       {o.status === "CANCELLED" && <RemoveOrder reference={o.reference} compact />}
-                      <OrderAgain items={o.items} compact />
+                      <OrderAgain items={o.items} note={o.note} compact />
                     </span>
                   </span>
                 </li>

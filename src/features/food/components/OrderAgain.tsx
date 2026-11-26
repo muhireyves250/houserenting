@@ -4,17 +4,23 @@ import { RotateCcw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 
-/** Puts the same dishes back in the cart and opens the food menu of the guest's stay (prices are checked again there). */
-export function OrderAgain({ items, compact = false }: { items: { menuItemId: string | null; quantity: number }[]; compact?: boolean }) {
+/**
+ * Puts exactly the same dishes (and quantities, and note) back in the cart and opens the stay's menu with the order
+ * already showing, ready to send (prices are checked again there; dishes no longer served are said).
+ */
+export function OrderAgain({ items, note = null, compact = false }: { items: { menuItemId: string | null; quantity: number }[]; note?: string | null; compact?: boolean }) {
   const t = useTranslations("Food");
   const router = useRouter();
   return (
     <button
       type="button"
       onClick={() => {
-        const cart = Object.fromEntries(items.filter((i) => i.menuItemId).map((i) => [i.menuItemId!, i.quantity]));
+        const cart: Record<string, number> = {};
+        for (const i of items) if (i.menuItemId) cart[i.menuItemId] = (cart[i.menuItemId] ?? 0) + i.quantity;
         try {
           localStorage.setItem("sr_cart_stay", JSON.stringify(cart));
+          // Open the order as soon as the menu loads, with how many dishes were asked for (to say if some are gone).
+          sessionStorage.setItem("sr_again_stay", JSON.stringify({ dishes: items.length, note: note ?? "" }));
         } catch {}
         router.push("/food");
       }}
