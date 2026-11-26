@@ -2227,7 +2227,13 @@
     "newCodeOnPromoters": "New promo codes are made on the Promoters page (add a promoter, or yourself, with their code) →",
     "seeWhoUsed": "See who used it",
     "turnOn": "Turn on",
-    "turnOff": "Turn off"
+    "turnOff": "Turn off",
+    "filter": {
+      "label": "Show codes",
+      "all": "All ({count})",
+      "active": "Active ({count})",
+      "ended": "Ended ({count})"
+    }
   },
   "Referrals": {
     "title": "Invite friends",
@@ -3357,7 +3363,8 @@
     "status": {
       "PENDING": "Waiting",
       "ACTIVE": "Active",
-      "SUSPENDED": "Suspended"
+      "SUSPENDED": "Suspended",
+      "ENDED": "Ended"
     },
     "method": {
       "MOBILE_MONEY": "Mobile money",
@@ -3420,11 +3427,38 @@
         "taken": "This code is already used: choose another.",
         "code": "Use 3–30 letters or numbers.",
         "percentOff": "Enter a discount from 1 to 100.",
-        "sharePercent": "Enter a share from 0.1 to 50."
-      }
+        "sharePercent": "Enter a share from 0.1 to 50.",
+        "startsOn": "Choose the first day.",
+        "endsOn": "Choose the last day.",
+        "endBeforeStart": "The last day must be on or after the first.",
+        "past": "The last day can't be in the past.",
+        "afterPromoter": "The code can't run past the promoter's own end date."
+      },
+      "startsOn": "Works from",
+      "endsOn": "Until (last day)"
     },
     "applicationsTitle": "Applications",
-    "applicationsEmpty": "Nobody is waiting to become a promoter."
+    "applicationsEmpty": "Nobody is waiting to become a promoter.",
+    "periodFromCode": "These dates are also the promoter's time with VIIPA: after the last day they are ended, their codes stop working, and they can apply again.",
+    "periodFrom": "Promoter from",
+    "periodUntil": "Promoter until",
+    "periodError": "Check the dates: the last day must be on or after the first, and not in the past.",
+    "periodLine": "Promoter from {from} to {until}",
+    "noPeriod": "No end date set",
+    "endedNote": "Their time ended: their codes no longer work. They can apply again.",
+    "money": {
+      "made": "Made",
+      "toApprove": "To approve",
+      "toPay": "Approved, to pay",
+      "paid": "Paid"
+    },
+    "backToPromoters": "Promoters",
+    "broughtBy": "Through",
+    "viaQr": "QR link",
+    "broughtTitle": "Clients they brought ({count})",
+    "endedTitle": "Your time as a promoter has ended",
+    "endedBody": "Your promo codes no longer work. Apply again and VIIPA will look at it and give you a new period.",
+    "activeUntil": "You are a promoter until {date}. After that your codes stop working and you can apply again."
   },
   "Reports": {
     "intro": "Money and activity by stay date. Paid stays and no-shows count; cancelled stays only for their refunds. Deposits are held, not revenue.",

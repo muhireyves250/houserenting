@@ -13,14 +13,22 @@ import { maskAccount } from "@/features/places/payout-service";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/cn";
 import { formatRWF } from "@/lib/format";
+import { promoState, promoterMoney } from "@/features/promotions/discount";
+
+const STATUS_TONE = { ACTIVE: "bg-emerald-100 text-emerald-800", PENDING: "bg-amber-100 text-amber-900", SUSPENDED: "bg-red-50 text-red-700", ENDED: "bg-canvas text-ink/70" } as const;
+const iso = (d: Date) => new Date(d.getTime() + 2 * 3_600_000).toISOString().slice(0, 10);
 
 /** Promoters (approve, suspend) and their rewards (approve, mark paid). Reward rules are in Settings. */
 export async function PromotersView() {
-  const [t, tP, locale, promoters, rewards] = await Promise.all([getTranslations("Admin"), getTranslations("Promoters"), getLocale(), allPromoters(), openPromoterRewards()]);
+  const now = new Date();
+  const [t, tP, tPromo, locale, promoters, rewards] = await Promise.all([getTranslations("Admin"), getTranslations("Promoters"), getTranslations("Promotions"), getLocale(), allPromoters(now), openPromoterRewards()]);
+  const day = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeZone: "Africa/Kigali" });
+  const rwf = (n: number) => formatRWF(n, locale);
   const empty = <p className="py-8 text-center text-[14px] text-muted">{t("nothingHere")}</p>;
   // People who asked to become promoters, waiting for VIIPA (shown first).
   const applications = promoters.filter((p) => p.status === "PENDING");
-  const team = promoters.filter((p) => p.status !== "PENDING");
+  // Running ones first, ended ones last.
+  const team = promoters.filter((p) => p.status !== "PENDING").sort((a, b) => Number(a.status === "ENDED") - Number(b.status === "ENDED"));
   return (
     <div className="flex flex-col gap-5">
       <section className="flex flex-col gap-3">
@@ -99,8 +107,10 @@ export async function PromotersView() {
           empty
         ) : (
           <ul className="grid gap-3 lg:grid-cols-2">
-            {team.map((p) => (
-              <li key={p.id} className={adminCard}>
+            {team.map((p) => {
+              const money = promoterMoney(p.rewards);
+              return (
+              <li key={p.id} className={cn(adminCard, p.status === "ENDED" && "opacity-80")}>
                 <div className="flex items-start justify-between gap-2">
                   <span className="min-w-0">
                     <Link href={`/admin/users/${p.user.id}`} className="block truncate text-[16px] font-bold text-ink hover:text-primary">
@@ -108,8 +118,13 @@ export async function PromotersView() {
                     </Link>
                     <span className="block truncate text-[12px] text-muted">{p.user.email}</span>
                   </span>
-                  <Chip tone={p.status === "ACTIVE" ? "bg-emerald-100 text-emerald-800" : p.status === "PENDING" ? "bg-amber-100 text-amber-900" : "bg-red-50 text-red-700"}>{tP(`status.${p.status}`)}</Chip>
+                  <Chip tone={STATUS_TONE[p.status]}>{tP(`status.${p.status}`)}</Chip>
                 </div>
+                {/* Their period: after the end date they are ended (codes stop) and can apply again. */}
+                <p className="text-[13px] text-ink">
+                  {p.startsAt && p.endsAt ? tP("periodLine", { from: day.format(p.startsAt), until: day.format(p.endsAt) }) : tP("noPeriod")}
+                  {p.status === "ENDED" && <span className="block text-[12px] text-muted">{tP("endedNote")}</span>}
+                </p>
                 <div className="flex flex-wrap gap-1.5">
                   <Chip>
                     <span className="font-mono">{p.code}</span>
@@ -122,12 +137,41 @@ export async function PromotersView() {
                 <div className="flex flex-wrap items-center gap-1.5 rounded-xl bg-canvas px-3 py-2">
                   <span className="text-[12px] font-semibold text-muted">{tP("promoCodesLabel")}</span>
                   {p.promoCodes.length === 0 && <span className="text-[12px] text-muted">{tP("noPromoCodes")}</span>}
-                  {p.promoCodes.map((c) => (
-                    <span key={c.id} className={cn("rounded-md border border-dashed px-2 py-0.5 font-mono text-[12px] font-bold", c.active ? "border-primary/40 text-primary" : "border-line-strong text-muted line-through")}>
-                      {c.code}
-                    </span>
-                  ))}
+                  {/* Each code with where it is now: active, or ended (off, past its date, used up). */}
+                  {p.promoCodes.map((c) => {
+                    const state = promoState(c, now);
+                    const live = state === "active";
+                    return (
+                      <Link
+                        key={c.id}
+                        href={`/admin/promotions/codes/${c.id}`}
+                        className={cn("inline-flex items-center gap-1.5 rounded-md border border-dashed px-2 py-0.5 text-[12px] hover:border-primary", live ? "border-primary/40 text-primary" : "border-line-strong text-muted")}
+                      >
+                        <b className={cn("font-mono font-bold", !live && state !== "scheduled" && "line-through")}>{c.code}</b>
+                        <span className="font-semibold">{tPromo(`state.${state}`)}</span>
+                      </Link>
+                    );
+                  })}
                   {p.status === "ACTIVE" && <GivePromoCode promoterId={p.id} />}
+                </div>
+                {/* The money they made, and where it stands; See who used it has every booking and the approve / pay buttons. */}
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl bg-emerald-50/60 px-3 py-2 text-[12.5px]">
+                  <span>
+                    {tP("money.made")} <b className="font-bold text-emerald-800 tabular-nums">{rwf(money.made)}</b>
+                  </span>
+                  {money.toApprove > 0 && (
+                    <span>
+                      {tP("money.toApprove")} <b className="font-bold text-amber-800 tabular-nums">{rwf(money.toApprove)}</b>
+                    </span>
+                  )}
+                  {money.toPay > 0 && (
+                    <span>
+                      {tP("money.toPay")} <b className="font-bold text-ink tabular-nums">{rwf(money.toPay)}</b>
+                    </span>
+                  )}
+                  <span>
+                    {tP("money.paid")} <b className="font-bold text-ink tabular-nums">{rwf(money.paid)}</b>
+                  </span>
                 </div>
                 {p.about && <p className="rounded-xl bg-canvas px-3 py-2 text-[13px] text-ink">{p.about}</p>}
                 {p.payoutNumber && (
@@ -137,17 +181,22 @@ export async function PromotersView() {
                   </p>
                 )}
                 <div className="flex flex-wrap items-center gap-2 border-t border-line pt-3">
+                  <Link href={`/admin/promotions/promoters/${p.id}`} className="rounded-full bg-primary px-3.5 py-1.5 text-[13px] font-semibold text-white hover:bg-primary-hover">
+                    {tPromo("seeWhoUsed")}
+                  </Link>
                   <EditPromoter
                     promoterId={p.id}
                     initial={{ about: p.about, payoutMethod: p.payoutMethod ?? "MOBILE_MONEY", payoutName: p.payoutName ?? "", payoutNumber: p.payoutNumber ?? "", bankName: p.bankName }}
+                    period={p.status !== "ENDED" && p.startsAt && p.endsAt ? { startsOn: iso(p.startsAt), endsOn: iso(p.endsAt) } : p.status !== "ENDED" ? { startsOn: "", endsOn: "" } : null}
                   />
-                  <PromoterStatusButtons promoterId={p.id} status={p.status} />
+                  {p.status !== "ENDED" && <PromoterStatusButtons promoterId={p.id} status={p.status} />}
                   {p._count.rewards === 0 && (
                     <ConfirmAction label={tP("delete")} question={tP("deleteQuestion")} action={deletePromoterAction.bind(null, p.id)} errors={{ hasRewards: tP("staffError.hasRewards") }} />
                   )}
                 </div>
               </li>
-            ))}
+              );
+            })}
           </ul>
         )}
       </section>

@@ -1381,6 +1381,8 @@ enum PromoterStatus {
   PENDING
   ACTIVE
   SUSPENDED
+  /// Their time (start to end date) is over: their codes stop working; they can apply again.
+  ENDED
 }
 
 /// Someone who brings guests with their own QR code / link and earns a reward per finished stay.
@@ -1399,6 +1401,9 @@ model Promoter {
   /// Where they promote (shown to staff when approving).
   about        String           @default("")
   statusReason String?
+  /// The period VIIPA gives them (set when added or approved); after endsAt they are ENDED.
+  startsAt     DateTime?
+  endsAt       DateTime?
   decidedById  String?
   decidedAt    DateTime?
   createdAt    DateTime         @default(now())

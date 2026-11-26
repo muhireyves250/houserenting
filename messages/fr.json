@@ -2227,7 +2227,13 @@
     "newCodeOnPromoters": "Les nouveaux codes se créent sur la page Promoteurs (ajoutez un promoteur, ou vous-même, avec son code) →",
     "seeWhoUsed": "Voir qui l'a utilisé",
     "turnOn": "Activer",
-    "turnOff": "Désactiver"
+    "turnOff": "Désactiver",
+    "filter": {
+      "label": "Afficher les codes",
+      "all": "Tous ({count})",
+      "active": "Actifs ({count})",
+      "ended": "Terminés ({count})"
+    }
   },
   "Referrals": {
     "title": "Inviter des amis",
@@ -3357,7 +3363,8 @@
     "status": {
       "PENDING": "En attente",
       "ACTIVE": "Actif",
-      "SUSPENDED": "Suspendu"
+      "SUSPENDED": "Suspendu",
+      "ENDED": "Terminé"
     },
     "method": {
       "MOBILE_MONEY": "Mobile money",
@@ -3420,11 +3427,38 @@
         "taken": "Ce code est déjà utilisé : choisissez-en un autre.",
         "code": "Utilisez 3 à 30 lettres ou chiffres.",
         "percentOff": "Entrez une réduction de 1 à 100.",
-        "sharePercent": "Entrez une part de 0,1 à 50."
-      }
+        "sharePercent": "Entrez une part de 0,1 à 50.",
+        "startsOn": "Choisissez le premier jour.",
+        "endsOn": "Choisissez le dernier jour.",
+        "endBeforeStart": "Le dernier jour doit être le même jour ou après le premier.",
+        "past": "Le dernier jour ne peut pas être passé.",
+        "afterPromoter": "Le code ne peut pas durer au-delà de la date de fin du promoteur."
+      },
+      "startsOn": "Valable à partir du",
+      "endsOn": "Jusqu'au (dernier jour)"
     },
     "applicationsTitle": "Demandes",
-    "applicationsEmpty": "Personne n'attend de devenir promoteur."
+    "applicationsEmpty": "Personne n'attend de devenir promoteur.",
+    "periodFromCode": "Ces dates sont aussi la période du promoteur chez VIIPA : après le dernier jour, il est terminé, ses codes ne marchent plus et il peut postuler à nouveau.",
+    "periodFrom": "Promoteur du",
+    "periodUntil": "Promoteur jusqu'au",
+    "periodError": "Vérifiez les dates : le dernier jour doit être le même jour ou après le premier, et pas dans le passé.",
+    "periodLine": "Promoteur du {from} au {until}",
+    "noPeriod": "Pas de date de fin",
+    "endedNote": "Sa période est terminée : ses codes ne marchent plus. Il peut postuler à nouveau.",
+    "money": {
+      "made": "Gagné",
+      "toApprove": "À approuver",
+      "toPay": "Approuvé, à payer",
+      "paid": "Payé"
+    },
+    "backToPromoters": "Promoteurs",
+    "broughtBy": "Via",
+    "viaQr": "Lien QR",
+    "broughtTitle": "Clients apportés ({count})",
+    "endedTitle": "Votre période de promoteur est terminée",
+    "endedBody": "Vos codes promo ne marchent plus. Postulez à nouveau : VIIPA l'examinera et vous donnera une nouvelle période.",
+    "activeUntil": "Vous êtes promoteur jusqu'au {date}. Ensuite vos codes ne marchent plus et vous pouvez postuler à nouveau."
   },
   "Reports": {
     "intro": "Argent et activité par date de séjour. Les séjours payés et non présentés comptent ; les séjours annulés seulement pour leurs remboursements. Les cautions sont retenues, pas des revenus.",

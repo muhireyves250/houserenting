@@ -2227,7 +2227,13 @@
     "newCodeOnPromoters": "Kode nshya zikorerwa ku rupapuro rw'Abamamaza (ongeramo umwamamaza, cyangwa wowe ubwawe, n'kode ye) →",
     "seeWhoUsed": "Reba abayikoresheje",
     "turnOn": "Fungura",
-    "turnOff": "Funga"
+    "turnOff": "Funga",
+    "filter": {
+      "label": "Erekana kode",
+      "all": "Zose ({count})",
+      "active": "Izikora ({count})",
+      "ended": "Izarangiye ({count})"
+    }
   },
   "Referrals": {
     "title": "Tumira inshuti",
@@ -3357,7 +3363,8 @@
     "status": {
       "PENDING": "Bitegereje",
       "ACTIVE": "Arakora",
-      "SUSPENDED": "Yahagaritswe"
+      "SUSPENDED": "Yahagaritswe",
+      "ENDED": "Byarangiye"
     },
     "method": {
       "MOBILE_MONEY": "Mobile money",
@@ -3420,11 +3427,38 @@
         "taken": "Iyi kode isanzwe ikoreshwa: hitamo indi.",
         "code": "Koresha inyuguti cyangwa imibare 3–30.",
         "percentOff": "Andika igabanywa riri hagati ya 1 na 100.",
-        "sharePercent": "Andika umugabane uri hagati ya 0.1 na 50."
-      }
+        "sharePercent": "Andika umugabane uri hagati ya 0.1 na 50.",
+        "startsOn": "Hitamo umunsi wa mbere.",
+        "endsOn": "Hitamo umunsi wa nyuma.",
+        "endBeforeStart": "Umunsi wa nyuma ugomba kuba uwo munsi cyangwa nyuma y'uwa mbere.",
+        "past": "Umunsi wa nyuma ntushobora kuba warashize.",
+        "afterPromoter": "Kode ntishobora kurenza itariki yo kurangira k'umwamamazi."
+      },
+      "startsOn": "Ritangira ku wa",
+      "endsOn": "Kugeza ku wa (umunsi wa nyuma)"
     },
     "applicationsTitle": "Ibyifuzo",
-    "applicationsEmpty": "Nta muntu utegereje kuba umwamamaza."
+    "applicationsEmpty": "Nta muntu utegereje kuba umwamamaza.",
+    "periodFromCode": "Izi tariki ni na zo gihe cy'umwamamazi muri VIIPA: nyuma y'umunsi wa nyuma arangira, kode ze ntizikora, kandi ashobora kongera gusaba.",
+    "periodFrom": "Umwamamazi guhera",
+    "periodUntil": "Umwamamazi kugeza",
+    "periodError": "Reba amatariki: umunsi wa nyuma ugomba kuba uwo munsi cyangwa nyuma y'uwa mbere, kandi utarashize.",
+    "periodLine": "Umwamamazi guhera {from} kugeza {until}",
+    "noPeriod": "Nta tariki yo kurangira",
+    "endedNote": "Igihe cye cyarangiye: kode ze ntizigikora. Ashobora kongera gusaba.",
+    "money": {
+      "made": "Yinjije",
+      "toApprove": "Byo kwemeza",
+      "toPay": "Byemejwe, byo kwishyura",
+      "paid": "Byishyuwe"
+    },
+    "backToPromoters": "Abamamazi",
+    "broughtBy": "Binyuze",
+    "viaQr": "Link ya QR",
+    "broughtTitle": "Abakiriya yazanye ({count})",
+    "endedTitle": "Igihe cyawe cyo kwamamaza cyarangiye",
+    "endedBody": "Kode zawe ntizigikora. Ongera usabe, VIIPA izabireba ikuhe ikindi gihe.",
+    "activeUntil": "Uri umwamamazi kugeza {date}. Nyuma yaho kode zawe ntizikora kandi ushobora kongera gusaba."
   },
   "Reports": {
     "intro": "Amafaranga n'ibikorwa bikurikije itariki y'icumbi. Amacumbi yishyuwe n'abataje arabarwa; ayahagaritswe abarwa gusa ku mafaranga yasubijwe. Ingwate zirabikwa, si inyungu.",

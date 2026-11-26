@@ -30,7 +30,15 @@ const errorsOf = (issues: { path: PropertyKey[]; message: string }[]) => Object.
 export async function savePromoter(userId: string, raw: PromoterInput): Promise<{ ok: true } | { ok: false; errors: Record<string, string> }> {
   const parsed = promoterInput.safeParse(raw);
   if (!parsed.success) return { ok: false, errors: errorsOf(parsed.error.issues) };
-  const existing = await db.promoter.findUnique({ where: { userId }, select: { id: true } });
+  await endExpiredPromoters();
+  const existing = await db.promoter.findUnique({ where: { userId }, select: { id: true, status: true } });
+  // Their time ended: applying again puts them back in VIIPA's queue (a new period comes with approval).
+  if (existing?.status === "ENDED") {
+    await db.promoter.update({ where: { userId }, data: { ...parsed.data, status: "PENDING", statusReason: null, startsAt: null, endsAt: null, decidedById: null, decidedAt: null } });
+    await audit(db, { actorId: userId, action: "promoter.reapply", entityType: "promoter", entityId: existing.id });
+    await notifyAdmins(db, "promoterApplied", {}, "/admin/promotions?tab=promoters");
+    return { ok: true };
+  }
   if (existing) {
     await db.promoter.update({ where: { userId }, data: parsed.data });
     await audit(db, { actorId: userId, action: "promoter.update", entityType: "promoter", entityId: existing.id });
@@ -66,6 +74,7 @@ export async function setPromoterStatus(actor: Actor, promoterId: string, status
 /** Counts a QR visit (once per visitor per day) and says whether the link belongs to an active promoter. */
 export async function recordVisit(code: string, visitor: string, now: Date = new Date()): Promise<boolean> {
   if (!isPromoterCode(code)) return false;
+  await endExpiredPromoters(now);
   const p = await db.promoter.findUnique({ where: { code }, select: { id: true, status: true } });
   if (!p || p.status !== "ACTIVE") return false;
   const day = new Date(`${todayISO(now)}T00:00:00Z`);
@@ -78,6 +87,7 @@ export async function recordVisit(code: string, visitor: string, now: Date = new
  * opened (cookie). Only an active promoter, never the guest themselves.
  */
 export async function attributeBooking(reference: string, guestId: string, code: string | undefined): Promise<void> {
+  await endExpiredPromoters();
   const counts = (p: { userId: string; status: string } | null | undefined) => Boolean(p && p.status === "ACTIVE" && p.userId !== guestId);
   const booking = await db.booking.findFirst({ where: { reference, guestId }, select: { promoCode: { select: { promoter: { select: { id: true, userId: true, status: true } } } } } });
   const fromCode = booking?.promoCode?.promoter;
@@ -149,6 +159,7 @@ export async function markPromoterRewardPaid(actor: Actor, rewardId: string, now
 
 /** The promoter's own page: status, link and what their visitors turned into. */
 export async function promoterDashboard(userId: string, now: Date = new Date()) {
+  await endExpiredPromoters(now);
   const p = await db.promoter.findUnique({ where: { userId } });
   if (!p) return null;
   const since = new Date(now.getTime() - 30 * 86_400_000);
@@ -180,13 +191,16 @@ export async function promoterDashboard(userId: string, now: Date = new Date()) 
   };
 }
 
-export function allPromoters() {
+export async function allPromoters(now: Date = new Date()) {
+  await endExpiredPromoters(now);
   return db.promoter.findMany({
     orderBy: [{ status: "asc" }, { createdAt: "desc" }],
     take: 300,
     include: {
       user: { select: { id: true, name: true, email: true } },
-      promoCodes: { orderBy: { createdAt: "desc" }, select: { id: true, code: true, active: true, percentOff: true, amountOff: true } },
+      promoCodes: { orderBy: { createdAt: "desc" }, select: { id: true, code: true, active: true, percentOff: true, amountOff: true, startsAt: true, endsAt: true, maxUses: true, usedCount: true } },
+      // What they made: every reward (waiting, approved, paid or voided).
+      rewards: { select: { amount: true, status: true, paidAt: true } },
       _count: { select: { visits: true, bookings: true, rewards: true } },
     },
   });
@@ -216,7 +230,7 @@ export async function staffAddPromoter(actor: Actor, email: string, raw: Promote
   for (let attempt = 0; attempt < 5; attempt++) {
     try {
       await db.$transaction(async (tx) => {
-        const created = await tx.promoter.create({ data: { userId: user.id, code: newReference("P"), status: "ACTIVE", decidedById: actor.id, decidedAt: new Date(), ...parsed.data } });
+        const created = await tx.promoter.create({ data: { userId: user.id, code: newReference("P"), status: "ACTIVE", decidedById: actor.id, decidedAt: new Date(), ...periodOf(checked.code), ...parsed.data } });
         await audit(tx, { actorId: actor.id, action: "promoter.add", entityType: "promoter", entityId: created.id });
         await notify(tx, user.id, "promoterStatus", { status: "ACTIVE", reason: "" }, "/promote");
       });
@@ -264,13 +278,17 @@ export const firstCodeInput = z.object({
   code: z.string().transform((v) => v.trim().toUpperCase().replace(/\s+/g, "")).pipe(z.string().regex(/^[A-Z0-9_-]{3,30}$/)),
   percentOff: z.number().int().min(1).max(100),
   sharePercent: z.number().gt(0).max(50),
-});
+  /** The code works from the start of startsOn to the end of endsOn (Kigali days); for a new promoter, their period. */
+  startsOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  endsOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+}).refine((c) => c.endsOn >= c.startsOn, { path: ["endsOn"], message: "endBeforeStart" });
 export type FirstCodeInput = z.input<typeof firstCodeInput>;
 
 /** Checks a first code before anything is saved: valid, and not used by another code. */
 async function checkFirstCode(raw: FirstCodeInput): Promise<{ ok: true; code: z.output<typeof firstCodeInput> } | { ok: false; errors: Record<string, string> }> {
   const parsed = firstCodeInput.safeParse(raw);
   if (!parsed.success) return { ok: false, errors: errorsOf(parsed.error.issues) };
+  if (parsed.data.endsOn < todayISO()) return { ok: false, errors: { endsOn: "past" } };
   if (await db.promoCode.findUnique({ where: { code: parsed.data.code }, select: { id: true } })) return { ok: false, errors: { code: "taken" } };
   return { ok: true, code: parsed.data };
 }
@@ -284,8 +302,7 @@ async function giveFirstCode(actorId: string, promoterId: string, code: z.output
     percentOff: code.percentOff,
     amountOff: null,
     minSubtotal: null,
-    startsAt: null,
-    endsAt: null,
+    ...periodOf(code),
     maxUses: null,
     fundedBy: "HOST",
     promoterId,
@@ -299,6 +316,7 @@ export async function approvePromoter(actor: Actor, promoterId: string, raw: Fir
   const checked = await checkFirstCode(raw);
   if (!checked.ok) return checked;
   if (!(await setPromoterStatus(actor, promoterId, "ACTIVE"))) return { ok: false, error: "notFound" };
+  await db.promoter.update({ where: { id: promoterId }, data: periodOf(checked.code) });
   const given = await giveFirstCode(actor.id, promoterId, checked.code);
   return given.ok ? { ok: true } : given;
 }
@@ -306,10 +324,48 @@ export async function approvePromoter(actor: Actor, promoterId: string, raw: Fir
 /** Staff give an active promoter another promo code (the code, the discount and their share). */
 export async function givePromoCode(actor: Actor, promoterId: string, raw: FirstCodeInput): Promise<StaffPromoterResult> {
   if (!canStaff(actor, "promotions")) return { ok: false, error: "notAllowed" };
-  const p = await db.promoter.findUnique({ where: { id: promoterId }, select: { status: true } });
+  const p = await db.promoter.findUnique({ where: { id: promoterId }, select: { status: true, endsAt: true } });
   if (!p || p.status !== "ACTIVE") return { ok: false, error: "notFound" };
   const checked = await checkFirstCode(raw);
   if (!checked.ok) return checked;
+  // A code can't outlast the promoter's own period.
+  if (p.endsAt && periodOf(checked.code).endsAt > p.endsAt) return { ok: false, errors: { endsOn: "afterPromoter" } };
   const given = await giveFirstCode(actor.id, promoterId, checked.code);
   return given.ok ? { ok: true } : given;
+}
+
+/** A period of Kigali days: from the start of the first day to the end of the last. */
+export function periodOf(c: { startsOn: string; endsOn: string }): { startsAt: Date; endsAt: Date } {
+  return { startsAt: new Date(`${c.startsOn}T00:00:00+02:00`), endsAt: new Date(`${c.endsOn}T23:59:59.999+02:00`) };
+}
+
+/**
+ * Promoters whose period is over: they are ENDED, their promo codes stop working, and they are told (they can apply
+ * again). Runs whenever promoters are looked at, so nothing waits for a timer.
+ */
+export async function endExpiredPromoters(now: Date = new Date()): Promise<number> {
+  const due = await db.promoter.findMany({ where: { status: "ACTIVE", endsAt: { lte: now } }, select: { id: true, userId: true } });
+  let ended = 0;
+  for (const p of due) {
+    await db.$transaction(async (tx) => {
+      const { count } = await tx.promoter.updateMany({ where: { id: p.id, status: "ACTIVE" }, data: { status: "ENDED", statusReason: null, decidedAt: now } });
+      if (count !== 1) return;
+      ended++;
+      await tx.promoCode.updateMany({ where: { promoterId: p.id, active: true }, data: { active: false } });
+      await audit(tx, { actorId: null, action: "promoter.end", entityType: "promoter", entityId: p.id });
+      await notify(tx, p.userId, "promoterStatus", { status: "ENDED", reason: "" }, "/promote");
+    });
+  }
+  return ended;
+}
+
+/** Staff change a promoter's period (still running ones only: an ended promoter applies again). Logged. */
+export async function setPromoterPeriod(actor: Actor, promoterId: string, startsOn: string, endsOn: string, now: Date = new Date()): Promise<{ ok: boolean; error?: "notAllowed" | "notFound" | "dates" }> {
+  if (!canStaff(actor, "promotions")) return { ok: false, error: "notAllowed" };
+  const day = /^\d{4}-\d{2}-\d{2}$/;
+  if (!day.test(startsOn) || !day.test(endsOn) || endsOn < startsOn || endsOn < todayISO(now)) return { ok: false, error: "dates" };
+  const { count } = await db.promoter.updateMany({ where: { id: promoterId, status: { in: ["ACTIVE", "SUSPENDED"] } }, data: periodOf({ startsOn, endsOn }) });
+  if (count !== 1) return { ok: false, error: "notFound" };
+  await audit(db, { actorId: actor.id, action: "promoter.period", entityType: "promoter", entityId: promoterId, data: { startsOn, endsOn } });
+  return { ok: true };
 }

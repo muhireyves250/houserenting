@@ -89,7 +89,20 @@ export default async function PromotePage() {
       ) : (
         <div className="flex flex-col gap-4">
           {data.promoter.status === "PENDING" && <p className="rounded-2xl bg-amber-50 px-5 py-3.5 text-sm text-amber-900">{t("pendingNote")}</p>}
+          {data.promoter.status === "ACTIVE" && data.promoter.endsAt && (
+            <p className="rounded-2xl bg-primary/[0.06] px-5 py-3.5 text-sm text-ink">{t("activeUntil", { date: new Intl.DateTimeFormat(locale, { dateStyle: "long", timeZone: "Africa/Kigali" }).format(data.promoter.endsAt) })}</p>
+          )}
           {data.promoter.status === "SUSPENDED" && <p className="rounded-2xl bg-red-50 px-5 py-3.5 text-sm text-red-900">{t("suspendedNote", { reason: data.promoter.statusReason ?? "" })}</p>}
+          {/* Their period is over: their codes stopped; they can apply again (VIIPA approves with a new period). */}
+          {data.promoter.status === "ENDED" && (
+            <Card title={t("endedTitle")}>
+              <p className="mb-4 text-[14px] text-muted">{t("endedBody")}</p>
+              <PromoterForm
+                applying
+                initial={{ about: data.promoter.about, payoutMethod: data.promoter.payoutMethod ?? "MOBILE_MONEY", payoutName: data.promoter.payoutName ?? user.name, payoutNumber: data.promoter.payoutNumber ?? "", bankName: data.promoter.bankName }}
+              />
+            </Card>
+          )}
           {qr && link && (
             <Card title={t("yourCode")}>
               <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-start">
@@ -168,12 +181,14 @@ export default async function PromotePage() {
               </ul>
             </Card>
           )}
-          <Card title={t("payoutTitle")}>
-            <PromoterForm
-              applying={false}
-              initial={{ about: data.promoter.about, payoutMethod: data.promoter.payoutMethod ?? "MOBILE_MONEY", payoutName: data.promoter.payoutName ?? "", payoutNumber: data.promoter.payoutNumber ?? "", bankName: data.promoter.bankName }}
-            />
-          </Card>
+          {data.promoter.status !== "ENDED" && (
+            <Card title={t("payoutTitle")}>
+              <PromoterForm
+                applying={false}
+                initial={{ about: data.promoter.about, payoutMethod: data.promoter.payoutMethod ?? "MOBILE_MONEY", payoutName: data.promoter.payoutName ?? "", payoutNumber: data.promoter.payoutNumber ?? "", bankName: data.promoter.bankName }}
+              />
+            </Card>
+          )}
           <p className="inline-flex items-start gap-2 text-[13px] text-muted">
             <Megaphone className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
             {t("rules")}

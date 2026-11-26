@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/session";
-import { decidePromoterReward, deletePromoter, markPromoterRewardPaid, savePromoter, setPromoterStatus, staffAddPromoter, staffEditPromoter, type PromoterInput, type StaffPromoterResult, approvePromoter, givePromoCode, type FirstCodeInput } from "./service";
+import { decidePromoterReward, deletePromoter, markPromoterRewardPaid, savePromoter, setPromoterStatus, staffAddPromoter, staffEditPromoter, type PromoterInput, type StaffPromoterResult, approvePromoter, givePromoCode, type FirstCodeInput, setPromoterPeriod } from "./service";
 
 const id = z.string().min(1).max(64);
 const refresh = () => revalidatePath("/[locale]", "layout");
@@ -48,9 +48,14 @@ export async function staffAddPromoterAction(email: string, input: PromoterInput
   return result;
 }
 
-export async function staffEditPromoterAction(promoterId: string, input: PromoterInput): Promise<StaffPromoterResult> {
+export async function staffEditPromoterAction(promoterId: string, input: PromoterInput, period?: { startsOn: string; endsOn: string } | null): Promise<StaffPromoterResult> {
   const user = await getCurrentUser();
   if (!user || typeof promoterId !== "string" || promoterId.length > 64) return { ok: false, error: "notAllowed" };
+  // Their period first (so a wrong date changes nothing).
+  if (period && typeof period.startsOn === "string" && typeof period.endsOn === "string") {
+    const changed = await setPromoterPeriod(user, promoterId, period.startsOn, period.endsOn);
+    if (!changed.ok) return changed.error === "dates" ? { ok: false, errors: { endsOn: "dates" } } : { ok: false, error: changed.error ?? "notFound" };
+  }
   const result = await staffEditPromoter(user, promoterId, input);
   if (result.ok) revalidatePath("/[locale]", "layout");
   return result;

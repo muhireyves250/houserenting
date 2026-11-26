@@ -103,9 +103,11 @@ export type PromoCheck =
 
 /** Whether a code works for this price right now (no use is counted). */
 export async function checkPromo(client: Prisma.TransactionClient | typeof db, raw: string, subtotal: number, now: Date = new Date()): Promise<PromoCheck> {
-  const promo = await client.promoCode.findUnique({ where: { code: normalizeCode(raw) } });
+  const promo = await client.promoCode.findUnique({ where: { code: normalizeCode(raw) }, include: { promoter: { select: { status: true, endsAt: true } } } });
   if (!promo || !promo.active) return { ok: false, error: "unknown" };
   if ((promo.startsAt && promo.startsAt > now) || (promo.endsAt && promo.endsAt <= now)) return { ok: false, error: "expired" };
+  // A promoter's code works only while they are active and inside their period.
+  if (promo.promoter && (promo.promoter.status !== "ACTIVE" || (promo.promoter.endsAt && promo.promoter.endsAt <= now))) return { ok: false, error: "expired" };
   if (promo.maxUses !== null && promo.usedCount >= promo.maxUses) return { ok: false, error: "usedUp" };
   const discount = promoDiscount(subtotal, promo);
   if (discount === 0) return { ok: false, error: "minimum" };

@@ -4,12 +4,13 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { Chip, FillScreen } from "@/features/admin/components/kit";
 import { ActionsMenu } from "@/features/admin/components/ActionsMenu";
 import { listPromos } from "@/features/promotions/service";
+import { promoState, type PromoState } from "@/features/promotions/discount";
 import { deletePromoAction, setPromoActiveAction } from "@/features/admin/money-actions";
 import { formatRWF } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import { Link } from "@/i18n/navigation";
 
-type State = "active" | "off" | "expired" | "usedUp" | "scheduled";
+type State = PromoState;
 const STATE_TONE: Record<State, string> = {
   active: "bg-emerald-50 text-emerald-800",
   off: "bg-canvas text-ink/70",
@@ -21,9 +22,12 @@ const STATE_TONE: Record<State, string> = {
 /** Promo codes: the new-code form beside the list; each code a card with what it gives, who pays and how far it's used. */
 export async function PromotionsView({
   tabs,
+  show = "all",
 }: {
   tabs: ReactNode;
   forPromoter?: string;
+  /** Which codes to list: all, the ones working now, or the ones that ended (off, past their date, used up). */
+  show?: "all" | "active" | "ended";
 }) {
   const [t, locale, promos] = await Promise.all([getTranslations("Promotions"), getLocale(), listPromos()]);
   const date = new Intl.DateTimeFormat(locale, {
@@ -31,17 +35,16 @@ export async function PromotionsView({
     timeZone: "Africa/Kigali",
   });
   const now = new Date();
-  const stateOf = (p: (typeof promos)[number]): State =>
-    !p.active
-      ? "off"
-      : p.endsAt && p.endsAt < now
-        ? "expired"
-        : p.maxUses !== null && p.usedCount >= p.maxUses
-          ? "usedUp"
-          : p.startsAt && p.startsAt > now
-            ? "scheduled"
-            : "active";
+  const stateOf = (p: (typeof promos)[number]): State => promoState(p, now);
   const activeCount = promos.filter((p) => stateOf(p) === "active").length;
+  const endedOf = (p: (typeof promos)[number]) => ["off", "expired", "usedUp"].includes(stateOf(p));
+  const endedCount = promos.filter(endedOf).length;
+  const shown = promos.filter((p) => (show === "active" ? stateOf(p) === "active" : show === "ended" ? endedOf(p) : true));
+  const filters = [
+    { key: "all", label: t("filter.all", { count: promos.length }) },
+    { key: "active", label: t("filter.active", { count: activeCount }) },
+    { key: "ended", label: t("filter.ended", { count: endedCount }) },
+  ] as const;
 
   return (
     <FillScreen>
@@ -53,11 +56,22 @@ export async function PromotionsView({
           {t("newCodeOnPromoters")}
         </Link>
         <section className="flex min-h-0 flex-col gap-3">
-          <p className="shrink-0 text-[13px] font-semibold text-muted">
-            {t("codesCount", { count: promos.length, active: activeCount })}
-          </p>
+          {/* Active or ended codes at a glance. */}
+          <div role="tablist" aria-label={t("filter.label")} className="flex shrink-0 flex-wrap gap-2">
+            {filters.map((f) => (
+              <Link
+                key={f.key}
+                role="tab"
+                aria-selected={show === f.key}
+                href={{ pathname: "/admin/promotions", query: f.key === "all" ? {} : { show: f.key } }}
+                className={cn("rounded-full px-3.5 py-1.5 text-[13px] font-semibold ring-1", show === f.key ? "bg-primary text-white ring-primary" : "bg-surface text-ink ring-line hover:ring-primary")}
+              >
+                {f.label}
+              </Link>
+            ))}
+          </div>
           <ul className="no-scrollbar flex min-h-0 flex-col gap-3 overflow-y-auto overscroll-contain p-1 pb-3">
-            {promos.length === 0 && (
+            {shown.length === 0 && (
               <li className="flex flex-col items-center gap-2 rounded-2xl bg-surface py-12 text-center ring-1 ring-line">
                 <TicketPercent
                   className="size-8 text-line-strong"
@@ -66,7 +80,7 @@ export async function PromotionsView({
                 <span className="text-[14px] text-muted">{t("none")}</span>
               </li>
             )}
-            {promos.map((p) => {
+            {shown.map((p) => {
               const state = stateOf(p);
               const live = state === "active";
               const value = p.percentOff

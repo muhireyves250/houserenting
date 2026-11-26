@@ -16,7 +16,7 @@ export function ApprovePromoter({ promoterId }: { promoterId: string }) {
   const [pending, start] = useTransition();
   return (
     <div className="flex flex-col gap-2">
-      <FirstCodeFields value={code} onChange={setCode} errors={errors} />
+      <FirstCodeFields value={code} onChange={setCode} errors={errors} periodHint={t("periodFromCode")} />
       {failed && <p role="alert" className="text-[13px] font-medium text-danger">{failed}</p>}
       <button
         type="button"

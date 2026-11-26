@@ -5,7 +5,7 @@ import { PromotersView } from "@/features/admin/views/PromotersView";
 import { PromotionsView } from "@/features/admin/views/PromotionsView";
 import { requireStaff } from "@/lib/permissions";
 
-type Props = { searchParams: Promise<{ tab?: string; for?: string }> };
+type Props = { searchParams: Promise<{ tab?: string; for?: string; show?: string }> };
 
 /** Promotions on one page: promo codes in one tab, promoters and their rewards in the other. */
 export default async function PromotionsPage({ searchParams }: Props) {
@@ -24,7 +24,7 @@ export default async function PromotionsPage({ searchParams }: Props) {
   );
   // Promo codes fill the screen (form and list side by side); promoters are an ordinary page.
   // "Give a promo code" from a promoter card opens the form with that promoter chosen.
-  if (!promoters) return <PromotionsView tabs={tabs} forPromoter={params.for} />;
+  if (!promoters) return <PromotionsView tabs={tabs} forPromoter={params.for} show={params.show === "active" || params.show === "ended" ? params.show : "all"} />;
   return (
     <div className="flex flex-col gap-5">
       <StickyTabs>{tabs}</StickyTabs>
