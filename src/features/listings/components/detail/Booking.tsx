@@ -4,13 +4,14 @@ import { Select } from "@/components/ui/Select";
 
 import { Tag } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { createContext, useContext, useId, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { dayClosed, type Window } from "@/features/bookings/availability";
 import { LONG_UNITS, type BookingUnit } from "@/features/bookings/period";
 import { discountedPrice, type Unit } from "@/features/listings/pricing";
 import { nightsBetween } from "@/features/listings/quote";
 import { DatePanel } from "@/features/search/components/DatePanel";
 import { roomStatusOn } from "@/features/rooms/availability";
+import type { AgainStart } from "@/features/bookings/again";
 import { isDayBlocked, todayISO, type BookedRange, type DateRange } from "@/features/search/date-range";
 import { Link, usePathname } from "@/i18n/navigation";
 import { animateScrollTo } from "@/lib/animate-scroll";
@@ -77,6 +78,8 @@ type Stay = {
   /** When the place can be booked (management agreement and its own dates) and on which days bookings may start. */
   window: Window;
   workingDays: number[];
+  /** Book again: true once, so the first Reserve button opens the reserve screen by itself. */
+  takeAutoReserve: () => boolean;
 };
 
 const StayContext = createContext<Stay | null>(null);
@@ -109,8 +112,11 @@ export function StayProvider({
   workingDays = [],
   numberBookings = [],
   initialRoomNumber = null,
+  again = null,
 }: {
   children: ReactNode;
+  /** Book again: the same guests and length on the soonest free dates, then straight to Reserve. */
+  again?: AgainStart | null;
   numberBookings?: NumberBooking[];
   /** A room's own page: that room number is the one booked. */
   initialRoomNumber?: string | null;
@@ -129,14 +135,15 @@ export function StayProvider({
   window?: Window;
   workingDays?: number[];
 }) {
-  const [range, setRange] = useState<DateRange>({});
-  const [guests, setGuests] = useState(1);
+  const [range, setRange] = useState<DateRange>(again?.range ?? {});
+  const [guests, setGuests] = useState(again?.guests ?? 1);
+  const autoReserve = useRef(Boolean(again));
   const [choice, setChoice] = useState<StayChoice>(
     initialRoom && rooms.some((r) => r.id === initialRoom) ? initialRoom : bookingModel === "ROOM_BY_ROOM" ? null : "whole",
   );
-  const [unit, setUnit] = useState<BookingUnit>(defaultUnit);
+  const [unit, setUnit] = useState<BookingUnit>(again?.unit ?? defaultUnit);
   const [roomNumber, setRoomNumber] = useState<string | null>(initialRoomNumber);
-  const [plan, setPlan] = useState<Plan>({ start: "", quantity: 1, startTime: "" });
+  const [plan, setPlan] = useState<Plan>(again?.plan ?? { start: "", quantity: 1, startTime: "" });
   const normalized = booked.map((b) => ({ ...b, roomId: b.roomId ?? null }));
   return (
     <StayContext.Provider
@@ -168,6 +175,11 @@ export function StayProvider({
         setPlan,
         window,
         workingDays,
+        takeAutoReserve: () => {
+          const take = autoReserve.current;
+          autoReserve.current = false;
+          return take;
+        },
       }}
     >
       {children}
@@ -493,9 +505,14 @@ function ReserveButton({
 }) {
   const t = useTranslations("Listings");
   const pathname = usePathname();
-  const { guests, listingId, holdMinutes, choice, guestFeeBps, cancellationPolicy, seller, roomNumber } = useStay();
+  const { guests, listingId, holdMinutes, choice, guestFeeBps, cancellationPolicy, seller, roomNumber, takeAutoReserve } = useStay();
   const quote = useQuote(rates, discountPercent);
   const [open, setOpen] = useState(false);
+  // Book again: dates and guests are filled in, so go straight on to reserve and pay (once, signed in).
+  const ready = Boolean(quote.current && quote.ready && signedIn && choice !== null);
+  useEffect(() => {
+    if (ready && takeAutoReserve()) queueMicrotask(() => setOpen(true));
+  }, [ready, takeAutoReserve]);
 
   if (!quote.current) {
     return (

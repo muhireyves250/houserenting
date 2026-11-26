@@ -13,6 +13,8 @@ import { DetailSection } from "@/features/listings/components/detail/DetailSecti
 import { FACILITY_ICONS } from "@/features/listings/components/detail/facility-icons";
 import { ListingPhotos } from "@/features/listings/components/detail/ListingPhotos";
 import { listingPath } from "@/features/listings/links";
+import { againStart, type Again } from "@/features/bookings/again";
+import { todayISO } from "@/features/search/date-range";
 import { ONLY_ROOM, roomLabel } from "@/features/rooms/links";
 import { getSettings, holdMinutesFrom, policyText } from "@/features/settings/service";
 import { Link } from "@/i18n/navigation";
@@ -26,7 +28,7 @@ const isoDay = (d: Date | null) => d?.toISOString().slice(0, 10) ?? null;
  * One room of a lodge: its photos, details and prices, its own calendar (days it's booked are marked) and the
  * booking card, which books exactly this room (this number of the room type).
  */
-export async function RoomBookingView({ listingId, roomId, number: asked }: { listingId: string; roomId: string; number: string }) {
+export async function RoomBookingView({ listingId, roomId, number: asked, again = null }: { listingId: string; roomId: string; number: string; again?: Again | null }) {
   const [listing, room] = await Promise.all([
     db.listing.findFirst({
       where: { id: listingId, status: "PUBLISHED" },
@@ -99,6 +101,7 @@ export async function RoomBookingView({ listingId, roomId, number: asked }: { li
       rooms={[publicRoom]}
       initialRoom={room.id}
       initialRoomNumber={number}
+      again={againStart(again, booked, room.id, todayISO())}
       bookingModel="ROOM_BY_ROOM"
       guestFeeBps={feesFor(settings, listing.type).guestFeeBps}
       cancellationPolicy={policyText(settings.cancellationPolicy, locale)}

@@ -676,7 +676,8 @@
     "time": "Time",
     "openMyStay": "Open My stay",
     "messageShort": "Message",
-    "placeShort": "Place"
+    "placeShort": "Place",
+    "bookAgain": "Book again"
   },
   "Host": {
     "title": "Your listings",

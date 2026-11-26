@@ -43,6 +43,26 @@ async function pickDates() {
 }
 
 describe("Booking card", () => {
+  it("Book again: the same guests on the dates found, straight on to the reservation (only when signed in)", async () => {
+    const again = { guests: 2, unit: "NIGHT" as const, range: { checkIn: "2026-10-14", checkOut: "2026-10-16" }, plan: null };
+    const { unmount } = renderWithIntl(
+      <StayProvider listingId="abc" holdMinutes={30} again={again}>
+        <BookingCard rates={rates} discountPercent={null} maxGuests={2} place={place} signedIn />
+      </StayProvider>,
+    );
+    const dialog = await screen.findByRole("dialog", { name: "Your reservation" });
+    expect(dialog).toHaveTextContent("RWF 45,000 × 2 nights");
+    expect(dialog).toHaveTextContent(/2 guests/);
+    unmount();
+    renderWithIntl(
+      <StayProvider listingId="abc" holdMinutes={30} again={again}>
+        <BookingCard rates={rates} discountPercent={null} maxGuests={2} place={place} signedIn={false} />
+      </StayProvider>,
+    );
+    expect((await screen.findAllByText(/RWF 90,000/)).length).toBeGreaterThan(0);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
   it("shows the nightly price and the discount note before dates are chosen", () => {
     setup();
     const card = screen.getByRole("complementary");

@@ -27,6 +27,7 @@ import { ListingNotice } from "@/features/listings/components/detail/ListingNoti
 import { bookedRanges, bookedRoomNumbers } from "@/features/bookings/service";
 import { getEnv } from "@/lib/env";
 import { placeRestaurants } from "@/features/food/service";
+import { againStart, parseAgain } from "@/features/bookings/again";
 import { feesFor } from "@/features/bookings/money";
 import { bookableWindow } from "@/features/bookings/availability";
 import QRCode from "qrcode";
@@ -43,7 +44,7 @@ import { Link } from "@/i18n/navigation";
 import { formatRWF } from "@/lib/format";
 import { getCurrentUser } from "@/lib/session";
 
-type Props = { params: Promise<{ id: string }>; searchParams?: Promise<{ room?: string | string[] }> };
+type Props = { params: Promise<{ id: string }>; searchParams?: Promise<{ room?: string | string[]; again?: string | string[] }> };
 
 const isoDay = (d: Date | null) => d?.toISOString().slice(0, 10) ?? null;
 const UNIT_ORDER = ["HOUR", "DAY", "NIGHT", "WEEK", "MONTH", "YEAR"] as const;
@@ -60,7 +61,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ListingPage({ params, searchParams }: Props) {
   // A room's permanent link (/rooms/<id>) lands here with that room already chosen.
-  const roomParam = (await searchParams)?.room;
+  const query = await searchParams;
+  const roomParam = query?.room;
   const initialRoom = typeof roomParam === "string" ? roomParam : null;
   const candidates = listingIdCandidates((await params).id);
   const listing = await getPublishedListingByParam(candidates);
@@ -190,6 +192,7 @@ export default async function ListingPage({ params, searchParams }: Props) {
       holdMinutes={holdMinutesFrom(settings)}
       rooms={rooms}
       initialRoom={initialRoom}
+      again={againStart(parseAgain(query?.again), booked, initialRoom, todayISO())}
       bookingModel={listing.bookingModel}
       guestFeeBps={feesFor(settings, listing.type).guestFeeBps}
       cancellationPolicy={policyText(settings.cancellationPolicy, locale)}

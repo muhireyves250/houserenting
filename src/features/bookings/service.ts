@@ -534,6 +534,7 @@ const GUEST_SELECT = {
   total: true,
   currency: true,
   room: { select: { name: true } },
+  roomId: true,
   roomNumber: true,
   promoCode: { select: { code: true } },
   payments: { where: { status: "SUCCEEDED" }, select: { provider: true, providerReference: true, createdAt: true }, take: 1 },

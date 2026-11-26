@@ -676,7 +676,8 @@
     "time": "Heure",
     "openMyStay": "Ouvrir Mon séjour",
     "messageShort": "Message",
-    "placeShort": "Logement"
+    "placeShort": "Logement",
+    "bookAgain": "Réserver à nouveau"
   },
   "Host": {
     "title": "Vos annonces",

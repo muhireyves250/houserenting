@@ -5,6 +5,9 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PageContainer } from "@/components/ui/PageContainer";
 import type { BookingTileData } from "@/features/bookings/components/BookingTile";
+import { listingPath } from "@/features/listings/links";
+import { ONLY_ROOM } from "@/features/rooms/links";
+import { againParam } from "@/features/bookings/again";
 import { BookingsTabs } from "@/features/bookings/components/BookingsTabs";
 import { StatusBadge } from "@/features/bookings/components/StatusBadge";
 import { directionsUrl, formatKigaliTime, formatStayDates } from "@/features/bookings/format";
@@ -50,6 +53,13 @@ export default async function BookingsPage() {
     note: b.status === "PENDING_PAYMENT" && b.holdExpiresAt ? t("heldUntil", { time: formatKigaliTime(locale, b.holdExpiresAt) }) : null,
     total: formatRWF(b.total, locale),
     review: (b.status === "COMPLETED" || b.status === "CHECKED_IN") && !b.review ? tReviews("leave") : null,
+    // Done or called off: book the same again (the same room, guests and length on the soonest free dates).
+    again: ["COMPLETED", "CANCELLED", "EXPIRED", "NO_SHOW"].includes(b.status)
+      ? {
+          href: `${b.roomId ? `${listingPath(b.listing.id, b.listing.title)}/rooms/${b.roomId}/${encodeURIComponent(b.roomNumber ?? ONLY_ROOM)}` : listingPath(b.listing.id, b.listing.title)}?again=${againParam(b)}`,
+          label: t("bookAgain"),
+        }
+      : null,
   });
 
   const phase = (b: GuestBooking) => stayPhase(b, today, now);
